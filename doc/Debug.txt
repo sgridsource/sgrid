@@ -1,0 +1,56 @@
+Bernd's Tips on debugging
+-------------------------
+
+1. Don't write buggy code.
+
+   Be aware of what you do and take sufficiently small steps so that 
+   it is always easy to find small mistakes.
+
+   Run the test suites on at least 2 processors, e.g.
+     cd par/test
+     sgridtest -2 -t 1e-12 *.par
+   Now you can also just do
+     make test
+   Note that you have to compile sgrid with gcc -O2 to get mostly exact
+   agreement! 
+
+
+2. If you do have a bug:
+
+--------
+
+Compile sgrid with debug flag turned on. In MyConfig, set
+
+# optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
+OFLAGS = -g
+
+Then "make clean" and "make". Should also work for parts of the code.
+
+--------
+
+A simple debugger is gdb. 
+
+> gdb
+
+(gdb) help
+(gdb) help running
+
+(gdb) file sgrid
+(gdb) set args myparfile
+(gdb) run
+
+... bad things happen, assume that code dies ...
+
+(gdb) backtrace          ... to see calling stack
+
+
+Sometimes we are left with a core file. This can be loaded with
+
+(gdb) <fill this in>
+
+
+
+--------
+
+Bracket the problem in time by checking out for different dates:
+cvs co -D 7/21/2003 sgrid

@@ -1,0 +1,41 @@
+# Makefile.subdirs
+# These commands are common to all standard source subdirectories.
+# For example, in the boundary directory there is a Makefile containing the 
+# lines
+# 
+# NAME := boundary
+# OBJS := sgrid_$(NAME).o epol.o mask.o
+# include $(TOP)/Makefile.subdirs
+
+# The only complication is that we don't want to clutter the source
+# directories with object files and library files, so we work in
+# a separate directory LIBDIR
+
+
+# the name of the library that we want to create
+NEWLIB := lib$(NAME).a
+
+# directory for the library
+LIBDIR  = $(TOP)/lib
+
+# directory for the object files of this library
+OBJDIR  = $(LIBDIR)/obj/$(NAME)
+OBJSWITHPATH = $(addprefix $(OBJDIR)/,$(OBJS))
+
+
+# main target: build library from object files
+# r: replace files
+# u: update only those files for which a newer version is given
+# c: create archive without warning 
+# s: symbol table is created (ar s = ranlib), needed for interdependencies
+# note that $@ is the matched target
+
+$(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
+	ar rucs $@ $(OBJSWITHPATH)
+
+
+# secondary target: build object files
+# note that $@ is the matched target, $* is the stem of the target defined by %
+
+$(OBJDIR)/%.o: %.c $(TOP)/src/main/main/sgrid.h sgrid_$(NAME).h $(NAME).h Makefile
+	$(CC) $(CFLAGS) -o $@ -c $*.c

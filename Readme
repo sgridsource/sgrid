@@ -1,0 +1,11 @@
+Readme file for 'sgrid'
+-----------------------
+Wolfgang Tichy, 4/2005
+
+
+'sgrid' is a code for numerical relativity using spectral methods. 
+The code is private for now (don't distribute, please). 
+
+
+sgrid is supposed to be:
+- extremely simple

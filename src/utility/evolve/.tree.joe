@@ -1,0 +1,14 @@
+../
+.
+Makefile
+bam_evolve.c
+bam_evolve.h
+evolve.c
+evolve.h
+evolve_test.c
+evolve_test.par
+icn.c
+rk.c
+sed.com
+
+0 directories, 10 files

@@ -1,0 +1,28 @@
+# evolve_test.par
+# BB 10/03
+# 
+# basic test for time integrators using ODE
+# you can look at it with
+#   ygraph evolve_test_?????????/evolve_test_error_max.t0
+
+physics = evolve_test
+
+evolution_method 	= rk
+evolution_method_rk	= rk4
+evolution_method_order  = 4
+
+iterate_parameters      = yes
+iterate_parameter1      = dxyz       0.08 0.04 0.02
+iterate_parameter2      = iterations 10   20   40
+iterate_parameter3      = 0doutiter  1    2    4
+ 
+iterations = 10
+
+0doutiter = 1
+0doutput = evolve_test_u evolve_test_error
+
+nxyz = 3
+dxyz = 0.08
+dtfac = 1
+grid = box
+

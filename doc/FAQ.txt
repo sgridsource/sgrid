@@ -1,0 +1,21 @@
+
+Frequently asked questions
+--------------------------
+
+-----------------------------------------------------------------------------
+How can I replace a string in several files?
+
+replace "old" by "new" after creating backup file, filename.bak:
+perl -pi.bak -e 's:old:new:' filename
+
+do it recursively (untested at the moment, but something like this):
+find . -exec perl -pi.bak -e 's:old:new:' {} \;
+
+
+OR:
+sed s/old/new/ filename
+
+-----------------------------------------------------------------------------
+Thinning out output directories:
+
+find ./orbit* -name "bssn_*" -exec rm {} \;

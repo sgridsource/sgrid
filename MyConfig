@@ -1,0 +1,26 @@
+# MyConfig.example
+#
+# The file MyConfig is included verbatim in the Makefile to determine which 
+# special libraries will be included in the build.
+
+# ------------------------------------------------------------------------
+# here are simple examples for libraries, they may be mutually exclusive
+
+# black hole evolution
+#libpaths += src/physics/adm
+#libpaths += src/physics/bssn
+libpaths += src/physics/testwave
+
+# ------------------------------------------------------------------------
+# override various options in the Makefile
+
+# name and directory for the executable
+EXEC = sgrid
+EXECDIR = $(TOP)/exe
+
+# pick a C compiler, only gcc and icc have been tested, gcc is the default
+CC = gcc
+
+# optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
+OFLAGS = -g -Wall # -O2
+
