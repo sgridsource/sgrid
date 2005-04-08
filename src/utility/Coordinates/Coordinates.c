@@ -125,46 +125,61 @@ double z_ofPolar(double rho, double phi, double Z)
 /* first coord. derivs */
 double drho_dx(double x, double y, double z)
 {
-  return x/sqrt(x*x + y*y);
+  double rho2 = x*x + y*y;
+  
+  if(rho2>0.0) return x/sqrt(rho2);
+  else         return 1.0; /* result if come along y=0 line */
 }
 double drho_dy(double x, double y, double z)
 {
-  return y/sqrt(x*x + y*y);
+  double rho2 = x*x + y*y;
+  if(rho2>0.0) return y/sqrt(rho2);
+  else         return 1.0; /* result if come along x=0 line */
 }
 
 double dphi_dx(double x, double y, double z)
 {
-  return -y/(x*x + y*y);
+  double rho2 = x*x + y*y;
+  if(rho2>0.0) return -y/(rho2);
+  else         return 0.0; /* result if come along y=0 line */
 }
 double dphi_dy(double x, double y, double z)
 {
-  return x/(x*x + y*y);
+  double rho2 = x*x + y*y;
+  if(rho2>0.0) return x/(rho2);
+  else         return 0.0; /* result if come along x=0 line */
 }
 
 /* second coord. derivs */
 double drho_dxdx(double x, double y, double z)
 {
-  return 1.0/sqrt(x*x + y*y) - (x/(x*x + y*y))* x/sqrt(x*x + y*y);
+  double rho2 = x*x + y*y;
+  return y*y/pow(rho2, 1.5);
 }
 double drho_dxdy(double x, double y, double z)
 {
-  return (x*y/(x*x + y*y))/sqrt(x*x + y*y);
+  double rho2 = x*x + y*y;
+  return -x*y/pow(rho2, 1.5);
 }
 double drho_dydy(double x, double y, double z)
 {
-  return 1.0/sqrt(x*x + y*y) - (y/(x*x + y*y))* y/sqrt(x*x + y*y);
+  double rho2 = x*x + y*y;
+  return x*x/pow(rho2, 1.5);
 }
 
 double dphi_dxdx(double x, double y, double z)
 {
-  return 2.0*y*x/( (x*x + y*y)*(x*x + y*y) );
+  double rho2 = x*x + y*y;
+  return 2.0*x*y/( rho2*rho2 );
 }
 double dphi_dxdy(double x, double y, double z)
 {
-  return -1.0/(x*x + y*y) + 2.0*y*y/( (x*x + y*y)*(x*x + y*y) );
+  double rho2 = x*x + y*y;
+  return (y*y - x*x)/( rho2*rho2 );
 }
 double dphi_dydy(double x, double y, double z)
 {
-  return -2.0*y*x/( (x*x + y*y)*(x*x + y*y) );
+  double rho2 = x*x + y*y;
+  return -2.0*x*y/( rho2*rho2 );
 }
 /* end: Polar coordinates: */
