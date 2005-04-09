@@ -93,7 +93,7 @@ void four_eval(double c[], double u[], int n)
       Im_c_k = c[2*k+1];
       sum += cos(k*PI2oN*j)*Re_c_k + sin(k*PI2oN*j)*Im_c_k;
     }
-    u[j] = 2.0*sum + c[0] + c[1]*cos(PI*j);
+    u[j] = ( 2.0*sum + c[0] + c[1]*cos(PI*j) )/N;
   }
   /* we should use a FFT for eveything above this line */
 }
