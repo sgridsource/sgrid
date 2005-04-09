@@ -109,19 +109,31 @@ tGrid *make_grid(int pr)
 	if( Getv(str, "ChebExtrema") )
 	  box->v[var_X][ijk] 
 	    = 0.5*( (box->bbox[0] - box->bbox[1])*cos(i*PI/(n1-1)) 
-	           +(box->bbox[0] + box->bbox[1])); 
+	           +(box->bbox[0] + box->bbox[1]));
+        else if( Getv(str, "Fourier") )
+	  box->v[var_X][ijk] 
+	    = ( (box->bbox[1] - box->bbox[0])* ((double) i)/n1 
+	           +box->bbox[0]);
 
 	snprintf(str, 999, "box%d_basis2", b);
 	if( Getv(str, "ChebExtrema") )
 	  box->v[var_Y][ijk] 
 	    = 0.5*( (box->bbox[2] - box->bbox[3])*cos(j*PI/(n2-1)) 
 	           +(box->bbox[2] + box->bbox[3])); 
+        else if( Getv(str, "Fourier") )
+	  box->v[var_Y][ijk] 
+	    = ( (box->bbox[3] - box->bbox[2])* ((double) j)/n1 
+	           +box->bbox[2]);
 
 	snprintf(str, 999, "box%d_basis3", b);
 	if( Getv(str, "ChebExtrema") )
 	  box->v[var_Z][ijk] 
-	    = 0.5*( (box->bbox[0] - box->bbox[1])*cos(k*PI/(n3-1)) 
-	           +(box->bbox[0] + box->bbox[1])); 
+	    = 0.5*( (box->bbox[4] - box->bbox[5])*cos(k*PI/(n3-1)) 
+	           +(box->bbox[4] + box->bbox[5])); 
+        else if( Getv(str, "Fourier") )
+	  box->v[var_Z][ijk] 
+	    = ( (box->bbox[5] - box->bbox[4])* ((double) k)/n1 
+	           +box->bbox[4]);
         }
       }
     }  /* end for (k = 0; k < n3; k++) */

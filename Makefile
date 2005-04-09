@@ -117,6 +117,10 @@ $(autoinclude): MyConfig
 $(autoinitial): MyConfig
 	echo $(autotext) > $(autoinitial) 
 	for X in $(libnames); do \
+	  echo int sgrid\_$$X\(\)\; >> $(autoinitial); \
+	done
+	echo "/* call sgrid initialization functions: */" >> $(autoinitial); \
+	for X in $(libnames); do \
 	  echo sgrid\_$$X\(\)\; >> $(autoinitial); \
 	done
 
