@@ -24,14 +24,17 @@ void testwave_evo(tVarList *vlunew,
     double *kpre = vlldataptr(vlupre, box, 1);
     double *knew = vlldataptr(vlunew, box, 1);
     int i;
+    double *u1 = box->v[Ind("testwave_u1")];
+    double *u2 = box->v[Ind("testwave_u2")];
+    double *u3 = box->v[Ind("testwave_u3")];
     double *u11 = box->v[Ind("testwave_u11")];
     double *u22 = box->v[Ind("testwave_u22")];
     double *u33 = box->v[Ind("testwave_u33")];
     double *dum = box->v[Ind("testwave_dum")];
 
     //spec_allDerivs(box, ucur, dum, dum, dum, u11, dum, dum, u22, dum, u33);
-    cart_partials(box, ucur, dum, u22, u33);
-    cart_partials(box, dum, u11, u22, u33);
+    cart_partials(box, ucur, u1, u2, u3);
+    cart_partials(box, u1, u11, u22, u33);
 
     forallpoints(box, i)
     {
@@ -44,14 +47,14 @@ void testwave_evo(tVarList *vlunew,
         knew[i] = kpre[i] + dt * krhs;
         unew[i] = upre[i] + dt * urhs;
         //knew[i] = kpre[i];
-        //unew[i] = upre[i] - dt * u11[i];
+        //unew[i] = upre[i] - dt * u1[i];
       }
       else
       {
         knew[i] = krhs;
         unew[i] = urhs;
         //knew[i] = 0;
-        //unew[i] = -u11[i];
+        //unew[i] = -u1[i];
       }
     }
     /* set boundary to zero */
@@ -105,6 +108,9 @@ int testwave_startup(tGrid *grid)
   
   enablevar(grid, Ind("testwave_u"));
   enablevar(grid, Ind("testwave_k"));
+  enablevar(grid, Ind("testwave_u1"));
+  enablevar(grid, Ind("testwave_u2"));
+  enablevar(grid, Ind("testwave_u3"));
   enablevar(grid, Ind("testwave_u11"));
   enablevar(grid, Ind("testwave_u22"));
   enablevar(grid, Ind("testwave_u33"));
@@ -124,6 +130,9 @@ int testwave_startup(tGrid *grid)
     double *pX = box->v[Ind("X")];
     double *pY = box->v[Ind("Y")];
     double *pZ = box->v[Ind("Z")];
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
 
     double *pu = box->v[Ind("testwave_u")];
     double *pk = box->v[Ind("testwave_k")];
@@ -136,16 +145,24 @@ int testwave_startup(tGrid *grid)
     
     forallijk(i,j,k)
     {
-     double X=pX[Index(i,j,k)] - 0.2;
-     double Y=pY[Index(i,j,k)];
-     double Z=pZ[Index(i,j,k)];
-     double f=exp( -10*(X*X + Y*Y + Z*Z) );
+     double x=pX[Index(i,j,k)] - 0.2;
+     double y=pY[Index(i,j,k)];
+     double z=pZ[Index(i,j,k)];
+     double f;
 
+     if(px!=NULL) 
+     {
+       x=px[Index(i,j,k)] - 0.2;
+       y=py[Index(i,j,k)];
+       z=pz[Index(i,j,k)];
+     }
+     f=exp( -10*(x*x + y*y + z*z) );
+     
      ijk=Index(i,j,k);
      pu[ijk] = f;
-     pk[ijk] = -(-2*10*X*f); // = - d/dx u
-     //pk[ijk] = -2*10*f + (2*10*X)*(2*10*X)*f;
-     //pk[ijk] = -2*10*X*f;
+     pk[ijk] = -(-2*10*x*f); // = - d/dx u
+     //pk[ijk] = -2*10*f + (2*10*x)*(2*10*x)*f;
+     //pk[ijk] = -2*10*x*f;
      
      //pu[ijk] = 1;
      //pk[ijk] = 0;
@@ -172,8 +189,6 @@ int testwave_startup(tGrid *grid)
           pu[Index(0,j,k)] = pu[Index(n1-1,j,k)] = 0;
           pk[Index(0,j,k)] = pk[Index(n1-1,j,k)] = 0;
         }
-      //cheb_coeffs_fromExtrema(u11+Index(0,1,1), pu+Index(0,1,1), n1-1);
-
   }
   evolve_vlregister(vlu);
   evolve_rhsregister(testwave_evo);
