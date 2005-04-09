@@ -39,8 +39,7 @@ OFLAGS = -O2
 # some libraries are currently required
 libpaths = src/main/MemoryMan 
 libpaths += src/utility/output src/utility/evolve
-libpaths += src/utility/Spectral
-libpaths += src/utility/Coordinates
+libpaths += src/utility/Coordinates src/utility/Spectral
 #libpaths += src/utility/NumericUtils
 
 # --------------------------------------------------------------------------
