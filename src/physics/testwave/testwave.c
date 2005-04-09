@@ -29,9 +29,10 @@ void testwave_evo(tVarList *vlunew,
     double *u33 = box->v[Ind("testwave_u33")];
     double *dum = box->v[Ind("testwave_dum")];
 
-    spec_allDerivs(box, ucur, dum, dum, dum, u11, dum, dum, u22, dum, u33 );
-    //spec_allDerivs(box, ucur, u11, dum, dum, dum, dum, dum, u22, dum, u33 );
-    
+    //spec_allDerivs(box, ucur, dum, dum, dum, u11, dum, dum, u22, dum, u33);
+    cart_partials(box, ucur, dum, u22, u33);
+    cart_partials(box, dum, u11, u22, u33);
+
     forallpoints(box, i)
     {
       double krhs = u11[i] + 0*u22[i] + 0*u33[i]

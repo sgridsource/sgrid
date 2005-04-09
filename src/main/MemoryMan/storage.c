@@ -48,7 +48,7 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
 {
   tBox *box = g->box[b];
   int nnodes = n1*n2*n3;
-  int i,j,k;
+  int i,j; //,k;
 
   printf("b=%d box=%p g->box=%p\n", b, box, g->box);
 
@@ -86,12 +86,12 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
   for(i=0;i<4;i++)
   {
     box->x_of_X[i] = NULL;
+    box->Sing_d_dx[i] = NULL;
     for(j=0;j<4;j++)
     {
       box->dX_dx[i][j] = NULL;
-
-      for(k=0;k<4;k++)
-        box->dX_dxdx[i][j][k] = NULL;
+      //for(k=0;k<4;k++)
+      //  box->dX_dxdx[i][j][k] = NULL;
     }
   }
 

@@ -17,9 +17,13 @@ double drho_dx(double x, double y, double z);
 double drho_dy(double x, double y, double z);
 double dphi_dx(double x, double y, double z);
 double dphi_dy(double x, double y, double z);
+void set_d_dx_at_rhoEQzero(void *bo, void *va, void *v1,void *v2,void *v3);
+void set_d_dy_at_rhoEQzero(void *bo, void *va, void *v1,void *v2,void *v3);
+/*
 double drho_dxdx(double x, double y, double z);
 double drho_dxdy(double x, double y, double z);
 double drho_dydy(double x, double y, double z);
 double dphi_dxdx(double x, double y, double z);
 double dphi_dxdy(double x, double y, double z);
 double dphi_dydy(double x, double y, double z);
+*/

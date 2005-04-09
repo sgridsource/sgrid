@@ -24,6 +24,7 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
 
     du[1] = u1;        du[2] = u2;        du[3] = u3;
 
+    /* compute cartesian derivs at all points */
     forallpoints(box,ind)
     {
       double x = xp[ind];
@@ -42,6 +43,14 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
       for(m=1; m<=3; m++)
         du[m][ind] = dv[m];
     } /* end loop over all points */
+
+    /* set derivs at singular points */
+    for(m=1; m<=3; m++)
+    {
+      if( box->Sing_d_dx[m] != NULL )
+        box->Sing_d_dx[m]((void *) box,   (void *) du[m],
+                          (void *) du[1], (void *) du[2], (void *) du[3]);
+    }
   }
 }
 
@@ -97,9 +106,10 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
         for(n=1; n<=3; n++)
         {
           ddv[m][n] = 0.0;
-          
-          for(i=1; i<=3; i++)
-            ddv[m][n] += box->dX_dxdx[i][m][n](x,y,z)  *  du[i][ind];
+
+          errorexit("cart_partial_all: box->dX_dxdx[i][m][n](x,y,z) is needed.");
+          //for(i=1; i<=3; i++)
+          //  ddv[m][n] += box->dX_dxdx[i][m][n](x,y,z)  *  du[i][ind];
 
           for(i=1; i<=3; i++)
             for(j=i; j<=3; j++)

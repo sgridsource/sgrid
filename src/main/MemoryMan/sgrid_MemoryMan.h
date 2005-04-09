@@ -27,9 +27,10 @@ typedef struct tBOX {
   double *DD1;		/* diff. matrix for two derivs in direction 1 */
   double *DD2;		/* diff. matrix for two derivs in direction 2 */
   double *DD3;		/* diff. matrix for two derivs in direction 3 */
-  double (*dX_dx[4][4])(double x, double y, double z);	    /* dX_l_{spec}/dx_m_{cart} */
-  double (*dX_dxdx[4][4][4])(double x, double y, double z); /* d^2X_l_{spec}/(dx_m_{cart} dx_n_{cart}) */
   double (*x_of_X[4])(double X, double Y, double Z);	    /* func to compute x from X */
+  double (*dX_dx[4][4])(double x, double y, double z);	    /* dX_l_{spec}/dx_m_{cart} */
+  void (*Sing_d_dx[4])(void *box, void *vx, void *v1, void *v2, void *v3);  /* func to compute d/dx_m_{cart} at singular points */
+  // double (*dX_dxdx[4][4][4])(double x, double y, double z); /* d^2X_l_{spec}/(dx_m_{cart} dx_n_{cart}) */
   double bbox[6];	/* global bounding box */
   int ibbox[6];	/* global bounding box in index range */
 } tBox;
