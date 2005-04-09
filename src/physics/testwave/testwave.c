@@ -121,9 +121,12 @@ int testwave_startup(tGrid *grid)
     int n1=box->n1;
     int n2=box->n2;
     int n3=box->n3;
+    double *pX = box->v[Ind("X")];
+    double *pY = box->v[Ind("Y")];
+    double *pZ = box->v[Ind("Z")];
+
     double *pu = box->v[Ind("testwave_u")];
     double *pk = box->v[Ind("testwave_k")];
-
     double *u11 = box->v[Ind("testwave_u11")];
     double *u22 = box->v[Ind("testwave_u22")];
     double *u33 = box->v[Ind("testwave_u33")];
@@ -133,9 +136,9 @@ int testwave_startup(tGrid *grid)
     
     forallijk(i,j,k)
     {
-     double X=-cos(i*PI/(n1-1))-0.2;
-     double Y=-cos(j*PI/(n2-1));
-     double Z=-cos(k*PI/(n3-1));
+     double X=pX[Index(i,j,k)] - 0.2;
+     double Y=pY[Index(i,j,k)];
+     double Z=pZ[Index(i,j,k)];
      double f=exp( -10*(X*X + Y*Y + Z*Z) );
 
      ijk=Index(i,j,k);
