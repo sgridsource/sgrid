@@ -12,6 +12,10 @@ int sgrid_Coordinates(void)
   
   printf("Adding Coordinates\n");
 
+  /* functions */
+  AddFun(PRE_INITIALDATA, init_CoordTransform_And_Derivs, 
+         "initialize coords and coord transforms");
+
   /* variables */
   AddConstantVar("x", "", "cartesian x coordinate");
   AddConstantVar("y", "", "cartesian y coordinate");

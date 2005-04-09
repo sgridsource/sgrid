@@ -73,19 +73,19 @@ tGrid *make_grid(int pr)
 
     /* get values of bounding box */
     snprintf(str, 999, "box%d_min1", b);
-    box->bbox[0] = Geti(str);
+    box->bbox[0] = Getd(str);
     snprintf(str, 999, "box%d_max1", b);
-    box->bbox[1] = Geti(str);
+    box->bbox[1] = Getd(str);
 
     snprintf(str, 999, "box%d_min2", b);
-    box->bbox[2] = Geti(str);
+    box->bbox[2] = Getd(str);
     snprintf(str, 999, "box%d_max2", b);
-    box->bbox[3] = Geti(str);
+    box->bbox[3] = Getd(str);
 
     snprintf(str, 999, "box%d_min3", b);
-    box->bbox[4] = Geti(str);
+    box->bbox[4] = Getd(str);
     snprintf(str, 999, "box%d_max3", b);
-    box->bbox[5] = Geti(str);
+    box->bbox[5] = Getd(str);
     
     n1 = box->n1;
     n2 = box->n2;
