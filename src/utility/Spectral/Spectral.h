@@ -31,4 +31,16 @@ void cheb_eval_onExtrema(double c[], double u[], int N);
 void cheb_filter(double c[], int k, int n);
 
 
-/* Functions from ... */
+/* Functions from explicit_Four_trafos.c */
+
+/* compute Four coeffs of deriv cder[0...N-1] from Four coeffs c[0...N-1] */
+void four_deriv(double a, double b, double c[], double cder[], int N);
+/* compute Four coeffs c[0...N-1] from function u 
+   at x_k = k/N, k=0,...,N-1 */
+void four_coeffs(double c[], double u[], int N);
+
+/* find function u from Four coeffs c[0...N-1] */
+void four_eval(double c[], double u[], int N);
+
+/* filter: zero all c[j] with k<=j<=n */
+void four_filter(double c[], int k, int N);

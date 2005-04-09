@@ -129,34 +129,56 @@ tGrid *make_grid(int pr)
     /* initialize diff. matrices */
     {
        void (*get_coeffs)(double *,double *, int);
+       void (*coeffs_of_deriv)(double, double, double *,double *, int);
        void (*eval_onPoints)(double *,double *, int);
        
        snprintf(str, 999, "box%d_basis1", b);
        if( Getv(str, "ChebExtrema") )
        {
          get_coeffs = cheb_coeffs_fromExtrema;
+         coeffs_of_deriv = cheb_deriv;
          eval_onPoints = cheb_eval_onExtrema;
        }
+       else if( Getv(str, "Fourier") )
+       {
+         get_coeffs = four_coeffs;
+         coeffs_of_deriv = four_deriv;
+         eval_onPoints = four_eval;
+       }
        initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
-                      get_coeffs, eval_onPoints);
+                      get_coeffs, coeffs_of_deriv, eval_onPoints);
         
        snprintf(str, 999, "box%d_basis2", b);
        if( Getv(str, "ChebExtrema") )
        {
          get_coeffs = cheb_coeffs_fromExtrema;
+         coeffs_of_deriv = cheb_deriv;
          eval_onPoints = cheb_eval_onExtrema;
        }
+       else if( Getv(str, "Fourier") )
+       {
+         get_coeffs = four_coeffs;
+         coeffs_of_deriv = four_deriv;
+         eval_onPoints = four_eval;
+       }
        initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
-                      get_coeffs, eval_onPoints);
+                      get_coeffs, coeffs_of_deriv, eval_onPoints);
 
        snprintf(str, 999, "box%d_basis3", b);
        if( Getv(str, "ChebExtrema") )
        {
          get_coeffs = cheb_coeffs_fromExtrema;
+         coeffs_of_deriv = cheb_deriv;
          eval_onPoints = cheb_eval_onExtrema;
        }
+       else if( Getv(str, "Fourier") )
+       {
+         get_coeffs = four_coeffs;
+         coeffs_of_deriv = four_deriv;
+         eval_onPoints = four_eval;
+       }
        initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
-                      get_coeffs, eval_onPoints);
+                      get_coeffs, coeffs_of_deriv, eval_onPoints);
     }
   }
 

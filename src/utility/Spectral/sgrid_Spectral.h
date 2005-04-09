@@ -22,5 +22,6 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
 /* Functions from diffmatrices.c */
 void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
+                    void (*coeffs_of_deriv)(double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) );
 void diffmat_deriv(double *D, double *u, double *du, int n);

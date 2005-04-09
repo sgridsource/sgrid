@@ -9,6 +9,7 @@
 /* init a n1*n1 diff. matrix */
 void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
+                    void (*coeffs_of_deriv)(double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) )
 {
   int i,j;
@@ -30,7 +31,8 @@ void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
     //cheb_coeffs_fromExtrema(c, u, n1-1);
     get_coeffs(c, u, n1-1);
     
-    cheb_deriv(a, b,  c, d, n1-1);
+    //cheb_deriv(a, b,  c, d, n1-1);
+    coeffs_of_deriv(a, b,  c, d, n1-1);
     
     //cheb_eval_onExtrema(d, c, n1-1);
     eval_onPoints(d, c, n1-1);
