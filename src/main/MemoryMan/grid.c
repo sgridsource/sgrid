@@ -122,7 +122,7 @@ tGrid *make_grid(int pr)
 	           +(box->bbox[2] + box->bbox[3])); 
         else if( Getv(str, "Fourier") )
 	  box->v[var_Y][ijk] 
-	    = ( (box->bbox[3] - box->bbox[2])* ((double) j)/n1 
+	    = ( (box->bbox[3] - box->bbox[2])* ((double) j)/n2 
 	           +box->bbox[2]);
 
 	snprintf(str, 999, "box%d_basis3", b);
@@ -132,7 +132,7 @@ tGrid *make_grid(int pr)
 	           +(box->bbox[4] + box->bbox[5])); 
         else if( Getv(str, "Fourier") )
 	  box->v[var_Z][ijk] 
-	    = ( (box->bbox[5] - box->bbox[4])* ((double) k)/n1 
+	    = ( (box->bbox[5] - box->bbox[4])* ((double) k)/n3 
 	           +box->bbox[4]);
         }
       }
