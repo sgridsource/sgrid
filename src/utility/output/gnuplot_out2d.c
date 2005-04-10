@@ -44,6 +44,8 @@ void write_plane(tBox *box, FILE *fp, int normal, int plane, int iv)
     kmin = kmax = plane;
   }
 
+  if(pv==NULL) return;
+
   fprintf(fp, "# time = %.16g\"\n", box->grid->time);
               
   /* go over plane, with normal */

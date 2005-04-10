@@ -43,6 +43,8 @@ void write_line(tBox *box, FILE *fp, int line, int iv)
     imin = imax = n1/2;
   }
 
+  if(pv==NULL) return;
+
   fprintf(fp, "\"time = %.16g\"\n", box->grid->time);
               
   /* go over plane, with normal */
