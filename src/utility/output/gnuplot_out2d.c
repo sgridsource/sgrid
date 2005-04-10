@@ -62,6 +62,7 @@ void write_plane(tBox *box, FILE *fp, int normal, int plane, int iv)
     }
     if(normal==2 || normal==1) fprintf(fp, "\n");
   }
+  fprintf(fp,"\n");
 }
 
 
@@ -90,8 +91,8 @@ void gnuplot_out2d_boxvar(tBox *box, char *name)
   write_plane(box, fy, 2 , box->n2/2, Ind(name));
   write_plane(box, fz, 1 , box->n1/2, Ind(name));
 
-  /* close file */
-  fprintf(fx,"\n"); fclose(fx);
-  fprintf(fy,"\n"); fclose(fy);
-  fprintf(fz,"\n"); fclose(fz);
+  /* close files */
+  fclose(fx);
+  fclose(fy);
+  fclose(fz);
 }

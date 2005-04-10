@@ -56,6 +56,7 @@ void write_line(tBox *box, FILE *fp, int line, int iv)
         //printf("i=%d j=%d k=%d index=%d\n", i,j,k, index);
         fprintf(fp, "%.16g %.16g\n", px[index], pv[index]);
       }
+  fprintf(fp,"\n");
 }
 
 
@@ -84,9 +85,9 @@ void xgraph_out1_boxvar(tBox *box, char *name)
   write_line(box, fy, 2 , Ind(name));  /* y-line */
   write_line(box, fz, 3 , Ind(name));  /* z-line */
 
-  /* close file */
-  fprintf(fx,"\n"); fclose(fx);
-  fprintf(fy,"\n"); fclose(fy);
-  fprintf(fz,"\n"); fclose(fz);
+  /* close files */
+  fclose(fx);
+  fclose(fy);
+  fclose(fz);
 }
 
