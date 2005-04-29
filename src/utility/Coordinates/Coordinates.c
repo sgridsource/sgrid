@@ -38,8 +38,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = zero_of_xyz;
       box->dX_dx[3][3] = one_of_xyz;
 
-      box->Sing_d_dx[1] = set_d_dx_at_rhoEQzero;
-      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero;
+      //box->Sing_d_dx[1] = set_d_dx_at_rhoEQzero;
+      //box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero;
       /*
       box->dX_dxdx[1][1][1] = drho_dxdx;
       box->dX_dxdx[1][1][2] = drho_dxdy;
@@ -63,6 +63,25 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dxdx[3][3][3] = zero_of_xyz;
       */
     }
+    if( Getv(str, "PolarCE") )
+    {
+      box->x_of_X[1] = x_ofPolarCE;
+      box->x_of_X[2] = y_ofPolarCE;
+      box->x_of_X[3] = z_equals_Z;
+
+      box->dX_dx[1][1] = drho_dx;
+      box->dX_dx[1][2] = drho_dy;
+      box->dX_dx[1][3] = zero_of_xyz;
+      box->dX_dx[2][1] = dYPolarCE_dx;
+      box->dX_dx[2][2] = dYPolarCE_dy;
+      box->dX_dx[2][3] = zero_of_xyz;
+      box->dX_dx[3][1] = zero_of_xyz;
+      box->dX_dx[3][2] = zero_of_xyz;
+      box->dX_dx[3][3] = one_of_xyz;
+
+      box->Sing_d_dx[1] = NULL;
+      box->Sing_d_dx[2] = NULL;
+    }
 
     /* compute cartesian coordinates x,y,z from X,Y,Z */
     if( box->x_of_X[1] != NULL )
@@ -77,9 +96,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         double X = box->v[var_X][ind];
         double Y = box->v[var_Y][ind];
         double Z = box->v[var_Z][ind];
-        box->v[var_x][ind] = box->x_of_X[1](X,Y,Z);
-        box->v[var_y][ind] = box->x_of_X[2](X,Y,Z);
-        box->v[var_z][ind] = box->x_of_X[3](X,Y,Z);
+        box->v[var_x][ind] = box->x_of_X[1]((void *) box, X,Y,Z);
+        box->v[var_y][ind] = box->x_of_X[2]((void *) box, X,Y,Z);
+        box->v[var_z][ind] = box->x_of_X[3]((void *) box, X,Y,Z);
       }
     }
   
@@ -89,23 +108,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
 
 
 /* Some trivial functions */
-double zero_of_xyz(double X, double Y, double Z)
+double zero_of_xyz(void *aux, double X, double Y, double Z)
 {
   return 0.0;
 }
-double one_of_xyz(double X, double Y, double Z)
+double one_of_xyz(void *aux, double X, double Y, double Z)
 {
   return 1.0;
 }
-double x_equals_X(double X, double Y, double Z)
+double x_equals_X(void *aux, double X, double Y, double Z)
 {
   return X;
 }
-double y_equals_Y(double X, double Y, double Z)
+double y_equals_Y(void *aux, double X, double Y, double Z)
 {
   return Y;
 }
-double z_equals_Z(double X, double Y, double Z)
+double z_equals_Z(void *aux, double X, double Y, double Z)
 {
   return Z;
 }
@@ -113,41 +132,41 @@ double z_equals_Z(double X, double Y, double Z)
 /* start: Polar coordinates: */
 
 /* Coord. trafos */
-double x_ofPolar(double rho, double phi, double Z)
+double x_ofPolar(void *aux, double rho, double phi, double Z)
 {
   return rho*cos(phi);
 }
-double y_ofPolar(double rho, double phi, double Z)
+double y_ofPolar(void *aux, double rho, double phi, double Z)
 {
   return rho*sin(phi);
 }
-double z_ofPolar(double rho, double phi, double Z)
+double z_ofPolar(void *aux, double rho, double phi, double Z)
 {
   return Z;
 }
 
 /* first coord. derivs */
-double drho_dx(double x, double y, double z)
+double drho_dx(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   
   if(rho2>0.0) return x/sqrt(rho2);
   else         return 1.0; /* result if we go along y=0 line */
 }
-double drho_dy(double x, double y, double z)
+double drho_dy(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   if(rho2>0.0) return y/sqrt(rho2);
   else         return 1.0; /* result if we go along x=0 line */
 }
 
-double dphi_dx(double x, double y, double z)
+double dphi_dx(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   if(rho2>0.0) return -y/(rho2);
   else         return 0.0; /* result if we go along y=0 line */
 }
-double dphi_dy(double x, double y, double z)
+double dphi_dy(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   if(rho2>0.0) return x/(rho2);
@@ -189,36 +208,84 @@ void set_d_dy_at_rhoEQzero(void *bo, void *va, void *v1,void *v2,void *v3)
 
 /* second coord. derivs currently not needed */
 /*
-double drho_dxdx(double x, double y, double z)
+double drho_dxdx(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   return y*y/pow(rho2, 1.5);
 }
-double drho_dxdy(double x, double y, double z)
+double drho_dxdy(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   return -x*y/pow(rho2, 1.5);
 }
-double drho_dydy(double x, double y, double z)
+double drho_dydy(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   return x*x/pow(rho2, 1.5);
 }
 
-double dphi_dxdx(double x, double y, double z)
+double dphi_dxdx(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   return 2.0*x*y/( rho2*rho2 );
 }
-double dphi_dxdy(double x, double y, double z)
+double dphi_dxdy(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   return (y*y - x*x)/( rho2*rho2 );
 }
-double dphi_dydy(double x, double y, double z)
+double dphi_dydy(void *aux, double x, double y, double z)
 {
   double rho2 = x*x + y*y;
   return -2.0*x*y/( rho2*rho2 );
 }
 */
 /* end: Polar coordinates: */
+
+
+/* start: PolarCE coordinates: */
+
+/* Coord. trafos */
+double x_ofPolarCE(void *aux, double rho, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;
+  int N = box->n2 - 1;
+  double phi = ((2.0*N)/(N-1.0)) * acos( 1.0 - Y/PI );
+
+  return rho*cos(phi);
+}
+double y_ofPolarCE(void *aux, double rho, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;
+  int N = box->n2 - 1;
+  double phi = ((2.0*N)/(N-1.0)) * acos( 1.0 - Y/PI );
+
+  return rho*sin(phi);
+}
+
+/* first coord. derivs */
+/* NOTE: Y = PI*( 1.0 - cos( ((N-1.0)/(2.0*N)) * phi ) )             */
+/* dY/dphi = PI*((N-1.0)/(2.0*N)) * sin( ((N-1.0)/(2.0*N)) * phi ) */
+double dYPolarCE_dx(void *aux, double x, double y, double z)
+{
+  tBox *box = (tBox *) aux;
+  int N = box->n2 - 1;
+  double phi = atan(y/x);
+  double dY_dphi = PI*((N-1.0)/(2.0*N)) * sin( ((N-1.0)/(2.0*N)) * phi );
+  
+  return dY_dphi * dphi_dx(aux, x, y, z);
+}
+double dYPolarCE_dy(void *aux, double x, double y, double z)
+{
+  tBox *box = (tBox *) aux;
+  int N = box->n2 - 1;
+  double phi = atan(y/x);
+  double dY_dphi = PI*((N-1.0)/(2.0*N)) * sin( ((N-1.0)/(2.0*N)) * phi );
+  
+  return dY_dphi * dphi_dy(aux, x, y, z);
+}
+/* functions to treat cartesian derivs at singular points are currently not
+   implemented */
+/* second coord. derivs are currently not needed */
+
+/* end: PolarCE coordinates: */
