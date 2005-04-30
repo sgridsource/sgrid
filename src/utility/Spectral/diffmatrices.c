@@ -40,7 +40,8 @@ void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
     /* set D */
     for(i=0; i<n1; i++) D[n1*i + j] = c[i];
     
-    cheb_deriv(a, b,  d, c, n1-1);
+    //cheb_deriv(a, b,  d, c, n1-1);
+    coeffs_of_deriv(a, b,  d, c, n1-1);
 
     //cheb_eval_onExtrema(c, d, n1-1);
     eval_onPoints(c, d, n1-1);

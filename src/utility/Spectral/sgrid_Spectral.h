@@ -25,3 +25,11 @@ void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
                     void (*coeffs_of_deriv)(double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) );
 void diffmat_deriv(double *D, double *u, double *du, int n);
+
+/* Functions from filters.c */
+void initfiltermatrix(double *F, int k, int n1,
+                    void (*get_coeffs)(double *,double *, int),
+                    void (*filter_coeffs)(double *, int, int),
+                    void (*eval_onPoints)(double *,double *, int) );
+void filtermatrix(double *F, double *u, double *uf, int n);
+void spec_filter1(tBox *box, int direc, double *u);
