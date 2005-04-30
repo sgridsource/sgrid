@@ -138,11 +138,12 @@ tGrid *make_grid(int pr)
       }
     }  /* end for (k = 0; k < n3; k++) */
 
-    /* initialize diff. matrices */
+    /* initialize diff. and filter matrices */
     {
        void (*get_coeffs)(double *,double *, int);
        void (*coeffs_of_deriv)(double, double, double *,double *, int);
        void (*eval_onPoints)(double *,double *, int);
+       void (*filter_coeffs)(double *, int, int);
        
        snprintf(str, 999, "box%d_basis1", b);
        if( Getv(str, "ChebExtrema") )
@@ -150,15 +151,20 @@ tGrid *make_grid(int pr)
          get_coeffs = cheb_coeffs_fromExtrema;
          coeffs_of_deriv = cheb_deriv;
          eval_onPoints = cheb_eval_onExtrema;
+         filter_coeffs = cheb_filter;
        }
        else if( Getv(str, "Fourier") )
        {
          get_coeffs = four_coeffs;
          coeffs_of_deriv = four_deriv;
          eval_onPoints = four_eval;
+         filter_coeffs = four_filter;
        }
        initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
+       initfiltermatrix(box->F1, n1+1, n1, 
+                        get_coeffs, filter_coeffs, eval_onPoints);
+
         
        snprintf(str, 999, "box%d_basis2", b);
        if( Getv(str, "ChebExtrema") )
@@ -166,15 +172,20 @@ tGrid *make_grid(int pr)
          get_coeffs = cheb_coeffs_fromExtrema;
          coeffs_of_deriv = cheb_deriv;
          eval_onPoints = cheb_eval_onExtrema;
+         filter_coeffs = cheb_filter;
        }
        else if( Getv(str, "Fourier") )
        {
          get_coeffs = four_coeffs;
          coeffs_of_deriv = four_deriv;
          eval_onPoints = four_eval;
+         filter_coeffs = four_filter;
        }
        initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
+       initfiltermatrix(box->F2, 13, n2, 
+                        get_coeffs, filter_coeffs, eval_onPoints);
+
 
        snprintf(str, 999, "box%d_basis3", b);
        if( Getv(str, "ChebExtrema") )
@@ -182,15 +193,19 @@ tGrid *make_grid(int pr)
          get_coeffs = cheb_coeffs_fromExtrema;
          coeffs_of_deriv = cheb_deriv;
          eval_onPoints = cheb_eval_onExtrema;
+         filter_coeffs = cheb_filter;
        }
        else if( Getv(str, "Fourier") )
        {
          get_coeffs = four_coeffs;
          coeffs_of_deriv = four_deriv;
          eval_onPoints = four_eval;
+         filter_coeffs = four_filter;
        }
        initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
+       initfiltermatrix(box->F3, n3+1, n3, 
+                        get_coeffs, filter_coeffs, eval_onPoints);
     }
   }
 

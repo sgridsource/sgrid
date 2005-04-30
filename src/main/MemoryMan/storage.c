@@ -95,6 +95,14 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
     }
   }
 
+  /* get mem. for filter matrices */
+  box->F1 = box->F2 = box->F3 = NULL;
+  box->F1 = (double *) calloc( n1*n1, sizeof(double) );
+  box->F2 = (double *) calloc( n2*n2, sizeof(double) );
+  box->F3 = (double *) calloc( n3*n3, sizeof(double) );
+  if( !(box->F1 && box->F2 && box->F3) )
+    errorexit("alloc_box: out of memory for filter matrices");
+
   return box;
 } 
 
@@ -137,6 +145,9 @@ void free_box(tBox *box)
   free(box->DD1);
   free(box->DD2);
   free(box->DD3);
+  free(box->F1);
+  free(box->F2);
+  free(box->F3);
   
   free(box);
 }
