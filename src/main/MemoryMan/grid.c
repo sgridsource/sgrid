@@ -144,7 +144,17 @@ tGrid *make_grid(int pr)
        void (*coeffs_of_deriv)(double, double, double *,double *, int);
        void (*eval_onPoints)(double *,double *, int);
        void (*filter_coeffs)(double *, int, int);
-       
+       int filt1, filt2, filt3;
+
+       snprintf(str, 999, "box%d_filter1", b);
+       filt1 = Geti(str);
+
+       snprintf(str, 999, "box%d_filter2", b);
+       filt2 = Geti(str);
+
+       snprintf(str, 999, "box%d_filter3", b);
+       filt3 = Geti(str);
+  
        snprintf(str, 999, "box%d_basis1", b);
        if( Getv(str, "ChebExtrema") )
        {
@@ -162,7 +172,7 @@ tGrid *make_grid(int pr)
        }
        initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
-       initfiltermatrix(box->F1, n1+1, n1, 
+       initfiltermatrix(box->F1, n1+1-filt1, n1, 
                         get_coeffs, filter_coeffs, eval_onPoints);
 
         
@@ -183,7 +193,7 @@ tGrid *make_grid(int pr)
        }
        initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
-       initfiltermatrix(box->F2, 13, n2, 
+       initfiltermatrix(box->F2, n2+1-filt2, n2, 
                         get_coeffs, filter_coeffs, eval_onPoints);
 
 
@@ -204,7 +214,7 @@ tGrid *make_grid(int pr)
        }
        initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
-       initfiltermatrix(box->F3, n3+1, n3, 
+       initfiltermatrix(box->F3, n3+1-filt3, n3, 
                         get_coeffs, filter_coeffs, eval_onPoints);
     }
   }

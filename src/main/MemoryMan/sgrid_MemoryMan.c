@@ -64,6 +64,17 @@ int sgrid_MemoryMan()
     snprintf(str, 999, "box%d_basis3", b);
     AddPar(str, "ChebExtrema", 
                 "basis functions in z-direction [ChebExtrema, ChebZeros]");
+
+    /* simple filter amounts used */
+    snprintf(str, 999, "box%d_filter1", b);
+    AddPar(str, "0", 
+                "filter amount in x-direction [some number up to n1]");
+    snprintf(str, 999, "box%d_filter2", b);
+    AddPar(str, "0", 
+                "filter amount in y-direction [some number up to n2]");
+    snprintf(str, 999, "box%d_filter3", b);
+    AddPar(str, "0", 
+                "filter amount in z-direction [some number up to n3]");
   }
   return 0;
 }
