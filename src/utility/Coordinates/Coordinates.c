@@ -84,6 +84,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->Sing_d_dx[1] = NULL;
       box->Sing_d_dx[2] = NULL;
     }
+    if( Getv(str, "Spherical") )
+    {
+      printf("Coordinates: initializing Spherical coordinates...\n");
+      box->x_of_X[1] = x_ofSpherical;
+      box->x_of_X[2] = y_ofSpherical;
+      box->x_of_X[3] = z_ofSpherical;
+
+      box->dX_dx[1][1] = dr_dx;
+      box->dX_dx[1][2] = dr_dy;
+      box->dX_dx[1][3] = dr_dz;
+      box->dX_dx[2][1] = dthm_dx;
+      box->dX_dx[2][2] = dthm_dy;
+      box->dX_dx[2][3] = dthm_dz;
+      box->dX_dx[3][1] = dphiSpherical_dx;
+      box->dX_dx[3][2] = dphiSpherical_dy;
+      box->dX_dx[3][3] = zero_of_xyz;
+    }
 
     /* compute cartesian coordinates x,y,z from X,Y,Z */
     if( box->x_of_X[1] != NULL )
@@ -131,7 +148,9 @@ double z_equals_Z(void *aux, double X, double Y, double Z)
   return Z;
 }
 
-/* start: Polar coordinates: */
+
+/* ****************************************************************** */
+/* start: Polar coordinates:                                          */
 
 /* Coord. trafos */
 double x_ofPolar(void *aux, double rho, double phi, double Z)
@@ -238,7 +257,8 @@ double dphi_dydy(void *aux, double rho, double phi, double Z)
 /* end: Polar coordinates: */
 
 
-/* start: PolarCE coordinates: */
+/* ****************************************************************** */
+/* start: PolarCE coordinates:                                        */
 
 /* Coord. trafos */
 double x_ofPolarCE(void *aux, double rho, double Y, double Z)
@@ -288,3 +308,109 @@ double dYPolarCE_dy(void *aux, double rho, double Y, double Z)
 /* second coord. derivs are currently not needed */
 
 /* end: PolarCE coordinates: */
+
+
+/* ****************************************************************** */
+/* start: Spherical coordinates:                                      */
+
+/* Coord. trafos */
+double x_ofSpherical(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  return r*cos(phi)*sin(theta);
+}
+double y_ofSpherical(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  return r*sin(phi)*sin(theta);
+}
+double z_ofSpherical(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  return r*cos(theta);
+}
+
+/* first coord. derivs */
+double dr_dx(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  return cos(phi)*sin(theta);
+}
+double dr_dy(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  return sin(phi)*sin(theta);
+}
+double dr_dz(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  return cos(theta);
+}
+
+double dthm_dx(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  if(r>0.0) return cos(theta)*cos(phi)/r;
+  else      return 0.0; /* result if we go along y=0 line */
+}
+double dthm_dy(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  if(r>0.0) return cos(theta)*sin(phi)/r;
+  else      return 0.0; /* result if we go along x=0 line */
+}
+double dthm_dz(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  if(r>0.0) return sin(theta)/r;
+  else      return 0.0; /* result if we go along z=0 line */
+}
+
+double dphiSpherical_dx(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  return -sin(phi)/(r*sin(theta));
+}
+double dphiSpherical_dy(void *aux, double r, double thm, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double N = box->n3;
+  double theta = thm + PI/N;
+
+  return cos(phi)/(r*sin(theta));
+}
+
+/* second coord. derivs are currently not needed */
+
+/* end: Spherical coordinates: */
+

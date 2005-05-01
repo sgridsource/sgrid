@@ -33,3 +33,16 @@ double x_ofPolarCE(void *aux, double rho, double Y, double Z);
 double y_ofPolarCE(void *aux, double rho, double Y, double Z);
 double dYPolarCE_dx(void *aux, double rho, double Y, double Z);
 double dYPolarCE_dy(void *aux, double rho, double Y, double Z);
+
+/* Spherical coordinates: */
+double x_ofSpherical(void *aux, double r, double thm, double phi);
+double y_ofSpherical(void *aux, double r, double thm, double phi);
+double z_ofSpherical(void *aux, double r, double thm, double phi);
+double dr_dx(void *aux, double r, double thm, double phi);
+double dr_dy(void *aux, double r, double thm, double phi);
+double dr_dz(void *aux, double r, double thm, double phi);
+double dphiSpherical_dx(void *aux, double r, double thm, double phi);
+double dphiSpherical_dy(void *aux, double r, double thm, double phi);
+double dthm_dx(void *aux, double r, double thm, double phi);
+double dthm_dy(void *aux, double r, double thm, double phi);
+double dthm_dz(void *aux, double r, double thm, double phi);
