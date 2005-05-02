@@ -333,7 +333,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
       }
   }
   else
-    errorexit("cheb_Deriv1: possible values for direction direc are 1,2,3.");
+    errorexit("spec_Deriv1: possible values for direction direc are 1,2,3.");
   /* free memory for lines */
   /*
     linelen=0;
