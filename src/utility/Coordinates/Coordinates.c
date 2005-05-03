@@ -317,7 +317,7 @@ double dYPolarCE_dy(void *aux, double rho, double Y, double Z)
 double x_ofSpherical(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   return r*cos(phi)*sin(theta);
@@ -325,7 +325,7 @@ double x_ofSpherical(void *aux, double r, double thm, double phi)
 double y_ofSpherical(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   return r*sin(phi)*sin(theta);
@@ -333,7 +333,7 @@ double y_ofSpherical(void *aux, double r, double thm, double phi)
 double z_ofSpherical(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   return r*cos(theta);
@@ -343,7 +343,7 @@ double z_ofSpherical(void *aux, double r, double thm, double phi)
 double dr_dx(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   return cos(phi)*sin(theta);
@@ -351,7 +351,7 @@ double dr_dx(void *aux, double r, double thm, double phi)
 double dr_dy(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   return sin(phi)*sin(theta);
@@ -359,7 +359,7 @@ double dr_dy(void *aux, double r, double thm, double phi)
 double dr_dz(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   return cos(theta);
@@ -368,7 +368,7 @@ double dr_dz(void *aux, double r, double thm, double phi)
 double dthm_dx(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   if(r>0.0) return cos(theta)*cos(phi)/r;
@@ -377,7 +377,7 @@ double dthm_dx(void *aux, double r, double thm, double phi)
 double dthm_dy(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   if(r>0.0) return cos(theta)*sin(phi)/r;
@@ -386,7 +386,7 @@ double dthm_dy(void *aux, double r, double thm, double phi)
 double dthm_dz(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   if(r>0.0) return sin(theta)/r;
@@ -396,7 +396,7 @@ double dthm_dz(void *aux, double r, double thm, double phi)
 double dphiSpherical_dx(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   return -sin(phi)/(r*sin(theta));
@@ -404,7 +404,7 @@ double dphiSpherical_dx(void *aux, double r, double thm, double phi)
 double dphiSpherical_dy(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
-  double N = box->n3;
+  double N = box->n2;
   double theta = thm + PI/N;
 
   return cos(phi)/(r*sin(theta));
