@@ -84,12 +84,12 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->Sing_d_dx[1] = NULL;
       box->Sing_d_dx[2] = NULL;
     }
-    if( Getv(str, "Spherical") )
+    if( Getv(str, "SphericalDF") )
     {
-      printf("Coordinates: initializing Spherical coordinates...\n");
-      box->x_of_X[1] = x_ofSpherical;
-      box->x_of_X[2] = y_ofSpherical;
-      box->x_of_X[3] = z_ofSpherical;
+      printf("Coordinates: initializing SphericalDF coordinates...\n");
+      box->x_of_X[1] = x_ofSphericalDF;
+      box->x_of_X[2] = y_ofSphericalDF;
+      box->x_of_X[3] = z_ofSphericalDF;
 
       box->dX_dx[1][1] = dr_dx;
       box->dX_dx[1][2] = dr_dy;
@@ -97,8 +97,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[2][1] = dthm_dx;
       box->dX_dx[2][2] = dthm_dy;
       box->dX_dx[2][3] = dthm_dz;
-      box->dX_dx[3][1] = dphiSpherical_dx;
-      box->dX_dx[3][2] = dphiSpherical_dy;
+      box->dX_dx[3][1] = dphiSphericalDF_dx;
+      box->dX_dx[3][2] = dphiSphericalDF_dy;
       box->dX_dx[3][3] = zero_of_xyz;
     }
 
@@ -311,10 +311,10 @@ double dYPolarCE_dy(void *aux, double rho, double Y, double Z)
 
 
 /* ****************************************************************** */
-/* start: Spherical coordinates:                                      */
+/* start: SphericalDF coordinates:                                      */
 
 /* Coord. trafos */
-double x_ofSpherical(void *aux, double r, double thm, double phi)
+double x_ofSphericalDF(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
   double N = box->n2;
@@ -322,7 +322,7 @@ double x_ofSpherical(void *aux, double r, double thm, double phi)
 
   return r*cos(phi)*sin(theta);
 }
-double y_ofSpherical(void *aux, double r, double thm, double phi)
+double y_ofSphericalDF(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
   double N = box->n2;
@@ -330,7 +330,7 @@ double y_ofSpherical(void *aux, double r, double thm, double phi)
 
   return r*sin(phi)*sin(theta);
 }
-double z_ofSpherical(void *aux, double r, double thm, double phi)
+double z_ofSphericalDF(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
   double N = box->n2;
@@ -393,7 +393,7 @@ double dthm_dz(void *aux, double r, double thm, double phi)
   else      return 0.0; /* result if we go along z=0 line */
 }
 
-double dphiSpherical_dx(void *aux, double r, double thm, double phi)
+double dphiSphericalDF_dx(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
   double N = box->n2;
@@ -401,7 +401,7 @@ double dphiSpherical_dx(void *aux, double r, double thm, double phi)
 
   return -sin(phi)/(r*sin(theta));
 }
-double dphiSpherical_dy(void *aux, double r, double thm, double phi)
+double dphiSphericalDF_dy(void *aux, double r, double thm, double phi)
 {
   tBox *box = (tBox *) aux;
   double N = box->n2;
@@ -412,5 +412,5 @@ double dphiSpherical_dy(void *aux, double r, double thm, double phi)
 
 /* second coord. derivs are currently not needed */
 
-/* end: Spherical coordinates: */
+/* end: SphericalDF coordinates: */
 
