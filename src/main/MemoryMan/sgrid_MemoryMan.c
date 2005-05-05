@@ -30,7 +30,7 @@ int sgrid_MemoryMan()
   {
     char str[1000];
 
-    /* number of popint in all 3 directions */
+    /* number of points in all 3 directions */
     snprintf(str, 999, "box%d_n1", b);
     AddPar(str, "1", "number of points in x-direction");
     snprintf(str, 999, "box%d_n2", b);
