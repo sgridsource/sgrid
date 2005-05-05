@@ -118,6 +118,100 @@ int timeforoutput(tGrid *grid, tVarList *vl)
 
 
 
+/* find index of coord X=X0 */
+int find_ind_closest_to_X0(tBox *box, double X0)
+{
+  int n1=box->n1;
+  int n2=box->n2;
+  double *X = box->v[Ind("X")];
+  int i,j,k;
+  double a,b;
+
+  i=0;  k=n1-1;
+  a = X[Index(i,0,0)];
+  b = X[Index(k,0,0)];
+  if(X0>=b) return k;
+  if(X0<=a) return i; 
+
+  while(k-i>1)
+  {
+    j=(i+k)/2;
+        
+    a = X[Index(i,0,0)]-X0;
+    b = X[Index(j,0,0)]-X0;
+    if(a*b<0.0) k=j;
+    else        i=j;
+  }
+  if( fabs(X[Index(i,0,0)]-X0) < fabs(X[Index(k,0,0)]-X0) )
+    return i;
+  else
+    return k;
+}
+
+/* find index of Y=Y0 */
+int find_ind_closest_to_Y0(tBox *box, double Y0)
+{
+  int n1=box->n1;
+  int n2=box->n2;
+  double *Y = box->v[Ind("Y")];
+  int i,j,k;
+  double a,b;
+
+  i=0;  k=n2-1;
+  a = Y[Index(0,i,0)];
+  b = Y[Index(0,k,0)];
+  if(Y0>=b) return k;
+  if(Y0<=a) return i; 
+  
+  while(k-i>1)
+  {
+    j=(i+k)/2;
+    a = Y[Index(0,i,0)]-Y0;
+    b = Y[Index(0,j,0)]-Y0;
+    if(a*b<0.0) k=j;
+    else        i=j;
+    //printf("i,j,k=%d,%d,%d Y[Index(0,i,0)]=%f\n",i,j,k, Y[Index(0,i,0)]);
+  }
+  if( fabs(Y[Index(0,i,0)]-Y0) < fabs(Y[Index(0,k,0)]-Y0) )
+    return i;
+  else
+    return k;
+}
+
+/* find index of Z=Z0 */
+int find_ind_closest_to_Z0(tBox *box, double Z0)
+{
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  double *Z = box->v[Ind("Z")];
+  int i,j,k;
+  double a,b;
+
+  i=0;  k=n3-1;
+  a = Z[Index(0,0,i)];
+  b = Z[Index(0,0,k)];
+  if(Z0>=b) return k;
+  if(Z0<=a) return i; 
+
+  while(k-i>1)
+  {
+    j=(i+k)/2;
+        
+    a = Z[Index(0,0,i)]-Z0;
+    b = Z[Index(0,0,j)]-Z0;
+    if(a*b<0.0) k=j;
+    else        i=j;
+  }
+  if( fabs(Z[Index(0,0,i)]-Z0) < fabs(Z[Index(0,0,k)]-Z0) )
+    return i;
+  else
+    return k;
+}
+
+
+
+
 /* master function to do all the writing */
 int write_grid(tGrid *grid)
 {

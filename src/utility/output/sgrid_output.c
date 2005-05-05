@@ -8,6 +8,9 @@
 
 int sgrid_output() 
 {
+  int nboxes = Geti("nboxes");
+  int b;
+
   printf("Adding output\n");
 
   /* functions */
@@ -68,9 +71,18 @@ int sgrid_output()
 	 "add_rotant_points)"); 
   AddPar("hdf5_timesteps_in_one_file", "yes", 
          "whether all timesteps are put into one hdf5 file");
-  
-  AddPar("outputX0", "0", "origin for output");
-  AddPar("outputY0", "0", "origin for output");
-  AddPar("outputZ0", "0", "origin for output");
+
+  for(b=0; b<nboxes; b++)
+  {
+    char str[1000];
+
+    /* origin for output */
+    snprintf(str, 999, "outputX0_box%d", b);
+    AddPar(str,   "0", "origin for output in X");
+    snprintf(str, 999, "outputY0_box%d", b);
+    AddPar(str,   "0", "origin for output in Y");
+    snprintf(str, 999, "outputZ0_box%d", b);
+    AddPar(str,   "0", "origin for output in Z");
+  }
   return 0;
 }

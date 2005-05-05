@@ -2,6 +2,7 @@
 /* Wolfgang Tichy, April 2005 */
 
 #include "sgrid.h"
+#include "output.h"
 
 
 void write_line(tBox *box, FILE *fp, int line, int iv)

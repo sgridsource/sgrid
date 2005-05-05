@@ -2,6 +2,8 @@
 /* Wolfgang Tichy, April 2005 */
 
 #include "sgrid.h"
+#include "output.h"
+
 
 
 void write_plane(tBox *box, FILE *fp, int normal, int plane, int iv)
@@ -86,7 +88,11 @@ void gnuplot_out2d_boxvar(tBox *box, char *name)
   fz = fopen(zfilename, "a");
   if (!fz) errorexits("failed opening %s", zfilename);
 
-  /* xy-plane:  z = 0 */
+  /* xy-plane:  z = 0, ... */
+  printf(">>>>>>>>X ind=%d\n",find_ind_closest_to_X0(box, 1));
+  printf(">>>>>>>>Y ind=%d\n",find_ind_closest_to_Y0(box, 11));
+  printf(">>>>>>>>Z ind=%d\n",find_ind_closest_to_Z0(box, 99));
+      
   write_plane(box, fx, 3 , box->n3/2, Ind(name));
   write_plane(box, fy, 2 , box->n2/2, Ind(name));
   write_plane(box, fz, 1 , box->n1/2, Ind(name));
