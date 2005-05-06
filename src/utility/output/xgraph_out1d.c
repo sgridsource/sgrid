@@ -19,6 +19,7 @@ void write_line(tBox *box, FILE *fp, int line, int iv)
   int imin, jmin, kmin;
   int imax, jmax, kmax;
   int index;
+  char str[1000];
   
   imin = jmin = kmin=0;
   imax = n1 - 1;
@@ -28,20 +29,32 @@ void write_line(tBox *box, FILE *fp, int line, int iv)
   if(line==1)
   {
     px = box->v[ix];
-    jmin = jmax = n2/2;
-    kmin = kmax = n3/2;
+
+    snprintf(str, 999, "outputY0_box%d", box->b);
+    jmin = jmax = find_ind_closest_to_Y0(box,Getd(str));
+
+    snprintf(str, 999, "outputZ0_box%d", box->b);
+    kmin = kmax = find_ind_closest_to_Z0(box,Getd(str));
   }
   else if(line==2)
   {
     px = box->v[iy];
-    imin = imax = n1/2;
-    kmin = kmax = n3/2;
+
+    snprintf(str, 999, "outputX0_box%d", box->b);
+    imin = imax = find_ind_closest_to_X0(box,Getd(str));
+
+    snprintf(str, 999, "outputZ0_box%d", box->b);
+    kmin = kmax = find_ind_closest_to_Z0(box,Getd(str));
   }
   else
   {
     px = box->v[iz];
-    jmin = jmax = n2/2;
-    imin = imax = n1/2;
+
+    snprintf(str, 999, "outputX0_box%d", box->b);
+    imin = imax = find_ind_closest_to_X0(box,Getd(str));
+
+    snprintf(str, 999, "outputY0_box%d", box->b);
+    jmin = jmax = find_ind_closest_to_Y0(box,Getd(str));
   }
 
   if(pv==NULL) return;

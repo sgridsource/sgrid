@@ -71,34 +71,38 @@ void write_plane(tBox *box, FILE *fp, int normal, int plane, int iv)
 /* 2d gnuplot */
 void gnuplot_out2d_boxvar(tBox *box, char *name)
 {
-  FILE *fx, *fy, *fz;
-  char xfilename[1000];
-  char yfilename[1000];
-  char zfilename[1000];
+  FILE *fXY, *fXZ, *fYZ;
+  char XYfilename[1000];
+  char XZfilename[1000];
+  char YZfilename[1000];
+  char str[1000];
   
-  snprintf(xfilename, 999, "%s/%s.XY%d", Gets("outdir"), name, box->b);
-  snprintf(yfilename, 999, "%s/%s.XZ%d", Gets("outdir"), name, box->b);
-  snprintf(zfilename, 999, "%s/%s.YZ%d", Gets("outdir"), name, box->b);
+  snprintf(XYfilename, 999, "%s/%s.XY%d", Gets("outdir"), name, box->b);
+  snprintf(XZfilename, 999, "%s/%s.XZ%d", Gets("outdir"), name, box->b);
+  snprintf(YZfilename, 999, "%s/%s.YZ%d", Gets("outdir"), name, box->b);
 
   /* open file */
-  fx = fopen(xfilename, "a");
-  if (!fx) errorexits("failed opening %s", xfilename);
-  fy = fopen(yfilename, "a");
-  if (!fy) errorexits("failed opening %s", yfilename);
-  fz = fopen(zfilename, "a");
-  if (!fz) errorexits("failed opening %s", zfilename);
+  fXY = fopen(XYfilename, "a");
+  if (!fXY) errorexits("failed opening %s", XYfilename);
+  fXZ = fopen(XZfilename, "a");
+  if (!fXZ) errorexits("failed opening %s", XZfilename);
+  fYZ = fopen(YZfilename, "a");
+  if (!fYZ) errorexits("failed opening %s", YZfilename);
 
-  /* xy-plane:  z = 0, ... */
-  printf(">>>>>>>>X ind=%d\n",find_ind_closest_to_X0(box, 1));
-  printf(">>>>>>>>Y ind=%d\n",find_ind_closest_to_Y0(box, 11));
-  printf(">>>>>>>>Z ind=%d\n",find_ind_closest_to_Z0(box, 99));
-      
-  write_plane(box, fx, 3 , box->n3/2, Ind(name));
-  write_plane(box, fy, 2 , box->n2/2, Ind(name));
-  write_plane(box, fz, 1 , box->n1/2, Ind(name));
+  /* XY-plane:  Z = Z0 */
+  snprintf(str, 999, "outputZ0_box%d", box->b);
+  write_plane(box, fXY, 3 , find_ind_closest_to_Z0(box,Getd(str)), Ind(name));
 
+  /* XZ-plane:  Y = Y0 */
+  snprintf(str, 999, "outputY0_box%d", box->b);
+  write_plane(box, fXZ, 2 , find_ind_closest_to_Y0(box,Getd(str)), Ind(name));
+
+  /* YZ-plane:  X = X0 */
+  snprintf(str, 999, "outputX0_box%d", box->b);
+  write_plane(box, fYZ, 1 , find_ind_closest_to_X0(box,Getd(str)), Ind(name));
+    
   /* close files */
-  fclose(fx);
-  fclose(fy);
-  fclose(fz);
+  fclose(fXY);
+  fclose(fXZ);
+  fclose(fYZ);
 }

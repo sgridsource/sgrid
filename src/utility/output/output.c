@@ -139,8 +139,8 @@ int find_ind_closest_to_X0(tBox *box, double X0)
         
     a = X[Index(i,0,0)]-X0;
     b = X[Index(j,0,0)]-X0;
-    if(a*b<0.0) k=j;
-    else        i=j;
+    if(a*b<=0.0) k=j;
+    else         i=j;
   }
   if( fabs(X[Index(i,0,0)]-X0) < fabs(X[Index(k,0,0)]-X0) )
     return i;
@@ -168,9 +168,9 @@ int find_ind_closest_to_Y0(tBox *box, double Y0)
     j=(i+k)/2;
     a = Y[Index(0,i,0)]-Y0;
     b = Y[Index(0,j,0)]-Y0;
-    if(a*b<0.0) k=j;
-    else        i=j;
-    //printf("i,j,k=%d,%d,%d Y[Index(0,i,0)]=%f\n",i,j,k, Y[Index(0,i,0)]);
+    if(a*b<=0.0) k=j;
+    else         i=j;
+    //printf("i,j,k=%d,%d,%d Y[Index(0,j,0)]=%f\n",i,j,k, Y[Index(0,j,0)]);
   }
   if( fabs(Y[Index(0,i,0)]-Y0) < fabs(Y[Index(0,k,0)]-Y0) )
     return i;
@@ -200,8 +200,9 @@ int find_ind_closest_to_Z0(tBox *box, double Z0)
         
     a = Z[Index(0,0,i)]-Z0;
     b = Z[Index(0,0,j)]-Z0;
-    if(a*b<0.0) k=j;
-    else        i=j;
+    if(a*b<=0.0) k=j;
+    else         i=j;
+    //printf("i,j,k=%d,%d,%d Z[Index(0,0,j)]=%f\n",i,j,k, Z[Index(0,0,j)]);
   }
   if( fabs(Z[Index(0,0,i)]-Z0) < fabs(Z[Index(0,0,k)]-Z0) )
     return i;
