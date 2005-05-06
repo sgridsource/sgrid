@@ -7,7 +7,10 @@
 
 int sgrid_ConvTest() 
 {
+  if (!Getv("physics", "ConvTest")) return;
   printf("Adding ConvTest\n");
+  if(!Getv("box0_Coordinates", "SphericalDF"))
+    errorexit("ConvTest needs box0_Coordinates = SphericalDF");
 
   /* functions */
   AddFun(INITIALDATA, ConvTest_startup, "initialize test");
