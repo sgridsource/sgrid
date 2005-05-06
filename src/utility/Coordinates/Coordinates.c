@@ -389,7 +389,7 @@ double dthm_dz(void *aux, double r, double thm, double phi)
   double N = box->n2;
   double theta = thm + PI/N;
 
-  if(r>0.0) return sin(theta)/r;
+  if(r>0.0) return -sin(theta)/r;
   else      return 0.0; /* result if we go along z=0 line */
 }
 
