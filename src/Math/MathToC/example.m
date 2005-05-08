@@ -44,6 +44,7 @@ LW[a_,b_]    := LW[b,a]    /; !OrderedQ[{a,b}]
 Bdown[a_,b_] := Bdown[b,a] /; !OrderedQ[{a,b}]
 Bup[a_,b_]   := Bup[b,a]   /; !OrderedQ[{a,b}]
 
+deldel[a_,b_, g_] := deldel[b,a, g] /; !OrderedQ[{a,b}]
 
 (************************************************************************)
 (* information for C output *)
@@ -66,14 +67,6 @@ BeginCFunction[] := Module[{},
   pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
   pr["#define Cal(x,y,z) ((x)?(y):(z))\n\n"];
 
-  pr["#define DEL(x,u)       dxu)\n"];
-  pr["#define DELDEL(x,y,u)  dxyu)\n"];
-  pr["#define DEL2(x,u)      dxxu)\n"];
-(*
-  pr["#define DEL(x,u)  partial(box, (x), (u), temp1, temp2, temp3)\n"];
-  pr["#define DELDEL(x,y ,u) partial2((x), (y), (u), ijk, x,y,z)\n"];
-  pr["#define DEL2(x, u)     DELDEL((x), (x) ,(u))\n"];
-*)
   pr["\n\n\n"];
 
   pr["void example(tL *level, tVarList *vlMetric, tVarList *vlCurv)\n"];
