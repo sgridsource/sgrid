@@ -2854,23 +2854,26 @@ fabs(cdKdA3) + fabs(cdKdB3) + fabs(cdKdC3) + fabs(codelTrKA3) +
 
 denom1
 =
-fabs(codelK111*ginv11 + codelK122*ginv22 + 
+fabs(cdKudd111 + cdKudd212 + cdKudd313) + 
+  fabs(codelK111*ginv11 + codelK122*ginv22 + 
     2.*(codelK112*ginv12 + codelK113*ginv13 + codelK123*ginv23) + 
-    codelK133*ginv33) + fabs(cdKudd(c,1.,c))
+    codelK133*ginv33)
 ;
 
 denom2
 =
-fabs(codelK211*ginv11 + codelK222*ginv22 + 
+fabs(cdKudd112 + cdKudd222 + cdKudd323) + 
+  fabs(codelK211*ginv11 + codelK222*ginv22 + 
     2.*(codelK212*ginv12 + codelK213*ginv13 + codelK223*ginv23) + 
-    codelK233*ginv33) + fabs(cdKudd(c,2.,c))
+    codelK233*ginv33)
 ;
 
 denom3
 =
-fabs(codelK311*ginv11 + codelK322*ginv22 + 
+fabs(cdKudd113 + cdKudd223 + cdKudd333) + 
+  fabs(codelK311*ginv11 + codelK322*ginv22 + 
     2.*(codelK312*ginv12 + codelK313*ginv13 + codelK323*ginv23) + 
-    codelK333*ginv33) + fabs(cdKudd(c,3.,c))
+    codelK333*ginv33)
 ;
 
 }
@@ -2903,4 +2906,4 @@ Cal(denom3 <= 0.,0.,mom3[ijk]/denom3)
 }  /* end of function */
 
 /* ADMconstraints.c */
-/* nvars = 103, n* = 1992,  n/ = 36,  n+ = 1928, n = 3956, O = 1 */
+/* nvars = 103, n* = 1992,  n/ = 36,  n+ = 1934, n = 3962, O = 1 */
