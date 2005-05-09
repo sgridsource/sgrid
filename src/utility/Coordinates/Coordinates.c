@@ -14,7 +14,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   int var_x = Ind("x");
   int var_y = Ind("y");
   int var_z = Ind("z");
-  int b;
+  int b, ind;
 
   for (b = 0; b < grid->nboxes; b++)
   {
@@ -103,13 +103,11 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
 
     /* compute cartesian coordinates x,y,z from X,Y,Z */
-    if( box->x_of_X[1] != NULL )
-    {
-      int ind;
-      enablevar_inbox(box, var_x);
-      enablevar_inbox(box, var_y);
-      enablevar_inbox(box, var_z);
+    enablevar_inbox(box, var_x);
+    enablevar_inbox(box, var_y);
+    enablevar_inbox(box, var_z);
 
+    if( box->x_of_X[1] != NULL )
       forallpoints(box, ind)
       {
         double X = box->v[var_X][ind];
@@ -119,8 +117,17 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         box->v[var_y][ind] = box->x_of_X[2]((void *) box, X,Y,Z);
         box->v[var_z][ind] = box->x_of_X[3]((void *) box, X,Y,Z);
       }
-    }
-  
+    else
+      forallpoints(box, ind)
+      {
+        double X = box->v[var_X][ind];
+        double Y = box->v[var_Y][ind];
+        double Z = box->v[var_Z][ind];
+        box->v[var_x][ind] = X;
+        box->v[var_y][ind] = Y;
+        box->v[var_z][ind] = Z;
+      }
+
   }
   return 0;
 }
