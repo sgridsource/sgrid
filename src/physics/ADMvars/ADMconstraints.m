@@ -175,7 +175,7 @@ BeginCFunction[] := Module[{},
   pr["\n"];
 
   pr["int normConstr = Getv(\"ADMvars_normalizedConstraints\", \"yes\");\n"];
-  pr["int TermByTerm = Getv(\"ADMvars_ConstraintNorm\", \"TermByTerm\");\n"];
+  pr["int TermByTerm = GetvLax(\"ADMvars_ConstraintNorm\", \"TermByTerm\");\n"];
   pr["\n"];
 
   pr["for(bi = 0; bi < grid->nboxes; bi++)\n"];
