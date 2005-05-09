@@ -14,9 +14,9 @@ variables = {g[a,b], K[a,b], psi, dpop[a], ddpop[a,b], ham, mom[a], trK,
 tocompute = {
 
   (* partial derivatives *)
-  delg[c,a,b] == del[c,g[a,b]],
-  deldelg[a,b,c,d] == deldel[a,b,g[c,d]],
-  delK[a,b,c] == del[a, K[b,c]],
+  delg[c,a,b] == OD[g[a,b], c],          (* del[c,g[a,b]], *)
+  deldelg[a,b,c,d] == OD2[g[c,d], a,b],  (* deldel[a,b,g[c,d]], *)
+  delK[a,b,c] == OD[K[b,c], a],          (* del[a, K[b,c]], *)
 
   (* make transition to physical metric *)
   f == psi^4,
@@ -118,7 +118,7 @@ ginv[a_,b_]    := ginv[b,a] /; !OrderedQ[{a,b}]
 ddpop[a_,b_]   := ddpop[b,a] /; !OrderedQ[{a,b}]
 deldelf[a_,b_] := deldelf[b,a] /; !OrderedQ[{a,b}]
 
-deldel[a_,b_,c_] := deldel[b,a,c] /; !OrderedQ[{a,b}]
+OD2[c_, a_,b_] := OD2[c,b,a] /; !OrderedQ[{a,b}]
 delg[c_,a_,b_] := delg[c,b,a] /; !OrderedQ[{a,b}]
 delK[c_,a_,b_] := delK[c,b,a] /; !OrderedQ[{a,b}]
 deldelg[a_,b_,c_,d_] := deldelg[b,a,c,d] /; !OrderedQ[{a,b}]
@@ -143,9 +143,13 @@ cdKuddC[c_,a_,b_] := cdKuddC[c,b,a] /; !OrderedQ[{a,b}]
 (* information for C output *)
 
 (* information about the function 
-   the C file will be functionname.c 
+   the C file will be in Cfunctionfile 
 *)
-includeANDdefine[] := Module[{},
+
+CFunctionFile = "ADMconstraints.c"
+
+(* the head of the function *)
+BeginCFunction[] := Module[{},
 
   pr["#include \"sgrid.h\"\n"];
   pr["#include \"ADMvars.h\"\n"];
@@ -153,20 +157,16 @@ includeANDdefine[] := Module[{},
   pr["#define Power(x,y) (pow((double) (x), (double) (y)))\n"];
   pr["#define Log(x)     log((double) (x)))\n"];
   pr["#define pow2(x)    ((x)*(x))\n"];
-  pr["#define pow2inv(x) (1.0/((x)*(x)))\n\n"];
+  pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
   pr["#define Cal(x,y,z) ((x)?(y):(z))\n\n"];
+
   pr["\n\n\n"];
 
+  pr["void ADMconstraints(tVarList *u)\n"];
+  pr["{\n"];
+  pr["int ijk=0;\n\n"];
+
 ];
-
-functionname = "ADMconstraints";
-
-functionarguments = "tVarList *u";
-
-functionloop = "forinner19(level) {";
-endfunctionloop = "} endforinner; /* loop i, j, k */";
-
-
 
 (* custom variable declaration
    we have to translate between the tensor names and the C variables  
@@ -183,11 +183,28 @@ variabledeclarations[] := Module[{},
   pr["int TermByTerm = Getv(\"ADMvars_ConstraintNorm\", \"TermByTerm\");\n"];
   pr["int usepsi = 1;\n"];
 ];    
+(* auxillary variables are automatically inserted here *)
+
+(* custom C-code which is placed directly after the variable declarations *)
+InitializationCommands[] := Module[{},
+
+  pr["/* Jetzt geht's los! */\n"];
+];
 
 
+(* the end or tail of the function (we need at least a }) *)
+EndCFunction[] := Module[{},
+
+  pr["\n\n"];
+  pr["}  /* end of function */\n\n"];
+];
+
+
+(* to turn off optimization for development set optimizeflag = False *)
+optimizeflag = True;
 
 
 (************************************************************************)
 (* now we are ready to go *)
 
-<< "../../Math/MathToC/TensorEquationsToC.m"
+<< "../../Math/MathToC/TensorEquations3dToC.m"
