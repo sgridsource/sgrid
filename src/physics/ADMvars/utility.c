@@ -17,24 +17,24 @@ void FirstDerivsOf_Sab(tBox *box, int i_Sab, int i_dSabc)
   double *S33 = box->v[i_Sab+5];
 
   /* tensor derivs from index */
-  double *dS111 = box->v[i_Sabc+0];
-  double *dS112 = box->v[i_Sabc+1];
-  double *dS113 = box->v[i_Sabc+2];
-  double *dS121 = box->v[i_Sabc+3];
-  double *dS122 = box->v[i_Sabc+4];
-  double *dS123 = box->v[i_Sabc+5];
-  double *dS131 = box->v[i_Sabc+6];
-  double *dS132 = box->v[i_Sabc+7];
-  double *dS133 = box->v[i_Sabc+8];
-  double *dS221 = box->v[i_Sabc+9];
-  double *dS222 = box->v[i_Sabc+10];
-  double *dS223 = box->v[i_Sabc+11];
-  double *dS231 = box->v[i_Sabc+12];
-  double *dS232 = box->v[i_Sabc+13];
-  double *dS233 = box->v[i_Sabc+14];
-  double *dS331 = box->v[i_Sabc+15];
-  double *dS332 = box->v[i_Sabc+16];
-  double *dS333 = box->v[i_Sabc+17];
+  double *dS111 = box->v[i_dSabc+0];
+  double *dS112 = box->v[i_dSabc+1];
+  double *dS113 = box->v[i_dSabc+2];
+  double *dS121 = box->v[i_dSabc+3];
+  double *dS122 = box->v[i_dSabc+4];
+  double *dS123 = box->v[i_dSabc+5];
+  double *dS131 = box->v[i_dSabc+6];
+  double *dS132 = box->v[i_dSabc+7];
+  double *dS133 = box->v[i_dSabc+8];
+  double *dS221 = box->v[i_dSabc+9];
+  double *dS222 = box->v[i_dSabc+10];
+  double *dS223 = box->v[i_dSabc+11];
+  double *dS231 = box->v[i_dSabc+12];
+  double *dS232 = box->v[i_dSabc+13];
+  double *dS233 = box->v[i_dSabc+14];
+  double *dS331 = box->v[i_dSabc+15];
+  double *dS332 = box->v[i_dSabc+16];
+  double *dS333 = box->v[i_dSabc+17];
 
   /* compute all derivs in box */
   cart_partials(box, S11, dS111,dS112,dS113);
@@ -53,92 +53,92 @@ void FirstAndSecondDerivsOf_Sab(tBox *box, int i_Sab,
   FirstDerivsOf_Sab(box, i_Sab, i_dSabc);
   
   /* first tensor derivs from index */
-  double *dS111 = box->v[i_Sabc+0];
-  double *dS112 = box->v[i_Sabc+1];
-  double *dS113 = box->v[i_Sabc+2];
-  double *dS121 = box->v[i_Sabc+3];
-  double *dS122 = box->v[i_Sabc+4];
-  double *dS123 = box->v[i_Sabc+5];
-  double *dS131 = box->v[i_Sabc+6];
-  double *dS132 = box->v[i_Sabc+7];
-  double *dS133 = box->v[i_Sabc+8];
-  double *dS221 = box->v[i_Sabc+9];
-  double *dS222 = box->v[i_Sabc+10];
-  double *dS223 = box->v[i_Sabc+11];
-  double *dS231 = box->v[i_Sabc+12];
-  double *dS232 = box->v[i_Sabc+13];
-  double *dS233 = box->v[i_Sabc+14];
-  double *dS331 = box->v[i_Sabc+15];
-  double *dS332 = box->v[i_Sabc+16];
-  double *dS333 = box->v[i_Sabc+17];
+  double *dS111 = box->v[i_dSabc+0];
+  double *dS112 = box->v[i_dSabc+1];
+  double *dS113 = box->v[i_dSabc+2];
+  double *dS121 = box->v[i_dSabc+3];
+  double *dS122 = box->v[i_dSabc+4];
+  double *dS123 = box->v[i_dSabc+5];
+  double *dS131 = box->v[i_dSabc+6];
+  double *dS132 = box->v[i_dSabc+7];
+  double *dS133 = box->v[i_dSabc+8];
+  double *dS221 = box->v[i_dSabc+9];
+  double *dS222 = box->v[i_dSabc+10];
+  double *dS223 = box->v[i_dSabc+11];
+  double *dS231 = box->v[i_dSabc+12];
+  double *dS232 = box->v[i_dSabc+13];
+  double *dS233 = box->v[i_dSabc+14];
+  double *dS331 = box->v[i_dSabc+15];
+  double *dS332 = box->v[i_dSabc+16];
+  double *dS333 = box->v[i_dSabc+17];
 
   /* second tensor derivs from index */
-  double *dS1111 = box->v[i_Sabcd+0];
-  double *dS1112 = box->v[i_Sabcd+1];
-  double *dS1113 = box->v[i_Sabcd+2];
-  double *dS1122 = box->v[i_Sabcd+3];
-  double *dS1123 = box->v[i_Sabcd+4];
-  double *dS1133 = box->v[i_Sabcd+5];
+  double *ddS1111 = box->v[i_ddSabcd+0];
+  double *ddS1112 = box->v[i_ddSabcd+1];
+  double *ddS1113 = box->v[i_ddSabcd+2];
+  double *ddS1122 = box->v[i_ddSabcd+3];
+  double *ddS1123 = box->v[i_ddSabcd+4];
+  double *ddS1133 = box->v[i_ddSabcd+5];
 
-  double *dS1211 = box->v[i_Sabcd+6];
-  double *dS1212 = box->v[i_Sabcd+7];
-  double *dS1213 = box->v[i_Sabcd+8];
-  double *dS1222 = box->v[i_Sabcd+9];
-  double *dS1223 = box->v[i_Sabcd+10];
-  double *dS1233 = box->v[i_Sabcd+11];
+  double *ddS1211 = box->v[i_ddSabcd+6];
+  double *ddS1212 = box->v[i_ddSabcd+7];
+  double *ddS1213 = box->v[i_ddSabcd+8];
+  double *ddS1222 = box->v[i_ddSabcd+9];
+  double *ddS1223 = box->v[i_ddSabcd+10];
+  double *ddS1233 = box->v[i_ddSabcd+11];
 
-  double *dS1311 = box->v[i_Sabcd+12];
-  double *dS1312 = box->v[i_Sabcd+13];
-  double *dS1313 = box->v[i_Sabcd+14];
-  double *dS1322 = box->v[i_Sabcd+15];
-  double *dS1323 = box->v[i_Sabcd+16];
-  double *dS1333 = box->v[i_Sabcd+17];
+  double *ddS1311 = box->v[i_ddSabcd+12];
+  double *ddS1312 = box->v[i_ddSabcd+13];
+  double *ddS1313 = box->v[i_ddSabcd+14];
+  double *ddS1322 = box->v[i_ddSabcd+15];
+  double *ddS1323 = box->v[i_ddSabcd+16];
+  double *ddS1333 = box->v[i_ddSabcd+17];
 
-  double *dS2211 = box->v[i_Sabcd+18];
-  double *dS2212 = box->v[i_Sabcd+19];
-  double *dS2213 = box->v[i_Sabcd+20];
-  double *dS2222 = box->v[i_Sabcd+21];
-  double *dS2223 = box->v[i_Sabcd+22];
-  double *dS2233 = box->v[i_Sabcd+23];
+  double *ddS2211 = box->v[i_ddSabcd+18];
+  double *ddS2212 = box->v[i_ddSabcd+19];
+  double *ddS2213 = box->v[i_ddSabcd+20];
+  double *ddS2222 = box->v[i_ddSabcd+21];
+  double *ddS2223 = box->v[i_ddSabcd+22];
+  double *ddS2233 = box->v[i_ddSabcd+23];
 
-  double *dS2311 = box->v[i_Sabcd+24];
-  double *dS2312 = box->v[i_Sabcd+25];
-  double *dS2313 = box->v[i_Sabcd+26];
-  double *dS2322 = box->v[i_Sabcd+27];
-  double *dS2323 = box->v[i_Sabcd+28];
-  double *dS2333 = box->v[i_Sabcd+29];
+  double *ddS2311 = box->v[i_ddSabcd+24];
+  double *ddS2312 = box->v[i_ddSabcd+25];
+  double *ddS2313 = box->v[i_ddSabcd+26];
+  double *ddS2322 = box->v[i_ddSabcd+27];
+  double *ddS2323 = box->v[i_ddSabcd+28];
+  double *ddS2333 = box->v[i_ddSabcd+29];
 
-  double *dS3311 = box->v[i_Sabcd+30];
-  double *dS3312 = box->v[i_Sabcd+31];
-  double *dS3313 = box->v[i_Sabcd+32];
-  double *dS3322 = box->v[i_Sabcd+33];
-  double *dS3323 = box->v[i_Sabcd+34];
-  double *dS3333 = box->v[i_Sabcd+35];
+  double *ddS3311 = box->v[i_ddSabcd+30];
+  double *ddS3312 = box->v[i_ddSabcd+31];
+  double *ddS3313 = box->v[i_ddSabcd+32];
+  double *ddS3322 = box->v[i_ddSabcd+33];
+  double *ddS3323 = box->v[i_ddSabcd+34];
+  double *ddS3333 = box->v[i_ddSabcd+35];
 
   /* compute all second derivs in box */
-  cart_partials(box, dS111, ddS1111,dS1112,dS1113);
-  cart_partials(box, dS112, ddS1112,dS1122,dS1123);
-  cart_partials(box, dS113, ddS1113,dS1123,dS1133);
+  cart_partials(box, dS111, ddS1111,ddS1112,ddS1113);
+  cart_partials(box, dS112, ddS1112,ddS1122,ddS1123);
+  cart_partials(box, dS113, ddS1113,ddS1123,ddS1133);
 
-  cart_partials(box, dS121, ddS1211,dS1212,dS1213);
-  cart_partials(box, dS122, ddS1212,dS1222,dS1223);
-  cart_partials(box, dS123, ddS1213,dS1223,dS1233);
+  cart_partials(box, dS121, ddS1211,ddS1212,ddS1213);
+  cart_partials(box, dS122, ddS1212,ddS1222,ddS1223);
+  cart_partials(box, dS123, ddS1213,ddS1223,ddS1233);
 
-  cart_partials(box, dS131, ddS1311,dS1312,dS1313);
-  cart_partials(box, dS132, ddS1312,dS1322,dS1323);
-  cart_partials(box, dS133, ddS1313,dS1323,dS1333);
+  cart_partials(box, dS131, ddS1311,ddS1312,ddS1313);
+  cart_partials(box, dS132, ddS1312,ddS1322,ddS1323);
+  cart_partials(box, dS133, ddS1313,ddS1323,ddS1333);
 
-  cart_partials(box, dS221, ddS2211,dS2212,dS2213);
-  cart_partials(box, dS222, ddS2212,dS2222,dS2223);
-  cart_partials(box, dS223, ddS2213,dS2223,dS2233);
+  cart_partials(box, dS221, ddS2211,ddS2212,ddS2213);
+  cart_partials(box, dS222, ddS2212,ddS2222,ddS2223);
+  cart_partials(box, dS223, ddS2213,ddS2223,ddS2233);
 
-  cart_partials(box, dS231, ddS2311,dS2312,dS2313);
-  cart_partials(box, dS232, ddS2312,dS2322,dS2323);
-  cart_partials(box, dS233, ddS2313,dS2323,dS2333);
+  cart_partials(box, dS231, ddS2311,ddS2312,ddS2313);
+  cart_partials(box, dS232, ddS2312,ddS2322,ddS2323);
+  cart_partials(box, dS233, ddS2313,ddS2323,ddS2333);
 
-  cart_partials(box, dS331, ddS3311,dS3312,dS3313);
-  cart_partials(box, dS332, ddS3312,dS3322,dS3323);
-  cart_partials(box, dS333, ddS3313,dS3323,dS3333);
+  cart_partials(box, dS331, ddS3311,ddS3312,ddS3313);
+  cart_partials(box, dS332, ddS3312,ddS3322,ddS3323);
+  cart_partials(box, dS333, ddS3313,ddS3323,ddS3333);
 } 
 
 

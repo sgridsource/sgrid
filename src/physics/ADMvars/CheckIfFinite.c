@@ -30,7 +30,8 @@ int CheckIfFinite(tGrid* grid, char *varname)
     double *sum;
     tVarList *vl = VLPtrEnable1(grid, varname);
 
-    bampi_allreduce_sum(vl, &sum);
+    // TODO: FIX this!!!!!
+    //bampi_allreduce_sum(vl, &sum);  
 
     if(!finite(*sum)) num=0.1;
 
