@@ -24,8 +24,12 @@ tocompute = {
   psqrPN1 == mu^2 (4 + r12m)/r12m^2,
 
 
+  W[a,b,c] == OD[g[b,c], a ],
+  Z[a,b,c,d] == OD2[g[c,d],a,b ],
+
   W[a,b,c] == del[a, g[b,c] ],
   Z[a,b,c,d] == deldel[a,b, g[c,d] ],
+
   V[a,b,c] == func[a, g[b,c] ],
 
   Bup[a,b] == LW[a,b],
@@ -44,6 +48,7 @@ LW[a_,b_]    := LW[b,a]    /; !OrderedQ[{a,b}]
 Bdown[a_,b_] := Bdown[b,a] /; !OrderedQ[{a,b}]
 Bup[a_,b_]   := Bup[b,a]   /; !OrderedQ[{a,b}]
 
+OD2[g_, a_,b_]    := OD2[g, b,a]    /; !OrderedQ[{a,b}]
 deldel[a_,b_, g_] := deldel[b,a, g] /; !OrderedQ[{a,b}]
 
 (************************************************************************)

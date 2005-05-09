@@ -13,7 +13,11 @@ PartialDerivatives = {
   del[m_,0] :> 0,
   deldel[m_,n_,0] :> 0,
   del[m_, x_[ijk]]  :> ToExpression["d"<>ToString[Round[m]]<>ToString[x]<>"[ijk]"],
-  deldel[m_, n_, x_[ijk]] :> ToExpression["d"<>ToString[Round[m]]<>"d"<>ToString[Round[n]]<>ToString[x]<>"[ijk]"]
+  deldel[m_, n_, x_[ijk]] :> ToExpression["d"<>ToString[Round[m]]<>"d"<>ToString[Round[n]]<>ToString[x]<>"[ijk]"],
+  OD[0,m_] :> 0,
+  OD2[0,m_,n_] :> 0,
+  OD[x_[ijk],m_]  :> ToExpression["d"<>ToString[x]<>ToString[Round[m]]<>"[ijk]"],
+  OD2[x_[ijk],m_, n_] :> ToExpression["dd"<>ToString[x]<>ToString[Round[m]]<>ToString[Round[n]]<>"[ijk]"]
 } 
 
 
@@ -25,7 +29,7 @@ putvarsgrid = Map[(# -> (#)[ijk])&, gridvars]
 dif = all /. putvarsgrid;
 If[False, prlist["dif = all /. putvarsgrid", dif]]
 
-(* Derivatives del and deldel *)
+(* Derivatives del, deldel and OD, OD2 *)
 dif = dif //. PartialDerivatives;
 dif = DeleteCases[dif, True]
 
