@@ -200,9 +200,9 @@ variabledeclarations[] := Module[{},
 
   prdecvl[{psi, dpop[a], ddpop[a,b]}, "psiandderivs"];
   prdecvl[{g[a,b], K[a,b], ham, mom[a], trK, normham, normmom[a]}, "u"];
-  prdecvarname[{dg[a,b,c]},    "ADMvars_dg"];
-  prdecvarname[{ddg[a,b,c,d]}, "ADMvars_ddg"];
-  prdecvarname[{dK[a,b,c]},    "ADMvars_dK"];
+  prdecvarname[{dg[a,b,c]},    "ADMvars_dgxxx"];
+  prdecvarname[{ddg[a,b,c,d]}, "ADMvars_ddgxxxx"];
+  prdecvarname[{dK[a,b,c]},    "ADMvars_dKxxx"];
 
 ];    
 (* auxillary variables are automatically inserted here *)
