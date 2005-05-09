@@ -17,7 +17,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
 {
   /* name of coordinates, could be made variable */
   char *coord[3] = {"x", "y", "z"};
-  int i, j, k;
+  int i, j, k, l;
   int n = 0;
   char *tensorindices = strdup(t);
 
@@ -54,7 +54,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     }
   }
 
-  if (strcmp(tensorindices, "ij+ji") == 0) {
+  if (strcmp(tensorindices, "(ij)") == 0) {
     for (i = 0; i < 3; i++)
     for (j = i; j < 3; j++) {
       sym[3*n+i] *= -1; 
@@ -64,7 +64,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     }
   }
   
-  if (strcmp(tensorindices, "ij-ji") == 0) {
+  if (strcmp(tensorindices, "[ij]") == 0) {
     for (i = 0; i < 3; i++)
     for (j = i+1; j < 3; j++) {
       sym[3*n+i] *= -1; 
@@ -86,7 +86,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     }
   }
   
-  if (strcmp(tensorindices, "ijk+ikj") == 0) {
+  if (strcmp(tensorindices, "i(jk)") == 0) {
     for (i = 0; i < 3; i++)
     for (j = 0; j < 3; j++) 
     for (k = j; k < 3; k++) {
@@ -98,7 +98,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     }
   }
   
-  if (strcmp(tensorindices, "ijk+jik") == 0) {
+  if (strcmp(tensorindices, "(ij)k") == 0) {
     for (i = 0; i < 3; i++)
     for (j = i; j < 3; j++) 
     for (k = 0; k < 3; k++) {
@@ -110,7 +110,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     }
   }
   
-  if (strcmp(tensorindices, "ijk-jik") == 0) {
+  if (strcmp(tensorindices, "[ij]k") == 0) {
     for (i = 0; i < 3; i++)
     for (j = i+1; j < 3; j++) 
     for (k = 0; k < 3; k++) {
@@ -121,11 +121,44 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
       sprintf(ilist[n++], "%s%s%s", coord[i], coord[j], coord[k]);
     }
   }
+
+
+
+  
+  if (strcmp(tensorindices, "ijkl") == 0) {
+    for (i = 0; i < 3; i++)
+    for (j = 0; j < 3; j++) 
+    for (k = 0; k < 3; k++)
+    for (l = 0; l < 3; l++)
+    {
+      sym[3*n+i] *= -1; 
+      sym[3*n+j] *= -1;
+      sym[3*n+k] *= -1;
+      sym[3*n+l] *= -1;
+      ilist[n] = calloc(sizeof(char), 8);
+      sprintf(ilist[n++], "%s%s%s%s", coord[i], coord[j], coord[k], coord[l]);
+    }
+  }
+
+  if (strcmp(tensorindices, "(ij)(kl)") == 0) {
+    for (i = 0; i < 3; i++)
+    for (j = i; j < 3; j++) 
+    for (k = 0; k < 3; k++)
+    for (l = k; l < 3; l++)
+    {
+      sym[3*n+i] *= -1; 
+      sym[3*n+j] *= -1;
+      sym[3*n+k] *= -1;
+      sym[3*n+l] *= -1;
+      ilist[n] = calloc(sizeof(char), 8);
+      sprintf(ilist[n++], "%s%s%s%s", coord[i], coord[j], coord[k], coord[l]);
+    }
+  }
   
   if (n == 0) {
     printf("Error in index string %s.\n", tensorindices);
     printf("Legal combinations besides the empty string are\n");
-    printf("i, ij, ij+ji, ij-ji, ijk, ijk+ikj, ijk+jik\n");
+    printf("i, ij, (ij), [ij], ijk, i(jk), (ij)k [ij]k ijkl (ij)(kl)\n");
     printf("Anything else can be easily added to main/tensors.c.\n");
     errorexit("");
   }
