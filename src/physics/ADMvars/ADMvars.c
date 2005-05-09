@@ -82,6 +82,13 @@ int allocateADMvars(tGrid *grid)
     enablevar(grid, Ind("gxx"));
     enablevar(grid, Ind("Kxx"));
   }
+  
+  /* enable psiandderivs */
+  if(Getv("ADMvars_memory_for_psiandderivs", "yes"))
+  {
+    psiandderivs->grid = grid;
+    enablevarlist(psiandderivs);
+  }
 
   /* enable derivs of g and K */
   if(Getv("ADMvars_memory_for_dg_ddg_dK", "yes"))

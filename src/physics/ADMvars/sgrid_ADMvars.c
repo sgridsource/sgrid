@@ -74,6 +74,8 @@ int sgrid_ADMvars()
          "whether memory is allocated for ADMvars_dg, ..._ddg and ..._dK");
   AddPar("ADMvars_memory_for_g_K", "yes",
          "whether memory is allocated for g and K");
+  AddPar("ADMvars_memory_for_psiandderivs", "yes",
+         "whether memory is allocated for psiandderivs");
   
   return 0;
 }
