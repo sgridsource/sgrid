@@ -44,7 +44,7 @@ tocompute = {
 
   (* extrinsic curvature terms *)
   Kud[a,b] == ginv[a,c] K[c,b],
-  K == Kud[a,a],
+  K == Kud[a,b] delta[a,b],
   KudKud == Kud[a,b] Kud[b,a],
   codelK[a,b,c] == delK[a,b,c] - gamma[d,a,b] K[d,c] - gamma[d,a,c] K[b,d],
   cdKudd[a,b,c] == ginv[a,d] codelK[d,b,c],
@@ -53,7 +53,7 @@ tocompute = {
   ham == R + K K - KudKud,
 
   (* momentum constraint *)
-  momu[a] == ginv[a,b] cdKudd[c,b,c] - ginv[b,c] cdKudd[a,b,c],
+  momu[a] == ginv[a,b] cdKudd[c,b,d] delta[c,d] - ginv[b,c] cdKudd[a,b,c],
   mom[a] == f g[a,b] momu[b],
 
   trK == K,
@@ -175,7 +175,6 @@ BeginCFunction[] := Module[{},
 
   pr["int normConstr = Getv(\"ADMvars_normalizedConstraints\", \"yes\");\n"];
   pr["int TermByTerm = Getv(\"ADMvars_ConstraintNorm\", \"TermByTerm\");\n"];
-  pr["int usepsi = 1;\n"];
   pr["\n"];
 
   pr["for(bi = 0; bi < grid->nboxes; bi++)\n"];

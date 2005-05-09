@@ -21,7 +21,6 @@ int bi;
 
 int normConstr = Getv("ADMvars_normalizedConstraints", "yes");
 int TermByTerm = Getv("ADMvars_ConstraintNorm", "TermByTerm");
-int usepsi = 1;
 
 for(bi = 0; bi < grid->nboxes; bi++)
 {
@@ -1674,7 +1673,7 @@ ginv13*K13[ijk] + ginv23*K23[ijk] + ginv33*K33[ijk]
 
 K
 =
-Kud(a,a)
+Kud11 + Kud22 + Kud33
 ;
 
 KudKud
@@ -1879,26 +1878,24 @@ ham[ijk]
 
 momu1
 =
--(cdKudd122*ginv22) - 2.*cdKudd123*ginv23 - cdKudd133*ginv33 + 
-  ginv11*(-cdKudd111 + cdKudd(c,1.,c)) + 
-  ginv12*(-2.*cdKudd112 + cdKudd(c,2.,c)) + 
-  ginv13*(-2.*cdKudd113 + cdKudd(c,3.,c))
+(cdKudd212 + cdKudd313)*ginv11 + 
+  (-cdKudd112 + cdKudd222 + cdKudd323)*ginv12 + 
+  (-cdKudd113 + cdKudd223 + cdKudd333)*ginv13 - cdKudd122*ginv22 - 
+  2.*cdKudd123*ginv23 - cdKudd133*ginv33
 ;
 
 momu2
 =
--(cdKudd211*ginv11) - 2.*cdKudd213*ginv13 - cdKudd233*ginv33 + 
-  ginv12*(-2.*cdKudd212 + cdKudd(c,1.,c)) + 
-  ginv22*(-cdKudd222 + cdKudd(c,2.,c)) + 
-  ginv23*(-2.*cdKudd223 + cdKudd(c,3.,c))
+-(cdKudd211*ginv11) + (cdKudd111 - cdKudd212 + cdKudd313)*ginv12 - 
+  2.*cdKudd213*ginv13 + (cdKudd112 + cdKudd323)*ginv22 + 
+  (cdKudd113 - cdKudd223 + cdKudd333)*ginv23 - cdKudd233*ginv33
 ;
 
 momu3
 =
--(cdKudd311*ginv11) - 2.*cdKudd312*ginv12 - cdKudd322*ginv22 + 
-  ginv13*(-2.*cdKudd313 + cdKudd(c,1.,c)) + 
-  ginv23*(-2.*cdKudd323 + cdKudd(c,2.,c)) + 
-  ginv33*(-cdKudd333 + cdKudd(c,3.,c))
+-(cdKudd311*ginv11) - 2.*cdKudd312*ginv12 + 
+  (cdKudd111 + cdKudd212 - cdKudd313)*ginv13 - cdKudd322*ginv22 + 
+  (cdKudd112 + cdKudd222 - cdKudd323)*ginv23 + (cdKudd113 + cdKudd223)*ginv33
 ;
 
 mom1[ijk]
@@ -2906,4 +2903,4 @@ Cal(denom3 <= 0.,0.,mom3[ijk]/denom3)
 }  /* end of function */
 
 /* ADMconstraints.c */
-/* nvars = 103, n* = 1998,  n/ = 36,  n+ = 1928, n = 3962, O = 1 */
+/* nvars = 103, n* = 1992,  n/ = 36,  n+ = 1928, n = 3956, O = 1 */
