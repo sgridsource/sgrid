@@ -9,7 +9,7 @@ variables = { psi, g[a,b], K[a,b], LW[a,b] }
 tocompute = {
 
 
-  Cinstruction == "forallpoints(level,ijk) {",
+  Cinstruction == "forallpoints(box,ijk) {",
 
   (* NOTE: g^{physical}_{ij} = Psi^4 g_{ij} *)
 
@@ -74,7 +74,7 @@ BeginCFunction[] := Module[{},
 
   pr["\n\n\n"];
 
-  pr["void example(tL *level, tVarList *vlMetric, tVarList *vlCurv)\n"];
+  pr["void example(tBox *box, tVarList *vlMetric, tVarList *vlCurv)\n"];
   pr["{\n"];
   pr["int ijk=0;\n\n"];
 
