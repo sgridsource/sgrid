@@ -17,8 +17,8 @@ int sgrid_ADMvars()
   AddFun(ANALYZE, computeADMconstraints, "compute ADM constraints");
 
   /* variables */
-  AddVar("g",        "ij+ji", "metric");
-  AddVar("K",        "ij+ji", "extrinsic curvature");
+  AddVar("g",        "(ij)", "metric");
+  AddVar("K",        "(ij)", "extrinsic curvature");
   AddVar("alpha",    "",      "lapse");
   AddVar("beta",     "I",     "shift");
   AddVar("betadot",  "I",     "time derivative of shift");
@@ -41,7 +41,7 @@ int sgrid_ADMvars()
   /* time independent conformal factor */
   AddConstantVar("psi",       "",      "time independent conformal factor");
   AddConstantVar("dpsiopsi",  "i",     "(del_i psi) / psi");
-  AddConstantVar("ddpsiopsi", "ij+ji", "(del_i del_j psi) / psi");
+  AddConstantVar("ddpsiopsi", "(ij)", "(del_i del_j psi) / psi");
   
   /* this is perhaps not the ideal place for global var list ... */
   psiandderivs = vlalloc(NULL);
@@ -63,10 +63,10 @@ int sgrid_ADMvars()
   if (!Getv("ADMvars_exitifNAN", "no")) 
     AddFun(POST_EVOLVE, ExitIfNAN, "exit if NAN");
 
-  /* add 3 temporary variables to take derivs */
-  AddVar("temp1", "", "temporary variable");
-  AddVar("temp2", "", "temporary variable");
-  AddVar("temp3", "", "temporary variable");
+  /* add variables to take derivs */
+  AddVar("ADMvars_dg",  "(ij)k", "first partial derivs of a symmetric tensor");
+  AddVar("ADMvars_ddg", "(ij)(kl)", "second part. derivs of a symm. tensor");
+  AddVar("ADMvars_dK",  "(ij)k", "first partial derivs of a symmetric tensor");
 
   return 0;
 }
