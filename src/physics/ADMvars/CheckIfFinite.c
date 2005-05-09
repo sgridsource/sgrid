@@ -35,8 +35,10 @@ int CheckIfFinite(tGrid* grid, char *varname)
 
     if(!finite(*sum)) num=0.1;
 
-    free(sum);
-    vlfree(vl);
+    // TODO: FIX this!!!!!
+    //free(sum);
+ 
+   vlfree(vl);
     
     if(num==0.0) return 0;
   }
