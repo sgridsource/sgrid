@@ -81,7 +81,7 @@ tocompute = {
     normham == Cal[denom <= 0.0, 0.0, ham/denom],
 
     (* normalized momentum constraint *)
-    (* normmom[a] == mom[a]/( f*( fabs[ cdKudd[c,a,c] ] 
+    (* normmom[a] == mom[a]/( f*( fabs[ cdKudd[c,a,d] delta[c,d] ] 
                                  +fabs[ ginv[b,c] codelK[a,b,c] ] ) ), *)
     Cif == TermByTerm,
       (* compute fabs of some terms in codelK separately *)
@@ -101,7 +101,8 @@ tocompute = {
                    fabs[codelTrKA[a]] + fabs[codelTrKB[a]] +
                    fabs[codelTrKC[a]],
     Cif == else,
-      denom[a]  == fabs[cdKudd[c,a,c]] + fabs[ginv[b,c] codelK[a,b,c]],
+      denom[a]  == fabs[cdKudd[c,a,d] delta[c,d]] + 
+                   fabs[ginv[b,c] codelK[a,b,c]],
     Cif == end,
 
     normmom[a] == Cal[denom[a] <= 0.0, 0.0, mom[a]/denom[a]],
