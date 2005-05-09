@@ -6,7 +6,7 @@
 
 (* variables *)
 variables = {g[a,b], K[a,b], psi, dpop[a], ddpop[a,b], ham, mom[a], trK,
-             normham, normmom[a]}
+             normham, normmom[a], dg[a,b,c], ddg[a,b,c,d], dK[a,b,c]}
 
 
 
@@ -118,7 +118,6 @@ ginv[a_,b_]    := ginv[b,a] /; !OrderedQ[{a,b}]
 ddpop[a_,b_]   := ddpop[b,a] /; !OrderedQ[{a,b}]
 deldelf[a_,b_] := deldelf[b,a] /; !OrderedQ[{a,b}]
 
-OD2[c_, a_,b_] := OD2[c,b,a] /; !OrderedQ[{a,b}]
 delg[c_,a_,b_] := delg[c,b,a] /; !OrderedQ[{a,b}]
 delK[c_,a_,b_] := delK[c,b,a] /; !OrderedQ[{a,b}]
 deldelg[a_,b_,c_,d_] := deldelg[b,a,c,d] /; !OrderedQ[{a,b}]
@@ -138,6 +137,12 @@ cdKuddA[c_,a_,b_] := cdKuddA[c,b,a] /; !OrderedQ[{a,b}]
 cdKuddB[c_,a_,b_] := cdKuddB[c,b,a] /; !OrderedQ[{a,b}]
 cdKuddC[c_,a_,b_] := cdKuddC[c,b,a] /; !OrderedQ[{a,b}]
 
+OD2[c_, a_,b_]   := OD2[c,b,a] /; !OrderedQ[{a,b}]
+
+dg[a_,b_,c_]     := dg[b,a,c]  /; !OrderedQ[{a,b}]
+dK[a_,b_,c_]     := dK[b,a,c]  /; !OrderedQ[{a,b}]
+ddg[a_,b_,c_,d_] := ddg[b,a,c,d] /; !OrderedQ[{a,b}]
+ddg[a_,b_,c_,d_] := ddg[a,b,d,c] /; !OrderedQ[{c,d}]
 
 (************************************************************************)
 (* information for C output *)
@@ -168,14 +173,19 @@ BeginCFunction[] := Module[{},
   pr["int bi;\n"];
   pr["\n"];
 
+  pr["int normConstr = Getv(\"ADMvars_normalizedConstraints\", \"yes\");\n"];
+  pr["int TermByTerm = Getv(\"ADMvars_ConstraintNorm\", \"TermByTerm\");\n"];
+  pr["int usepsi = 1;\n"];
+  pr["\n"];
+
   pr["for(bi = 0; bi < grid->nboxes; bi++)\n"];
   pr["{\n"];
   pr["tBox *box = grid->box[bi];\n"];
   pr["int ijk;\n\n"];
 
-  pr["FirstAndSecondDerivsOf_Sab(box, Ind("gxx"), 
-                                 Ind("ADMvars_dgxxx"), Ind("ADMvars_ddgxxxx"));\n"];
-  pr["FirstDerivsOf_Sab(box, Ind("Kxx"), Ind("ADMvars_dKxxx"));\n"];
+  pr["FirstAndSecondDerivsOf_Sab(box, Ind(\"gxx\"), Ind(\"ADMvars_dgxxx\"),
+                                 Ind(\"ADMvars_ddgxxxx\"));\n"];
+  pr["FirstDerivsOf_Sab(box, Ind(\"Kxx\"), Ind(\"ADMvars_dKxxx\"));\n"];
   pr["\n"];
 
   pr["forallpoints(box, ijk)\n"];
@@ -190,10 +200,10 @@ variabledeclarations[] := Module[{},
 
   prdecvl[{psi, dpop[a], ddpop[a,b]}, "psiandderivs"];
   prdecvl[{g[a,b], K[a,b], ham, mom[a], trK, normham, normmom[a]}, "u"];
+  prdecvarname[{dg[a,b,c]},    "ADMvars_dg"];
+  prdecvarname[{ddg[a,b,c,d]}, "ADMvars_ddg"];
+  prdecvarname[{dK[a,b,c]},    "ADMvars_dK"];
 
-  pr["int normConstr = Getv(\"ADMvars_normalizedConstraints\", \"yes\");\n"];
-  pr["int TermByTerm = Getv(\"ADMvars_ConstraintNorm\", \"TermByTerm\");\n"];
-  pr["int usepsi = 1;\n"];
 ];    
 (* auxillary variables are automatically inserted here *)
 

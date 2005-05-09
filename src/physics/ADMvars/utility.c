@@ -185,22 +185,6 @@ double invg(double g11, double g12, double g13,
 /* compute and save initial value of the trace of K */
 int set_K_initial(tGrid *grid)
 {
-  double *gxx = Ptr(level, "gxx");
-  double *gxy = Ptr(level, "gxy");
-  double *gxz = Ptr(level, "gxz");
-  double *gyy = Ptr(level, "gyy");
-  double *gyz = Ptr(level, "gyz");
-  double *gzz = Ptr(level, "gzz");
-
-  double *Kxx = Ptr(level, "Kxx");
-  double *Kxy = Ptr(level, "Kxy");
-  double *Kxz = Ptr(level, "Kxz");
-  double *Kyy = Ptr(level, "Kyy");
-  double *Kyz = Ptr(level, "Kyz");
-  double *Kzz = Ptr(level, "Kzz");
-
-  double *psi = Ptr(level, "psi");
-  double *K_initial = PtrEnable(level, "K_initial");
 
   double ixx, ixy, ixz, iyy, iyz, izz;
   int i,b;
@@ -209,9 +193,27 @@ int set_K_initial(tGrid *grid)
   if (!Getv("physics", "KerrSchild")) 
     return;
 
+  enablevar(grid, Ind("K_initial"));
+  
   for (b = 0; b < grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
+    double *gxx = box->v[Ind("gxx")];
+    double *gxy = box->v[Ind("gxy")];
+    double *gxz = box->v[Ind("gxz")];
+    double *gyy = box->v[Ind("gyy")];
+    double *gyz = box->v[Ind("gyz")];
+    double *gzz = box->v[Ind("gzz")];
+  
+    double *Kxx = box->v[Ind("Kxx")];
+    double *Kxy = box->v[Ind("Kxy")];
+    double *Kxz = box->v[Ind("Kxz")];
+    double *Kyy = box->v[Ind("Kyy")];
+    double *Kyz = box->v[Ind("Kyz")];
+    double *Kzz = box->v[Ind("Kzz")];
+  
+    double *psi = box->v[Ind("psi")];
+    double *K_initial = box->v[Ind("K_initial")];
       
     forallpoints(box, i)
     {
