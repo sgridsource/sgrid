@@ -69,4 +69,27 @@ int computeADMconstraints(tGrid *grid)
   } 
     
   vlfree(vl);
+  return 0;
+}
+
+
+int allocateADMvars(tGrid *grid)
+{
+  
+  /* enable g, K and their derivs */
+  if(Getv("ADMvars_memory_for_g_K", "yes"))
+  {
+    enablevar(grid, Ind("gxx"));
+    enablevar(grid, Ind("Kxx"));
+  }
+
+  /* enable derivs of g and K */
+  if(Getv("ADMvars_memory_for_dg_ddg_dK", "yes"))
+  {
+    enablevar(grid, Ind("ADMvars_dgxxx"));
+    enablevar(grid, Ind("ADMvars_ddgxxxx"));
+    enablevar(grid, Ind("ADMvars_dKxxx"));
+  }
+
+  return 0;
 }

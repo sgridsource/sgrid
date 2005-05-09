@@ -225,4 +225,5 @@ int set_K_initial(tGrid *grid)
          + 2*(ixy*Kxy[i] + ixz*Kxz[i] + iyz*Kyz[i]));
     }
   }
+  return 0;
 }

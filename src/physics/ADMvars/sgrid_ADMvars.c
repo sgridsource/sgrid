@@ -15,6 +15,7 @@ int sgrid_ADMvars()
 
   /* functions */
   AddFun(ANALYZE, computeADMconstraints, "compute ADM constraints");
+  AddFun(PRE_INITIALDATA, allocateADMvars, "allocate mem. for some ADM vars");
 
   /* variables */
   AddVar("g",        "(ij)", "metric");
@@ -67,6 +68,12 @@ int sgrid_ADMvars()
   AddVar("ADMvars_dg",  "(ij)k", "first partial derivs of a symmetric tensor");
   AddVar("ADMvars_ddg", "(ij)(kl)", "second part. derivs of a symm. tensor");
   AddVar("ADMvars_dK",  "(ij)k", "first partial derivs of a symmetric tensor");
-
+ 
+  /* For what is memory needed? */
+  AddPar("ADMvars_memory_for_dg_ddg_dK", "yes",
+         "whether memory is allocated for ADMvars_dg, ..._ddg and ..._dK");
+  AddPar("ADMvars_memory_for_g_K", "yes",
+         "whether memory is allocated for g and K");
+  
   return 0;
 }
