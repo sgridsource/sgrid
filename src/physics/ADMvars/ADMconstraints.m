@@ -164,8 +164,17 @@ BeginCFunction[] := Module[{},
 
   pr["void ADMconstraints(tVarList *u)\n"];
   pr["{\n"];
-  pr["int ijk=0;\n\n"];
+  pr["tGrid *grid = u->grid;\n"];
+  pr["int bi;\n"];
+  pr["\n"];
 
+  pr["for(bi = 0; bi < grid->nboxes; bi++)\n"];
+  pr["{\n"];
+  pr["tBox *box = grid->box[bi];\n"];
+  pr["int ijk;\n\n"];
+
+  pr["forallpoints(box, ijk)\n"];
+  pr["{\n"];
 ];
 
 (* custom variable declaration
@@ -177,8 +186,6 @@ variabledeclarations[] := Module[{},
   prdecvl[{psi, dpop[a], ddpop[a,b]}, "psiandderivs"];
   prdecvl[{g[a,b], K[a,b], ham, mom[a], trK, normham, normmom[a]}, "u"];
 
-  pr["tL *level = u->level;\n"];
-  pr["\n"];
   pr["int normConstr = Getv(\"ADMvars_normalizedConstraints\", \"yes\");\n"];
   pr["int TermByTerm = Getv(\"ADMvars_ConstraintNorm\", \"TermByTerm\");\n"];
   pr["int usepsi = 1;\n"];
@@ -189,12 +196,14 @@ variabledeclarations[] := Module[{},
 InitializationCommands[] := Module[{},
 
   pr["/* Jetzt geht's los! */\n"];
-];
 
+];
 
 (* the end or tail of the function (we need at least a }) *)
 EndCFunction[] := Module[{},
 
+  pr["} /* end of points */\n"];
+  pr["} /* end of boxes */\n"];
   pr["\n\n"];
   pr["}  /* end of function */\n\n"];
 ];

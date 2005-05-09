@@ -43,7 +43,7 @@ BeginCFunction[];
 prdecvar[vars_, name_] := Module[{cvars, s, nf}, 
   cvars = vars /. expfreeindices /. gluevar;
   For[nf = 0, nf < Length[cvars], nf++,
-    s = StringForm["double *`` = level->v[``+``];\n", 
+    s = StringForm["double *`` = box->v[``+``];\n", 
                     cvars[[nf+1]], name, nf];
     pr[s];
   ];
@@ -54,8 +54,8 @@ prdecvarname[vars_, name_] := Module[{cvars, s, nf},
   s = StringForm["int index_`` = Ind(\"``\");\n", name, name];
   pr[s];
   For[nf = 0, nf < Length[cvars], nf++,
-      (* level should not be hardwired *)
-      s = StringForm["double *`` = level->v[index_`` + ``];\n", 
+      (* box should not be hardwired *)
+      s = StringForm["double *`` = box->v[index_`` + ``];\n", 
                     cvars[[nf+1]], name, nf];
     pr[s];
   ];
@@ -64,7 +64,7 @@ prdecvarname[vars_, name_] := Module[{cvars, s, nf},
 prdecvl[vars_, name_] := Module[{cvars, s, nf}, 
   cvars = vars /. expfreeindices /. gluevar;
   For[nf = 0, nf < Length[cvars], nf++,
-    s = StringForm["double *`` = vldataptr(``, ``);\n", 
+    s = StringForm["double *`` = vlldataptr(``, box, ``);\n", 
                     cvars[[nf+1]], name, nf];
     pr[s];
   ];
