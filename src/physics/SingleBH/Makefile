@@ -1,7 +1,7 @@
 # SingleBH/Makefile
 
 NAME := SingleBH
-OBJS := sgrid_$(NAME).o SingleBH.o SingleBHKS.o
+OBJS := sgrid_$(NAME).o SingleBH.o SingleBHKS.o SingleBHisotropic.o
 
 include $(TOP)/Makefile.subdirs
 

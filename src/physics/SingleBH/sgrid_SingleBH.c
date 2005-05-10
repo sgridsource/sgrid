@@ -11,14 +11,22 @@ int sgrid_SingleBH()
   printf("Adding SingleBH\n");
 
   /* functions: */
-  AddFun(INITIALDATA, SingleBH, "SingleBH: compute Kerr-Schild data");
+  AddFun(INITIALDATA, SingleBH, "SingleBH: set initial data for a single BH");
 
   /* Parameters: */
-  AddPar("SingleBH_ConformalFactor","no","set cconformal factor psi=1+2M/r");
   AddPar("BHmass1", "0.0", "mass of black hole 1");
   AddPar("BHsx1", "0.0", "spin_x of black hole 1");
   AddPar("BHsy1", "0.0", "spin_y of black hole 1");
   AddPar("BHsz1", "0.0", "spin_z of black hole 1");
+
+  AddPar("SingleBH_type", "KerrSchild",
+         "on what slice and in which coords we compute BH data"
+         " [KerrSchild, isotropic]");
+  AddPar("SingleBH_initial_lapse", "donothing",
+         "initial lapse [donothing,one]");
+  AddPar("SingleBH_initial_shift", "donothing",
+         "initial shift [donothing,zero]");
+  AddPar("SingleBH_ConformalFactor","no","set cconformal factor psi=1+2M/r");
 
   return 0;
 }
