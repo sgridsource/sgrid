@@ -1,0 +1,24 @@
+/* sgrid_SingleBH.c */
+/* Wolfgang Tichy, 12/02 */
+
+#include "sgrid.h"
+#include "SingleBH.h"
+
+
+int sgrid_SingleBH() 
+{
+  if (!Getv("physics", "SingleBH")) return;
+  printf("Adding SingleBH\n");
+
+  /* functions: */
+  AddFun(INITIALDATA, SingleBH, "SingleBH: compute Kerr-Schild data");
+
+  /* Parameters: */
+  AddPar("SingleBH_ConformalFactor","no","set cconformal factor psi=1+2M/r");
+  AddPar("BHmass1", "0.0", "mass of black hole 1");
+  AddPar("BHsx1", "0.0", "spin_x of black hole 1");
+  AddPar("BHsy1", "0.0", "spin_y of black hole 1");
+  AddPar("BHsz1", "0.0", "spin_z of black hole 1");
+
+  return 0;
+}
