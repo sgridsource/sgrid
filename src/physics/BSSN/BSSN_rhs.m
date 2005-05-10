@@ -49,6 +49,13 @@ tocompute = {
   (* dK[a] == dK[a], *)
   dA[a,b,c] == dAt[b,c,a],
 
+  (* former shift adv terms *)
+  betadf == beta[d] dphi[d],
+  betadg[a,b] == beta[d] dgt[a,b,d],
+  betadA[a,b] == beta[d] dAt[a,b,d],
+  betadK == beta[d] dK[d],
+  betadG[a],  == beta[d] dGt[a,d],
+
   (* inverse conformal metric *)
   detginv == 1/matrixdet[g],
   ginv[a,b] == detginv matrixinvdet[g,a,b],
@@ -71,14 +78,13 @@ tocompute = {
 
   (* conformal factor and its derivatives *)
   f == phi,
-  advf == adv[phi],
   logpsi == 0,
   Cif == usepsi,
     logpsi == log[psi],
     f == f + logpsi,
     df[a] == df[a] + dpop[a],
     ddf[a,b] == ddf[a,b] - dpop[a] dpop[b] + ddpop[a,b],
-    advf == advf + beta[a] dpop[a],
+    betadf == betadf + beta[a] dpop[a],
   Cif == end,
   cddf[a,b] == ddf[a,b] - gamma[c,a,b] df[c],
   trcddf == ginv[a,b] cddf[a,b],
@@ -112,22 +118,22 @@ tocompute = {
   totdivbeta == 2/3 divbeta,
   ootddivbeta[a] == 1/3 delta[b,c] ddb[a,b,c],
   
-  lieg[a,b] == adv[g[a,b]] - g[a,b] totdivbeta +
+  lieg[a,b] == betadg[a,b] - g[a,b] totdivbeta +
                  db[a,c] g[b,c] + db[b,c] g[a,c],
 
-  lieA[a,b] == adv[A[a,b]] - A[a,b] totdivbeta +
+  lieA[a,b] == betadA[a,b] - A[a,b] totdivbeta +
                  db[a,c] A[b,c] + db[b,c] A[a,c],
 
-  lieK == adv[K],
+  lieK == betadK,
 
   (* liephi is NOT a real Lie deriv.! It is simply:
      $ liephi = \nabla_i^{phys. metric} \beta^i /6 
               = \partial_i \beta^i /6 + \beta^i \partial_i BSSNphi $ *)
-  liephi == advf + divbeta/6,
+  liephi == betadf + divbeta/6,
 
   pseudolieG[a] == ginv[b,c] ddb[b,c,a] + ginv[a,b] ootddivbeta[b] -
                    Gfromg[b] db[b,a] + Gfromg[a] totdivbeta + 
-                   adv[G[a]],
+                   betadG[a],
 
   (* right hand sides *)
   rg[a,b] == - 2 alpha A[a,b] + lieg[a,b],
