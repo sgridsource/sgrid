@@ -7,11 +7,15 @@
 
 (* variables *)
 variables = {gb[a,b], K[a,b], psi, 
-             gt[a,b], At[a,b], G[a], K, phi, alpha, alphaDensity}
+             gt[a,b], At[a,b], G[a], K, phi, alpha, alphaDensity,
+             dgt[a,b,c]}
 
 
 (* compute in this order *)
 tocompute = {
+
+  (* loop of all points *)
+  Cinstruction == "forallpoints(box, ijk) {",
 
   (* conformal factors *)
   detgb == matrixdet[gb],
@@ -43,7 +47,6 @@ tocompute = {
   gtinv[a,b] == detgtinv matrixinvdet[gt,a,b],
 
   (* G *)
-  dgt[a,b,c] == OD[gt[a,b], c],
   Gtdown[a] == gtinv[b,c] dgt[a,b,c],
   G[a] == gtinv[a,b] Gtdown[b]
 }
@@ -99,11 +102,7 @@ BeginCFunction[] := Module[{},
   pr["tBox *box = grid->box[bi];\n"];
   pr["int ijk;\n\n"];
   pr["\n"];
-
-  pr["forallpoints(box, ijk)\n"];
-  pr["{\n"];
 ];
-
 
 (* custom variable declaration
    we have to translate between the tensor names and the C variables  
