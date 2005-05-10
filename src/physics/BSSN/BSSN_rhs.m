@@ -342,7 +342,7 @@ BeginCFunction[] := Module[{},
   pr["double gamma0factor    = Getv(\"BSSN_shift\", \"gamma0\");\n"];
   pr["double gamma2factor    = Getv(\"BSSN_shift\", \"gamma2\");\n"];
   pr["double shift_st        = Getd(\"BSSN_shift_stop_time\");\n"];
-  pr["double evolveshift     = Cal( (level->time>=shift_st)*(shift_st>=0), 0.0, 1.0);\n"];
+  pr["double evolveshift     = Cal( (grid->time>=shift_st)*(shift_st>=0), 0.0, 1.0);\n"];
 
   pr["double lapsepsipower   = Getd(\"BSSN_lapsepsipower\");\n"];
   pr["double lapseharmonicf  = Getd(\"BSSN_lapseharmonicf\");\n"];

@@ -36,7 +36,7 @@ double alphaDensityWeight = Getd("BSSN_alphaDensityWeight");
 double gamma0factor    = Getv("BSSN_shift", "gamma0");
 double gamma2factor    = Getv("BSSN_shift", "gamma2");
 double shift_st        = Getd("BSSN_shift_stop_time");
-double evolveshift     = Cal( (level->time>=shift_st)*(shift_st>=0), 0.0, 1.0);
+double evolveshift     = Cal( (grid->time>=shift_st)*(shift_st>=0), 0.0, 1.0);
 double lapsepsipower   = Getd("BSSN_lapsepsipower");
 double lapseharmonicf  = Getd("BSSN_lapseharmonicf");
 double shiftpsipower   = Getd("BSSN_shiftpsipower");
