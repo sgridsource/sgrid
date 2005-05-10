@@ -12,9 +12,9 @@ tVarList *BSSNvars;
 /* evolve in the interior and 
    for those boundary points set by special evolution
 */ 
-void BSSN_evolve(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
+void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 {
-  BSSN_rhs(unew, upre, c, ucur);
+  BSSN_rhs(unew, upre, dt, ucur);
   /* wether addDissipation is called after each ICN (or RK) step: */
   /* if(Getv("evolve_Dissipation", "yes")) 
        addDissipation(unew, upre, c, ucur); */
@@ -196,11 +196,11 @@ int BSSN_startup(tGrid *grid)
   enablevar(grid, Ind("BSSN_dphix"));
   enablevar(grid, Ind("BSSN_ddphixx"));
   enablevar(grid, Ind("BSSN_dKx"));
-  enablevar(grid, Ind("BSSN_dGx"));
+  enablevar(grid, Ind("BSSN_dGxx"));
   enablevar(grid, Ind("BSSN_dalpx"));
   enablevar(grid, Ind("BSSN_ddalpxx"));
   enablevar(grid, Ind("BSSN_dbetaxx"));
-  enablevar(grid, Ind("BSSN_ddbetaxx"));
+  enablevar(grid, Ind("BSSN_ddbetaxxx"));
 
   return 0;
 }
