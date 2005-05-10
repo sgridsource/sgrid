@@ -13,7 +13,7 @@ variables = {g[a,b],  A[a,b],  G[a],  K,  phi,   alpha,  beta[a],  B[a],
 	     nalphaDensity,
 	     palphaDensity,
 	     psi, dpop[a], ddpop[a,b], K0,
-             dgt[a,b,c], ddgt[a,b,c,d], dAt[a,b,c], dphi[a], dphi[a,b], 
+             dgt[a,b,c], ddgt[a,b,c,d], dAt[a,b,c], dphi[a], ddphi[a,b], 
              dGt[a,b], dK[a], dalp[a], ddalp[a,b], dbeta[a,b], ddbeta[a,b,c] }
 
 (* compute in this order *)
@@ -26,12 +26,14 @@ tocompute = {
 
   Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"BSSN_phi\"), \
                     Ind(\"BSSN_dphix\"), Ind(\"BSSN_ddphixx\"));",
+(*
   Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BSSN_Gx\"), \
                     Ind(\"BSSN_dGxx\"));",
   Cinstruction == "FirstDerivsOf_S(box, Ind(\"BSSN_K\"), Ind(\"BSSN_dKx\"));",
 
   Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"alpha"), \
                     Ind(\"BSSN_dalpx\"), Ind(\"BSSN_ddalpxx\"));",
+*)
   Cinstruction == "FirstAndSecondDerivsOf_Sa(box, Ind(\"betax\"), \
                     Ind(\"BSSN_dbetaxx\"), Ind(\"BSSN_ddbetaxxx\"));",
 
