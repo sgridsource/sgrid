@@ -19,20 +19,20 @@ variables = {g[a,b],  A[a,b],  G[a],  K,  phi,   alpha,  beta[a],  B[a],
 (* compute in this order *)
 tocompute = {
 
-  Cinstruction == "FirstAndSecondDerivsOf_Sab(box, Ind(\"BSSN_gxx\"),
+  Cinstruction == "FirstAndSecondDerivsOf_Sab(box, Ind(\"BSSN_gxx\"), \
                     Ind(\"ADMvars_dgxxx\"), Ind(\"ADMvars_ddgxxxx\"));",
-  Cinstruction == "FirstDerivsOf_Sab(box, Ind(\"BSSN_Axx\"),
+  Cinstruction == "FirstDerivsOf_Sab(box, Ind(\"BSSN_Axx\"), \
                     Ind(\"ADMvars_dKxxx\"));",
 
-  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"BSSN_phi\"),
+  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"BSSN_phi\"), \
                     Ind(\"BSSN_dphix\"), Ind(\"BSSN_ddphixx\"));",
-  Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BSSN_Gx\"),
+  Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BSSN_Gx\"), \
                     Ind(\"BSSN_dGxx\"));",
   Cinstruction == "FirstDerivsOf_S(box, Ind(\"BSSN_K\"), Ind(\"BSSN_dKx\"));",
 
-  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"alpha"),
+  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"alpha"), \
                     Ind(\"BSSN_dalpx\"), Ind(\"BSSN_ddalpxx\"));",
-  Cinstruction == "FirstAndSecondDerivsOf_Sa(box, Ind(\"betax\"),
+  Cinstruction == "FirstAndSecondDerivsOf_Sa(box, Ind(\"betax\"), \
                     Ind(\"BSSN_dbetaxx\"), Ind(\"BSSN_ddbetaxxx\"));",
 
   (* loop of all points *)
@@ -285,8 +285,14 @@ deldelg[a_,b_,c_,d_] := deldelg[a,b,d,c] /; !OrderedQ[{c,d}]
 codel[a_, (x_ /; NumberQ[x])] = 0
 codelK[c_,a_,b_] := codelK[c,b,a] /; !OrderedQ[{a,b}]
 
-
-
+(* additional derivs on grid *)
+dgt[a_,b_,c_]     := dgt[b,a,c]    /; !OrderedQ[{a,b}]
+ddgt[a_,b_,c_,d_] := ddgt[b,a,c,d] /; !OrderedQ[{a,b}]
+ddgt[a_,b_,c_,d_] := ddgt[a,b,d,c] /; !OrderedQ[{c,d}]
+dAt[a_,b_,c_]     := dAt[b,a,c]    /; !OrderedQ[{a,b}]
+ddphi[a_,b_]      := ddphi[b,a]    /; !OrderedQ[{a,b}]
+ddalp[a_,b_]      := ddalp[b,a]    /; !OrderedQ[{a,b}]
+ddbeta[c_,a_,b_]  := ddbeta[c,b,a] /; !OrderedQ[{a,b}]
 
 
 (************************************************************************)
