@@ -28,6 +28,18 @@ void sgrid_BSSN(void)
   AddVar("BSSN_G",     "I",     "contracted Gamma");
   AddVar("BSSN_alphaDensity", "", "densitized Lapse");
 
+  /* derivatives which need to be precomputed before each evo steo */
+  /* Note: ADMvars_ddg, ADMvars_dg, ADMvars_dA are overwritten and used 
+           in place of BSSN_ddg, BSSN_dg, BSSN_dA */
+  AddVar("BSSN_dphi",   "i",    "1st deriv of conformal factor");
+  AddVar("BSSN_ddphi",  "(ij)", "2nd deriv of conformal factor");
+  AddVar("BSSN_dK",     "i",    "1st deriv of trace of extrinsic curvature");
+  AddVar("BSSN_dG",     "Ij",   "1st deriv of contracted Gamma");
+  AddVar("BSSN_dalp",   "i",    "1st deriv of Lapse");
+  AddVar("BSSN_ddalp",  "(ij)", "2nd deriv of Lapse");
+  AddVar("BSSN_dbeta",  "Ij",   "1st deriv of shift");
+  AddVar("BSSN_ddbeta", "I(jk)","2nd deriv of shift");
+    
   /* parameters */
   AddPar("BSSN_densitizedLapse", "no", 
   "wether we evolve a densitized lapse instead of ADM alpha "

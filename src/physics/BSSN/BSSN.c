@@ -188,7 +188,17 @@ int BSSN_startup(tL *level)
 
   /* translate initial data in ADM variables to BSSN variables */
   ADMtoBSSN(level);
-  set_boundary_symmetry(level, BSSNvars);
+  //set_boundary_symmetry(level, BSSNvars);
+
+  /* enable all derivative vars */
+  enablevar(grid, Ind("BSSN_dphi"));
+  enablevar(grid, Ind("BSSN_ddphi"));
+  enablevar(grid, Ind("BSSN_dK"));
+  enablevar(grid, Ind("BSSN_dG"));
+  enablevar(grid, Ind("BSSN_dalp"));
+  enablevar(grid, Ind("BSSN_ddalp"));
+  enablevar(grid, Ind("BSSN_dbeta"));
+  enablevar(grid, Ind("BSSN_ddbeta"));
 
   return 0;
 }

@@ -27,6 +27,7 @@ tocompute = {
                     Ind(\"BSSN_dphix\"), Ind(\"BSSN_ddphixx\"));",
   Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BSSN_Gx\"),
                     Ind(\"BSSN_dGxx\"));",
+  Cinstruction == "FirstDerivsOf_S(box, Ind(\"BSSN_K\"), Ind(\"BSSN_dKx\"));",
 
   Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"alpha"),
                     Ind(\"BSSN_dalpx\"), Ind(\"BSSN_ddalpxx\"));",
@@ -36,18 +37,18 @@ tocompute = {
   (* loop of all points *)
   Cinstruction == "forallpoints(box, ijk) {",
 
-  (* partial derivatives *)
-  df[a] == del[a,phi],
-  ddf[a,b] == deldel[a,b,phi],
-  da[a] == del[a,alpha],
-  dda[a,b] == deldel[a,b,alpha],
-  db[a,b] == del[a,beta[b]],
-  ddb[a,b,c] == deldel[a,b,beta[c]],
-  delg[c,a,b] == del[c,g[a,b]],
-  deldelg[a,b,c,d] == deldel[a,b,g[c,d]],
-  delG[a,b] == del[a, G[b]],
-  dK[a] == del[a, K],
-  dA[a,b,c] == del[a, A[b,c]],
+  (* transfer partial derivatives into Bernd's vars *)
+  df[a] == dphi[a],
+  ddf[a,b] == ddphi[a,b],
+  da[a] == dalp[a],
+  dda[a,b] == ddalp[a,b],
+  db[a,b] == dbetabeta[b,a],
+  ddb[a,b,c] == ddbeta[c,a,b],
+  delg[c,a,b] == dgt[a,b,c],
+  deldelg[a,b,c,d] == ddgt[c,d,a,b],
+  delG[a,b] == dG[b,a],
+  (* dK[a] == dK[a], *)
+  dA[a,b,c] == dAtA[b,c,a],
 
   (* inverse conformal metric *)
   detginv == 1/matrixdet[g],
@@ -369,7 +370,17 @@ variabledeclarations[] := Module[{},
   pr["tL *level = ucur->level;\n"];
   pr["\n"];
 
-  prdecvarname[{dgt[a,b,c]}, "ADMvars_dgxxx"];
+  prdecvarname[{dgt[a,b,c]},    "ADMvars_dgxxx"];
+  prdecvarname[{ddgt[a,b,c]},   "ADMvars_ddgxxxx"];
+  prdecvarname[{dAt[a,b,c]},    "ADMvars_dKxxx"];
+  prdecvarname[{dphi[a,b,c]},   "BSSN_dphix"];
+  prdecvarname[{ddphi[a,b,c]},  "BSSN_ddphixx"];
+  prdecvarname[{dGt[a,b,c]},    "BSSN_dGxx"];
+  prdecvarname[{dK[a,b,c]},     "BSSN_dKx"];
+  prdecvarname[{dalp[a,b,c]},   "BSSN_dalpx"];
+  prdecvarname[{ddalp[a,b,c]},  "BSSN_ddalpxx"];
+  prdecvarname[{dbeta[a,b,c]},  "BSSN_dbetaxx"];
+  prdecvarname[{ddbeta[a,b,c]}, "BSSN_ddbetaxxx"];
   pr["\n"];
 ];    
 (* auxillary variables are automatically inserted here *)
