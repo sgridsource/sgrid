@@ -70,12 +70,21 @@ prdecvl[vars_, name_] := Module[{cvars, s, nf},
   ];
 ]
 
+prdecvlindices[vars_, name_] := Module[{cvars, s, nf}, 
+  cvars = vars /. expfreeindices /. gluevar;
+  For[nf = 0, nf < Length[cvars], nf++,
+      s = StringForm["int index_`` = (``)->index[``];\n", 
+                    cvars[[nf+1]], name, nf];
+    pr[s];
+  ];
+]
+
+
 (* write var declarations *)
 writeCdef[vars_, auxvars_] := Module[{cvars, s, nf, nfields, nl},
 
   variabledeclarations[];
   pr["\n"];
-
   
   nfields = Length[auxvars];
   For[nf = 1, nf <= nfields, nf++,
