@@ -41,13 +41,13 @@ tocompute = {
   ddf[a,b] == ddphi[a,b],
   da[a] == dalp[a],
   dda[a,b] == ddalp[a,b],
-  db[a,b] == dbetabeta[b,a],
+  db[a,b] == dbeta[b,a],
   ddb[a,b,c] == ddbeta[c,a,b],
   delg[c,a,b] == dgt[a,b,c],
   deldelg[a,b,c,d] == ddgt[c,d,a,b],
-  delG[a,b] == dG[b,a],
+  delG[a,b] == dGt[b,a],
   (* dK[a] == dK[a], *)
-  dA[a,b,c] == dAtA[b,c,a],
+  dA[a,b,c] == dAt[b,c,a],
 
   (* inverse conformal metric *)
   detginv == 1/matrixdet[g],

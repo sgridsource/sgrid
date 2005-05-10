@@ -4,11 +4,11 @@
 
 
 
-int BSSN_startup(tL *level);
+int BSSN_startup(tGrid *grid);
 
-void BSSN_init(tL* level, int igb, int iK, int ipsi, int igt, int iAt,
+void BSSN_init(tGrid* grid, int igb, int iK, int ipsi, int igt, int iAt,
 	       int iG, int itrK, int iphi,
 	       int i_alpha, int i_alphaDensity);
 
-int BSSNtoADM(tL *level);
+int BSSNtoADM(tGrid *grid);
 

@@ -14,8 +14,6 @@ tVarList *BSSNvars;
 */ 
 void BSSN_evolve(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
 {
-  if (0) test_shift(unew->level);
-
   BSSN_rhs(unew, upre, c, ucur);
   /* wether addDissipation is called after each ICN (or RK) step: */
   /* if(Getv("evolve_Dissipation", "yes")) 
@@ -32,40 +30,45 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
    A_ij = exp(4 phi) Atilde_ij
    K_ij = A_ij + 1/3 K g_ij
 */
-int BSSNtoADM(tL *level) 
+int BSSNtoADM(tGrid *grid) 
 {
-  int n, i;
-  int ipsi    = Ind("psi");
-  int ig      = Ind("gxx");
-  int iK      = Ind("Kxx");
-  int iphi    = Ind("BSSN_phi");
-  int itrK    = Ind("BSSN_K");
-  int igtilde = Ind("BSSN_gxx");
-  int iAtilde = Ind("BSSN_Axx");
-  double *psi = level->v[ipsi];
-  double *phi = level->v[iphi];
-  double *trK = level->v[itrK];
-  double *g, *K, *gtilde, *Atilde;
-  double fg, fK;
+  int bi;
 
-  /* for now always use conformal factor 
-     int usepsi = 1; */
-  if (0) printf("  deriving ADM variables from BSSN variables\n");
+  for(bi = 0; bi < grid->nboxes; bi++)
+  {
+    tBox *box = grid->box[bi];
+    int n, i;
+    int ipsi    = Ind("psi");
+    int ig      = Ind("gxx");
+    int iK      = Ind("Kxx");
+    int iphi    = Ind("BSSN_phi");
+    int itrK    = Ind("BSSN_K");
+    int igtilde = Ind("BSSN_gxx");
+    int iAtilde = Ind("BSSN_Axx");
+    double *psi = box->v[ipsi];
+    double *phi = box->v[iphi];
+    double *trK = box->v[itrK];
+    double *g, *K, *gtilde, *Atilde;
+    double fg, fK;
 
-  forallpoints(level, i) {
-    fg = exp(4 * phi[i]);
-    fK = fg * pow(psi[i], 4.0);   // use conformal factor
-    for (n = 0; n < 6; n++) {
-      g = level->v[ig+n];
-      K = level->v[iK+n];
-      gtilde = level->v[igtilde+n];
-      Atilde = level->v[iAtilde+n];
-      
-      g[i] = fg * gtilde[i];     
-      K[i] = fK * (Atilde[i] + trK[i] * gtilde[i] / 3.0);
+    /* for now always use conformal factor 
+       int usepsi = 1; */
+    if (0) printf("  deriving ADM variables from BSSN variables\n");
+
+    forallpoints(box, i) {
+      fg = exp(4 * phi[i]);
+      fK = fg * pow(psi[i], 4.0);   // use conformal factor
+      for (n = 0; n < 6; n++) {
+        g = box->v[ig+n];
+        K = box->v[iK+n];
+        gtilde = box->v[igtilde+n];
+        Atilde = box->v[iAtilde+n];
+        
+        g[i] = fg * gtilde[i];     
+        K[i] = fK * (Atilde[i] + trK[i] * gtilde[i] / 3.0);
+      }
     }
   }
-
   return 0;
 }
 
@@ -85,12 +88,12 @@ int BSSNtoADM(tL *level)
 
    G^i = - del_j gtildeinv^ji
 */
-void ADMtoBSSN(tL *level) 
+void ADMtoBSSN(tGrid *grid) 
 {
   printf("  deriving BSSN variables from ADM variables\n");
 
   /* compute */
-  BSSN_init(level, Ind("gxx"), Ind("Kxx"), Ind("psi"), 
+  BSSN_init(grid, Ind("gxx"), Ind("Kxx"), Ind("psi"), 
 	    Ind("BSSN_gxx"), Ind("BSSN_Axx"), Ind("BSSN_Gx"), 
 	    Ind("BSSN_K"), Ind("BSSN_phi"),
 	    Ind("alpha"), Ind("BSSN_alphaDensity"));
@@ -108,7 +111,7 @@ void ADMtoBSSN(tL *level)
 
 /* initialize BSSN after initial data has been computed in POST_INITIALDATA
 */
-int BSSN_startup(tL *level)
+int BSSN_startup(tGrid *grid)
 {
   int i;
   double vgauge;
@@ -160,7 +163,7 @@ int BSSN_startup(tL *level)
   /* create a variable list for BSSN evolutions 
      note that we include lapse and shift directly
   */
-  BSSNvars = vlalloc(level);
+  BSSNvars = vlalloc(grid);
   vlpush(BSSNvars, Ind("BSSN_gxx"));
   vlpush(BSSNvars, Ind("BSSN_phi"));
   vlpush(BSSNvars, Ind("BSSN_Axx"));
@@ -187,7 +190,7 @@ int BSSN_startup(tL *level)
   }
 
   /* translate initial data in ADM variables to BSSN variables */
-  ADMtoBSSN(level);
+  ADMtoBSSN(grid);
   //set_boundary_symmetry(level, BSSNvars);
 
   /* enable all derivative vars */
