@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 9.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 10.5.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -43,10 +43,12 @@ double shiftpsipower   = Getd("BSSN_shiftpsipower");
 double shiftalphapower = Getd("BSSN_shiftalphapower");
 double shiftgammacoeff = Getd("BSSN_shiftgammacoeff");
 double shiftdriver     = Getd("BSSN_shiftdriver");
+
 for(bi = 0; bi < grid->nboxes; bi++)
 {
 tBox *box = grid->box[bi];
 int ijk;
+
 
 
 double *K0 = vlldataptr(K_initial, box, 0);
@@ -138,33 +140,145 @@ double *palphaDensity = vlldataptr(upre, box, 24);
 tL *level = ucur->level;
 
 int index_ADMvars_dgxxx = Ind("ADMvars_dgxxx");
-double *dgt[1, 1, 1] = box->v[index_ADMvars_dgxxx + 0];
-double *dgt[1, 1, 2] = box->v[index_ADMvars_dgxxx + 1];
-double *dgt[1, 1, 3] = box->v[index_ADMvars_dgxxx + 2];
-double *dgt[1, 2, 1] = box->v[index_ADMvars_dgxxx + 3];
-double *dgt[1, 2, 2] = box->v[index_ADMvars_dgxxx + 4];
-double *dgt[1, 2, 3] = box->v[index_ADMvars_dgxxx + 5];
-double *dgt[1, 3, 1] = box->v[index_ADMvars_dgxxx + 6];
-double *dgt[1, 3, 2] = box->v[index_ADMvars_dgxxx + 7];
-double *dgt[1, 3, 3] = box->v[index_ADMvars_dgxxx + 8];
-double *dgt[2, 1, 1] = box->v[index_ADMvars_dgxxx + 9];
-double *dgt[2, 1, 2] = box->v[index_ADMvars_dgxxx + 10];
-double *dgt[2, 1, 3] = box->v[index_ADMvars_dgxxx + 11];
-double *dgt[2, 2, 1] = box->v[index_ADMvars_dgxxx + 12];
-double *dgt[2, 2, 2] = box->v[index_ADMvars_dgxxx + 13];
-double *dgt[2, 2, 3] = box->v[index_ADMvars_dgxxx + 14];
-double *dgt[2, 3, 1] = box->v[index_ADMvars_dgxxx + 15];
-double *dgt[2, 3, 2] = box->v[index_ADMvars_dgxxx + 16];
-double *dgt[2, 3, 3] = box->v[index_ADMvars_dgxxx + 17];
-double *dgt[3, 1, 1] = box->v[index_ADMvars_dgxxx + 18];
-double *dgt[3, 1, 2] = box->v[index_ADMvars_dgxxx + 19];
-double *dgt[3, 1, 3] = box->v[index_ADMvars_dgxxx + 20];
-double *dgt[3, 2, 1] = box->v[index_ADMvars_dgxxx + 21];
-double *dgt[3, 2, 2] = box->v[index_ADMvars_dgxxx + 22];
-double *dgt[3, 2, 3] = box->v[index_ADMvars_dgxxx + 23];
-double *dgt[3, 3, 1] = box->v[index_ADMvars_dgxxx + 24];
-double *dgt[3, 3, 2] = box->v[index_ADMvars_dgxxx + 25];
-double *dgt[3, 3, 3] = box->v[index_ADMvars_dgxxx + 26];
+double *dgt111 = box->v[index_ADMvars_dgxxx + 0];
+double *dgt112 = box->v[index_ADMvars_dgxxx + 1];
+double *dgt113 = box->v[index_ADMvars_dgxxx + 2];
+double *dgt121 = box->v[index_ADMvars_dgxxx + 3];
+double *dgt122 = box->v[index_ADMvars_dgxxx + 4];
+double *dgt123 = box->v[index_ADMvars_dgxxx + 5];
+double *dgt131 = box->v[index_ADMvars_dgxxx + 6];
+double *dgt132 = box->v[index_ADMvars_dgxxx + 7];
+double *dgt133 = box->v[index_ADMvars_dgxxx + 8];
+double *dgt221 = box->v[index_ADMvars_dgxxx + 9];
+double *dgt222 = box->v[index_ADMvars_dgxxx + 10];
+double *dgt223 = box->v[index_ADMvars_dgxxx + 11];
+double *dgt231 = box->v[index_ADMvars_dgxxx + 12];
+double *dgt232 = box->v[index_ADMvars_dgxxx + 13];
+double *dgt233 = box->v[index_ADMvars_dgxxx + 14];
+double *dgt331 = box->v[index_ADMvars_dgxxx + 15];
+double *dgt332 = box->v[index_ADMvars_dgxxx + 16];
+double *dgt333 = box->v[index_ADMvars_dgxxx + 17];
+int index_ADMvars_ddgxxxx = Ind("ADMvars_ddgxxxx");
+double *ddgt1111 = box->v[index_ADMvars_ddgxxxx + 0];
+double *ddgt1112 = box->v[index_ADMvars_ddgxxxx + 1];
+double *ddgt1113 = box->v[index_ADMvars_ddgxxxx + 2];
+double *ddgt1122 = box->v[index_ADMvars_ddgxxxx + 3];
+double *ddgt1123 = box->v[index_ADMvars_ddgxxxx + 4];
+double *ddgt1133 = box->v[index_ADMvars_ddgxxxx + 5];
+double *ddgt1211 = box->v[index_ADMvars_ddgxxxx + 6];
+double *ddgt1212 = box->v[index_ADMvars_ddgxxxx + 7];
+double *ddgt1213 = box->v[index_ADMvars_ddgxxxx + 8];
+double *ddgt1222 = box->v[index_ADMvars_ddgxxxx + 9];
+double *ddgt1223 = box->v[index_ADMvars_ddgxxxx + 10];
+double *ddgt1233 = box->v[index_ADMvars_ddgxxxx + 11];
+double *ddgt1311 = box->v[index_ADMvars_ddgxxxx + 12];
+double *ddgt1312 = box->v[index_ADMvars_ddgxxxx + 13];
+double *ddgt1313 = box->v[index_ADMvars_ddgxxxx + 14];
+double *ddgt1322 = box->v[index_ADMvars_ddgxxxx + 15];
+double *ddgt1323 = box->v[index_ADMvars_ddgxxxx + 16];
+double *ddgt1333 = box->v[index_ADMvars_ddgxxxx + 17];
+double *ddgt2211 = box->v[index_ADMvars_ddgxxxx + 18];
+double *ddgt2212 = box->v[index_ADMvars_ddgxxxx + 19];
+double *ddgt2213 = box->v[index_ADMvars_ddgxxxx + 20];
+double *ddgt2222 = box->v[index_ADMvars_ddgxxxx + 21];
+double *ddgt2223 = box->v[index_ADMvars_ddgxxxx + 22];
+double *ddgt2233 = box->v[index_ADMvars_ddgxxxx + 23];
+double *ddgt2311 = box->v[index_ADMvars_ddgxxxx + 24];
+double *ddgt2312 = box->v[index_ADMvars_ddgxxxx + 25];
+double *ddgt2313 = box->v[index_ADMvars_ddgxxxx + 26];
+double *ddgt2322 = box->v[index_ADMvars_ddgxxxx + 27];
+double *ddgt2323 = box->v[index_ADMvars_ddgxxxx + 28];
+double *ddgt2333 = box->v[index_ADMvars_ddgxxxx + 29];
+double *ddgt3311 = box->v[index_ADMvars_ddgxxxx + 30];
+double *ddgt3312 = box->v[index_ADMvars_ddgxxxx + 31];
+double *ddgt3313 = box->v[index_ADMvars_ddgxxxx + 32];
+double *ddgt3322 = box->v[index_ADMvars_ddgxxxx + 33];
+double *ddgt3323 = box->v[index_ADMvars_ddgxxxx + 34];
+double *ddgt3333 = box->v[index_ADMvars_ddgxxxx + 35];
+int index_ADMvars_dKxxx = Ind("ADMvars_dKxxx");
+double *dAt111 = box->v[index_ADMvars_dKxxx + 0];
+double *dAt112 = box->v[index_ADMvars_dKxxx + 1];
+double *dAt113 = box->v[index_ADMvars_dKxxx + 2];
+double *dAt121 = box->v[index_ADMvars_dKxxx + 3];
+double *dAt122 = box->v[index_ADMvars_dKxxx + 4];
+double *dAt123 = box->v[index_ADMvars_dKxxx + 5];
+double *dAt131 = box->v[index_ADMvars_dKxxx + 6];
+double *dAt132 = box->v[index_ADMvars_dKxxx + 7];
+double *dAt133 = box->v[index_ADMvars_dKxxx + 8];
+double *dAt221 = box->v[index_ADMvars_dKxxx + 9];
+double *dAt222 = box->v[index_ADMvars_dKxxx + 10];
+double *dAt223 = box->v[index_ADMvars_dKxxx + 11];
+double *dAt231 = box->v[index_ADMvars_dKxxx + 12];
+double *dAt232 = box->v[index_ADMvars_dKxxx + 13];
+double *dAt233 = box->v[index_ADMvars_dKxxx + 14];
+double *dAt331 = box->v[index_ADMvars_dKxxx + 15];
+double *dAt332 = box->v[index_ADMvars_dKxxx + 16];
+double *dAt333 = box->v[index_ADMvars_dKxxx + 17];
+int index_BSSN_dphix = Ind("BSSN_dphix");
+double *dphi1 = box->v[index_BSSN_dphix + 0];
+double *dphi2 = box->v[index_BSSN_dphix + 1];
+double *dphi3 = box->v[index_BSSN_dphix + 2];
+int index_BSSN_ddphixx = Ind("BSSN_ddphixx");
+double *ddphi11 = box->v[index_BSSN_ddphixx + 0];
+double *ddphi12 = box->v[index_BSSN_ddphixx + 1];
+double *ddphi13 = box->v[index_BSSN_ddphixx + 2];
+double *ddphi22 = box->v[index_BSSN_ddphixx + 3];
+double *ddphi23 = box->v[index_BSSN_ddphixx + 4];
+double *ddphi33 = box->v[index_BSSN_ddphixx + 5];
+int index_BSSN_dGxx = Ind("BSSN_dGxx");
+double *dGt11 = box->v[index_BSSN_dGxx + 0];
+double *dGt12 = box->v[index_BSSN_dGxx + 1];
+double *dGt13 = box->v[index_BSSN_dGxx + 2];
+double *dGt21 = box->v[index_BSSN_dGxx + 3];
+double *dGt22 = box->v[index_BSSN_dGxx + 4];
+double *dGt23 = box->v[index_BSSN_dGxx + 5];
+double *dGt31 = box->v[index_BSSN_dGxx + 6];
+double *dGt32 = box->v[index_BSSN_dGxx + 7];
+double *dGt33 = box->v[index_BSSN_dGxx + 8];
+int index_BSSN_dKx = Ind("BSSN_dKx");
+double *dK1 = box->v[index_BSSN_dKx + 0];
+double *dK2 = box->v[index_BSSN_dKx + 1];
+double *dK3 = box->v[index_BSSN_dKx + 2];
+int index_BSSN_dalpx = Ind("BSSN_dalpx");
+double *dalp1 = box->v[index_BSSN_dalpx + 0];
+double *dalp2 = box->v[index_BSSN_dalpx + 1];
+double *dalp3 = box->v[index_BSSN_dalpx + 2];
+int index_BSSN_ddalpxx = Ind("BSSN_ddalpxx");
+double *ddalp11 = box->v[index_BSSN_ddalpxx + 0];
+double *ddalp12 = box->v[index_BSSN_ddalpxx + 1];
+double *ddalp13 = box->v[index_BSSN_ddalpxx + 2];
+double *ddalp22 = box->v[index_BSSN_ddalpxx + 3];
+double *ddalp23 = box->v[index_BSSN_ddalpxx + 4];
+double *ddalp33 = box->v[index_BSSN_ddalpxx + 5];
+int index_BSSN_dbetaxx = Ind("BSSN_dbetaxx");
+double *dbeta11 = box->v[index_BSSN_dbetaxx + 0];
+double *dbeta12 = box->v[index_BSSN_dbetaxx + 1];
+double *dbeta13 = box->v[index_BSSN_dbetaxx + 2];
+double *dbeta21 = box->v[index_BSSN_dbetaxx + 3];
+double *dbeta22 = box->v[index_BSSN_dbetaxx + 4];
+double *dbeta23 = box->v[index_BSSN_dbetaxx + 5];
+double *dbeta31 = box->v[index_BSSN_dbetaxx + 6];
+double *dbeta32 = box->v[index_BSSN_dbetaxx + 7];
+double *dbeta33 = box->v[index_BSSN_dbetaxx + 8];
+int index_BSSN_ddbetaxxx = Ind("BSSN_ddbetaxxx");
+double *ddbeta111 = box->v[index_BSSN_ddbetaxxx + 0];
+double *ddbeta112 = box->v[index_BSSN_ddbetaxxx + 1];
+double *ddbeta113 = box->v[index_BSSN_ddbetaxxx + 2];
+double *ddbeta122 = box->v[index_BSSN_ddbetaxxx + 3];
+double *ddbeta123 = box->v[index_BSSN_ddbetaxxx + 4];
+double *ddbeta133 = box->v[index_BSSN_ddbetaxxx + 5];
+double *ddbeta211 = box->v[index_BSSN_ddbetaxxx + 6];
+double *ddbeta212 = box->v[index_BSSN_ddbetaxxx + 7];
+double *ddbeta213 = box->v[index_BSSN_ddbetaxxx + 8];
+double *ddbeta222 = box->v[index_BSSN_ddbetaxxx + 9];
+double *ddbeta223 = box->v[index_BSSN_ddbetaxxx + 10];
+double *ddbeta233 = box->v[index_BSSN_ddbetaxxx + 11];
+double *ddbeta311 = box->v[index_BSSN_ddbetaxxx + 12];
+double *ddbeta312 = box->v[index_BSSN_ddbetaxxx + 13];
+double *ddbeta313 = box->v[index_BSSN_ddbetaxxx + 14];
+double *ddbeta322 = box->v[index_BSSN_ddbetaxxx + 15];
+double *ddbeta323 = box->v[index_BSSN_ddbetaxxx + 16];
+double *ddbeta333 = box->v[index_BSSN_ddbetaxxx + 17];
 
 
 double AA;
@@ -363,9 +477,6 @@ double dginv333;
 double divAinv1;
 double divAinv2;
 double divAinv3;
-double dK1;
-double dK2;
-double dK3;
 double gamma111;
 double gamma112;
 double gamma113;
@@ -485,651 +596,702 @@ double Rphi33;
 
 /* Jetzt geht's los! */
 
+FirstAndSecondDerivsOf_Sab(box, Ind("BSSN_gxx"),                     Ind("ADMvars_dgxxx"), Ind("ADMvars_ddgxxxx")); 
+
+
+FirstDerivsOf_Sab(box, Ind("BSSN_Axx"),                     Ind("ADMvars_dKxxx")); 
+
+
+FirstAndSecondDerivsOf_S(box, Ind("BSSN_phi"),                     Ind("BSSN_dphix"), Ind("BSSN_ddphixx")); 
+
+
+FirstDerivsOf_Sa(box, Ind("BSSN_Gx"),                     Ind("BSSN_dGxx")); 
+
+
+FirstDerivsOf_S(box, Ind("BSSN_K"), Ind("BSSN_dKx")); 
+
+
+FirstAndSecondDerivsOf_S(box, Ind("alpha"),                     Ind("BSSN_dalpx"), Ind("BSSN_ddalpxx")); 
+
+
+FirstAndSecondDerivsOf_Sa(box, Ind("betax"),                     Ind("BSSN_dbetaxx"), Ind("BSSN_ddbetaxxx")); 
+
+
 forallpoints(box, ijk) { 
 
 df1
 =
-d1phi[ijk]
+dphi1[ijk]
 ;
 
 df2
 =
-d2phi[ijk]
+dphi2[ijk]
 ;
 
 df3
 =
-d3phi[ijk]
+dphi3[ijk]
 ;
 
 ddf11
 =
-d1d1phi[ijk]
+ddphi11[ijk]
 ;
 
 ddf12
 =
-d1d2phi[ijk]
+ddphi12[ijk]
 ;
 
 ddf13
 =
-d1d3phi[ijk]
+ddphi13[ijk]
 ;
 
 ddf22
 =
-d2d2phi[ijk]
+ddphi22[ijk]
 ;
 
 ddf23
 =
-d2d3phi[ijk]
+ddphi23[ijk]
 ;
 
 ddf33
 =
-d3d3phi[ijk]
+ddphi33[ijk]
 ;
 
 da1
 =
-d1alpha[ijk]
+dalp1[ijk]
 ;
 
 da2
 =
-d2alpha[ijk]
+dalp2[ijk]
 ;
 
 da3
 =
-d3alpha[ijk]
+dalp3[ijk]
 ;
 
 dda11
 =
-d1d1alpha[ijk]
+ddalp11[ijk]
 ;
 
 dda12
 =
-d1d2alpha[ijk]
+ddalp12[ijk]
 ;
 
 dda13
 =
-d1d3alpha[ijk]
+ddalp13[ijk]
 ;
 
 dda22
 =
-d2d2alpha[ijk]
+ddalp22[ijk]
 ;
 
 dda23
 =
-d2d3alpha[ijk]
+ddalp23[ijk]
 ;
 
 dda33
 =
-d3d3alpha[ijk]
+ddalp33[ijk]
 ;
 
 db11
 =
-d1beta1[ijk]
+dbetabeta(1.,1.)
 ;
 
 db12
 =
-d1beta2[ijk]
+dbetabeta(2.,1.)
 ;
 
 db13
 =
-d1beta3[ijk]
+dbetabeta(3.,1.)
 ;
 
 db21
 =
-d2beta1[ijk]
+dbetabeta(1.,2.)
 ;
 
 db22
 =
-d2beta2[ijk]
+dbetabeta(2.,2.)
 ;
 
 db23
 =
-d2beta3[ijk]
+dbetabeta(3.,2.)
 ;
 
 db31
 =
-d3beta1[ijk]
+dbetabeta(1.,3.)
 ;
 
 db32
 =
-d3beta2[ijk]
+dbetabeta(2.,3.)
 ;
 
 db33
 =
-d3beta3[ijk]
+dbetabeta(3.,3.)
 ;
 
 ddb111
 =
-d1d1beta1[ijk]
+ddbeta111[ijk]
 ;
 
 ddb112
 =
-d1d1beta2[ijk]
+ddbeta211[ijk]
 ;
 
 ddb113
 =
-d1d1beta3[ijk]
+ddbeta311[ijk]
 ;
 
 ddb121
 =
-d1d2beta1[ijk]
+ddbeta112[ijk]
 ;
 
 ddb122
 =
-d1d2beta2[ijk]
+ddbeta212[ijk]
 ;
 
 ddb123
 =
-d1d2beta3[ijk]
+ddbeta312[ijk]
 ;
 
 ddb131
 =
-d1d3beta1[ijk]
+ddbeta113[ijk]
 ;
 
 ddb132
 =
-d1d3beta2[ijk]
+ddbeta213[ijk]
 ;
 
 ddb133
 =
-d1d3beta3[ijk]
+ddbeta313[ijk]
 ;
 
 ddb221
 =
-d2d2beta1[ijk]
+ddbeta122[ijk]
 ;
 
 ddb222
 =
-d2d2beta2[ijk]
+ddbeta222[ijk]
 ;
 
 ddb223
 =
-d2d2beta3[ijk]
+ddbeta322[ijk]
 ;
 
 ddb231
 =
-d2d3beta1[ijk]
+ddbeta123[ijk]
 ;
 
 ddb232
 =
-d2d3beta2[ijk]
+ddbeta223[ijk]
 ;
 
 ddb233
 =
-d2d3beta3[ijk]
+ddbeta323[ijk]
 ;
 
 ddb331
 =
-d3d3beta1[ijk]
+ddbeta133[ijk]
 ;
 
 ddb332
 =
-d3d3beta2[ijk]
+ddbeta233[ijk]
 ;
 
 ddb333
 =
-d3d3beta3[ijk]
+ddbeta333[ijk]
 ;
 
 delg111
 =
-d1g11[ijk]
+dgt111[ijk]
 ;
 
 delg112
 =
-d1g12[ijk]
+dgt121[ijk]
 ;
 
 delg113
 =
-d1g13[ijk]
+dgt131[ijk]
 ;
 
 delg122
 =
-d1g22[ijk]
+dgt221[ijk]
 ;
 
 delg123
 =
-d1g23[ijk]
+dgt231[ijk]
 ;
 
 delg133
 =
-d1g33[ijk]
+dgt331[ijk]
 ;
 
 delg211
 =
-d2g11[ijk]
+dgt112[ijk]
 ;
 
 delg212
 =
-d2g12[ijk]
+dgt122[ijk]
 ;
 
 delg213
 =
-d2g13[ijk]
+dgt132[ijk]
 ;
 
 delg222
 =
-d2g22[ijk]
+dgt222[ijk]
 ;
 
 delg223
 =
-d2g23[ijk]
+dgt232[ijk]
 ;
 
 delg233
 =
-d2g33[ijk]
+dgt332[ijk]
 ;
 
 delg311
 =
-d3g11[ijk]
+dgt113[ijk]
 ;
 
 delg312
 =
-d3g12[ijk]
+dgt123[ijk]
 ;
 
 delg313
 =
-d3g13[ijk]
+dgt133[ijk]
 ;
 
 delg322
 =
-d3g22[ijk]
+dgt223[ijk]
 ;
 
 delg323
 =
-d3g23[ijk]
+dgt233[ijk]
 ;
 
 delg333
 =
-d3g33[ijk]
+dgt333[ijk]
 ;
 
 deldelg1111
 =
-d1d1g11[ijk]
+ddgt1111[ijk]
 ;
 
 deldelg1112
 =
-d1d1g12[ijk]
+ddgt1211[ijk]
 ;
 
 deldelg1113
 =
-d1d1g13[ijk]
+ddgt1311[ijk]
 ;
 
 deldelg1122
 =
-d1d1g22[ijk]
+ddgt2211[ijk]
 ;
 
 deldelg1123
 =
-d1d1g23[ijk]
+ddgt2311[ijk]
 ;
 
 deldelg1133
 =
-d1d1g33[ijk]
+ddgt3311[ijk]
 ;
 
 deldelg1211
 =
-d1d2g11[ijk]
+ddgt1112[ijk]
 ;
 
 deldelg1212
 =
-d1d2g12[ijk]
+ddgt1212[ijk]
 ;
 
 deldelg1213
 =
-d1d2g13[ijk]
+ddgt1312[ijk]
 ;
 
 deldelg1222
 =
-d1d2g22[ijk]
+ddgt2212[ijk]
 ;
 
 deldelg1223
 =
-d1d2g23[ijk]
+ddgt2312[ijk]
 ;
 
 deldelg1233
 =
-d1d2g33[ijk]
+ddgt3312[ijk]
 ;
 
 deldelg1311
 =
-d1d3g11[ijk]
+ddgt1113[ijk]
 ;
 
 deldelg1312
 =
-d1d3g12[ijk]
+ddgt1213[ijk]
 ;
 
 deldelg1313
 =
-d1d3g13[ijk]
+ddgt1313[ijk]
 ;
 
 deldelg1322
 =
-d1d3g22[ijk]
+ddgt2213[ijk]
 ;
 
 deldelg1323
 =
-d1d3g23[ijk]
+ddgt2313[ijk]
 ;
 
 deldelg1333
 =
-d1d3g33[ijk]
+ddgt3313[ijk]
 ;
 
 deldelg2211
 =
-d2d2g11[ijk]
+ddgt1122[ijk]
 ;
 
 deldelg2212
 =
-d2d2g12[ijk]
+ddgt1222[ijk]
 ;
 
 deldelg2213
 =
-d2d2g13[ijk]
+ddgt1322[ijk]
 ;
 
 deldelg2222
 =
-d2d2g22[ijk]
+ddgt2222[ijk]
 ;
 
 deldelg2223
 =
-d2d2g23[ijk]
+ddgt2322[ijk]
 ;
 
 deldelg2233
 =
-d2d2g33[ijk]
+ddgt3322[ijk]
 ;
 
 deldelg2311
 =
-d2d3g11[ijk]
+ddgt1123[ijk]
 ;
 
 deldelg2312
 =
-d2d3g12[ijk]
+ddgt1223[ijk]
 ;
 
 deldelg2313
 =
-d2d3g13[ijk]
+ddgt1323[ijk]
 ;
 
 deldelg2322
 =
-d2d3g22[ijk]
+ddgt2223[ijk]
 ;
 
 deldelg2323
 =
-d2d3g23[ijk]
+ddgt2323[ijk]
 ;
 
 deldelg2333
 =
-d2d3g33[ijk]
+ddgt3323[ijk]
 ;
 
 deldelg3311
 =
-d3d3g11[ijk]
+ddgt1133[ijk]
 ;
 
 deldelg3312
 =
-d3d3g12[ijk]
+ddgt1233[ijk]
 ;
 
 deldelg3313
 =
-d3d3g13[ijk]
+ddgt1333[ijk]
 ;
 
 deldelg3322
 =
-d3d3g22[ijk]
+ddgt2233[ijk]
 ;
 
 deldelg3323
 =
-d3d3g23[ijk]
+ddgt2333[ijk]
 ;
 
 deldelg3333
 =
-d3d3g33[ijk]
+ddgt3333[ijk]
 ;
 
 delG11
 =
-d1G1[ijk]
+dG(1.,1.)
 ;
 
 delG12
 =
-d1G2[ijk]
+dG(2.,1.)
 ;
 
 delG13
 =
-d1G3[ijk]
+dG(3.,1.)
 ;
 
 delG21
 =
-d2G1[ijk]
+dG(1.,2.)
 ;
 
 delG22
 =
-d2G2[ijk]
+dG(2.,2.)
 ;
 
 delG23
 =
-d2G3[ijk]
+dG(3.,2.)
 ;
 
 delG31
 =
-d3G1[ijk]
+dG(1.,3.)
 ;
 
 delG32
 =
-d3G2[ijk]
+dG(2.,3.)
 ;
 
 delG33
 =
-d3G3[ijk]
-;
-
-dK1
-=
-d1K[ijk]
-;
-
-dK2
-=
-d2K[ijk]
-;
-
-dK3
-=
-d3K[ijk]
+dG(3.,3.)
 ;
 
 dA111
 =
-d1A11[ijk]
+dAtA(1.,1.,1.)
 ;
 
 dA112
 =
-d1A12[ijk]
+dAtA(1.,2.,1.)
+;
+
+dA112
+=
+dAtA(2.,1.,1.)
 ;
 
 dA113
 =
-d1A13[ijk]
+dAtA(1.,3.,1.)
+;
+
+dA113
+=
+dAtA(3.,1.,1.)
 ;
 
 dA122
 =
-d1A22[ijk]
+dAtA(2.,2.,1.)
 ;
 
 dA123
 =
-d1A23[ijk]
+dAtA(2.,3.,1.)
+;
+
+dA123
+=
+dAtA(3.,2.,1.)
 ;
 
 dA133
 =
-d1A33[ijk]
+dAtA(3.,3.,1.)
 ;
 
 dA211
 =
-d2A11[ijk]
+dAtA(1.,1.,2.)
 ;
 
 dA212
 =
-d2A12[ijk]
+dAtA(1.,2.,2.)
+;
+
+dA212
+=
+dAtA(2.,1.,2.)
 ;
 
 dA213
 =
-d2A13[ijk]
+dAtA(1.,3.,2.)
+;
+
+dA213
+=
+dAtA(3.,1.,2.)
 ;
 
 dA222
 =
-d2A22[ijk]
+dAtA(2.,2.,2.)
 ;
 
 dA223
 =
-d2A23[ijk]
+dAtA(2.,3.,2.)
+;
+
+dA223
+=
+dAtA(3.,2.,2.)
 ;
 
 dA233
 =
-d2A33[ijk]
+dAtA(3.,3.,2.)
 ;
 
 dA311
 =
-d3A11[ijk]
+dAtA(1.,1.,3.)
 ;
 
 dA312
 =
-d3A12[ijk]
+dAtA(1.,2.,3.)
+;
+
+dA312
+=
+dAtA(2.,1.,3.)
 ;
 
 dA313
 =
-d3A13[ijk]
+dAtA(1.,3.,3.)
+;
+
+dA313
+=
+dAtA(3.,1.,3.)
 ;
 
 dA322
 =
-d3A22[ijk]
+dAtA(2.,2.,3.)
 ;
 
 dA323
 =
-d3A23[ijk]
+dAtA(2.,3.,3.)
+;
+
+dA323
+=
+dAtA(3.,2.,3.)
 ;
 
 dA333
 =
-d3A33[ijk]
+dAtA(3.,3.,3.)
 ;
 
 detginv
@@ -2177,19 +2339,19 @@ K[ijk]
 forceKzerofactor*K[ijk]
 ;
 
-dK1
+dK1[ijk]
 =
-dK1*forceKzerofactor
+forceKzerofactor*dK1[ijk]
 ;
 
-dK2
+dK2[ijk]
 =
-dK2*forceKzerofactor
+forceKzerofactor*dK2[ijk]
 ;
 
-dK3
+dK3[ijk]
 =
-dK3*forceKzerofactor
+forceKzerofactor*dK3[ijk]
 ;
 
 AA11
@@ -2289,7 +2451,7 @@ divAinv1
   Ainv12*(gamma112 + gamma121) - Ainv22*gamma122 - 
   Ainv13*(gamma113 + gamma131) - Ainv23*(gamma123 + gamma132) - 
   Ainv33*gamma133 + 0.66666666666666666666666666666666666667*
-   (dK1*ginv11 + dK2*ginv12 + dK3*ginv13)
+   (ginv11*dK1[ijk] + ginv12*dK2[ijk] + ginv13*dK3[ijk])
 ;
 
 divAinv2
@@ -2298,7 +2460,7 @@ divAinv2
   Ainv12*(gamma212 + gamma221) - Ainv22*gamma222 - 
   Ainv13*(gamma213 + gamma231) - Ainv23*(gamma223 + gamma232) - 
   Ainv33*gamma233 + 0.66666666666666666666666666666666666667*
-   (dK1*ginv12 + dK2*ginv22 + dK3*ginv23)
+   (ginv12*dK1[ijk] + ginv22*dK2[ijk] + ginv23*dK3[ijk])
 ;
 
 divAinv3
@@ -2307,7 +2469,7 @@ divAinv3
   Ainv12*(gamma312 + gamma321) - Ainv22*gamma322 - 
   Ainv13*(gamma313 + gamma331) - Ainv23*(gamma323 + gamma332) - 
   Ainv33*gamma333 + 0.66666666666666666666666666666666666667*
-   (dK1*ginv13 + dK2*ginv23 + dK3*ginv33)
+   (ginv13*dK1[ijk] + ginv23*dK2[ijk] + ginv33*dK3[ijk])
 ;
 
 R
@@ -3058,4 +3220,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 86, n* = 2068,  n/ = 58,  n+ = 1753, n = 3879, O = 1 */
+/* nvars = 215, n* = 2170,  n/ = 58,  n+ = 1957, n = 4185, O = 1 */

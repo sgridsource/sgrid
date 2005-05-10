@@ -26,14 +26,12 @@ tocompute = {
 
   Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"BSSN_phi\"), \
                     Ind(\"BSSN_dphix\"), Ind(\"BSSN_ddphixx\"));",
-(*
   Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BSSN_Gx\"), \
                     Ind(\"BSSN_dGxx\"));",
   Cinstruction == "FirstDerivsOf_S(box, Ind(\"BSSN_K\"), Ind(\"BSSN_dKx\"));",
 
-  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"alpha"), \
+  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"alpha\"), \
                     Ind(\"BSSN_dalpx\"), Ind(\"BSSN_ddalpxx\"));",
-*)
   Cinstruction == "FirstAndSecondDerivsOf_Sa(box, Ind(\"betax\"), \
                     Ind(\"BSSN_dbetaxx\"), Ind(\"BSSN_ddbetaxxx\"));",
 
