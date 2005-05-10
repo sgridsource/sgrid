@@ -1,5 +1,5 @@
 /* ADMconstraints.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 9.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 10.5.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
