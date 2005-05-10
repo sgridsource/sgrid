@@ -113,7 +113,6 @@ void ADMtoBSSN(tGrid *grid)
 */
 int BSSN_startup(tGrid *grid)
 {
-  int i;
   double vgauge;
 
   printf("Initializing BSSN: ");
