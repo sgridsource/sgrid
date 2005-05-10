@@ -193,14 +193,14 @@ int BSSN_startup(tGrid *grid)
   //set_boundary_symmetry(level, BSSNvars);
 
   /* enable all derivative vars */
-  enablevar(grid, Ind("BSSN_dphi"));
-  enablevar(grid, Ind("BSSN_ddphi"));
-  enablevar(grid, Ind("BSSN_dK"));
-  enablevar(grid, Ind("BSSN_dG"));
-  enablevar(grid, Ind("BSSN_dalp"));
-  enablevar(grid, Ind("BSSN_ddalp"));
-  enablevar(grid, Ind("BSSN_dbeta"));
-  enablevar(grid, Ind("BSSN_ddbeta"));
+  enablevar(grid, Ind("BSSN_dphix"));
+  enablevar(grid, Ind("BSSN_ddphixx"));
+  enablevar(grid, Ind("BSSN_dKx"));
+  enablevar(grid, Ind("BSSN_dGx"));
+  enablevar(grid, Ind("BSSN_dalpx"));
+  enablevar(grid, Ind("BSSN_ddalpxx"));
+  enablevar(grid, Ind("BSSN_dbetaxx"));
+  enablevar(grid, Ind("BSSN_ddbetaxx"));
 
   return 0;
 }
