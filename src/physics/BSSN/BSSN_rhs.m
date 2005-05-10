@@ -18,6 +18,9 @@ variables = {g[a,b],  A[a,b],  G[a],  K,  phi,   alpha,  beta[a],  B[a],
 (* compute in this order *)
 tocompute = {
 
+  (* loop of all points *)
+  Cinstruction == "forallpoints(box, ijk) {",
+
   (* partial derivatives *)
   df[a] == del[a,phi],
   ddf[a,b] == deldel[a,b,phi],
