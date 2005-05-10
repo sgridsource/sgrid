@@ -305,13 +305,8 @@ double invg(double g11, double g12, double g13,
 /* compute and save initial value of the trace of K */
 int set_K_initial(tGrid *grid)
 {
-
   double ixx, ixy, ixz, iyy, iyz, izz;
   int i,b;
-
-  /* K_initial is zero upon enabling, return if that is what we want */
-  if (!Getv("physics", "KerrSchild")) 
-    return;
 
   enablevar(grid, Ind("K_initial"));
   
