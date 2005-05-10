@@ -81,7 +81,6 @@ int SingleBH(tGrid *grid)
   else
     printf("  left shift unchanged\n");
 
-
   /* temporary hack */
   // test_bampi_getdata(level);
 
