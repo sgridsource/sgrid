@@ -12,8 +12,9 @@ variables = {g[a,b],  A[a,b],  G[a],  K,  phi,   alpha,  beta[a],  B[a],
 	      alphaDensity,
 	     nalphaDensity,
 	     palphaDensity,
-	     psi, dpop[a], ddpop[a,b], K0}
-
+	     psi, dpop[a], ddpop[a,b], K0,
+             dgt[a,b,c], ddgt[a,b,c,d], dAt[a,b,c], dphi[a], dphi[a,b], 
+             dGt[a,b], dK[a], dalp[a], ddalp[a,b], dbeta[a,b], ddbeta[a,b,c] }
 
 (* compute in this order *)
 tocompute = {
@@ -371,15 +372,15 @@ variabledeclarations[] := Module[{},
   pr["\n"];
 
   prdecvarname[{dgt[a,b,c]},    "ADMvars_dgxxx"];
-  prdecvarname[{ddgt[a,b,c]},   "ADMvars_ddgxxxx"];
+  prdecvarname[{ddgt[a,b,c,d]}, "ADMvars_ddgxxxx"];
   prdecvarname[{dAt[a,b,c]},    "ADMvars_dKxxx"];
-  prdecvarname[{dphi[a,b,c]},   "BSSN_dphix"];
-  prdecvarname[{ddphi[a,b,c]},  "BSSN_ddphixx"];
-  prdecvarname[{dGt[a,b,c]},    "BSSN_dGxx"];
-  prdecvarname[{dK[a,b,c]},     "BSSN_dKx"];
-  prdecvarname[{dalp[a,b,c]},   "BSSN_dalpx"];
-  prdecvarname[{ddalp[a,b,c]},  "BSSN_ddalpxx"];
-  prdecvarname[{dbeta[a,b,c]},  "BSSN_dbetaxx"];
+  prdecvarname[{dphi[a]},       "BSSN_dphix"];
+  prdecvarname[{ddphi[a,b]},    "BSSN_ddphixx"];
+  prdecvarname[{dGt[a,b]},      "BSSN_dGxx"];
+  prdecvarname[{dK[a]},         "BSSN_dKx"];
+  prdecvarname[{dalp[a]},       "BSSN_dalpx"];
+  prdecvarname[{ddalp[a,b]},    "BSSN_ddalpxx"];
+  prdecvarname[{dbeta[a,b]},    "BSSN_dbetaxx"];
   prdecvarname[{ddbeta[a,b,c]}, "BSSN_ddbetaxxx"];
   pr["\n"];
 ];    
