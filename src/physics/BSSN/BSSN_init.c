@@ -1,5 +1,5 @@
 /* BSSN_init.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 9.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 10.5.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -269,7 +269,7 @@ Kt33 - 0.33333333333333333333333333333333333333*gt33[ijk]*K[ijk]
 } /* end 1st forallpoints loop */ 
 
 
-FirstDerivsOf_Sab(box, Ind("BSSN_g"),                     Ind("ADMvars_dgxxx")); 
+FirstDerivsOf_Sab(box, Ind("BSSN_gxx"),                     Ind("ADMvars_dgxxx")); 
 
 
 forallpoints(box, ijk) { 
