@@ -137,8 +137,31 @@ double *pB1 = vlldataptr(upre, box, 21);
 double *pB2 = vlldataptr(upre, box, 22);
 double *pB3 = vlldataptr(upre, box, 23);
 double *palphaDensity = vlldataptr(upre, box, 24);
-tL *level = ucur->level;
-
+int index_g11 = (ucur)->index[0];
+int index_g12 = (ucur)->index[1];
+int index_g13 = (ucur)->index[2];
+int index_g22 = (ucur)->index[3];
+int index_g23 = (ucur)->index[4];
+int index_g33 = (ucur)->index[5];
+int index_phi = (ucur)->index[6];
+int index_A11 = (ucur)->index[7];
+int index_A12 = (ucur)->index[8];
+int index_A13 = (ucur)->index[9];
+int index_A22 = (ucur)->index[10];
+int index_A23 = (ucur)->index[11];
+int index_A33 = (ucur)->index[12];
+int index_K = (ucur)->index[13];
+int index_G1 = (ucur)->index[14];
+int index_G2 = (ucur)->index[15];
+int index_G3 = (ucur)->index[16];
+int index_alpha = (ucur)->index[17];
+int index_beta1 = (ucur)->index[18];
+int index_beta2 = (ucur)->index[19];
+int index_beta3 = (ucur)->index[20];
+int index_B1 = (ucur)->index[21];
+int index_B2 = (ucur)->index[22];
+int index_B3 = (ucur)->index[23];
+int index_alphaDensity = (ucur)->index[24];
 int index_ADMvars_dgxxx = Ind("ADMvars_dgxxx");
 double *dgt111 = box->v[index_ADMvars_dgxxx + 0];
 double *dgt112 = box->v[index_ADMvars_dgxxx + 1];
@@ -596,25 +619,25 @@ double Rphi33;
 
 /* Jetzt geht's los! */
 
-FirstAndSecondDerivsOf_Sab(box, Ind("BSSN_gxx"),                     Ind("ADMvars_dgxxx"), Ind("ADMvars_ddgxxxx")); 
+FirstAndSecondDerivsOf_Sab(box, index_g11,                     Ind("ADMvars_dgxxx"), Ind("ADMvars_ddgxxxx")); 
 
 
-FirstDerivsOf_Sab(box, Ind("BSSN_Axx"),                     Ind("ADMvars_dKxxx")); 
+FirstDerivsOf_Sab(box, index_A11, Ind("ADMvars_dKxxx")); 
 
 
-FirstAndSecondDerivsOf_S(box, Ind("BSSN_phi"),                     Ind("BSSN_dphix"), Ind("BSSN_ddphixx")); 
+FirstAndSecondDerivsOf_S(box, index_phi,                     Ind("BSSN_dphix"), Ind("BSSN_ddphixx")); 
 
 
-FirstDerivsOf_Sa(box, Ind("BSSN_Gx"),                     Ind("BSSN_dGxx")); 
+FirstDerivsOf_Sa(box, index_G1, Ind("BSSN_dGxx")); 
 
 
-FirstDerivsOf_S(box, Ind("BSSN_K"), Ind("BSSN_dKx")); 
+FirstDerivsOf_S(box, index_K, Ind("BSSN_dKx")); 
 
 
-FirstAndSecondDerivsOf_S(box, Ind("alpha"),                     Ind("BSSN_dalpx"), Ind("BSSN_ddalpxx")); 
+FirstAndSecondDerivsOf_S(box, index_alpha,                     Ind("BSSN_dalpx"), Ind("BSSN_ddalpxx")); 
 
 
-FirstAndSecondDerivsOf_Sa(box, Ind("betax"),                     Ind("BSSN_dbetaxx"), Ind("BSSN_ddbetaxxx")); 
+FirstAndSecondDerivsOf_Sa(box, index_beta1,                     Ind("BSSN_dbetaxx"), Ind("BSSN_ddbetaxxx")); 
 
 
 forallpoints(box, ijk) { 
@@ -3220,4 +3243,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2170,  n/ = 58,  n+ = 1957, n = 4185, O = 1 */
+/* nvars = 215, n* = 2169,  n/ = 58,  n+ = 1981, n = 4208, O = 1 */

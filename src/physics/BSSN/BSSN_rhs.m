@@ -19,20 +19,18 @@ variables = {g[a,b],  A[a,b],  G[a],  K,  phi,   alpha,  beta[a],  B[a],
 (* compute in this order *)
 tocompute = {
 
-  Cinstruction == "FirstAndSecondDerivsOf_Sab(box, Ind(\"BSSN_gxx\"), \
+  Cinstruction == "FirstAndSecondDerivsOf_Sab(box, index_g11, \
                     Ind(\"ADMvars_dgxxx\"), Ind(\"ADMvars_ddgxxxx\"));",
-  Cinstruction == "FirstDerivsOf_Sab(box, Ind(\"BSSN_Axx\"), \
-                    Ind(\"ADMvars_dKxxx\"));",
+  Cinstruction == "FirstDerivsOf_Sab(box, index_A11, Ind(\"ADMvars_dKxxx\"));",
 
-  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"BSSN_phi\"), \
+  Cinstruction == "FirstAndSecondDerivsOf_S(box, index_phi, \
                     Ind(\"BSSN_dphix\"), Ind(\"BSSN_ddphixx\"));",
-  Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BSSN_Gx\"), \
-                    Ind(\"BSSN_dGxx\"));",
-  Cinstruction == "FirstDerivsOf_S(box, Ind(\"BSSN_K\"), Ind(\"BSSN_dKx\"));",
+  Cinstruction == "FirstDerivsOf_Sa(box, index_G1, Ind(\"BSSN_dGxx\"));",
+  Cinstruction == "FirstDerivsOf_S(box, index_K, Ind(\"BSSN_dKx\"));",
 
-  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"alpha\"), \
+  Cinstruction == "FirstAndSecondDerivsOf_S(box, index_alpha, \
                     Ind(\"BSSN_dalpx\"), Ind(\"BSSN_ddalpxx\"));",
-  Cinstruction == "FirstAndSecondDerivsOf_Sa(box, Ind(\"betax\"), \
+  Cinstruction == "FirstAndSecondDerivsOf_Sa(box, index_beta1, \
                     Ind(\"BSSN_dbetaxx\"), Ind(\"BSSN_ddbetaxxx\"));",
 
   (* loop of all points *)
@@ -374,8 +372,7 @@ variabledeclarations[] := Module[{},
   prdecvl[{ng[a,b], nphi, nA[a,b], nK, nG[a], nalpha, nbeta[a],nB[a], nalphaDensity}, "unew"];
   prdecvl[{pg[a,b], pphi, pA[a,b], pK, pG[a], palpha, pbeta[a],pB[a], palphaDensity}, "upre"];
 
-  pr["tL *level = ucur->level;\n"];
-  pr["\n"];
+  prdecvlindices[{g[a,b], phi, A[a,b], K, G[a], alpha, beta[a], B[a], alphaDensity}, "ucur"];
 
   prdecvarname[{dgt[a,b,c]},    "ADMvars_dgxxx"];
   prdecvarname[{ddgt[a,b,c,d]}, "ADMvars_ddgxxxx"];
