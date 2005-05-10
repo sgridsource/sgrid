@@ -142,6 +142,126 @@ void FirstAndSecondDerivsOf_Sab(tBox *box, int i_Sab,
 } 
 
 
+/* compute all first derivs S_{a,b} of a tensor S_{a} in a box */
+void FirstDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab)
+{
+  /* tensor from index */
+  double *S1 = box->v[i_Sa+0];
+  double *S2 = box->v[i_Sa+1];
+  double *S3 = box->v[i_Sa+2];
+
+  /* tensor derivs from index */
+  double *dS11 = box->v[i_dSab+0];
+  double *dS12 = box->v[i_dSab+1];
+  double *dS13 = box->v[i_dSab+2];
+  double *dS21 = box->v[i_dSab+3];
+  double *dS22 = box->v[i_dSab+4];
+  double *dS23 = box->v[i_dSab+5];
+  double *dS31 = box->v[i_dSab+6];
+  double *dS32 = box->v[i_dSab+7];
+  double *dS33 = box->v[i_dSab+8];
+
+  /* compute all derivs in box */
+  cart_partials(box, S1, dS11,dS12,dS13);
+  cart_partials(box, S2, dS21,dS22,dS23);
+  cart_partials(box, S3, dS31,dS32,dS33);
+} 
+
+/* compute all first and second derivs S_{a,b} and S_{a,bc} 
+   of a tensor S_{a} in a box */
+void FirstAndSecondDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc)
+{
+  FirstDerivsOf_Sa(box, i_Sa, i_dSab);
+  
+  /* first tensor derivs from index */
+  double *dS11 = box->v[i_dSab+0];
+  double *dS12 = box->v[i_dSab+1];
+  double *dS13 = box->v[i_dSab+2];
+  double *dS21 = box->v[i_dSab+3];
+  double *dS22 = box->v[i_dSab+4];
+  double *dS23 = box->v[i_dSab+5];
+  double *dS31 = box->v[i_dSab+6];
+  double *dS32 = box->v[i_dSab+7];
+  double *dS33 = box->v[i_dSab+8];
+
+  /* second tensor derivs from index */
+  double *ddS111 = box->v[i_ddSabc+0];
+  double *ddS112 = box->v[i_ddSabc+1];
+  double *ddS113 = box->v[i_ddSabc+2];
+  double *ddS122 = box->v[i_ddSabc+3];
+  double *ddS123 = box->v[i_ddSabc+4];
+  double *ddS133 = box->v[i_ddSabc+5];
+
+  double *ddS211 = box->v[i_ddSabc+6];
+  double *ddS212 = box->v[i_ddSabc+7];
+  double *ddS213 = box->v[i_ddSabc+8];
+  double *ddS222 = box->v[i_ddSabc+9];
+  double *ddS223 = box->v[i_ddSabc+10];
+  double *ddS233 = box->v[i_ddSabc+11];
+
+  double *ddS311 = box->v[i_ddSabc+12];
+  double *ddS312 = box->v[i_ddSabc+13];
+  double *ddS313 = box->v[i_ddSabc+14];
+  double *ddS322 = box->v[i_ddSabc+15];
+  double *ddS323 = box->v[i_ddSabc+16];
+  double *ddS333 = box->v[i_ddSabc+17];
+
+  /* compute all second derivs in box */
+  cart_partials(box, dS11, ddS111,ddS112,ddS113);
+  cart_partials(box, dS12, ddS112,ddS122,ddS123);
+  cart_partials(box, dS13, ddS113,ddS123,ddS133);
+
+  cart_partials(box, dS21, ddS211,ddS212,ddS213);
+  cart_partials(box, dS22, ddS212,ddS222,ddS223);
+  cart_partials(box, dS23, ddS213,ddS223,ddS233);
+
+  cart_partials(box, dS31, ddS311,ddS312,ddS313);
+  cart_partials(box, dS32, ddS312,ddS322,ddS323);
+  cart_partials(box, dS33, ddS313,ddS323,ddS333);
+} 
+
+
+/* compute all first derivs S_{,a} of a tensor S in a box */
+void FirstDerivsOf_S(tBox *box, int i_S, int i_dSa)
+{
+  /* tensor from index */
+  double *S = box->v[i_S];
+
+  /* tensor derivs from index */
+  double *dS1 = box->v[i_dSa+0];
+  double *dS2 = box->v[i_dSa+1];
+  double *dS3 = box->v[i_dSa+2];
+
+  /* compute all derivs in box */
+  cart_partials(box, S, dS1,dS2,dS3);
+} 
+
+/* compute all first and second derivs S_{,a} and S_{,ab} 
+   of a tensor S_{a} in a box */
+void FirstAndSecondDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab)
+{
+  FirstDerivsOf_Sa(box, i_S, i_dSa);
+  
+  /* first tensor derivs from index */
+  double *dS1 = box->v[i_dSa+0];
+  double *dS2 = box->v[i_dSa+1];
+  double *dS3 = box->v[i_dSa+2];
+
+  /* second tensor derivs from index */
+  double *ddS11 = box->v[i_ddSab+0];
+  double *ddS12 = box->v[i_ddSab+1];
+  double *ddS13 = box->v[i_ddSab+2];
+  double *ddS22 = box->v[i_ddSab+3];
+  double *ddS23 = box->v[i_ddSab+4];
+  double *ddS33 = box->v[i_ddSab+5];
+
+  /* compute all second derivs in box */
+  cart_partials(box, dS1, ddS11,ddS12,ddS13);
+  cart_partials(box, dS2, ddS12,ddS22,ddS23);
+  cart_partials(box, dS3, ddS13,ddS23,ddS33);
+} 
+
+
 
 double detg(double g11, double g12, double g13, 
 	    double g22, double g23, double g33)

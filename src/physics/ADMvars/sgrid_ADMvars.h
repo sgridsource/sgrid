@@ -7,3 +7,9 @@ extern tVarList *psiandderivs, *K_initial;
 void FirstDerivsOf_Sab(tBox *box, int i_Sab, int i_dSabc);
 void FirstAndSecondDerivsOf_Sab(tBox *box, int i_Sab,
                                 int i_dSabc, int i_ddSabcd);
+
+void FirstDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab);
+void FirstAndSecondDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc);
+
+void FirstDerivsOf_S(tBox *box, int i_S, int i_dSa);
+void FirstAndSecondDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab);
