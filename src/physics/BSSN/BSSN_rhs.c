@@ -305,8 +305,9 @@ double *ddbeta333 = box->v[index_BSSN_ddbetaxxx + 17];
 
 
 double AA;
-double advf;
 double aux;
+double betadf;
+double betadK;
 double betaF;
 double detginv;
 double detnginv;
@@ -341,6 +342,27 @@ double Ainv13;
 double Ainv22;
 double Ainv23;
 double Ainv33;
+double betadA11;
+double betadA12;
+double betadA13;
+double betadA21;
+double betadA22;
+double betadA23;
+double betadA31;
+double betadA32;
+double betadA33;
+double betadg11;
+double betadg12;
+double betadg13;
+double betadg21;
+double betadg22;
+double betadg23;
+double betadg31;
+double betadg32;
+double betadg33;
+double betadG1;
+double betadG2;
+double betadG3;
 double cdda11;
 double cdda12;
 double cdda13;
@@ -734,47 +756,47 @@ ddalp33[ijk]
 
 db11
 =
-dbetabeta(1.,1.)
+dbeta11[ijk]
 ;
 
 db12
 =
-dbetabeta(2.,1.)
+dbeta21[ijk]
 ;
 
 db13
 =
-dbetabeta(3.,1.)
+dbeta31[ijk]
 ;
 
 db21
 =
-dbetabeta(1.,2.)
+dbeta12[ijk]
 ;
 
 db22
 =
-dbetabeta(2.,2.)
+dbeta22[ijk]
 ;
 
 db23
 =
-dbetabeta(3.,2.)
+dbeta32[ijk]
 ;
 
 db31
 =
-dbetabeta(1.,3.)
+dbeta13[ijk]
 ;
 
 db32
 =
-dbetabeta(2.,3.)
+dbeta23[ijk]
 ;
 
 db33
 =
-dbetabeta(3.,3.)
+dbeta33[ijk]
 ;
 
 ddb111
@@ -1139,182 +1161,252 @@ ddgt3333[ijk]
 
 delG11
 =
-dG(1.,1.)
+dGt11[ijk]
 ;
 
 delG12
 =
-dG(2.,1.)
+dGt21[ijk]
 ;
 
 delG13
 =
-dG(3.,1.)
+dGt31[ijk]
 ;
 
 delG21
 =
-dG(1.,2.)
+dGt12[ijk]
 ;
 
 delG22
 =
-dG(2.,2.)
+dGt22[ijk]
 ;
 
 delG23
 =
-dG(3.,2.)
+dGt32[ijk]
 ;
 
 delG31
 =
-dG(1.,3.)
+dGt13[ijk]
 ;
 
 delG32
 =
-dG(2.,3.)
+dGt23[ijk]
 ;
 
 delG33
 =
-dG(3.,3.)
+dGt33[ijk]
 ;
 
 dA111
 =
-dAtA(1.,1.,1.)
+dAt111[ijk]
 ;
 
 dA112
 =
-dAtA(1.,2.,1.)
-;
-
-dA112
-=
-dAtA(2.,1.,1.)
+dAt121[ijk]
 ;
 
 dA113
 =
-dAtA(1.,3.,1.)
-;
-
-dA113
-=
-dAtA(3.,1.,1.)
+dAt131[ijk]
 ;
 
 dA122
 =
-dAtA(2.,2.,1.)
+dAt221[ijk]
 ;
 
 dA123
 =
-dAtA(2.,3.,1.)
-;
-
-dA123
-=
-dAtA(3.,2.,1.)
+dAt231[ijk]
 ;
 
 dA133
 =
-dAtA(3.,3.,1.)
+dAt331[ijk]
 ;
 
 dA211
 =
-dAtA(1.,1.,2.)
+dAt112[ijk]
 ;
 
 dA212
 =
-dAtA(1.,2.,2.)
-;
-
-dA212
-=
-dAtA(2.,1.,2.)
+dAt122[ijk]
 ;
 
 dA213
 =
-dAtA(1.,3.,2.)
-;
-
-dA213
-=
-dAtA(3.,1.,2.)
+dAt132[ijk]
 ;
 
 dA222
 =
-dAtA(2.,2.,2.)
+dAt222[ijk]
 ;
 
 dA223
 =
-dAtA(2.,3.,2.)
-;
-
-dA223
-=
-dAtA(3.,2.,2.)
+dAt232[ijk]
 ;
 
 dA233
 =
-dAtA(3.,3.,2.)
+dAt332[ijk]
 ;
 
 dA311
 =
-dAtA(1.,1.,3.)
+dAt113[ijk]
 ;
 
 dA312
 =
-dAtA(1.,2.,3.)
-;
-
-dA312
-=
-dAtA(2.,1.,3.)
+dAt123[ijk]
 ;
 
 dA313
 =
-dAtA(1.,3.,3.)
-;
-
-dA313
-=
-dAtA(3.,1.,3.)
+dAt133[ijk]
 ;
 
 dA322
 =
-dAtA(2.,2.,3.)
+dAt223[ijk]
 ;
 
 dA323
 =
-dAtA(2.,3.,3.)
-;
-
-dA323
-=
-dAtA(3.,2.,3.)
+dAt233[ijk]
 ;
 
 dA333
 =
-dAtA(3.,3.,3.)
+dAt333[ijk]
+;
+
+betadf
+=
+beta1[ijk]*dphi1[ijk] + beta2[ijk]*dphi2[ijk] + beta3[ijk]*dphi3[ijk]
+;
+
+betadg11
+=
+beta1[ijk]*dgt111[ijk] + beta2[ijk]*dgt112[ijk] + beta3[ijk]*dgt113[ijk]
+;
+
+betadg12
+=
+beta1[ijk]*dgt121[ijk] + beta2[ijk]*dgt122[ijk] + beta3[ijk]*dgt123[ijk]
+;
+
+betadg13
+=
+beta1[ijk]*dgt131[ijk] + beta2[ijk]*dgt132[ijk] + beta3[ijk]*dgt133[ijk]
+;
+
+betadg21
+=
+beta1[ijk]*dgt121[ijk] + beta2[ijk]*dgt122[ijk] + beta3[ijk]*dgt123[ijk]
+;
+
+betadg22
+=
+beta1[ijk]*dgt221[ijk] + beta2[ijk]*dgt222[ijk] + beta3[ijk]*dgt223[ijk]
+;
+
+betadg23
+=
+beta1[ijk]*dgt231[ijk] + beta2[ijk]*dgt232[ijk] + beta3[ijk]*dgt233[ijk]
+;
+
+betadg31
+=
+beta1[ijk]*dgt131[ijk] + beta2[ijk]*dgt132[ijk] + beta3[ijk]*dgt133[ijk]
+;
+
+betadg32
+=
+beta1[ijk]*dgt231[ijk] + beta2[ijk]*dgt232[ijk] + beta3[ijk]*dgt233[ijk]
+;
+
+betadg33
+=
+beta1[ijk]*dgt331[ijk] + beta2[ijk]*dgt332[ijk] + beta3[ijk]*dgt333[ijk]
+;
+
+betadA11
+=
+beta1[ijk]*dAt111[ijk] + beta2[ijk]*dAt112[ijk] + beta3[ijk]*dAt113[ijk]
+;
+
+betadA12
+=
+beta1[ijk]*dAt121[ijk] + beta2[ijk]*dAt122[ijk] + beta3[ijk]*dAt123[ijk]
+;
+
+betadA13
+=
+beta1[ijk]*dAt131[ijk] + beta2[ijk]*dAt132[ijk] + beta3[ijk]*dAt133[ijk]
+;
+
+betadA21
+=
+beta1[ijk]*dAt121[ijk] + beta2[ijk]*dAt122[ijk] + beta3[ijk]*dAt123[ijk]
+;
+
+betadA22
+=
+beta1[ijk]*dAt221[ijk] + beta2[ijk]*dAt222[ijk] + beta3[ijk]*dAt223[ijk]
+;
+
+betadA23
+=
+beta1[ijk]*dAt231[ijk] + beta2[ijk]*dAt232[ijk] + beta3[ijk]*dAt233[ijk]
+;
+
+betadA31
+=
+beta1[ijk]*dAt131[ijk] + beta2[ijk]*dAt132[ijk] + beta3[ijk]*dAt133[ijk]
+;
+
+betadA32
+=
+beta1[ijk]*dAt231[ijk] + beta2[ijk]*dAt232[ijk] + beta3[ijk]*dAt233[ijk]
+;
+
+betadA33
+=
+beta1[ijk]*dAt331[ijk] + beta2[ijk]*dAt332[ijk] + beta3[ijk]*dAt333[ijk]
+;
+
+betadK
+=
+beta1[ijk]*dK1[ijk] + beta2[ijk]*dK2[ijk] + beta3[ijk]*dK3[ijk]
+;
+
+betadG1
+=
+beta1[ijk]*dGt11[ijk] + beta2[ijk]*dGt12[ijk] + beta3[ijk]*dGt13[ijk]
+;
+
+betadG2
+=
+beta1[ijk]*dGt21[ijk] + beta2[ijk]*dGt22[ijk] + beta3[ijk]*dGt23[ijk]
+;
+
+betadG3
+=
+beta1[ijk]*dGt31[ijk] + beta2[ijk]*dGt32[ijk] + beta3[ijk]*dGt33[ijk]
 ;
 
 detginv
@@ -2099,11 +2191,6 @@ f
 phi[ijk]
 ;
 
-advf
-=
-adv(phi[ijk])
-;
-
 logpsi
 =
 0
@@ -2169,9 +2256,10 @@ ddf33
 ddf33 + ddpop33[ijk] - pow2(dpop3[ijk])
 ;
 
-advf
+betadf
 =
-advf + beta1[ijk]*dpop1[ijk] + beta2[ijk]*dpop2[ijk] + beta3[ijk]*dpop3[ijk]
+betadf + beta1[ijk]*dpop1[ijk] + beta2[ijk]*dpop2[ijk] + 
+  beta3[ijk]*dpop3[ijk]
 ;
 
 }
@@ -2527,108 +2615,144 @@ ootddivbeta3
 
 lieg11
 =
-adv(g11[ijk]) + (2.*db11 - totdivbeta)*g11[ijk] + 
+betadg11 + (2.*db11 - totdivbeta)*g11[ijk] + 
   2.*(db12*g12[ijk] + db13*g13[ijk])
 ;
 
 lieg12
 =
-adv(g12[ijk]) + db21*g11[ijk] + (db11 + db22 - totdivbeta)*g12[ijk] + 
+betadg12 + db21*g11[ijk] + (db11 + db22 - totdivbeta)*g12[ijk] + 
+  db23*g13[ijk] + db12*g22[ijk] + db13*g23[ijk]
+;
+
+lieg12
+=
+betadg21 + db21*g11[ijk] + (db11 + db22 - totdivbeta)*g12[ijk] + 
   db23*g13[ijk] + db12*g22[ijk] + db13*g23[ijk]
 ;
 
 lieg13
 =
-adv(g13[ijk]) + db31*g11[ijk] + db32*g12[ijk] + 
+betadg13 + db31*g11[ijk] + db32*g12[ijk] + 
+  (db11 + db33 - totdivbeta)*g13[ijk] + db12*g23[ijk] + db13*g33[ijk]
+;
+
+lieg13
+=
+betadg31 + db31*g11[ijk] + db32*g12[ijk] + 
   (db11 + db33 - totdivbeta)*g13[ijk] + db12*g23[ijk] + db13*g33[ijk]
 ;
 
 lieg22
 =
-adv(g22[ijk]) - totdivbeta*g22[ijk] + 
+betadg22 - totdivbeta*g22[ijk] + 
   2.*(db21*g12[ijk] + db22*g22[ijk] + db23*g23[ijk])
 ;
 
 lieg23
 =
-adv(g23[ijk]) + db31*g12[ijk] + db21*g13[ijk] + db32*g22[ijk] + 
+betadg23 + db31*g12[ijk] + db21*g13[ijk] + db32*g22[ijk] + 
+  (db22 + db33 - totdivbeta)*g23[ijk] + db23*g33[ijk]
+;
+
+lieg23
+=
+betadg32 + db31*g12[ijk] + db21*g13[ijk] + db32*g22[ijk] + 
   (db22 + db33 - totdivbeta)*g23[ijk] + db23*g33[ijk]
 ;
 
 lieg33
 =
-adv(g33[ijk]) - totdivbeta*g33[ijk] + 
+betadg33 - totdivbeta*g33[ijk] + 
   2.*(db31*g13[ijk] + db32*g23[ijk] + db33*g33[ijk])
 ;
 
 lieA11
 =
-adv(A11[ijk]) + (2.*db11 - totdivbeta)*A11[ijk] + 
+betadA11 + (2.*db11 - totdivbeta)*A11[ijk] + 
   2.*(db12*A12[ijk] + db13*A13[ijk])
 ;
 
 lieA12
 =
-adv(A12[ijk]) + db21*A11[ijk] + (db11 + db22 - totdivbeta)*A12[ijk] + 
+betadA12 + db21*A11[ijk] + (db11 + db22 - totdivbeta)*A12[ijk] + 
+  db23*A13[ijk] + db12*A22[ijk] + db13*A23[ijk]
+;
+
+lieA12
+=
+betadA21 + db21*A11[ijk] + (db11 + db22 - totdivbeta)*A12[ijk] + 
   db23*A13[ijk] + db12*A22[ijk] + db13*A23[ijk]
 ;
 
 lieA13
 =
-adv(A13[ijk]) + db31*A11[ijk] + db32*A12[ijk] + 
+betadA13 + db31*A11[ijk] + db32*A12[ijk] + 
+  (db11 + db33 - totdivbeta)*A13[ijk] + db12*A23[ijk] + db13*A33[ijk]
+;
+
+lieA13
+=
+betadA31 + db31*A11[ijk] + db32*A12[ijk] + 
   (db11 + db33 - totdivbeta)*A13[ijk] + db12*A23[ijk] + db13*A33[ijk]
 ;
 
 lieA22
 =
-adv(A22[ijk]) - totdivbeta*A22[ijk] + 
+betadA22 - totdivbeta*A22[ijk] + 
   2.*(db21*A12[ijk] + db22*A22[ijk] + db23*A23[ijk])
 ;
 
 lieA23
 =
-adv(A23[ijk]) + db31*A12[ijk] + db21*A13[ijk] + db32*A22[ijk] + 
+betadA23 + db31*A12[ijk] + db21*A13[ijk] + db32*A22[ijk] + 
+  (db22 + db33 - totdivbeta)*A23[ijk] + db23*A33[ijk]
+;
+
+lieA23
+=
+betadA32 + db31*A12[ijk] + db21*A13[ijk] + db32*A22[ijk] + 
   (db22 + db33 - totdivbeta)*A23[ijk] + db23*A33[ijk]
 ;
 
 lieA33
 =
-adv(A33[ijk]) - totdivbeta*A33[ijk] + 
+betadA33 - totdivbeta*A33[ijk] + 
   2.*(db31*A13[ijk] + db32*A23[ijk] + db33*A33[ijk])
 ;
 
 lieK
 =
-adv(K[ijk])
+betadK
 ;
 
 liephi
 =
-advf + 0.16666666666666666666666666666666666667*divbeta
+betadf + 0.16666666666666666666666666666666666667*divbeta
 ;
 
 pseudolieG1
 =
--(db11*Gfromg1) - db21*Gfromg2 - db31*Gfromg3 + ddb221*ginv22 + 
+betadG1 - db11*Gfromg1 - db21*Gfromg2 - db31*Gfromg3 + ddb221*ginv22 + 
   2.*ddb231*ginv23 + ddb331*ginv33 + ginv11*(ddb111 + ootddivbeta1) + 
   ginv12*(2.*ddb121 + ootddivbeta2) + ginv13*(2.*ddb131 + ootddivbeta3) + 
-  Gfromg1*totdivbeta + adv(G1[ijk])
+  Gfromg1*totdivbeta
 ;
 
 pseudolieG2
 =
--(db12*Gfromg1) - db22*Gfromg2 - db32*Gfromg3 + ddb112*ginv11 + 
+betadG2 - db12*Gfromg1 - db22*Gfromg2 - db32*Gfromg3 + ddb112*ginv11 + 
   2.*ddb132*ginv13 + ddb332*ginv33 + ginv12*(2.*ddb122 + ootddivbeta1) + 
   ginv22*(ddb222 + ootddivbeta2) + ginv23*(2.*ddb232 + ootddivbeta3) + 
-  Gfromg2*totdivbeta + adv(G2[ijk])
+  Gfromg2*totdivbeta
 ;
 
 pseudolieG3
 =
--(db13*Gfromg1) - db23*Gfromg2 - db33*Gfromg3 + ddb113*ginv11 + 
+betadG3 - db13*Gfromg1 - db23*Gfromg2 - db33*Gfromg3 + ddb113*ginv11 + 
   2.*ddb123*ginv12 + ddb223*ginv22 + ginv13*(2.*ddb133 + ootddivbeta1) + 
   ginv23*(2.*ddb233 + ootddivbeta2) + ginv33*(ddb333 + ootddivbeta3) + 
-  Gfromg3*totdivbeta + adv(G3[ijk])
+  Gfromg3*totdivbeta
 ;
 
 rg11
@@ -3243,4 +3367,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2169,  n/ = 58,  n+ = 1981, n = 4208, O = 1 */
+/* nvars = 215, n* = 2268,  n/ = 58,  n+ = 2066, n = 4392, O = 1 */

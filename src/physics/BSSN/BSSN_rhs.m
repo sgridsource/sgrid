@@ -54,7 +54,7 @@ tocompute = {
   betadg[a,b] == beta[d] dgt[a,b,d],
   betadA[a,b] == beta[d] dAt[a,b,d],
   betadK == beta[d] dK[d],
-  betadG[a],  == beta[d] dGt[a,d],
+  betadG[a] == beta[d] dGt[a,d],
 
   (* inverse conformal metric *)
   detginv == 1/matrixdet[g],
