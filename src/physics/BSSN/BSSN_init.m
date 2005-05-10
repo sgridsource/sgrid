@@ -38,7 +38,7 @@ tocompute = {
 
   (* new loop *)
   Cinstruction == "} /* end 1st forallpoints loop */",
-  Cinstruction == "FirstDerivsOf_Sab(box, Ind(\"BSSN_g\"), 
+  Cinstruction == "FirstDerivsOf_Sab(box, Ind(\"BSSN_gxx\"), 
                    Ind(\"ADMvars_dgxxx\"));",
   Cinstruction == "forallpoints(box, ijk) {",
 

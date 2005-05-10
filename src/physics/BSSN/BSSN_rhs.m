@@ -18,6 +18,21 @@ variables = {g[a,b],  A[a,b],  G[a],  K,  phi,   alpha,  beta[a],  B[a],
 (* compute in this order *)
 tocompute = {
 
+  Cinstruction == "FirstAndSecondDerivsOf_Sab(box, Ind(\"BSSN_gxx\"),
+                    Ind(\"ADMvars_dgxxx\"), Ind(\"ADMvars_ddgxxxx\"));",
+  Cinstruction == "FirstDerivsOf_Sab(box, Ind(\"BSSN_Axx\"),
+                    Ind(\"ADMvars_dKxxx\"));",
+
+  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"BSSN_phi\"),
+                    Ind(\"BSSN_dphix\"), Ind(\"BSSN_ddphixx\"));",
+  Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BSSN_Gx\"),
+                    Ind(\"BSSN_dGxx\"));",
+
+  Cinstruction == "FirstAndSecondDerivsOf_S(box, Ind(\"alpha"),
+                    Ind(\"BSSN_dalpx\"), Ind(\"BSSN_ddalpxx\"));",
+  Cinstruction == "FirstAndSecondDerivsOf_Sa(box, Ind(\"betax\"),
+                    Ind(\"BSSN_dbetaxx\"), Ind(\"BSSN_ddbetaxxx\"));",
+
   (* loop of all points *)
   Cinstruction == "forallpoints(box, ijk) {",
 
@@ -329,12 +344,13 @@ BeginCFunction[] := Module[{},
   pr["double shiftalphapower = Getd(\"BSSN_shiftalphapower\");\n"];
   pr["double shiftgammacoeff = Getd(\"BSSN_shiftgammacoeff\");\n"];
   pr["double shiftdriver     = Getd(\"BSSN_shiftdriver\");\n"];
-
+  pr["\n"];
 
   pr["for(bi = 0; bi < grid->nboxes; bi++)\n"];
   pr["{\n"];
   pr["tBox *box = grid->box[bi];\n"];
   pr["int ijk;\n\n"];
+  pr["\n"];
   pr["\n"];
 ];
 
