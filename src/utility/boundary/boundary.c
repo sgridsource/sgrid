@@ -18,6 +18,8 @@ int initialize_BoundaryPointLists(tGrid *grid)
   
   radiativeBoundaryPointList = AllocatePointList(grid);
   simpleExcisionBoundaryPointList = AllocatePointList(grid);
+
+  printf("boundary: initialize_BoundaryPointLists:\n");
   
   /* radiative boundary condition */
   if( Getv("boundary", "radiative") )
