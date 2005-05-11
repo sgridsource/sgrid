@@ -8,7 +8,7 @@
    tPointList *radiativeBoundaryPointList;
    tPointList *simpleExcisionBoundaryPointList; */
 /* initialize our Boundary PointLists */
-int initilize_BoundaryPointLists(tGrid *grid)
+int initialize_BoundaryPointLists(tGrid *grid)
 {
   char str[100];
   int bi;

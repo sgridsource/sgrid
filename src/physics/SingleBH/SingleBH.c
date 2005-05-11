@@ -81,8 +81,32 @@ int SingleBH(tGrid *grid)
   else
     printf("  left shift unchanged\n");
 
-  /* temporary hack */
-  // test_bampi_getdata(level);
+/* temporary hack */
+//{
+//int bi;
+//int i,j,k, ijk, pi;
+//tPointList *PL;
+//
+//PL=AllocatePointList(grid);
+//
+//forallboxes(grid,bi)
+//{
+//int n1=grid->box[bi]->n1;
+//int n2=grid->box[bi]->n2;
+//int n3=grid->box[bi]->n3;
+//
+//forplane1(i,j,k, n1,n2,n3, 1)
+// AddToPointList(PL, bi, Index(i,j,k));
+//}
+//
+//prPointList(PL);
+//forPointList(PL,bi,pi,ijk)
+// printf("ijk=%d| ",ijk);
+//printf("bi=%d pi=%d ijk=%d| ",bi,pi,ijk);
+//
+//FreePointList(PL);
+//exit(33);
+//}
 
   return 0;
 }

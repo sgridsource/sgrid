@@ -14,6 +14,10 @@ int sgrid_boundary()
 {
   printf("Adding boundary\n");
 
+  /* functions */
+  AddFun(PRE_INITIALDATA, initialize_BoundaryPointLists,
+         "initialize all Boundary PointLists");
+         
   /* parameters */
   AddPar("boundary", "", "boundary condition");
 

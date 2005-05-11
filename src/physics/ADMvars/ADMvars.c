@@ -98,5 +98,13 @@ int allocateADMvars(tGrid *grid)
     enablevar(grid, Ind("ADMvars_dKxxx"));
   }
 
+  /* enable temp1, temp2, temp3 */
+  if(Getv("ADMvars_memory_for_temp123", "yes"))
+  {
+    enablevar(grid, Ind("temp1"));
+    enablevar(grid, Ind("temp2"));
+    enablevar(grid, Ind("temp3"));
+  }
+
   return 0;
 }

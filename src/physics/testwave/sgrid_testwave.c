@@ -12,7 +12,7 @@ int sgrid_testwave()
   /* functions */
   AddFun(INITIALDATA, testwave_startup, "initialize test");
   // AddFun(ANALYZE, testwave_analyze, "compute test results");
-  // AddFun(POST_EVOLVE, testwave_filter, "filter u and k");
+  AddFun(POST_EVOLVE, testwave_filter, "filter u and k");
 
   /* variables */
   AddVar("testwave_u", "",  "wave function");

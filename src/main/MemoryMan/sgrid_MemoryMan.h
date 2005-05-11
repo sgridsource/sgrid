@@ -108,3 +108,8 @@ void enablesamevars(tGrid *grid, tGrid *newgrid);
 
 void realloc_gridvariables(tGrid *g, int nvariables);
 
+/* points.c */
+tPointList *AllocatePointList(tGrid *grid);
+void AddToPointList(tPointList *PL, int boxindex, int newpoint);
+void FreePointList(tPointList *PL);
+void prPointList(tPointList *PL);

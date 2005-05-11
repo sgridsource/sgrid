@@ -10,7 +10,7 @@ tVarList *psiandderivs, *K_initial;
 
 int sgrid_ADMvars() 
 {
-  if (!Getv("physics", "ADMvars")) return;
+  if (!Getv("physics", "ADMvars")) return 0;
   printf("Adding ADMvars\n");
 
   /* functions */
@@ -68,12 +68,17 @@ int sgrid_ADMvars()
   AddVar("ADMvars_dg",  "(ij)k", "first partial derivs of a symmetric tensor");
   AddVar("ADMvars_ddg", "(ij)(kl)", "second part. derivs of a symm. tensor");
   AddVar("ADMvars_dK",  "(ij)k", "first partial derivs of a symmetric tensor");
+  AddVar("temp1", "", "temporary variable(e.g. to store derivs)");
+  AddVar("temp2", "", "temporary variable(e.g. to store derivs)");
+  AddVar("temp3", "", "temporary variable(e.g. to store derivs)");
  
   /* For what is memory needed? */
   AddPar("ADMvars_memory_for_dg_ddg_dK", "yes",
          "whether memory is allocated for ADMvars_dg, ..._ddg and ..._dK");
   AddPar("ADMvars_memory_for_g_K", "yes",
          "whether memory is allocated for g and K");
+  AddPar("ADMvars_memory_for_temp123", "yes",
+         "whether memory is allocated for temp1, temp2, temp3");
   AddPar("ADMvars_memory_for_psiandderivs", "yes",
          "whether memory is allocated for psiandderivs");
   
