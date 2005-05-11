@@ -25,7 +25,14 @@ int sgrid_evolve()
 	 "obtain rhs in variable after one timestep");
   AddPar("evolve_compute_change", "", 
 	 "list of variables for which change is to be computed");
-	     	   	   	 
+
+  /* for addDissipation: */
+  AddPar("evolve_DissipationFactor", "0", "amount of dissipation, e.g. 0.02");
+  AddPar("evolve_Dissipation_dt_Order", "3",
+    	 "power of time resolution dt in dissipation factor");
+  AddPar("evolve_Dissipation", "no", 
+    "if and when dissipation terms are added [no, yes, only_after_evo_step]");
+    	   	   	 
   /* test */
   if (Getv("physics", "evolve_test")) {
     AddFun(INITIALDATA, evolve_test_startup, "initialize test");

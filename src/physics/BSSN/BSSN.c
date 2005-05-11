@@ -16,8 +16,8 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 {
   BSSN_rhs(unew, upre, dt, ucur);
   /* wether addDissipation is called after each ICN (or RK) step: */
-  /* if(Getv("evolve_Dissipation", "yes")) 
-       addDissipation(unew, upre, c, ucur); */
+  if(Getv("evolve_Dissipation", "yes")) 
+     addDissipation(unew, upre, dt, ucur);
   set_boundary(unew, upre, dt, ucur);
 }
 
