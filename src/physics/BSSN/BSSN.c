@@ -206,5 +206,31 @@ int BSSN_startup(tGrid *grid)
 }
 
 
+/* Filter BSSN vars */
+int BSSN_filter(tGrid *grid)
+{
+  int bi, j;
+
+  //printf("BSSN_filter\n");
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+
+    /* for all variables */
+    for (j = 0; j < BSSNvars->n; j++)
+    {
+      int vi = BSSNvars->index[j];
+      double *u = box->v[vi];
+
+      //printf("BSSN_filter: VarName[vi]=%s\n", VarName(vi));
+      
+      /* use filters */
+      spec_filter1(box, 1, u);
+      spec_filter1(box, 2, u);
+      spec_filter1(box, 3, u);
+    }
+  }
+  return 0;
+}
 
 

@@ -12,3 +12,4 @@ void BSSN_init(tGrid* grid, int igb, int iK, int ipsi, int igt, int iAt,
 
 int BSSNtoADM(tGrid *grid);
 
+int BSSN_filter(tGrid *grid);

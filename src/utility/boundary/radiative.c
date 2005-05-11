@@ -28,6 +28,8 @@ void set_boundary_radiative(tGrid *grid,
     double *dvar_dz = box->v[Ind("temp3")];
     double r, vx, vy, vz, x, y, z, rhs;
 
+//if(v==0) printf("v=0 ");
+
     cart_partials(box, var, dvar_dx, dvar_dy, dvar_dz); 
 
     forPointList_inbox(radiativeBoundaryPointList, box, pi , ijk)

@@ -8,9 +8,9 @@
 
 
 
-void sgrid_BSSN(void) 
+int sgrid_BSSN(void) 
 {
-  if (!Getv("physics", "BSSN")) return;
+  if (!Getv("physics", "BSSN")) return 0;
   printf("Adding BSSN\n");
 
   /* functions */
@@ -66,4 +66,12 @@ void sgrid_BSSN(void)
 
   AddPar("BSSN_shift_stop_time", "-1.0", 
          "time when shift stops evolving (-1 for don't stop)");
+  AddPar("BSSN_filter", "no", "whether we use filters");
+  if(Getv("BSSN_filter", "yes"))
+  {
+    printf("scheduling BSSN_filter in bin POST_EVOLVE.\n");
+    AddFun(POST_EVOLVE, BSSN_filter, "filter all BSSN variables");
+  }
+         
+  return 0;
 }
