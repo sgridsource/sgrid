@@ -1,0 +1,24 @@
+#storage_verbose = yes
+
+physics = testwave
+
+evolution_method = rk # icn # euler # rk
+#evolution_method_rk = rk2 # midpoint
+
+nboxes =1
+box0_n1=16
+box0_n2=3
+box0_n3=3
+
+
+dt=0.004
+
+iterations = 2000
+
+1doutiter = 100
+1doutput = testwave_u testwave_k  testwave_u11 testwave_u22 testwave_u33
+
+
+#2doutiter = 100
+#2doutput = testwave_u
+

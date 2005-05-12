@@ -1,0 +1,80 @@
+#===========================================================================
+# physics
+physics = ADMvars SingleBH BSSN
+
+#===========================================================================
+# Grid setup
+
+dt        = 0.01 # 0.0025 # 0.001
+finaltime = 8 # 0.1 # 8
+
+nboxes = 1
+box0_n1=28
+box0_n2=10 # currently we need an even number here for Fourier, bad???
+box0_n3=9
+
+iterate_parameters = no
+iterate_parameter1 = box0_n1 12 18 24 
+iterate_parameter2 = box0_n2 16 24 32  # currently we need an even number here for Fourier, bad???
+iterate_parameter3 = box0_n3 15 23 31
+
+box0_Coordinates = SphericalDF
+
+box0_filter1 = 0 # 8
+box0_min1 = 1.5
+box0_max1 = 16
+
+box0_basis2 = Fourier
+box0_filter2 = 0 # 3 # 15
+box0_min2 = 0
+box0_max2 = 2*pi
+
+box0_basis3 = Fourier
+box0_filter3 = 0 # 2 # 10
+box0_min3 = 0
+box0_max3 = 2*pi
+
+#===========================================================================
+# initial data
+BHmass1 		 = 1
+SingleBH_type 		 = KerrSchild
+SingleBH_ConformalFactor = no
+SingleBH_initial_lapse	 = donothing
+SingleBH_initial_shift	 = donothing
+
+#===========================================================================
+# BCs
+boundary = radiative # simpleExcision
+##boundary_radconstant = BSSN_gxx
+
+#===========================================================================
+# evolution
+evolution_method        = icn # rk
+
+BSSN_subtractA          = yes
+
+BSSN_lapse              = 1+log
+BSSN_lapsepsipower      = 4
+BSSN_densitizedLapse	= no
+BSSN_alphaDensityWeight	= 1.0
+
+# don't evolve shift
+BSSN_shift_stop_time	= 0
+BSSN_shift              = gamma0
+BSSN_shiftpsipower      = 2.0
+BSSN_shiftalphapower    = 1.0
+BSSN_shiftdriver        = 2.0
+
+BSSN_filter = no
+evolve_Dissipation = no
+evolve_DissipationFactor = 1000.0
+evolve_Dissipation_dt_Order = 2
+
+#===========================================================================
+# output
+outputX0_box0 = 1.268242413364671
+outputY0_box0 = 1.5708 # 3.141592653589793
+outputZ0_box0 = 0
+
+1douttime = 0.05
+1doutput = alpha betax BSSN_alphaDensity gxx gxy gxz gyy gyz gzz Kxx Kxy psi dpsiopsix ddpsiopsixx BSSN_gxx BSSN_gyy BSSN_phi BSSN_Gx BSSN_Gy BSSN_K BSSN_Axx BSSN_Ayy ham momx momy momz x y z

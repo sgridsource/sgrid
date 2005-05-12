@@ -1,0 +1,41 @@
+#storage_verbose = yes
+
+physics = testwave
+
+evolution_method = rk # icn # euler # rk
+#evolution_method_rk = rk2 # midpoint
+
+nboxes =1
+box0_n1=24
+box0_n2=48 # currently we need an even number here for Fourier, bad???
+box0_n3=31
+
+box0_Coordinates = SphericalDF
+
+box0_filter1 = 0 # 8
+box0_min1 = 0.2
+box0_max1 = 2.2
+
+box0_basis2 = Fourier
+box0_filter2 = 3 # 15
+box0_min2 = 0
+box0_max2 = 2*pi
+
+box0_basis3 = Fourier
+box0_filter3 = 2 # 10
+box0_min3 = 0
+box0_max3 = 2*pi
+
+dt=0.002 # 0.002 # 0.002
+
+finaltime = 8 # 8
+
+1douttime = 0.1
+1doutput = testwave_u testwave_k  testwave_u1 testwave_u2 testwave_u3 testwave_u11 testwave_u22 testwave_u33   x y z X Y Z
+
+2douttime = 0.1
+2doutput = testwave_u testwave_k  testwave_u1 testwave_u2 testwave_u3 testwave_u11 testwave_u22 testwave_u33 
+
+outputX0_box0 = 1.268242413364671
+outputY0_box0 = 1.5708 # 3.141592653589793
+outputZ0_box0 = 3.040250955086897

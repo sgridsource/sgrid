@@ -1,0 +1,35 @@
+#storage_verbose = yes
+
+physics = testwave
+
+evolution_method = rk # icn # euler # rk
+#evolution_method_rk = rk2 # midpoint
+
+nboxes =1
+box0_n1=24
+box0_n2=47
+box0_n3=3
+
+box0_Coordinates = Polar
+box0_min1 = 0.2
+box0_max1 = 2.2
+
+box0_basis2 = Fourier
+box0_filter2 = 2
+box0_min2 = 0
+box0_max2 = 2*pi
+#box0_min2 = -3.1416
+#box0_max2 = 3.1416
+
+
+dt=0.002 # 0.002
+
+finaltime = 32 # 8
+
+1douttime = 0.1
+1doutput = testwave_u testwave_k  testwave_u11 testwave_u22 testwave_u33  x y z X Y Z
+
+
+#2douttime = 0.1
+#2doutput = testwave_u testwave_k  testwave_u11 testwave_u22
+
