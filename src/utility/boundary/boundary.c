@@ -62,6 +62,23 @@ int initialize_BoundaryPointLists(tGrid *grid)
     printf("radiativeBoundaryPointList:\n");
     prPointList(radiativeBoundaryPointList);
   }
+  
+  if( Getv("boundary", "simpleExcision") )
+  {
+    bi=0;
+    snprintf(str, 99, "box%d_Coordinates", bi);
+    if(Getv(str, "SphericalDF"))
+    {
+       n1=grid->box[bi]->n1;
+       n2=grid->box[bi]->n2;
+       n3=grid->box[bi]->n3;
+        
+       forplane1(i,j,k, n1,n2,n3, 0)
+         AddToPointList(simpleExcisionBoundaryPointList, bi, Index(i,j,k));
+    }
+    printf("simpleExcisionBoundaryPointList:\n");
+    prPointList(simpleExcisionBoundaryPointList);
+  }
   return 0;
 }
 
@@ -94,6 +111,14 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
       set_boundary_radiative(grid, 
 	unew->index[j], upre->index[j], c, ucur->index[j], var0, v0);
     }
+  }
+
+  /* excision boundary condition */
+  if( Getv("boundary", "simpleExcision") )
+  {
+    /* for all variables */
+    for (j = 0; j < unew->n; j++)
+      set_boundary_excision(grid, unew->index[j], upre->index[j]);
   }
 
   /* symmetry boundary 
