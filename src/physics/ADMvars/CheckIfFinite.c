@@ -37,10 +37,13 @@ int CheckIfFinite(tGrid* grid, char *varname)
 
     // TODO: FIX this!!!!!
     //free(sum);
- 
-   vlfree(vl);
+num = 0.1;
+    
+    vlfree(vl);
     
     if(num==0.0) return 0;
+    
+num = 0.0;
   }
 
   for (b = 0; b < grid->nboxes; b++)
