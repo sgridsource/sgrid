@@ -279,6 +279,17 @@ int write_grid(tGrid *grid)
         start += strlen(str);
         if(ou[1][start]==' ') start++;
         //printf("1dout |%s|\n",str);
+        /* check whether we do 1doutputall */
+        if( all[1] )
+        {
+          int i;
+          int vi  = Ind(str);
+          int vi0 = IndComponent0(vi);
+
+          for(i=0; i<VarNComponents(vi0); i++)
+            xgraph_out1_boxvar(box, VarName(vi0+i));
+        }
+        else
         xgraph_out1_boxvar(box, str);
       }
     }
@@ -299,8 +310,20 @@ int write_grid(tGrid *grid)
       {
         start += strlen(str);
         if(ou[2][start]==' ') start++;
+        
         //printf("2dout |%s|\n", str);
-        gnuplot_out2d_boxvar(box, str);
+        /* check whether we do 2doutputall */
+        if( all[2] )
+        {
+          int i;
+          int vi  = Ind(str);
+          int vi0 = IndComponent0(vi);
+
+          for(i=0; i<VarNComponents(vi0); i++)
+            gnuplot_out2d_boxvar(box, VarName(vi0+i));
+        }
+        else
+          gnuplot_out2d_boxvar(box, str);
       }
     }
   }
