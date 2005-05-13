@@ -272,6 +272,7 @@ int write_grid(tGrid *grid)
       tBox *box = grid->box[b];
       char str[1000];
       int start=0;
+      int vi;
 
       //printf("1dout ... |%s|\n", ou[1]);
       while(sscanf(ou[1]+start, "%s", str)==1)
@@ -279,11 +280,15 @@ int write_grid(tGrid *grid)
         start += strlen(str);
         if(ou[1][start]==' ') start++;
         //printf("1dout |%s|\n",str);
+  
+        /* check if str has an index exists */
+        vi = IndLax(str);
+        if(vi<0) continue;
+
         /* check whether we do 1doutputall */
         if( all[1] )
         {
           int i;
-          int vi  = Ind(str);
           int vi0 = IndComponent0(vi);
 
           for(i=0; i<VarNComponents(vi0); i++)
@@ -304,19 +309,23 @@ int write_grid(tGrid *grid)
       tBox *box = grid->box[b];
       char str[1000];
       int start=0;
+      int vi;
 
       //printf("2dout ... |%s|\n", ou[2]);
       while(sscanf(ou[2]+start, "%s", str)==1)
       {
         start += strlen(str);
         if(ou[2][start]==' ') start++;
-        
         //printf("2dout |%s|\n", str);
+        
+        /* check if str has an index exists */
+        vi = IndLax(str);
+        if(vi<0) continue;
+
         /* check whether we do 2doutputall */
         if( all[2] )
         {
           int i;
-          int vi  = Ind(str);
           int vi0 = IndComponent0(vi);
 
           for(i=0; i<VarNComponents(vi0); i++)
