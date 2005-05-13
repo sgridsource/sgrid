@@ -7,7 +7,7 @@
 
 
 /* set excision boundary for one variable */
-void set_boundary_excision(tGrid *grid, int unew, int upre)
+void set_boundary_simpleExcision(tGrid *grid, int unew, int upre)
 {
   int bi, pi, ijk;
   

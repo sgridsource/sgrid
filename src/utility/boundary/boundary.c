@@ -17,6 +17,7 @@ int initialize_BoundaryPointLists(tGrid *grid)
   int nboxes = grid->nboxes;
   
   radiativeBoundaryPointList = AllocatePointList(grid);
+  constantBoundaryPointList = AllocatePointList(grid);
   simpleExcisionBoundaryPointList = AllocatePointList(grid);
 
   printf("boundary: initialize_BoundaryPointLists:\n");
@@ -62,7 +63,68 @@ int initialize_BoundaryPointLists(tGrid *grid)
     printf("radiativeBoundaryPointList:\n");
     prPointList(radiativeBoundaryPointList);
   }
+
+  /* constant boundary condition */
+  if( Getv("boundary", "constant") )
+  {
+    bi=nboxes-1;
+    snprintf(str, 99, "box%d_Coordinates", bi);
+    if(Getv(str, "SphericalDF"))
+    {
+       n1=grid->box[bi]->n1;
+       n2=grid->box[bi]->n2;
+       n3=grid->box[bi]->n3;
+        
+       forplane1(i,j,k, n1,n2,n3, n1-1)
+         AddToPointList(constantBoundaryPointList, bi, Index(i,j,k));
+    }
+    else
+    {
+       n1=grid->box[bi]->n1;
+       n2=grid->box[bi]->n2;
+       n3=grid->box[bi]->n3;
+        
+       forplane1(i,j,k, n1,n2,n3, 0)
+         AddToPointList(constantBoundaryPointList, bi, Index(i,j,k));
+
+       forplane1(i,j,k, n1,n2,n3, n1-1)
+         AddToPointList(constantBoundaryPointList, bi, Index(i,j,k));
+
+       forplane2(i,j,k, n1,n2,n3, 0)
+         AddToPointList(constantBoundaryPointList, bi, Index(i,j,k));
+
+       forplane2(i,j,k, n1,n2,n3, n2-1)
+         AddToPointList(constantBoundaryPointList, bi, Index(i,j,k));
+
+       forplane3(i,j,k, n1,n2,n3, 0)
+         AddToPointList(constantBoundaryPointList, bi, Index(i,j,k));
+
+       forplane3(i,j,k, n1,n2,n3, n3-1)
+         AddToPointList(constantBoundaryPointList, bi, Index(i,j,k));
+    }
+    printf("constantBoundaryPointList:\n");
+    prPointList(constantBoundaryPointList);
+  }
   
+  /* constant Excision boundary condition */
+  if( Getv("boundary", "constantExcision") )
+  {
+    bi=0;
+    snprintf(str, 99, "box%d_Coordinates", bi);
+    if(Getv(str, "SphericalDF"))
+    {
+       n1=grid->box[bi]->n1;
+       n2=grid->box[bi]->n2;
+       n3=grid->box[bi]->n3;
+        
+       forplane1(i,j,k, n1,n2,n3, 0)
+         AddToPointList(constantBoundaryPointList, bi, Index(i,j,k));
+    }
+    printf("constantBoundaryPointList:\n");
+    prPointList(constantBoundaryPointList);
+  }
+
+  /* simple Excision boundary condition */
   if( Getv("boundary", "simpleExcision") )
   {
     bi=0;
@@ -79,6 +141,7 @@ int initialize_BoundaryPointLists(tGrid *grid)
     printf("simpleExcisionBoundaryPointList:\n");
     prPointList(simpleExcisionBoundaryPointList);
   }
+
   return 0;
 }
 
@@ -114,11 +177,19 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
   }
 
   /* excision boundary condition */
+  if( Getv("boundary", "constant") || Getv("boundary", "constantExcision") )
+  {
+    /* for all variables */
+    for (j = 0; j < unew->n; j++)
+      set_boundary_constant(grid, unew->index[j], upre->index[j]);
+  }
+
+  /* simple excision boundary condition */
   if( Getv("boundary", "simpleExcision") )
   {
     /* for all variables */
     for (j = 0; j < unew->n; j++)
-      set_boundary_excision(grid, unew->index[j], upre->index[j]);
+      set_boundary_simpleExcision(grid, unew->index[j], upre->index[j]);
   }
 
   /* symmetry boundary 
@@ -128,3 +199,19 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
   //set_boundary_symmetry(level, unew); 
 }
 
+
+/* constant boundary condition */
+void set_boundary_constant(tGrid *grid, int unew, int upre)
+{
+  int bi, pi, ijk;
+  
+  forallboxes(grid,bi)
+  {
+    tBox *box=grid->box[bi];
+    double *varnew = box->v[unew];
+    double *varpre = box->v[upre];
+
+    forPointList_inbox(constantBoundaryPointList, box, pi , ijk)
+      varnew[ijk] =  varpre[ijk];
+  }
+}

@@ -7,6 +7,7 @@
 
 /* global point lists to mark boundries */
 tPointList *radiativeBoundaryPointList;
+tPointList *constantBoundaryPointList;
 tPointList *simpleExcisionBoundaryPointList;
 
 
