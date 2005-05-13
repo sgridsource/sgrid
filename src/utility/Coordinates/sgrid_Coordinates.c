@@ -31,5 +31,7 @@ int sgrid_Coordinates(void)
            "coordinates used in box [Cartesian, Polar]");
   }
 
+  AddPar("compactSphericalDF_r0", "-1", "radius r at xi=0");
+
   return 0;
 }

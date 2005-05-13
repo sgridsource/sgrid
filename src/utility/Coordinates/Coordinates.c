@@ -101,6 +101,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphiSphericalDF_dy;
       box->dX_dx[3][3] = zero_of_xyz;
     }
+    if( Getv(str, "compactSphericalDF") )
+    {
+      printf("Coordinates: initializing compactSphericalDF coordinates...\n");
+      box->x_of_X[1] = x_ofcompactSphericalDF;
+      box->x_of_X[2] = y_ofcompactSphericalDF;
+      box->x_of_X[3] = z_ofcompactSphericalDF;
+
+      box->dX_dx[1][1] = dxi_dx;
+      box->dX_dx[1][2] = dxi_dy;
+      box->dX_dx[1][3] = dxi_dz;
+      box->dX_dx[2][1] = dthmcompactSphericalDF_dx;
+      box->dX_dx[2][2] = dthmcompactSphericalDF_dy;
+      box->dX_dx[2][3] = dthmcompactSphericalDF_dz;
+      box->dX_dx[3][1] = dphicompactSphericalDF_dx;
+      box->dX_dx[3][2] = dphicompactSphericalDF_dy;
+      box->dX_dx[3][3] = zero_of_xyz;
+    }
 
     /* compute cartesian coordinates x,y,z from X,Y,Z */
     enablevar_inbox(box, var_x);
@@ -420,4 +437,95 @@ double dphiSphericalDF_dy(void *aux, double r, double thm, double phi)
 /* second coord. derivs are currently not needed */
 
 /* end: SphericalDF coordinates: */
+
+
+/* ****************************************************************** */
+/* start: compactSphericalDF coordinates:                                      */
+/* xi = (2/PI) * arctan( r - r0)  <=>  r = r0 + tan(xi * PI/2) */
+/* xi in [0,1] then r in [r0,infty] */
+double r_of_xi(double xi)
+{
+  static double r0=-1.0;
+
+//  if(xi==1.0) return  
+  if(r0 < 0.0)
+  {
+    r0=Getd("compactSphericalDF_r0");
+    printf(" Coordinates: r_of_xi: compactSphericalDF_r0=%f\n", r0);
+  }
+  return tan(xi * PI/2.0) + r0;
+}
+double dxi_dr(double xi)
+{
+  static double r0=-1.0;
+  double r;
+
+  if(xi==1.0) return 0.0;
+
+  if(r0 < 0.0)
+  {
+    r0=Getd("compactSphericalDF_r0");
+    printf(" Coordinates: dxi_dr: compactSphericalDF_r0=%f\n", r0);
+  }
+  
+  r = tan(xi * PI/2.0) + r0;
+  return (2.0/PI) / ( 1.0 + (r-r0)*(r-r0) );
+}
+/* xi = (2/PI) * arctan( r - r0)  <=>  r = r0 + tan(xi * PI/2) */
+/* xi in [0,1] then r in [r0,infty] */
+
+/* Coord. trafos */
+double x_ofcompactSphericalDF(void *aux, double xi, double thm, double phi)
+{
+  return x_ofSphericalDF(aux, r_of_xi(xi), thm, phi);
+}
+double y_ofcompactSphericalDF(void *aux, double xi, double thm, double phi)
+{
+  return y_ofSphericalDF(aux, r_of_xi(xi), thm, phi);
+}
+double z_ofcompactSphericalDF(void *aux, double xi, double thm, double phi)
+{
+  return z_ofSphericalDF(aux, r_of_xi(xi), thm, phi);
+}
+
+/* first coord. derivs */
+/* xi = (2.0/PI) * arctan( r - r0) */
+double dxi_dx(void *aux, double xi, double thm, double phi)
+{
+  return  dxi_dr(xi) * dr_dx(aux, r_of_xi(xi), thm, phi);
+}
+double dxi_dy(void *aux, double xi, double thm, double phi)
+{
+  return  dxi_dr(xi) * dr_dy(aux, r_of_xi(xi), thm, phi);
+}
+double dxi_dz(void *aux, double xi, double thm, double phi)
+{
+  return  dxi_dr(xi) * dr_dz(aux, r_of_xi(xi), thm, phi);
+}
+
+double dthmcompactSphericalDF_dx(void *aux, double xi, double thm, double phi)
+{
+  return dthm_dx(aux, r_of_xi(xi), thm, phi);
+}
+double dthmcompactSphericalDF_dy(void *aux, double xi, double thm, double phi)
+{
+  return dthm_dy(aux, r_of_xi(xi), thm, phi);
+}
+double dthmcompactSphericalDF_dz(void *aux, double xi, double thm, double phi)
+{
+  return dthm_dz(aux, r_of_xi(xi), thm, phi);
+}
+
+double dphicompactSphericalDF_dx(void *aux, double xi, double thm, double phi)
+{
+  return dphiSphericalDF_dx(aux, r_of_xi(xi), thm, phi);
+}
+double dphicompactSphericalDF_dy(void *aux, double xi, double thm, double phi)
+{
+  return dphiSphericalDF_dy(aux, r_of_xi(xi), thm, phi);
+}
+
+/* second coord. derivs are currently not needed */
+
+/* end: compactSphericalDF coordinates: */
 

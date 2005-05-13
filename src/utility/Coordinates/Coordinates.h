@@ -46,3 +46,18 @@ double dphiSphericalDF_dy(void *aux, double r, double thm, double phi);
 double dthm_dx(void *aux, double r, double thm, double phi);
 double dthm_dy(void *aux, double r, double thm, double phi);
 double dthm_dz(void *aux, double r, double thm, double phi);
+
+/* compactSphericalDF coordinates: */
+double r_of_xi(double xi);
+double dxi_dr(double xi);
+double x_ofcompactSphericalDF(void *aux, double xi, double thm, double phi);
+double y_ofcompactSphericalDF(void *aux, double xi, double thm, double phi);
+double z_ofcompactSphericalDF(void *aux, double xi, double thm, double phi);
+double dxi_dx(void *aux, double xi, double thm, double phi);
+double dxi_dy(void *aux, double xi, double thm, double phi);
+double dxi_dz(void *aux, double xi, double thm, double phi);
+double dthmcompactSphericalDF_dx(void *aux, double xi, double thm, double phi);
+double dthmcompactSphericalDF_dy(void *aux, double xi, double thm, double phi);
+double dthmcompactSphericalDF_dz(void *aux, double xi, double thm, double phi);
+double dphicompactSphericalDF_dx(void *aux, double xi, double thm, double phi);
+double dphicompactSphericalDF_dy(void *aux, double xi, double thm, double phi);
