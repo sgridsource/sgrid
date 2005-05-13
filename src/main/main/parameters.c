@@ -343,15 +343,18 @@ int GetvFlag(char *name, char *value, int fatal)
 {
   tParameter *p = findparameter(name, fatal);
   char *s;
-  int ls, lp, startok, endok;
+  int lv, ls, lp, startok, endok;
 
   if (!p) return 0;
   s = strstr(p->value, value);
   if (!s) return 0;
   ls = strlen(s);
   lp = strlen(p->value);
+  lv = strlen(value);
+  //printf("ls=%d  value=%s| s=%s| p->value=%s|\n", ls, value, s, p->value); 
+  if( s[lv]!=' ' && s[lv]!=0 ) return 0;
   startok = (s == p->value || *(s-1) == ' ');  /* how robust is this? */
-  endok   = (s+ls == p->value+lp || *(s+ls+1) == ' ');
+  endok   = (s+ls == p->value+lp || *(s+ls) == ' ');
   return startok && endok ? 1 : 0;
 }
 
