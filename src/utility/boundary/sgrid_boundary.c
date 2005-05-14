@@ -8,7 +8,8 @@
 /* global point lists to mark boundries */
 tPointList *radiativeBoundaryPointList;
 tPointList *constantBoundaryPointList;
-tPointList *simpleExcisionBoundaryPointList;
+tPointList *selectedconstantBoundaryPointList;
+tPointList *ExcisionBoundaryPointList;
 
 
 int sgrid_boundary() 
@@ -20,7 +21,9 @@ int sgrid_boundary()
          "initialize all Boundary PointLists");
          
   /* parameters */
-  AddPar("boundary", "", "boundary condition");
+  AddPar("boundary", "", "boundary condition"
+         "[radiative,constant,constantExcision,simpleExcision,"
+          "selectedconstantExcision]");
 
   /* radiative boundary */
   if (Getv("boundary", "radiative"))
@@ -29,5 +32,13 @@ int sgrid_boundary()
     AddPar("boundary_radconstant", "", 
 	   "keep these variables constant for radiative boundary");
   }
+
+  /* selectedconstantExcision boundary */
+  if (Getv("boundary", "selectedconstantExcision"))
+  {
+    AddPar("boundary_selectedconstantExcision", "", 
+	   "keep these variables constant on selectedconstantExcision boundary");
+  }
+
   return 0;
 }

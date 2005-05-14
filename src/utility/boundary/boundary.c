@@ -6,7 +6,7 @@
 
 /* here we use:
    tPointList *radiativeBoundaryPointList;
-   tPointList *simpleExcisionBoundaryPointList; */
+   tPointList *ExcisionBoundaryPointList; */
 /* initialize our Boundary PointLists */
 int initialize_BoundaryPointLists(tGrid *grid)
 {
@@ -18,7 +18,8 @@ int initialize_BoundaryPointLists(tGrid *grid)
   
   radiativeBoundaryPointList = AllocatePointList(grid);
   constantBoundaryPointList = AllocatePointList(grid);
-  simpleExcisionBoundaryPointList = AllocatePointList(grid);
+  selectedconstantBoundaryPointList = AllocatePointList(grid);
+  ExcisionBoundaryPointList = AllocatePointList(grid);
 
   printf("boundary: initialize_BoundaryPointLists:\n");
   
@@ -136,10 +137,28 @@ int initialize_BoundaryPointLists(tGrid *grid)
        n3=grid->box[bi]->n3;
         
        forplane1(i,j,k, n1,n2,n3, 0)
-         AddToPointList(simpleExcisionBoundaryPointList, bi, Index(i,j,k));
+         AddToPointList(ExcisionBoundaryPointList, bi, Index(i,j,k));
     }
-    printf("simpleExcisionBoundaryPointList:\n");
-    prPointList(simpleExcisionBoundaryPointList);
+    printf("ExcisionBoundaryPointList:\n");
+    prPointList(ExcisionBoundaryPointList);
+  }
+
+  /* const Excision boundary for some slected variables */
+  if( Getv("boundary", "selectedconstantExcision") )
+  {
+    bi=0;
+    snprintf(str, 99, "box%d_Coordinates", bi);
+    if(Getv(str, "SphericalDF") || Getv(str, "compactSphericalDF"))
+    {
+       n1=grid->box[bi]->n1;
+       n2=grid->box[bi]->n2;
+       n3=grid->box[bi]->n3;
+        
+       forplane1(i,j,k, n1,n2,n3, 0)
+         AddToPointList(selectedconstantBoundaryPointList, bi, Index(i,j,k));
+    }
+    printf("selectedconstantBoundaryPointList:\n");
+    prPointList(selectedconstantBoundaryPointList);
   }
 
   return 0;
@@ -181,7 +200,8 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
   {
     /* for all variables */
     for (j = 0; j < unew->n; j++)
-      set_boundary_constant(grid, unew->index[j], upre->index[j]);
+      set_boundary_constant(constantBoundaryPointList,
+                            unew->index[j], upre->index[j]);
   }
 
   /* simple excision boundary condition */
@@ -190,6 +210,19 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
     /* for all variables */
     for (j = 0; j < unew->n; j++)
       set_boundary_simpleExcision(grid, unew->index[j], upre->index[j]);
+  }
+
+  /* selectedconstantExcision excision boundary condition */
+  if( Getv("boundary", "selectedconstantExcision") )
+  {
+    /* for all variables */
+    for (j = 0; j < unew->n; j++)
+    {
+      i = unew->index[j];
+      if (Getv("boundary_selectedconstantExcision", VarName(i)))
+        set_boundary_constant(selectedconstantBoundaryPointList,
+                              unew->index[j], upre->index[j]);
+    }
   }
 
   /* symmetry boundary 
@@ -201,8 +234,9 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
 
 
 /* constant boundary condition */
-void set_boundary_constant(tGrid *grid, int unew, int upre)
+void set_boundary_constant(tPointList *PL, int unew, int upre)
 {
+  tGrid *grid = PL->grid;
   int bi, pi, ijk;
   
   forallboxes(grid,bi)
@@ -211,7 +245,7 @@ void set_boundary_constant(tGrid *grid, int unew, int upre)
     double *varnew = box->v[unew];
     double *varpre = box->v[upre];
 
-    forPointList_inbox(constantBoundaryPointList, box, pi , ijk)
+    forPointList_inbox(PL, box, pi , ijk)
       varnew[ijk] =  varpre[ijk];
   }
 }
