@@ -492,36 +492,44 @@ double z_ofcompactSphericalDF(void *aux, double xi, double thm, double phi)
 /* xi = (2.0/PI) * arctan( r - r0) */
 double dxi_dx(void *aux, double xi, double thm, double phi)
 {
+  if(xi==1.0) return 0.0;
   return  dxi_dr(xi) * dr_dx(aux, r_of_xi(xi), thm, phi);
 }
 double dxi_dy(void *aux, double xi, double thm, double phi)
 {
+  if(xi==1.0) return 0.0;
   return  dxi_dr(xi) * dr_dy(aux, r_of_xi(xi), thm, phi);
 }
 double dxi_dz(void *aux, double xi, double thm, double phi)
 {
+  if(xi==1.0) return 0.0;
   return  dxi_dr(xi) * dr_dz(aux, r_of_xi(xi), thm, phi);
 }
 
 double dthmcompactSphericalDF_dx(void *aux, double xi, double thm, double phi)
 {
+  if(xi==1.0) return 0.0;
   return dthm_dx(aux, r_of_xi(xi), thm, phi);
 }
 double dthmcompactSphericalDF_dy(void *aux, double xi, double thm, double phi)
 {
+  if(xi==1.0) return 0.0;
   return dthm_dy(aux, r_of_xi(xi), thm, phi);
 }
 double dthmcompactSphericalDF_dz(void *aux, double xi, double thm, double phi)
 {
+  if(xi==1.0) return 0.0;
   return dthm_dz(aux, r_of_xi(xi), thm, phi);
 }
 
 double dphicompactSphericalDF_dx(void *aux, double xi, double thm, double phi)
 {
+  if(xi==1.0) return 0.0;
   return dphiSphericalDF_dx(aux, r_of_xi(xi), thm, phi);
 }
 double dphicompactSphericalDF_dy(void *aux, double xi, double thm, double phi)
 {
+  if(xi==1.0) return 0.0;
   return dphiSphericalDF_dy(aux, r_of_xi(xi), thm, phi);
 }
 
