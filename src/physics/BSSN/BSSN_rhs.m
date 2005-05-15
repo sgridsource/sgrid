@@ -169,6 +169,8 @@ tocompute = {
            ( (lapseharmonicf/alpha) psi^lapsepsipower - alphaDensityWeight ) *
            (-alpha (K - subtractK0 K0)),
     Cif == end,
+
+    ralphaDensity  == ralphaDensity * nonconstantlapse,
   Cif == end,
 
   betaF == shiftgammacoeff alpha^shiftalphapower / psi^shiftpsipower,

@@ -2908,6 +2908,11 @@ alphaDensity[ijk]*(alphaDensityWeight*alpha[ijk]*
 /* if (densitizedoplogWithoutShift) */
 
 
+ralphaDensity
+=
+nonconstantlapse*ralphaDensity
+;
+
 }
 /* if (densitizedoplogWithoutShift) */
 
@@ -3367,4 +3372,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2269,  n/ = 58,  n+ = 2066, n = 4393, O = 1 */
+/* nvars = 215, n* = 2270,  n/ = 58,  n+ = 2066, n = 4394, O = 1 */
