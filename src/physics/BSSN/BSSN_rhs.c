@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 10.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 14.5.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -22,14 +22,14 @@ int bi;
 int addlinear = (dt != 0.0l);
 int usepsi = 1;
 double forceKzerofactor = Getv("BSSN_forceKzero", "no");
-int subtractA      = Getv("BSSN_subtractA", "yes");
-int normalizedetg  = Getv("BSSN_normalizedetg", "yes");
-int constantlapse  = Getv("BSSN_lapse", "constant");
-int oploglapse     = Getv("BSSN_lapse", "1+log");
-int oploglapse2    = Getv("BSSN_lapse", "1+log2");
-int oplogwithshift = Getv("BSSN_lapse", "withshift");
-int harmoniclapse  = Getv("BSSN_lapse", "harmonic");
-int subtractK0     = Getv("BSSN_subtractK0", "yes");
+int subtractA           = Getv("BSSN_subtractA", "yes");
+int normalizedetg       = Getv("BSSN_normalizedetg", "yes");
+int nonconstantlapse    =!Getv("BSSN_lapse", "constant");
+int oploglapse          = Getv("BSSN_lapse", "1+log");
+int oploglapse2         = Getv("BSSN_lapse", "1+log2");
+int oplogwithshift      = Getv("BSSN_lapse", "withshift");
+int harmoniclapse       = Getv("BSSN_lapse", "harmonic");
+int subtractK0          = Getv("BSSN_subtractK0", "yes");
 int densitizedLapse = !Getv("BSSN_densitizedLapse", "no");
 int densitizedoplogWithoutShift = Getv("BSSN_densitizedLapse", "1+log_withoutShift");
 double alphaDensityWeight = Getd("BSSN_alphaDensityWeight");
@@ -2867,8 +2867,8 @@ ralpha0
 
 ralpha
 =
-ralpha0*(lapseharmonicf*oploglapse + (8.*oploglapse2)/(9. - 3.*alpha[ijk]) + 
-    harmoniclapse*alpha[ijk])
+nonconstantlapse*ralpha0*(lapseharmonicf*oploglapse + 
+    (8.*oploglapse2)/(9. - 3.*alpha[ijk]) + harmoniclapse*alpha[ijk])
 ;
 
 
@@ -3367,4 +3367,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2268,  n/ = 58,  n+ = 2066, n = 4392, O = 1 */
+/* nvars = 215, n* = 2269,  n/ = 58,  n+ = 2066, n = 4393, O = 1 */

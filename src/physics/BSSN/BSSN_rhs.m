@@ -152,9 +152,9 @@ tocompute = {
   (* gauge conditions, avoid unnecessary if statements, use flags *)
   ralpha0 == (6 oplogwithshift liephi - 
               alpha (K - subtractK0 K0)) psi^lapsepsipower,
-  ralpha  == ralpha0 (oploglapse lapseharmonicf +
-                      oploglapse2 8/3/(3-alpha) +
-                      harmoniclapse alpha),
+  ralpha  == ralpha0 * nonconstantlapse *
+             (oploglapse lapseharmonicf +
+              oploglapse2 8/3/(3-alpha) + harmoniclapse alpha),
 
   Cif == densitizedLapse,
     (* exponentials of total conformal factor used in densitized lapse *)
@@ -332,14 +332,14 @@ BeginCFunction[] := Module[{},
   pr["int usepsi = 1;\n"];
 
   pr["double forceKzerofactor = Getv(\"BSSN_forceKzero\", \"no\");\n"];
-  pr["int subtractA      = Getv(\"BSSN_subtractA\", \"yes\");\n"];
-  pr["int normalizedetg  = Getv(\"BSSN_normalizedetg\", \"yes\");\n"];
-  pr["int constantlapse  = Getv(\"BSSN_lapse\", \"constant\");\n"];
-  pr["int oploglapse     = Getv(\"BSSN_lapse\", \"1+log\");\n"];
-  pr["int oploglapse2    = Getv(\"BSSN_lapse\", \"1+log2\");\n"];
-  pr["int oplogwithshift = Getv(\"BSSN_lapse\", \"withshift\");\n"];
-  pr["int harmoniclapse  = Getv(\"BSSN_lapse\", \"harmonic\");\n"];
-  pr["int subtractK0     = Getv(\"BSSN_subtractK0\", \"yes\");\n"];
+  pr["int subtractA           = Getv(\"BSSN_subtractA\", \"yes\");\n"];
+  pr["int normalizedetg       = Getv(\"BSSN_normalizedetg\", \"yes\");\n"];
+  pr["int nonconstantlapse    =!Getv(\"BSSN_lapse\", \"constant\");\n"];
+  pr["int oploglapse          = Getv(\"BSSN_lapse\", \"1+log\");\n"];
+  pr["int oploglapse2         = Getv(\"BSSN_lapse\", \"1+log2\");\n"];
+  pr["int oplogwithshift      = Getv(\"BSSN_lapse\", \"withshift\");\n"];
+  pr["int harmoniclapse       = Getv(\"BSSN_lapse\", \"harmonic\");\n"];
+  pr["int subtractK0          = Getv(\"BSSN_subtractK0\", \"yes\");\n"];
 
   pr["int densitizedLapse = !Getv(\"BSSN_densitizedLapse\", \"no\");\n"];
   pr["int densitizedoplogWithoutShift = Getv(\"BSSN_densitizedLapse\", \"1+log_withoutShift\");\n"];
