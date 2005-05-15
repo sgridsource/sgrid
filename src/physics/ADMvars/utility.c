@@ -50,8 +50,6 @@ void FirstDerivsOf_Sab(tBox *box, int i_Sab, int i_dSabc)
 void FirstAndSecondDerivsOf_Sab(tBox *box, int i_Sab, 
                                 int i_dSabc, int i_ddSabcd)
 {
-  FirstDerivsOf_Sab(box, i_Sab, i_dSabc);
-  
   /* first tensor derivs from index */
   double *dS111 = box->v[i_dSabc+0];
   double *dS112 = box->v[i_dSabc+1];
@@ -115,6 +113,8 @@ void FirstAndSecondDerivsOf_Sab(tBox *box, int i_Sab,
   double *ddS3323 = box->v[i_ddSabcd+34];
   double *ddS3333 = box->v[i_ddSabcd+35];
 
+  FirstDerivsOf_Sab(box, i_Sab, i_dSabc);
+  
   /* compute all second derivs in box */
   cart_partials(box, dS111, ddS1111,ddS1112,ddS1113);
   cart_partials(box, dS112, ddS1112,ddS1122,ddS1123);
@@ -171,8 +171,6 @@ void FirstDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab)
    of a tensor S_{a} in a box */
 void FirstAndSecondDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc)
 {
-  FirstDerivsOf_Sa(box, i_Sa, i_dSab);
-  
   /* first tensor derivs from index */
   double *dS11 = box->v[i_dSab+0];
   double *dS12 = box->v[i_dSab+1];
@@ -206,6 +204,8 @@ void FirstAndSecondDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc)
   double *ddS323 = box->v[i_ddSabc+16];
   double *ddS333 = box->v[i_ddSabc+17];
 
+  FirstDerivsOf_Sa(box, i_Sa, i_dSab);
+  
   /* compute all second derivs in box */
   cart_partials(box, dS11, ddS111,ddS112,ddS113);
   cart_partials(box, dS12, ddS112,ddS122,ddS123);
@@ -240,8 +240,6 @@ void FirstDerivsOf_S(tBox *box, int i_S, int i_dSa)
    of a tensor S_{a} in a box */
 void FirstAndSecondDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab)
 {
-  FirstDerivsOf_Sa(box, i_S, i_dSa);
-  
   /* first tensor derivs from index */
   double *dS1 = box->v[i_dSa+0];
   double *dS2 = box->v[i_dSa+1];
@@ -255,6 +253,8 @@ void FirstAndSecondDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab)
   double *ddS23 = box->v[i_ddSab+4];
   double *ddS33 = box->v[i_ddSab+5];
 
+  FirstDerivsOf_Sa(box, i_S, i_dSa);
+  
   /* compute all second derivs in box */
   cart_partials(box, dS1, ddS11,ddS12,ddS13);
   cart_partials(box, dS2, ddS12,ddS22,ddS23);
