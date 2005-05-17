@@ -44,3 +44,23 @@ void four_eval(double c[], double u[], int N);
 
 /* filter: zero all c[j] with k<=j<=n */
 void four_filter(double c[], int k, int N);
+
+
+/* Functions from finite_differences.c */
+
+/* compute coeffs of deriv cder[0...n] from coeffs c for a periodic grid:
+ x_j = j (b-a)/(n+1) + a ,  j=0, ..., n */
+void fd2_deriv_periodic(double a, double b, double c[], double cder[], int n);
+
+/* compute coeffs of deriv cder[0...n] from coeffs c for a non-periodic grid:
+ x_j = j (b-a)/n + a ,  j=0, ..., n */
+void fd2_deriv_onesidedBC(double a, double b, double c[], double cder[], int n);
+
+/* compute Four coeffs c[0...n] from function u */
+void fd2_coeffs(double c[], double u[], int n);
+
+/* find function u from Four coeffs c[0...n] */
+void fd2_eval(double c[], double u[], int n);
+
+/* filter: zero all c[j] with k<=j<=n */
+void fd2_filter(double c[], int k, int n);
