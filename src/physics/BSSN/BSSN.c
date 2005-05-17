@@ -14,6 +14,10 @@ tVarList *BSSNvars;
 */ 
 void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 {
+
+  //filter_VarList(upre);
+  //filter_VarList(ucur);
+ 
   BSSN_rhs(unew, upre, dt, ucur);
   /* wether addDissipation is called after each ICN (or RK) step: */
   if(Getv("evolve_Dissipation", "yes")) 
