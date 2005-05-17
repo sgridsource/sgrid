@@ -110,9 +110,13 @@ tGrid *make_grid(int pr)
 	  box->v[var_X][ijk] 
 	    = 0.5*( (box->bbox[0] - box->bbox[1])*cos(i*PI/(n1-1)) 
 	           +(box->bbox[0] + box->bbox[1]));
-        else if( Getv(str, "Fourier") )
+        else if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
 	  box->v[var_X][ijk] 
 	    = ( (box->bbox[1] - box->bbox[0])* ((double) i)/n1 
+	           +box->bbox[0]);
+        else if( Getv(str, "fd2_onesided") )
+	  box->v[var_X][ijk] 
+	    = ( (box->bbox[1] - box->bbox[0])* ((double) i)/(n1-1)
 	           +box->bbox[0]);
 
 	snprintf(str, 999, "box%d_basis2", b);
@@ -120,9 +124,13 @@ tGrid *make_grid(int pr)
 	  box->v[var_Y][ijk] 
 	    = 0.5*( (box->bbox[2] - box->bbox[3])*cos(j*PI/(n2-1)) 
 	           +(box->bbox[2] + box->bbox[3])); 
-        else if( Getv(str, "Fourier") )
+        else if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
 	  box->v[var_Y][ijk] 
 	    = ( (box->bbox[3] - box->bbox[2])* ((double) j)/n2 
+	           +box->bbox[2]);
+        else if( Getv(str, "fd2_onesided") )
+	  box->v[var_Y][ijk] 
+	    = ( (box->bbox[3] - box->bbox[2])* ((double) j)/(n2-1) 
 	           +box->bbox[2]);
 
 	snprintf(str, 999, "box%d_basis3", b);
@@ -130,9 +138,13 @@ tGrid *make_grid(int pr)
 	  box->v[var_Z][ijk] 
 	    = 0.5*( (box->bbox[4] - box->bbox[5])*cos(k*PI/(n3-1)) 
 	           +(box->bbox[4] + box->bbox[5])); 
-        else if( Getv(str, "Fourier") )
+        else if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
 	  box->v[var_Z][ijk] 
 	    = ( (box->bbox[5] - box->bbox[4])* ((double) k)/n3 
+	           +box->bbox[4]);
+        else if( Getv(str, "fd2_onesided") )
+	  box->v[var_Z][ijk] 
+	    = ( (box->bbox[5] - box->bbox[4])* ((double) k)/(n3-1) 
 	           +box->bbox[4]);
         }
       }
@@ -170,6 +182,20 @@ tGrid *make_grid(int pr)
          eval_onPoints = four_eval;
          filter_coeffs = four_filter;
        }
+       else if( Getv(str, "fd2_onesided") )
+       {
+         get_coeffs = fd2_coeffs;
+         coeffs_of_deriv = fd2_deriv_onesidedBC;
+         eval_onPoints = fd2_eval;
+         filter_coeffs = fd2_filter;
+       }
+       else if( Getv(str, "fd2_periodic") )
+       {
+         get_coeffs = fd2_coeffs;
+         coeffs_of_deriv = fd2_deriv_periodic;
+         eval_onPoints = fd2_eval;
+         filter_coeffs = fd2_filter;
+       }
        initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F1, n1+1-filt1, n1, 
@@ -191,6 +217,20 @@ tGrid *make_grid(int pr)
          eval_onPoints = four_eval;
          filter_coeffs = four_filter;
        }
+       else if( Getv(str, "fd2_onesided") )
+       {
+         get_coeffs = fd2_coeffs;
+         coeffs_of_deriv = fd2_deriv_onesidedBC;
+         eval_onPoints = fd2_eval;
+         filter_coeffs = fd2_filter;
+       }
+       else if( Getv(str, "fd2_periodic") )
+       {
+         get_coeffs = fd2_coeffs;
+         coeffs_of_deriv = fd2_deriv_periodic;
+         eval_onPoints = fd2_eval;
+         filter_coeffs = fd2_filter;
+       }
        initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F2, n2+1-filt2, n2, 
@@ -211,6 +251,20 @@ tGrid *make_grid(int pr)
          coeffs_of_deriv = four_deriv;
          eval_onPoints = four_eval;
          filter_coeffs = four_filter;
+       }
+       else if( Getv(str, "fd2_onesided") )
+       {
+         get_coeffs = fd2_coeffs;
+         coeffs_of_deriv = fd2_deriv_onesidedBC;
+         eval_onPoints = fd2_eval;
+         filter_coeffs = fd2_filter;
+       }
+       else if( Getv(str, "fd2_periodic") )
+       {
+         get_coeffs = fd2_coeffs;
+         coeffs_of_deriv = fd2_deriv_periodic;
+         eval_onPoints = fd2_eval;
+         filter_coeffs = fd2_filter;
        }
        initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
