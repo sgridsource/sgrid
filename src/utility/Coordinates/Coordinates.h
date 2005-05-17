@@ -61,3 +61,13 @@ double dthmcompactSphericalDF_dy(void *aux, double xi, double thm, double phi);
 double dthmcompactSphericalDF_dz(void *aux, double xi, double thm, double phi);
 double dphicompactSphericalDF_dx(void *aux, double xi, double thm, double phi);
 double dphicompactSphericalDF_dy(void *aux, double xi, double thm, double phi);
+
+/* tan_stretch coordinates: */
+double x_of_xs(double xs);
+double dxs_dx(double xs);
+double x_of_tan_stretch(void *aux, double xs, double ys, double zs);
+double y_of_tan_stretch(void *aux, double xs, double ys, double zs);
+double z_of_tan_stretch(void *aux, double xs, double ys, double zs);
+double dxs_dx_tan_stretch(void *aux, double xs, double ys, double zs);
+double dys_dy_tan_stretch(void *aux, double xs, double ys, double zs);
+double dzs_dz_tan_stretch(void *aux, double xs, double ys, double zs);

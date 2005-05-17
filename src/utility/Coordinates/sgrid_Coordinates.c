@@ -32,6 +32,7 @@ int sgrid_Coordinates(void)
   }
 
   AddPar("compactSphericalDF_r0", "-1", "radius r at xi=0");
+  AddPar("tan_stretch_s", "0", "how much we stretch [0,Xmax]");
 
   return 0;
 }

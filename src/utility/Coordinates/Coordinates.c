@@ -118,6 +118,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphicompactSphericalDF_dy;
       box->dX_dx[3][3] = zero_of_xyz;
     }
+    if( Getv(str, "tan_stretch") )
+    {
+      printf("Coordinates: initializing tan_stretch coordinates...\n");
+      box->x_of_X[1] = x_of_tan_stretch;
+      box->x_of_X[2] = y_of_tan_stretch;
+      box->x_of_X[3] = z_of_tan_stretch;
+
+      box->dX_dx[1][1] = dxs_dx_tan_stretch;
+      box->dX_dx[1][2] = zero_of_xyz;
+      box->dX_dx[1][3] = zero_of_xyz;
+      box->dX_dx[2][1] = zero_of_xyz;
+      box->dX_dx[2][2] = dys_dy_tan_stretch;
+      box->dX_dx[2][3] = zero_of_xyz;
+      box->dX_dx[3][1] = zero_of_xyz;
+      box->dX_dx[3][2] = zero_of_xyz;
+      box->dX_dx[3][3] = dzs_dz_tan_stretch;
+    }
 
     /* compute cartesian coordinates x,y,z from X,Y,Z */
     enablevar_inbox(box, var_x);
@@ -439,8 +456,8 @@ double dphiSphericalDF_dy(void *aux, double r, double thm, double phi)
 /* end: SphericalDF coordinates: */
 
 
-/* ****************************************************************** */
-/* start: compactSphericalDF coordinates:                                      */
+/* *********************************************************** */
+/* start: compactSphericalDF coordinates:                      */
 /* xi = (2/PI) * arctan( r - r0)  <=>  r = r0 + tan(xi * PI/2) */
 /* xi in [0,1] then r in [r0,infty] */
 double r_of_xi(double xi)
@@ -536,4 +553,76 @@ double dphicompactSphericalDF_dy(void *aux, double xi, double thm, double phi)
 /* second coord. derivs are currently not needed */
 
 /* end: compactSphericalDF coordinates: */
+
+
+/* *********************************************** */
+/* start: tan_stretch coordinates:                 */
+/* x  = tan(xs * s * PI/2.0) * 2.0/(PI*s)          */
+/* xs = arctan( x * s * PI/2.0) * 2.0/(PI*s)       */
+/* s=1:  xs in [-1,1] then x in [-infty,infty]     */
+/* s<<1: xs in [-1,1] then x ~ xs                  */
+double x_of_xs(double xs)
+{
+  static double s=-1.0;
+
+  if(s < 0.0)
+  {
+    s=Getd("tan_stretch_s");
+    printf(" Coordinates: x_of_xs: tan_stretch_s=%f\n", s);
+  }
+  if(s==0) return xs;
+
+  return tan(xs * s * PI/2.0) * 2.0/(PI*s);
+}
+double dxs_dx(double xs)
+{
+  static double s=-1.0;
+  double u, arg;
+
+  if(s < 0.0)
+  {
+    s=Getd("tan_stretch_s");
+    printf(" Coordinates: dxs_dx: tan_stretch_s=%f\n", s);
+  }
+  
+  arg = xs * s;
+  if( fabs(arg)>=1.0 ) return 0.0;
+
+  u = tan(arg * PI/2.0);
+  
+  return 1.0 / ( 1.0 + u*u );
+}
+
+/* Coord. trafos */
+double x_of_tan_stretch(void *aux, double xs, double ys, double zs)
+{
+  return x_of_xs(xs);
+}
+double y_of_tan_stretch(void *aux, double xs, double ys, double zs)
+{
+  return x_of_xs(ys);
+}
+double z_of_tan_stretch(void *aux, double xs, double ys, double zs)
+{
+  return x_of_xs(zs);
+}
+
+/* first coord. derivs */
+/* xi = (2.0/PI) * arctan( r - r0) */
+double dxs_dx_tan_stretch(void *aux, double xs, double ys, double zs)
+{
+  return dxs_dx(xs);
+}
+double dys_dy_tan_stretch(void *aux, double xs, double ys, double zs)
+{
+  return dxs_dx(ys);
+}
+double dzs_dz_tan_stretch(void *aux, double xs, double ys, double zs)
+{
+  return dxs_dx(zs);
+}
+
+/* second coord. derivs are currently not needed */
+
+/* end: _tan_stretch coordinates: */
 
