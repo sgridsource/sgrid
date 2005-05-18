@@ -219,20 +219,34 @@ int filter_VarList(tVarList *vl)
   forallboxes(grid,bi)
   {
     tBox *box = grid->box[bi];
-
+    double *BP = calloc(boxBoundaryPointList->npoints[bi], sizeof( double ) );
+    
     /* for all variables */
     for (j = 0; j < vl->n; j++)
     {
       int vi = vl->index[j];
       double *u = box->v[vi];
+      int pi,ijk;
 
       //printf("filter_VarList: VarName[vi]=%s\n", VarName(vi));
+
+      /* save boundary values */
+      //if(boxBoundaryPointList->npoints[bi]>0)
+      //  forPointList_inbox(boxBoundaryPointList, box, pi , ijk)
+      //    BP[pi] = u[ijk];
       
       /* use filters */
       spec_filter1(box, 1, u);
       spec_filter1(box, 2, u);
       spec_filter1(box, 3, u);
+
+      /* restore boundary values */
+      //if(boxBoundaryPointList->npoints[bi]>0)
+      //  forPointList_inbox(boxBoundaryPointList, box, pi , ijk)
+      //    u[ijk]=BP[pi];
     }
+    
+    free(BP);
   }
   return 0;
 }
