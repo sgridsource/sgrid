@@ -6,6 +6,7 @@ extern tPointList *radiativeBoundaryPointList;
 extern tPointList *constantBoundaryPointList;
 extern tPointList *selectedconstantBoundaryPointList;
 extern tPointList *ExcisionBoundaryPointList;
+extern tPointList *boxBoundaryPointList;
 
 /* functions to set BCs */
 void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur);

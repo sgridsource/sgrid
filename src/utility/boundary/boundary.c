@@ -20,8 +20,48 @@ int initialize_BoundaryPointLists(tGrid *grid)
   constantBoundaryPointList = AllocatePointList(grid);
   selectedconstantBoundaryPointList = AllocatePointList(grid);
   ExcisionBoundaryPointList = AllocatePointList(grid);
+  boxBoundaryPointList = AllocatePointList(grid);
 
   printf("boundary: initialize_BoundaryPointLists:\n");
+
+  /* make PointList containing all boundaries of all boxes */
+  forallboxes(grid,bi)
+  {
+     n1=grid->box[bi]->n1;
+     n2=grid->box[bi]->n2;
+     n3=grid->box[bi]->n3;
+
+     snprintf(str, 99, "box%d_basis1", bi);
+     if( !(Getv(str, "Fourier") || Getv(str, "fd2_periodic")) )
+     {
+       forplane1(i,j,k, n1,n2,n3, 0)
+         AddToPointList(boxBoundaryPointList, bi, Index(i,j,k));
+
+       forplane1(i,j,k, n1,n2,n3, n1-1)
+         AddToPointList(boxBoundaryPointList, bi, Index(i,j,k));
+     }
+     snprintf(str, 99, "box%d_basis2", bi);
+     if( !(Getv(str, "Fourier") || Getv(str, "fd2_periodic")) )
+     {
+       forplane2(i,j,k, n1,n2,n3, 0)
+         AddToPointList(boxBoundaryPointList, bi, Index(i,j,k));
+
+       forplane2(i,j,k, n1,n2,n3, n2-1)
+         AddToPointList(boxBoundaryPointList, bi, Index(i,j,k));
+     }
+     snprintf(str, 99, "box%d_basis3", bi);
+     if( !(Getv(str, "Fourier") || Getv(str, "fd2_periodic")) )
+     {
+       forplane3(i,j,k, n1,n2,n3, 0)
+         AddToPointList(boxBoundaryPointList, bi, Index(i,j,k));
+
+       forplane3(i,j,k, n1,n2,n3, n3-1)
+         AddToPointList(boxBoundaryPointList, bi, Index(i,j,k));
+     }
+  }
+  printf("boxBoundaryPointList:\n");
+  prPointList(boxBoundaryPointList);
+
   
   /* radiative boundary condition */
   if( Getv("boundary", "radiative") )

@@ -10,6 +10,7 @@ tPointList *radiativeBoundaryPointList;
 tPointList *constantBoundaryPointList;
 tPointList *selectedconstantBoundaryPointList;
 tPointList *ExcisionBoundaryPointList;
+tPointList *boxBoundaryPointList;
 
 
 int sgrid_boundary() 
