@@ -32,7 +32,7 @@ void set_boundary_normalderiv_leftBound(tPointList *PL, int direc, int ui,
   {
     tBox *box=grid->box[bi];
     double *u = box->v[ui];
-    double *du= box->v[Ind("ADMvars_temp1")];
+    double *du= box->v[Ind("temp1")];
     double D00;
 
     spec_Deriv1(box, direc, u, du);
@@ -58,7 +58,7 @@ void set_boundary_normalderiv_rightBound(tPointList *PL, int direc, int ui,
   {
     tBox *box=grid->box[bi];
     double *u = box->v[ui];
-    double *du= box->v[Ind("ADMvars_temp1")];
+    double *du= box->v[Ind("temp1")];
     double Dmm;
 
     spec_Deriv1(box, direc, u, du);
