@@ -18,7 +18,7 @@ int initialize_BoundaryPointLists(tGrid *grid)
   
   radiativeBoundaryPointList = AllocatePointList(grid);
   constantBoundaryPointList = AllocatePointList(grid);
-  selectedconstantBoundaryPointList = AllocatePointList(grid);
+  selectedBoundaryPointList = AllocatePointList(grid);
   ExcisionBoundaryPointList = AllocatePointList(grid);
   boxBoundaryPointList = AllocatePointList(grid);
 
@@ -166,7 +166,8 @@ int initialize_BoundaryPointLists(tGrid *grid)
   }
 
   /* simple Excision boundary condition */
-  if( Getv("boundary", "simpleExcision") )
+  if( Getv("boundary", "simpleExcision") ||
+      Getv("boundary", "VonNeumannExcision") )
   {
     bi=0;
     snprintf(str, 99, "box%d_Coordinates", bi);
@@ -183,8 +184,9 @@ int initialize_BoundaryPointLists(tGrid *grid)
     prPointList(ExcisionBoundaryPointList);
   }
 
-  /* const Excision boundary for some slected variables */
-  if( Getv("boundary", "selectedconstantExcision") )
+  /* Excision boundary for some slected variables */
+  if( Getv("boundary", "selectedconstantExcision") ||
+      Getv("boundary", "selectedVonNeumannExcision") )
   {
     bi=0;
     snprintf(str, 99, "box%d_Coordinates", bi);
@@ -195,10 +197,10 @@ int initialize_BoundaryPointLists(tGrid *grid)
        n3=grid->box[bi]->n3;
         
        forplane1(i,j,k, n1,n2,n3, 0)
-         AddToPointList(selectedconstantBoundaryPointList, bi, Index(i,j,k));
+         AddToPointList(selectedBoundaryPointList, bi, Index(i,j,k));
     }
-    printf("selectedconstantBoundaryPointList:\n");
-    prPointList(selectedconstantBoundaryPointList);
+    printf("selectedBoundaryPointList:\n");
+    prPointList(selectedBoundaryPointList);
   }
 
   return 0;
@@ -259,9 +261,31 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
     for (j = 0; j < unew->n; j++)
     {
       i = unew->index[j];
-      if (Getv("boundary_selectedconstantExcision", VarName(i)))
-        set_boundary_constant(selectedconstantBoundaryPointList,
+      if (Getv("boundary_selectedExcisionVars", VarName(i)))
+        set_boundary_constant(selectedBoundaryPointList,
                               unew->index[j], upre->index[j]);
+    }
+  }
+
+  /* VonNeumannExcision excision boundary condition */
+  if( Getv("boundary", "VonNeumannExcision") )
+  {
+    /* for all variables */
+    for (j = 0; j < unew->n; j++)
+      set_boundary_VonNeumannExcision(ExcisionBoundaryPointList,
+                                      unew->index[j]);
+  }
+
+  /* selectedVonNeumannExcision excision boundary condition */
+  if( Getv("boundary", "selectedVonNeumannExcision") )
+  {
+    /* for all variables */
+    for (j = 0; j < unew->n; j++)
+    {
+      i = unew->index[j];
+      if (Getv("boundary_selectedExcisionVars", VarName(i)))
+        set_boundary_VonNeumannExcision(selectedBoundaryPointList,
+                                        unew->index[j]);
     }
   }
 

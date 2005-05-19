@@ -4,7 +4,7 @@
 /* global point lists to mark boundries */
 extern tPointList *radiativeBoundaryPointList;
 extern tPointList *constantBoundaryPointList;
-extern tPointList *selectedconstantBoundaryPointList;
+extern tPointList *selectedBoundaryPointList;
 extern tPointList *ExcisionBoundaryPointList;
 extern tPointList *boxBoundaryPointList;
 
@@ -20,3 +20,4 @@ void set_boundary_normalderiv_leftBound(tPointList *PL, int direc, int ui,
                                         double deriv);
 void set_boundary_normalderiv_rightBound(tPointList *PL, int direc, int ui, 
                                          double deriv);
+void set_boundary_VonNeumannExcision(tPointList *PL, int unew);

@@ -22,3 +22,11 @@ void set_boundary_simpleExcision(tGrid *grid, int unew, int upre)
       varnew[ijk] =  varpre[ijk] + varnew[ijk+1] - varpre[ijk+1];
   }
 }
+
+
+/* set VonNeumann excision boundary for one variable */
+void set_boundary_VonNeumannExcision(tPointList *PL, int unew)
+{
+  /* NOTE: This works only if excsion boundary is at i=0: */
+  set_boundary_normalderiv_leftBound(PL, 1, unew, 0.0);
+}
