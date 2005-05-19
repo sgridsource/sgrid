@@ -15,3 +15,8 @@ void set_boundary_radiative(tGrid *grid,
 			    double var0, double v);
 void set_boundary_simpleExcision(tGrid *grid, int unew, int upre);
 void set_boundary_constant(tPointList *PL, int unew, int upre);
+void set_boundary_value(tPointList *PL, int ui, double value);
+void set_boundary_normalderiv_leftBound(tPointList *PL, int direc, int ui, 
+                                        double deriv);
+void set_boundary_normalderiv_rightBound(tPointList *PL, int direc, int ui, 
+                                         double deriv);
