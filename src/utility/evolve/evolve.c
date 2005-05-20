@@ -121,7 +121,7 @@ int evolve(tGrid *grid)
 
       /* make temporary varlist containing only the current variable */
       var = vlalloc(grid);
-      vlpush(var, u_c->index[j]);
+      vlpush( var, IndComponent0(u_c->index[j]) );
       enablevarlist(var);
 
       /* duplicate var, to create var_change */
@@ -132,7 +132,7 @@ int evolve(tGrid *grid)
         tBox *box = grid->box[b];
         double *old = box->v[u_p->index[j]];
         double *new = box->v[u_c->index[j]];
-        double *ch = box->v[change->index[0]];
+        double *ch = box->v[change->index[VarComponent(u_c->index[j])]];
 
         /* loop over all points and write into var_change */
         forallpoints(box, i)

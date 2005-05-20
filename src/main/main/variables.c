@@ -309,8 +309,7 @@ tVarList *vlduplicate(tVarList *v)
   tVarList *u = vlalloc(v->grid);
 
   for (i = 0; i < v->n; i++) 
-    if (VarComponent(v->index[i]) == 0)
-      vlpush(u, v->index[i]);
+    vlpushone(u, v->index[i]);
 
   return u;
 }
