@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 14.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 26.5.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -21,6 +21,7 @@ int bi;
 
 int addlinear = (dt != 0.0l);
 int usepsi = 1;
+int useDD               = Getv("BSSN_useDD", "yes");
 double forceKzerofactor = Getv("BSSN_forceKzero", "no");
 int subtractA           = Getv("BSSN_subtractA", "yes");
 int normalizedetg       = Getv("BSSN_normalizedetg", "yes");
@@ -641,6 +642,35 @@ double Rphi33;
 
 /* Jetzt geht's los! */
 
+
+/* conditional */
+if (useDD) {
+
+
+allDerivsOf_Sab(box, index_g11,                     Ind("ADMvars_dgxxx"), Ind("ADMvars_ddgxxxx")); 
+
+
+FirstDerivsOf_Sab(box, index_A11, Ind("ADMvars_dKxxx")); 
+
+
+allDerivsOf_S(box, index_phi,                     Ind("BSSN_dphix"), Ind("BSSN_ddphixx")); 
+
+
+FirstDerivsOf_Sa(box, index_G1, Ind("BSSN_dGxx")); 
+
+
+FirstDerivsOf_S(box, index_K, Ind("BSSN_dKx")); 
+
+
+allDerivsOf_S(box, index_alpha,                     Ind("BSSN_dalpx"), Ind("BSSN_ddalpxx")); 
+
+
+allDerivsOf_Sa(box, index_beta1,                     Ind("BSSN_dbetaxx"), Ind("BSSN_ddbetaxxx")); 
+
+
+} else { /* if (!useDD) */
+
+
 FirstAndSecondDerivsOf_Sab(box, index_g11,                     Ind("ADMvars_dgxxx"), Ind("ADMvars_ddgxxxx")); 
 
 
@@ -660,6 +690,10 @@ FirstAndSecondDerivsOf_S(box, index_alpha,                     Ind("BSSN_dalpx")
 
 
 FirstAndSecondDerivsOf_Sa(box, index_beta1,                     Ind("BSSN_dbetaxx"), Ind("BSSN_ddbetaxxx")); 
+
+}
+/* if (useDD) */
+
 
 
 forallpoints(box, ijk) { 
@@ -3372,4 +3406,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2270,  n/ = 58,  n+ = 2066, n = 4394, O = 1 */
+/* nvars = 215, n* = 2276,  n/ = 64,  n+ = 2066, n = 4406, O = 1 */
