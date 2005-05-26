@@ -83,6 +83,9 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
     ddu[2][1] = u12;   ddu[2][2] = u22;   ddu[2][3] = u23;  
     ddu[3][1] = u13;   ddu[3][2] = u23;   ddu[3][3] = u33;  
 
+    if( box->ddX_dxdx[1][1][1] == NULL )
+      errorexit("cart_partial_all: box->ddX_dxdx[i][m][n] = NULL.");
+
     /* loop over all points */
     forallpoints(box,ind)
     {
@@ -108,7 +111,6 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
         {
           ddv[m][n] = 0.0;
 
-          //errorexit("cart_partial_all: box->ddX_dxdx[i][m][n] is needed.");
           for(i=1; i<=3; i++)
             ddv[m][n] += box->ddX_dxdx[i][m][n]((void *) box, X,Y,Z) * du[i][ind];
 
