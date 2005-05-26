@@ -30,7 +30,7 @@ typedef struct tBOX {
   double (*x_of_X[4])(void *aux, double X, double Y, double Z);	    /* func to compute x from X */
   double (*dX_dx[4][4])(void *aux, double X, double Y, double Z);	    /* dX_l_{spec}/dx_m_{cart} */
   void (*Sing_d_dx[4])(void *aux, void *vx, void *v1, void *v2, void *v3);  /* func to compute d/dx_m_{cart} at singular points */
-  // double (*dX_dxdx[4][4][4])(void *aux, double Z, double Y, double Z); /* d^2X_l_{spec}/(dx_m_{cart} dx_n_{cart}) */
+  double (*ddX_dxdx[4][4][4])(void *aux, double X, double Y, double Z); /* d^2X_l_{spec}/(dx_m_{cart} dx_n_{cart}) */
   double *F1;		/* filter matrix for direction 1 */
   double *F2;		/* filter matrix for direction 2 */
   double *F3;		/* filter matrix for direction 3 */

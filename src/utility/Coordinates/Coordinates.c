@@ -42,26 +42,26 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       //box->Sing_d_dx[1] = set_d_dx_at_rhoEQzero;
       //box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero;
       /*
-      box->dX_dxdx[1][1][1] = drho_dxdx;
-      box->dX_dxdx[1][1][2] = drho_dxdy;
-      box->dX_dxdx[1][1][3] = zero_of_xyz;
-      box->dX_dxdx[1][2][2] = drho_dydy;
-      box->dX_dxdx[1][2][3] = zero_of_xyz;
-      box->dX_dxdx[1][3][3] = zero_of_xyz;
+      box->ddX_dxdx[1][1][1] = drho_dxdx;
+      box->ddX_dxdx[1][1][2] = drho_dxdy;
+      box->ddX_dxdx[1][1][3] = zero_of_xyz;
+      box->ddX_dxdx[1][2][2] = drho_dydy;
+      box->ddX_dxdx[1][2][3] = zero_of_xyz;
+      box->ddX_dxdx[1][3][3] = zero_of_xyz;
 
-      box->dX_dxdx[2][1][1] = dphi_dxdx;
-      box->dX_dxdx[2][1][2] = dphi_dxdy;
-      box->dX_dxdx[2][1][3] = zero_of_xyz;
-      box->dX_dxdx[2][2][2] = dphi_dydy;
-      box->dX_dxdx[2][2][3] = zero_of_xyz;
-      box->dX_dxdx[2][3][3] = zero_of_xyz;
+      box->ddX_dxdx[2][1][1] = dphi_dxdx;
+      box->ddX_dxdx[2][1][2] = dphi_dxdy;
+      box->ddX_dxdx[2][1][3] = zero_of_xyz;
+      box->ddX_dxdx[2][2][2] = dphi_dydy;
+      box->ddX_dxdx[2][2][3] = zero_of_xyz;
+      box->ddX_dxdx[2][3][3] = zero_of_xyz;
 
-      box->dX_dxdx[3][1][1] = zero_of_xyz;
-      box->dX_dxdx[3][1][2] = zero_of_xyz;
-      box->dX_dxdx[3][1][3] = zero_of_xyz;
-      box->dX_dxdx[3][2][2] = zero_of_xyz;
-      box->dX_dxdx[3][2][3] = zero_of_xyz;
-      box->dX_dxdx[3][3][3] = zero_of_xyz;
+      box->ddX_dxdx[3][1][1] = zero_of_xyz;
+      box->ddX_dxdx[3][1][2] = zero_of_xyz;
+      box->ddX_dxdx[3][1][3] = zero_of_xyz;
+      box->ddX_dxdx[3][2][2] = zero_of_xyz;
+      box->ddX_dxdx[3][2][3] = zero_of_xyz;
+      box->ddX_dxdx[3][3][3] = zero_of_xyz;
       */
     }
     if( Getv(str, "PolarCE") )

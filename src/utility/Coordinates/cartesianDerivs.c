@@ -56,7 +56,7 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
 
 
 /* compute du/dx_m and d^2u/(dx_m dx_n) where m,n=1,2,3 */
-/* Note dX_dxdx[l][m][n] = dX_l/(dx_m dx_n) where x_m is the mth 
+/* Note ddX_dxdx[l][m][n] = dX_l/(dx_m dx_n) where x_m is the mth 
    cartesian coord, i.e x_m=(x,y,z) and X_l is e.g. X_l=(rho,phi,z)*/
 void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
                       double *u11, double *u12, double *u13,
@@ -80,7 +80,8 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
 
     du[1] = u1;        du[2] = u2;        du[3] = u3;
     ddu[1][1] = u11;   ddu[1][2] = u12;   ddu[1][3] = u13;  
-    ddu[2][2] = u22;   ddu[2][3] = u23;   ddu[3][3] = u33;  
+    ddu[2][1] = u12;   ddu[2][2] = u22;   ddu[2][3] = u23;  
+    ddu[3][1] = u13;   ddu[3][2] = u23;   ddu[3][3] = u33;  
 
     /* loop over all points */
     forallpoints(box,ind)
@@ -103,16 +104,16 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
         for(i=1; i<=3; i++)
           dv[m] += box->dX_dx[i][m]((void *) box, X,Y,Z)  *  du[i][ind];
 
-        for(n=1; n<=3; n++)
+        for(n=m; n<=3; n++)
         {
           ddv[m][n] = 0.0;
 
-          errorexit("cart_partial_all: box->dX_dxdx[i][m][n] is needed.");
-          //for(i=1; i<=3; i++)
-          //  ddv[m][n] += box->dX_dxdx[i][m][n]((void *) box, X,Y,Z) * du[i][ind];
+          //errorexit("cart_partial_all: box->ddX_dxdx[i][m][n] is needed.");
+          for(i=1; i<=3; i++)
+            ddv[m][n] += box->ddX_dxdx[i][m][n]((void *) box, X,Y,Z) * du[i][ind];
 
           for(i=1; i<=3; i++)
-            for(j=i; j<=3; j++)
+            for(j=1; j<=3; j++)
               ddv[m][n] += box->dX_dx[i][m]((void *) box, X,Y,Z) *
                            box->dX_dx[j][n]((void *) box, X,Y,Z) *
                            ddu[i][j][ind];
@@ -124,7 +125,7 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         du[m][ind] = dv[m];
         
-        for(n=1; n<=3; n++)
+        for(n=m; n<=3; n++)
           ddu[m][n][ind] = ddv[m][n];
       }
     } /* end loop over all points */
