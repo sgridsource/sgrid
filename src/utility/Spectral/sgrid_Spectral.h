@@ -24,6 +24,10 @@ void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
                     void (*coeffs_of_deriv)(double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) );
+void initdiffmatrix2(double a, double b, double *DD, int n1,
+                    void (*get_coeffs)(double *,double *, int),
+                    void (*coeffs_of_2ndderiv)(double, double, double *,double *, int),
+                    void (*eval_onPoints)(double *,double *, int) );
 void diffmat_deriv(double *D, double *u, double *du, int n);
 
 /* Functions from filters.c */

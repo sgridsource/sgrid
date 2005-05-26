@@ -6,7 +6,7 @@
 
 
 
-/* init a n1*n1 diff. matrix */
+/* init the n1*n1 diff. matrices D and DD */
 void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
                     void (*coeffs_of_deriv)(double, double, double *,double *, int),
@@ -49,6 +49,44 @@ void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
     /* set DD */
     for(i=0; i<n1; i++) DD[n1*i + j] = d[i];
 
+    u[j]=0.0;
+  }
+
+  free(u);
+  free(c);
+  free(d);
+}
+
+
+/* init the diff. matrix DD for second derivs only */
+void initdiffmatrix2(double a, double b, double *DD, int n1,
+                    void (*get_coeffs)(double *,double *, int),
+                    void (*coeffs_of_2ndderiv)(double, double, double *,double *, int),
+                    void (*eval_onPoints)(double *,double *, int) )
+{
+  int i,j;
+  double *u;
+  double *c;
+  double *d;
+
+  u = (double *) calloc(n1, sizeof(double));
+  c = (double *) calloc(n1, sizeof(double));
+  d = (double *) calloc(n1, sizeof(double));
+
+  if( !(u && c && d) ) errorexit("initdiffmatrix: out of memory for u, c, d");
+
+
+  /* read matrix from functions */
+  for(j=0; j<n1; j++)
+  {
+    u[j]=1.0;
+    get_coeffs(c, u, n1-1);
+    coeffs_of_2ndderiv(a, b,  c, d, n1-1);
+    eval_onPoints(d, c, n1-1);
+    
+    /* set DD */
+    for(i=0; i<n1; i++) DD[n1*i + j] = c[i];
+    
     u[j]=0.0;
   }
 
