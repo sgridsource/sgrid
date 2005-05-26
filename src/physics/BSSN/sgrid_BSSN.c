@@ -41,6 +41,8 @@ int sgrid_BSSN(void)
   AddVar("BSSN_ddbeta", "I(jk)","2nd deriv of shift");
     
   /* parameters */
+  AddPar("BSSN_useDD", "no",
+         "wether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BSSN_densitizedLapse", "no", 
   "wether we evolve a densitized lapse instead of ADM alpha "
   "[no,yes,1+log_withoutShift]");

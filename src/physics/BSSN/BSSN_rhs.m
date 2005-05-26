@@ -19,6 +19,24 @@ variables = {g[a,b],  A[a,b],  G[a],  K,  phi,   alpha,  beta[a],  B[a],
 (* compute in this order *)
 tocompute = {
 
+  Cif == useDD,
+
+  Cinstruction == "allDerivsOf_Sab(box, index_g11, \
+                    Ind(\"ADMvars_dgxxx\"), Ind(\"ADMvars_ddgxxxx\"));",
+  Cinstruction == "FirstDerivsOf_Sab(box, index_A11, Ind(\"ADMvars_dKxxx\"));",
+
+  Cinstruction == "allDerivsOf_S(box, index_phi, \
+                    Ind(\"BSSN_dphix\"), Ind(\"BSSN_ddphixx\"));",
+  Cinstruction == "FirstDerivsOf_Sa(box, index_G1, Ind(\"BSSN_dGxx\"));",
+  Cinstruction == "FirstDerivsOf_S(box, index_K, Ind(\"BSSN_dKx\"));",
+
+  Cinstruction == "allDerivsOf_S(box, index_alpha, \
+                    Ind(\"BSSN_dalpx\"), Ind(\"BSSN_ddalpxx\"));",
+  Cinstruction == "allDerivsOf_Sa(box, index_beta1, \
+                    Ind(\"BSSN_dbetaxx\"), Ind(\"BSSN_ddbetaxxx\"));",
+
+  Cif == else,
+
   Cinstruction == "FirstAndSecondDerivsOf_Sab(box, index_g11, \
                     Ind(\"ADMvars_dgxxx\"), Ind(\"ADMvars_ddgxxxx\"));",
   Cinstruction == "FirstDerivsOf_Sab(box, index_A11, Ind(\"ADMvars_dKxxx\"));",
@@ -32,6 +50,8 @@ tocompute = {
                     Ind(\"BSSN_dalpx\"), Ind(\"BSSN_ddalpxx\"));",
   Cinstruction == "FirstAndSecondDerivsOf_Sa(box, index_beta1, \
                     Ind(\"BSSN_dbetaxx\"), Ind(\"BSSN_ddbetaxxx\"));",
+
+  Cif == end,
 
   (* loop of all points *)
   Cinstruction == "forallpoints(box, ijk) {",
@@ -333,6 +353,7 @@ BeginCFunction[] := Module[{},
   pr["int addlinear = (dt != 0.0l);\n"];
   pr["int usepsi = 1;\n"];
 
+  pr["int useDD               = Getv(\"BSSN_useDD\", \"yes\");\n"];
   pr["double forceKzerofactor = Getv(\"BSSN_forceKzero\", \"no\");\n"];
   pr["int subtractA           = Getv(\"BSSN_subtractA\", \"yes\");\n"];
   pr["int normalizedetg       = Getv(\"BSSN_normalizedetg\", \"yes\");\n"];
