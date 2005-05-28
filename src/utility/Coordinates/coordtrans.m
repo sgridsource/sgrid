@@ -31,6 +31,7 @@ IncludeAndDefine[] := Module[{},
   pr["#define Sin(x)     (sin((double) (x)))\n"];
   pr["#define Cos(x)     (cos((double) (x)))\n"];
   pr["#define Csc(x)     (1.0/sin((double) (x)))\n"];
+  pr["#define Cot(x)     (1.0/tan((double) (x)))\n"];
   pr["#define pow2(x)    ((x)*(x))\n"];
   pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
   pr["#define Cal(x,y,z) ((x)?(y):(z))\n\n"];
@@ -68,7 +69,7 @@ prxOfX := Module[{xOfXYZ, fs, rs},
   pr["/* coord transforms */\n"];
   For[i = 1, i <= 3, i++,
     xOfXYZ = x[i] /. ToXYZrule[i];
-    fs = StringForm["``_of``(``)\n",
+    fs = StringForm["double ``_of``(``)\n",
                     x[i], CoordTransfName, FuncArgs];
     rs = StringForm["return ``;\n", CForm[xOfXYZ]];
     pr[fs];
@@ -86,7 +87,7 @@ prdXdx := Module[{dXdx, fs, rs},
   pr["/* 1st derivs */\n"];
   For[i = 1, i <= 3, i++,
     For[j = 1, j <= 3, j++,
-      fs = StringForm["d``_``_d``(``)\n",
+      fs = StringForm["double d``_``_d``(``)\n",
                       X[i], CoordTransfName, x[j], FuncArgs];
       dXdx[i,j] = D[ X[i] /. Toxyzrule[i], x[j] ];
       dXdx[i,j] = dXdx[i,j] /. ToXYZ;
@@ -111,7 +112,7 @@ prddXdxdx := Module[{ddXdxdx, fs, rs},
   For[i = 1, i <= 3, i++,
     For[j = 1, j <= 3, j++,
       For[k = j, k <= 3, k++,
-        fs = StringForm["dd``_``_d``d``(``)\n",
+        fs = StringForm["double dd``_``_d``d``(``)\n",
                         X[i], CoordTransfName, x[j], x[k], FuncArgs];
         ddXdxdx[i,j,k] = D[ X[i] /. Toxyzrule[i], x[j],x[k] ];
         ddXdxdx[i,j,k] = ddXdxdx[i,j,k] /. ToXYZ;
