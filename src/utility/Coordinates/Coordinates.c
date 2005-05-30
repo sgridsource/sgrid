@@ -9,6 +9,7 @@
 #define Sin(x)     (sin((double) (x)))
 #define Cos(x)     (cos((double) (x)))
 #define Csc(x)     (1.0/sin((double) (x)))
+#define Tan(x)     (tan((double) (x)))
 #define Cot(x)     (1.0/tan((double) (x)))
 #define pow2(x)    ((x)*(x))
 #define pow2inv(x) (1.0/((x)*(x)))
@@ -147,6 +148,27 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dphicompactSphericalDF_dx;
       box->dX_dx[3][2] = dphicompactSphericalDF_dy;
       box->dX_dx[3][3] = zero_of_xyz;
+
+      box->ddX_dxdx[1][1][1] = ddxi_compactSphericalDF_dxdx;
+      box->ddX_dxdx[1][1][2] = ddxi_compactSphericalDF_dxdy;
+      box->ddX_dxdx[1][1][3] = ddxi_compactSphericalDF_dxdz;
+      box->ddX_dxdx[1][2][2] = ddxi_compactSphericalDF_dydy;
+      box->ddX_dxdx[1][2][3] = ddxi_compactSphericalDF_dydz;
+      box->ddX_dxdx[1][3][3] = ddxi_compactSphericalDF_dzdz;
+
+      box->ddX_dxdx[2][1][1] = ddthm_compactSphericalDF_dxdx;
+      box->ddX_dxdx[2][1][2] = ddthm_compactSphericalDF_dxdy;
+      box->ddX_dxdx[2][1][3] = ddthm_compactSphericalDF_dxdz;
+      box->ddX_dxdx[2][2][2] = ddthm_compactSphericalDF_dydy;
+      box->ddX_dxdx[2][2][3] = ddthm_compactSphericalDF_dydz;
+      box->ddX_dxdx[2][3][3] = ddthm_compactSphericalDF_dzdz;
+
+      box->ddX_dxdx[3][1][1] = ddphi_compactSphericalDF_dxdx;
+      box->ddX_dxdx[3][1][2] = ddphi_compactSphericalDF_dxdy;
+      box->ddX_dxdx[3][1][3] = ddphi_compactSphericalDF_dxdz;
+      box->ddX_dxdx[3][2][2] = ddphi_compactSphericalDF_dydy;
+      box->ddX_dxdx[3][2][3] = ddphi_compactSphericalDF_dydz;
+      box->ddX_dxdx[3][3][3] = ddphi_compactSphericalDF_dzdz;
     }
     if( Getv(str, "tan_stretch") )
     {
@@ -684,8 +706,126 @@ double dphicompactSphericalDF_dy(void *aux, double xi, double thm, double phi)
   return dphiSphericalDF_dy(aux, r_of_xi(xi), thm, phi);
 }
 
-/* second coord. derivs are currently not needed */
+/* second coord. derivs */
+double ddxi_compactSphericalDF_dxdx(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (2.*Power(Cos(0.5*PI*xi),4)*(Power(Cos(theta),4)*Power(r0 + Tan(0.5*PI*xi),2) + Power(Cos(theta),2)*(1. + Power(r0,2) - 2.*r0*(r0 + Tan(0.5*PI*xi)) - Power(Cos(phi),2)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2) + 2.*Power(Sin(phi),2)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2)) + Power(Sin(theta),2)*(2.*r0*Power(Cos(phi),2)*(r0 + Tan(0.5*PI*xi)) - 2.*Power(Cos(phi),4)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2) + Power(Sin(phi),4)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2) - Power(Sin(phi),2)*(-1. + Power(r0,2) + 2.*r0*Tan(0.5*PI*xi) + Power(Cos(phi),2)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2)))))/(PI*(r0 + Tan(0.5*PI*xi)));
+}
 
+double ddxi_compactSphericalDF_dxdy(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (Power(Cos(0.5*PI*xi),2)*Sin(2.*phi)*Power(Sin(theta),2)*(-2. + Cos(PI*xi) - r0*Sin(PI*xi)))/(PI*(r0 + Tan(0.5*PI*xi)));
+}
+
+double ddxi_compactSphericalDF_dxdz(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (Cos(phi)*Power(Cos(0.5*PI*xi),2)*Sin(2.*theta)*(-2. + Cos(PI*xi) - r0*Sin(PI*xi)))/(PI*(r0 + Tan(0.5*PI*xi)));
+}
+
+double ddxi_compactSphericalDF_dydy(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (2.*Power(Cos(0.5*PI*xi),4)*(Power(Cos(theta),4)*Power(r0 + Tan(0.5*PI*xi),2) + Power(Cos(theta),2)*(1. + Power(r0,2) - 2.*r0*(r0 + Tan(0.5*PI*xi)) + 2.*Power(Cos(phi),2)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2) - Power(Sin(phi),2)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2)) + Power(Sin(theta),2)*(2.*r0*Power(Sin(phi),2)*(r0 + Tan(0.5*PI*xi)) + Power(Cos(phi),4)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2) - 2.*Power(Sin(phi),4)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2) - Power(Cos(phi),2)*(-1. + Power(r0,2) + 2.*r0*Tan(0.5*PI*xi) + Power(Sin(phi),2)*Power(Sin(theta),2)*Power(r0 + Tan(0.5*PI*xi),2)))))/(PI*(r0 + Tan(0.5*PI*xi)));
+}
+
+double ddxi_compactSphericalDF_dydz(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (Power(Cos(0.5*PI*xi),2)*Sin(phi)*Sin(2.*theta)*(-2. + Cos(PI*xi) - r0*Sin(PI*xi)))/(PI*(r0 + Tan(0.5*PI*xi)));
+}
+
+double ddxi_compactSphericalDF_dzdz(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (-2.*Power(Cos(0.5*PI*xi),2)*(Cos(2.*theta) + Power(Cos(theta),2)*(-Cos(PI*xi) + r0*Sin(PI*xi))))/(PI*(r0 + Tan(0.5*PI*xi)));
+}
+
+double ddthm_compactSphericalDF_dxdx(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return -(((Cos(2.*phi) - Power(Cos(phi),2)*Cos(2.*theta))*Power(Cos(0.5*PI*xi),2)*Cot(theta))/Power(r0*Cos(0.5*PI*xi) + Sin(0.5*PI*xi),2));
+}
+
+double ddthm_compactSphericalDF_dxdy(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (0.5*(-2. + Cos(2.*theta))*Power(Cos(0.5*PI*xi),2)*Cot(theta)*Sin(2.*phi))/Power(r0*Cos(0.5*PI*xi) + Sin(0.5*PI*xi),2);
+}
+
+double ddthm_compactSphericalDF_dxdz(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return -((Cos(phi)*Cos(2.*theta)*Power(Cos(0.5*PI*xi),2))/Power(r0*Cos(0.5*PI*xi) + Sin(0.5*PI*xi),2));
+}
+
+double ddthm_compactSphericalDF_dydy(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (Power(Cos(0.5*PI*xi),2)*Cot(theta)*(Cos(2.*phi) + Cos(2.*theta)*Power(Sin(phi),2)))/Power(r0*Cos(0.5*PI*xi) + Sin(0.5*PI*xi),2);
+}
+
+double ddthm_compactSphericalDF_dydz(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return -((Cos(2.*theta)*Power(Cos(0.5*PI*xi),2)*Sin(phi))/Power(r0*Cos(0.5*PI*xi) + Sin(0.5*PI*xi),2));
+}
+
+double ddthm_compactSphericalDF_dzdz(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (Power(Cos(0.5*PI*xi),2)*Sin(2.*theta))/Power(r0*Cos(0.5*PI*xi) + Sin(0.5*PI*xi),2);
+}
+
+double ddphi_compactSphericalDF_dxdx(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (Power(Csc(theta),2)*Sin(2.*phi))/Power(r0 + Tan(0.5*PI*xi),2);
+}
+
+double ddphi_compactSphericalDF_dxdy(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return -((Cos(2.*phi)*Power(Csc(theta),2))/Power(r0 + Tan(0.5*PI*xi),2));
+}
+
+double ddphi_compactSphericalDF_dxdz(void *aux, double xi, double thm, double phi)
+{
+return 0.0;
+}
+
+double ddphi_compactSphericalDF_dydy(void *aux, double xi, double thm, double phi)
+{
+tBox *box = (tBox *) aux;  double N = box->n2;  double theta = thm + PI/N;  static double r0=-1.0;
+   if(r0 < 0.0)  {    r0=Getd("compactSphericalDF_r0");    printf(" Coordinates: compactSphericalDF_r0=%f\n", r0);  }
+return (-2.*Cos(phi)*Power(Csc(theta),2)*Sin(phi))/Power(r0 + Tan(0.5*PI*xi),2);
+}
+
+double ddphi_compactSphericalDF_dydz(void *aux, double xi, double thm, double phi)
+{
+return 0.0;
+}
+
+double ddphi_compactSphericalDF_dzdz(void *aux, double xi, double thm, double phi)
+{
+return 0.0;
+}
 /* end: compactSphericalDF coordinates: */
 
 

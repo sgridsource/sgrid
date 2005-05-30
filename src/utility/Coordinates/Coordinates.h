@@ -79,6 +79,24 @@ double dthmcompactSphericalDF_dy(void *aux, double xi, double thm, double phi);
 double dthmcompactSphericalDF_dz(void *aux, double xi, double thm, double phi);
 double dphicompactSphericalDF_dx(void *aux, double xi, double thm, double phi);
 double dphicompactSphericalDF_dy(void *aux, double xi, double thm, double phi);
+double ddxi_compactSphericalDF_dxdx(void *aux, double xi, double thm, double phi);
+double ddxi_compactSphericalDF_dxdy(void *aux, double xi, double thm, double phi);
+double ddxi_compactSphericalDF_dxdz(void *aux, double xi, double thm, double phi);
+double ddxi_compactSphericalDF_dydy(void *aux, double xi, double thm, double phi);
+double ddxi_compactSphericalDF_dydz(void *aux, double xi, double thm, double phi);
+double ddxi_compactSphericalDF_dzdz(void *aux, double xi, double thm, double phi);
+double ddthm_compactSphericalDF_dxdx(void *aux, double xi, double thm, double phi);
+double ddthm_compactSphericalDF_dxdy(void *aux, double xi, double thm, double phi);
+double ddthm_compactSphericalDF_dxdz(void *aux, double xi, double thm, double phi);
+double ddthm_compactSphericalDF_dydy(void *aux, double xi, double thm, double phi);
+double ddthm_compactSphericalDF_dydz(void *aux, double xi, double thm, double phi);
+double ddthm_compactSphericalDF_dzdz(void *aux, double xi, double thm, double phi);
+double ddphi_compactSphericalDF_dxdx(void *aux, double xi, double thm, double phi);
+double ddphi_compactSphericalDF_dxdy(void *aux, double xi, double thm, double phi);
+double ddphi_compactSphericalDF_dxdz(void *aux, double xi, double thm, double phi);
+double ddphi_compactSphericalDF_dydy(void *aux, double xi, double thm, double phi);
+double ddphi_compactSphericalDF_dydz(void *aux, double xi, double thm, double phi);
+double ddphi_compactSphericalDF_dzdz(void *aux, double xi, double thm, double phi);
 
 /* tan_stretch coordinates: */
 double x_of_xs(double xs);
