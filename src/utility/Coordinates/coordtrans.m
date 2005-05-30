@@ -93,7 +93,9 @@ prdXdx := Module[{dXdx, fs, rs},
       dXdx[i,j] = dXdx[i,j] /. ToXYZ;
       dXdx[i,j] = dXdx[i,j] /. ToXYZ;
       dXdx[i,j] = dXdx[i,j] /. ToXYZ;
-      dXdx[i,j] = N[Simplify[PowerExpand[Simplify[ dXdx[i,j] ]]]];
+      dXdx[i,j] = Simplify[PowerExpand[Simplify[ dXdx[i,j] ]]];
+      dXdx[i,j] = Simplify[ dXdx[i,j] ];
+      dXdx[i,j] = N[ dXdx[i,j], 20 ] /. -1. xxx_ -> -xxx;
       rs = StringForm["return ``;\n", CForm[dXdx[i,j]]];
       pr[fs];
       pr["{\n"];
@@ -118,7 +120,9 @@ prddXdxdx := Module[{ddXdxdx, fs, rs},
         ddXdxdx[i,j,k] = ddXdxdx[i,j,k] /. ToXYZ;
         ddXdxdx[i,j,k] = ddXdxdx[i,j,k] /. ToXYZ;
         ddXdxdx[i,j,k] = ddXdxdx[i,j,k] /. ToXYZ;
-        ddXdxdx[i,j,k] = N[Simplify[PowerExpand[Simplify[ ddXdxdx[i,j,k] ]]]];
+        ddXdxdx[i,j,k] = Simplify[PowerExpand[Simplify[ ddXdxdx[i,j,k] ]]];
+        ddXdxdx[i,j,k] = Simplify[ ddXdxdx[i,j,k] ];
+        ddXdxdx[i,j,k] = N[ ddXdxdx[i,j,k], 20 ] /. -1. xxx_ -> -xxx;
         rs = StringForm["return ``;\n", CForm[ddXdxdx[i,j,k]]];
         pr[fs];
         pr["{\n"];
