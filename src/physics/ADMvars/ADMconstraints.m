@@ -105,7 +105,9 @@ tocompute = {
                    fabs[ginv[b,c] codelK[a,b,c]],
     Cif == end,
 
-    normmom[a] == Cal[denom[a] <= 0.0, 0.0, mom[a]/denom[a]],
+    denom == denom1 + denom2 + denom3,
+
+    normmom[a] == Cal[denom <= 0.0, 0.0, mom[a]/denom],
  
   Cif == end
 }

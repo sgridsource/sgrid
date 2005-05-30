@@ -1,5 +1,5 @@
 /* ADMconstraints.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 10.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 30.5.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -2880,19 +2880,24 @@ fabs(cdKudd113 + cdKudd223 + cdKudd333) +
 /* if (TermByTerm) */
 
 
+denom
+=
+denom1 + denom2 + denom3
+;
+
 normmom1[ijk]
 =
-Cal(denom1 <= 0.,0.,mom1[ijk]/denom1)
+Cal(denom <= 0.,0.,mom1[ijk]/denom)
 ;
 
 normmom2[ijk]
 =
-Cal(denom2 <= 0.,0.,mom2[ijk]/denom2)
+Cal(denom <= 0.,0.,mom2[ijk]/denom)
 ;
 
 normmom3[ijk]
 =
-Cal(denom3 <= 0.,0.,mom3[ijk]/denom3)
+Cal(denom <= 0.,0.,mom3[ijk]/denom)
 ;
 
 }
@@ -2906,4 +2911,4 @@ Cal(denom3 <= 0.,0.,mom3[ijk]/denom3)
 }  /* end of function */
 
 /* ADMconstraints.c */
-/* nvars = 103, n* = 1992,  n/ = 36,  n+ = 1934, n = 3962, O = 1 */
+/* nvars = 103, n* = 1992,  n/ = 36,  n+ = 1936, n = 3964, O = 1 */
