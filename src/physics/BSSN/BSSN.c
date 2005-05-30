@@ -219,7 +219,7 @@ int filter_VarList(tVarList *vl)
   forallboxes(grid,bi)
   {
     tBox *box = grid->box[bi];
-    double *BP = calloc(boxBoundaryPointList->npoints[bi], sizeof( double ) );
+//    double *BP = calloc(boxBoundaryPointList->npoints[bi], sizeof( double ) );
     
     /* for all variables */
     for (j = 0; j < vl->n; j++)
@@ -244,9 +244,33 @@ int filter_VarList(tVarList *vl)
       //if(boxBoundaryPointList->npoints[bi]>0)
       //  forPointList_inbox(boxBoundaryPointList, box, pi , ijk)
       //    u[ijk]=BP[pi];
+
+      /* true simpleExcision hack */
+/*
+      {
+        int n1=box->n1;
+        int n2=box->n2;
+        int n3=box->n3;
+        int i,j,k;
+
+        forplane1(i,j,k, n1,n2,n3, 0)
+        {
+          ijk=Index(i,j,k);
+          u[ijk] = u[ijk+1];
+        }
+      }
+*/
     }
-    
-    free(BP);
+
+    /* Hack: set deriv of ui on ExcisionBoundary */
+/*
+    {
+      int ui = Ind("alpha");
+      set_boundary_normalderiv_leftBound(selectedBoundaryPointList, 
+                                         1, ui, 0.0);
+    }
+*/
+//    free(BP);
   }
   return 0;
 }
