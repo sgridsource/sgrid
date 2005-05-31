@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 26.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 31.5.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -25,6 +25,7 @@ int useDD               = Getv("BSSN_useDD", "yes");
 double forceKzerofactor = Getv("BSSN_forceKzero", "no");
 int subtractA           = Getv("BSSN_subtractA", "yes");
 int normalizedetg       = Getv("BSSN_normalizedetg", "yes");
+double YoTermFactor    =  Getd("BSSN_YoTermFactor");
 int nonconstantlapse    =!Getv("BSSN_lapse", "constant");
 int oploglapse          = Getv("BSSN_lapse", "1+log");
 int oploglapse2         = Getv("BSSN_lapse", "1+log2");
@@ -2595,7 +2596,7 @@ divAinv1
 -6.*(Ainv11*df1 + Ainv12*df2 + Ainv13*df3) - Ainv11*gamma111 - 
   Ainv12*(gamma112 + gamma121) - Ainv22*gamma122 - 
   Ainv13*(gamma113 + gamma131) - Ainv23*(gamma123 + gamma132) - 
-  Ainv33*gamma133 + 0.66666666666666666666666666666666666667*
+  Ainv33*gamma133 + 0.66666666666666666667*
    (ginv11*dK1[ijk] + ginv12*dK2[ijk] + ginv13*dK3[ijk])
 ;
 
@@ -2604,7 +2605,7 @@ divAinv2
 -6.*(Ainv12*df1 + Ainv22*df2 + Ainv23*df3) - Ainv11*gamma211 - 
   Ainv12*(gamma212 + gamma221) - Ainv22*gamma222 - 
   Ainv13*(gamma213 + gamma231) - Ainv23*(gamma223 + gamma232) - 
-  Ainv33*gamma233 + 0.66666666666666666666666666666666666667*
+  Ainv33*gamma233 + 0.66666666666666666667*
    (ginv12*dK1[ijk] + ginv22*dK2[ijk] + ginv23*dK3[ijk])
 ;
 
@@ -2613,13 +2614,13 @@ divAinv3
 -6.*(Ainv13*df1 + Ainv23*df2 + Ainv33*df3) - Ainv11*gamma311 - 
   Ainv12*(gamma312 + gamma321) - Ainv22*gamma322 - 
   Ainv13*(gamma313 + gamma331) - Ainv23*(gamma323 + gamma332) - 
-  Ainv33*gamma333 + 0.66666666666666666666666666666666666667*
+  Ainv33*gamma333 + 0.66666666666666666667*
    (ginv13*dK1[ijk] + ginv23*dK2[ijk] + ginv33*dK3[ijk])
 ;
 
 R
 =
-AA - 0.66666666666666666666666666666666666667*pow2(K[ijk])
+AA - 0.66666666666666666667*pow2(K[ijk])
 ;
 
 divbeta
@@ -2629,22 +2630,22 @@ db11 + db22 + db33
 
 totdivbeta
 =
-0.66666666666666666666666666666666666667*divbeta
+0.66666666666666666667*divbeta
 ;
 
 ootddivbeta1
 =
-0.33333333333333333333333333333333333333*(ddb111 + ddb122 + ddb133)
+0.33333333333333333333*(ddb111 + ddb122 + ddb133)
 ;
 
 ootddivbeta2
 =
-0.33333333333333333333333333333333333333*(ddb121 + ddb222 + ddb233)
+0.33333333333333333333*(ddb121 + ddb222 + ddb233)
 ;
 
 ootddivbeta3
 =
-0.33333333333333333333333333333333333333*(ddb131 + ddb232 + ddb333)
+0.33333333333333333333*(ddb131 + ddb232 + ddb333)
 ;
 
 lieg11
@@ -2762,7 +2763,7 @@ betadK
 
 liephi
 =
-betadf + 0.16666666666666666666666666666666666667*divbeta
+betadf + 0.16666666666666666667*divbeta
 ;
 
 pseudolieG1
@@ -2822,75 +2823,77 @@ lieg33 - 2.*A33[ijk]*alpha[ijk]
 rA11
 =
 lieA11 + psim4*(-cdda11 + R11*alpha[ijk]) + 
-  0.33333333333333333333333333333333333333*trcdda*g11[ijk] + 
-  alpha[ijk]*(-2.*AA11 + psim4*Rphi11 - 
-     0.33333333333333333333333333333333333333*R*g11[ijk] + A11[ijk]*K[ijk])
+  0.33333333333333333333*trcdda*g11[ijk] + 
+  alpha[ijk]*(-2.*AA11 + psim4*Rphi11 - 0.33333333333333333333*R*g11[ijk] + 
+     A11[ijk]*K[ijk])
 ;
 
 rA12
 =
 lieA12 + psim4*(-cdda12 + R12*alpha[ijk]) + 
-  0.33333333333333333333333333333333333333*trcdda*g12[ijk] + 
-  alpha[ijk]*(-2.*AA12 + psim4*Rphi12 - 
-     0.33333333333333333333333333333333333333*R*g12[ijk] + A12[ijk]*K[ijk])
+  0.33333333333333333333*trcdda*g12[ijk] + 
+  alpha[ijk]*(-2.*AA12 + psim4*Rphi12 - 0.33333333333333333333*R*g12[ijk] + 
+     A12[ijk]*K[ijk])
 ;
 
 rA13
 =
 lieA13 + psim4*(-cdda13 + R13*alpha[ijk]) + 
-  0.33333333333333333333333333333333333333*trcdda*g13[ijk] + 
-  alpha[ijk]*(-2.*AA13 + psim4*Rphi13 - 
-     0.33333333333333333333333333333333333333*R*g13[ijk] + A13[ijk]*K[ijk])
+  0.33333333333333333333*trcdda*g13[ijk] + 
+  alpha[ijk]*(-2.*AA13 + psim4*Rphi13 - 0.33333333333333333333*R*g13[ijk] + 
+     A13[ijk]*K[ijk])
 ;
 
 rA22
 =
 lieA22 + psim4*(-cdda22 + R22*alpha[ijk]) + 
-  0.33333333333333333333333333333333333333*trcdda*g22[ijk] + 
-  alpha[ijk]*(-2.*AA22 + psim4*Rphi22 - 
-     0.33333333333333333333333333333333333333*R*g22[ijk] + A22[ijk]*K[ijk])
+  0.33333333333333333333*trcdda*g22[ijk] + 
+  alpha[ijk]*(-2.*AA22 + psim4*Rphi22 - 0.33333333333333333333*R*g22[ijk] + 
+     A22[ijk]*K[ijk])
 ;
 
 rA23
 =
 lieA23 + psim4*(-cdda23 + R23*alpha[ijk]) + 
-  0.33333333333333333333333333333333333333*trcdda*g23[ijk] + 
-  alpha[ijk]*(-2.*AA23 + psim4*Rphi23 - 
-     0.33333333333333333333333333333333333333*R*g23[ijk] + A23[ijk]*K[ijk])
+  0.33333333333333333333*trcdda*g23[ijk] + 
+  alpha[ijk]*(-2.*AA23 + psim4*Rphi23 - 0.33333333333333333333*R*g23[ijk] + 
+     A23[ijk]*K[ijk])
 ;
 
 rA33
 =
 lieA33 + psim4*(-cdda33 + R33*alpha[ijk]) + 
-  0.33333333333333333333333333333333333333*trcdda*g33[ijk] + 
-  alpha[ijk]*(-2.*AA33 + psim4*Rphi33 - 
-     0.33333333333333333333333333333333333333*R*g33[ijk] + A33[ijk]*K[ijk])
+  0.33333333333333333333*trcdda*g33[ijk] + 
+  alpha[ijk]*(-2.*AA33 + psim4*Rphi33 - 0.33333333333333333333*R*g33[ijk] + 
+     A33[ijk]*K[ijk])
 ;
 
 rG1
 =
-pseudolieG1 - 2.*(Ainv11*da1 + Ainv12*da2 + Ainv13*da3 + divAinv1*alpha[ijk])
+pseudolieG1 - 2.*(Ainv11*da1 + Ainv12*da2 + Ainv13*da3 + 
+     divAinv1*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg1 - G1[ijk])
 ;
 
 rG2
 =
-pseudolieG2 - 2.*(Ainv12*da1 + Ainv22*da2 + Ainv23*da3 + divAinv2*alpha[ijk])
+pseudolieG2 - 2.*(Ainv12*da1 + Ainv22*da2 + Ainv23*da3 + 
+     divAinv2*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg2 - G2[ijk])
 ;
 
 rG3
 =
-pseudolieG3 - 2.*(Ainv13*da1 + Ainv23*da2 + Ainv33*da3 + divAinv3*alpha[ijk])
+pseudolieG3 - 2.*(Ainv13*da1 + Ainv23*da2 + Ainv33*da3 + 
+     divAinv3*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg3 - G3[ijk])
 ;
 
 rK
 =
-lieK - trcdda + alpha[ijk]*(AA + 
-     0.33333333333333333333333333333333333333*pow2(K[ijk]))
+lieK - trcdda + alpha[ijk]*(AA + 0.33333333333333333333*pow2(K[ijk]))
 ;
 
 rphi
 =
-liephi - 0.16666666666666666666666666666666666667*alpha[ijk]*K[ijk]
+liephi - 0.16666666666666666667*alpha[ijk]*K[ijk]
 ;
 
 ralpha0
@@ -3165,7 +3168,7 @@ detnginv*(-2.*nA23[ijk]*ng11[ijk]*ng23[ijk] +
 
 aux
 =
--0.33333333333333333333333333333333333333*traceA
+-0.33333333333333333333*traceA
 ;
 
 nA11[ijk]
@@ -3406,4 +3409,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2276,  n/ = 64,  n+ = 2066, n = 4406, O = 1 */
+/* nvars = 215, n* = 2282,  n/ = 64,  n+ = 2072, n = 4418, O = 1 */
