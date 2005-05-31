@@ -25,7 +25,8 @@ int useDD               = Getv("BSSN_useDD", "yes");
 double forceKzerofactor = Getv("BSSN_forceKzero", "no");
 int subtractA           = Getv("BSSN_subtractA", "yes");
 int normalizedetg       = Getv("BSSN_normalizedetg", "yes");
-double YoTermFactor    =  Getd("BSSN_YoTermFactor");
+int GReplacedBydg       = Getv("BSSN_GReplacedBydg", "yes");
+double YoTermFactor     = Getd("BSSN_YoTermFactor");
 int nonconstantlapse    =!Getv("BSSN_lapse", "constant");
 int oploglapse          = Getv("BSSN_lapse", "1+log");
 int oploglapse2         = Getv("BSSN_lapse", "1+log2");
@@ -638,6 +639,9 @@ double Rphi13;
 double Rphi22;
 double Rphi23;
 double Rphi33;
+double undiffdG1;
+double undiffdG2;
+double undiffdG3;
 
 
 
@@ -1889,10 +1893,51 @@ gamma311*ginv11 + (gamma312 + gamma321)*ginv12 +
   (gamma323 + gamma332)*ginv23 + gamma333*ginv33
 ;
 
+
+
+/* conditional */
+if (GReplacedBydg) {
+
+undiffdG1
+=
+Gfromg1
+;
+
+undiffdG2
+=
+Gfromg2
+;
+
+undiffdG3
+=
+Gfromg3
+;
+
+
+} else { /* if (!GReplacedBydg) */
+
+undiffdG1
+=
+G1[ijk]
+;
+
+undiffdG2
+=
+G2[ijk]
+;
+
+undiffdG3
+=
+G3[ijk]
+;
+
+}
+/* if (GReplacedBydg) */
+
+
 R11
 =
-gammado111*Gfromg1 + gammado112*Gfromg2 + gammado113*Gfromg3 + 
-  (-0.5*deldelg1111 + 3.*gamma111*gammado111 + 
+(-0.5*deldelg1111 + 3.*gamma111*gammado111 + 
      2.*(gamma211*gammado121 + gamma311*gammado131) + 
      gamma211*gammado211 + gamma311*gammado311)*ginv11 + 
   (-deldelg1211 + (gamma112 + 2.*gamma121)*gammado111 + 
@@ -1916,7 +1961,8 @@ gammado111*Gfromg1 + gammado112*Gfromg2 + gammado113*Gfromg3 +
   (-0.5*deldelg3311 + gamma113*gammado131 + 
      2.*(gamma131*gammado113 + gamma231*gammado123 + 
         gamma331*gammado133) + gamma213*gammado231 + gamma313*gammado331)*
-   ginv33 + delG11*g11[ijk] + delG12*g12[ijk] + delG13*g13[ijk]
+   ginv33 + gammado111*undiffdG1 + gammado112*undiffdG2 + 
+  gammado113*undiffdG3 + delG11*g11[ijk] + delG12*g12[ijk] + delG13*g13[ijk]
 ;
 
 R12
@@ -1954,10 +2000,11 @@ R12
      gamma123*gammado131 + gamma332*gammado133 + gamma131*gammado213 + 
      gamma231*gammado223 + gamma223*gammado231 + gamma331*gammado233 + 
      gamma323*gammado331)*ginv33 + 
-  0.5*((gammado121 + gammado211)*Gfromg1 + 
-     (gammado122 + gammado212)*Gfromg2 + (gammado123 + gammado213)*Gfromg3 + 
-     delG21*g11[ijk] + (delG11 + delG22)*g12[ijk] + delG23*g13[ijk] + 
-     delG12*g22[ijk] + delG13*g23[ijk])
+  0.5*((gammado121 + gammado211)*undiffdG1 + 
+     (gammado122 + gammado212)*undiffdG2 + 
+     (gammado123 + gammado213)*undiffdG3 + delG21*g11[ijk] + 
+     (delG11 + delG22)*g12[ijk] + delG23*g13[ijk] + delG12*g22[ijk] + 
+     delG13*g23[ijk])
 ;
 
 R12
@@ -1995,10 +2042,11 @@ R12
      gamma113*gammado132 + gamma332*gammado133 + gamma131*gammado213 + 
      gamma231*gammado223 + gamma213*gammado232 + gamma331*gammado233 + 
      gamma313*gammado332)*ginv33 + 
-  0.5*((gammado121 + gammado211)*Gfromg1 + 
-     (gammado122 + gammado212)*Gfromg2 + (gammado123 + gammado213)*Gfromg3 + 
-     delG21*g11[ijk] + (delG11 + delG22)*g12[ijk] + delG23*g13[ijk] + 
-     delG12*g22[ijk] + delG13*g23[ijk])
+  0.5*((gammado121 + gammado211)*undiffdG1 + 
+     (gammado122 + gammado212)*undiffdG2 + 
+     (gammado123 + gammado213)*undiffdG3 + delG21*g11[ijk] + 
+     (delG11 + delG22)*g12[ijk] + delG23*g13[ijk] + delG12*g22[ijk] + 
+     delG13*g23[ijk])
 ;
 
 R13
@@ -2035,10 +2083,11 @@ R13
      gamma233*(gammado123 + gammado231) + gamma131*gammado313 + 
      gamma231*gammado323 + gamma333*(gammado133 + gammado331) + 
      gamma331*gammado333)*ginv33 + 
-  0.5*((gammado131 + gammado311)*Gfromg1 + 
-     (gammado132 + gammado312)*Gfromg2 + (gammado133 + gammado313)*Gfromg3 + 
-     delG31*g11[ijk] + delG32*g12[ijk] + (delG11 + delG33)*g13[ijk] + 
-     delG12*g23[ijk] + delG13*g33[ijk])
+  0.5*((gammado131 + gammado311)*undiffdG1 + 
+     (gammado132 + gammado312)*undiffdG2 + 
+     (gammado133 + gammado313)*undiffdG3 + delG31*g11[ijk] + 
+     delG32*g12[ijk] + (delG11 + delG33)*g13[ijk] + delG12*g23[ijk] + 
+     delG13*g33[ijk])
 ;
 
 R13
@@ -2075,16 +2124,16 @@ R13
      (gamma113 + gamma333)*gammado133 + gamma213*gammado233 + 
      gamma131*gammado313 + gamma231*gammado323 + 
      (gamma313 + gamma331)*gammado333)*ginv33 + 
-  0.5*((gammado131 + gammado311)*Gfromg1 + 
-     (gammado132 + gammado312)*Gfromg2 + (gammado133 + gammado313)*Gfromg3 + 
-     delG31*g11[ijk] + delG32*g12[ijk] + (delG11 + delG33)*g13[ijk] + 
-     delG12*g23[ijk] + delG13*g33[ijk])
+  0.5*((gammado131 + gammado311)*undiffdG1 + 
+     (gammado132 + gammado312)*undiffdG2 + 
+     (gammado133 + gammado313)*undiffdG3 + delG31*g11[ijk] + 
+     delG32*g12[ijk] + (delG11 + delG33)*g13[ijk] + delG12*g23[ijk] + 
+     delG13*g33[ijk])
 ;
 
 R22
 =
-gammado221*Gfromg1 + gammado222*Gfromg2 + gammado223*Gfromg3 + 
-  (-0.5*deldelg1122 + gamma121*gammado112 + gamma221*gammado212 + 
+(-0.5*deldelg1122 + gamma121*gammado112 + gamma221*gammado212 + 
      2.*(gamma112*gammado211 + gamma212*gammado221 + 
         gamma312*gammado231) + gamma321*gammado312)*ginv11 + 
   (-deldelg1222 + gamma121*gammado122 + 
@@ -2109,6 +2158,7 @@ gammado221*Gfromg1 + gammado222*Gfromg2 + gammado223*Gfromg3 +
   (-0.5*deldelg3322 + gamma123*gammado132 + gamma223*gammado232 + 
      2.*(gamma132*gammado213 + gamma232*gammado223 + 
         gamma332*gammado233) + gamma323*gammado332)*ginv33 + 
+  gammado221*undiffdG1 + gammado222*undiffdG2 + gammado223*undiffdG3 + 
   delG21*g12[ijk] + delG22*g22[ijk] + delG23*g23[ijk]
 ;
 
@@ -2146,10 +2196,11 @@ R23
      gamma233*(gammado223 + gammado232) + gamma132*gammado313 + 
      gamma232*gammado323 + gamma333*(gammado233 + gammado332) + 
      gamma332*gammado333)*ginv33 + 
-  0.5*((gammado231 + gammado321)*Gfromg1 + 
-     (gammado232 + gammado322)*Gfromg2 + (gammado233 + gammado323)*Gfromg3 + 
-     delG31*g12[ijk] + delG21*g13[ijk] + delG32*g22[ijk] + 
-     (delG22 + delG33)*g23[ijk] + delG23*g33[ijk])
+  0.5*((gammado231 + gammado321)*undiffdG1 + 
+     (gammado232 + gammado322)*undiffdG2 + 
+     (gammado233 + gammado323)*undiffdG3 + delG31*g12[ijk] + 
+     delG21*g13[ijk] + delG32*g22[ijk] + (delG22 + delG33)*g23[ijk] + 
+     delG23*g33[ijk])
 ;
 
 R23
@@ -2186,16 +2237,16 @@ R23
      gamma133*gammado213 + gamma233*gammado223 + 
      (gamma223 + gamma333)*gammado233 + gamma132*gammado313 + 
      gamma232*gammado323 + (gamma323 + gamma332)*gammado333)*ginv33 + 
-  0.5*((gammado231 + gammado321)*Gfromg1 + 
-     (gammado232 + gammado322)*Gfromg2 + (gammado233 + gammado323)*Gfromg3 + 
-     delG31*g12[ijk] + delG21*g13[ijk] + delG32*g22[ijk] + 
-     (delG22 + delG33)*g23[ijk] + delG23*g33[ijk])
+  0.5*((gammado231 + gammado321)*undiffdG1 + 
+     (gammado232 + gammado322)*undiffdG2 + 
+     (gammado233 + gammado323)*undiffdG3 + delG31*g12[ijk] + 
+     delG21*g13[ijk] + delG32*g22[ijk] + (delG22 + delG33)*g23[ijk] + 
+     delG23*g33[ijk])
 ;
 
 R33
 =
-gammado331*Gfromg1 + gammado332*Gfromg2 + gammado333*Gfromg3 + 
-  (-0.5*deldelg1133 + gamma131*gammado113 + gamma231*gammado213 + 
+(-0.5*deldelg1133 + gamma131*gammado113 + gamma231*gammado213 + 
      gamma331*gammado313 + 2.*(gamma113*gammado311 + gamma213*gammado321 + 
         gamma313*gammado331))*ginv11 + 
   (-deldelg1233 + gamma132*gammado113 + gamma131*gammado123 + 
@@ -2218,7 +2269,8 @@ gammado331*Gfromg1 + gammado332*Gfromg2 + gammado333*Gfromg3 +
      2.*(gamma123*gammado313 + gamma223*gammado323 + gamma323*gammado333))*
    ginv23 + (-0.5*deldelg3333 + gamma133*(gammado133 + 2.*gammado313) + 
      gamma233*(gammado233 + 2.*gammado323) + 3.*gamma333*gammado333)*ginv33 \
-+ delG31*g13[ijk] + delG32*g23[ijk] + delG33*g33[ijk]
++ gammado331*undiffdG1 + gammado332*undiffdG2 + gammado333*undiffdG3 + 
+  delG31*g13[ijk] + delG32*g23[ijk] + delG33*g33[ijk]
 ;
 
 f
@@ -2768,26 +2820,26 @@ betadf + 0.16666666666666666667*divbeta
 
 pseudolieG1
 =
-betadG1 - db11*Gfromg1 - db21*Gfromg2 - db31*Gfromg3 + ddb221*ginv22 + 
-  2.*ddb231*ginv23 + ddb331*ginv33 + ginv11*(ddb111 + ootddivbeta1) + 
-  ginv12*(2.*ddb121 + ootddivbeta2) + ginv13*(2.*ddb131 + ootddivbeta3) + 
-  Gfromg1*totdivbeta
+betadG1 + ddb221*ginv22 + 2.*ddb231*ginv23 + ddb331*ginv33 + 
+  ginv11*(ddb111 + ootddivbeta1) + ginv12*(2.*ddb121 + ootddivbeta2) + 
+  ginv13*(2.*ddb131 + ootddivbeta3) + (-db11 + totdivbeta)*undiffdG1 - 
+  db21*undiffdG2 - db31*undiffdG3
 ;
 
 pseudolieG2
 =
-betadG2 - db12*Gfromg1 - db22*Gfromg2 - db32*Gfromg3 + ddb112*ginv11 + 
-  2.*ddb132*ginv13 + ddb332*ginv33 + ginv12*(2.*ddb122 + ootddivbeta1) + 
-  ginv22*(ddb222 + ootddivbeta2) + ginv23*(2.*ddb232 + ootddivbeta3) + 
-  Gfromg2*totdivbeta
+betadG2 + ddb112*ginv11 + 2.*ddb132*ginv13 + ddb332*ginv33 + 
+  ginv12*(2.*ddb122 + ootddivbeta1) + ginv22*(ddb222 + ootddivbeta2) + 
+  ginv23*(2.*ddb232 + ootddivbeta3) - db12*undiffdG1 - db22*undiffdG2 + 
+  totdivbeta*undiffdG2 - db32*undiffdG3
 ;
 
 pseudolieG3
 =
-betadG3 - db13*Gfromg1 - db23*Gfromg2 - db33*Gfromg3 + ddb113*ginv11 + 
-  2.*ddb123*ginv12 + ddb223*ginv22 + ginv13*(2.*ddb133 + ootddivbeta1) + 
-  ginv23*(2.*ddb233 + ootddivbeta2) + ginv33*(ddb333 + ootddivbeta3) + 
-  Gfromg3*totdivbeta
+betadG3 + ddb113*ginv11 + 2.*ddb123*ginv12 + ddb223*ginv22 + 
+  ginv13*(2.*ddb133 + ootddivbeta1) + ginv23*(2.*ddb233 + ootddivbeta2) + 
+  ginv33*(ddb333 + ootddivbeta3) - db13*undiffdG1 - db23*undiffdG2 - 
+  db33*undiffdG3 + totdivbeta*undiffdG3
 ;
 
 rg11
@@ -3409,4 +3461,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2282,  n/ = 64,  n+ = 2072, n = 4418, O = 1 */
+/* nvars = 215, n* = 2287,  n/ = 70,  n+ = 2073, n = 4430, O = 1 */
