@@ -51,9 +51,9 @@ int sgrid_BSSN(void)
   AddPar("BSSN_forceKzero",    "no",  "set K identically to zero");
   AddPar("BSSN_subtractA",     "yes", "set trace of A identically zero");
   AddPar("BSSN_normalizedetg", "no",  "normalize determinant of gamma to one");
-
   AddPar("BSSN_YoTermFactor",  "0",
          "YoTermFactor = (xi + 2/3) in Yo's paper (gr-qc/0209066)");
+  AddPar("BSSN_GReplacedBydg", "yes", "replace G by dg in RHS of evo eqns");
 
   AddPar("BSSN_lapsepsipower",  "0", "power of psi in lapse equation");
   AddPar("BSSN_lapseharmonicf", "2", "2 for 1+log, 1 for harmonic");

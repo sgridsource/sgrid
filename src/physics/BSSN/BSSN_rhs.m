@@ -88,13 +88,20 @@ tocompute = {
   gamma[c,a,b] == ginv[c,d] gammado[d,a,b], 
   Gfromg[a] == ginv[b,c] gamma[a,b,c],
 
+  (* whether the undifferentiated G is computed from delg *)
+  Cif == GReplacedBydg,
+    undiffdG[a] == Gfromg[a],
+  Cif == else,
+    undiffdG[a] == G[a],
+  Cif == end,
+
   (* curvature of conformal metric *)
   R[a,b] == ginv[c,d] ( -1/2 deldelg[c,d,a,b] +
                     gamma[e,c,a] gammado[b,e,d] +
                     gamma[e,c,b] gammado[a,e,d] +
                     gamma[e,a,d] gammado[e,c,b]) +
                1/2 (g[c,a] delG[b,c] + g[c,b] delG[a,c] +
-               Gfromg[c] (gammado[a,b,c] + gammado[b,a,c])),
+               undiffdG[c] (gammado[a,b,c] + gammado[b,a,c])),
 
   (* conformal factor and its derivatives *)
   f == phi,
@@ -152,7 +159,7 @@ tocompute = {
   liephi == betadf + divbeta/6,
 
   pseudolieG[a] == ginv[b,c] ddb[b,c,a] + ginv[a,b] ootddivbeta[b] -
-                   Gfromg[b] db[b,a] + Gfromg[a] totdivbeta + 
+                   undiffdG[b] db[b,a] + undiffdG[a] totdivbeta + 
                    betadG[a],
 
   (* right hand sides *)
@@ -359,7 +366,8 @@ BeginCFunction[] := Module[{},
   pr["double forceKzerofactor = Getv(\"BSSN_forceKzero\", \"no\");\n"];
   pr["int subtractA           = Getv(\"BSSN_subtractA\", \"yes\");\n"];
   pr["int normalizedetg       = Getv(\"BSSN_normalizedetg\", \"yes\");\n"];
-  pr["double YoTermFactor    =  Getd(\"BSSN_YoTermFactor\");\n"];
+  pr["int GReplacedBydg       = Getv(\"BSSN_GReplacedBydg\", \"yes\");\n"];
+  pr["double YoTermFactor     = Getd(\"BSSN_YoTermFactor\");\n"];
 
   pr["int nonconstantlapse    =!Getv(\"BSSN_lapse\", \"constant\");\n"];
   pr["int oploglapse          = Getv(\"BSSN_lapse\", \"1+log\");\n"];
