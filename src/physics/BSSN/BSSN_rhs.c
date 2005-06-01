@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 31.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 1.6.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -23,6 +23,8 @@ int addlinear = (dt != 0.0l);
 int usepsi = 1;
 int useDD               = Getv("BSSN_useDD", "yes");
 double forceKzerofactor = Getv("BSSN_forceKzero", "no");
+int recomputeAzz        = Getv("BSSN_recomputeAzz", "yes");
+int recomputegzz        = Getv("BSSN_recomputegzz", "yes");
 int subtractA           = Getv("BSSN_subtractA", "yes");
 int normalizedetg       = Getv("BSSN_normalizedetg", "yes");
 int GReplacedBydg       = Getv("BSSN_GReplacedBydg", "yes");
@@ -320,6 +322,8 @@ double f;
 double lieK;
 double liephi;
 double logpsi;
+double nAdu11;
+double nAdu22;
 double nf;
 double ooE6alphaDensityWeightf;
 double psim4;
@@ -600,6 +604,15 @@ double lieg13;
 double lieg22;
 double lieg23;
 double lieg33;
+double nguu11;
+double nguu12;
+double nguu13;
+double nguu21;
+double nguu22;
+double nguu23;
+double nguu31;
+double nguu32;
+double nguu33;
 double ootddivbeta1;
 double ootddivbeta2;
 double ootddivbeta3;
@@ -3204,6 +3217,90 @@ detnginv
 
 
 /* conditional */
+if (recomputeAzz) {
+
+nguu11
+=
+detnginv*(ng22[ijk]*ng33[ijk] - pow2(ng23[ijk]))
+;
+
+nguu12
+=
+detnginv*(ng13[ijk]*ng23[ijk] - ng12[ijk]*ng33[ijk])
+;
+
+nguu13
+=
+detnginv*(-(ng13[ijk]*ng22[ijk]) + ng12[ijk]*ng23[ijk])
+;
+
+nguu21
+=
+detnginv*(ng13[ijk]*ng23[ijk] - ng12[ijk]*ng33[ijk])
+;
+
+nguu22
+=
+detnginv*(ng11[ijk]*ng33[ijk] - pow2(ng13[ijk]))
+;
+
+nguu23
+=
+detnginv*(ng12[ijk]*ng13[ijk] - ng11[ijk]*ng23[ijk])
+;
+
+nguu31
+=
+detnginv*(-(ng13[ijk]*ng22[ijk]) + ng12[ijk]*ng23[ijk])
+;
+
+nguu32
+=
+detnginv*(ng12[ijk]*ng13[ijk] - ng11[ijk]*ng23[ijk])
+;
+
+nguu33
+=
+detnginv*(ng11[ijk]*ng22[ijk] - pow2(ng12[ijk]))
+;
+
+nAdu11
+=
+nguu11*nA11[ijk] + nguu12*nA12[ijk] + nguu13*nA13[ijk]
+;
+
+nAdu22
+=
+nguu12*nA12[ijk] + nguu22*nA22[ijk] + nguu23*nA23[ijk]
+;
+
+nA33[ijk]
+=
+-((nAdu11 + nAdu22 + nguu13*nA13[ijk] + nguu23*nA23[ijk])/nguu33)
+;
+
+}
+/* if (recomputeAzz) */
+
+
+
+
+/* conditional */
+if (recomputegzz) {
+
+ng33[ijk]
+=
+1. + (-2.*ng12[ijk]*ng13[ijk]*ng23[ijk] + ng22[ijk]*pow2(ng13[ijk]) + 
+     ng11[ijk]*pow2(ng23[ijk]))/(ng11[ijk]*ng22[ijk] - pow2(ng12[ijk]))
+;
+
+}
+/* if (recomputegzz) */
+
+
+
+
+/* conditional */
 if (subtractA) {
 
 traceA
@@ -3461,4 +3558,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2287,  n/ = 70,  n+ = 2073, n = 4430, O = 1 */
+/* nvars = 215, n* = 2333,  n/ = 80,  n+ = 2097, n = 4510, O = 1 */
