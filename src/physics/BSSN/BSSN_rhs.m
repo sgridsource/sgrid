@@ -228,8 +228,21 @@ tocompute = {
     nbeta[a] == pbeta[a] + dt rbeta[a],
     nB[a] == pB[a] + dt rB[a], 
 
-    (* normalize detg and subtract trace from As *)
+    (* recompute Azz from the other As and gzz from th other gs *)
     detnginv == 1/matrixdet[ng],
+    Cif == recomputeAzz,
+      nguu[a,b] == detnginv matrixinvdet[ng,a,b],
+      (* nAdu[a,b] == nA[a,c] nguu[c,b], *)
+      nAdu11 == nA11 nguu11 + nA12 nguu12 + nA13 nguu13,
+      nAdu22 == nA12 nguu12 + nA22 nguu22 + nA23 nguu23,
+      nA33 == -( nAdu11 + nAdu22 + nA13 nguu13 + nA23 nguu23)/nguu33,
+    Cif == end,
+    Cif == recomputegzz,
+      ng33 == 1 + (ng22 ng13 ng13 -2 ng12 ng23 ng13 + ng11 ng23 ng23)/
+                  (ng11 ng22 - ng12 ng12),
+    Cif == end,
+
+    (* normalize detg and subtract trace from As *)
     Cif == subtractA,
       traceA == detnginv matrixinvdet[ng,a,b] nA[a,b],
       aux == -traceA/3,
@@ -239,6 +252,7 @@ tocompute = {
       aux == detnginv^(1/3),
       ng[a,b] == aux ng[a,b], 
     Cif == end,
+
 
   Cif == else,
     ng[a,b] == rg[a,b],
@@ -364,6 +378,8 @@ BeginCFunction[] := Module[{},
 
   pr["int useDD               = Getv(\"BSSN_useDD\", \"yes\");\n"];
   pr["double forceKzerofactor = Getv(\"BSSN_forceKzero\", \"no\");\n"];
+  pr["int recomputeAzz        = Getv(\"BSSN_recomputeAzz\", \"yes\");\n"];
+  pr["int recomputegzz        = Getv(\"BSSN_recomputegzz\", \"yes\");\n"];
   pr["int subtractA           = Getv(\"BSSN_subtractA\", \"yes\");\n"];
   pr["int normalizedetg       = Getv(\"BSSN_normalizedetg\", \"yes\");\n"];
   pr["int GReplacedBydg       = Getv(\"BSSN_GReplacedBydg\", \"yes\");\n"];

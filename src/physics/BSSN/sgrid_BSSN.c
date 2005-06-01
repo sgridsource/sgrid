@@ -49,6 +49,8 @@ int sgrid_BSSN(void)
   AddPar("BSSN_alphaDensityWeight",  "1.0", "weight of densitized lapse");
   
   AddPar("BSSN_forceKzero",    "no",  "set K identically to zero");
+  AddPar("BSSN_recomputeAzz",  "no",  "recompute Azz from the other As");
+  AddPar("BSSN_recomputegzz",  "no",  "recompute gzz from the other gs");
   AddPar("BSSN_subtractA",     "yes", "set trace of A identically zero");
   AddPar("BSSN_normalizedetg", "no",  "normalize determinant of gamma to one");
   AddPar("BSSN_YoTermFactor",  "0",
