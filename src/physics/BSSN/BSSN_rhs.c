@@ -607,11 +607,8 @@ double lieg33;
 double nguu11;
 double nguu12;
 double nguu13;
-double nguu21;
 double nguu22;
 double nguu23;
-double nguu31;
-double nguu32;
 double nguu33;
 double ootddivbeta1;
 double ootddivbeta2;
@@ -2661,7 +2658,7 @@ divAinv1
 -6.*(Ainv11*df1 + Ainv12*df2 + Ainv13*df3) - Ainv11*gamma111 - 
   Ainv12*(gamma112 + gamma121) - Ainv22*gamma122 - 
   Ainv13*(gamma113 + gamma131) - Ainv23*(gamma123 + gamma132) - 
-  Ainv33*gamma133 + 0.66666666666666666667*
+  Ainv33*gamma133 + 0.66666666666666666666666666666666666667*
    (ginv11*dK1[ijk] + ginv12*dK2[ijk] + ginv13*dK3[ijk])
 ;
 
@@ -2670,7 +2667,7 @@ divAinv2
 -6.*(Ainv12*df1 + Ainv22*df2 + Ainv23*df3) - Ainv11*gamma211 - 
   Ainv12*(gamma212 + gamma221) - Ainv22*gamma222 - 
   Ainv13*(gamma213 + gamma231) - Ainv23*(gamma223 + gamma232) - 
-  Ainv33*gamma233 + 0.66666666666666666667*
+  Ainv33*gamma233 + 0.66666666666666666666666666666666666667*
    (ginv12*dK1[ijk] + ginv22*dK2[ijk] + ginv23*dK3[ijk])
 ;
 
@@ -2679,13 +2676,13 @@ divAinv3
 -6.*(Ainv13*df1 + Ainv23*df2 + Ainv33*df3) - Ainv11*gamma311 - 
   Ainv12*(gamma312 + gamma321) - Ainv22*gamma322 - 
   Ainv13*(gamma313 + gamma331) - Ainv23*(gamma323 + gamma332) - 
-  Ainv33*gamma333 + 0.66666666666666666667*
+  Ainv33*gamma333 + 0.66666666666666666666666666666666666667*
    (ginv13*dK1[ijk] + ginv23*dK2[ijk] + ginv33*dK3[ijk])
 ;
 
 R
 =
-AA - 0.66666666666666666667*pow2(K[ijk])
+AA - 0.66666666666666666666666666666666666667*pow2(K[ijk])
 ;
 
 divbeta
@@ -2695,22 +2692,22 @@ db11 + db22 + db33
 
 totdivbeta
 =
-0.66666666666666666667*divbeta
+0.66666666666666666666666666666666666667*divbeta
 ;
 
 ootddivbeta1
 =
-0.33333333333333333333*(ddb111 + ddb122 + ddb133)
+0.33333333333333333333333333333333333333*(ddb111 + ddb122 + ddb133)
 ;
 
 ootddivbeta2
 =
-0.33333333333333333333*(ddb121 + ddb222 + ddb233)
+0.33333333333333333333333333333333333333*(ddb121 + ddb222 + ddb233)
 ;
 
 ootddivbeta3
 =
-0.33333333333333333333*(ddb131 + ddb232 + ddb333)
+0.33333333333333333333333333333333333333*(ddb131 + ddb232 + ddb333)
 ;
 
 lieg11
@@ -2828,7 +2825,7 @@ betadK
 
 liephi
 =
-betadf + 0.16666666666666666667*divbeta
+betadf + 0.16666666666666666666666666666666666667*divbeta
 ;
 
 pseudolieG1
@@ -2888,49 +2885,49 @@ lieg33 - 2.*A33[ijk]*alpha[ijk]
 rA11
 =
 lieA11 + psim4*(-cdda11 + R11*alpha[ijk]) + 
-  0.33333333333333333333*trcdda*g11[ijk] + 
-  alpha[ijk]*(-2.*AA11 + psim4*Rphi11 - 0.33333333333333333333*R*g11[ijk] + 
-     A11[ijk]*K[ijk])
+  0.33333333333333333333333333333333333333*trcdda*g11[ijk] + 
+  alpha[ijk]*(-2.*AA11 + psim4*Rphi11 - 
+     0.33333333333333333333333333333333333333*R*g11[ijk] + A11[ijk]*K[ijk])
 ;
 
 rA12
 =
 lieA12 + psim4*(-cdda12 + R12*alpha[ijk]) + 
-  0.33333333333333333333*trcdda*g12[ijk] + 
-  alpha[ijk]*(-2.*AA12 + psim4*Rphi12 - 0.33333333333333333333*R*g12[ijk] + 
-     A12[ijk]*K[ijk])
+  0.33333333333333333333333333333333333333*trcdda*g12[ijk] + 
+  alpha[ijk]*(-2.*AA12 + psim4*Rphi12 - 
+     0.33333333333333333333333333333333333333*R*g12[ijk] + A12[ijk]*K[ijk])
 ;
 
 rA13
 =
 lieA13 + psim4*(-cdda13 + R13*alpha[ijk]) + 
-  0.33333333333333333333*trcdda*g13[ijk] + 
-  alpha[ijk]*(-2.*AA13 + psim4*Rphi13 - 0.33333333333333333333*R*g13[ijk] + 
-     A13[ijk]*K[ijk])
+  0.33333333333333333333333333333333333333*trcdda*g13[ijk] + 
+  alpha[ijk]*(-2.*AA13 + psim4*Rphi13 - 
+     0.33333333333333333333333333333333333333*R*g13[ijk] + A13[ijk]*K[ijk])
 ;
 
 rA22
 =
 lieA22 + psim4*(-cdda22 + R22*alpha[ijk]) + 
-  0.33333333333333333333*trcdda*g22[ijk] + 
-  alpha[ijk]*(-2.*AA22 + psim4*Rphi22 - 0.33333333333333333333*R*g22[ijk] + 
-     A22[ijk]*K[ijk])
+  0.33333333333333333333333333333333333333*trcdda*g22[ijk] + 
+  alpha[ijk]*(-2.*AA22 + psim4*Rphi22 - 
+     0.33333333333333333333333333333333333333*R*g22[ijk] + A22[ijk]*K[ijk])
 ;
 
 rA23
 =
 lieA23 + psim4*(-cdda23 + R23*alpha[ijk]) + 
-  0.33333333333333333333*trcdda*g23[ijk] + 
-  alpha[ijk]*(-2.*AA23 + psim4*Rphi23 - 0.33333333333333333333*R*g23[ijk] + 
-     A23[ijk]*K[ijk])
+  0.33333333333333333333333333333333333333*trcdda*g23[ijk] + 
+  alpha[ijk]*(-2.*AA23 + psim4*Rphi23 - 
+     0.33333333333333333333333333333333333333*R*g23[ijk] + A23[ijk]*K[ijk])
 ;
 
 rA33
 =
 lieA33 + psim4*(-cdda33 + R33*alpha[ijk]) + 
-  0.33333333333333333333*trcdda*g33[ijk] + 
-  alpha[ijk]*(-2.*AA33 + psim4*Rphi33 - 0.33333333333333333333*R*g33[ijk] + 
-     A33[ijk]*K[ijk])
+  0.33333333333333333333333333333333333333*trcdda*g33[ijk] + 
+  alpha[ijk]*(-2.*AA33 + psim4*Rphi33 - 
+     0.33333333333333333333333333333333333333*R*g33[ijk] + A33[ijk]*K[ijk])
 ;
 
 rG1
@@ -2953,12 +2950,13 @@ pseudolieG3 - 2.*(Ainv13*da1 + Ainv23*da2 + Ainv33*da3 +
 
 rK
 =
-lieK - trcdda + alpha[ijk]*(AA + 0.33333333333333333333*pow2(K[ijk]))
+lieK - trcdda + alpha[ijk]*(AA + 
+     0.33333333333333333333333333333333333333*pow2(K[ijk]))
 ;
 
 rphi
 =
-liephi - 0.16666666666666666667*alpha[ijk]*K[ijk]
+liephi - 0.16666666666666666666666666666666666667*alpha[ijk]*K[ijk]
 ;
 
 ralpha0
@@ -3234,27 +3232,12 @@ nguu13
 detnginv*(-(ng13[ijk]*ng22[ijk]) + ng12[ijk]*ng23[ijk])
 ;
 
-nguu21
-=
-detnginv*(ng13[ijk]*ng23[ijk] - ng12[ijk]*ng33[ijk])
-;
-
 nguu22
 =
 detnginv*(ng11[ijk]*ng33[ijk] - pow2(ng13[ijk]))
 ;
 
 nguu23
-=
-detnginv*(ng12[ijk]*ng13[ijk] - ng11[ijk]*ng23[ijk])
-;
-
-nguu31
-=
-detnginv*(-(ng13[ijk]*ng22[ijk]) + ng12[ijk]*ng23[ijk])
-;
-
-nguu32
 =
 detnginv*(ng12[ijk]*ng13[ijk] - ng11[ijk]*ng23[ijk])
 ;
@@ -3317,7 +3300,7 @@ detnginv*(-2.*nA23[ijk]*ng11[ijk]*ng23[ijk] +
 
 aux
 =
--0.33333333333333333333*traceA
+-0.33333333333333333333333333333333333333*traceA
 ;
 
 nA11[ijk]
@@ -3558,4 +3541,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2333,  n/ = 80,  n+ = 2097, n = 4510, O = 1 */
+/* nvars = 215, n* = 2324,  n/ = 80,  n+ = 2093, n = 4497, O = 1 */
