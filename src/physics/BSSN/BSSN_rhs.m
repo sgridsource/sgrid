@@ -304,6 +304,7 @@ nA[a_,b_] := nA[b,a] /; !OrderedQ[{a,b}]
 rA[a_,b_] := rA[b,a] /; !OrderedQ[{a,b}]
 
 ginv[a_,b_] := ginv[b,a] /; !OrderedQ[{a,b}]
+nguu[a_,b_] := nguu[b,a] /; !OrderedQ[{a,b}]
 Ainv[a_,b_] := Ainv[b,a] /; !OrderedQ[{a,b}]
 Kinv[a_,b_] := Kinv[b,a] /; !OrderedQ[{a,b}]
 K[a_,b_] := K[b,a] /; !OrderedQ[{a,b}]
