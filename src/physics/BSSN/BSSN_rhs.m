@@ -229,17 +229,17 @@ tocompute = {
     nB[a] == pB[a] + dt rB[a], 
 
     (* recompute Azz from the other As and gzz from th other gs *)
-    detnginv == 1/matrixdet[ng],
-    Cif == recomputeAzz,
-      nguu[a,b] == detnginv matrixinvdet[ng,a,b],
-      (* nAdu[a,b] == nA[a,c] nguu[c,b], *)
-      nAdu11 == nA11 nguu11 + nA12 nguu12 + nA13 nguu13,
-      nAdu22 == nA12 nguu12 + nA22 nguu22 + nA23 nguu23,
-      nA33 == -( nAdu11 + nAdu22 + nA13 nguu13 + nA23 nguu23)/nguu33,
-    Cif == end,
     Cif == recomputegzz,
       ng33 == 1 + (ng22 ng13 ng13 -2 ng12 ng23 ng13 + ng11 ng23 ng23)/
                   (ng11 ng22 - ng12 ng12),
+    Cif == end,
+    detnginv == 1/matrixdet[ng],
+    Cif == recomputeAzz,
+      nginv[a,b] == detnginv matrixinvdet[ng,a,b],
+      (* nAdu[a,b] == nA[a,c] nginv[c,b], *)
+      nAdu11 == nA11 nginv11 + nA12 nginv12 + nA13 nginv13,
+      nAdu22 == nA12 nginv12 + nA22 nginv22 + nA23 nginv23,
+      nA33 == -( nAdu11 + nAdu22 + nA13 nginv13 + nA23 nginv23)/nginv33,
     Cif == end,
 
     (* normalize detg and subtract trace from As *)
@@ -304,7 +304,7 @@ nA[a_,b_] := nA[b,a] /; !OrderedQ[{a,b}]
 rA[a_,b_] := rA[b,a] /; !OrderedQ[{a,b}]
 
 ginv[a_,b_] := ginv[b,a] /; !OrderedQ[{a,b}]
-nguu[a_,b_] := nguu[b,a] /; !OrderedQ[{a,b}]
+nginv[a_,b_] := nginv[b,a] /; !OrderedQ[{a,b}]
 Ainv[a_,b_] := Ainv[b,a] /; !OrderedQ[{a,b}]
 Kinv[a_,b_] := Kinv[b,a] /; !OrderedQ[{a,b}]
 K[a_,b_] := K[b,a] /; !OrderedQ[{a,b}]

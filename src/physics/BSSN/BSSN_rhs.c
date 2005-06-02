@@ -604,12 +604,12 @@ double lieg13;
 double lieg22;
 double lieg23;
 double lieg33;
-double nguu11;
-double nguu12;
-double nguu13;
-double nguu22;
-double nguu23;
-double nguu33;
+double nginv11;
+double nginv12;
+double nginv13;
+double nginv22;
+double nginv23;
+double nginv33;
 double ootddivbeta1;
 double ootddivbeta2;
 double ootddivbeta3;
@@ -3205,67 +3205,6 @@ nB3[ijk]
 dt*rB3 + pB3[ijk]
 ;
 
-detnginv
-=
-1/(2.*ng12[ijk]*ng13[ijk]*ng23[ijk] + ng11[ijk]*ng22[ijk]*ng33[ijk] - 
-    ng33[ijk]*pow2(ng12[ijk]) - ng22[ijk]*pow2(ng13[ijk]) - 
-    ng11[ijk]*pow2(ng23[ijk]))
-;
-
-
-
-/* conditional */
-if (recomputeAzz) {
-
-nguu11
-=
-detnginv*(ng22[ijk]*ng33[ijk] - pow2(ng23[ijk]))
-;
-
-nguu12
-=
-detnginv*(ng13[ijk]*ng23[ijk] - ng12[ijk]*ng33[ijk])
-;
-
-nguu13
-=
-detnginv*(-(ng13[ijk]*ng22[ijk]) + ng12[ijk]*ng23[ijk])
-;
-
-nguu22
-=
-detnginv*(ng11[ijk]*ng33[ijk] - pow2(ng13[ijk]))
-;
-
-nguu23
-=
-detnginv*(ng12[ijk]*ng13[ijk] - ng11[ijk]*ng23[ijk])
-;
-
-nguu33
-=
-detnginv*(ng11[ijk]*ng22[ijk] - pow2(ng12[ijk]))
-;
-
-nAdu11
-=
-nguu11*nA11[ijk] + nguu12*nA12[ijk] + nguu13*nA13[ijk]
-;
-
-nAdu22
-=
-nguu12*nA12[ijk] + nguu22*nA22[ijk] + nguu23*nA23[ijk]
-;
-
-nA33[ijk]
-=
--((nAdu11 + nAdu22 + nguu13*nA13[ijk] + nguu23*nA23[ijk])/nguu33)
-;
-
-}
-/* if (recomputeAzz) */
-
-
 
 
 /* conditional */
@@ -3279,6 +3218,67 @@ ng33[ijk]
 
 }
 /* if (recomputegzz) */
+
+
+detnginv
+=
+1/(2.*ng12[ijk]*ng13[ijk]*ng23[ijk] + ng11[ijk]*ng22[ijk]*ng33[ijk] - 
+    ng33[ijk]*pow2(ng12[ijk]) - ng22[ijk]*pow2(ng13[ijk]) - 
+    ng11[ijk]*pow2(ng23[ijk]))
+;
+
+
+
+/* conditional */
+if (recomputeAzz) {
+
+nginv11
+=
+detnginv*(ng22[ijk]*ng33[ijk] - pow2(ng23[ijk]))
+;
+
+nginv12
+=
+detnginv*(ng13[ijk]*ng23[ijk] - ng12[ijk]*ng33[ijk])
+;
+
+nginv13
+=
+detnginv*(-(ng13[ijk]*ng22[ijk]) + ng12[ijk]*ng23[ijk])
+;
+
+nginv22
+=
+detnginv*(ng11[ijk]*ng33[ijk] - pow2(ng13[ijk]))
+;
+
+nginv23
+=
+detnginv*(ng12[ijk]*ng13[ijk] - ng11[ijk]*ng23[ijk])
+;
+
+nginv33
+=
+detnginv*(ng11[ijk]*ng22[ijk] - pow2(ng12[ijk]))
+;
+
+nAdu11
+=
+nginv11*nA11[ijk] + nginv12*nA12[ijk] + nginv13*nA13[ijk]
+;
+
+nAdu22
+=
+nginv12*nA12[ijk] + nginv22*nA22[ijk] + nginv23*nA23[ijk]
+;
+
+nA33[ijk]
+=
+-((nAdu11 + nAdu22 + nginv13*nA13[ijk] + nginv23*nA23[ijk])/nginv33)
+;
+
+}
+/* if (recomputeAzz) */
 
 
 
