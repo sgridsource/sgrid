@@ -21,3 +21,5 @@ void set_boundary_normalderiv_leftBound(tPointList *PL, int direc, int ui,
 void set_boundary_normalderiv_rightBound(tPointList *PL, int direc, int ui, 
                                          double deriv);
 void set_boundary_VonNeumannExcision(tPointList *PL, int unew);
+void set_boundary_radiative_analytic(tVarList *unew, tVarList *upre,
+                                     double c, tVarList *ucur);

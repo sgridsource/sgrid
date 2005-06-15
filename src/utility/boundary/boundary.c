@@ -64,7 +64,7 @@ int initialize_BoundaryPointLists(tGrid *grid)
 
   
   /* radiative boundary condition */
-  if( Getv("boundary", "radiative") )
+  if( Getv("boundary", "radiative") || Getv("boundary", "radiative_analytic") )
   {
     bi=nboxes-1;
     snprintf(str, 99, "box%d_Coordinates", bi);
@@ -235,6 +235,12 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
       set_boundary_radiative(grid, 
 	unew->index[j], upre->index[j], c, ucur->index[j], var0, v0);
     }
+  }
+
+  /* radiative boundary condition on (f-f_analytic) */
+  if( Getv("boundary", "radiative_analytic") )
+  {
+    set_boundary_radiative_analytic(unew, upre, c, ucur);
   }
 
   /* excision boundary condition */

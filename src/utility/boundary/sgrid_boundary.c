@@ -24,11 +24,11 @@ int sgrid_boundary()
   /* parameters */
   AddPar("boundary", "", "boundary condition"
          "[radiative,constant,constantExcision,simpleExcision,"
-          "selectedconstantExcision, VonNeumannExcision,"
-          "selectedVonNeumannExcision]");
+          "selectedconstantExcision,VonNeumannExcision,"
+          "selectedVonNeumannExcision,radiative_analytic]");
 
   /* radiative boundary */
-  if(Getv("boundary", "radiative"))
+  if(Getv("boundary", "radiative") || Getv("boundary", "radiative_analytic"))
   {
     AddPar("boundary_radpower", "0", "exponent of non-wave term");
     AddPar("boundary_radconstant", "", 
