@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 1.6.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 15.6.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -29,6 +29,7 @@ int subtractA           = Getv("BSSN_subtractA", "yes");
 int normalizedetg       = Getv("BSSN_normalizedetg", "yes");
 int GReplacedBydg       = Getv("BSSN_GReplacedBydg", "yes");
 double YoTermFactor     = Getd("BSSN_YoTermFactor");
+int evolveGamma         =!Getv("BSSN_freezeGamma", "yes");
 int nonconstantlapse    =!Getv("BSSN_lapse", "constant");
 int oploglapse          = Getv("BSSN_lapse", "1+log");
 int oploglapse2         = Getv("BSSN_lapse", "1+log2");
@@ -2932,20 +2933,20 @@ lieA33 + psim4*(-cdda33 + R33*alpha[ijk]) +
 
 rG1
 =
-pseudolieG1 - 2.*(Ainv11*da1 + Ainv12*da2 + Ainv13*da3 + 
-     divAinv1*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg1 - G1[ijk])
+evolveGamma*(pseudolieG1 - 2.*(Ainv11*da1 + Ainv12*da2 + Ainv13*da3 + 
+       divAinv1*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg1 - G1[ijk]))
 ;
 
 rG2
 =
-pseudolieG2 - 2.*(Ainv12*da1 + Ainv22*da2 + Ainv23*da3 + 
-     divAinv2*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg2 - G2[ijk])
+evolveGamma*(pseudolieG2 - 2.*(Ainv12*da1 + Ainv22*da2 + Ainv23*da3 + 
+       divAinv2*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg2 - G2[ijk]))
 ;
 
 rG3
 =
-pseudolieG3 - 2.*(Ainv13*da1 + Ainv23*da2 + Ainv33*da3 + 
-     divAinv3*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg3 - G3[ijk])
+evolveGamma*(pseudolieG3 - 2.*(Ainv13*da1 + Ainv23*da2 + Ainv33*da3 + 
+       divAinv3*alpha[ijk]) + divbeta*YoTermFactor*(Gfromg3 - G3[ijk]))
 ;
 
 rK
@@ -3541,4 +3542,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2324,  n/ = 80,  n+ = 2093, n = 4497, O = 1 */
+/* nvars = 215, n* = 2327,  n/ = 80,  n+ = 2093, n = 4500, O = 1 */

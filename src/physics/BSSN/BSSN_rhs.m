@@ -170,8 +170,9 @@ tocompute = {
              alpha (K A[a,b] - 2 AA[a,b]) + lieA[a,b],
 
   (* Note: YoTermFactor = (xi + 2/3) in Yo's paper (gr-qc/0209066) *)
-  rG[a] == - 2 Ainv[a,b] da[b] - 2 alpha divAinv[a] + pseudolieG[a] -
-           YoTermFactor (G[a] - Gfromg[a]) divbeta, 
+  rG[a] == evolveGamma *
+           ( -2 Ainv[a,b] da[b] - 2 alpha divAinv[a] + pseudolieG[a] -
+             YoTermFactor (G[a] - Gfromg[a]) divbeta ), 
 
   rK == - trcdda + alpha (AA + K K/3) + lieK, 
 
@@ -385,6 +386,7 @@ BeginCFunction[] := Module[{},
   pr["int normalizedetg       = Getv(\"BSSN_normalizedetg\", \"yes\");\n"];
   pr["int GReplacedBydg       = Getv(\"BSSN_GReplacedBydg\", \"yes\");\n"];
   pr["double YoTermFactor     = Getd(\"BSSN_YoTermFactor\");\n"];
+  pr["int evolveGamma         =!Getv(\"BSSN_freezeGamma\", \"yes\");\n"];
 
   pr["int nonconstantlapse    =!Getv(\"BSSN_lapse\", \"constant\");\n"];
   pr["int oploglapse          = Getv(\"BSSN_lapse\", \"1+log\");\n"];
