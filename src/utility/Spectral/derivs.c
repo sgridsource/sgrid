@@ -354,6 +354,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
   static double *duline=NULL;
   static double *dduline=NULL;
   int i,j,k, m3;
+  static int second_deriv_order;
 
   /* static memory for lines */
   m3=max3(box->n1, box->n2, box->n3);
@@ -363,10 +364,15 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     uline = (double*) realloc(uline, linelen * sizeof(double));
     duline = (double*) realloc(duline, linelen * sizeof(double));
     dduline = (double*) realloc(dduline, linelen * sizeof(double));
+    
+    /* read par which determines order of second derivs once */
+    second_deriv_order = Geti("Spectral_second_deriv_order");
   }
 
-  /* x-direction */
+  /* if X frist, then Y and then Z derivs are taken */
+  if(second_deriv_order == 123)
   {
+    /* x-direction */
     for (k = 0; k < box->n3; k++)
       for (j = 0; j < box->n2; j++)
       {
@@ -382,10 +388,8 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
         diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
         diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
       }
-  }
-  
-  /* y-direction */
-  {
+
+    /* y-direction */
     for (k = 0; k < box->n3; k++)
       for (i = 0; i < box->n1; i++)
       {
@@ -399,10 +403,8 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
         diffmat_deriv(box->D2, uline, duline, box->n2);
         put_memline(u12, duline, 2, i, k, box->n1, box->n2, box->n3);
       }
-  }
-  
-  /* z-direction */
-  {
+
+    /* z-direction */
     for (j = 0; j < box->n2; j++)
       for (i = 0; i < box->n1; i++)
       {
@@ -421,6 +423,235 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
         put_memline(u23, duline, 3, i, j, box->n1, box->n2, box->n3);
       }
   }
+  else if(second_deriv_order == 132)
+  {
+    /* x-direction */
+    for (k = 0; k < box->n3; k++)
+      for (j = 0; j < box->n2; j++)
+      {
+        /* 
+        get_memline(u, uline, 1, j, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D1, uline, duline, box->n1);
+        diffmat_deriv(box->DD1, uline, dduline, box->n1);
+        put_memline(u1, duline, 1, j, k, box->n1, box->n2, box->n3);
+        put_memline(u11, dduline, 1, j, k, box->n1, box->n2, box->n3); 
+        */
+        int n1=box->n1;
+        int n2=box->n2;
+        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+      }
+
+    /* z-direction */
+    for (j = 0; j < box->n2; j++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
+        put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
+        
+        get_memline(u1, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        put_memline(u13, duline, 3, i, j, box->n1, box->n2, box->n3);
+      }
+
+    /* y-direction */
+    for (k = 0; k < box->n3; k++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
+        put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
+
+        get_memline(u1, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        put_memline(u12, duline, 2, i, k, box->n1, box->n2, box->n3);
+
+        get_memline(u3, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        put_memline(u23, duline, 2, i, k, box->n1, box->n2, box->n3);
+      }
+
+  }
+  else if(second_deriv_order == 213)
+  {
+    /* y-direction */
+    for (k = 0; k < box->n3; k++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
+        put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
+      }
+
+    /* x-direction */
+    for (k = 0; k < box->n3; k++)
+      for (j = 0; j < box->n2; j++)
+      {
+        int n1=box->n1;
+        int n2=box->n2;
+        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+
+        diffmat_deriv(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
+      }
+
+    /* z-direction */
+    for (j = 0; j < box->n2; j++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
+        put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
+        
+        get_memline(u1, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        put_memline(u13, duline, 3, i, j, box->n1, box->n2, box->n3);
+        
+        get_memline(u2, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        put_memline(u23, duline, 3, i, j, box->n1, box->n2, box->n3);
+      }
+  }
+  else if(second_deriv_order == 231)
+  {
+    /* y-direction */
+    for (k = 0; k < box->n3; k++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
+        put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
+      }
+
+    /* z-direction */
+    for (j = 0; j < box->n2; j++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
+        put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
+        
+        get_memline(u2, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        put_memline(u23, duline, 3, i, j, box->n1, box->n2, box->n3);
+      }
+
+    /* x-direction */
+    for (k = 0; k < box->n3; k++)
+      for (j = 0; j < box->n2; j++)
+      {
+        int n1=box->n1;
+        int n2=box->n2;
+        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+
+        diffmat_deriv(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
+        diffmat_deriv(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
+      }
+
+
+  }
+  else if(second_deriv_order == 312)
+  {
+    /* z-direction */
+    for (j = 0; j < box->n2; j++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
+        put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
+      }
+
+    /* x-direction */
+    for (k = 0; k < box->n3; k++)
+      for (j = 0; j < box->n2; j++)
+      {
+        int n1=box->n1;
+        int n2=box->n2;
+        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+
+        diffmat_deriv(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
+      }
+
+    /* y-direction */
+    for (k = 0; k < box->n3; k++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
+        put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
+
+        get_memline(u1, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        put_memline(u12, duline, 2, i, k, box->n1, box->n2, box->n3);
+
+        get_memline(u3, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        put_memline(u23, duline, 2, i, k, box->n1, box->n2, box->n3);
+      }
+  }
+  else if(second_deriv_order == 321)
+  {
+    /* z-direction */
+    for (j = 0; j < box->n2; j++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D3, uline, duline, box->n3);
+        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
+        put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
+      }
+
+    /* y-direction */
+    for (k = 0; k < box->n3; k++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
+        put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
+
+        get_memline(u3, uline, 2, i, k, box->n1, box->n2, box->n3);
+        diffmat_deriv(box->D2, uline, duline, box->n2);
+        put_memline(u23, duline, 2, i, k, box->n1, box->n2, box->n3);
+      }
+
+    /* x-direction */
+    for (k = 0; k < box->n3; k++)
+      for (j = 0; j < box->n2; j++)
+      {
+        int n1=box->n1;
+        int n2=box->n2;
+        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+
+        diffmat_deriv(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
+        diffmat_deriv(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
+      }
+  }
+  else
+    errorexit("spec_allDerivs: Spectral_second_deriv_order must be "
+              "123, 132, 213, 231, 312 or 321");
   
   /* free memory for lines */
   /*
