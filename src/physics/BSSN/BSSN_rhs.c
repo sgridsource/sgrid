@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 15.6.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 18.6.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -30,6 +30,7 @@ int normalizedetg       = Getv("BSSN_normalizedetg", "yes");
 int GReplacedBydg       = Getv("BSSN_GReplacedBydg", "yes");
 double YoTermFactor     = Getd("BSSN_YoTermFactor");
 int evolveGamma         =!Getv("BSSN_freezeGamma", "yes");
+double RtoRminusHfactor = Getd("BSSN_RtoRminusHfactor");
 int nonconstantlapse    =!Getv("BSSN_lapse", "constant");
 int oploglapse          = Getv("BSSN_lapse", "1+log");
 int oploglapse2         = Getv("BSSN_lapse", "1+log2");
@@ -320,6 +321,7 @@ double detnginv;
 double divbeta;
 double E6alphaDensityWeightf;
 double f;
+double hamil;
 double lieK;
 double liephi;
 double logpsi;
@@ -2683,7 +2685,19 @@ divAinv3
 
 R
 =
-AA - 0.66666666666666666666666666666666666667*pow2(K[ijk])
+psim4*(ginv11*(R11 + Rphi11) + ginv22*(R22 + Rphi22) + 
+    2.*(ginv12*(R12 + Rphi12) + ginv13*(R13 + Rphi13) + 
+       ginv23*(R23 + Rphi23)) + ginv33*(R33 + Rphi33))
+;
+
+hamil
+=
+-AA + R + 0.66666666666666666666666666666666666667*pow2(K[ijk])
+;
+
+R
+=
+R - hamil*RtoRminusHfactor
 ;
 
 divbeta
@@ -3542,4 +3556,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2327,  n/ = 80,  n+ = 2093, n = 4500, O = 1 */
+/* nvars = 215, n* = 2336,  n/ = 80,  n+ = 2107, n = 4523, O = 1 */

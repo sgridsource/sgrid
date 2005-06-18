@@ -137,8 +137,14 @@ tocompute = {
   divAinv[a] == 2/3 ginv[a,b] dK[b] - 6 Ainv[a,b] df[b] -
                   gamma[a,b,c] Ainv[b,c],
 
-  (* Ricci scalar *)
-  R == AA - 2 K K / 3,
+  (* Ricci scalar *)  (* In Bernds bssn:  R == AA - 2 K K / 3, *)
+  R == psim4 ginv[a,b] (R[a,b] + Rphi[a,b]),
+
+  (* Hamiltonian constraint *)
+  hamil == R + 2/3 K K - AA,
+
+  (* subtract hamil from R  (In Bernds bssn: RtoRminusHfactor=1) *)
+  R == R - RtoRminusHfactor * hamil,
 
   (* the shift terms *)
   divbeta == delta[a,b] db[a,b],
@@ -387,6 +393,7 @@ BeginCFunction[] := Module[{},
   pr["int GReplacedBydg       = Getv(\"BSSN_GReplacedBydg\", \"yes\");\n"];
   pr["double YoTermFactor     = Getd(\"BSSN_YoTermFactor\");\n"];
   pr["int evolveGamma         =!Getv(\"BSSN_freezeGamma\", \"yes\");\n"];
+  pr["double RtoRminusHfactor = Getd(\"BSSN_RtoRminusHfactor\");\n"];
 
   pr["int nonconstantlapse    =!Getv(\"BSSN_lapse\", \"constant\");\n"];
   pr["int oploglapse          = Getv(\"BSSN_lapse\", \"1+log\");\n"];
