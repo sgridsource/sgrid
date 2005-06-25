@@ -83,7 +83,7 @@ int Z4secondO_startup(tGrid *grid)
 
   /* enable all derivative vars */
   enablevar(grid, Ind("Z4secondO_dThetax"));
-  enablevar(grid, Ind("Z4secondO_dZx"));
+  enablevar(grid, Ind("Z4secondO_dZxx"));
   enablevar(grid, Ind("Z4secondO_dalpx"));
   enablevar(grid, Ind("Z4secondO_ddalpxx"));
   enablevar(grid, Ind("Z4secondO_dbetaxx"));

@@ -22,7 +22,7 @@ int sgrid_Z4secondO(void)
   /* Note: ADMvars_ddg, ADMvars_dg, ADMvars_dA are overwritten and used 
            in place of Z4secondO_ddg, Z4secondO_dg, Z4secondO_dK */
   AddVar("Z4secondO_dTheta", "i",    "1st deriv of Theta");
-  AddVar("Z4secondO_dZ",     "i",    "1st deriv of Z_i");
+  AddVar("Z4secondO_dZ",     "ij",   "1st deriv of Z_i");
   AddVar("Z4secondO_dalp",   "i",    "1st deriv of Lapse");
   AddVar("Z4secondO_ddalp",  "(ij)", "2nd deriv of Lapse");
   AddVar("Z4secondO_dbeta",  "Ij",   "1st deriv of shift");
