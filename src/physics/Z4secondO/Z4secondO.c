@@ -12,6 +12,7 @@ tVarList *Z4secondOvars;
 void Z4secondO_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 {
   Z4secondO_rhs(unew, upre, dt, ucur);
+  set_boundary(unew, upre, dt, ucur);
 }
 
 
