@@ -29,20 +29,16 @@ int sgrid_Z4secondO(void)
   AddVar("Z4secondO_ddbeta", "I(jk)","2nd deriv of shift");
     
   /* parameters */
-  AddPar("Z4secondO_useDD", "no",
+  AddPar("Z4secondO_useDD", "yes",
          "wether we use the DD ops to compute second derivs [no,yes]");
-  AddPar("Z4secondO_densitizedLapse", "no", 
-  "wether we evolve a densitized lapse instead of ADM alpha "
-  "[no,yes,1+log_withoutShift]");
-  AddPar("Z4secondO_alphaDensityWeight",  "1.0", "weight of densitized lapse");
   
-  AddPar("Z4secondO_normalizedetg", "no",  "normalize determinant of gamma to one");
-  AddPar("Z4secondO_RtoRminusHfactor", "1",
+  AddPar("Z4secondO_RtoRminusHfactor", "0",
          "how much of Hamiltonian H we subtract from Ricci scalar R");
 
   AddPar("Z4secondO_lapsepsipower",  "0", "power of psi in lapse equation");
   AddPar("Z4secondO_lapseharmonicf", "2", "2 for 1+log, 1 for harmonic");
-  AddPar("Z4secondO_subtractK0",     "yes", 
+  AddPar("Z4secondO_lapseharmonicm", "0", "m in -m Theta term of lapse Eqn");
+  AddPar("Z4secondO_subtractK0",     "no", 
 	 "for harmonic and 1+log, subtract initial traceK or not");
 
   AddPar("Z4secondO_shiftpsipower",   "0", "power of 1/psi in shift equation");
@@ -53,6 +49,6 @@ int sgrid_Z4secondO(void)
   AddPar("Z4secondO_shift",  "constant",
          "shift equation [constant,gamma0,gamma2]");
   AddPar("Z4secondOy_lapse", "constant", 
-	 "lapse equation [constant,1+log,1+log2,harmonic;withshift]");
+	 "lapse equation [constant,1+log,harmonic;withshift]");
   return 0;
 }

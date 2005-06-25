@@ -54,6 +54,7 @@ tocompute = {
   betadK[a,b] == beta[d] dK[a,b,d],
   betadTheta  == beta[d] dTheta[d],
   betadZ[a]   == beta[d] dZ[a,d],
+  betadalp    == beta[d] dalp[d],
 
   (* make transition to physical metric *)
   (*
@@ -111,14 +112,14 @@ tocompute = {
   lieg[a,b] == betadg[a,b] + dbeta[c,a] g[b,c] + dbeta[c,b] g[a,c],
   lieK[a,b] == betadK[a,b] + dbeta[c,a] K[b,c] + dbeta[c,b] K[a,c],
   lieTheta  == betadTheta,
-  lieZ[a]   == betadZ[a] + dbeta[c,b] Z[c],
+  lieZ[a]   == betadZ[a] + dbeta[c,a] Z[c],
 
   (* right hand sides *)
 
   rg[a,b] == - 2 alpha K[a,b] + lieg[a,b],
 
   rK[a,b] == - cddalp[a,b] + alpha (R[a,b] + cdZ[a,b] + cdZ[b,a] -
-             2 KK[a,b] + K[a,b](K - 2 Theta)) + lieK[a,b],
+             2 KK[a,b] + K[a,b](trK - 2 Theta)) + lieK[a,b],
 
   rTheta == alpha/2 ( R + 2 cdZ[a,b] ginv[a,b] + 
                       trK(trK - 2 Theta) - trKK ) - 
@@ -128,15 +129,21 @@ tocompute = {
            2 K[a,b] Z[c] ginv[b,c] ) - Theta dalp[a] + lieZ[a],
 
   (* gauge conditions, avoid unnecessary if statements, use flags *)
-  ralpha0 == (6 oplogwithshift liephi - 
+  liealpha == betadalp,
+  ralpha0 == -alpha (trK - subtractK0 K0 - lapseharmonicm Theta) *
+               psi^lapsepsipower,
+  ralpha  == nonconstantlapse * ( withshift liealpha +
+              (oploglapse lapseharmonicf  + harmoniclapse alpha) ralpha0 ),
+
+  rbeta[a] == 0,
+  rB[a] == 0,
+(*
+  ralpha0 == (6 withshift liephi - 
               alpha (trK - subtractK0 K0)) psi^lapsepsipower,
   ralpha  == ralpha0 * nonconstantlapse *
              (oploglapse lapseharmonicf +
               oploglapse2 8/3/(3-alpha) + harmoniclapse alpha),
 
-  rbeta[a] == 0,
-  rB[a] == 0,
-(*
    betaF == shiftgammacoeff alpha^shiftalphapower / psi^shiftpsipower,
    rbeta[a] == evolveshift (gamma2factor + gamma0factor betaF) B[a],
    rB[a]    == evolveshift ((gamma0factor + gamma2factor betaF) rG[a] -  
@@ -233,15 +240,14 @@ BeginCFunction[] := Module[{},
   pr["\n"];
 
   pr["int addlinear = (dt != 0.0l);\n"];
-  pr["int usepsi = 1;\n"];
+  pr["/* int usepsi = 1; */\n"];
 
   pr["int useDD               = Getv(\"Z4secondO_useDD\", \"yes\");\n"];
   pr["double RtoRminusHfactor = Getd(\"Z4secondO_RtoRminusHfactor\");\n"];
 
   pr["int nonconstantlapse    =!Getv(\"Z4secondO_lapse\", \"constant\");\n"];
   pr["int oploglapse          = Getv(\"Z4secondO_lapse\", \"1+log\");\n"];
-  pr["int oploglapse2         = Getv(\"Z4secondO_lapse\", \"1+log2\");\n"];
-  pr["int oplogwithshift      = Getv(\"Z4secondO_lapse\", \"withshift\");\n"];
+  pr["int withshift           = Getv(\"Z4secondO_lapse\", \"withshift\");\n"];
   pr["int harmoniclapse       = Getv(\"Z4secondO_lapse\", \"harmonic\");\n"];
   pr["int subtractK0          = Getv(\"Z4secondO_subtractK0\", \"yes\");\n"];
 
@@ -252,6 +258,7 @@ BeginCFunction[] := Module[{},
 
   pr["double lapsepsipower   = Getd(\"Z4secondO_lapsepsipower\");\n"];
   pr["double lapseharmonicf  = Getd(\"Z4secondO_lapseharmonicf\");\n"];
+  pr["double lapseharmonicm  = Getd(\"Z4secondO_lapseharmonicm\");\n"];
   pr["double shiftpsipower   = Getd(\"Z4secondO_shiftpsipower\");\n"];
   pr["double shiftalphapower = Getd(\"Z4secondO_shiftalphapower\");\n"];
   pr["double shiftgammacoeff = Getd(\"Z4secondO_shiftgammacoeff\");\n"];

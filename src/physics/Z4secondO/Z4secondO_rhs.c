@@ -20,13 +20,12 @@ tGrid *grid = ucur->grid;
 int bi;
 
 int addlinear = (dt != 0.0l);
-int usepsi = 1;
+/* int usepsi = 1; */
 int useDD               = Getv("Z4secondO_useDD", "yes");
 double RtoRminusHfactor = Getd("Z4secondO_RtoRminusHfactor");
 int nonconstantlapse    =!Getv("Z4secondO_lapse", "constant");
 int oploglapse          = Getv("Z4secondO_lapse", "1+log");
-int oploglapse2         = Getv("Z4secondO_lapse", "1+log2");
-int oplogwithshift      = Getv("Z4secondO_lapse", "withshift");
+int withshift           = Getv("Z4secondO_lapse", "withshift");
 int harmoniclapse       = Getv("Z4secondO_lapse", "harmonic");
 int subtractK0          = Getv("Z4secondO_subtractK0", "yes");
 double gamma0factor    = Getv("Z4secondO_shift", "gamma0");
@@ -35,6 +34,7 @@ double shift_st        = Getd("Z4secondO_shift_stop_time");
 double evolveshift     = Cal( (grid->time>=shift_st)*(shift_st>=0), 0.0, 1.0);
 double lapsepsipower   = Getd("Z4secondO_lapsepsipower");
 double lapseharmonicf  = Getd("Z4secondO_lapseharmonicf");
+double lapseharmonicm  = Getd("Z4secondO_lapseharmonicm");
 double shiftpsipower   = Getd("Z4secondO_shiftpsipower");
 double shiftalphapower = Getd("Z4secondO_shiftalphapower");
 double shiftgammacoeff = Getd("Z4secondO_shiftgammacoeff");
@@ -281,6 +281,7 @@ double *ddbeta323 = box->v[index_Z4secondO_ddbetaxxx + 16];
 double *ddbeta333 = box->v[index_Z4secondO_ddbetaxxx + 17];
 
 
+double betadalp;
 double betadg11;
 double betadg12;
 double betadg13;
@@ -416,6 +417,7 @@ double KK13;
 double KK22;
 double KK23;
 double KK33;
+double liealpha;
 double lieg11;
 double lieg12;
 double lieg13;
@@ -628,6 +630,11 @@ beta1[ijk]*dZ21[ijk] + beta2[ijk]*dZ22[ijk] + beta3[ijk]*dZ23[ijk]
 betadZ3
 =
 beta1[ijk]*dZ31[ijk] + beta2[ijk]*dZ32[ijk] + beta3[ijk]*dZ33[ijk]
+;
+
+betadalp
+=
+beta1[ijk]*dalp1[ijk] + beta2[ijk]*dalp2[ijk] + beta3[ijk]*dalp3[ijk]
 ;
 
 detginv
@@ -1610,17 +1617,17 @@ betadTheta
 
 lieZ1
 =
-betadZ1 + dbeta(1.,b)*Z1[ijk] + dbeta(2.,b)*Z2[ijk] + dbeta(3.,b)*Z3[ijk]
+betadZ1 + dbeta11[ijk]*Z1[ijk] + dbeta21[ijk]*Z2[ijk] + dbeta31[ijk]*Z3[ijk]
 ;
 
 lieZ2
 =
-betadZ2 + dbeta(1.,b)*Z1[ijk] + dbeta(2.,b)*Z2[ijk] + dbeta(3.,b)*Z3[ijk]
+betadZ2 + dbeta12[ijk]*Z1[ijk] + dbeta22[ijk]*Z2[ijk] + dbeta32[ijk]*Z3[ijk]
 ;
 
 lieZ3
 =
-betadZ3 + dbeta(1.,b)*Z1[ijk] + dbeta(2.,b)*Z2[ijk] + dbeta(3.,b)*Z3[ijk]
+betadZ3 + dbeta13[ijk]*Z1[ijk] + dbeta23[ijk]*Z2[ijk] + dbeta33[ijk]*Z3[ijk]
 ;
 
 rg11
@@ -1656,37 +1663,37 @@ lieg33 - 2.*alpha[ijk]*K33[ijk]
 rK11
 =
 -cddalp11 + lieK11 + alpha[ijk]*
-   (R11 + K*K11[ijk] + 2.*(cdZ11 - KK11 - K11[ijk]*Theta[ijk]))
+   (R11 + trK*K11[ijk] + 2.*(cdZ11 - KK11 - K11[ijk]*Theta[ijk]))
 ;
 
 rK12
 =
 -cddalp12 + lieK12 + alpha[ijk]*
-   (cdZ12 + cdZ21 + R12 + K*K12[ijk] - 2.*(KK12 + K12[ijk]*Theta[ijk]))
+   (cdZ12 + cdZ21 + R12 + trK*K12[ijk] - 2.*(KK12 + K12[ijk]*Theta[ijk]))
 ;
 
 rK13
 =
 -cddalp13 + lieK13 + alpha[ijk]*
-   (cdZ13 + cdZ31 + R13 + K*K13[ijk] - 2.*(KK13 + K13[ijk]*Theta[ijk]))
+   (cdZ13 + cdZ31 + R13 + trK*K13[ijk] - 2.*(KK13 + K13[ijk]*Theta[ijk]))
 ;
 
 rK22
 =
 -cddalp22 + lieK22 + alpha[ijk]*
-   (R22 + K*K22[ijk] + 2.*(cdZ22 - KK22 - K22[ijk]*Theta[ijk]))
+   (R22 + trK*K22[ijk] + 2.*(cdZ22 - KK22 - K22[ijk]*Theta[ijk]))
 ;
 
 rK23
 =
 -cddalp23 + lieK23 + alpha[ijk]*
-   (cdZ23 + cdZ32 + R23 + K*K23[ijk] - 2.*(KK23 + K23[ijk]*Theta[ijk]))
+   (cdZ23 + cdZ32 + R23 + trK*K23[ijk] - 2.*(KK23 + K23[ijk]*Theta[ijk]))
 ;
 
 rK33
 =
 -cddalp33 + lieK33 + alpha[ijk]*
-   (R33 + K*K33[ijk] + 2.*(cdZ33 - KK33 - K33[ijk]*Theta[ijk]))
+   (R33 + trK*K33[ijk] + 2.*(cdZ33 - KK33 - K33[ijk]*Theta[ijk]))
 ;
 
 rTheta
@@ -1734,16 +1741,21 @@ lieZ3 - dalp3[ijk]*Theta[ijk] +
      ginv23*(cdK233 + cdK332 - 2.*(K33[ijk]*Z2[ijk] + K23[ijk]*Z3[ijk])))
 ;
 
+liealpha
+=
+betadalp
+;
+
 ralpha0
 =
-(6.*liephi*oplogwithshift + alpha[ijk]*(-trK + subtractK0*K0[ijk]))*
-  Power(psi[ijk],lapsepsipower)
+alpha[ijk]*Power(psi[ijk],lapsepsipower)*
+  (-trK + subtractK0*K0[ijk] + lapseharmonicm*Theta[ijk])
 ;
 
 ralpha
 =
-nonconstantlapse*ralpha0*(lapseharmonicf*oploglapse + 
-    (8.*oploglapse2)/(9. - 3.*alpha[ijk]) + harmoniclapse*alpha[ijk])
+nonconstantlapse*(liealpha*withshift + 
+    ralpha0*(lapseharmonicf*oploglapse + harmoniclapse*alpha[ijk]))
 ;
 
 rbeta1
@@ -2025,4 +2037,4 @@ rB3
 }  /* end of function */
 
 /* Z4secondO_rhs.c */
-/* nvars = 200, n* = 1534,  n/ = 29,  n+ = 1497, n = 3060, O = 1 */
+/* nvars = 200, n* = 1537,  n/ = 30,  n+ = 1497, n = 3064, O = 1 */
