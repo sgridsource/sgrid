@@ -290,7 +290,7 @@ variabledeclarations[] := Module[{},
   prdecvarname[{dg[a,b,c]},     "ADMvars_dgxxx"];
   prdecvarname[{ddg[a,b,c,d]},  "ADMvars_ddgxxxx"];
   prdecvarname[{dK[a,b,c]},     "ADMvars_dKxxx"];
-  prdecvarname[{dTheta[a]},     "Z4secondO_dTheta"];
+  prdecvarname[{dTheta[a]},     "Z4secondO_dThetax"];
   prdecvarname[{dZ[a,b]},       "Z4secondO_dZxx"];
   prdecvarname[{dalp[a]},       "Z4secondO_dalpx"];
   prdecvarname[{ddalp[a,b]},    "Z4secondO_ddalpxx"];
