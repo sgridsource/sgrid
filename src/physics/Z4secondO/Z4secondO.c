@@ -20,7 +20,6 @@ void Z4secondO_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
    computed in POST_INITIALDATA */
 int Z4secondO_startup(tGrid *grid)
 {
-  int i;
   double vgauge;
 
   printf("Initializing Z4secondO:\n");
@@ -64,7 +63,7 @@ int Z4secondO_startup(tGrid *grid)
   /* create a variable list for Z4secondO evolutions 
      note that we include lapse and shift directly
   */
-  Z4secondOvars = vlalloc(level);
+  Z4secondOvars = vlalloc(grid);
   vlpush(Z4secondOvars, Ind("gxx"));
   vlpush(Z4secondOvars, Ind("Kxx"));
   vlpush(Z4secondOvars, Ind("Z4secondO_Theta"));

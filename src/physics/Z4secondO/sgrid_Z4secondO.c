@@ -7,7 +7,7 @@
 
 int sgrid_Z4secondO(void) 
 {
-  if (!Getv("physics", "Z4secondO")) return;
+  if (!Getv("physics", "Z4secondO")) return 0;
   printf("Adding Z4secondO\n");
 
   /* functions */
