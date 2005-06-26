@@ -338,6 +338,8 @@ dA[c_,a_,b_] := dA[c,b,a] /; !OrderedQ[{a,b}]
 
 deldelg[a_,b_,c_,d_] := deldelg[b,a,c,d] /; !OrderedQ[{a,b}]
 deldelg[a_,b_,c_,d_] := deldelg[a,b,d,c] /; !OrderedQ[{c,d}]
+gammado[c_,a_,b_] := gammado[c,b,a] /; !OrderedQ[{a,b}]
+gamma[c_,a_,b_]   := gamma[c,b,a] /; !OrderedQ[{a,b}]
 
 codel[a_, (x_ /; NumberQ[x])] = 0
 codelK[c_,a_,b_] := codelK[c,b,a] /; !OrderedQ[{a,b}]

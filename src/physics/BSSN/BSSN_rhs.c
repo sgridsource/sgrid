@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 18.6.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 25.6.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -535,56 +535,38 @@ double divAinv3;
 double gamma111;
 double gamma112;
 double gamma113;
-double gamma121;
 double gamma122;
 double gamma123;
-double gamma131;
-double gamma132;
 double gamma133;
 double gamma211;
 double gamma212;
 double gamma213;
-double gamma221;
 double gamma222;
 double gamma223;
-double gamma231;
-double gamma232;
 double gamma233;
 double gamma311;
 double gamma312;
 double gamma313;
-double gamma321;
 double gamma322;
 double gamma323;
-double gamma331;
-double gamma332;
 double gamma333;
 double gammado111;
 double gammado112;
 double gammado113;
-double gammado121;
 double gammado122;
 double gammado123;
-double gammado131;
-double gammado132;
 double gammado133;
 double gammado211;
 double gammado212;
 double gammado213;
-double gammado221;
 double gammado222;
 double gammado223;
-double gammado231;
-double gammado232;
 double gammado233;
 double gammado311;
 double gammado312;
 double gammado313;
-double gammado321;
 double gammado322;
 double gammado323;
-double gammado331;
-double gammado332;
 double gammado333;
 double Gfromg1;
 double Gfromg2;
@@ -1630,27 +1612,12 @@ gammado113
 0.5*delg311
 ;
 
-gammado121
-=
-0.5*delg211
-;
-
 gammado122
 =
 -0.5*delg122 + delg212
 ;
 
 gammado123
-=
-0.5*(-delg123 + delg213 + delg312)
-;
-
-gammado131
-=
-0.5*delg311
-;
-
-gammado132
 =
 0.5*(-delg123 + delg213 + delg312)
 ;
@@ -1675,27 +1642,12 @@ gammado213
 0.5*(delg123 - delg213 + delg312)
 ;
 
-gammado221
-=
-0.5*delg122
-;
-
 gammado222
 =
 0.5*delg222
 ;
 
 gammado223
-=
-0.5*delg322
-;
-
-gammado231
-=
-0.5*(delg123 - delg213 + delg312)
-;
-
-gammado232
 =
 0.5*delg322
 ;
@@ -1720,27 +1672,12 @@ gammado313
 0.5*delg133
 ;
 
-gammado321
-=
-0.5*(delg123 + delg213 - delg312)
-;
-
 gammado322
 =
 delg223 - 0.5*delg322
 ;
 
 gammado323
-=
-0.5*delg233
-;
-
-gammado331
-=
-0.5*delg133
-;
-
-gammado332
 =
 0.5*delg233
 ;
@@ -1765,11 +1702,6 @@ gamma113
 gammado113*ginv11 + gammado213*ginv12 + gammado313*ginv13
 ;
 
-gamma121
-=
-gammado121*ginv11 + gammado221*ginv12 + gammado321*ginv13
-;
-
 gamma122
 =
 gammado122*ginv11 + gammado222*ginv12 + gammado322*ginv13
@@ -1778,16 +1710,6 @@ gammado122*ginv11 + gammado222*ginv12 + gammado322*ginv13
 gamma123
 =
 gammado123*ginv11 + gammado223*ginv12 + gammado323*ginv13
-;
-
-gamma131
-=
-gammado131*ginv11 + gammado231*ginv12 + gammado331*ginv13
-;
-
-gamma132
-=
-gammado132*ginv11 + gammado232*ginv12 + gammado332*ginv13
 ;
 
 gamma133
@@ -1810,11 +1732,6 @@ gamma213
 gammado113*ginv12 + gammado213*ginv22 + gammado313*ginv23
 ;
 
-gamma221
-=
-gammado121*ginv12 + gammado221*ginv22 + gammado321*ginv23
-;
-
 gamma222
 =
 gammado122*ginv12 + gammado222*ginv22 + gammado322*ginv23
@@ -1823,16 +1740,6 @@ gammado122*ginv12 + gammado222*ginv22 + gammado322*ginv23
 gamma223
 =
 gammado123*ginv12 + gammado223*ginv22 + gammado323*ginv23
-;
-
-gamma231
-=
-gammado131*ginv12 + gammado231*ginv22 + gammado331*ginv23
-;
-
-gamma232
-=
-gammado132*ginv12 + gammado232*ginv22 + gammado332*ginv23
 ;
 
 gamma233
@@ -1855,11 +1762,6 @@ gamma313
 gammado113*ginv13 + gammado213*ginv23 + gammado313*ginv33
 ;
 
-gamma321
-=
-gammado121*ginv13 + gammado221*ginv23 + gammado321*ginv33
-;
-
 gamma322
 =
 gammado122*ginv13 + gammado222*ginv23 + gammado322*ginv33
@@ -1870,16 +1772,6 @@ gamma323
 gammado123*ginv13 + gammado223*ginv23 + gammado323*ginv33
 ;
 
-gamma331
-=
-gammado131*ginv13 + gammado231*ginv23 + gammado331*ginv33
-;
-
-gamma332
-=
-gammado132*ginv13 + gammado232*ginv23 + gammado332*ginv33
-;
-
 gamma333
 =
 gammado133*ginv13 + gammado233*ginv23 + gammado333*ginv33
@@ -1887,23 +1779,20 @@ gammado133*ginv13 + gammado233*ginv23 + gammado333*ginv33
 
 Gfromg1
 =
-gamma111*ginv11 + (gamma112 + gamma121)*ginv12 + 
-  (gamma113 + gamma131)*ginv13 + gamma122*ginv22 + 
-  (gamma123 + gamma132)*ginv23 + gamma133*ginv33
+gamma111*ginv11 + gamma122*ginv22 + 
+  2.*(gamma112*ginv12 + gamma113*ginv13 + gamma123*ginv23) + gamma133*ginv33
 ;
 
 Gfromg2
 =
-gamma211*ginv11 + (gamma212 + gamma221)*ginv12 + 
-  (gamma213 + gamma231)*ginv13 + gamma222*ginv22 + 
-  (gamma223 + gamma232)*ginv23 + gamma233*ginv33
+gamma211*ginv11 + gamma222*ginv22 + 
+  2.*(gamma212*ginv12 + gamma213*ginv13 + gamma223*ginv23) + gamma233*ginv33
 ;
 
 Gfromg3
 =
-gamma311*ginv11 + (gamma312 + gamma321)*ginv12 + 
-  (gamma313 + gamma331)*ginv13 + gamma322*ginv22 + 
-  (gamma323 + gamma332)*ginv23 + gamma333*ginv33
+gamma311*ginv11 + gamma322*ginv22 + 
+  2.*(gamma312*ginv12 + gamma313*ginv13 + gamma323*ginv23) + gamma333*ginv33
 ;
 
 
@@ -1951,69 +1840,60 @@ G3[ijk]
 R11
 =
 (-0.5*deldelg1111 + 3.*gamma111*gammado111 + 
-     2.*(gamma211*gammado121 + gamma311*gammado131) + 
+     2.*(gamma211*gammado112 + gamma311*gammado113) + 
      gamma211*gammado211 + gamma311*gammado311)*ginv11 + 
-  (-deldelg1211 + (gamma112 + 2.*gamma121)*gammado111 + 
-     gamma111*(2.*gammado112 + gammado121) + 
-     2.*(gamma221*gammado121 + gamma211*gammado122 + 
-        gamma321*gammado131 + gamma311*gammado132) + gamma212*gammado211 + 
-     gamma211*gammado221 + gamma312*gammado311 + gamma311*gammado321)*ginv12 \
-+ (-deldelg1311 + (gamma113 + 2.*gamma131)*gammado111 + 
-     gamma111*gammado131 + 2.*
-      (gamma111*gammado113 + gamma231*gammado121 + gamma211*gammado123 + 
-        gamma331*gammado131 + gamma311*gammado133) + gamma213*gammado211 + 
-     gamma211*gammado231 + gamma313*gammado311 + gamma311*gammado331)*ginv13 \
-+ (-0.5*deldelg2211 + gamma112*gammado121 + 
-     2.*(gamma121*gammado112 + gamma221*gammado122 + 
-        gamma321*gammado132) + gamma212*gammado221 + gamma312*gammado321)*
-   ginv22 + (-deldelg2311 + gamma113*gammado121 + gamma112*gammado131 + 
-     2.*(gamma131*gammado112 + gamma121*gammado113 + 
-        gamma231*gammado122 + gamma221*gammado123 + gamma331*gammado132 + 
-        gamma321*gammado133) + gamma213*gammado221 + gamma212*gammado231 + 
-     gamma313*gammado321 + gamma312*gammado331)*ginv23 + 
-  (-0.5*deldelg3311 + gamma113*gammado131 + 
-     2.*(gamma131*gammado113 + gamma231*gammado123 + 
-        gamma331*gammado133) + gamma213*gammado231 + gamma313*gammado331)*
-   ginv33 + gammado111*undiffdG1 + gammado112*undiffdG2 + 
-  gammado113*undiffdG3 + delG11*g11[ijk] + delG12*g12[ijk] + delG13*g13[ijk]
+  (-deldelg1211 + 3.*(gamma112*gammado111 + gamma111*gammado112) + 
+     2.*(gamma212*gammado112 + gamma312*gammado113 + 
+        gamma211*gammado122 + gamma311*gammado123) + gamma212*gammado211 + 
+     gamma211*gammado212 + gamma312*gammado311 + gamma311*gammado312)*ginv12 \
++ (-deldelg1311 + 3.*(gamma113*gammado111 + gamma111*gammado113) + 
+     2.*(gamma213*gammado112 + gamma313*gammado113 + 
+        gamma211*gammado123 + gamma311*gammado133) + gamma213*gammado211 + 
+     gamma211*gammado213 + gamma313*gammado311 + gamma311*gammado313)*ginv13 \
++ (-0.5*deldelg2211 + 3.*gamma112*gammado112 + 
+     2.*(gamma212*gammado122 + gamma312*gammado123) + 
+     gamma212*gammado212 + gamma312*gammado312)*ginv22 + 
+  (-deldelg2311 + 3.*(gamma113*gammado112 + gamma112*gammado113) + 
+     2.*(gamma213*gammado122 + (gamma212 + gamma313)*gammado123 + 
+        gamma312*gammado133) + gamma213*gammado212 + gamma212*gammado213 + 
+     gamma313*gammado312 + gamma312*gammado313)*ginv23 + 
+  (-0.5*deldelg3311 + 3.*gamma113*gammado113 + 
+     2.*(gamma213*gammado123 + gamma313*gammado133) + 
+     gamma213*gammado213 + gamma313*gammado313)*ginv33 + 
+  gammado111*undiffdG1 + gammado112*undiffdG2 + gammado113*undiffdG3 + 
+  delG11*g11[ijk] + delG12*g12[ijk] + delG13*g13[ijk]
 ;
 
 R12
 =
-(-0.5*deldelg1112 + (gamma112 + gamma121)*gammado111 + 
-     gamma212*gammado121 + gamma312*gammado131 + 
-     (gamma111 + gamma221)*gammado211 + gamma211*gammado221 + 
-     gamma311*gammado231 + gamma321*gammado311)*ginv11 + 
-  (-deldelg1212 + gamma112*gammado112 + gamma212*gammado122 + 
-     gamma312*gammado132 + (gamma121 + gamma222)*
-      (gammado121 + gammado211) + gamma111*gammado212 + 
-     2.*(gamma122*gammado111 + gamma221*gammado221) + 
-     gamma211*gammado222 + gamma311*gammado232 + 
-     gamma322*(gammado131 + gammado311) + 
-     gamma321*(gammado231 + gammado321))*ginv12 + 
-  (-deldelg1312 + (gamma123 + gamma132)*gammado111 + gamma112*gammado113 + 
-     gamma232*gammado121 + gamma212*gammado123 + 
-     (gamma121 + gamma332)*gammado131 + gamma312*gammado133 + 
-     (gamma131 + gamma223)*gammado211 + gamma111*gammado213 + 
-     gamma231*gammado221 + gamma211*gammado223 + 
-     (gamma221 + gamma331)*gammado231 + gamma311*gammado233 + 
-     gamma323*gammado311 + gamma321*gammado331)*ginv13 + 
-  (-0.5*deldelg2212 + gamma122*(gammado112 + gammado121) + 
-     gamma121*gammado212 + gamma222*(gammado122 + gammado221) + 
-     gamma221*gammado222 + gamma321*gammado232 + 
-     gamma322*(gammado132 + gammado321))*ginv22 + 
-  (-deldelg2312 + gamma132*gammado112 + gamma123*gammado121 + 
-     gamma232*gammado122 + gamma122*(gammado113 + gammado131) + 
-     gamma332*gammado132 + gamma131*gammado212 + gamma121*gammado213 + 
-     gamma223*gammado221 + gamma231*gammado222 + gamma221*gammado223 + 
-     gamma222*(gammado123 + gammado231) + gamma331*gammado232 + 
-     gamma321*gammado233 + gamma323*gammado321 + 
-     gamma322*(gammado133 + gammado331))*ginv23 + 
-  (-0.5*deldelg3312 + gamma132*gammado113 + gamma232*gammado123 + 
-     gamma123*gammado131 + gamma332*gammado133 + gamma131*gammado213 + 
-     gamma231*gammado223 + gamma223*gammado231 + gamma331*gammado233 + 
-     gamma323*gammado331)*ginv33 + 
-  0.5*((gammado121 + gammado211)*undiffdG1 + 
+(-0.5*deldelg1112 + 2.*gamma112*gammado111 + gamma111*gammado211 + 
+     gamma212*(gammado112 + gammado211) + gamma211*gammado212 + 
+     gamma311*gammado213 + gamma312*(gammado113 + gammado311))*ginv11 + 
+  (-deldelg1212 + gamma212*gammado122 + gamma112*gammado211 + 
+     gamma222*(gammado112 + gammado211) + gamma111*gammado212 + 
+     2.*(gamma122*gammado111 + gamma112*gammado112 + 
+        gamma212*gammado212) + gamma211*gammado222 + gamma311*gammado223 + 
+     gamma322*(gammado113 + gammado311) + 
+     gamma312*(gammado123 + gammado213 + gammado312))*ginv12 + 
+  (-deldelg1312 + 2.*(gamma123*gammado111 + gamma112*gammado113) + 
+     gamma113*gammado211 + gamma223*(gammado112 + gammado211) + 
+     gamma213*gammado212 + (gamma111 + gamma313)*gammado213 + 
+     gamma212*(gammado123 + gammado213) + gamma211*gammado223 + 
+     gamma311*gammado233 + gamma323*(gammado113 + gammado311) + 
+     gamma312*(gammado133 + gammado313))*ginv13 + 
+  (-0.5*deldelg2212 + 2.*gamma122*gammado112 + gamma112*gammado212 + 
+     gamma222*(gammado122 + gammado212) + gamma212*gammado222 + 
+     gamma312*gammado223 + gamma322*(gammado123 + gammado312))*ginv22 + 
+  (-deldelg2312 + 2.*(gamma123*gammado112 + gamma122*gammado113) + 
+     (gamma222 + gamma323)*gammado123 + gamma113*gammado212 + 
+     gamma223*(gammado122 + gammado212) + 
+     (gamma112 + gamma222)*gammado213 + gamma213*gammado222 + 
+     (gamma212 + gamma313)*gammado223 + gamma312*gammado233 + 
+     gamma323*gammado312 + gamma322*(gammado133 + gammado313))*ginv23 + 
+  (-0.5*deldelg3312 + 2.*gamma123*gammado113 + gamma113*gammado213 + 
+     gamma223*(gammado123 + gammado213) + gamma213*gammado223 + 
+     gamma313*gammado233 + gamma323*(gammado133 + gammado313))*ginv33 + 
+  0.5*((gammado112 + gammado211)*undiffdG1 + 
      (gammado122 + gammado212)*undiffdG2 + 
      (gammado123 + gammado213)*undiffdG3 + delG21*g11[ijk] + 
      (delG11 + delG22)*g12[ijk] + delG23*g13[ijk] + delG12*g22[ijk] + 
@@ -2022,40 +1902,38 @@ R12
 
 R12
 =
-(-0.5*deldelg1112 + gamma112*gammado111 + gamma212*gammado121 + 
-     gamma312*gammado131 + gamma111*(gammado112 + gammado211) + 
-     gamma211*(gammado212 + gammado221) + 
-     gamma311*(gammado231 + gammado312))*ginv11 + 
-  (-deldelg1212 + gamma122*gammado111 + gamma222*gammado121 + 
-     gamma322*gammado131 + gamma121*gammado211 + 
-     (gamma111 + gamma212)*(gammado122 + gammado212) + 
-     gamma221*gammado221 + 2.*
-      (gamma112*gammado112 + gamma211*gammado222) + gamma321*gammado231 + 
-     gamma312*(gammado132 + gammado312) + 
-     gamma311*(gammado232 + gammado322))*ginv12 + 
-  (-deldelg1312 + gamma132*gammado111 + gamma113*gammado112 + 
-     gamma112*gammado113 + gamma232*gammado121 + gamma212*gammado123 + 
-     gamma332*gammado131 + gamma312*gammado133 + gamma131*gammado211 + 
-     gamma213*gammado212 + gamma111*(gammado132 + gammado213) + 
-     gamma231*gammado221 + gamma331*gammado231 + 
-     gamma211*(gammado223 + gammado232) + gamma313*gammado312 + 
-     gamma311*(gammado233 + gammado332))*ginv13 + 
+(-0.5*deldelg1112 + gamma112*gammado111 + 
+     (gamma111 + gamma212)*gammado112 + gamma312*gammado113 + 
+     gamma111*gammado211 + 2.*gamma211*gammado212 + 
+     gamma311*(gammado213 + gammado312))*ginv11 + 
+  (-deldelg1212 + gamma122*gammado111 + 
+     (2.*gamma112 + gamma222)*gammado112 + gamma322*gammado113 + 
+     (gamma111 + gamma212)*gammado122 + gamma112*gammado211 + 
+     (gamma111 + 2.*gamma212)*gammado212 + 2.*gamma211*gammado222 + 
+     gamma312*(gammado123 + gammado213 + gammado312) + 
+     gamma311*(gammado223 + gammado322))*ginv12 + 
+  (-deldelg1312 + gamma123*gammado111 + (gamma113 + gamma223)*gammado112 + 
+     (gamma112 + gamma323)*gammado113 + (gamma111 + gamma212)*gammado123 + 
+     gamma312*gammado133 + gamma113*gammado211 + 
+     (gamma111 + gamma313)*gammado213 + 
+     2.*(gamma213*gammado212 + gamma211*gammado223) + 
+     gamma313*gammado312 + gamma311*(gammado233 + gammado323))*ginv13 + 
   (-0.5*deldelg2212 + gamma122*gammado112 + 
-     (gamma112 + gamma222)*gammado122 + gamma322*gammado132 + 
-     gamma121*gammado212 + (gamma212 + gamma221)*gammado222 + 
-     gamma321*gammado232 + gamma312*gammado322)*ginv22 + 
-  (-deldelg2312 + gamma132*gammado112 + gamma122*gammado113 + 
-     (gamma113 + gamma232)*gammado122 + gamma222*gammado123 + 
-     (gamma112 + gamma332)*gammado132 + gamma322*gammado133 + 
-     gamma131*gammado212 + gamma121*gammado213 + 
-     (gamma213 + gamma231)*gammado222 + gamma221*gammado223 + 
-     (gamma212 + gamma331)*gammado232 + gamma321*gammado233 + 
-     gamma313*gammado322 + gamma312*gammado332)*ginv23 + 
-  (-0.5*deldelg3312 + gamma132*gammado113 + gamma232*gammado123 + 
-     gamma113*gammado132 + gamma332*gammado133 + gamma131*gammado213 + 
-     gamma231*gammado223 + gamma213*gammado232 + gamma331*gammado233 + 
-     gamma313*gammado332)*ginv33 + 
-  0.5*((gammado121 + gammado211)*undiffdG1 + 
+     (gamma112 + gamma222)*gammado122 + gamma322*gammado123 + 
+     gamma112*gammado212 + 2.*gamma212*gammado222 + 
+     gamma312*(gammado223 + gammado322))*ginv22 + 
+  (-deldelg2312 + gamma123*gammado112 + gamma122*gammado113 + 
+     (gamma113 + gamma223)*gammado122 + 
+     (gamma112 + gamma222 + gamma323)*gammado123 + gamma322*gammado133 + 
+     gamma113*gammado212 + gamma112*gammado213 + 
+     2.*(gamma213*gammado222 + gamma212*gammado223) + 
+     gamma313*(gammado223 + gammado322) + 
+     gamma312*(gammado233 + gammado323))*ginv23 + 
+  (-0.5*deldelg3312 + gamma123*gammado113 + 
+     (gamma113 + gamma223)*gammado123 + gamma323*gammado133 + 
+     gamma113*gammado213 + 2.*gamma213*gammado223 + 
+     gamma313*(gammado233 + gammado323))*ginv33 + 
+  0.5*((gammado112 + gammado211)*undiffdG1 + 
      (gammado122 + gammado212)*undiffdG2 + 
      (gammado123 + gammado213)*undiffdG3 + delG21*g11[ijk] + 
      (delG11 + delG22)*g12[ijk] + delG23*g13[ijk] + delG12*g22[ijk] + 
@@ -2064,40 +1942,40 @@ R12
 
 R13
 =
-(-0.5*deldelg1113 + (gamma113 + gamma131)*gammado111 + 
-     gamma213*gammado121 + gamma313*gammado131 + gamma231*gammado211 + 
-     (gamma111 + gamma331)*gammado311 + gamma211*gammado321 + 
-     gamma311*gammado331)*ginv11 + 
-  (-deldelg1213 + (gamma123 + gamma132)*gammado111 + gamma113*gammado112 + 
-     (gamma131 + gamma223)*gammado121 + gamma213*gammado122 + 
-     gamma323*gammado131 + gamma313*gammado132 + gamma232*gammado211 + 
-     gamma231*gammado221 + (gamma121 + gamma332)*gammado311 + 
-     gamma111*gammado312 + (gamma221 + gamma331)*gammado321 + 
-     gamma211*gammado322 + gamma321*gammado331 + gamma311*gammado332)*ginv12 \
-+ (-deldelg1313 + gamma113*gammado113 + gamma213*gammado123 + 
-     gamma313*gammado133 + gamma233*(gammado121 + gammado211) + 
-     (gamma131 + gamma333)*(gammado131 + gammado311) + 
-     gamma111*gammado313 + gamma231*(gammado231 + gammado321) + 
-     gamma211*gammado323 + 2.*
-      (gamma133*gammado111 + gamma331*gammado331) + gamma311*gammado333)*
-   ginv13 + (-0.5*deldelg2213 + gamma123*gammado112 + 
-     gamma132*gammado121 + gamma223*gammado122 + gamma323*gammado132 + 
-     gamma232*gammado221 + gamma121*gammado312 + gamma332*gammado321 + 
-     gamma221*gammado322 + gamma321*gammado332)*ginv22 + 
-  (-deldelg2313 + gamma123*gammado113 + 
-     gamma133*(gammado112 + gammado121) + gamma223*gammado123 + 
-     gamma132*gammado131 + gamma323*gammado133 + 
-     gamma233*(gammado122 + gammado221) + gamma232*gammado231 + 
-     gamma131*gammado312 + gamma121*gammado313 + 
-     gamma333*(gammado132 + gammado321) + gamma231*gammado322 + 
-     gamma221*gammado323 + gamma332*gammado331 + gamma331*gammado332 + 
-     gamma321*gammado333)*ginv23 + 
-  (-0.5*deldelg3313 + gamma133*(gammado113 + gammado131) + 
-     gamma233*(gammado123 + gammado231) + gamma131*gammado313 + 
-     gamma231*gammado323 + gamma333*(gammado133 + gammado331) + 
-     gamma331*gammado333)*ginv33 + 
-  0.5*((gammado131 + gammado311)*undiffdG1 + 
-     (gammado132 + gammado312)*undiffdG2 + 
+(-0.5*deldelg1113 + 2.*gamma113*gammado111 + 
+     gamma213*(gammado112 + gammado211) + gamma111*gammado311 + 
+     gamma313*(gammado113 + gammado311) + gamma211*gammado312 + 
+     gamma311*gammado313)*ginv11 + 
+  (-deldelg1213 + 2.*(gamma123*gammado111 + gamma113*gammado112) + 
+     gamma223*(gammado112 + gammado211) + 
+     gamma213*(gammado122 + gammado212) + gamma112*gammado311 + 
+     gamma323*(gammado113 + gammado311) + 
+     (gamma111 + gamma212)*gammado312 + 
+     gamma313*(gammado123 + gammado312) + gamma312*gammado313 + 
+     gamma211*gammado322 + gamma311*gammado323)*ginv12 + 
+  (-deldelg1313 + gamma313*gammado133 + 
+     gamma233*(gammado112 + gammado211) + gamma113*gammado311 + 
+     gamma333*(gammado113 + gammado311) + 
+     gamma213*(gammado123 + gammado213 + gammado312) + 
+     gamma111*gammado313 + 2.*
+      (gamma133*gammado111 + gamma113*gammado113 + gamma313*gammado313) + 
+     gamma211*gammado323 + gamma311*gammado333)*ginv13 + 
+  (-0.5*deldelg2213 + 2.*gamma123*gammado112 + 
+     gamma223*(gammado122 + gammado212) + gamma112*gammado312 + 
+     gamma323*(gammado123 + gammado312) + gamma212*gammado322 + 
+     gamma312*gammado323)*ginv22 + 
+  (-deldelg2313 + 2.*(gamma133*gammado112 + gamma123*gammado113) + 
+     (gamma223 + gamma333)*gammado123 + 
+     gamma233*(gammado122 + gammado212) + gamma223*gammado213 + 
+     (gamma113 + gamma333)*gammado312 + gamma112*gammado313 + 
+     gamma323*(gammado133 + gammado313) + gamma213*gammado322 + 
+     (gamma212 + gamma313)*gammado323 + gamma312*gammado333)*ginv23 + 
+  (-0.5*deldelg3313 + 2.*gamma133*gammado113 + 
+     gamma233*(gammado123 + gammado213) + gamma113*gammado313 + 
+     gamma333*(gammado133 + gammado313) + gamma213*gammado323 + 
+     gamma313*gammado333)*ginv33 + 
+  0.5*((gammado113 + gammado311)*undiffdG1 + 
+     (gammado123 + gammado312)*undiffdG2 + 
      (gammado133 + gammado313)*undiffdG3 + delG31*g11[ijk] + 
      delG32*g12[ijk] + (delG11 + delG33)*g13[ijk] + delG12*g23[ijk] + 
      delG13*g33[ijk])
@@ -2105,40 +1983,35 @@ R13
 
 R13
 =
-(-0.5*deldelg1113 + gamma113*gammado111 + gamma213*gammado121 + 
-     gamma313*gammado131 + gamma111*(gammado113 + gammado311) + 
-     gamma211*(gammado213 + gammado321) + 
-     gamma311*(gammado313 + gammado331))*ginv11 + 
-  (-deldelg1213 + gamma123*gammado111 + gamma113*gammado112 + 
-     gamma112*gammado113 + gamma223*gammado121 + gamma213*gammado122 + 
-     gamma323*gammado131 + gamma313*gammado132 + gamma212*gammado213 + 
-     gamma121*gammado311 + gamma111*(gammado123 + gammado312) + 
-     gamma312*gammado313 + gamma221*gammado321 + 
-     gamma211*(gammado223 + gammado322) + gamma321*gammado331 + 
-     gamma311*(gammado323 + gammado332))*ginv12 + 
-  (-deldelg1313 + gamma133*gammado111 + gamma233*gammado121 + 
-     gamma333*gammado131 + gamma213*(gammado123 + gammado213) + 
-     gamma131*gammado311 + (gamma111 + gamma313)*
-      (gammado133 + gammado313) + gamma231*gammado321 + 
-     gamma211*(gammado233 + gammado323) + gamma331*gammado331 + 
-     2.*(gamma113*gammado113 + gamma311*gammado333))*ginv13 + 
+(-0.5*deldelg1113 + gamma113*gammado111 + gamma213*gammado112 + 
+     (gamma111 + gamma313)*gammado113 + gamma111*gammado311 + 
+     gamma211*(gammado213 + gammado312) + 2.*gamma311*gammado313)*ginv11 + 
+  (-deldelg1213 + gamma123*gammado111 + (gamma113 + gamma223)*gammado112 + 
+     (gamma112 + gamma323)*gammado113 + gamma213*gammado122 + 
+     (gamma111 + gamma313)*gammado123 + gamma112*gammado311 + 
+     gamma111*gammado312 + gamma212*(gammado213 + gammado312) + 
+     gamma211*(gammado223 + gammado322) + 
+     2.*(gamma312*gammado313 + gamma311*gammado323))*ginv12 + 
+  (-deldelg1313 + gamma133*gammado111 + gamma233*gammado112 + 
+     (2.*gamma113 + gamma333)*gammado113 + 
+     (gamma111 + gamma313)*gammado133 + gamma113*gammado311 + 
+     gamma213*(gammado123 + gammado213 + gammado312) + 
+     (gamma111 + 2.*gamma313)*gammado313 + 
+     gamma211*(gammado233 + gammado323) + 2.*gamma311*gammado333)*ginv13 + 
   (-0.5*deldelg2213 + gamma123*gammado112 + gamma223*gammado122 + 
-     gamma112*gammado123 + gamma323*gammado132 + gamma212*gammado223 + 
-     gamma121*gammado312 + gamma221*gammado322 + gamma312*gammado323 + 
-     gamma321*gammado332)*ginv22 + 
+     (gamma112 + gamma323)*gammado123 + gamma112*gammado312 + 
+     gamma212*(gammado223 + gammado322) + 2.*gamma312*gammado323)*ginv22 + 
   (-deldelg2313 + gamma133*gammado112 + gamma123*gammado113 + 
-     gamma233*gammado122 + (gamma113 + gamma223)*gammado123 + 
-     gamma333*gammado132 + (gamma112 + gamma323)*gammado133 + 
-     gamma213*gammado223 + gamma212*gammado233 + gamma131*gammado312 + 
-     gamma121*gammado313 + gamma231*gammado322 + 
-     (gamma221 + gamma313)*gammado323 + gamma331*gammado332 + 
-     (gamma312 + gamma321)*gammado333)*ginv23 + 
+     gamma233*gammado122 + (gamma113 + gamma223 + gamma333)*gammado123 + 
+     (gamma112 + gamma323)*gammado133 + gamma113*gammado312 + 
+     gamma112*gammado313 + gamma213*(gammado223 + gammado322) + 
+     gamma212*(gammado233 + gammado323) + 
+     2.*(gamma313*gammado323 + gamma312*gammado333))*ginv23 + 
   (-0.5*deldelg3313 + gamma133*gammado113 + gamma233*gammado123 + 
-     (gamma113 + gamma333)*gammado133 + gamma213*gammado233 + 
-     gamma131*gammado313 + gamma231*gammado323 + 
-     (gamma313 + gamma331)*gammado333)*ginv33 + 
-  0.5*((gammado131 + gammado311)*undiffdG1 + 
-     (gammado132 + gammado312)*undiffdG2 + 
+     (gamma113 + gamma333)*gammado133 + gamma113*gammado313 + 
+     gamma213*(gammado233 + gammado323) + 2.*gamma313*gammado333)*ginv33 + 
+  0.5*((gammado113 + gammado311)*undiffdG1 + 
+     (gammado123 + gammado312)*undiffdG2 + 
      (gammado133 + gammado313)*undiffdG3 + delG31*g11[ijk] + 
      delG32*g12[ijk] + (delG11 + delG33)*g13[ijk] + delG12*g23[ijk] + 
      delG13*g33[ijk])
@@ -2146,71 +2019,65 @@ R13
 
 R22
 =
-(-0.5*deldelg1122 + gamma121*gammado112 + gamma221*gammado212 + 
-     2.*(gamma112*gammado211 + gamma212*gammado221 + 
-        gamma312*gammado231) + gamma321*gammado312)*ginv11 + 
-  (-deldelg1222 + gamma121*gammado122 + 
-     gamma122*(gammado112 + 2.*gammado211) + 
-     (2.*gamma112 + gamma222)*gammado212 + gamma221*gammado222 + 
-     2.*(gamma222*gammado221 + gamma212*gammado222 + 
-        gamma322*gammado231 + gamma312*gammado232) + gamma322*gammado312 + 
-     gamma321*gammado322)*ginv12 + 
-  (-deldelg1322 + gamma123*gammado112 + gamma121*gammado132 + 
-     gamma223*gammado212 + gamma221*gammado232 + 
-     2.*(gamma132*gammado211 + gamma112*gammado213 + 
-        gamma232*gammado221 + gamma212*gammado223 + gamma332*gammado231 + 
-        gamma312*gammado233) + gamma323*gammado312 + gamma321*gammado332)*
-   ginv13 + (-0.5*deldelg2222 + gamma122*(gammado122 + 2.*gammado212) + 
-     3.*gamma222*gammado222 + gamma322*(2.*gammado232 + gammado322))*ginv22 \
-+ (-deldelg2322 + gamma123*gammado122 + 
-     gamma122*(gammado132 + 2.*gammado213) + gamma223*gammado222 + 
-     gamma222*gammado232 + 2.*
-      (gamma132*gammado212 + gamma232*gammado222 + gamma222*gammado223 + 
-        gamma332*gammado232 + gamma322*gammado233) + gamma323*gammado322 + 
-     gamma322*gammado332)*ginv23 + 
-  (-0.5*deldelg3322 + gamma123*gammado132 + gamma223*gammado232 + 
-     2.*(gamma132*gammado213 + gamma232*gammado223 + 
-        gamma332*gammado233) + gamma323*gammado332)*ginv33 + 
-  gammado221*undiffdG1 + gammado222*undiffdG2 + gammado223*undiffdG3 + 
+(-0.5*deldelg1122 + gamma112*(gammado112 + 2.*gammado211) + 
+     3.*gamma212*gammado212 + gamma312*(2.*gammado213 + gammado312))*ginv11 \
++ (-deldelg1222 + gamma122*(gammado112 + 2.*gammado211) + 
+     gamma112*(gammado122 + 2.*gammado212) + 
+     3.*(gamma222*gammado212 + gamma212*gammado222) + 
+     2.*(gamma322*gammado213 + gamma312*gammado223) + 
+     gamma322*gammado312 + gamma312*gammado322)*ginv12 + 
+  (-deldelg1322 + gamma123*(gammado112 + 2.*gammado211) + 
+     gamma112*(gammado123 + 2.*gammado213) + 
+     3.*(gamma223*gammado212 + gamma212*gammado223) + 
+     2.*(gamma323*gammado213 + gamma312*gammado233) + 
+     gamma323*gammado312 + gamma312*gammado323)*ginv13 + 
+  (-0.5*deldelg2222 + gamma122*(gammado122 + 2.*gammado212) + 
+     3.*gamma222*gammado222 + gamma322*(2.*gammado223 + gammado322))*ginv22 \
++ (-deldelg2322 + gamma123*(gammado122 + 2.*gammado212) + 
+     gamma122*(gammado123 + 2.*gammado213) + 
+     3.*(gamma223*gammado222 + gamma222*gammado223) + 
+     2.*(gamma323*gammado223 + gamma322*gammado233) + 
+     gamma323*gammado322 + gamma322*gammado323)*ginv23 + 
+  (-0.5*deldelg3322 + gamma123*(gammado123 + 2.*gammado213) + 
+     3.*gamma223*gammado223 + gamma323*(2.*gammado233 + gammado323))*ginv33 \
++ gammado212*undiffdG1 + gammado222*undiffdG2 + gammado223*undiffdG3 + 
   delG21*g12[ijk] + delG22*g22[ijk] + delG23*g23[ijk]
 ;
 
 R23
 =
-(-0.5*deldelg1123 + gamma131*gammado112 + gamma113*gammado211 + 
-     gamma231*gammado212 + gamma213*gammado221 + gamma313*gammado231 + 
-     gamma112*gammado311 + gamma331*gammado312 + gamma212*gammado321 + 
-     gamma312*gammado331)*ginv11 + 
-  (-deldelg1223 + gamma132*gammado112 + gamma131*gammado122 + 
-     gamma123*gammado211 + (gamma113 + gamma232)*gammado212 + 
-     gamma223*gammado221 + (gamma213 + gamma231)*gammado222 + 
-     gamma323*gammado231 + gamma313*gammado232 + gamma122*gammado311 + 
-     (gamma112 + gamma332)*gammado312 + gamma222*gammado321 + 
-     (gamma212 + gamma331)*gammado322 + gamma322*gammado331 + 
-     gamma312*gammado332)*ginv12 + 
-  (-deldelg1323 + gamma131*gammado132 + 
-     gamma133*(gammado112 + gammado211) + gamma113*gammado213 + 
-     gamma233*(gammado212 + gammado221) + gamma213*gammado223 + 
-     gamma231*gammado232 + gamma313*gammado233 + gamma132*gammado311 + 
-     gamma333*(gammado231 + gammado312) + gamma112*gammado313 + 
-     gamma232*gammado321 + gamma212*gammado323 + gamma332*gammado331 + 
-     gamma331*gammado332 + gamma312*gammado333)*ginv13 + 
-  (-0.5*deldelg2223 + gamma132*gammado122 + gamma123*gammado212 + 
-     (gamma223 + gamma232)*gammado222 + gamma323*gammado232 + 
-     gamma122*gammado312 + (gamma222 + gamma332)*gammado322 + 
-     gamma322*gammado332)*ginv22 + 
+(-0.5*deldelg1123 + gamma113*(gammado112 + gammado211) + 
+     2.*gamma213*gammado212 + gamma112*gammado311 + gamma212*gammado312 + 
+     gamma313*(gammado213 + gammado312) + gamma312*gammado313)*ginv11 + 
+  (-deldelg1223 + gamma123*(gammado112 + gammado211) + 
+     gamma113*(gammado122 + gammado212) + 
+     2.*(gamma223*gammado212 + gamma213*gammado222) + 
+     gamma122*gammado311 + (gamma112 + gamma222)*gammado312 + 
+     gamma323*(gammado213 + gammado312) + gamma322*gammado313 + 
+     gamma212*gammado322 + gamma313*(gammado223 + gammado322) + 
+     gamma312*gammado323)*ginv12 + 
+  (-deldelg1323 + gamma133*(gammado112 + gammado211) + 
+     gamma113*(gammado123 + gammado213) + 
+     2.*(gamma233*gammado212 + gamma213*gammado223) + 
+     gamma123*gammado311 + gamma223*gammado312 + 
+     gamma333*(gammado213 + gammado312) + 
+     (gamma112 + gamma323)*gammado313 + gamma212*gammado323 + 
+     gamma313*(gammado233 + gammado323) + gamma312*gammado333)*ginv13 + 
+  (-0.5*deldelg2223 + gamma123*(gammado122 + gammado212) + 
+     2.*gamma223*gammado222 + gamma122*gammado312 + gamma222*gammado322 + 
+     gamma323*(gammado223 + gammado322) + gamma322*gammado323)*ginv22 + 
   (-deldelg2323 + gamma133*(gammado122 + gammado212) + 
-     gamma123*gammado213 + gamma223*gammado223 + gamma323*gammado233 + 
-     gamma132*(gammado132 + gammado312) + gamma122*gammado313 + 
-     (gamma232 + gamma333)*(gammado232 + gammado322) + 
+     gamma323*gammado233 + gamma123*
+      (gammado123 + gammado213 + gammado312) + gamma122*gammado313 + 
+     gamma223*gammado322 + gamma333*(gammado223 + gammado322) + 
      gamma222*gammado323 + 2.*
-      (gamma233*gammado222 + gamma332*gammado332) + gamma322*gammado333)*
-   ginv23 + (-0.5*deldelg3323 + gamma133*(gammado132 + gammado213) + 
-     gamma233*(gammado223 + gammado232) + gamma132*gammado313 + 
-     gamma232*gammado323 + gamma333*(gammado233 + gammado332) + 
-     gamma332*gammado333)*ginv33 + 
-  0.5*((gammado231 + gammado321)*undiffdG1 + 
-     (gammado232 + gammado322)*undiffdG2 + 
+      (gamma233*gammado222 + gamma223*gammado223 + gamma323*gammado323) + 
+     gamma322*gammado333)*ginv23 + 
+  (-0.5*deldelg3323 + gamma133*(gammado123 + gammado213) + 
+     2.*gamma233*gammado223 + gamma123*gammado313 + gamma223*gammado323 + 
+     gamma333*(gammado233 + gammado323) + gamma323*gammado333)*ginv33 + 
+  0.5*((gammado213 + gammado312)*undiffdG1 + 
+     (gammado223 + gammado322)*undiffdG2 + 
      (gammado233 + gammado323)*undiffdG3 + delG31*g12[ijk] + 
      delG21*g13[ijk] + delG32*g22[ijk] + (delG22 + delG33)*g23[ijk] + 
      delG23*g33[ijk])
@@ -2218,40 +2085,38 @@ R23
 
 R23
 =
-(-0.5*deldelg1123 + gamma121*gammado113 + gamma113*gammado211 + 
-     gamma221*gammado213 + gamma213*gammado221 + gamma313*gammado231 + 
-     gamma112*gammado311 + gamma321*gammado313 + gamma212*gammado321 + 
-     gamma312*gammado331)*ginv11 + 
-  (-deldelg1223 + gamma121*gammado123 + gamma123*gammado211 + 
-     gamma113*gammado212 + gamma223*gammado221 + gamma213*gammado222 + 
-     gamma221*gammado223 + gamma323*gammado231 + gamma313*gammado232 + 
-     gamma122*(gammado113 + gammado311) + gamma112*gammado312 + 
-     gamma222*(gammado213 + gammado321) + gamma212*gammado322 + 
-     gamma321*gammado323 + gamma322*(gammado313 + gammado331) + 
-     gamma312*gammado332)*ginv12 + 
-  (-deldelg1323 + gamma123*gammado113 + gamma121*gammado133 + 
-     gamma133*gammado211 + (gamma113 + gamma223)*gammado213 + 
-     gamma233*gammado221 + gamma213*gammado223 + gamma333*gammado231 + 
-     (gamma221 + gamma313)*gammado233 + gamma132*gammado311 + 
-     (gamma112 + gamma323)*gammado313 + gamma232*gammado321 + 
-     gamma212*gammado323 + gamma332*gammado331 + 
-     (gamma312 + gamma321)*gammado333)*ginv13 + 
+(-0.5*deldelg1123 + gamma113*gammado211 + gamma213*gammado212 + 
+     (gamma212 + gamma313)*gammado213 + 
+     gamma112*(gammado113 + gammado311) + gamma212*gammado312 + 
+     2.*gamma312*gammado313)*ginv11 + 
+  (-deldelg1223 + gamma123*gammado211 + (gamma113 + gamma223)*gammado212 + 
+     (gamma222 + gamma323)*gammado213 + gamma213*gammado222 + 
+     (gamma212 + gamma313)*gammado223 + 
+     gamma122*(gammado113 + gammado311) + gamma222*gammado312 + 
+     gamma112*(gammado123 + gammado312) + gamma212*gammado322 + 
+     2.*(gamma322*gammado313 + gamma312*gammado323))*ginv12 + 
+  (-deldelg1323 + gamma133*gammado211 + gamma233*gammado212 + 
+     (gamma113 + gamma223 + gamma333)*gammado213 + gamma213*gammado223 + 
+     (gamma212 + gamma313)*gammado233 + 
+     gamma123*(gammado113 + gammado311) + gamma223*gammado312 + 
+     gamma112*(gammado133 + gammado313) + gamma212*gammado323 + 
+     2.*(gamma323*gammado313 + gamma312*gammado333))*ginv13 + 
   (-0.5*deldelg2223 + gamma123*gammado212 + gamma223*gammado222 + 
-     gamma323*gammado232 + gamma122*(gammado123 + gammado312) + 
-     gamma222*(gammado223 + gammado322) + 
-     gamma322*(gammado323 + gammado332))*ginv22 + 
-  (-deldelg2323 + gamma133*gammado212 + 
-     gamma123*(gammado123 + gammado213) + gamma233*gammado222 + 
-     gamma333*gammado232 + gamma132*gammado312 + 
-     gamma122*(gammado133 + gammado313) + gamma232*gammado322 + 
-     (gamma222 + gamma323)*(gammado233 + gammado323) + 
-     gamma332*gammado332 + 2.*(gamma223*gammado223 + gamma322*gammado333))*
-   ginv23 + (-0.5*deldelg3323 + gamma123*gammado133 + 
-     gamma133*gammado213 + gamma233*gammado223 + 
-     (gamma223 + gamma333)*gammado233 + gamma132*gammado313 + 
-     gamma232*gammado323 + (gamma323 + gamma332)*gammado333)*ginv33 + 
-  0.5*((gammado231 + gammado321)*undiffdG1 + 
-     (gammado232 + gammado322)*undiffdG2 + 
+     (gamma222 + gamma323)*gammado223 + 
+     gamma122*(gammado123 + gammado312) + gamma222*gammado322 + 
+     2.*gamma322*gammado323)*ginv22 + 
+  (-deldelg2323 + gamma133*gammado212 + gamma233*gammado222 + 
+     (2.*gamma223 + gamma333)*gammado223 + 
+     (gamma222 + gamma323)*gammado233 + 
+     gamma123*(gammado123 + gammado213 + gammado312) + 
+     gamma122*(gammado133 + gammado313) + gamma223*gammado322 + 
+     (gamma222 + 2.*gamma323)*gammado323 + 2.*gamma322*gammado333)*ginv23 + 
+  (-0.5*deldelg3323 + gamma133*gammado213 + gamma233*gammado223 + 
+     (gamma223 + gamma333)*gammado233 + 
+     gamma123*(gammado133 + gammado313) + gamma223*gammado323 + 
+     2.*gamma323*gammado333)*ginv33 + 
+  0.5*((gammado213 + gammado312)*undiffdG1 + 
+     (gammado223 + gammado322)*undiffdG2 + 
      (gammado233 + gammado323)*undiffdG3 + delG31*g12[ijk] + 
      delG21*g13[ijk] + delG32*g22[ijk] + (delG22 + delG33)*g23[ijk] + 
      delG23*g33[ijk])
@@ -2259,30 +2124,28 @@ R23
 
 R33
 =
-(-0.5*deldelg1133 + gamma131*gammado113 + gamma231*gammado213 + 
-     gamma331*gammado313 + 2.*(gamma113*gammado311 + gamma213*gammado321 + 
-        gamma313*gammado331))*ginv11 + 
-  (-deldelg1233 + gamma132*gammado113 + gamma131*gammado123 + 
-     gamma232*gammado213 + gamma231*gammado223 + gamma332*gammado313 + 
-     gamma331*gammado323 + 2.*(gamma123*gammado311 + gamma113*gammado312 + 
-        gamma223*gammado321 + gamma213*gammado322 + gamma323*gammado331 + 
-        gamma313*gammado332))*ginv12 + 
-  (-deldelg1333 + gamma131*gammado133 + gamma231*gammado233 + 
-     gamma133*(gammado113 + 2.*gammado311) + 
-     (2.*gamma113 + gamma333)*gammado313 + 
-     gamma233*(gammado213 + 2.*gammado321) + gamma331*gammado333 + 
-     2.*(gamma213*gammado323 + gamma333*gammado331 + gamma313*gammado333))*
-   ginv13 + (-0.5*deldelg2233 + gamma132*gammado123 + 
-     gamma232*gammado223 + gamma332*gammado323 + 
-     2.*(gamma123*gammado312 + gamma223*gammado322 + gamma323*gammado332))*
-   ginv22 + (-deldelg2333 + gamma132*gammado133 + gamma232*gammado233 + 
-     gamma133*(gammado123 + 2.*gammado312) + 
+(-0.5*deldelg1133 + gamma113*(gammado113 + 2.*gammado311) + 
+     gamma213*(gammado213 + 2.*gammado312) + 3.*gamma313*gammado313)*ginv11 \
++ (-deldelg1233 + gamma123*(gammado113 + 2.*gammado311) + 
+     gamma113*(gammado123 + 2.*gammado312) + 
+     gamma223*(gammado213 + 2.*gammado312) + 
+     gamma213*(gammado223 + 2.*gammado322) + 
+     3.*(gamma323*gammado313 + gamma313*gammado323))*ginv12 + 
+  (-deldelg1333 + gamma133*(gammado113 + 2.*gammado311) + 
+     gamma233*(gammado213 + 2.*gammado312) + 
+     gamma113*(gammado133 + 2.*gammado313) + 
+     gamma213*(gammado233 + 2.*gammado323) + 
+     3.*(gamma333*gammado313 + gamma313*gammado333))*ginv13 + 
+  (-0.5*deldelg2233 + gamma123*(gammado123 + 2.*gammado312) + 
+     gamma223*(gammado223 + 2.*gammado322) + 3.*gamma323*gammado323)*ginv22 \
++ (-deldelg2333 + gamma133*(gammado123 + 2.*gammado312) + 
+     gamma123*(gammado133 + 2.*gammado313) + 
      gamma233*(gammado223 + 2.*gammado322) + 
-     gamma333*(gammado323 + 2.*gammado332) + gamma332*gammado333 + 
-     2.*(gamma123*gammado313 + gamma223*gammado323 + gamma323*gammado333))*
-   ginv23 + (-0.5*deldelg3333 + gamma133*(gammado133 + 2.*gammado313) + 
+     gamma223*(gammado233 + 2.*gammado323) + 
+     3.*(gamma333*gammado323 + gamma323*gammado333))*ginv23 + 
+  (-0.5*deldelg3333 + gamma133*(gammado133 + 2.*gammado313) + 
      gamma233*(gammado233 + 2.*gammado323) + 3.*gamma333*gammado333)*ginv33 \
-+ gammado331*undiffdG1 + gammado332*undiffdG2 + gammado333*undiffdG3 + 
++ gammado313*undiffdG1 + gammado323*undiffdG2 + gammado333*undiffdG3 + 
   delG31*g13[ijk] + delG32*g23[ijk] + delG33*g33[ijk]
 ;
 
@@ -2376,19 +2239,9 @@ cddf12
 ddf12 - df1*gamma112 - df2*gamma212 - df3*gamma312
 ;
 
-cddf12
-=
-ddf12 - df1*gamma121 - df2*gamma221 - df3*gamma321
-;
-
 cddf13
 =
 ddf13 - df1*gamma113 - df2*gamma213 - df3*gamma313
-;
-
-cddf13
-=
-ddf13 - df1*gamma131 - df2*gamma231 - df3*gamma331
 ;
 
 cddf22
@@ -2399,11 +2252,6 @@ ddf22 - df1*gamma122 - df2*gamma222 - df3*gamma322
 cddf23
 =
 ddf23 - df1*gamma123 - df2*gamma223 - df3*gamma323
-;
-
-cddf23
-=
-ddf23 - df1*gamma132 - df2*gamma232 - df3*gamma332
 ;
 
 cddf33
@@ -2481,26 +2329,10 @@ dda12 - 2.*(da2*df1 + da1*df2) - da1*gamma112 - da2*gamma212 -
      (da3*df2 + da2*df3)*ginv23 + da3*df3*ginv33)*g12[ijk]
 ;
 
-cdda12
-=
-dda12 - 2.*(da2*df1 + da1*df2) - da1*gamma121 - da2*gamma221 - 
-  da3*gamma321 + 2.*(da1*df1*ginv11 + (da2*df1 + da1*df2)*ginv12 + 
-     (da3*df1 + da1*df3)*ginv13 + da2*df2*ginv22 + 
-     (da3*df2 + da2*df3)*ginv23 + da3*df3*ginv33)*g12[ijk]
-;
-
 cdda13
 =
 dda13 - 2.*(da3*df1 + da1*df3) - da1*gamma113 - da2*gamma213 - 
   da3*gamma313 + 2.*(da1*df1*ginv11 + (da2*df1 + da1*df2)*ginv12 + 
-     (da3*df1 + da1*df3)*ginv13 + da2*df2*ginv22 + 
-     (da3*df2 + da2*df3)*ginv23 + da3*df3*ginv33)*g13[ijk]
-;
-
-cdda13
-=
-dda13 - 2.*(da3*df1 + da1*df3) - da1*gamma131 - da2*gamma231 - 
-  da3*gamma331 + 2.*(da1*df1*ginv11 + (da2*df1 + da1*df2)*ginv12 + 
      (da3*df1 + da1*df3)*ginv13 + da2*df2*ginv22 + 
      (da3*df2 + da2*df3)*ginv23 + da3*df3*ginv33)*g13[ijk]
 ;
@@ -2518,14 +2350,6 @@ cdda23
 =
 dda23 - 2.*(da3*df2 + da2*df3) - da1*gamma123 - da2*gamma223 - 
   da3*gamma323 + 2.*(da1*df1*ginv11 + (da2*df1 + da1*df2)*ginv12 + 
-     (da3*df1 + da1*df3)*ginv13 + da2*df2*ginv22 + 
-     (da3*df2 + da2*df3)*ginv23 + da3*df3*ginv33)*g23[ijk]
-;
-
-cdda23
-=
-dda23 - 2.*(da3*df2 + da2*df3) - da1*gamma132 - da2*gamma232 - 
-  da3*gamma332 + 2.*(da1*df1*ginv11 + (da2*df1 + da1*df2)*ginv12 + 
      (da3*df1 + da1*df3)*ginv13 + da2*df2*ginv22 + 
      (da3*df2 + da2*df3)*ginv23 + da3*df3*ginv33)*g23[ijk]
 ;
@@ -2659,27 +2483,27 @@ Ainv33
 divAinv1
 =
 -6.*(Ainv11*df1 + Ainv12*df2 + Ainv13*df3) - Ainv11*gamma111 - 
-  Ainv12*(gamma112 + gamma121) - Ainv22*gamma122 - 
-  Ainv13*(gamma113 + gamma131) - Ainv23*(gamma123 + gamma132) - 
-  Ainv33*gamma133 + 0.66666666666666666666666666666666666667*
+  Ainv22*gamma122 - 2.*(Ainv12*gamma112 + Ainv13*gamma113 + 
+     Ainv23*gamma123) - Ainv33*gamma133 + 
+  0.66666666666666666666666666666666666667*
    (ginv11*dK1[ijk] + ginv12*dK2[ijk] + ginv13*dK3[ijk])
 ;
 
 divAinv2
 =
 -6.*(Ainv12*df1 + Ainv22*df2 + Ainv23*df3) - Ainv11*gamma211 - 
-  Ainv12*(gamma212 + gamma221) - Ainv22*gamma222 - 
-  Ainv13*(gamma213 + gamma231) - Ainv23*(gamma223 + gamma232) - 
-  Ainv33*gamma233 + 0.66666666666666666666666666666666666667*
+  Ainv22*gamma222 - 2.*(Ainv12*gamma212 + Ainv13*gamma213 + 
+     Ainv23*gamma223) - Ainv33*gamma233 + 
+  0.66666666666666666666666666666666666667*
    (ginv12*dK1[ijk] + ginv22*dK2[ijk] + ginv23*dK3[ijk])
 ;
 
 divAinv3
 =
 -6.*(Ainv13*df1 + Ainv23*df2 + Ainv33*df3) - Ainv11*gamma311 - 
-  Ainv12*(gamma312 + gamma321) - Ainv22*gamma322 - 
-  Ainv13*(gamma313 + gamma331) - Ainv23*(gamma323 + gamma332) - 
-  Ainv33*gamma333 + 0.66666666666666666666666666666666666667*
+  Ainv22*gamma322 - 2.*(Ainv12*gamma312 + Ainv13*gamma313 + 
+     Ainv23*gamma323) - Ainv33*gamma333 + 
+  0.66666666666666666666666666666666666667*
    (ginv13*dK1[ijk] + ginv23*dK2[ijk] + ginv33*dK3[ijk])
 ;
 
@@ -3556,4 +3380,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2336,  n/ = 80,  n+ = 2107, n = 4523, O = 1 */
+/* nvars = 215, n* = 2175,  n/ = 80,  n+ = 1947, n = 4202, O = 1 */
