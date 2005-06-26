@@ -34,7 +34,9 @@ int sgrid_Z4secondO(void)
   
   AddPar("Z4secondO_RtoRminusHfactor", "0",
          "how much of Hamiltonian H we subtract from Ricci scalar R");
-
+  AddPar("Z4secondO_kappa1", "0", "exponential damping factor for Theta");
+  AddPar("Z4secondO_kappa2", "0", "exponential damping factor for Z_i");
+         
   AddPar("Z4secondO_lapsepsipower",  "0", "power of psi in lapse equation");
   AddPar("Z4secondO_lapseharmonicf", "2", "2 for 1+log, 1 for harmonic");
   AddPar("Z4secondO_lapseharmonicm", "0", "m in -m Theta term of lapse Eqn");

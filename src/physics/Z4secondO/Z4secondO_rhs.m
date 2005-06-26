@@ -123,10 +123,12 @@ tocompute = {
 
   rTheta == alpha/2 ( R + 2 cdZ[a,b] ginv[a,b] + 
                       trK(trK - 2 Theta) - trKK ) - 
-            ginv[a,b] Z[a] dalp[b] + lieTheta,
+            ginv[a,b] Z[a] dalp[b] + lieTheta -
+            kappa1 Theta,
 
   rZ[a] == alpha ( cdK[b,a,c] ginv[b,c] - dK[a] + dTheta[a] -
-           2 K[a,b] Z[c] ginv[b,c] ) - Theta dalp[a] + lieZ[a],
+           2 K[a,b] Z[c] ginv[b,c] ) - Theta dalp[a] + lieZ[a] -
+           kappa2 Z[a],
 
   (* gauge conditions, avoid unnecessary if statements, use flags *)
   liealpha == betadalp,
@@ -244,6 +246,8 @@ BeginCFunction[] := Module[{},
 
   pr["int useDD               = Getv(\"Z4secondO_useDD\", \"yes\");\n"];
   pr["double RtoRminusHfactor = Getd(\"Z4secondO_RtoRminusHfactor\");\n"];
+  pr["double kappa1	      = Getd(\"Z4secondO_kappa1\");\n"];
+  pr["double kappa2           = Getd(\"Z4secondO_kappa2\");\n"];
 
   pr["int nonconstantlapse    =!Getv(\"Z4secondO_lapse\", \"constant\");\n"];
   pr["int oploglapse          = Getv(\"Z4secondO_lapse\", \"1+log\");\n"];

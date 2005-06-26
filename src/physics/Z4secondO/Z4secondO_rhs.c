@@ -23,6 +23,8 @@ int addlinear = (dt != 0.0l);
 /* int usepsi = 1; */
 int useDD               = Getv("Z4secondO_useDD", "yes");
 double RtoRminusHfactor = Getd("Z4secondO_RtoRminusHfactor");
+double kappa1       = Getd("Z4secondO_kappa1");
+double kappa2           = Getd("Z4secondO_kappa2");
 int nonconstantlapse    =!Getv("Z4secondO_lapse", "constant");
 int oploglapse          = Getv("Z4secondO_lapse", "1+log");
 int withshift           = Getv("Z4secondO_lapse", "withshift");
@@ -1698,7 +1700,8 @@ rK33
 
 rTheta
 =
-lieTheta + ginv11*(cdZ11*alpha[ijk] - dalp1[ijk]*Z1[ijk]) + 
+lieTheta - kappa1*Theta[ijk] + 
+  ginv11*(cdZ11*alpha[ijk] - dalp1[ijk]*Z1[ijk]) + 
   ginv12*((cdZ12 + cdZ21)*alpha[ijk] - dalp2[ijk]*Z1[ijk] - 
      dalp1[ijk]*Z2[ijk]) + ginv22*(cdZ22*alpha[ijk] - dalp2[ijk]*Z2[ijk]) + 
   ginv13*((cdZ13 + cdZ31)*alpha[ijk] - dalp3[ijk]*Z1[ijk] - 
@@ -1710,7 +1713,7 @@ lieTheta + ginv11*(cdZ11*alpha[ijk] - dalp1[ijk]*Z1[ijk]) +
 
 rZ1
 =
-lieZ1 - dalp1[ijk]*Theta[ijk] + 
+lieZ1 - dalp1[ijk]*Theta[ijk] - kappa2*Z1[ijk] + 
   alpha[ijk]*(-dK1 + dTheta1[ijk] + ginv11*(cdK111 - 2.*K11[ijk]*Z1[ijk]) + 
      ginv22*(cdK212 - 2.*K12[ijk]*Z2[ijk]) + 
      ginv12*(cdK112 + cdK211 - 2.*(K12[ijk]*Z1[ijk] + K11[ijk]*Z2[ijk])) + 
@@ -1721,7 +1724,7 @@ lieZ1 - dalp1[ijk]*Theta[ijk] +
 
 rZ2
 =
-lieZ2 - dalp2[ijk]*Theta[ijk] + 
+lieZ2 - dalp2[ijk]*Theta[ijk] - kappa2*Z2[ijk] + 
   alpha[ijk]*(-dK2 + dTheta2[ijk] + ginv11*(cdK121 - 2.*K12[ijk]*Z1[ijk]) + 
      ginv22*(cdK222 - 2.*K22[ijk]*Z2[ijk]) + 
      ginv12*(cdK122 + cdK221 - 2.*(K22[ijk]*Z1[ijk] + K12[ijk]*Z2[ijk])) + 
@@ -1732,7 +1735,7 @@ lieZ2 - dalp2[ijk]*Theta[ijk] +
 
 rZ3
 =
-lieZ3 - dalp3[ijk]*Theta[ijk] + 
+lieZ3 - dalp3[ijk]*Theta[ijk] - kappa2*Z3[ijk] + 
   alpha[ijk]*(-dK3 + dTheta3[ijk] + ginv11*(cdK131 - 2.*K13[ijk]*Z1[ijk]) + 
      ginv22*(cdK232 - 2.*K23[ijk]*Z2[ijk]) + 
      ginv12*(cdK132 + cdK231 - 2.*(K23[ijk]*Z1[ijk] + K13[ijk]*Z2[ijk])) + 
@@ -2037,4 +2040,4 @@ rB3
 }  /* end of function */
 
 /* Z4secondO_rhs.c */
-/* nvars = 200, n* = 1537,  n/ = 30,  n+ = 1497, n = 3064, O = 1 */
+/* nvars = 200, n* = 1541,  n/ = 30,  n+ = 1501, n = 3072, O = 1 */
