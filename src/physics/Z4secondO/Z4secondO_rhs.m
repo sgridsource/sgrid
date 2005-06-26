@@ -97,7 +97,7 @@ tocompute = {
   dginv[b,c,a] == - ginv[b,d] ginv[c,e] dg[d,e,a],
   
   (* derivative of the trace of the extrinsic curvature *)
-  dK[a] == dginv[b,c,a] K[b,c] + ginv[b,c] dK[b,c,a],
+  dtrK[a] == dginv[b,c,a] K[b,c] + ginv[b,c] dK[b,c,a],
 
   (* covariant derivatives of the lapse *)
   cddalp[a,b] == ddalp[a,b] - gamma[c,a,b] dalp[c],
@@ -126,7 +126,7 @@ tocompute = {
             ginv[a,b] Z[a] dalp[b] + lieTheta -
             kappa1 Theta,
 
-  rZ[a] == alpha ( cdK[b,a,c] ginv[b,c] - dK[a] + dTheta[a] -
+  rZ[a] == alpha ( cdK[b,a,c] ginv[b,c] - dtrK[a] + dTheta[a] -
            2 K[a,b] Z[c] ginv[b,c] ) - Theta dalp[a] + lieZ[a] -
            kappa2 Z[a],
 

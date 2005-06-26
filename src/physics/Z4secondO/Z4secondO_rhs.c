@@ -367,9 +367,9 @@ double dginv233;
 double dginv331;
 double dginv332;
 double dginv333;
-double dK1;
-double dK2;
-double dK3;
+double dtrK1;
+double dtrK2;
+double dtrK3;
 double gamma111;
 double gamma112;
 double gamma113;
@@ -1235,7 +1235,7 @@ dginv333
   dg223[ijk]*pow2(ginv23) - dg333[ijk]*pow2(ginv33)
 ;
 
-dK1
+dtrK1
 =
 ginv11*dK111[ijk] + ginv22*dK221[ijk] + ginv33*dK331[ijk] + 
   dginv111*K11[ijk] + dginv221*K22[ijk] + 
@@ -1244,7 +1244,7 @@ ginv11*dK111[ijk] + ginv22*dK221[ijk] + ginv33*dK331[ijk] +
   dginv331*K33[ijk]
 ;
 
-dK2
+dtrK2
 =
 ginv11*dK112[ijk] + ginv22*dK222[ijk] + ginv33*dK332[ijk] + 
   dginv112*K11[ijk] + dginv222*K22[ijk] + 
@@ -1253,7 +1253,7 @@ ginv11*dK112[ijk] + ginv22*dK222[ijk] + ginv33*dK332[ijk] +
   dginv332*K33[ijk]
 ;
 
-dK3
+dtrK3
 =
 ginv11*dK113[ijk] + ginv22*dK223[ijk] + ginv33*dK333[ijk] + 
   dginv113*K11[ijk] + dginv223*K22[ijk] + 
@@ -1714,7 +1714,8 @@ lieTheta - kappa1*Theta[ijk] +
 rZ1
 =
 lieZ1 - dalp1[ijk]*Theta[ijk] - kappa2*Z1[ijk] + 
-  alpha[ijk]*(-dK1 + dTheta1[ijk] + ginv11*(cdK111 - 2.*K11[ijk]*Z1[ijk]) + 
+  alpha[ijk]*(-dtrK1 + dTheta1[ijk] + 
+     ginv11*(cdK111 - 2.*K11[ijk]*Z1[ijk]) + 
      ginv22*(cdK212 - 2.*K12[ijk]*Z2[ijk]) + 
      ginv12*(cdK112 + cdK211 - 2.*(K12[ijk]*Z1[ijk] + K11[ijk]*Z2[ijk])) + 
      ginv33*(cdK313 - 2.*K13[ijk]*Z3[ijk]) + 
@@ -1725,7 +1726,8 @@ lieZ1 - dalp1[ijk]*Theta[ijk] - kappa2*Z1[ijk] +
 rZ2
 =
 lieZ2 - dalp2[ijk]*Theta[ijk] - kappa2*Z2[ijk] + 
-  alpha[ijk]*(-dK2 + dTheta2[ijk] + ginv11*(cdK121 - 2.*K12[ijk]*Z1[ijk]) + 
+  alpha[ijk]*(-dtrK2 + dTheta2[ijk] + 
+     ginv11*(cdK121 - 2.*K12[ijk]*Z1[ijk]) + 
      ginv22*(cdK222 - 2.*K22[ijk]*Z2[ijk]) + 
      ginv12*(cdK122 + cdK221 - 2.*(K22[ijk]*Z1[ijk] + K12[ijk]*Z2[ijk])) + 
      ginv33*(cdK323 - 2.*K23[ijk]*Z3[ijk]) + 
@@ -1736,7 +1738,8 @@ lieZ2 - dalp2[ijk]*Theta[ijk] - kappa2*Z2[ijk] +
 rZ3
 =
 lieZ3 - dalp3[ijk]*Theta[ijk] - kappa2*Z3[ijk] + 
-  alpha[ijk]*(-dK3 + dTheta3[ijk] + ginv11*(cdK131 - 2.*K13[ijk]*Z1[ijk]) + 
+  alpha[ijk]*(-dtrK3 + dTheta3[ijk] + 
+     ginv11*(cdK131 - 2.*K13[ijk]*Z1[ijk]) + 
      ginv22*(cdK232 - 2.*K23[ijk]*Z2[ijk]) + 
      ginv12*(cdK132 + cdK231 - 2.*(K23[ijk]*Z1[ijk] + K13[ijk]*Z2[ijk])) + 
      ginv33*(cdK333 - 2.*K33[ijk]*Z3[ijk]) + 
