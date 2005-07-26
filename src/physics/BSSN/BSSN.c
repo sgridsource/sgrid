@@ -19,10 +19,15 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
   //filter_VarList(ucur);
  
   BSSN_rhs(unew, upre, dt, ucur);
+
   /* wether addDissipation is called after each ICN (or RK) step: */
   if(Getv("evolve_Dissipation", "yes")) 
      addDissipation(unew, upre, dt, ucur);
+
   set_boundary(unew, upre, dt, ucur);
+
+  if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
+    reset_doubleCoveredPoints(unew);
 }
 
 
@@ -195,7 +200,9 @@ int BSSN_startup(tGrid *grid)
   /* translate initial data in ADM variables to BSSN variables */
   ADMtoBSSN(grid);
   //set_boundary_symmetry(level, BSSNvars);
-
+  if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
+    reset_doubleCoveredPoints(BSSNvars);
+  
   /* enable all derivative vars */
   enablevar(grid, Ind("BSSN_dphix"));
   enablevar(grid, Ind("BSSN_ddphixx"));

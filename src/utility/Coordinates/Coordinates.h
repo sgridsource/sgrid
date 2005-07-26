@@ -1,6 +1,8 @@
 /* Coordinates.h */
 /* Wolfgang Tichy 4/2005 */
 
+/* from doubleCovering.c */
+void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);
 
 /* Some trivial functions */
 double zero_of_xyz(void *aux, double X, double Y, double Z);

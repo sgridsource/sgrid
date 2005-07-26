@@ -2,6 +2,6 @@
 
 NAME := Coordinates
 
-OBJS := sgrid_$(NAME).o $(NAME).o cartesianDerivs.o
+OBJS := sgrid_$(NAME).o $(NAME).o cartesianDerivs.o doubleCovering.o
 
 include $(TOP)/Makefile.subdirs
