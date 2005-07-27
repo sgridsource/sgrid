@@ -4,6 +4,9 @@
 /* from doubleCovering.c */
 void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);
 
+/* from coordFilters.c */
+void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew);
+
 /* Some trivial functions */
 double zero_of_xyz(void *aux, double X, double Y, double Z);
 double one_of_xyz(void *aux, double X, double Y, double Z);
