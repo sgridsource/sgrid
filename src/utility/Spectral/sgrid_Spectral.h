@@ -38,3 +38,11 @@ void initfiltermatrix(double *F, int k, int n1,
                     void (*filter_coeffs)(double *, int, int),
                     void (*eval_onPoints)(double *,double *, int) );
 void spec_filter1(tBox *box, int direc, double *u);
+
+/* Functions from spec_coeffs.c */
+void initMatrix_ForCoeffs(double *M, int n1,
+                          void (*get_coeffs)(double *,double *, int));
+void initMatrix_ToEvaluate(double *M, int n1,
+                           void (*eval_onPoints)(double *,double *, int));
+void spec_analysis1(tBox *box, int direc, double *M, double *u, double *c);
+void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c);
