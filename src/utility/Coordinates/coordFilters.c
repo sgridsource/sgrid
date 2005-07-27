@@ -33,7 +33,7 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
   double *u;
   double *F;
   double *B;
-  double *c = box->v[Ind("ADMVars_temp1")]; /* we store the coeffs in the variable ADMVars_temp1 */
+  double *c = box->v[Ind("temp1")]; /* we store the coeffs in the variable ADMVars temp1 */
   double *thm = box->v[Ind("Y")];
 
   n1 = box->n1;
