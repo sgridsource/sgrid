@@ -54,6 +54,7 @@ void initfiltermatrix(double *F, int k, int n1,
 
 
 /* this is just a matrix multiplication */
+/*
 void filtermatrix(double *F, double *u, double *uf, int n)
 {
   int i,j;
@@ -66,7 +67,7 @@ void filtermatrix(double *F, double *u, double *uf, int n)
     uf[i] = sum;
   }
 }
-
+*/
 
 
 /* Filter with filter matrices */
@@ -94,7 +95,7 @@ void spec_filter1(tBox *box, int direc, double *u)
       for (j = 0; j < box->n2; j++)
       {
         get_memline(u, uline,  1, j, k, box->n1, box->n2, box->n3);
-        filtermatrix(box->F1, uline, ufline, box->n1);
+        matrix_times_vector(box->F1, uline, ufline, box->n1);
         put_memline(u, ufline, 1, j, k, box->n1, box->n2, box->n3);        
       }
   }
@@ -104,7 +105,7 @@ void spec_filter1(tBox *box, int direc, double *u)
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline,  2, i, k, box->n1, box->n2, box->n3);
-        filtermatrix(box->F2, uline, ufline, box->n2);
+        matrix_times_vector(box->F2, uline, ufline, box->n2);
         put_memline(u, ufline, 2, i, k, box->n1, box->n2, box->n3);        
       }
   }
@@ -114,7 +115,7 @@ void spec_filter1(tBox *box, int direc, double *u)
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline,  3, i, j, box->n1, box->n2, box->n3);
-        filtermatrix(box->F3 , uline, ufline, box->n3);
+        matrix_times_vector(box->F3 , uline, ufline, box->n3);
         put_memline(u, ufline, 3, i, j, box->n1, box->n2, box->n3);
       }
   }

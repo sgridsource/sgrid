@@ -98,6 +98,7 @@ void initdiffmatrix2(double a, double b, double *DD, int n1,
 
 /* take 1d deriv of u along a line */
 /* this is just a matrix multiplication */
+/*
 void diffmat_deriv(double *D, double *u, double *du, int n)
 {
   int i,j;
@@ -110,4 +111,4 @@ void diffmat_deriv(double *D, double *u, double *du, int n)
     du[i] = sum;
   }
 }
-
+*/

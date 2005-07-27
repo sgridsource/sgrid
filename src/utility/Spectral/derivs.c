@@ -304,12 +304,12 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
       {
         /* 
         get_memline(u, uline, 1, j, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D1, uline, duline, box->n1);
+        matrix_times_vector(box->D1, uline, duline, box->n1);
         put_memline(du, duline, 1, j, k, box->n1, box->n2, box->n3);        
         */
         int n1=box->n1;
         int n2=box->n2;
-        diffmat_deriv(box->D1, u+Index(0,j,k), du+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u+Index(0,j,k), du+Index(0,j,k), n1);
       }
   }
   else if(direc==2)
@@ -318,7 +318,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
         put_memline(du, duline, 2, i, k, box->n1, box->n2, box->n3);        
       }
   }
@@ -328,7 +328,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3 , uline, duline, box->n3);
+        matrix_times_vector(box->D3 , uline, duline, box->n3);
         put_memline(du, duline, 3, i, j, box->n1, box->n2, box->n3);
       }
   }
@@ -378,15 +378,15 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         /* 
         get_memline(u, uline, 1, j, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D1, uline, duline, box->n1);
-        diffmat_deriv(box->DD1, uline, dduline, box->n1);
+        matrix_times_vector(box->D1, uline, duline, box->n1);
+        matrix_times_vector(box->DD1, uline, dduline, box->n1);
         put_memline(u1, duline, 1, j, k, box->n1, box->n2, box->n3);
         put_memline(u11, dduline, 1, j, k, box->n1, box->n2, box->n3); 
         */
         int n1=box->n1;
         int n2=box->n2;
-        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
-        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        matrix_times_vector(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
       }
 
     /* y-direction */
@@ -394,13 +394,13 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
-        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->DD2, uline, dduline, box->n2);
         put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
         put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
 
         get_memline(u1, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
         put_memline(u12, duline, 2, i, k, box->n1, box->n2, box->n3);
       }
 
@@ -409,17 +409,17 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
-        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->DD3, uline, dduline, box->n3);
         put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
         put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
         
         get_memline(u1, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
         put_memline(u13, duline, 3, i, j, box->n1, box->n2, box->n3);
         
         get_memline(u2, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
         put_memline(u23, duline, 3, i, j, box->n1, box->n2, box->n3);
       }
   }
@@ -431,15 +431,15 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         /* 
         get_memline(u, uline, 1, j, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D1, uline, duline, box->n1);
-        diffmat_deriv(box->DD1, uline, dduline, box->n1);
+        matrix_times_vector(box->D1, uline, duline, box->n1);
+        matrix_times_vector(box->DD1, uline, dduline, box->n1);
         put_memline(u1, duline, 1, j, k, box->n1, box->n2, box->n3);
         put_memline(u11, dduline, 1, j, k, box->n1, box->n2, box->n3); 
         */
         int n1=box->n1;
         int n2=box->n2;
-        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
-        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        matrix_times_vector(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
       }
 
     /* z-direction */
@@ -447,13 +447,13 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
-        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->DD3, uline, dduline, box->n3);
         put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
         put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
         
         get_memline(u1, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
         put_memline(u13, duline, 3, i, j, box->n1, box->n2, box->n3);
       }
 
@@ -462,17 +462,17 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
-        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->DD2, uline, dduline, box->n2);
         put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
         put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
 
         get_memline(u1, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
         put_memline(u12, duline, 2, i, k, box->n1, box->n2, box->n3);
 
         get_memline(u3, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
         put_memline(u23, duline, 2, i, k, box->n1, box->n2, box->n3);
       }
 
@@ -484,8 +484,8 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
-        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->DD2, uline, dduline, box->n2);
         put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
         put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
       }
@@ -496,10 +496,10 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         int n1=box->n1;
         int n2=box->n2;
-        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
-        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        matrix_times_vector(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
 
-        diffmat_deriv(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
       }
 
     /* z-direction */
@@ -507,17 +507,17 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
-        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->DD3, uline, dduline, box->n3);
         put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
         put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
         
         get_memline(u1, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
         put_memline(u13, duline, 3, i, j, box->n1, box->n2, box->n3);
         
         get_memline(u2, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
         put_memline(u23, duline, 3, i, j, box->n1, box->n2, box->n3);
       }
   }
@@ -528,8 +528,8 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
-        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->DD2, uline, dduline, box->n2);
         put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
         put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
       }
@@ -539,13 +539,13 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
-        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->DD3, uline, dduline, box->n3);
         put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
         put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
         
         get_memline(u2, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
         put_memline(u23, duline, 3, i, j, box->n1, box->n2, box->n3);
       }
 
@@ -555,11 +555,11 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         int n1=box->n1;
         int n2=box->n2;
-        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
-        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        matrix_times_vector(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
 
-        diffmat_deriv(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
-        diffmat_deriv(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
       }
 
 
@@ -571,8 +571,8 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
-        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->DD3, uline, dduline, box->n3);
         put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
         put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
       }
@@ -583,10 +583,10 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         int n1=box->n1;
         int n2=box->n2;
-        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
-        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        matrix_times_vector(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
 
-        diffmat_deriv(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
       }
 
     /* y-direction */
@@ -594,17 +594,17 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
-        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->DD2, uline, dduline, box->n2);
         put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
         put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
 
         get_memline(u1, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
         put_memline(u12, duline, 2, i, k, box->n1, box->n2, box->n3);
 
         get_memline(u3, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
         put_memline(u23, duline, 2, i, k, box->n1, box->n2, box->n3);
       }
   }
@@ -615,8 +615,8 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D3, uline, duline, box->n3);
-        diffmat_deriv(box->DD3, uline, dduline, box->n3);
+        matrix_times_vector(box->D3, uline, duline, box->n3);
+        matrix_times_vector(box->DD3, uline, dduline, box->n3);
         put_memline(u3, duline, 3, i, j, box->n1, box->n2, box->n3);
         put_memline(u33, dduline, 3, i, j, box->n1, box->n2, box->n3);
       }
@@ -626,13 +626,13 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       for (i = 0; i < box->n1; i++)
       {
         get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
-        diffmat_deriv(box->DD2, uline, dduline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->DD2, uline, dduline, box->n2);
         put_memline(u2, duline, 2, i, k, box->n1, box->n2, box->n3);
         put_memline(u22, dduline, 2, i, k, box->n1, box->n2, box->n3);
 
         get_memline(u3, uline, 2, i, k, box->n1, box->n2, box->n3);
-        diffmat_deriv(box->D2, uline, duline, box->n2);
+        matrix_times_vector(box->D2, uline, duline, box->n2);
         put_memline(u23, duline, 2, i, k, box->n1, box->n2, box->n3);
       }
 
@@ -642,11 +642,11 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         int n1=box->n1;
         int n2=box->n2;
-        diffmat_deriv(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
-        diffmat_deriv(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        matrix_times_vector(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
 
-        diffmat_deriv(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
-        diffmat_deriv(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
+        matrix_times_vector(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
       }
   }
   else
