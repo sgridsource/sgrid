@@ -24,6 +24,7 @@ void coordinateDependentFilter(tVarList *unew)
   }
 }
 
+
 /* Filter unew such that the the upper 1-sin(theta) portion of 
    the Fourier coeffs in the phi direction is zero.            */
 void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
@@ -35,8 +36,6 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
   double *B;
   double *c = box->v[Ind("temp1")]; /* we store the coeffs in the variable ADMVars temp1 */
   double *thm = box->v[Ind("Y")];
-
-printf("c=%p\n",c);
 
   n1 = box->n1;
   n2 = box->n2;
@@ -74,13 +73,13 @@ printf("c=%p\n",c);
     for(j = 0; j < n2; j++)
     {
       double theta = thm[Index(0,j,0)] + PI/((1+n2%2)*n2);
-      int ks = n3*sin(theta);
+      int ks = n3*fabs(sin(theta));
       
       if( ks%2 == 0 ) ks++;
       if( ks >= n3) continue;
-//      for(k = ks; k < n3; k++)
-//        for(i = 0; i < n1; i++)
-//          c[Index(i,j,k)] = 0.0; // broken?????
+      for(k = ks; k < n3; k++)
+        for(i = 0; i < n1; i++)
+          c[Index(i,j,k)] = 0.0; // broken?????
     }
 
     /* get new u from new c */
