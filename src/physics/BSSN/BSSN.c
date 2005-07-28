@@ -26,6 +26,9 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 
   set_boundary(unew, upre, dt, ucur);
 
+  if(Getv("BSSN_coordinateDependentFilter", "yes"))
+    coordinateDependentFilter(unew);
+  
   if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
 }
@@ -200,6 +203,10 @@ int BSSN_startup(tGrid *grid)
   /* translate initial data in ADM variables to BSSN variables */
   ADMtoBSSN(grid);
   //set_boundary_symmetry(level, BSSNvars);
+
+  if(Getv("BSSN_coordinateDependentFilter", "yes"))
+    coordinateDependentFilter(BSSNvars);
+
   if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(BSSNvars);
   

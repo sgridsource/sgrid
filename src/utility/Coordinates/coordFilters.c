@@ -64,9 +64,14 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
     for(j = 0; j < n2; j++)
     {
       double theta = thm[Index(0,j,0)] + PI/((1+n2%2)*n2);
-      int ks = n3*fabs(sin(theta));
-
-      if( ks%2 == 0 ) ks++;
+      int ms, ks;
+      
+      /* first m which we eliminate is m = ms = [N fabs(sin(theta)] + 1, 
+         where N=n3/2                                                    */
+      ms = n3/2;
+      ms *= fabs(sin(theta));
+      ms++;
+      ks = 2*ms-1; // before we had: ks = n3*fabs(sin(theta)); if( ks%2 == 0 ) ks++;
       if( ks >= n3) continue;
       for(k = ks; k < n3; k++)
         for(i = 0; i < n1; i++)

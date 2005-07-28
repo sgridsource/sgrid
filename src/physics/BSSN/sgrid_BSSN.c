@@ -42,12 +42,15 @@ int sgrid_BSSN(void)
     
   /* parameters */
   AddPar("BSSN_useDD", "no",
-         "wether we use the DD ops to compute second derivs [no,yes]");
+         "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BSSN_reset_doubleCoveredPoints", "no",
-  "wether we reset double covered points after each evo step [no,yes]");
+         "whether we reset double covered points after each evo step [no,yes]");
+  AddPar("BSSN_coordinateDependentFilter", "no",
+         "whether coordinate dependent filters (e.g. for SphereicalDF) "
+         "are used [no,yes]");
   AddPar("BSSN_densitizedLapse", "no", 
-  "wether we evolve a densitized lapse instead of ADM alpha "
-  "[no,yes,1+log_withoutShift]");
+         "whether we evolve a densitized lapse instead of ADM alpha "
+         "[no,yes,1+log_withoutShift]");
   AddPar("BSSN_alphaDensityWeight",  "1.0", "weight of densitized lapse");
   
   AddPar("BSSN_forceKzero",    "no",  "set K identically to zero");
