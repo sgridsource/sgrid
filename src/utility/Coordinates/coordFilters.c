@@ -49,6 +49,9 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
   B = (double *) calloc(n3*n3, sizeof(double));
   initMatrix_ToEvaluate(B, n3, four_eval);
 
+//for(i=0; i<n3*n3; i++)
+// printf("F[i]=%f B[i]=%f\n",F[i],B[i]);
+
   /* for all variables */
   for(vi = 0; vi < unew->n; vi++)
   {
@@ -57,29 +60,17 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
     /* get spectral coeffs in c */
     spec_analysis1(box, 3, F, u, c);
     
-    /* set the upper 1-sin(theta) portion of the coeffs to zero */
-    /*
-    for(k = 0; k < n3; k++)
-      for(j = 0; j < n2; j++)
-        for(i = 0; i < n1; i++)
-        {
-          double theta = thm[Index(i,j,k)] + PI/((1+n2%2)*n2);
-          
-          if( k > sin(theta)*n3 )  c[Index(i,j,k)] = 0.0;
-        }
-    */
-
     /* set the upper 1-sin(theta) portion of the coeffs c to zero */
     for(j = 0; j < n2; j++)
     {
       double theta = thm[Index(0,j,0)] + PI/((1+n2%2)*n2);
       int ks = n3*fabs(sin(theta));
-      
+
       if( ks%2 == 0 ) ks++;
       if( ks >= n3) continue;
       for(k = ks; k < n3; k++)
         for(i = 0; i < n1; i++)
-          c[Index(i,j,k)] = 0.0; // broken?????
+          c[Index(i,j,k)] = 0.0;
     }
 
     /* get new u from new c */

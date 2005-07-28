@@ -146,7 +146,7 @@ void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c)
       for (j = 0; j < box->n2; j++)
       {
         get_memline(c, cline, 1, j, k, box->n1, box->n2, box->n3);
-        matrix_times_vector(M, uline, cline, box->n1);
+        matrix_times_vector(M, cline, uline, box->n1);
         put_memline(u, uline, 1, j, k, box->n1, box->n2, box->n3);        
       }
   }
@@ -156,7 +156,7 @@ void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c)
       for (i = 0; i < box->n1; i++)
       {
         get_memline(c, cline, 2, i, k, box->n1, box->n2, box->n3);
-        matrix_times_vector(M, uline, cline, box->n2);
+        matrix_times_vector(M, cline, uline, box->n2);
         put_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);        
       }
   }
@@ -166,7 +166,7 @@ void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c)
       for (i = 0; i < box->n1; i++)
       {
         get_memline(c, cline, 3, i, j, box->n1, box->n2, box->n3);
-        matrix_times_vector(M, uline, cline, box->n3);
+        matrix_times_vector(M, cline, uline, box->n3);
         put_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
       }
   }
