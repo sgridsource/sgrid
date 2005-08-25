@@ -1,0 +1,203 @@
+/* ScalarWave.c */
+/* Wolfgang Tichy  8/2005 */
+
+#include "sgrid.h"
+#include "ScalarWave.h"
+
+
+
+
+/* evolve in the interior and 
+   for those boundary points set by special evolution
+*/ 
+void ScalarWave_evolve(tVarList *unew, tVarList *upre, double dt, 
+                       tVarList *ucur)
+{
+  tGrid *grid = ucur->grid;
+  int b;
+  double nonlin = Getd("ScalarWave_nonlinearity");
+  
+  for (b = 0; b < grid->nboxes; b++)
+  {
+    tBox *box = grid->box[b];
+    double *cpsi = vlldataptr(ucur, box, 0);
+    double *ppsi = vlldataptr(upre, box, 0);
+    double *npsi = vlldataptr(unew, box, 0);
+    int ipsi = (ucur)->index[0];
+    double *cpsidot = vlldataptr(ucur, box, 1);
+    double *ppsidot = vlldataptr(upre, box, 1);
+    double *npsidot = vlldataptr(unew, box, 1);
+    int i;
+    //double *psix = box->v[Ind("ScalarWave_dpsix")];
+    //double *psiy = box->v[Ind("ScalarWave_dpsix")+1];
+    //double *psiz = box->v[Ind("ScalarWave_dpsix")+2];
+    double *psixx = box->v[Ind("ScalarWave_ddpsixx")];
+    //double *psixy = box->v[Ind("ScalarWave_ddpsixx")+1];
+    //double *psixz = box->v[Ind("ScalarWave_ddpsixx")+2];
+    double *psiyy = box->v[Ind("ScalarWave_ddpsixx")+3];
+    //double *psiyz = box->v[Ind("ScalarWave_ddpsixx")+4];
+    double *psizz = box->v[Ind("ScalarWave_ddpsixx")+5];
+
+    allDerivsOf_S(box, ipsi,
+                  Ind("ScalarWave_dpsix"), Ind("ScalarWave_ddpsixx"));
+
+    forallpoints(box, i)
+    {
+      double rpsidot, rpsi;
+      
+      rpsidot = psixx[i] + psiyy[i] + psizz[i]
+                - nonlin * cpsi[i]*cpsi[i]*cpsi[i]/(1.0+cpsi[i]*cpsi[i]);
+      rpsi = cpsidot[i];
+      
+      if(dt!=0.0)
+      {
+        npsidot[i] = ppsidot[i] + dt * rpsidot;
+        npsi[i] = ppsi[i] + dt * rpsi;
+      }
+      else
+      {
+        npsidot[i] = rpsidot;
+        npsi[i] = rpsi;
+      }
+    }
+  }
+
+  /* wether addDissipation is called after each ICN (or RK) step: */
+  if(Getv("evolve_Dissipation", "yes")) 
+     addDissipation(unew, upre, dt, ucur);
+
+  set_boundary(unew, upre, dt, ucur);
+
+  if(Getv("ScalarWave_coordinateDependentFilter", "yes"))
+    coordinateDependentFilter(unew);
+  
+  if(Getv("ScalarWave_reset_doubleCoveredPoints", "yes"))
+    reset_doubleCoveredPoints(unew);
+}
+
+
+
+
+
+/* initialize ScalarWave */
+int ScalarWave_startup(tGrid *grid)
+{
+  tVarList *ScalarWavevars;
+  int b;
+  double A         = Getd("ScalarWave_A");
+  double sigma     = Getd("ScalarWave_sigma");
+  double r0        = Getd("ScalarWave_r0");
+  double x0        = Getd("ScalarWave_x0");
+  double y0        = Getd("ScalarWave_y0");
+  double z0        = Getd("ScalarWave_z0");
+  int spherical    = Getv("ScalarWave_waveform", "spherical");
+  
+  printf("Initializing ScalarWave: ");
+
+  /* set boundary information for ScalarWave evolution: 
+     farlimit, falloff, propagation speed 
+  */
+  VarNameSetBoundaryInfo("ScalarWave_psi",     0, 1, 1.0);
+
+  VarNameSetBoundaryInfo("ScalarWave_dpsix",   0, 1, 1.0);
+  VarNameSetBoundaryInfo("ScalarWave_dpsiy",   0, 1, 1.0);
+  VarNameSetBoundaryInfo("ScalarWave_dpsiz",   0, 1, 1.0);
+
+  VarNameSetBoundaryInfo("ScalarWave_ddpsixx", 0, 1, 1.0);
+  VarNameSetBoundaryInfo("ScalarWave_ddpsixy", 0, 1, 1.0);
+  VarNameSetBoundaryInfo("ScalarWave_ddpsixz", 0, 1, 1.0);
+  VarNameSetBoundaryInfo("ScalarWave_ddpsiyy", 0, 1, 1.0);
+  VarNameSetBoundaryInfo("ScalarWave_ddpsiyz", 0, 1, 1.0);
+  VarNameSetBoundaryInfo("ScalarWave_ddpsizz", 0, 1, 1.0);
+
+  VarNameSetBoundaryInfo("ScalarWave_psidot",  0, 1, 1.0);
+
+  /* create a variable list for ScalarWave evolutions 
+     note that we include lapse and shift directly
+  */
+  ScalarWavevars = vlalloc(grid);
+  vlpush(ScalarWavevars, Ind("ScalarWave_psi"));
+  vlpush(ScalarWavevars, Ind("ScalarWave_psidot"));
+  if (0) prvarlist(ScalarWavevars);
+  enablevarlist(ScalarWavevars);
+
+  /* register evolved variables */
+  evolve_vlregister(ScalarWavevars);
+  
+  /* register evolution routine */
+  evolve_rhsregister(ScalarWave_evolve);
+
+  /* set initial data in boxes */
+  forallboxes(grid,b)
+  {  
+    tBox *box = grid->box[b];
+    int i,j,k;
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    double *pX = box->v[Ind("X")];
+    double *pY = box->v[Ind("Y")];
+    double *pZ = box->v[Ind("Z")];
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+
+    double *psi = box->v[Ind("ScalarWave_psi")];
+    double *psidot= box->v[Ind("ScalarWave_psidot")];
+
+    forallpoints(box,i)
+    {
+      double x = pX[i];
+      double y = pY[i];
+      double z = pZ[i];
+      double r, f, df;
+
+      if(px!=NULL) 
+      {
+        x = px[i];
+        y = py[i];
+        z = pz[i];
+      }
+      
+      r = sqrt(x*x + y*y + z*z);
+
+      if(spherical)
+      {
+        f = A*exp( -(r-r0)*(r-r0) / (sigma*sigma) );
+        df= ( -2.0/(sigma*sigma) )*(r-r0)*f;
+      }
+      else
+      {
+        f = A*exp( -( (x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0) )/
+                    (sigma*sigma) );
+        df= ( -2.0/(sigma*sigma) )*f*(
+            (x-x0)*(x/r) + (y-y0)*(y/r)+(z-z0)*(z/r) );
+      }
+      psi[i]    =  f/r;
+      psidot[i] = df/r;
+    }
+    /* set psi=0 on boundaries */
+    for(k=0; k<n3; k++)
+      for(j=0; j<n2; j++)
+      {
+        psi[Index(0,j,k)]    = psi[Index(n1-1,j,k)] = 0;
+        psidot[Index(0,j,k)] = psidot[Index(n1-1,j,k)] = 0;
+      }
+  }
+
+  //set_boundary_symmetry(level, ScalarWavevars);
+
+  if(Getv("ScalarWave_coordinateDependentFilter", "yes"))
+    coordinateDependentFilter(ScalarWavevars);
+
+  if(Getv("ScalarWave_reset_doubleCoveredPoints", "yes"))
+    reset_doubleCoveredPoints(ScalarWavevars);
+  
+  /* enable all derivative vars */
+  enablevar(grid, Ind("ScalarWave_dpsix"));
+  enablevar(grid, Ind("ScalarWave_ddpsixx"));
+
+  return 0;
+}
+
+
