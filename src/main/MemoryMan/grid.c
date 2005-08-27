@@ -168,37 +168,9 @@ tGrid *make_grid(int pr)
        snprintf(str, 999, "box%d_filter3", b);
        filt3 = Geti(str);
   
-       snprintf(str, 999, "box%d_basis1", b);
-       if( Getv(str, "ChebExtrema") )
-       {
-         get_coeffs = cheb_coeffs_fromExtrema;
-         coeffs_of_deriv = cheb_deriv;
-         eval_onPoints = cheb_eval_onExtrema;
-         filter_coeffs = cheb_filter;
-       }
-       else if( Getv(str, "Fourier") )
-       {
-         get_coeffs = four_coeffs;
-         coeffs_of_deriv = four_deriv;
-         eval_onPoints = four_eval;
-         filter_coeffs = four_filter;
-       }
-       else if( Getv(str, "fd2_onesided") )
-       {
-         get_coeffs = fd2_coeffs;
-         coeffs_of_deriv = fd2_deriv_onesidedBC;
-         eval_onPoints = fd2_eval;
-         filter_coeffs = fd2_filter;
-         coeffs_of_2ndderiv = fd2_2ndderiv_onesidedBC;
-       }
-       else if( Getv(str, "fd2_periodic") )
-       {
-         get_coeffs = fd2_coeffs;
-         coeffs_of_deriv = fd2_deriv_periodic;
-         eval_onPoints = fd2_eval;
-         filter_coeffs = fd2_filter;
-         coeffs_of_2ndderiv = fd2_2ndderiv_periodic;
-       }
+       get_spec_functionpointers(box, 1, &get_coeffs, &coeffs_of_deriv,
+                                 &coeffs_of_2ndderiv, &eval_onPoints, 
+                                 &filter_coeffs);
        initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F1, n1+1-filt1, n1, 
@@ -208,37 +180,9 @@ tGrid *make_grid(int pr)
                          get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
 
         
-       snprintf(str, 999, "box%d_basis2", b);
-       if( Getv(str, "ChebExtrema") )
-       {
-         get_coeffs = cheb_coeffs_fromExtrema;
-         coeffs_of_deriv = cheb_deriv;
-         eval_onPoints = cheb_eval_onExtrema;
-         filter_coeffs = cheb_filter;
-       }
-       else if( Getv(str, "Fourier") )
-       {
-         get_coeffs = four_coeffs;
-         coeffs_of_deriv = four_deriv;
-         eval_onPoints = four_eval;
-         filter_coeffs = four_filter;
-       }
-       else if( Getv(str, "fd2_onesided") )
-       {
-         get_coeffs = fd2_coeffs;
-         coeffs_of_deriv = fd2_deriv_onesidedBC;
-         eval_onPoints = fd2_eval;
-         filter_coeffs = fd2_filter;
-         coeffs_of_2ndderiv = fd2_2ndderiv_onesidedBC;
-       }
-       else if( Getv(str, "fd2_periodic") )
-       {
-         get_coeffs = fd2_coeffs;
-         coeffs_of_deriv = fd2_deriv_periodic;
-         eval_onPoints = fd2_eval;
-         filter_coeffs = fd2_filter;
-         coeffs_of_2ndderiv = fd2_2ndderiv_periodic;
-       }
+       get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
+                                 &coeffs_of_2ndderiv, &eval_onPoints, 
+                                 &filter_coeffs);
        initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F2, n2+1-filt2, n2, 
@@ -248,37 +192,9 @@ tGrid *make_grid(int pr)
                          get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
 
 
-       snprintf(str, 999, "box%d_basis3", b);
-       if( Getv(str, "ChebExtrema") )
-       {
-         get_coeffs = cheb_coeffs_fromExtrema;
-         coeffs_of_deriv = cheb_deriv;
-         eval_onPoints = cheb_eval_onExtrema;
-         filter_coeffs = cheb_filter;
-       }
-       else if( Getv(str, "Fourier") )
-       {
-         get_coeffs = four_coeffs;
-         coeffs_of_deriv = four_deriv;
-         eval_onPoints = four_eval;
-         filter_coeffs = four_filter;
-       }
-       else if( Getv(str, "fd2_onesided") )
-       {
-         get_coeffs = fd2_coeffs;
-         coeffs_of_deriv = fd2_deriv_onesidedBC;
-         eval_onPoints = fd2_eval;
-         filter_coeffs = fd2_filter;
-         coeffs_of_2ndderiv = fd2_2ndderiv_onesidedBC;
-       }
-       else if( Getv(str, "fd2_periodic") )
-       {
-         get_coeffs = fd2_coeffs;
-         coeffs_of_deriv = fd2_deriv_periodic;
-         eval_onPoints = fd2_eval;
-         filter_coeffs = fd2_filter;
-         coeffs_of_2ndderiv = fd2_2ndderiv_periodic;
-       }
+       get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
+                                 &coeffs_of_2ndderiv, &eval_onPoints, 
+                                 &filter_coeffs);
        initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F3, n3+1-filt3, n3, 

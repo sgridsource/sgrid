@@ -174,3 +174,54 @@ void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c)
     errorexit("spec_synthesis1: possible values for direction direc are 1,2,3.");
 }
 
+
+
+/* get all relevant function points in one box in direction direc */
+void get_spec_functionpointers(tBox *box, int direc,
+     void (**get_coeffs)(double *,double *, int),
+     void (**coeffs_of_deriv)(double, double, double *,double *, int),
+     void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
+     void (**eval_onPoints)(double *,double *, int),
+     void (**filter_coeffs)(double *, int, int) )
+{       
+  char str[1000];
+
+  *get_coeffs=NULL;
+  *coeffs_of_deriv=NULL;
+  *coeffs_of_2ndderiv=NULL;
+  *eval_onPoints=NULL;
+  *filter_coeffs=NULL;
+
+  snprintf(str, 999, "box%d_basis%d", box->b, direc);
+  printf("%s %s|", str, Gets(str));
+  if( Getv(str, "ChebExtrema") )
+  {
+    *get_coeffs = cheb_coeffs_fromExtrema;
+    *coeffs_of_deriv = cheb_deriv;
+    *eval_onPoints = cheb_eval_onExtrema;
+    *filter_coeffs = cheb_filter;
+  }
+  else if( Getv(str, "Fourier") )
+  {
+    *get_coeffs = four_coeffs;
+    *coeffs_of_deriv = four_deriv;
+    *eval_onPoints = four_eval;
+    *filter_coeffs = four_filter;
+  }
+  else if( Getv(str, "fd2_onesided") )
+  {
+    *get_coeffs = fd2_coeffs;
+    *coeffs_of_deriv = fd2_deriv_onesidedBC;
+    *eval_onPoints = fd2_eval;
+    *filter_coeffs = fd2_filter;
+    *coeffs_of_2ndderiv = fd2_2ndderiv_onesidedBC;
+  }
+  else if( Getv(str, "fd2_periodic") )
+  {
+    *get_coeffs = fd2_coeffs;
+    *coeffs_of_deriv = fd2_deriv_periodic;
+    *eval_onPoints = fd2_eval;
+    *filter_coeffs = fd2_filter;
+    *coeffs_of_2ndderiv = fd2_2ndderiv_periodic;
+  }
+}
