@@ -179,3 +179,84 @@ double spec_3dIntegral(tBox *box, double *u, double *U)
   
   return U[0];
 }
+
+
+/* compute U = 2d integral of var u over theta and phi */
+void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
+{
+  int linelen;
+  double *M=NULL;
+  int i,j,k;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  void (*get_coeffs)(double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*eval_onPoints)(double *,double *, int)=NULL;
+  void (*filter_coeffs)(double *, int, int)=NULL;
+
+  /* do phi integral */
+  spec_Integral1(box, 3, u, U);
+
+  get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
+                            &coeffs_of_2ndderiv, &eval_onPoints,
+                            &filter_coeffs);
+  {
+    linelen = n2;
+
+    /* initialize the matrix M used to compute coeffs */
+    M = (double *) calloc( linelen*linelen, sizeof(double));
+    initMatrix_ForCoeffs(M, linelen, get_coeffs);
+
+    /* write spec coeffs into U */
+    spec_analysis1(box, 2, M, U, U);
+
+    /* write four-integral from a to b into U */
+    if(get_coeffs==four_coeffs)
+      for (k = 0; k < n3; k++)
+        for (i = 0; i < n1; i++)
+        {
+          double sum;
+          double L = box->bbox[3] - box->bbox[2];
+          int n;
+          int N = box->n2;
+          /* double theta = thm + PI/((1+N%2)*N); */
+          double d = 1.0/(2.0*(1+N%2)*N);
+          double PI2 = 2.0*PI;
+          double Re_c_n, Im_c_n;
+
+          /* sum over all theta-integrated terms */
+          sum = (1.0/PI) * U[Index(i,0,k)];
+          sum += 0.5*( sin(PI2*d) * U[Index(i,1,k)]
+                      +cos(PI2*d) * U[Index(i,2,k)] );
+          for(n=2;n<N/2;n+=2)
+          {
+            Re_c_n = U[Index(i, 2*n-1, k)]; /* c[2*n-1]; */
+            Im_c_n = U[Index(i, 2*n, k)];   /* c[2*n];   */
+            sum += 2.0*( cos(PI2*n*d)/((1-n*n)*PI) * Re_c_n 
+                        +sin(PI2*n*d)/((n*n-1)*PI) * Im_c_n );
+          }
+          if( N%4 == 0 )
+            sum += cos(PI2*(N/2)*d)/((1-N*N/4)*PI) * U[Index(i,N-1,k)];
+
+          /* write sum into U along direction 2 */
+          for(j = 0; j < n2; j++)
+            U[Index(i,j,k)] = sum*L/N;
+        }
+    else errorexit("spec_sphericalDF2dIntegral: you need Fourier in direction 2");
+  }
+
+  /* free memory for  matrix M */
+  free(M);
+}
+
+
+/* compute volume integral over var u if we use sphericalDF */
+void spec_sphericalDF3dIntegral(tBox *box, double *u, double *U)
+{
+  spec_sphericalDF2dIntegral(box, u, U);
+  spec_Integral1(box, 1, U, U);
+  
+  return U[0];
+}
