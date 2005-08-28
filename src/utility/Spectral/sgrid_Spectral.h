@@ -52,3 +52,8 @@ void get_spec_functionpointers(tBox *box, int direc,
      void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
      void (**eval_onPoints)(double *,double *, int),
      void (**filter_coeffs)(double *, int, int) );
+
+/* Functions from integrals.c */
+void spec_Integral1(tBox *box, int direc, double *u, double *U);
+void spec_2dIntegral(tBox *box, int norm, double *u, double *U);
+double spec_3dIntegral(tBox *box, double *u, double *U);

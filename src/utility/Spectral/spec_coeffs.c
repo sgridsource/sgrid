@@ -193,7 +193,7 @@ void get_spec_functionpointers(tBox *box, int direc,
   *filter_coeffs=NULL;
 
   snprintf(str, 999, "box%d_basis%d", box->b, direc);
-  printf("%s %s|", str, Gets(str));
+  //printf("%s=%s\n", str, Gets(str));
   if( Getv(str, "ChebExtrema") )
   {
     *get_coeffs = cheb_coeffs_fromExtrema;
