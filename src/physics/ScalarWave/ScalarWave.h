@@ -3,3 +3,4 @@
 
 
 int ScalarWave_startup(tGrid *grid);
+int ScalarWave_analyze(tGrid *grid);

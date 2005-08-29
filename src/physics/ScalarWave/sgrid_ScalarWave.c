@@ -15,7 +15,7 @@ int sgrid_ScalarWave(void)
   /* functions */
   AddFun(POST_INITIALDATA, ScalarWave_startup, 
 	 "initialize ScalarWave system from adm initial data");
-  // AddFun(ANALYZE,     ScalarWaveconstraints,   "compute ScalarWave constraints");
+  AddFun(ANALYZE, ScalarWave_analyze, "compute ScalarWave energy density");
 
   /* variables */
   AddVar("ScalarWave_psi",    "", "scalar");
@@ -26,6 +26,11 @@ int sgrid_ScalarWave(void)
            in place of ScalarWave_ddg, ScalarWave_dg, ScalarWave_dA */
   AddVar("ScalarWave_dpsi",   "i",    "1st deriv of scalar");
   AddVar("ScalarWave_ddpsi",  "(ij)", "2nd deriv of scalar");
+
+  /* energy density of psi */
+  AddVar("ScalarWave_rho",      "", "energy density of scalar");
+  AddVar("ScalarWave_2dInt_rho","", "surface integral of energy density");
+  AddVar("ScalarWave_temp",     "", "temp var");
     
   /* parameters */
   AddPar("ScalarWave_useDD", "yes",

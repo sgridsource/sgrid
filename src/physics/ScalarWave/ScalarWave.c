@@ -92,7 +92,7 @@ int ScalarWave_startup(tGrid *grid)
   double z0        = Getd("ScalarWave_z0");
   int spherical    = Getv("ScalarWave_waveform", "spherical");
   
-  printf("Initializing ScalarWave: ");
+  printf("Initializing ScalarWave:\n");
 
   /* set boundary information for ScalarWave evolution: 
      farlimit, falloff, propagation speed 
@@ -144,7 +144,45 @@ int ScalarWave_startup(tGrid *grid)
 
     double *psi = box->v[Ind("ScalarWave_psi")];
     double *psidot= box->v[Ind("ScalarWave_psidot")];
+//test
+/*
+forallpoints(box,i)
+{
+psi[i]=1.0/(2.0*PI);
+//psi[i]=(pX[i]*pX[i])*fabs(sin(acos(pz[i]/pX[i]))); //correct weight, but not analytic
+//printf("acos(pz[i]/pX[i])=%f pY[i]=%f\n", acos(pz[i]/pX[i]), pY[i]);
+psi[i]=(pX[i]*pX[i]);
+psi[i]=(pX[i]*pX[i])*fabs(sin(pZ[i]));
+psi[i]=( sin(1*(pY[i]+PI/n2)) + cos(4*(pY[i]+PI/n2)) )*1.0/(2.0*PI);
+psi[i]=(pX[i]*pX[i])*sin(pZ[i]-1)*cos(pZ[i])*( sin(1*(pY[i]+PI/n2)) + cos(4*(pY[i]+PI/n2)) )/(1.4374629934615632542716*(-2.6435590640814554674876));
+psi[i]=(pX[i]*pX[i]);
+psi[i]=1;
+psi[i]=sin(pZ[i]-1)*cos(pZ[i])*( sin(1*(pY[i]+PI/n2)) + cos(4*(pY[i]+PI/n2)) )/(1.4374629934615632542716*(-2.6435590640814554674876));
+//psi[i] *= fabs(sin(acos(pz[i]/pX[i])));
+//psi[i]=(pX[i]*pX[i])*fabs(sin(acos(pz[i]/pX[i])))/2; 
+}
+spec_Integral1(box,1, psi, psidot);
+//spec_2dIntegral(box,2, psi, psidot);
+//spec_3dIntegral(box, psi, psidot);
 
+//spec_Integral1(box, 1, psi, psidot);
+//spec_Integral1(box, 2, psidot, psidot);
+//spec_Integral1(box, 3, psidot, psidot);
+
+spec_3dIntegral(box, psi, psidot);
+
+spec_sphericalDF2dIntegral(box, psi, psidot);
+spec_Integral1(box, 1, psidot, psidot);
+
+//spec_sphericalDF3dIntegral(box, psi, psidot);
+
+i=0; j=0; k=0;
+printf("psidot[Index(%d,%d,%d)]=%.22f\n", i,j,k, psidot[Index(i,j,k)]);  
+
+forallpoints(box,i) 
+  if(psidot[i] != psidot[0]) printf("i=%d ", i);
+*/
+//end test
     forallpoints(box,i)
     {
       double x = pX[i];
@@ -163,14 +201,14 @@ int ScalarWave_startup(tGrid *grid)
 
       if(spherical)
       {
-        f = A*exp( -(r-r0)*(r-r0) / (sigma*sigma) );
-        df= ( -2.0/(sigma*sigma) )*(r-r0)*f;
+        f = A*exp( -(r-r0)*(r-r0) / (2.0*sigma*sigma) );
+        df= ( -1.0/(sigma*sigma) )*(r-r0)*f;
       }
       else
       {
         f = A*exp( -( (x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0) )/
-                    (sigma*sigma) );
-        df= ( -2.0/(sigma*sigma) )*f*(
+                    (2.0*sigma*sigma) );
+        df= ( -1.0/(sigma*sigma) )*f*(
             (x-x0)*(x/r) + (y-y0)*(y/r)+(z-z0)*(z/r) );
       }
       psi[i]    =  f/r;
@@ -197,7 +235,44 @@ int ScalarWave_startup(tGrid *grid)
   enablevar(grid, Ind("ScalarWave_dpsix"));
   enablevar(grid, Ind("ScalarWave_ddpsixx"));
 
+  /* enable all rho vars */
+  enablevar(grid, Ind("ScalarWave_rho"));
+  enablevar(grid, Ind("ScalarWave_2dInt_rho"));
+  enablevar(grid, Ind("ScalarWave_temp"));
+
   return 0;
 }
 
 
+/* compute rho and integrals of rho */
+int ScalarWave_analyze(tGrid *grid)
+{
+  int b;
+  double nonlin = Getd("ScalarWave_nonlinearity");
+  
+  for (b = 0; b < grid->nboxes; b++)
+  {
+    tBox *box = grid->box[b];
+    double *psi    = box->v[Ind("ScalarWave_psi")];
+    double *psidot = box->v[Ind("ScalarWave_psidot")];
+    double *psix   = box->v[Ind("ScalarWave_dpsix")];
+    double *psiy   = box->v[Ind("ScalarWave_dpsix")+1];
+    double *psiz   = box->v[Ind("ScalarWave_dpsix")+2];
+    double *rho    = box->v[Ind("ScalarWave_rho")];
+    double *I2rho  = box->v[Ind("ScalarWave_2dInt_rho")];
+    double *I3rho  = box->v[Ind("ScalarWave_temp")];
+    int i;
+
+    FirstDerivsOf_S(box, Ind("ScalarWave_psi"), Ind("ScalarWave_dpsix"));
+
+    /* compute rho */
+    forallpoints(box, i)
+      rho[i] = 0.5*(  psidot[i]*psidot[i]  // is this correct???
+                 + psix[i]*psix[i] + psiy[i]*psiy[i] + psiz[i]*psiz[i] )
+               - nonlin*0.5*( psi[i]*psi[i] - log(1+psi[i]*psi[i]) );
+
+    spec_sphericalDF2dIntegral(box, rho, I2rho);
+    spec_Integral1(box, 1, I2rho, I3rho);
+  }
+  return 0;
+}
