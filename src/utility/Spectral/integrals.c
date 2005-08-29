@@ -257,7 +257,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
 
 
 /* compute volume integral over var u if we use sphericalDF */
-void spec_sphericalDF3dIntegral(tBox *box, double *u, double *U)
+double spec_sphericalDF3dIntegral(tBox *box, double *u, double *U)
 {
   spec_sphericalDF2dIntegral(box, u, U);
   spec_Integral1(box, 1, U, U);

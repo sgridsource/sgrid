@@ -58,4 +58,4 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U);
 void spec_2dIntegral(tBox *box, int norm, double *u, double *U);
 double spec_3dIntegral(tBox *box, double *u, double *U);
 void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U);
-void spec_sphericalDF3dIntegral(tBox *box, double *u, double *U);
+double spec_sphericalDF3dIntegral(tBox *box, double *u, double *U);

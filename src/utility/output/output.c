@@ -81,12 +81,12 @@ int timeforoutput_index(tGrid *grid, int index)
       dt[d+4] = dt[0];
     }
     for (d = 0; d <= 3; d++) {
-      sprintf(output[d+4], "1doutput%s", dstring[d]);
+      sprintf(output[d+10], "1doutput%s", dstring[d]);
       di[d+10] = di[1];
       dt[d+10] = dt[1];
     }
     for (d = 0; d < 6; d++) {
-      sprintf(output[d+8], "2doutput%s", ddstring[d]);
+      sprintf(output[d+14], "2doutput%s", ddstring[d]);
       di[d+14] = di[2];
       dt[d+14] = dt[2];
     }
@@ -260,7 +260,7 @@ int write_grid(tGrid *grid)
   d = 0;
   if (timeforoutput_di_dt(grid, di[d], dt[d]))
   {
-    errorexit("0d output not implemented");
+    //errorexit("0d output not implemented");
     for (b = 0; b < grid->nboxes; b++)
     {
       tBox *box = grid->box[b];
@@ -284,10 +284,10 @@ int write_grid(tGrid *grid)
           int vi0 = IndComponent0(vi);
 
           for(i=0; i<VarNComponents(vi0); i++)
-            yo(); //output0d_boxvar(box, VarName(vi0+i));
+            output0d_boxvar(box, VarName(vi0+i));
         }
         else
-          yo(); //output0d_boxvar(box, str);
+          output0d_boxvar(box, str);
       }
     }
   }
