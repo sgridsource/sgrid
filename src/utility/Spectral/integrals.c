@@ -195,6 +195,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
+  double *pX = box->v[Ind("X")];
 
   /* do phi integral */
   spec_Integral1(box, 3, u, U);
@@ -240,9 +241,12 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
           if( N%4 == 0 )
             sum += cos(PI2*(N/2)*d)/((1-N*N/4)*PI) * U[Index(i,N-1,k)];
 
-          /* write sum into U along direction 2 */
+          /* adjust sum for L and N to obtain integral over theta */
+          sum *= L/N;
+
+          /* write integral into U along direction 2, and multiply by r^2  */
           for(j = 0; j < n2; j++)
-            U[Index(i,j,k)] = sum*L/N;
+            U[Index(i,j,k)] = sum*pX[Index(i,j,k)]*pX[Index(i,j,k)];
         }
     else errorexit("spec_sphericalDF2dIntegral: you need Fourier in direction 2");
   }
