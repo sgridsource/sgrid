@@ -238,7 +238,7 @@ forallpoints(box,i)
   /* enable all rho vars */
   enablevar(grid, Ind("ScalarWave_rho"));
   enablevar(grid, Ind("ScalarWave_2dInt_rho"));
-  enablevar(grid, Ind("ScalarWave_temp"));
+  /* enablevar(grid, Ind("ScalarWave_temp")); */
 
   return 0;
 }
@@ -260,7 +260,7 @@ int ScalarWave_analyze(tGrid *grid)
     double *psiz   = box->v[Ind("ScalarWave_dpsix")+2];
     double *rho    = box->v[Ind("ScalarWave_rho")];
     double *I2rho  = box->v[Ind("ScalarWave_2dInt_rho")];
-    double *I3rho  = box->v[Ind("ScalarWave_temp")];
+    /* double *I3rho  = box->v[Ind("ScalarWave_temp")]; */
     int i;
 
     FirstDerivsOf_S(box, Ind("ScalarWave_psi"), Ind("ScalarWave_dpsix"));
@@ -269,10 +269,10 @@ int ScalarWave_analyze(tGrid *grid)
     forallpoints(box, i)
       rho[i] = 0.5*(  psidot[i]*psidot[i]  // is this correct???
                  + psix[i]*psix[i] + psiy[i]*psiy[i] + psiz[i]*psiz[i] )
-               - nonlin*0.5*( psi[i]*psi[i] - log(1+psi[i]*psi[i]) );
+               + nonlin*( psi[i]*psi[i] - log(1+psi[i]*psi[i]) )*0.5;
 
     spec_sphericalDF2dIntegral(box, rho, I2rho);
-    spec_Integral1(box, 1, I2rho, I3rho);
+    /* spec_Integral1(box, 1, I2rho, I3rho); */
   }
   return 0;
 }
