@@ -50,20 +50,20 @@ int timeforoutput_any(tGrid *grid)
    the variable has to be present in any one of the output parameters, and
    the iteration count has to be right
 */
-#define NOUTPUT 14
+#define NOUTPUT 20 /* 16 from dstring, ddstring, rstring + 4 from 0d,1d,2d,3d */
 int timeforoutput_index(tGrid *grid, int index)
 {
   static int firstcall = 1;
   static int di[NOUTPUT];
   static double dt[NOUTPUT];
-  static char output[NOUTPUT][20];
-  char *name, s[20];
+  static char output[NOUTPUT][32];
+  char *name, s[32];
   int d, n;
 
   if (firstcall) {
     char *dstring[4] = {"D", "X", "Y", "Z"};
     char *ddstring[6] = {"XY", "XZ", "YZ", "XD", "YD", "ZD"};
-    char *rstring[4] = {"max", "min", "norm","norminf"};
+    char *rstring[6] = {"max", "min", "rms", "meanAbs", "mean", "VolInt"};
 
     firstcall = 0;
 
@@ -75,20 +75,20 @@ int timeforoutput_index(tGrid *grid, int index)
       dt[d] = Getd(s);
       sprintf(output[d], "%ddoutput", d);
     }
-    for (d = 0; d <= 3; d++) {
+    for (d = 0; d <= 5; d++) {
       sprintf(output[d+4], "0doutput%s", rstring[d]);
       di[d+4] = di[0];
       dt[d+4] = dt[0];
     }
     for (d = 0; d <= 3; d++) {
       sprintf(output[d+4], "1doutput%s", dstring[d]);
-      di[d+4] = di[1];
-      dt[d+4] = dt[1];
+      di[d+10] = di[1];
+      dt[d+10] = dt[1];
     }
     for (d = 0; d < 6; d++) {
       sprintf(output[d+8], "2doutput%s", ddstring[d]);
-      di[d+8] = di[2];
-      dt[d+8] = dt[2];
+      di[d+14] = di[2];
+      dt[d+14] = dt[2];
     }
   }
 
@@ -221,11 +221,11 @@ int write_grid(tGrid *grid)
   static double dt[4];
   static char *ou[4], *ou0d[4], *ou1d[4], *ou2d[6];
   static int all[4];
-  char s[20];
+  char s[32];
   int b, d;
   char *dstring[4]  = {"D", "X", "Y", "Z"};
   char *ddstring[6] = {"XY", "XZ", "YZ", "XD", "YD", "ZD"};
-  char *rstring[4]  = {"max", "min", "norm","norminf"};
+  char *rstring[6]  = {"max", "min", "rms", "meanAbs", "mean", "VolInt"};
 
   if (firstcall) {
     firstcall = 0;
@@ -243,7 +243,7 @@ int write_grid(tGrid *grid)
       sprintf(s, "1doutput%s", dstring[d]);
       ou1d[d] = Gets(s);
     }
-    for (d = 0; d < 4; d++) {
+    for (d = 0; d < 6; d++) {
       sprintf(s, "0doutput%s", rstring[d]);
       ou0d[d] = Gets(s);
 
