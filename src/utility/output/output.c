@@ -260,7 +260,36 @@ int write_grid(tGrid *grid)
   d = 0;
   if (timeforoutput_di_dt(grid, di[d], dt[d]))
   {
-    printf("0d output not implemented");
+    errorexit("0d output not implemented");
+    for (b = 0; b < grid->nboxes; b++)
+    {
+      tBox *box = grid->box[b];
+      char str[1000];
+      int start=0;
+      int vi;
+
+      while(sscanf(ou[0]+start, "%s", str)==1)
+      {
+        start += strlen(str);
+        if(ou[0][start]==' ') start++;
+  
+        /* check if str has an index that exists */
+        vi = IndLax(str);
+        if(vi<0) continue;
+
+        /* check whether we do 1doutputall */
+        if( all[0] )
+        {
+          int i;
+          int vi0 = IndComponent0(vi);
+
+          for(i=0; i<VarNComponents(vi0); i++)
+            yo(); //output0d_boxvar(box, VarName(vi0+i));
+        }
+        else
+          yo(); //output0d_boxvar(box, str);
+      }
+    }
   }
 
   /* 1d output */
