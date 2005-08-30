@@ -6,6 +6,7 @@
 
 
 /* output.c */
+int timeforoutput_index(tGrid *grid, int index);
 int timeforoutput(tGrid *grid, tVarList *vl);
 int timeforoutput_any(tGrid *grid);
 

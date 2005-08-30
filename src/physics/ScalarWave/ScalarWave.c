@@ -248,8 +248,12 @@ forallpoints(box,i)
 int ScalarWave_analyze(tGrid *grid)
 {
   int b;
-  double nonlin = Getd("ScalarWave_nonlinearity");
-  
+  double nonlin;
+
+  if( ! timeforoutput_index(grid, Ind("ScalarWave_rho")) ) return 0;
+
+  nonlin = Getd("ScalarWave_nonlinearity");
+
   for (b = 0; b < grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
