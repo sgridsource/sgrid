@@ -44,6 +44,9 @@ int sgrid_ScalarWave(void)
   AddPar("ScalarWave_A",    "1", "amplitude of wave");
   AddPar("ScalarWave_sigma","1", "sigma of Gaussian wavepacket");
   AddPar("ScalarWave_r0",   "1", "location of spherical Gaussian wavepacket");
+  AddPar("ScalarWave_sigmax","1", "sigmax of Gaussian wavepacket");
+  AddPar("ScalarWave_sigmay","1", "sigmay of Gaussian wavepacket");
+  AddPar("ScalarWave_sigmaz","1", "sigmaz of Gaussian wavepacket");
   AddPar("ScalarWave_x0",   "1", "x-location Gaussian wavepacket");
   AddPar("ScalarWave_y0",   "0", "y-location Gaussian wavepacket");
   AddPar("ScalarWave_z0",   "0", "z-location Gaussian wavepacket");

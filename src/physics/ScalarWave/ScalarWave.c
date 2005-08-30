@@ -87,6 +87,9 @@ int ScalarWave_startup(tGrid *grid)
   double A         = Getd("ScalarWave_A");
   double sigma     = Getd("ScalarWave_sigma");
   double r0        = Getd("ScalarWave_r0");
+  double sigmax    = Getd("ScalarWave_sigmax");
+  double sigmay    = Getd("ScalarWave_sigmay");
+  double sigmaz    = Getd("ScalarWave_sigmaz");
   double x0        = Getd("ScalarWave_x0");
   double y0        = Getd("ScalarWave_y0");
   double z0        = Getd("ScalarWave_z0");
@@ -206,10 +209,12 @@ forallpoints(box,i)
       }
       else
       {
-        f = A*exp( -( (x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0) )/
-                    (2.0*sigma*sigma) );
-        df= ( -1.0/(sigma*sigma) )*f*(
-            (x-x0)*(x/r) + (y-y0)*(y/r)+(z-z0)*(z/r) );
+        f = A*exp( -0.5*( 
+               (x-x0)*(x-x0)/(sigmax*sigmax) + (y-y0)*(y-y0)/(sigmay*sigmay)
+             + (z-z0)*(z-z0)/(sigmaz*sigmaz)   ) );
+        df= -f*(
+                 (x-x0)*(x/r)/(sigmax*sigmax) + (y-y0)*(y/r)/(sigmay*sigmay)
+                +(z-z0)*(z/r)/(sigmaz*sigmaz)  );
       }
       psi[i]    =  f/r;
       psidot[i] = df/r;
