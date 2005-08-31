@@ -1,5 +1,5 @@
 /* ADMconstraints.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 30.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 31.8.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -27,7 +27,7 @@ for(bi = 0; bi < grid->nboxes; bi++)
 tBox *box = grid->box[bi];
 int ijk;
 
-FirstAndSecondDerivsOf_Sab(box, Ind("gxx"), Ind("ADMvars_dgxxx"),                                  Ind("ADMvars_ddgxxxx"));
+allDerivsOf_Sab(box, Ind("gxx"), Ind("ADMvars_dgxxx"),                       Ind("ADMvars_ddgxxxx"));
 FirstDerivsOf_Sab(box, Ind("Kxx"), Ind("ADMvars_dKxxx"));
 
 forallpoints(box, ijk)

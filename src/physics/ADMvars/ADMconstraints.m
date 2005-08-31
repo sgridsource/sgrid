@@ -185,8 +185,8 @@ BeginCFunction[] := Module[{},
   pr["tBox *box = grid->box[bi];\n"];
   pr["int ijk;\n\n"];
 
-  pr["FirstAndSecondDerivsOf_Sab(box, Ind(\"gxx\"), Ind(\"ADMvars_dgxxx\"),
-                                 Ind(\"ADMvars_ddgxxxx\"));\n"];
+  pr["allDerivsOf_Sab(box, Ind(\"gxx\"), Ind(\"ADMvars_dgxxx\"),
+                      Ind(\"ADMvars_ddgxxxx\"));\n"];
   pr["FirstDerivsOf_Sab(box, Ind(\"Kxx\"), Ind(\"ADMvars_dKxxx\"));\n"];
   pr["\n"];
 
