@@ -28,6 +28,7 @@ int sgrid_ADMvars()
   AddVar("mom",      "i",     "momentum constraint");
   AddVar("trK",      "",
 	 "trace of extrinsic curvature tensor (for output)");
+  AddVar("E_ADM",    "",      "ADM energy");
 
   AddPar("ADMvars_normalizedConstraints", "no",
          "whether we compute normalized constraints [no,yes]");

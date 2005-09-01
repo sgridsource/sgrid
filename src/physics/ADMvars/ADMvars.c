@@ -12,7 +12,8 @@ int computeADMconstraints(tGrid *grid)
 {
   int NANcheck = Getv("ADMvars_NANcheck", "yes");
   tVarList *vl, *wl;
-  
+
+  /* compute the constraints */
   vl = vlalloc(grid);
   vlpush(vl, Ind("ham"));
   vlpush(vl, Ind("momx"));
@@ -29,8 +30,8 @@ int computeADMconstraints(tGrid *grid)
     vlpush(vl, Ind("momx"));
   }
 
-  if (timeforoutput(grid, vl)) {
-
+  if (timeforoutput(grid, vl))
+  {
     /*    printf("computing ADM constraints\n"); */
 
     enablevarlist(vl);
@@ -67,8 +68,49 @@ int computeADMconstraints(tGrid *grid)
     disablevarlist(vl);
     */
   } 
-    
   vlfree(vl);
+
+  /* compute ADM energy */
+  vl = vlalloc(grid);
+  vlpush(vl, Ind("E_ADM"));
+
+  if (timeforoutput(grid, vl))
+  {
+    int bi;
+
+    enablevarlist(vl);
+    wl = vlalloc(grid);
+    vlpushvl(wl, vl);
+    vlpush(wl, Ind("gxx"));
+    vlpush(wl, Ind("x"));
+    vlpush(wl, Ind("y"));
+    vlpush(wl, Ind("z"));
+    vlpush(wl, Ind("psi"));
+    vlpush(wl, Ind("dpsiopsix"));
+
+    /* get the integrand for the ADM energy in var E_ADM */
+    ADMenergy_spheric_intergrand(wl);
+
+    /* now integrate integrand in var E_ADM to get the real E_ADM */
+    forallboxes(grid, bi)
+    {
+      tBox *box = grid->box[bi];
+      char str[1000];
+  
+      snprintf(str, 999, "box%d_Coordinates", bi);
+      if( Getv(str, "SphericalDF") )
+      {
+        double *E_ADM = box->v[Ind("E_ADM")];
+        spec_sphericalDF2dIntegral(box, E_ADM, E_ADM);
+      }
+      else
+        errorexits("ADMvars.c: I don't know how to do surface integrals in "
+                   "%s coordinates", str);
+    }
+    vlfree(wl);
+  } 
+  vlfree(vl);
+
   return 0;
 }
 
