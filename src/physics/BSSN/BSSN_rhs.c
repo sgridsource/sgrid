@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 25.6.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 12.9.2005 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -31,6 +31,7 @@ int GReplacedBydg       = Getv("BSSN_GReplacedBydg", "yes");
 double YoTermFactor     = Getd("BSSN_YoTermFactor");
 int evolveGamma         =!Getv("BSSN_freezeGamma", "yes");
 double RtoRminusHfactor = Getd("BSSN_RtoRminusHfactor");
+int GentlePhiRHS        = Getv("BSSN_GentlePhiRHS", "yes");
 int nonconstantlapse    =!Getv("BSSN_lapse", "constant");
 int oploglapse          = Getv("BSSN_lapse", "1+log");
 int oploglapse2         = Getv("BSSN_lapse", "1+log2");
@@ -312,6 +313,7 @@ double *ddbeta333 = box->v[index_BSSN_ddbetaxxx + 17];
 
 
 double AA;
+double Abshamil;
 double aux;
 double betadf;
 double betadK;
@@ -322,6 +324,7 @@ double divbeta;
 double E6alphaDensityWeightf;
 double f;
 double hamil;
+double KK;
 double lieK;
 double liephi;
 double logpsi;
@@ -2514,9 +2517,19 @@ psim4*(ginv11*(R11 + Rphi11) + ginv22*(R22 + Rphi22) +
        ginv23*(R23 + Rphi23)) + ginv33*(R33 + Rphi33))
 ;
 
+KK
+=
+pow2(K[ijk])
+;
+
 hamil
 =
--AA + R + 0.66666666666666666666666666666666666667*pow2(K[ijk])
+-AA + 0.66666666666666666666666666666666666667*KK + R
+;
+
+Abshamil
+=
+fabs(hamil)
 ;
 
 R
@@ -2797,6 +2810,20 @@ rphi
 =
 liephi - 0.16666666666666666666666666666666666667*alpha[ijk]*K[ijk]
 ;
+
+
+
+/* conditional */
+if (GentlePhiRHS && KK > Abshamil) {
+
+rphi
+=
+liephi + (0.25*(-AA + R)*alpha[ijk])/K[ijk]
+;
+
+}
+/* if (GentlePhiRHS && KK > Abshamil) */
+
 
 ralpha0
 =
@@ -3380,4 +3407,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2175,  n/ = 80,  n+ = 1947, n = 4202, O = 1 */
+/* nvars = 215, n* = 2181,  n/ = 85,  n+ = 1950, n = 4216, O = 1 */
