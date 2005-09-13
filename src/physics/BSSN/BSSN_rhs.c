@@ -343,6 +343,7 @@ double totdivbeta;
 double traceA;
 double trcdda;
 double trcddf;
+double trRicci;
 double AA11;
 double AA12;
 double AA13;
@@ -2510,7 +2511,7 @@ divAinv3
    (ginv13*dK1[ijk] + ginv23*dK2[ijk] + ginv33*dK3[ijk])
 ;
 
-R
+trRicci
 =
 psim4*(ginv11*(R11 + Rphi11) + ginv22*(R22 + Rphi22) + 
     2.*(ginv12*(R12 + Rphi12) + ginv13*(R13 + Rphi13) + 
@@ -2524,7 +2525,7 @@ pow2(K[ijk])
 
 hamil
 =
--AA + 0.66666666666666666666666666666666666667*KK + R
+-AA + 0.66666666666666666666666666666666666667*KK + trRicci
 ;
 
 Abshamil
@@ -2534,7 +2535,7 @@ fabs(hamil)
 
 R
 =
-R - hamil*RtoRminusHfactor
+-(hamil*RtoRminusHfactor) + trRicci
 ;
 
 divbeta
@@ -2818,7 +2819,7 @@ if (GentlePhiRHS && KK > Abshamil) {
 
 rphi
 =
-liephi + (0.25*(-AA + R)*alpha[ijk])/K[ijk]
+liephi + (0.25*(-AA + trRicci)*alpha[ijk])/K[ijk]
 ;
 
 }
@@ -3407,4 +3408,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2181,  n/ = 85,  n+ = 1950, n = 4216, O = 1 */
+/* nvars = 215, n* = 2181,  n/ = 85,  n+ = 1951, n = 4217, O = 1 */
