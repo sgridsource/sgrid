@@ -64,6 +64,7 @@ int sgrid_BSSN(void)
   AddPar("BSSN_freezeGamma",   "no",  "keep BSSN_G constant during to evo");
   AddPar("BSSN_RtoRminusHfactor", "1",
          "how much of Hamiltonian H we subtract from Ricci scalar R");
+  AddPar("BSSN_GentlePhiRHS",  "no", "use H as evo eqn as in Gentle et al");
 
   AddPar("BSSN_lapsepsipower",  "0", "power of psi in lapse equation");
   AddPar("BSSN_lapseharmonicf", "2", "2 for 1+log, 1 for harmonic");

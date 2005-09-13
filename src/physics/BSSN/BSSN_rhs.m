@@ -141,7 +141,9 @@ tocompute = {
   R == psim4 ginv[a,b] (R[a,b] + Rphi[a,b]),
 
   (* Hamiltonian constraint *)
-  hamil == R + 2/3 K K - AA,
+  KK == K K,
+  hamil == R + 2/3 KK - AA,
+  Abshamil == fabs[hamil],
 
   (* subtract hamil from R  (In Bernds bssn: RtoRminusHfactor=1) *)
   R == R - RtoRminusHfactor * hamil,
@@ -184,6 +186,11 @@ tocompute = {
 
   rphi == - alpha K/6 + liephi,
 
+  (* Ham as evo eqn. as in gr-qc/0307007,
+     the usual BSSN eqn is:  rphi == - alpha K/6 + liephi, *)
+  Cif == (GentlePhiRHS && (KK > Abshamil) ),
+    rphi == alpha (R - AA)/(4 K) + liephi,
+  Cif == end,
 
   (* gauge conditions, avoid unnecessary if statements, use flags *)
   ralpha0 == (6 oplogwithshift liephi - 
@@ -396,6 +403,7 @@ BeginCFunction[] := Module[{},
   pr["double YoTermFactor     = Getd(\"BSSN_YoTermFactor\");\n"];
   pr["int evolveGamma         =!Getv(\"BSSN_freezeGamma\", \"yes\");\n"];
   pr["double RtoRminusHfactor = Getd(\"BSSN_RtoRminusHfactor\");\n"];
+  pr["int GentlePhiRHS        = Getv(\"BSSN_GentlePhiRHS\", \"yes\");\n"];
 
   pr["int nonconstantlapse    =!Getv(\"BSSN_lapse\", \"constant\");\n"];
   pr["int oploglapse          = Getv(\"BSSN_lapse\", \"1+log\");\n"];
