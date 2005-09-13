@@ -138,15 +138,15 @@ tocompute = {
                   gamma[a,b,c] Ainv[b,c],
 
   (* Ricci scalar *)  (* In Bernds bssn:  R == AA - 2 K K / 3, *)
-  R == psim4 ginv[a,b] (R[a,b] + Rphi[a,b]),
+  trRicci == psim4 ginv[a,b] (R[a,b] + Rphi[a,b]),
 
   (* Hamiltonian constraint *)
   KK == K K,
-  hamil == R + 2/3 KK - AA,
+  hamil == trRicci + 2/3 KK - AA,
   Abshamil == fabs[hamil],
 
   (* subtract hamil from R  (In Bernds bssn: RtoRminusHfactor=1) *)
-  R == R - RtoRminusHfactor * hamil,
+  R == trRicci - RtoRminusHfactor * hamil,
 
   (* the shift terms *)
   divbeta == delta[a,b] db[a,b],
@@ -189,7 +189,7 @@ tocompute = {
   (* Ham as evo eqn. as in gr-qc/0307007,
      the usual BSSN eqn is:  rphi == - alpha K/6 + liephi, *)
   Cif == (GentlePhiRHS && (KK > Abshamil) ),
-    rphi == alpha (R - AA)/(4 K) + liephi,
+    rphi == alpha (trRicci - AA)/(4 K) + liephi,
   Cif == end,
 
   (* gauge conditions, avoid unnecessary if statements, use flags *)
