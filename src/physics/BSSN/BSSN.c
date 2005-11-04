@@ -28,6 +28,9 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 
   if(Getv("BSSN_coordinateDependentFilter", "yes"))
     coordinateDependentFilter(unew);
+
+  if(Getv("BSSN_unewFilter", "yes"))
+    filter_VarList(unew);
   
   if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);

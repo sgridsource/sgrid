@@ -48,6 +48,8 @@ int sgrid_BSSN(void)
   AddPar("BSSN_coordinateDependentFilter", "no",
          "whether coordinate dependent filters (e.g. for SphereicalDF) "
          "are used [no,yes]");
+  AddPar("BSSN_unewFilter", "no",
+         "whether unew is filtered inside the time integrator [no,yes]");
   AddPar("BSSN_densitizedLapse", "no", 
          "whether we evolve a densitized lapse instead of ADM alpha "
          "[no,yes,1+log_withoutShift]");
