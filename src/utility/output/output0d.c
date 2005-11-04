@@ -53,14 +53,14 @@ void output0d_boxvar(tBox *box, char *name)
     VolIntergral = spec_3dIntegral;
     forallpoints(box ,i) VolJac[i] = 1.0;
   }
-  if( Getv(str, "SphericalDF") )
+  else if( Getv(str, "SphericalDF") )
   {
     VolIntergral = spec_sphericalDF3dIntegral;
     forallpoints(box ,i) VolJac[i] = 1.0; /* not r^2 sin(theta), since spec_sphericalDF3dIntegral is special */
   }
   else
     errorexits("output0d_boxvar: I don't know how to do volume integrals in "
-               "%s coordinates", str);
+               "%s coordinates", Gets(str));
 
   /* compute volume */
   Vol=VolIntergral(box, VolJac, temp2);

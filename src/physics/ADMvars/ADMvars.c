@@ -105,7 +105,7 @@ int computeADMconstraints(tGrid *grid)
       }
       else
         errorexits("ADMvars.c: I don't know how to do surface integrals in "
-                   "%s coordinates", str);
+                   "%s coordinates", Gets(str));
     }
     vlfree(wl);
   } 
