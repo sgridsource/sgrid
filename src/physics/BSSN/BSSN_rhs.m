@@ -75,6 +75,7 @@ tocompute = {
   betadA[a,b] == beta[d] dAt[a,b,d],
   betadK == beta[d] dK[d],
   betadG[a] == beta[d] dGt[a,d],
+  betadalp == beta[d] dalp[d],
 
   (* inverse conformal metric *)
   detginv == 1/matrixdet[g],
@@ -197,7 +198,8 @@ tocompute = {
               alpha (K - subtractK0 K0)) psi^lapsepsipower,
   ralpha  == ralpha0 * nonconstantlapse *
              (oploglapse lapseharmonicf +
-              oploglapse2 8/3/(3-alpha) + harmoniclapse alpha),
+              oploglapse2 8/3/(3-alpha) +
+              harmoniclapse alpha) + addliealpha betadalp,
 
   Cif == densitizedLapse,
     (* exponentials of total conformal factor used in densitized lapse *)
@@ -411,6 +413,7 @@ BeginCFunction[] := Module[{},
   pr["int oplogwithshift      = Getv(\"BSSN_lapse\", \"withshift\");\n"];
   pr["int harmoniclapse       = Getv(\"BSSN_lapse\", \"harmonic\");\n"];
   pr["int subtractK0          = Getv(\"BSSN_subtractK0\", \"yes\");\n"];
+  pr["int addliealpha         = Getv(\"BSSN_lapse\", \"addliealpha\");\n"];
 
   pr["int densitizedLapse = !Getv(\"BSSN_densitizedLapse\", \"no\");\n"];
   pr["int densitizedoplogWithoutShift = Getv(\"BSSN_densitizedLapse\", \"1+log_withoutShift\");\n"];

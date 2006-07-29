@@ -80,7 +80,7 @@ int sgrid_BSSN(void)
          
   AddPar("BSSN_shift", "constant", "shift equation [constant,gamma0,gamma2]");
   AddPar("BSSN_lapse", "constant", 
-	 "lapse equation [constant,1+log,1+log2,harmonic;withshift]");
+	 "lapse equation [constant,1+log,1+log2,harmonic;withshift,addliealpha]");
 
   AddPar("BSSN_shift_stop_time", "-1.0", 
          "time when shift stops evolving (-1 for don't stop)");
