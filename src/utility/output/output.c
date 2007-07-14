@@ -219,7 +219,7 @@ int write_grid(tGrid *grid)
   static int firstcall = 1;
   static int di[4];
   static double dt[4];
-  static char *ou[4], *ou0d[4], *ou1d[4], *ou2d[6];
+  static char *ou[4], *ou0d[6], *ou1d[4], *ou2d[6];
   static int all[4];
   char s[32];
   int b, d;
