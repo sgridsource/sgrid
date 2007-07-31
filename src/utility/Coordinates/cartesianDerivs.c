@@ -37,7 +37,7 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
         dv[m] = 0.0;
           
         for(i=1; i<=3; i++)
-          dv[m] += box->dX_dx[i][m]((void *) box, X,Y,Z)  *  du[i][ind];
+          dv[m] += box->dX_dx[i][m]((void *) box, ind, X,Y,Z)  *  du[i][ind];
       }
       /* copy dv into du */
       for(m=1; m<=3; m++)
@@ -105,19 +105,19 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
         dv[m] = 0.0;
         
         for(i=1; i<=3; i++)
-          dv[m] += box->dX_dx[i][m]((void *) box, X,Y,Z)  *  du[i][ind];
+          dv[m] += box->dX_dx[i][m]((void *) box, ind, X,Y,Z)  *  du[i][ind];
 
         for(n=m; n<=3; n++)
         {
           ddv[m][n] = 0.0;
 
           for(i=1; i<=3; i++)
-            ddv[m][n] += box->ddX_dxdx[i][m][n]((void *) box, X,Y,Z) * du[i][ind];
+            ddv[m][n] += box->ddX_dxdx[i][m][n]((void *) box, ind, X,Y,Z) * du[i][ind];
 
           for(i=1; i<=3; i++)
             for(j=1; j<=3; j++)
-              ddv[m][n] += box->dX_dx[i][m]((void *) box, X,Y,Z) *
-                           box->dX_dx[j][n]((void *) box, X,Y,Z) *
+              ddv[m][n] += box->dX_dx[i][m]((void *) box, ind, X,Y,Z) *
+                           box->dX_dx[j][n]((void *) box, ind, X,Y,Z) *
                            ddu[i][j][ind];
         }
       }
