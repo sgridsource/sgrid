@@ -17,3 +17,12 @@ void reset_doubleCoveredPoints(tVarList *unew);
 
 /* coordFilters.c */
 void coordinateDependentFilter(tVarList *unew);
+
+/* from ComplexFunctions.c */
+double Arg(double x, double y);
+double Retanh(double x, double y);
+double Imtanh(double x, double y);
+double Argtanh(double x, double y);
+double Abstanh(double x, double y);
+double Argsech(double x, double y);
+double Abssech(double x, double y);

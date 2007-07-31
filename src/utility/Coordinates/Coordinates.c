@@ -900,3 +900,455 @@ double dzs_dz_tan_stretch(void *aux, double xs, double ys, double zs)
 
 /* end: _tan_stretch coordinates: */
 
+
+/* ******************************************************************** */
+/* start: AnsorgNS coordinates:						*/
+/* 4 domains: 0=inside NS+, 1=outside NS+, 2=outside NS-, 3=inside NS-	*/
+/* see gr-qc/0612081 v1							*/
+/* A,B,phi are computational coords					*/
+/* We need to do several coord. trafos:					*/
+/* (A,B,phi) -> (X,R,phi)=C -> (x,rho,phi)=c -> (x,y,z)			*/
+/* we may skip over (x,rho,phi)... */
+
+
+/* compute (x,y,z) from (A,B,ph) and save result to speed up
+   repeated calls */
+void xyz_of_AnsorgNS(tBox *box, double A, double B, double phi, 
+                     double *x, double *y, double *z)
+{
+  int boxind = box->b;
+  static int boxindsav=-1;
+  static double Asav=-1, Bsav=-1, phisav=-1;
+  static double xsav, ysav, zsav;
+  double X,R;
+  double Rsqr, Xsqr, ooRsqr_p_Xsqr_sqr;
+  double b;
+
+  /* check if we have saved values */  
+  if(A==Asav && B==Bsav && phi==phisav && boxind==boxindsav) 
+  {
+    *x=xsav; *y=ysav; *z=zsav;
+    return;
+  }
+  Asav=A;  Bsav=B;  phisav=phi;  boxindsav=boxind;
+  b = 1; // Getd("BNS_D")*0.5;
+
+  if(boxind==0) yo();
+  if(boxind==1)
+  {
+    double lep = 0.1; // Getd("BNS_log_epsp");
+    double Ap = sinh(A*lep)/sinh(lep);
+    double sigp_Bphi = 1; // change this!
+    double sigp_1phi = 1; // change this!
+    double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+    double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+    double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+    double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
+    double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+    double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+    double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+    double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+    
+    X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
+        B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
+    R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
+        B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
+  }
+  if(boxind==2) yo();
+  if(boxind==3) yo();
+
+  /* compute x,y,z */
+  Rsqr = R*R;
+  Xsqr = X*X;
+  ooRsqr_p_Xsqr_sqr = 1.0/((Rsqr + Xsqr)*(Rsqr + Xsqr));
+  *x = b*(ooRsqr_p_Xsqr_sqr + 1.0)*(Xsqr - Rsqr)*0.5;
+  *y = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*cos(phi);
+  *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
+
+  /* and save x,y,z */
+  xsav=*x; ysav=*y; zsav=*z;
+}
+
+/* compute d(A,B,ph)/d(x,y,z) and save result to speed up
+   repeated calls */
+void dABphi_dxyz_AnsorgNS(tBox *box, double A, double B, double phi, 
+                          double *x, double *y, double *z,
+                          double *dAdx,   double *dAdy,   double *dAdz,
+                          double *dBdx,   double *dBdy,   double *dBdz,
+                          double *dphidx, double *dphidy, double *dphidz)
+{
+  int boxind = box->b;
+  static int boxindsav=-1;
+  static double Asav=-1, Bsav=-1, phisav=-1;
+  static double xsav, ysav, zsav;
+  static double dAdxsav,   dAdysav,   dAdzsav,
+                dBdxsav,   dBdysav,   dBdzsav,
+                dphidxsav, dphidysav, dphidzsav;
+
+  double X,R;
+  double Rsqr, Xsqr, Rsqr_p_Xsqr;
+  double b;
+  double dABphi_dXRphi[4][4]; /* dABphi_dXRphi[k][l] = dA^k/dX^l */
+  double dXRphi_dxyz[4][4];   /* dXRphi_dxyz[l][m]   = dX^l/dx^m */
+  int l;
+
+  /* check if we have saved values */  
+  if(A==Asav && B==Bsav && phi==phisav && boxind==boxindsav) 
+  {
+    *x=xsav; *y=ysav; *z=zsav;
+    *dAdx=dAdxsav;     *dAdy=dAdysav;     *dAdz=dAdzsav;
+    *dBdx=dBdxsav;     *dBdy=dBdysav;     *dBdz=dBdzsav;
+    *dphidx=dphidxsav; *dphidy=dphidysav; *dphidz=dphidzsav;
+    return;
+  }
+  Asav=A;  Bsav=B;  phisav=phi;  boxindsav=boxind;
+  b = 1; // Getd("BNS_D")*0.5;
+
+  if(boxind==0) yo();
+  if(boxind==1)
+  {
+    double lep = 0.1; // Getd("BNS_log_epsp");
+    double Ap = sinh(A*lep)/sinh(lep);
+    double dApdA = lep*cosh(A*lep)/sinh(lep);
+
+    double sigp_Bphi = 1; // change this!
+    double sigp_1phi = 1; // change this!
+    double dsigp_dB_Bphi = 0; // change this!
+    /* double dsigp_dB_1phi = 0; // change this! */
+    double dsigp_dphi_Bphi = 0; // change this!
+    double dsigp_dphi_1phi = 0; // change this!
+
+    double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+    double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+    double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+    double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
+    double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+    double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+    double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+    double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+
+    double AbsdCp_dB_Bphi =(0.5/AbsCp_Bphi)*Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                           0.25*sqrt(dsigp_dB_Bphi*dsigp_dB_Bphi + PI*PI);
+    double ArgdCp_dB_Bphi =-ArgCp_Bphi+Argsech(0.25*sigp_Bphi, 0.25*PI*B)+
+                            Arg(dsigp_dB_Bphi, PI);
+    double AbsdCp_dphi_Bphi =(0.5/AbsCp_Bphi)*
+                             Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                             0.25*abs(dsigp_dphi_Bphi);
+    double ArgdCp_dphi_Bphi =-ArgCp_Bphi+Argsech(0.25*sigp_Bphi, 0.25*PI*B);
+
+    /* double AbsdCp_dB_1phi =(0.5/AbsCp_1phi)*Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                           0.25*sqrt(dsigp_dB_1phi*dsigp_dB_1phi + PI*PI);
+       double ArgdCp_dB_1phi =-ArgCp_1phi+Argsech(0.25*sigp_1phi, 0.25*PI*B)+
+                            Arg(dsigp_dB_1phi, PI);  */
+    double AbsdCp_dphi_1phi =(0.5/AbsCp_1phi)*
+                             Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                             0.25*abs(dsigp_dphi_1phi);
+    double ArgdCp_dphi_1phi =-ArgCp_1phi+Argsech(0.25*sigp_1phi, 0.25*PI*B);
+
+    double dArgCp_dphi_1phi=(-(sin(2.0*PI*B)*cosh(2.0*sigp_1phi))/
+                              (sinh(2.0*sigp_1phi)*sinh(2.0*sigp_1phi)+
+                               sin(2.0*PI*B)*sin(2.0*PI*B)) )*dsigp_dphi_1phi;
+
+    double RedCp_dB_Bphi   = AbsdCp_dB_Bphi * cos(ArgdCp_dB_Bphi);
+    double ImdCp_dB_Bphi   = AbsdCp_dB_Bphi * sin(ArgdCp_dB_Bphi);
+    double RedCp_dphi_Bphi = AbsdCp_dphi_Bphi * cos(ArgdCp_dphi_Bphi);
+    double ImdCp_dphi_Bphi = AbsdCp_dphi_Bphi * sin(ArgdCp_dphi_Bphi);
+    /* double RedCp_dB_1phi   = AbsdCp_dB_1phi * cos(ArgdCp_dB_1phi);
+       double ImdCp_dB_1phi   = AbsdCp_dB_1phi * sin(ArgdCp_dB_1phi); */
+    double RedCp_dphi_1phi = AbsdCp_dphi_1phi * cos(ArgdCp_dphi_1phi);
+    double ImdCp_dphi_1phi = AbsdCp_dphi_1phi * sin(ArgdCp_dphi_1phi);
+    
+    double dXdA = -(ReCp_Bphi - B*ReCp_1phi)*dApdA -
+                  B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi)*(PIq-ArgCp_1phi)*dApdA;
+    double dRdA = -(ImCp_Bphi - B*ImCp_1phi)*dApdA +
+                  B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi)*(PIq-ArgCp_1phi)*dApdA;
+    double dXdB = (1.0-Ap)*(RedCp_dB_Bphi-ReCp_1phi) +
+                  cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
+    double dRdB = (1.0-Ap)*(ImdCp_dB_Bphi-ImCp_1phi) +
+                  sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
+    double dXdphi=(1.0-Ap)*(RedCp_dphi_Bphi-B*RedCp_dphi_1phi) -
+                  B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
+                  dArgCp_dphi_1phi;
+    double dRdphi=(1.0-Ap)*(ImdCp_dphi_Bphi-B*ImdCp_dphi_1phi) +
+                  B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
+                  dArgCp_dphi_1phi;
+    /* M = {{dXdA, dXdB, dXdphi}, {dRdA, dRdB, dRdphi}, {0,0,1}} 
+      In[49]:= Inverse[M]
+
+                           dRdB                        dXdB
+      Out[49]= {{------------------------, -(------------------------),
+                 -(dXdB dRdA) + dXdA dRdB    -(dXdB dRdA) + dXdA dRdB
+
+      -(dXdphi dRdB) + dXdB dRdphi
+      ----------------------------},
+      -(dXdB dRdA) + dXdA dRdB
+
+                  dRdA                       dXdA
+     {-(------------------------), ------------------------,
+        -(dXdB dRdA) + dXdA dRdB   -(dXdB dRdA) + dXdA dRdB
+
+       dXdphi dRdA - dXdA dRdphi
+      --------------------------}, {0, 0, 1}}
+      -(dXdB dRdA) + dXdA dRdB
+    */
+    double dXdA_dRdB_m_dXdB_dRdA = dXdA*dRdB-dXdB*dRdA;
+    double dAdX = dRdB/dXdA_dRdB_m_dXdB_dRdA;
+    double dAdR =-dXdB/dXdA_dRdB_m_dXdB_dRdA;
+    double dAdphi = (dXdB*dRdphi-dXdphi*dRdB)/dXdA_dRdB_m_dXdB_dRdA;
+    double dBdX = dRdA/dXdA_dRdB_m_dXdB_dRdA;
+    double dBdR =-dXdA/dXdA_dRdB_m_dXdB_dRdA;
+    double dBdphi = (dXdphi*dRdA-dXdA*dRdphi)/dXdA_dRdB_m_dXdB_dRdA;
+    /* dphidX=0; dphidR=0; dphidphi=1; */
+    dABphi_dXRphi[1][1] = dAdX;
+    dABphi_dXRphi[1][2] = dAdR;
+    dABphi_dXRphi[1][3] = dAdphi;
+    dABphi_dXRphi[2][1] = dBdX;
+    dABphi_dXRphi[2][2] = dBdR;
+    dABphi_dXRphi[2][3] = dBdphi;
+    dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
+    dABphi_dXRphi[3][3] = 1.0;
+
+    X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
+        B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
+    R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
+        B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
+  }
+  if(boxind==2) yo();
+  if(boxind==3) yo();
+
+
+  /* compute output vars from X,R,phi */
+  Rsqr = R*R;
+  Xsqr = X*X;
+  Rsqr_p_Xsqr = (Rsqr + Xsqr);
+  if(Rsqr_p_Xsqr>0) /* if not at infinity */
+  {
+    double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
+    double ooRsqr_p_Xsqr_cube = ooRsqr_p_Xsqr_sqr/Rsqr_p_Xsqr;
+
+    /* compute derivs */
+    double dxDX = (-2*b*X*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube +
+                   b*X*(1 + ooRsqr_p_Xsqr_sqr);
+    double dxDR = (-2*b*R*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube -
+                   b*R*(1 + ooRsqr_p_Xsqr_sqr);
+    /* double dxDphi=0; */
+
+    double dyDX=  (-4*b*R*Xsqr*cos(phi))*ooRsqr_p_Xsqr_cube +
+                   b*R*(-1 + ooRsqr_p_Xsqr_sqr)*cos(phi);
+    double dyDR=  (-4*b*Rsqr*X*cos(phi))*ooRsqr_p_Xsqr_cube +
+                   b*X*(-1 + ooRsqr_p_Xsqr_sqr)*cos(phi);
+    double dyDphi=-(b*R*X*(-1 + ooRsqr_p_Xsqr_sqr)*sin(phi));
+
+    double dzDX=  (-4*b*R*Xsqr*sin(phi))*ooRsqr_p_Xsqr_cube +
+                   b*R*(-1 + ooRsqr_p_Xsqr_sqr)*sin(phi);
+    double dzDR=  (-4*b*Rsqr*X*sin(phi))*ooRsqr_p_Xsqr_cube +
+                   b*X*(-1 + ooRsqr_p_Xsqr_sqr)*sin(phi);
+    double dzDphi=b*R*X*(-1 + ooRsqr_p_Xsqr_sqr)*cos(phi);
+    /* M = {{dxDX, dxDR, 0}, {dyDX, dyDR, dyDphi}, {dzDX, dzDR, dzDphi}}
+       In[27]:= Inverse[M]
+       In[28]:= Simplify[%]
+       Out[28]= {{(dyDR dzDphi - dyDphi dzDR) /
+                  (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
+                   dxDR dyDphi dzDX), (dxDR dzDphi) /
+                   (-(dxDX dyDR dzDphi) + dxDR dyDX dzDphi + dxDX dyDphi dzDR -
+                    dxDR dyDphi dzDX), (dxDR dyDphi) /
+                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
+                    dxDR dyDphi dzDX)}, {(-(dyDX dzDphi) + dyDphi dzDX) /
+                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
+                    dxDR dyDphi dzDX), (dxDX dzDphi) /
+                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
+                    dxDR dyDphi dzDX), (dxDX dyDphi) /
+                   (-(dxDX dyDR dzDphi) + dxDR dyDX dzDphi + dxDX dyDphi dzDR -
+                    dxDR dyDphi dzDX)}, {(dyDX dzDR - dyDR dzDX) /
+                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
+                    dxDR dyDphi dzDX), (-(dxDX dzDR) + dxDR dzDX) /
+                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
+                    dxDR dyDphi dzDX), (dxDX dyDR - dxDR dyDX) /
+                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
+                    dxDR dyDphi dzDX)}}    */
+    double nenner=dxDX*dyDR*dzDphi -dxDR*dyDX*dzDphi -dxDX*dyDphi*dzDR +
+                       dxDR*dyDphi*dzDX;
+
+    dXRphi_dxyz[1][1]=(dyDR*dzDphi - dyDphi*dzDR)/nenner;
+    dXRphi_dxyz[1][2]=-dxDR*dzDphi/nenner;
+    dXRphi_dxyz[1][3]=dxDR*dyDphi/nenner;
+    dXRphi_dxyz[2][1]=(-(dyDX*dzDphi) + dyDphi*dzDX)/nenner;
+    dXRphi_dxyz[2][2]=dxDX*dzDphi/nenner;
+    dXRphi_dxyz[2][3]=-dxDX*dyDphi/nenner;
+    dXRphi_dxyz[3][1]=(dyDX*dzDR - dyDR*dzDX)/nenner;
+    dXRphi_dxyz[3][2]=(-(dxDX*dzDR) + dxDR*dzDX)/nenner;
+    dXRphi_dxyz[3][3]=(dxDX*dyDR - dxDR*dyDX)/nenner;
+
+    /* compute x,y,z */
+    *x = b*(ooRsqr_p_Xsqr_sqr + 1.0)*(Xsqr - Rsqr)*0.5;
+    *y = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*cos(phi);
+    *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
+  }
+  else
+    printf("we are at infinity!!! Put code for this case\n");
+
+
+  /* compute dA^k/dx^m */
+  *dAdx = *dAdy = *dAdz = 0.0;
+  *dBdx = *dBdy = *dBdz = 0.0;
+  *dphidx=*dphidy=*dphidz=0.0;
+  
+  for(l=1; l<=3; l++) *dAdx+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][1];
+  for(l=1; l<=3; l++) *dAdy+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][2];
+  for(l=1; l<=3; l++) *dAdz+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][3];
+
+  for(l=1; l<=3; l++) *dBdx+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][1];
+  for(l=1; l<=3; l++) *dBdy+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][2];
+  for(l=1; l<=3; l++) *dBdz+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][3];
+
+  for(l=1; l<=3; l++) *dphidx+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][1];
+  for(l=1; l<=3; l++) *dphidy+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][2];
+  for(l=1; l<=3; l++) *dphidz+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][3];
+
+  /* and save */
+  xsav=*x; ysav=*y; zsav=*z;
+  dAdxsav=*dAdx;     dAdysav=*dAdy;     dAdzsav=*dAdz;
+  dBdxsav=*dBdx;     dBdysav=*dBdy;     dBdzsav=*dBdz;
+  dphidxsav=*dphidx; dphidysav=*dphidy; dphidzsav=*dphidz;
+}
+
+/* Coord. trafos */
+double x_of_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, A,B,phi, &x,&y,&z);
+  return x;
+}
+double y_of_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, A,B,phi, &x,&y,&z);
+  return y;
+}
+double z_of_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, A,B,phi, &x,&y,&z);
+  return z;
+}
+
+/* first coord. derivs */
+double dA_dx_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdx;                                                                                                          
+}
+double dA_dy_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdy;                                                                                                          
+}
+double dA_dz_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdz;                                                                                                          
+}
+double dB_dx_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdx;                                                                                                          
+}
+double dB_dy_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdy;                                                                                                          
+}
+double dB_dz_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdz;                                                                                                          
+}
+double dphi_dx_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidx;                                                                                                          
+}
+double dphi_dy_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidy;                                                                                                          
+}
+double dphi_dz_AnsorgNS(void *aux, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidz;                                                                                                          
+}
+
+/* second coord. derivs are currently not implemented */
+
+/* end: _AnsorgNS coordinates: */
+
