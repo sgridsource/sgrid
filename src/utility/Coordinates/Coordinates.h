@@ -112,3 +112,56 @@ double z_of_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 double dxs_dx_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 double dys_dy_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 double dzs_dz_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
+
+/* AnsorgNS coordinates:                                               */
+/* 4 domains: 0=inside NS+, 1=outside NS+, 2=outside NS-, 3=inside NS- */
+double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double y_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double z_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dA_dy_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dA_dz_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dB_dx_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dB_dy_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dB_dz_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dphi_dx_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dphi_dy_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dphi_dz_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+
+double x_of_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double y_of_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double z_of_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dA_dx_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dA_dy_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dA_dz_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dB_dx_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dB_dy_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dB_dz_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dphi_dx_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dphi_dy_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+double dphi_dz_AnsorgNS1(void *aux, int ind, double A, double B, double phi);
+
+double x_of_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double y_of_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double z_of_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dA_dx_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dA_dy_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dA_dz_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dB_dx_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dB_dy_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dB_dz_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dphi_dx_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dphi_dy_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+double dphi_dz_AnsorgNS2(void *aux, int ind, double A, double B, double phi);
+
+double x_of_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double y_of_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double z_of_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dA_dx_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dA_dy_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dA_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dB_dx_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dB_dy_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dB_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dphi_dx_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dphi_dy_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+double dphi_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi);

@@ -187,6 +187,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = zero_of_xyz;
       box->dX_dx[3][3] = dzs_dz_tan_stretch;
     }
+    if( Getv(str, "AnsorgNS1") )
+    {
+      printf("Coordinates: initializing AnsorgNS1 coordinates...\n");
+      box->x_of_X[1] = x_of_AnsorgNS1;
+      box->x_of_X[2] = y_of_AnsorgNS1;
+      box->x_of_X[3] = z_of_AnsorgNS1;
+
+      box->dX_dx[1][1] = dA_dx_AnsorgNS1;
+      box->dX_dx[1][2] = dA_dy_AnsorgNS1;
+      box->dX_dx[1][3] = dA_dz_AnsorgNS1;
+      box->dX_dx[2][1] = dB_dx_AnsorgNS1;
+      box->dX_dx[2][2] = dB_dy_AnsorgNS1;
+      box->dX_dx[2][3] = dB_dz_AnsorgNS1;
+      box->dX_dx[3][1] = dphi_dx_AnsorgNS1;
+      box->dX_dx[3][2] = dphi_dx_AnsorgNS1;
+      box->dX_dx[3][3] = dphi_dx_AnsorgNS1;
+    }
 
     /* compute cartesian coordinates x,y,z from X,Y,Z */
     enablevar_inbox(box, var_x);
@@ -913,11 +930,10 @@ double dzs_dz_tan_stretch(void *aux, int ind, double xs, double ys, double zs)
 
 /* compute (x,y,z) from (A,B,ph) and save result to speed up
    repeated calls */
-void xyz_of_AnsorgNS(tBox *box, double A, double B, double phi, 
+void xyz_of_AnsorgNS(tBox *box, int domain, double A, double B, double phi, 
                      double *x, double *y, double *z)
 {
-  int boxind = box->b;
-  static int boxindsav=-1;
+  static int domainsav=-1;
   static double Asav=-1, Bsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
   double X,R;
@@ -925,16 +941,16 @@ void xyz_of_AnsorgNS(tBox *box, double A, double B, double phi,
   double b;
 
   /* check if we have saved values */  
-  if(A==Asav && B==Bsav && phi==phisav && boxind==boxindsav) 
+  if(A==Asav && B==Bsav && phi==phisav && domain==domainsav) 
   {
     *x=xsav; *y=ysav; *z=zsav;
     return;
   }
-  Asav=A;  Bsav=B;  phisav=phi;  boxindsav=boxind;
+  Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
   b = 1; // Getd("BNS_D")*0.5;
 
-  if(boxind==0) yo();
-  if(boxind==1)
+  if(domain==0) yo();
+  if(domain==1)
   {
     double lep = 0.1; // Getd("BNS_log_epsp");
     double Ap = sinh(A*lep)/sinh(lep);
@@ -954,8 +970,8 @@ void xyz_of_AnsorgNS(tBox *box, double A, double B, double phi,
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
   }
-  if(boxind==2) yo();
-  if(boxind==3) yo();
+  if(domain==2) yo();
+  if(domain==3) yo();
 
   /* compute x,y,z */
   Rsqr = R*R;
@@ -971,14 +987,14 @@ void xyz_of_AnsorgNS(tBox *box, double A, double B, double phi,
 
 /* compute d(A,B,ph)/d(x,y,z) and save result to speed up
    repeated calls */
-void dABphi_dxyz_AnsorgNS(tBox *box, double A, double B, double phi, 
+void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi, 
                           double *x, double *y, double *z,
                           double *dAdx,   double *dAdy,   double *dAdz,
                           double *dBdx,   double *dBdy,   double *dBdz,
                           double *dphidx, double *dphidy, double *dphidz)
 {
-  int boxind = box->b;
-  static int boxindsav=-1;
+  int domain = box->b;
+  static int domainsav=-1;
   static double Asav=-1, Bsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
   static double dAdxsav,   dAdysav,   dAdzsav,
@@ -993,7 +1009,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, double A, double B, double phi,
   int l;
 
   /* check if we have saved values */  
-  if(A==Asav && B==Bsav && phi==phisav && boxind==boxindsav) 
+  if(A==Asav && B==Bsav && phi==phisav && domain==domainsav) 
   {
     *x=xsav; *y=ysav; *z=zsav;
     *dAdx=dAdxsav;     *dAdy=dAdysav;     *dAdz=dAdzsav;
@@ -1001,11 +1017,11 @@ void dABphi_dxyz_AnsorgNS(tBox *box, double A, double B, double phi,
     *dphidx=dphidxsav; *dphidy=dphidysav; *dphidz=dphidzsav;
     return;
   }
-  Asav=A;  Bsav=B;  phisav=phi;  boxindsav=boxind;
+  Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
   b = 1; // Getd("BNS_D")*0.5;
 
-  if(boxind==0) yo();
-  if(boxind==1)
+  if(domain==0) yo();
+  if(domain==1)
   {
     double lep = 0.1; // Getd("BNS_log_epsp");
     double Ap = sinh(A*lep)/sinh(lep);
@@ -1113,8 +1129,8 @@ void dABphi_dxyz_AnsorgNS(tBox *box, double A, double B, double phi,
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
   }
-  if(boxind==2) yo();
-  if(boxind==3) yo();
+  if(domain==2) yo();
+  if(domain==3) yo();
 
 
   /* compute output vars from X,R,phi */
@@ -1212,142 +1228,552 @@ void dABphi_dxyz_AnsorgNS(tBox *box, double A, double B, double phi,
   dphidxsav=*dphidx; dphidysav=*dphidy; dphidzsav=*dphidz;
 }
 
-/* Coord. trafos */
-double x_of_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+/* Coord. trafos for domain 0 */
+double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
 
-  xyz_of_AnsorgNS(box, A,B,phi, &x,&y,&z);
+  xyz_of_AnsorgNS(box, 0, A,B,phi, &x,&y,&z);
   return x;
 }
-double y_of_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double y_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
 
-  xyz_of_AnsorgNS(box, A,B,phi, &x,&y,&z);
+  xyz_of_AnsorgNS(box, 0, A,B,phi, &x,&y,&z);
   return y;
 }
-double z_of_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double z_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
 
-  xyz_of_AnsorgNS(box, A,B,phi, &x,&y,&z);
+  xyz_of_AnsorgNS(box, 0, A,B,phi, &x,&y,&z);
   return z;
 }
 
-/* first coord. derivs */
-double dA_dx_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+/* first coord. derivs for domain 0 */
+double dA_dx_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dAdx;                                                                                                          
 }
-double dA_dy_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double dA_dy_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dAdy;                                                                                                          
 }
-double dA_dz_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double dA_dz_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dAdz;                                                                                                          
 }
-double dB_dx_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double dB_dx_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dBdx;                                                                                                          
 }
-double dB_dy_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double dB_dy_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dBdy;                                                                                                          
 }
-double dB_dz_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double dB_dz_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dBdz;                                                                                                          
 }
-double dphi_dx_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double dphi_dx_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dphidx;                                                                                                          
 }
-double dphi_dy_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double dphi_dy_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dphidy;                                                                                                          
 }
-double dphi_dz_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+double dphi_dz_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
   double x,y,z;
   double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
 
-  dABphi_dxyz_AnsorgNS(box, A,B,phi,  &x,&y,&z,
+  dABphi_dxyz_AnsorgNS(box, 0, A,B,phi,  &x,&y,&z,
                        &dAdx,   &dAdy,   &dAdz, 
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dphidz;                                                                                                          
 }
+/* second coord. derivs are currently not implemented */
 
+/* Coord. trafos for domain 1 */
+double x_of_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 1, A,B,phi, &x,&y,&z);
+  return x;
+}
+double y_of_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 1, A,B,phi, &x,&y,&z);
+  return y;
+}
+double z_of_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 1, A,B,phi, &x,&y,&z);
+  return z;
+}
+
+/* first coord. derivs for domain 1 */
+double dA_dx_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdx;                                                                                                          
+}
+double dA_dy_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdy;                                                                                                          
+}
+double dA_dz_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdz;                                                                                                          
+}
+double dB_dx_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdx;                                                                                                          
+}
+double dB_dy_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdy;                                                                                                          
+}
+double dB_dz_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdz;                                                                                                          
+}
+double dphi_dx_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidx;                                                                                                          
+}
+double dphi_dy_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidy;                                                                                                          
+}
+double dphi_dz_AnsorgNS1(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 1, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidz;                                                                                                          
+}
+/* second coord. derivs are currently not implemented */
+
+/* Coord. trafos for domain 2 */
+double x_of_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 2, A,B,phi, &x,&y,&z);
+  return x;
+}
+double y_of_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 2, A,B,phi, &x,&y,&z);
+  return y;
+}
+double z_of_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 2, A,B,phi, &x,&y,&z);
+  return z;
+}
+
+/* first coord. derivs for domain 2 */
+double dA_dx_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdx;                                                                                                          
+}
+double dA_dy_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdy;                                                                                                          
+}
+double dA_dz_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdz;                                                                                                          
+}
+double dB_dx_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdx;                                                                                                          
+}
+double dB_dy_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdy;                                                                                                          
+}
+double dB_dz_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdz;                                                                                                          
+}
+double dphi_dx_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidx;                                                                                                          
+}
+double dphi_dy_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidy;                                                                                                          
+}
+double dphi_dz_AnsorgNS2(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 2, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidz;                                                                                                          
+}
+/* second coord. derivs are currently not implemented */
+
+/* Coord. trafos for domain 3 */
+double x_of_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 3, A,B,phi, &x,&y,&z);
+  return x;
+}
+double y_of_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 3, A,B,phi, &x,&y,&z);
+  return y;
+}
+double z_of_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+
+  xyz_of_AnsorgNS(box, 3, A,B,phi, &x,&y,&z);
+  return z;
+}
+
+/* first coord. derivs for domain 3 */
+double dA_dx_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdx;                                                                                                          
+}
+double dA_dy_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdy;                                                                                                          
+}
+double dA_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dAdz;                                                                                                          
+}
+double dB_dx_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdx;                                                                                                          
+}
+double dB_dy_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdy;                                                                                                          
+}
+double dB_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dBdz;                                                                                                          
+}
+double dphi_dx_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidx;                                                                                                          
+}
+double dphi_dy_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidy;                                                                                                          
+}
+double dphi_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z;
+  double dAdx,dAdy,dAdz, dBdx,dBdy,dBdz, dphidx,dphidy,dphidz;
+
+  dABphi_dxyz_AnsorgNS(box, 3, A,B,phi,  &x,&y,&z,
+                       &dAdx,   &dAdy,   &dAdz, 
+                       &dBdx,   &dBdy,   &dBdz,
+                       &dphidx, &dphidy, &dphidz);
+  return dphidz;                                                                                                          
+}
 /* second coord. derivs are currently not implemented */
 
 /* end: _AnsorgNS coordinates: */
