@@ -993,7 +993,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
                           double *dBdx,   double *dBdy,   double *dBdz,
                           double *dphidx, double *dphidy, double *dphidz)
 {
-  int domain = box->b;
   static int domainsav=-1;
   static double Asav=-1, Bsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
