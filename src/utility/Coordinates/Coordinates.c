@@ -952,7 +952,7 @@ void xyz_of_AnsorgNS(tBox *box, int domain, double A, double B, double phi,
   if(domain==0) yo();
   if(domain==1)
   {
-    double lep = 0.1; // Getd("BNS_log_epsp");
+    double lep = -1; // Getd("BNS_log_epsp");
     double Ap = sinh(A*lep)/sinh(lep);
     double sigp_Bphi = 1; // change this!
     double sigp_1phi = 1; // change this!
@@ -1020,9 +1020,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
   b = 1; // Getd("BNS_D")*0.5;
 
   if(domain==0) yo();
-  if(domain==1)
+  if(domain==1) /* use Eq. (22) */
   {
-    double lep = 0.1; // Getd("BNS_log_epsp");
+    double lep = -1; // Getd("BNS_log_epsp");
     double Ap = sinh(A*lep)/sinh(lep);
     double dApdA = lep*cosh(A*lep)/sinh(lep);
 
@@ -1123,6 +1123,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
     dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
     dABphi_dXRphi[3][3] = 1.0;
 
+    /* use Eq. (22) */
     X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
         B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
