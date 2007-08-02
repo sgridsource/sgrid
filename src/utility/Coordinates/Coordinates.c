@@ -209,6 +209,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphi_dy_AnsorgNS1;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS1;
     }
+    else if( Getv(str, "AnsorgNS2") )
+    {
+      printf("Coordinates: initializing AnsorgNS2 coordinates...\n");
+      box->x_of_X[1] = x_of_AnsorgNS2;
+      box->x_of_X[2] = y_of_AnsorgNS2;
+      box->x_of_X[3] = z_of_AnsorgNS2;
+
+      box->dX_dx[1][1] = dA_dx_AnsorgNS2;
+      box->dX_dx[1][2] = dA_dy_AnsorgNS2;
+      box->dX_dx[1][3] = dA_dz_AnsorgNS2;
+      box->dX_dx[2][1] = dB_dx_AnsorgNS2;
+      box->dX_dx[2][2] = dB_dy_AnsorgNS2;
+      box->dX_dx[2][3] = dB_dz_AnsorgNS2;
+      box->dX_dx[3][1] = dphi_dx_AnsorgNS2;
+      box->dX_dx[3][2] = dphi_dy_AnsorgNS2;
+      box->dX_dx[3][3] = dphi_dz_AnsorgNS2;
+    }
     else
       errorexit("Coordinates: unknown coordinates...");
 
