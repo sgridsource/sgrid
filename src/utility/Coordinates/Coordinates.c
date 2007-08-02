@@ -32,7 +32,12 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     char str[1000];
 
     snprintf(str, 999, "box%d_Coordinates", b);
-    if( Getv(str, "Polar") )
+    printf("Coordinates: %s = %s\n", str, Gets(str));
+    if( Getv(str, "Cartesian") )
+    {
+      printf("Coordinates: default Cartesian coordinates...\n");
+    }
+    else if( Getv(str, "Polar") )
     {
       printf("Coordinates: initializing Polar coordinates...\n");
       box->x_of_X[1] = x_ofPolar;
@@ -74,7 +79,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][3][3] = zero_of_xyz;
       */
     }
-    if( Getv(str, "PolarCE") )
+    else if( Getv(str, "PolarCE") )
     {
       printf("Coordinates: initializing PolarCE coordinates...\n");
       box->x_of_X[1] = x_ofPolarCE;
@@ -94,7 +99,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->Sing_d_dx[1] = NULL;
       box->Sing_d_dx[2] = NULL;
     }
-    if( Getv(str, "SphericalDF") )
+    else if( Getv(str, "SphericalDF") )
     {
       printf("Coordinates: initializing SphericalDF coordinates...\n");
       box->x_of_X[1] = x_ofSphericalDF;
@@ -132,7 +137,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][2][3] = ddphi_SphericalDF_dydz;
       box->ddX_dxdx[3][3][3] = ddphi_SphericalDF_dzdz;
     }
-    if( Getv(str, "compactSphericalDF") )
+    else if( Getv(str, "compactSphericalDF") )
     {
       printf("Coordinates: initializing compactSphericalDF coordinates...\n");
       box->x_of_X[1] = x_ofcompactSphericalDF;
@@ -170,7 +175,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][2][3] = ddphi_compactSphericalDF_dydz;
       box->ddX_dxdx[3][3][3] = ddphi_compactSphericalDF_dzdz;
     }
-    if( Getv(str, "tan_stretch") )
+    else if( Getv(str, "tan_stretch") )
     {
       printf("Coordinates: initializing tan_stretch coordinates...\n");
       box->x_of_X[1] = x_of_tan_stretch;
@@ -187,7 +192,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = zero_of_xyz;
       box->dX_dx[3][3] = dzs_dz_tan_stretch;
     }
-    if( Getv(str, "AnsorgNS1") )
+    else if( Getv(str, "AnsorgNS1") )
     {
       printf("Coordinates: initializing AnsorgNS1 coordinates...\n");
       box->x_of_X[1] = x_of_AnsorgNS1;
@@ -204,6 +209,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphi_dy_AnsorgNS1;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS1;
     }
+    else
+      errorexit("Coordinates: unknown coordinates...");
 
     /* compute cartesian coordinates x,y,z from X,Y,Z */
     enablevar_inbox(box, var_x);
