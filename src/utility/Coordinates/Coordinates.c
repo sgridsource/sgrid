@@ -966,6 +966,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     sigp_1phi = 1; // change this!
   }
 
+  /* compute coord trafo for each domain */
   if(domain==0) yo();
   if(domain==1 || domain==2)
   {
@@ -1083,6 +1084,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 //phi=0.4;
 /* End HACK3a */
 
+  /* compute coord trafo for each domain */
   if(domain==0) yo();
   if(domain==1 || domain==2) /* use Eq. (22) */
   {
