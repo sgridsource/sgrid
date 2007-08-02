@@ -939,7 +939,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   static double Asav=-1, Bsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
   double X,R;
-  double Rsqr, Xsqr, ooRsqr_p_Xsqr_sqr;
+  double Rsqr, Xsqr, Rsqr_p_Xsqr;
   double b;
 
   /* check if we have saved values */  
@@ -983,11 +983,20 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   /* compute x,y,z */
   Rsqr = R*R;
   Xsqr = X*X;
-  ooRsqr_p_Xsqr_sqr = 1.0/((Rsqr + Xsqr)*(Rsqr + Xsqr));
-  *x = b*(ooRsqr_p_Xsqr_sqr + 1.0)*(Xsqr - Rsqr)*0.5;
-  *y = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*cos(phi);
-  *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
+  Rsqr_p_Xsqr = (Rsqr + Xsqr);
+  if(Rsqr_p_Xsqr>0) /* if not at infinity */
+  {
+    double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
 
+    *x = b*(ooRsqr_p_Xsqr_sqr + 1.0)*(Xsqr - Rsqr)*0.5;
+    *y = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*cos(phi);
+    *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
+  }
+  else
+  {
+    *x = *y = *z = 1.0e300;
+  }
+        
 /* Begin HACK2 */
 //*x=X;
 //*y=R;
@@ -1234,8 +1243,16 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
   }
   else
-    printf("we are at infinity!!! Probably all dXRphi_dxyz are zero???\n");
-
+  {
+    // printf("we are at infinity!!! Probably all dXRphi_dxyz are zero???\n");
+    /* Assume that all dXRphi_dxyz[l][m] are zero at infinity */
+    // check this later!
+    dXRphi_dxyz[1][1] = dXRphi_dxyz[1][2] = dXRphi_dxyz[1][3] = 0.0;
+    dXRphi_dxyz[2][1] = dXRphi_dxyz[2][3] = dXRphi_dxyz[2][2] = 0.0;
+    dXRphi_dxyz[3][1] = dXRphi_dxyz[3][2] = dXRphi_dxyz[3][3] = 0.0;
+    
+    *x = *y = *z = 1.0e300;
+  }
 /* Begin HACK2 */
 //*x=X;
 //*y=R;
