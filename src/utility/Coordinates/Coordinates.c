@@ -987,9 +987,9 @@ void xyz_of_AnsorgNS(tBox *box, int domain, double A, double B, double phi,
   *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
 
 /* Begin HACK2 */
-*x=X;
-*y=R;
-*z=phi;
+//*x=X;
+//*y=R;
+//*z=phi;
 /* End HACK2 */
 
   /* and save x,y,z */
@@ -1030,6 +1030,12 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
   Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
   b = 1; // Getd("BNS_D")*0.5;
 
+/* Begin HACK3a */
+//A=0.3;
+//B=0.35;
+//phi=0.4;
+/* End HACK3a */
+
   if(domain==0) yo();
   if(domain==1) /* use Eq. (22) */
   {
@@ -1054,22 +1060,26 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
     double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
 
     double AbsdCp_dB_Bphi =(0.5/AbsCp_Bphi)*Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                           Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
                            0.25*sqrt(dsigp_dB_Bphi*dsigp_dB_Bphi + PI*PI);
-    double ArgdCp_dB_Bphi =-ArgCp_Bphi+Argsech(0.25*sigp_Bphi, 0.25*PI*B)+
+    double ArgdCp_dB_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B)+
                             Arg(dsigp_dB_Bphi, PI);
     double AbsdCp_dphi_Bphi =(0.5/AbsCp_Bphi)*
                              Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                             Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
                              0.25*abs(dsigp_dphi_Bphi);
-    double ArgdCp_dphi_Bphi =-ArgCp_Bphi+Argsech(0.25*sigp_Bphi, 0.25*PI*B);
+    double ArgdCp_dphi_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B);
 
     /* double AbsdCp_dB_1phi =(0.5/AbsCp_1phi)*Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                           Abssech(0.25*sigp_1phi, 0.25*PI*B)*
                            0.25*sqrt(dsigp_dB_1phi*dsigp_dB_1phi + PI*PI);
-       double ArgdCp_dB_1phi =-ArgCp_1phi+Argsech(0.25*sigp_1phi, 0.25*PI*B)+
+       double ArgdCp_dB_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI*B)+
                             Arg(dsigp_dB_1phi, PI);  */
     double AbsdCp_dphi_1phi =(0.5/AbsCp_1phi)*
                              Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                             Abssech(0.25*sigp_1phi, 0.25*PI*B)*
                              0.25*abs(dsigp_dphi_1phi);
-    double ArgdCp_dphi_1phi =-ArgCp_1phi+Argsech(0.25*sigp_1phi, 0.25*PI*B);
+    double ArgdCp_dphi_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI*B);
 
     double dArgCp_dphi_1phi=(-(sin(2.0*PI*B)*cosh(2.0*sigp_1phi))/
                               (sinh(2.0*sigp_1phi)*sinh(2.0*sigp_1phi)+
@@ -1120,6 +1130,17 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
     dABphi_dXRphi[2][3] = dBdphi;
     dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
     dABphi_dXRphi[3][3] = 1.0;
+
+/* Begin HACK3b */
+//printf("dXdA=%f dRdA=%f dXdB=%f dRdB=%f dXdphi=%f dRdphi=%f\n",
+//        dXdA,dRdA,dXdB,dRdB,dXdphi,dRdphi);
+//printf("RedCp_dB_Bphi=%f ImdCp_dB_Bphi=%f\n",        
+//        RedCp_dB_Bphi, ImdCp_dB_Bphi);
+//printf("AbsdCp_dB_Bphi=%f ArgdCp_dB_Bphi=%f\n",
+//        AbsdCp_dB_Bphi, ArgdCp_dB_Bphi);
+//printf("AbsCp_Bphi=%f ArgCp_Bphi=%f\n",
+//        AbsCp_Bphi, ArgCp_Bphi);
+/* End HACK3b */
 
     /* use Eq. (22) */
     X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
@@ -1212,15 +1233,15 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
     printf("we are at infinity!!! Probably all dXRphi_dxyz are zero???\n");
 
 /* Begin HACK2 */
-*x=X;
-*y=R;
-*z=phi;
-dXRphi_dxyz[1][1] = 1;
-dXRphi_dxyz[1][2] = dXRphi_dxyz[1][3] = 0;
-dXRphi_dxyz[2][1] = dXRphi_dxyz[2][3] = 0;
-dXRphi_dxyz[2][2] = 1;
-dXRphi_dxyz[3][1] = dXRphi_dxyz[3][2] = 0.0;
-dXRphi_dxyz[3][3] = 1.0;
+//*x=X;
+//*y=R;
+//*z=phi;
+//dXRphi_dxyz[1][1] = 1;
+//dXRphi_dxyz[1][2] = dXRphi_dxyz[1][3] = 0;
+//dXRphi_dxyz[2][1] = dXRphi_dxyz[2][3] = 0;
+//dXRphi_dxyz[2][2] = 1;
+//dXRphi_dxyz[3][1] = dXRphi_dxyz[3][2] = 0.0;
+//dXRphi_dxyz[3][3] = 1.0;
 /* End HACK2 */
 
   /* compute dA^k/dx^m */
