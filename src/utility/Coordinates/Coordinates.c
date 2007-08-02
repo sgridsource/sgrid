@@ -974,8 +974,8 @@ void xyz_of_AnsorgNS(tBox *box, int domain, double A, double B, double phi,
   if(domain==3) yo();
 
 /* Begin HACK1 */
-X=A;
-R=B;
+//X=A;
+//R=B;
 /* End HACK1 */
 
   /* compute x,y,z */
@@ -987,9 +987,9 @@ R=B;
   *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
 
 /* Begin HACK2 */
-//*x=X;
-//*y=R;
-//*z=phi;
+*x=X;
+*y=R;
+*z=phi;
 /* End HACK2 */
 
   /* and save x,y,z */
@@ -1099,31 +1099,18 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
                   B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
                   dArgCp_dphi_1phi;
     /* M = {{dXdA, dXdB, dXdphi}, {dRdA, dRdB, dRdphi}, {0,0,1}} 
-      In[49]:= Inverse[M]
-
-                           dRdB                        dXdB
-      Out[49]= {{------------------------, -(------------------------),
-                 -(dXdB dRdA) + dXdA dRdB    -(dXdB dRdA) + dXdA dRdB
-
-      -(dXdphi dRdB) + dXdB dRdphi
-      ----------------------------},
-      -(dXdB dRdA) + dXdA dRdB
-
-                  dRdA                       dXdA
-     {-(------------------------), ------------------------,
-        -(dXdB dRdA) + dXdA dRdB   -(dXdB dRdA) + dXdA dRdB
-
-       dXdphi dRdA - dXdA dRdphi
-      --------------------------}, {0, 0, 1}}
-      -(dXdB dRdA) + dXdA dRdB
-    */
-    double dXdA_dRdB_m_dXdB_dRdA = dXdA*dRdB-dXdB*dRdA;
-    double dAdX = dRdB/dXdA_dRdB_m_dXdB_dRdA;
-    double dAdR =-dXdB/dXdA_dRdB_m_dXdB_dRdA;
-    double dAdphi = (dXdB*dRdphi-dXdphi*dRdB)/dXdA_dRdB_m_dXdB_dRdA;
-    double dBdX = dRdA/dXdA_dRdB_m_dXdB_dRdA;
-    double dBdR =-dXdA/dXdA_dRdB_m_dXdB_dRdA;
-    double dBdphi = (dXdphi*dRdA-dXdA*dRdphi)/dXdA_dRdB_m_dXdB_dRdA;
+       nenner = dRdB*dXdA - dRdA*dXdB
+      In[4]:= Inverse[M]*nenner
+      Out[4]= {{ dRdB, -dXdB,   dRdphi dXdB  - dRdB dXdphi},
+               {-dRdA,  dXdA, -(dRdphi dXdA) + dRdA dXdphi},
+               {0, 0, nenner}}    */
+    double nenner = dRdB*dXdA - dRdA*dXdB;
+    double dAdX   = dRdB/nenner;
+    double dAdR   =-dXdB/nenner;
+    double dAdphi = (dRdphi*dXdB - dRdB*dXdphi)/nenner;
+    double dBdX   =-dRdA/nenner;
+    double dBdR   = dXdA/nenner;
+    double dBdphi = (-(dRdphi*dXdA) + dRdA*dXdphi)/nenner;
     /* dphidX=0; dphidR=0; dphidphi=1; */
     dABphi_dXRphi[1][1] = dAdX;
     dABphi_dXRphi[1][2] = dAdR;
@@ -1144,14 +1131,14 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
   if(domain==3) yo();
 
 /* Begin HACK1 */
-X=A;
-R=B;
-dABphi_dXRphi[1][1] = 1;
-dABphi_dXRphi[1][2] = dABphi_dXRphi[1][3] = 0;
-dABphi_dXRphi[2][1] = dABphi_dXRphi[2][3] = 0;
-dABphi_dXRphi[2][2] = 1;
-dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
-dABphi_dXRphi[3][3] = 1.0;
+//X=A;
+//R=B;
+//dABphi_dXRphi[1][1] = 1;
+//dABphi_dXRphi[1][2] = dABphi_dXRphi[1][3] = 0;
+//dABphi_dXRphi[2][1] = dABphi_dXRphi[2][3] = 0;
+//dABphi_dXRphi[2][2] = 1;
+//dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
+//dABphi_dXRphi[3][3] = 1.0;
 /* End HACK1 */
 
   /* compute output vars from X,R,phi */
@@ -1225,15 +1212,15 @@ dABphi_dXRphi[3][3] = 1.0;
     printf("we are at infinity!!! Probably all dXRphi_dxyz are zero???\n");
 
 /* Begin HACK2 */
-//*x=X;
-//*y=R;
-//*z=phi;
-//dXRphi_dxyz[1][1] = 1;
-//dXRphi_dxyz[1][2] = dXRphi_dxyz[1][3] = 0;
-//dXRphi_dxyz[2][1] = dXRphi_dxyz[2][3] = 0;
-//dXRphi_dxyz[2][2] = 1;
-//dXRphi_dxyz[3][1] = dXRphi_dxyz[3][2] = 0.0;
-//dXRphi_dxyz[3][3] = 1.0;
+*x=X;
+*y=R;
+*z=phi;
+dXRphi_dxyz[1][1] = 1;
+dXRphi_dxyz[1][2] = dXRphi_dxyz[1][3] = 0;
+dXRphi_dxyz[2][1] = dXRphi_dxyz[2][3] = 0;
+dXRphi_dxyz[2][2] = 1;
+dXRphi_dxyz[3][1] = dXRphi_dxyz[3][2] = 0.0;
+dXRphi_dxyz[3][3] = 1.0;
 /* End HACK2 */
 
   /* compute dA^k/dx^m */
