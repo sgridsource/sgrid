@@ -201,8 +201,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[2][2] = dB_dy_AnsorgNS1;
       box->dX_dx[2][3] = dB_dz_AnsorgNS1;
       box->dX_dx[3][1] = dphi_dx_AnsorgNS1;
-      box->dX_dx[3][2] = dphi_dx_AnsorgNS1;
-      box->dX_dx[3][3] = dphi_dx_AnsorgNS1;
+      box->dX_dx[3][2] = dphi_dy_AnsorgNS1;
+      box->dX_dx[3][3] = dphi_dz_AnsorgNS1;
     }
 
     /* compute cartesian coordinates x,y,z from X,Y,Z */
@@ -973,6 +973,11 @@ void xyz_of_AnsorgNS(tBox *box, int domain, double A, double B, double phi,
   if(domain==2) yo();
   if(domain==3) yo();
 
+/* Begin HACK1 */
+X=A;
+R=B;
+/* End HACK1 */
+
   /* compute x,y,z */
   Rsqr = R*R;
   Xsqr = X*X;
@@ -980,6 +985,12 @@ void xyz_of_AnsorgNS(tBox *box, int domain, double A, double B, double phi,
   *x = b*(ooRsqr_p_Xsqr_sqr + 1.0)*(Xsqr - Rsqr)*0.5;
   *y = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*cos(phi);
   *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
+
+/* Begin HACK2 */
+//*x=X;
+//*y=R;
+//*z=phi;
+/* End HACK2 */
 
   /* and save x,y,z */
   xsav=*x; ysav=*y; zsav=*z;
@@ -1132,6 +1143,16 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
   if(domain==2) yo();
   if(domain==3) yo();
 
+/* Begin HACK1 */
+X=A;
+R=B;
+dABphi_dXRphi[1][1] = 1;
+dABphi_dXRphi[1][2] = dABphi_dXRphi[1][3] = 0;
+dABphi_dXRphi[2][1] = dABphi_dXRphi[2][3] = 0;
+dABphi_dXRphi[2][2] = 1;
+dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
+dABphi_dXRphi[3][3] = 1.0;
+/* End HACK1 */
 
   /* compute output vars from X,R,phi */
   Rsqr = R*R;
@@ -1201,8 +1222,19 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int domain, double A,double B,double phi,
     *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
   }
   else
-    printf("we are at infinity!!! Put code for this case\n");
+    printf("we are at infinity!!! Probably all dXRphi_dxyz are zero???\n");
 
+/* Begin HACK2 */
+//*x=X;
+//*y=R;
+//*z=phi;
+//dXRphi_dxyz[1][1] = 1;
+//dXRphi_dxyz[1][2] = dXRphi_dxyz[1][3] = 0;
+//dXRphi_dxyz[2][1] = dXRphi_dxyz[2][3] = 0;
+//dXRphi_dxyz[2][2] = 1;
+//dXRphi_dxyz[3][1] = dXRphi_dxyz[3][2] = 0.0;
+//dXRphi_dxyz[3][3] = 1.0;
+/* End HACK2 */
 
   /* compute dA^k/dx^m */
   *dAdx = *dAdy = *dAdz = 0.0;
