@@ -935,6 +935,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
                      double *x, double *y, double *z)
 {
   static int domainsav=-1;
+  static int indsav=-1;
   static double Asav=-1, Bsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
   double X,R;
@@ -942,7 +943,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   double b;
 
   /* check if we have saved values */  
-  if(A==Asav && B==Bsav && phi==phisav && domain==domainsav) 
+  if(ind==indsav && domain==domainsav) 
   {
     *x=xsav; *y=ysav; *z=zsav;
     return;
@@ -1007,6 +1008,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                           double *dphidx, double *dphidy, double *dphidz)
 {
   static int domainsav=-1;
+  static int indsav=-1;
   static double Asav=-1, Bsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
   static double dAdxsav,   dAdysav,   dAdzsav,
@@ -1021,7 +1023,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   int l;
 
   /* check if we have saved values */  
-  if(A==Asav && B==Bsav && phi==phisav && domain==domainsav) 
+  if(ind==indsav && domain==domainsav) 
   {
     *x=xsav; *y=ysav; *z=zsav;
     *dAdx=dAdxsav;     *dAdy=dAdysav;     *dAdz=dAdzsav;
