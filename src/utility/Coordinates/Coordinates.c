@@ -940,7 +940,8 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   static double xsav, ysav, zsav;
   double X,R;
   double Rsqr, Xsqr, Rsqr_p_Xsqr;
-  double b;
+  double b, lep;
+  double sigp_Bphi, sigp_1phi;
 
   /* check if we have saved values */  
   if(ind==indsav && domain==domainsav) 
@@ -949,15 +950,26 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     return;
   }
   Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
+
+  /* set some pars */
   b = 1; // Getd("BNS_D")*0.5;
+  if(domain==0 || domain==1)
+  {
+    lep = -1; // Getd("BNS_log_epsp");
+    sigp_Bphi = 1; // change this!
+    sigp_1phi = 1; // change this!
+  }
+  if(domain==2 || domain==3)
+  {
+    lep = -1; // Getd("BNS_log_epsm");
+    sigp_Bphi = 1; // change this!
+    sigp_1phi = 1; // change this!
+  }
 
   if(domain==0) yo();
-  if(domain==1)
+  if(domain==1 || domain==2)
   {
-    double lep = -1; // Getd("BNS_log_epsp");
     double Ap = sinh(A*lep)/sinh(lep);
-    double sigp_Bphi = 1; // change this!
-    double sigp_1phi = 1; // change this!
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
     double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
@@ -972,7 +984,6 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
   }
-  if(domain==2) yo();
   if(domain==3) yo();
 
 /* Begin HACK1 */
@@ -1023,13 +1034,14 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   static double dAdxsav,   dAdysav,   dAdzsav,
                 dBdxsav,   dBdysav,   dBdzsav,
                 dphidxsav, dphidysav, dphidzsav;
-
   double X,R;
   double Rsqr, Xsqr, Rsqr_p_Xsqr;
-  double b;
   double dABphi_dXRphi[4][4]; /* dABphi_dXRphi[k][l] = dA^k/dX^l */
   double dXRphi_dxyz[4][4];   /* dXRphi_dxyz[l][m]   = dX^l/dx^m */
   int l;
+  double b, lep;
+  double sigp_Bphi, sigp_1phi;
+  double dsigp_dphi_Bphi, dsigp_dphi_1phi, dsigp_dB_Bphi; /* dsigp_dB_1phi */
 
   /* check if we have saved values */  
   if(ind==indsav && domain==domainsav) 
@@ -1041,7 +1053,29 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     return;
   }
   Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
+
+  /* set some pars */
   b = 1; // Getd("BNS_D")*0.5;
+  if(domain==0 || domain==1)
+  {
+    lep = -1; // Getd("BNS_log_epsp");
+    sigp_Bphi = 1; // change this!
+    sigp_1phi = 1; // change this!
+    dsigp_dB_Bphi = 0; // change this!
+    /* dsigp_dB_1phi = 0; // change this! */
+    dsigp_dphi_Bphi = 0; // change this!
+    dsigp_dphi_1phi = 0; // change this!
+  }
+  if(domain==2 || domain==3)
+  {
+    lep = -1; // Getd("BNS_log_epsm");
+    sigp_Bphi = 1; // change this!
+    sigp_1phi = 1; // change this!
+    dsigp_dB_Bphi = 0; // change this!
+    /* dsigp_dB_1phi = 0; // change this! */
+    dsigp_dphi_Bphi = 0; // change this!
+    dsigp_dphi_1phi = 0; // change this!
+  }
 
 /* Begin HACK3a */
 //A=0.3;
@@ -1050,18 +1084,11 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 /* End HACK3a */
 
   if(domain==0) yo();
-  if(domain==1) /* use Eq. (22) */
+  if(domain==1 || domain==2) /* use Eq. (22) */
   {
-    double lep = -1; // Getd("BNS_log_epsp");
     double Ap = sinh(A*lep)/sinh(lep);
     double dApdA = lep*cosh(A*lep)/sinh(lep);
 
-    double sigp_Bphi = 1; // change this!
-    double sigp_1phi = 1; // change this!
-    double dsigp_dB_Bphi = 0; // change this!
-    /* double dsigp_dB_1phi = 0; // change this! */
-    double dsigp_dphi_Bphi = 0; // change this!
-    double dsigp_dphi_1phi = 0; // change this!
 
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
@@ -1161,7 +1188,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
   }
-  if(domain==2) yo();
   if(domain==3) yo();
 
 /* Begin HACK1 */
