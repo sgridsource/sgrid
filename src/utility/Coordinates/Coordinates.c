@@ -1079,8 +1079,25 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   }
 
   /* compute coord trafo for each domain */
-  if(domain==0) yo();
-  if(domain==1 || domain==2)
+  if(domain==0) /* use Eq. (24) */
+  {
+    double Ap = sinh(A*lep)/sinh(lep);
+    double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+    double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+    double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+    double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
+    double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+    double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+    double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+    double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+
+    /* use Eq. (24) */
+    X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
+        B*cos((1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
+    R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
+        B*sin((1.0-Ap)*ArgCp_1phi);
+  }
+  if(domain==1 || domain==2) /* use Eq. (22) */
   {
     double Ap = sinh(A*lep)/sinh(lep);
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
@@ -1092,12 +1109,30 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
     double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
     
+    /* use Eq. (22) */
     X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
         B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
   }
-  if(domain==3) yo();
+  if(domain==3) /* use Eq. (23) */
+  {
+    double Ap = sinh(A*lep)/sinh(lep);
+    double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+    double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+    double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+    double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
+    double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+    double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+    double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+    double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+
+    /* use Eq. (23) */
+    X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
+        B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi);
+    R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
+        B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
+  }
 
 /* Begin HACK1 */
 //X=A;
@@ -1457,7 +1492,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                   B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(PIq-ArgCp_1phi)*dApdA;
     double dRdA = -(ImCp_Bphi - B*ImCp_1phi)*dApdA +
                   B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(PIq-ArgCp_1phi)*dApdA +
-                  (1-B)*dApdA;
+                  (1.0-B)*dApdA;
     double dXdB = (1.0-Ap)*(RedCp_dB_Bphi-ReCp_1phi) +
                   cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi);
     double dRdB = (1.0-Ap)*(ImdCp_dB_Bphi-ImCp_1phi) +
@@ -1506,7 +1541,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
         B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
-        B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi) + Ap*(1-B);
+        B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
   }
 
 
