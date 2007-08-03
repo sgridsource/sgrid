@@ -122,6 +122,7 @@ double ddzs_dzdz_tan_stretch(void *aux, int ind, double xs, double ys, double zs
 double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double y_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double z_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double dA_dx_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double dA_dy_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double dA_dz_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double dB_dx_AnsorgNS0(void *aux, int ind, double A, double B, double phi);

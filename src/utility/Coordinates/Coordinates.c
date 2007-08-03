@@ -213,6 +213,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][2][3] = zero_of_xyz;
       box->ddX_dxdx[3][3][3] = ddzs_dzdz_tan_stretch;
     }
+    else if( Getv(str, "AnsorgNS0") )
+    {
+      printf("Coordinates: initializing AnsorgNS0 coordinates...\n");
+      box->x_of_X[1] = x_of_AnsorgNS0;
+      box->x_of_X[2] = y_of_AnsorgNS0;
+      box->x_of_X[3] = z_of_AnsorgNS0;
+
+      box->dX_dx[1][1] = dA_dx_AnsorgNS0;
+      box->dX_dx[1][2] = dA_dy_AnsorgNS0;
+      box->dX_dx[1][3] = dA_dz_AnsorgNS0;
+      box->dX_dx[2][1] = dB_dx_AnsorgNS0;
+      box->dX_dx[2][2] = dB_dy_AnsorgNS0;
+      box->dX_dx[2][3] = dB_dz_AnsorgNS0;
+      box->dX_dx[3][1] = dphi_dx_AnsorgNS0;
+      box->dX_dx[3][2] = dphi_dy_AnsorgNS0;
+      box->dX_dx[3][3] = dphi_dz_AnsorgNS0;
+    }
     else if( Getv(str, "AnsorgNS1") )
     {
       printf("Coordinates: initializing AnsorgNS1 coordinates...\n");
@@ -246,6 +263,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dphi_dx_AnsorgNS2;
       box->dX_dx[3][2] = dphi_dy_AnsorgNS2;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS2;
+    }
+    else if( Getv(str, "AnsorgNS3") )
+    {
+      printf("Coordinates: initializing AnsorgNS3 coordinates...\n");
+      box->x_of_X[1] = x_of_AnsorgNS3;
+      box->x_of_X[2] = y_of_AnsorgNS3;
+      box->x_of_X[3] = z_of_AnsorgNS3;
+
+      box->dX_dx[1][1] = dA_dx_AnsorgNS3;
+      box->dX_dx[1][2] = dA_dy_AnsorgNS3;
+      box->dX_dx[1][3] = dA_dz_AnsorgNS3;
+      box->dX_dx[2][1] = dB_dx_AnsorgNS3;
+      box->dX_dx[2][2] = dB_dy_AnsorgNS3;
+      box->dX_dx[2][3] = dB_dz_AnsorgNS3;
+      box->dX_dx[3][1] = dphi_dx_AnsorgNS3;
+      box->dX_dx[3][2] = dphi_dy_AnsorgNS3;
+      box->dX_dx[3][3] = dphi_dz_AnsorgNS3;
     }
     else
       errorexit("Coordinates: unknown coordinates...");
@@ -1163,12 +1197,114 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 /* End HACK3a */
 
   /* compute coord trafo for each domain */
-  if(domain==0) yo();
-  if(domain==1 || domain==2) /* use Eq. (22) */
+  if(domain==0) /* use Eq. (24) */
   {
     double Ap = sinh(A*lep)/sinh(lep);
     double dApdA = lep*cosh(A*lep)/sinh(lep);
 
+    double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+    double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+    double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+    double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
+    double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+    double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+    double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+    double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+
+    double AbsdCp_dB_Bphi =(0.5/AbsCp_Bphi)*Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                           Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                           0.25*sqrt(dsigp_dB_Bphi*dsigp_dB_Bphi + PI*PI);
+    double ArgdCp_dB_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B)+
+                            Arg(dsigp_dB_Bphi, PI);
+    double AbsdCp_dphi_Bphi =(0.5/AbsCp_Bphi)*
+                             Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                             Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                             0.25*abs(dsigp_dphi_Bphi);
+    double ArgdCp_dphi_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B);
+
+    /* double AbsdCp_dB_1phi =(0.5/AbsCp_1phi)*Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                           Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                           0.25*sqrt(dsigp_dB_1phi*dsigp_dB_1phi + PI*PI);
+       double ArgdCp_dB_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI*B)+
+                            Arg(dsigp_dB_1phi, PI);  */
+    double AbsdCp_dphi_1phi =(0.5/AbsCp_1phi)*
+                             Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                             Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                             0.25*abs(dsigp_dphi_1phi);
+    double ArgdCp_dphi_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI*B);
+
+    double dArgCp_dphi_1phi=(-(sin(2.0*PI*B)*cosh(2.0*sigp_1phi))/
+                              (sinh(2.0*sigp_1phi)*sinh(2.0*sigp_1phi)+
+                               sin(2.0*PI*B)*sin(2.0*PI*B)) )*dsigp_dphi_1phi;
+
+    double RedCp_dB_Bphi   = AbsdCp_dB_Bphi * cos(ArgdCp_dB_Bphi);
+    double ImdCp_dB_Bphi   = AbsdCp_dB_Bphi * sin(ArgdCp_dB_Bphi);
+    double RedCp_dphi_Bphi = AbsdCp_dphi_Bphi * cos(ArgdCp_dphi_Bphi);
+    double ImdCp_dphi_Bphi = AbsdCp_dphi_Bphi * sin(ArgdCp_dphi_Bphi);
+    /* double RedCp_dB_1phi   = AbsdCp_dB_1phi * cos(ArgdCp_dB_1phi);
+       double ImdCp_dB_1phi   = AbsdCp_dB_1phi * sin(ArgdCp_dB_1phi); */
+    double RedCp_dphi_1phi = AbsdCp_dphi_1phi * cos(ArgdCp_dphi_1phi);
+    double ImdCp_dphi_1phi = AbsdCp_dphi_1phi * sin(ArgdCp_dphi_1phi);
+    
+    double dXdA = -(ReCp_Bphi - B*ReCp_1phi)*dApdA -
+                  B*sin((1.0-Ap)*ArgCp_1phi)*(-ArgCp_1phi)*dApdA +(1-B)*dApdA;
+    double dRdA = -(ImCp_Bphi - B*ImCp_1phi)*dApdA +
+                  B*cos((1.0-Ap)*ArgCp_1phi)*(-ArgCp_1phi)*dApdA;
+    double dXdB = (1.0-Ap)*(RedCp_dB_Bphi-ReCp_1phi) +
+                  cos((1.0-Ap)*ArgCp_1phi) - Ap;
+    double dRdB = (1.0-Ap)*(ImdCp_dB_Bphi-ImCp_1phi) +
+                  sin((1.0-Ap)*ArgCp_1phi);
+    double dXdphi=(1.0-Ap)*(RedCp_dphi_Bphi-B*RedCp_dphi_1phi) -
+                  B*sin((1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
+                  dArgCp_dphi_1phi;
+    double dRdphi=(1.0-Ap)*(ImdCp_dphi_Bphi-B*ImdCp_dphi_1phi) +
+                  B*cos((1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
+                  dArgCp_dphi_1phi;
+    /* M = {{dXdA, dXdB, dXdphi}, {dRdA, dRdB, dRdphi}, {0,0,1}} 
+       nenner = dRdB*dXdA - dRdA*dXdB
+      In[4]:= Inverse[M]*nenner
+      Out[4]= {{ dRdB, -dXdB,   dRdphi dXdB  - dRdB dXdphi},
+               {-dRdA,  dXdA, -(dRdphi dXdA) + dRdA dXdphi},
+               {0, 0, nenner}}    */
+    double nenner = dRdB*dXdA - dRdA*dXdB;
+    double dAdX   = dRdB/nenner;
+    double dAdR   =-dXdB/nenner;
+    double dAdphi = (dRdphi*dXdB - dRdB*dXdphi)/nenner;
+    double dBdX   =-dRdA/nenner;
+    double dBdR   = dXdA/nenner;
+    double dBdphi = (-(dRdphi*dXdA) + dRdA*dXdphi)/nenner;
+    /* dphidX=0; dphidR=0; dphidphi=1; */
+    dABphi_dXRphi[1][1] = dAdX;
+    dABphi_dXRphi[1][2] = dAdR;
+    dABphi_dXRphi[1][3] = dAdphi;
+    dABphi_dXRphi[2][1] = dBdX;
+    dABphi_dXRphi[2][2] = dBdR;
+    dABphi_dXRphi[2][3] = dBdphi;
+    dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
+    dABphi_dXRphi[3][3] = 1.0;
+
+/* Begin HACK3b */
+//printf("dXdA=%f dRdA=%f dXdB=%f dRdB=%f dXdphi=%f dRdphi=%f\n",
+//        dXdA,dRdA,dXdB,dRdB,dXdphi,dRdphi);
+//printf("RedCp_dB_Bphi=%f ImdCp_dB_Bphi=%f\n",        
+//        RedCp_dB_Bphi, ImdCp_dB_Bphi);
+//printf("AbsdCp_dB_Bphi=%f ArgdCp_dB_Bphi=%f\n",
+//        AbsdCp_dB_Bphi, ArgdCp_dB_Bphi);
+//printf("AbsCp_Bphi=%f ArgCp_Bphi=%f\n",
+//        AbsCp_Bphi, ArgCp_Bphi);
+/* End HACK3b */
+
+    /* use Eq. (24) */
+    X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
+        B*cos((1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
+    R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
+        B*sin((1.0-Ap)*ArgCp_1phi);
+  }
+
+  if(domain==1 || domain==2) /* use Eq. (22) */
+  {
+    double Ap = sinh(A*lep)/sinh(lep);
+    double dApdA = lep*cosh(A*lep)/sinh(lep);
 
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
@@ -1268,7 +1404,111 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
   }
-  if(domain==3) yo();
+  if(domain==3) /* use Eq. (23) */
+  {
+    double Ap = sinh(A*lep)/sinh(lep);
+    double dApdA = lep*cosh(A*lep)/sinh(lep);
+
+    double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+    double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+    double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+    double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
+    double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+    double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+    double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+    double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+
+    double AbsdCp_dB_Bphi =(0.5/AbsCp_Bphi)*Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                           Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                           0.25*sqrt(dsigp_dB_Bphi*dsigp_dB_Bphi + PI*PI);
+    double ArgdCp_dB_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B)+
+                            Arg(dsigp_dB_Bphi, PI);
+    double AbsdCp_dphi_Bphi =(0.5/AbsCp_Bphi)*
+                             Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                             Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
+                             0.25*abs(dsigp_dphi_Bphi);
+    double ArgdCp_dphi_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B);
+
+    /* double AbsdCp_dB_1phi =(0.5/AbsCp_1phi)*Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                           Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                           0.25*sqrt(dsigp_dB_1phi*dsigp_dB_1phi + PI*PI);
+       double ArgdCp_dB_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI*B)+
+                            Arg(dsigp_dB_1phi, PI);  */
+    double AbsdCp_dphi_1phi =(0.5/AbsCp_1phi)*
+                             Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                             Abssech(0.25*sigp_1phi, 0.25*PI*B)*
+                             0.25*abs(dsigp_dphi_1phi);
+    double ArgdCp_dphi_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI*B);
+
+    double dArgCp_dphi_1phi=(-(sin(2.0*PI*B)*cosh(2.0*sigp_1phi))/
+                              (sinh(2.0*sigp_1phi)*sinh(2.0*sigp_1phi)+
+                               sin(2.0*PI*B)*sin(2.0*PI*B)) )*dsigp_dphi_1phi;
+
+    double RedCp_dB_Bphi   = AbsdCp_dB_Bphi * cos(ArgdCp_dB_Bphi);
+    double ImdCp_dB_Bphi   = AbsdCp_dB_Bphi * sin(ArgdCp_dB_Bphi);
+    double RedCp_dphi_Bphi = AbsdCp_dphi_Bphi * cos(ArgdCp_dphi_Bphi);
+    double ImdCp_dphi_Bphi = AbsdCp_dphi_Bphi * sin(ArgdCp_dphi_Bphi);
+    /* double RedCp_dB_1phi   = AbsdCp_dB_1phi * cos(ArgdCp_dB_1phi);
+       double ImdCp_dB_1phi   = AbsdCp_dB_1phi * sin(ArgdCp_dB_1phi); */
+    double RedCp_dphi_1phi = AbsdCp_dphi_1phi * cos(ArgdCp_dphi_1phi);
+    double ImdCp_dphi_1phi = AbsdCp_dphi_1phi * sin(ArgdCp_dphi_1phi);
+    
+    double dXdA = -(ReCp_Bphi - B*ReCp_1phi)*dApdA -
+                  B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(PIq-ArgCp_1phi)*dApdA;
+    double dRdA = -(ImCp_Bphi - B*ImCp_1phi)*dApdA +
+                  B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(PIq-ArgCp_1phi)*dApdA +
+                  (1-B)*dApdA;
+    double dXdB = (1.0-Ap)*(RedCp_dB_Bphi-ReCp_1phi) +
+                  cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi);
+    double dRdB = (1.0-Ap)*(ImdCp_dB_Bphi-ImCp_1phi) +
+                  sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi) - Ap;
+    double dXdphi=(1.0-Ap)*(RedCp_dphi_Bphi-B*RedCp_dphi_1phi) -
+                  B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
+                  dArgCp_dphi_1phi;
+    double dRdphi=(1.0-Ap)*(ImdCp_dphi_Bphi-B*ImdCp_dphi_1phi) +
+                  B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
+                  dArgCp_dphi_1phi;
+    /* M = {{dXdA, dXdB, dXdphi}, {dRdA, dRdB, dRdphi}, {0,0,1}} 
+       nenner = dRdB*dXdA - dRdA*dXdB
+      In[4]:= Inverse[M]*nenner
+      Out[4]= {{ dRdB, -dXdB,   dRdphi dXdB  - dRdB dXdphi},
+               {-dRdA,  dXdA, -(dRdphi dXdA) + dRdA dXdphi},
+               {0, 0, nenner}}    */
+    double nenner = dRdB*dXdA - dRdA*dXdB;
+    double dAdX   = dRdB/nenner;
+    double dAdR   =-dXdB/nenner;
+    double dAdphi = (dRdphi*dXdB - dRdB*dXdphi)/nenner;
+    double dBdX   =-dRdA/nenner;
+    double dBdR   = dXdA/nenner;
+    double dBdphi = (-(dRdphi*dXdA) + dRdA*dXdphi)/nenner;
+    /* dphidX=0; dphidR=0; dphidphi=1; */
+    dABphi_dXRphi[1][1] = dAdX;
+    dABphi_dXRphi[1][2] = dAdR;
+    dABphi_dXRphi[1][3] = dAdphi;
+    dABphi_dXRphi[2][1] = dBdX;
+    dABphi_dXRphi[2][2] = dBdR;
+    dABphi_dXRphi[2][3] = dBdphi;
+    dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
+    dABphi_dXRphi[3][3] = 1.0;
+
+/* Begin HACK3b */
+//printf("dXdA=%f dRdA=%f dXdB=%f dRdB=%f dXdphi=%f dRdphi=%f\n",
+//        dXdA,dRdA,dXdB,dRdB,dXdphi,dRdphi);
+//printf("RedCp_dB_Bphi=%f ImdCp_dB_Bphi=%f\n",        
+//        RedCp_dB_Bphi, ImdCp_dB_Bphi);
+//printf("AbsdCp_dB_Bphi=%f ArgdCp_dB_Bphi=%f\n",
+//        AbsdCp_dB_Bphi, ArgdCp_dB_Bphi);
+//printf("AbsCp_Bphi=%f ArgCp_Bphi=%f\n",
+//        AbsCp_Bphi, ArgCp_Bphi);
+/* End HACK3b */
+
+    /* use Eq. (23) */
+    X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
+        B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi);
+    R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
+        B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi) + Ap*(1-B);
+  }
+
 
 /* Begin HACK1 */
 //X=A;
