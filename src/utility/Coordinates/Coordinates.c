@@ -1489,9 +1489,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     double ImdCp_dphi_1phi = AbsdCp_dphi_1phi * sin(ArgdCp_dphi_1phi);
     
     double dXdA = -(ReCp_Bphi - B*ReCp_1phi)*dApdA -
-                  B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(PIq-ArgCp_1phi)*dApdA;
+                  B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(PIh-ArgCp_1phi)*dApdA;
     double dRdA = -(ImCp_Bphi - B*ImCp_1phi)*dApdA +
-                  B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(PIq-ArgCp_1phi)*dApdA +
+                  B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(PIh-ArgCp_1phi)*dApdA +
                   (1.0-B)*dApdA;
     double dXdB = (1.0-Ap)*(RedCp_dB_Bphi-ReCp_1phi) +
                   cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi);
