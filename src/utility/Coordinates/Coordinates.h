@@ -106,12 +106,16 @@ double ddphi_compactSphericalDF_dzdz(void *aux, int ind, double xi, double thm, 
 /* tan_stretch coordinates: */
 double x_of_xs(double xs);
 double dxs_dx(double xs);
+double ddxs_dxdx(double xs);
 double x_of_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 double y_of_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 double z_of_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 double dxs_dx_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 double dys_dy_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 double dzs_dz_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
+double ddxs_dxdx_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
+double ddys_dydy_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
+double ddzs_dzdz_tan_stretch(void *aux, int ind, double xs, double ys, double zs);
 
 /* AnsorgNS coordinates:                                               */
 /* 4 domains: 0=inside NS+, 1=outside NS+, 2=outside NS-, 3=inside NS- */

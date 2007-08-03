@@ -191,6 +191,27 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = zero_of_xyz;
       box->dX_dx[3][2] = zero_of_xyz;
       box->dX_dx[3][3] = dzs_dz_tan_stretch;
+
+      box->ddX_dxdx[1][1][1] = ddxs_dxdx_tan_stretch;
+      box->ddX_dxdx[1][1][2] = zero_of_xyz;
+      box->ddX_dxdx[1][1][3] = zero_of_xyz;
+      box->ddX_dxdx[1][2][2] = zero_of_xyz;
+      box->ddX_dxdx[1][2][3] = zero_of_xyz;
+      box->ddX_dxdx[1][3][3] = zero_of_xyz;
+
+      box->ddX_dxdx[2][1][1] = zero_of_xyz;
+      box->ddX_dxdx[2][1][2] = zero_of_xyz;
+      box->ddX_dxdx[2][1][3] = zero_of_xyz;
+      box->ddX_dxdx[2][2][2] = ddys_dydy_tan_stretch;
+      box->ddX_dxdx[2][2][3] = zero_of_xyz;
+      box->ddX_dxdx[2][3][3] = zero_of_xyz;
+
+      box->ddX_dxdx[3][1][1] = zero_of_xyz;
+      box->ddX_dxdx[3][1][2] = zero_of_xyz;
+      box->ddX_dxdx[3][1][3] = zero_of_xyz;
+      box->ddX_dxdx[3][2][2] = zero_of_xyz;
+      box->ddX_dxdx[3][2][3] = zero_of_xyz;
+      box->ddX_dxdx[3][3][3] = ddzs_dzdz_tan_stretch;
     }
     else if( Getv(str, "AnsorgNS1") )
     {
@@ -907,6 +928,25 @@ double dxs_dx(double xs)
   
   return 1.0 / ( 1.0 + u*u );
 }
+double ddxs_dxdx(double xs)
+{
+  static double s=-1.0;
+  double u, arg, dum;
+
+  if(s < 0.0)
+  {
+    s=Getd("tan_stretch_s");
+    printf(" Coordinates: dxs_dx: tan_stretch_s=%f\n", s);
+  }
+  
+  arg = xs * s;
+  if( fabs(arg)>=1.0 ) return 0.0;
+
+  u = tan(arg * PI/2.0);
+  
+  dum = 1.0 / ( 1.0 + u*u );
+  return -PI*s*u*dum*dum;
+}
 
 /* Coord. trafos */
 double x_of_tan_stretch(void *aux, int ind, double xs, double ys, double zs)
@@ -937,7 +977,21 @@ double dzs_dz_tan_stretch(void *aux, int ind, double xs, double ys, double zs)
   return dxs_dx(zs);
 }
 
-/* second coord. derivs are currently not needed */
+/* second coord. derivs are from an old sgrid version on loki,
+   they may have some bugs!!! */
+/* second coord. derivs */
+double ddxs_dxdx_tan_stretch(void *aux, int ind, double xs, double ys, double zs)
+{
+  return ddxs_dxdx(xs);
+}
+double ddys_dydy_tan_stretch(void *aux, int ind, double xs, double ys, double zs)
+{
+  return ddxs_dxdx(ys);
+}
+double ddzs_dzdz_tan_stretch(void *aux, int ind, double xs, double ys, double zs)
+{
+  return ddxs_dxdx(zs);
+}
 
 /* end: _tan_stretch coordinates: */
 
