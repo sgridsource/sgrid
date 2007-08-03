@@ -1040,8 +1040,8 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   if(domain==2 || domain==3)
   {
     lep = -1; // Getd("BNS_log_epsm");
-    sigp_Bphi = 1; // change this!
-    sigp_1phi = 1; // change this!
+    sigp_Bphi = -1; // change this!
+    sigp_1phi = -1; // change this!
   }
 
   /* compute coord trafo for each domain */
@@ -1148,8 +1148,8 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   if(domain==2 || domain==3)
   {
     lep = -1; // Getd("BNS_log_epsm");
-    sigp_Bphi = 1; // change this!
-    sigp_1phi = 1; // change this!
+    sigp_Bphi = -1; // change this!
+    sigp_1phi = -1; // change this!
     dsigp_dB_Bphi = 0; // change this!
     /* dsigp_dB_1phi = 0; // change this! */
     dsigp_dphi_Bphi = 0; // change this!
