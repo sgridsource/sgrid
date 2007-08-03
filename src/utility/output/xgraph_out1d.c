@@ -7,9 +7,9 @@
 
 void write_line(tBox *box, FILE *fp, int line, int iv)
 {
-  int ix = Ind("X");
-  int iy = Ind("Y");
-  int iz = Ind("Z");
+  int ix;
+  int iy;
+  int iz;
   double *px;
   double *pv = box->v[iv];
   int n1=box->n1;
@@ -20,6 +20,17 @@ void write_line(tBox *box, FILE *fp, int line, int iv)
   int imax, jmax, kmax;
   int index;
   char str[1000];
+  char Xvarname[1000];
+  char Yvarname[1000];
+  char Zvarname[1000];
+
+  /* get pointers to X, Y, Z */
+  snprintf(Xvarname, 999, "outputReplaceXby_box%d", box->b);
+  snprintf(Yvarname, 999, "outputReplaceYby_box%d", box->b);
+  snprintf(Zvarname, 999, "outputReplaceZby_box%d", box->b);
+  ix = Ind(Gets(Xvarname));
+  iy = Ind(Gets(Yvarname));
+  iz = Ind(Gets(Zvarname));
   
   imin = jmin = kmin=0;
   imax = n1 - 1;

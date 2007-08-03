@@ -8,9 +8,9 @@
 
 void write_plane(tBox *box, FILE *fp, int normal, int plane, int iv)
 {
-  int ix = Ind("X");
-  int iy = Ind("Y");
-  int iz = Ind("Z");
+  int ix;
+  int iy;
+  int iz;
   double *p1;
   double *p2;
   double *pv = box->v[iv];
@@ -21,6 +21,17 @@ void write_plane(tBox *box, FILE *fp, int normal, int plane, int iv)
   int imin, jmin, kmin;
   int imax, jmax, kmax;
   int index;
+  char Xvarname[1000];
+  char Yvarname[1000];
+  char Zvarname[1000];
+  
+  /* get pointers to X, Y, Z */
+  snprintf(Xvarname, 999, "outputReplaceXby_box%d", box->b);
+  snprintf(Yvarname, 999, "outputReplaceYby_box%d", box->b);
+  snprintf(Zvarname, 999, "outputReplaceZby_box%d", box->b);
+  ix = Ind(Gets(Xvarname));
+  iy = Ind(Gets(Yvarname));
+  iz = Ind(Gets(Zvarname));
   
   imin = jmin = kmin=0;
   imax = n1 - 1;

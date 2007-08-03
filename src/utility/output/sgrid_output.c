@@ -85,6 +85,13 @@ int sgrid_output()
     AddPar(str,   "0", "origin for output in Y");
     snprintf(str, 999, "outputZ0_box%d", b);
     AddPar(str,   "0", "origin for output in Z");
+    /* get X, Y, Z to be used for output */
+    snprintf(str, 999, "outputReplaceXby_box%d", b);
+    AddPar(str,   "X", "origin for output in X");
+    snprintf(str, 999, "outputReplaceYby_box%d", b);
+    AddPar(str,   "Y", "origin for output in Y");
+    snprintf(str, 999, "outputReplaceZby_box%d", b);
+    AddPar(str,   "Z", "origin for output in Z");
   }
   return 0;
 }
