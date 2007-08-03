@@ -1618,6 +1618,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     dXRphi_dxyz[3][2]=(-(dxDX*dzDR) + dxDR*dzDX)/nenner;
     dXRphi_dxyz[3][3]=(dxDX*dyDR - dxDR*dyDX)/nenner;
 
+if(nenner==0) 
+printf("nenner==0: A=%f B=%f phi=%f  X=%f R=%f\n",A,B,phi,X,R);
+
     /* compute x,y,z */
     *x = b*(ooRsqr_p_Xsqr_sqr + 1.0)*(Xsqr - Rsqr)*0.5;
     *y = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*cos(phi);
