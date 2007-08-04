@@ -1608,7 +1608,10 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   {
     double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
     double ooRsqr_p_Xsqr_cube = ooRsqr_p_Xsqr_sqr/Rsqr_p_Xsqr;
+    double rho = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X;
 
+if(0)
+{
     /* compute derivs */
     double dxDX = (-2*b*X*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube +
                    b*X*(1 + ooRsqr_p_Xsqr_sqr);
@@ -1662,13 +1665,62 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     dXRphi_dxyz[3][2]=(-(dxDX*dzDR) + dxDR*dzDX)/nenner;
     dXRphi_dxyz[3][3]=(dxDX*dyDR - dxDR*dyDX)/nenner;
 
-if(nenner==0) 
-printf("nenner==0: A=%f B=%f phi=%f  X=%f R=%f\n",A,B,phi,X,R);
+//if(nenner==0 && domain==0 && (B!=1 && B!=0) ) 
+//if(dequal(nenner,0) && domain==2 && B==1 )
+//printf("nenner==0: A=%f B=%f phi=%f  X=%f R=%f\n",A,B,phi,X,R);
+//if(domain==3 && B==0 && A!=1){
+//printf("A=%f B=%f  X=%f R=%f  nenner=%f:%d\n",A,B,X,R,nenner,nenner!=0);
+//}
+}
+
+if(1)
+    {
+   /* compute derivs */
+    double dxdX = (-2*b*X*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube +
+                   b*X*(1 + ooRsqr_p_Xsqr_sqr);
+    double dxdR = (-2*b*R*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube -
+                   b*R*(1 + ooRsqr_p_Xsqr_sqr);
+    double drhodX=(-4*b*R*Xsqr)*ooRsqr_p_Xsqr_cube +
+                   b*R*(-1 + ooRsqr_p_Xsqr_sqr);
+    double drhodR=(-4*b*Rsqr*X)*ooRsqr_p_Xsqr_cube +
+                   b*X*(-1 + ooRsqr_p_Xsqr_sqr);
+    double det = -(drhodX*dxdR) + drhodR*dxdX;
+    /* M = {{dxdX, dxdR}, {drhodX, drhodR}}
+       Inverse[M]*det = {{drhodR, -dxdR}, {-drhodX, dxdX}}  */
+    double dXdx   = drhodR/det;
+    double dXdrho = -dxdR/det;
+    double dRdx   = -drhodX/det;
+    double dRdrho = dxdX/det;
+
+
+    dXRphi_dxyz[1][1]=dXdx;
+    dXRphi_dxyz[1][2]=dXdrho*cos(phi);
+    dXRphi_dxyz[1][3]=dXdrho*sin(phi);
+    dXRphi_dxyz[2][1]=dRdx;
+    dXRphi_dxyz[2][2]=dRdrho*cos(phi);
+    dXRphi_dxyz[2][3]=dRdrho*sin(phi);
+    dXRphi_dxyz[3][1]=0.0;
+    if( !dequal(rho, 0.0) )
+    {
+      dXRphi_dxyz[3][2]=-sin(phi)/rho;
+      dXRphi_dxyz[3][3]=cos(phi)/rho;
+    }
+    else /* regularize */
+    {
+      /* du/dx^m = du/dX dX/dx^m + du/dR dR/dx^m + du/dphi dphi/dx^m */
+      /* thus if du/dphi=0 at rho=0 we can safely say dphi/dx^m = 0 */
+      dXRphi_dxyz[3][2]=0.0;
+      dXRphi_dxyz[3][3]=0.0;
+    }
+
+
+    }
+
 
     /* compute x,y,z */
     *x = b*(ooRsqr_p_Xsqr_sqr + 1.0)*(Xsqr - Rsqr)*0.5;
-    *y = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*cos(phi);
-    *z = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X*sin(phi);
+    *y = rho*cos(phi);
+    *z = rho*sin(phi);
   }
   else
   {
