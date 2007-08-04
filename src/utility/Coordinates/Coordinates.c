@@ -1325,8 +1325,8 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
       dBdX   = dBdR = dBdphi = 0.0; /* allowed since  du/dB=0 at A=1 */
 ////printf("dXdBodRdB=%f/n", dXdBodRdB);
 //printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
-if(A==1 && B==0)
-printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
+//if(A==1 && B==0)
+//printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
     }
     /* dphidX=0; dphidR=0; dphidphi=1; */
     dABphi_dXRphi[1][1] = dAdX;
@@ -1649,14 +1649,23 @@ printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
                    b*R*(-1 + ooRsqr_p_Xsqr_sqr);
     double drhodR=(-4*b*Rsqr*X)*ooRsqr_p_Xsqr_cube +
                    b*X*(-1 + ooRsqr_p_Xsqr_sqr);
-    double det = -(drhodX*dxdR) + drhodR*dxdX;
-    /* M = {{dxdX, dxdR}, {drhodX, drhodR}}
-       Inverse[M]*det = {{drhodR, -dxdR}, {-drhodX, dxdX}}  */
-    double dXdx   = drhodR/det;
-    double dXdrho = -dxdR/det;
-    double dRdx   = -drhodX/det;
-    double dRdrho = dxdX/det;
-
+    double det, dXdx, dXdrho, dRdx, dRdrho;
+    
+    if( !(dequal(R,0.0)&&dequal(X,1.0)) && !(dequal(R,1.0)&&dequal(X,0.0)) )
+    {
+    det = -(drhodX*dxdR) + drhodR*dxdX;
+      /* M = {{dxdX, dxdR}, {drhodX, drhodR}}
+         Inverse[M]*det = {{drhodR, -dxdR}, {-drhodX, dxdX}}  */
+      dXdx   = drhodR/det;
+      dXdrho = -dxdR/det;
+      dRdx   = -drhodX/det;
+      dRdrho = dxdX/det;
+    }
+    else /* we are at (X,R)=(1,0) or  (X,R)=(0,1) */
+    {
+      /* ad hoc regularization. CHECK THIS!!! */
+      dXdx = dXdrho = dRdx = dRdrho = 0.0; // this must be wrong
+    }
     dXRphi_dxyz[1][1]=dXdx;
     dXRphi_dxyz[1][2]=dXdrho*cos(phi);
     dXRphi_dxyz[1][3]=dXdrho*sin(phi);
@@ -1726,14 +1735,14 @@ printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
   *dphidy=dXRphi_dxyz[3][2];
   *dphidz=dXRphi_dxyz[3][3];
 
-if(domain==0 && A==1 && B==0)
-for(l=1; l<=3; l++)
-{
-double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
-double rho = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X;
-//printf("dABphi_dXRphi[1][%d]=%f ", l, dABphi_dXRphi[1][l]); yo();
-printf("dXRphi_dxyz[%d][1]=%f rho=%g\n", l, dXRphi_dxyz[l][1], rho);
-}
+//if(domain==0 && A==1 && B==0)
+//for(l=1; l<=3; l++)
+//{
+//double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
+//double rho = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X;
+////printf("dABphi_dXRphi[1][%d]=%f ", l, dABphi_dXRphi[1][l]); yo();
+//printf("dXRphi_dxyz[%d][1]=%f rho=%g\n", l, dXRphi_dxyz[l][1], rho);
+//}
 
   /* and save */
   xsav=*x; ysav=*y; zsav=*z;
