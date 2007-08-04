@@ -1609,73 +1609,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
     double ooRsqr_p_Xsqr_cube = ooRsqr_p_Xsqr_sqr/Rsqr_p_Xsqr;
     double rho = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X;
-
-if(0)
-{
     /* compute derivs */
-    double dxDX = (-2*b*X*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube +
-                   b*X*(1 + ooRsqr_p_Xsqr_sqr);
-    double dxDR = (-2*b*R*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube -
-                   b*R*(1 + ooRsqr_p_Xsqr_sqr);
-    /* double dxDphi=0; */
-
-    double dyDX=  (-4*b*R*Xsqr*cos(phi))*ooRsqr_p_Xsqr_cube +
-                   b*R*(-1 + ooRsqr_p_Xsqr_sqr)*cos(phi);
-    double dyDR=  (-4*b*Rsqr*X*cos(phi))*ooRsqr_p_Xsqr_cube +
-                   b*X*(-1 + ooRsqr_p_Xsqr_sqr)*cos(phi);
-    double dyDphi=-(b*R*X*(-1 + ooRsqr_p_Xsqr_sqr)*sin(phi));
-
-    double dzDX=  (-4*b*R*Xsqr*sin(phi))*ooRsqr_p_Xsqr_cube +
-                   b*R*(-1 + ooRsqr_p_Xsqr_sqr)*sin(phi);
-    double dzDR=  (-4*b*Rsqr*X*sin(phi))*ooRsqr_p_Xsqr_cube +
-                   b*X*(-1 + ooRsqr_p_Xsqr_sqr)*sin(phi);
-    double dzDphi=b*R*X*(-1 + ooRsqr_p_Xsqr_sqr)*cos(phi);
-    /* M = {{dxDX, dxDR, 0}, {dyDX, dyDR, dyDphi}, {dzDX, dzDR, dzDphi}}
-       In[27]:= Inverse[M]
-       In[28]:= Simplify[%]
-       Out[28]= {{(dyDR dzDphi - dyDphi dzDR) /
-                  (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
-                   dxDR dyDphi dzDX), (dxDR dzDphi) /
-                   (-(dxDX dyDR dzDphi) + dxDR dyDX dzDphi + dxDX dyDphi dzDR -
-                    dxDR dyDphi dzDX), (dxDR dyDphi) /
-                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
-                    dxDR dyDphi dzDX)}, {(-(dyDX dzDphi) + dyDphi dzDX) /
-                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
-                    dxDR dyDphi dzDX), (dxDX dzDphi) /
-                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
-                    dxDR dyDphi dzDX), (dxDX dyDphi) /
-                   (-(dxDX dyDR dzDphi) + dxDR dyDX dzDphi + dxDX dyDphi dzDR -
-                    dxDR dyDphi dzDX)}, {(dyDX dzDR - dyDR dzDX) /
-                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
-                    dxDR dyDphi dzDX), (-(dxDX dzDR) + dxDR dzDX) /
-                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
-                    dxDR dyDphi dzDX), (dxDX dyDR - dxDR dyDX) /
-                   (dxDX dyDR dzDphi - dxDR dyDX dzDphi - dxDX dyDphi dzDR +
-                    dxDR dyDphi dzDX)}}    */
-    double nenner=dxDX*dyDR*dzDphi -dxDR*dyDX*dzDphi -dxDX*dyDphi*dzDR +
-                       dxDR*dyDphi*dzDX;
-
-    dXRphi_dxyz[1][1]=(dyDR*dzDphi - dyDphi*dzDR)/nenner;
-    dXRphi_dxyz[1][2]=-dxDR*dzDphi/nenner;
-    dXRphi_dxyz[1][3]=dxDR*dyDphi/nenner;
-    dXRphi_dxyz[2][1]=(-(dyDX*dzDphi) + dyDphi*dzDX)/nenner;
-    dXRphi_dxyz[2][2]=dxDX*dzDphi/nenner;
-    dXRphi_dxyz[2][3]=-dxDX*dyDphi/nenner;
-    dXRphi_dxyz[3][1]=(dyDX*dzDR - dyDR*dzDX)/nenner;
-    dXRphi_dxyz[3][2]=(-(dxDX*dzDR) + dxDR*dzDX)/nenner;
-    dXRphi_dxyz[3][3]=(dxDX*dyDR - dxDR*dyDX)/nenner;
-
-//if(nenner==0 && domain==0 && (B!=1 && B!=0) ) 
-//if(dequal(nenner,0) && domain==2 && B==1 )
-//printf("nenner==0: A=%f B=%f phi=%f  X=%f R=%f\n",A,B,phi,X,R);
-//if(domain==3 && B==0 && A!=1){
-//printf("A=%f B=%f  X=%f R=%f  nenner=%f:%d\n",A,B,X,R,nenner,nenner!=0);
-//}
-}
-
-if(1)
-    {
-   /* compute derivs */
     double dxdX = (-2*b*X*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube +
                    b*X*(1 + ooRsqr_p_Xsqr_sqr);
     double dxdR = (-2*b*R*(-Rsqr + Xsqr))*ooRsqr_p_Xsqr_cube -
@@ -1691,7 +1625,6 @@ if(1)
     double dXdrho = -dxdR/det;
     double dRdx   = -drhodX/det;
     double dRdrho = dxdX/det;
-
 
     dXRphi_dxyz[1][1]=dXdx;
     dXRphi_dxyz[1][2]=dXdrho*cos(phi);
@@ -1712,17 +1645,12 @@ if(1)
       dXRphi_dxyz[3][2]=0.0;
       dXRphi_dxyz[3][3]=0.0;
     }
-
-
-    }
-
-
     /* compute x,y,z */
     *x = b*(ooRsqr_p_Xsqr_sqr + 1.0)*(Xsqr - Rsqr)*0.5;
     *y = rho*cos(phi);
     *z = rho*sin(phi);
   }
-  else
+  else  /* if we are at infinity */
   {
     // printf("we are at infinity!!! Probably all dXRphi_dxyz are zero???\n");
     /* Assume that all dXRphi_dxyz[l][m] are zero at infinity */
