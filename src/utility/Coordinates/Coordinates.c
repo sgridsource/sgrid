@@ -1298,19 +1298,36 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     double dRdphi=(1.0-Ap)*(ImdCp_dphi_Bphi-B*ImdCp_dphi_1phi) +
                   B*cos((1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
                   dArgCp_dphi_1phi;
+    double nenner, dAdX, dAdR, dAdphi, dBdX, dBdR, dBdphi;
     /* M = {{dXdA, dXdB, dXdphi}, {dRdA, dRdB, dRdphi}, {0,0,1}} 
        nenner = dRdB*dXdA - dRdA*dXdB
       In[4]:= Inverse[M]*nenner
       Out[4]= {{ dRdB, -dXdB,   dRdphi dXdB  - dRdB dXdphi},
                {-dRdA,  dXdA, -(dRdphi dXdA) + dRdA dXdphi},
                {0, 0, nenner}}    */
-    double nenner = dRdB*dXdA - dRdA*dXdB;
-    double dAdX   = dRdB/nenner;
-    double dAdR   =-dXdB/nenner;
-    double dAdphi = (dRdphi*dXdB - dRdB*dXdphi)/nenner;
-    double dBdX   =-dRdA/nenner;
-    double dBdR   = dXdA/nenner;
-    double dBdphi = (-(dRdphi*dXdA) + dRdA*dXdphi)/nenner;
+    if(A!=1.0)
+    {
+      nenner = dRdB*dXdA - dRdA*dXdB;
+      dAdX   = dRdB/nenner;
+      dAdR   =-dXdB/nenner;
+      dAdphi = (dRdphi*dXdB - dRdB*dXdphi)/nenner;
+      dBdX   =-dRdA/nenner;
+      dBdR   = dXdA/nenner;
+      dBdphi = (-(dRdphi*dXdA) + dRdA*dXdphi)/nenner;
+    }
+    else /* factor dRdB out of nenner and Zaehler */
+    {
+      double dXdBodRdB = (1 - ReCp_1phi + RedCp_dB_Bphi)/
+                         (ArgCp_1phi - ImCp_1phi + ImdCp_dB_Bphi);
+      dAdX   = 1.0/(dXdA - dRdA*dXdBodRdB);
+      dAdR   =-dXdBodRdB/(dXdA - dRdA*dXdBodRdB);
+      dAdphi = (dRdphi*dXdBodRdB - dXdphi)/(dXdA - dRdA*dXdBodRdB);
+      dBdX   = dBdR = dBdphi = 0.0; /* allowed since  du/dB=0 at A=1 */
+////printf("dXdBodRdB=%f/n", dXdBodRdB);
+//printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
+if(A==1 && B==0)
+printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
+    }
     /* dphidX=0; dphidR=0; dphidphi=1; */
     dABphi_dXRphi[1][1] = dAdX;
     dABphi_dXRphi[1][2] = dAdR;
@@ -1547,20 +1564,34 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     double dRdphi=(1.0-Ap)*(ImdCp_dphi_Bphi-B*ImdCp_dphi_1phi) +
                   B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi)*(1.0-Ap)*
                   dArgCp_dphi_1phi;
+    double nenner, dAdX, dAdR, dAdphi, dBdX, dBdR, dBdphi;
     /* M = {{dXdA, dXdB, dXdphi}, {dRdA, dRdB, dRdphi}, {0,0,1}} 
        nenner = dRdB*dXdA - dRdA*dXdB
       In[4]:= Inverse[M]*nenner
       Out[4]= {{ dRdB, -dXdB,   dRdphi dXdB  - dRdB dXdphi},
                {-dRdA,  dXdA, -(dRdphi dXdA) + dRdA dXdphi},
                {0, 0, nenner}}    */
-    double nenner = dRdB*dXdA - dRdA*dXdB;
-    double dAdX   = dRdB/nenner;
-    double dAdR   =-dXdB/nenner;
-    double dAdphi = (dRdphi*dXdB - dRdB*dXdphi)/nenner;
-    double dBdX   =-dRdA/nenner;
-    double dBdR   = dXdA/nenner;
-    double dBdphi = (-(dRdphi*dXdA) + dRdA*dXdphi)/nenner;
+    if(A!=1.0)
+    {
+      nenner = dRdB*dXdA - dRdA*dXdB;
+      dAdX   = dRdB/nenner;
+      dAdR   =-dXdB/nenner;
+      dAdphi = (dRdphi*dXdB - dRdB*dXdphi)/nenner;
+      dBdX   =-dRdA/nenner;
+      dBdR   = dXdA/nenner;
+      dBdphi = (-(dRdphi*dXdA) + dRdA*dXdphi)/nenner;
+    }
+    else /* factor dRdB out of nenner and Zaehler */
+    {
+      double dXdBodRdB = (2*ArgCp_1phi - PI + 2*ReCp_1phi - 2*RedCp_dB_Bphi)/
+                         (-2 + 2*ImCp_1phi - 2*ImdCp_dB_Bphi);
+      dAdX   = 1.0/(dXdA - dRdA*dXdBodRdB);
+      dAdR   =-dXdBodRdB/(dXdA - dRdA*dXdBodRdB);
+      dAdphi = (dRdphi*dXdBodRdB - dXdphi)/(dXdA - dRdA*dXdBodRdB);
+      dBdX   = dBdR = dBdphi = 0.0; /* allowed since  du/dB=0 at A=1 */
+    }
     /* dphidX=0; dphidR=0; dphidphi=1; */
+
     dABphi_dXRphi[1][1] = dAdX;
     dABphi_dXRphi[1][2] = dAdR;
     dABphi_dXRphi[1][3] = dAdphi;
@@ -1676,19 +1707,33 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   /* compute dA^k/dx^m */
   *dAdx = *dAdy = *dAdz = 0.0;
   *dBdx = *dBdy = *dBdz = 0.0;
-  *dphidx=*dphidy=*dphidz=0.0;
-  
-  for(l=1; l<=3; l++) *dAdx+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][1];
-  for(l=1; l<=3; l++) *dAdy+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][2];
-  for(l=1; l<=3; l++) *dAdz+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][3];
+  /* *dphidx=*dphidy=*dphidz=0.0; */
+  for(l=1; l<=3; l++)
+  {
+    *dAdx+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][1];
+    *dAdy+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][2];
+    *dAdz+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][3];
 
-  for(l=1; l<=3; l++) *dBdx+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][1];
-  for(l=1; l<=3; l++) *dBdy+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][2];
-  for(l=1; l<=3; l++) *dBdz+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][3];
+    *dBdx+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][1];
+    *dBdy+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][2];
+    *dBdz+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][3];
 
-  for(l=1; l<=3; l++) *dphidx+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][1];
-  for(l=1; l<=3; l++) *dphidy+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][2];
-  for(l=1; l<=3; l++) *dphidz+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][3];
+    /*  *dphidx+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][1];
+        *dphidy+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][2];
+        *dphidz+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][3]; */
+  }
+  *dphidx=dXRphi_dxyz[3][1]; /* dABphi_dXRphi[3][l]=1 if l=3 otherwise 0*/
+  *dphidy=dXRphi_dxyz[3][2];
+  *dphidz=dXRphi_dxyz[3][3];
+
+if(domain==0 && A==1 && B==0)
+for(l=1; l<=3; l++)
+{
+double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
+double rho = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X;
+//printf("dABphi_dXRphi[1][%d]=%f ", l, dABphi_dXRphi[1][l]); yo();
+printf("dXRphi_dxyz[%d][1]=%f rho=%g\n", l, dXRphi_dxyz[l][1], rho);
+}
 
   /* and save */
   xsav=*x; ysav=*y; zsav=*z;
