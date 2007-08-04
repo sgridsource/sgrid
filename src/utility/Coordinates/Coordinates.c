@@ -1070,9 +1070,6 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     lep = -1.5; // Getd("BNS_log_epsp");
     sigp_Bphi = 0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
     sigp_1phi = 0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
-
-    sigp_Bphi = 0.8 + 0.15*cos(B*2*PI); // 1; // change this!
-    sigp_1phi = 0.8 + 0.15; // 1; // change this!
   }
   if(domain==2 || domain==3)
   {
@@ -1205,6 +1202,12 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   }
   Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
 
+/* Begin HACK3a */
+//A=0.3;
+//B=0.35;
+//phi=2;
+/* End HACK3a */
+
   /* set some pars */
   b = 1; // Getd("BNS_D")*0.5;
   if(domain==0 || domain==1)
@@ -1216,13 +1219,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     /* dsigp_dB_1phi = 0; // change this! */
     dsigp_dphi_Bphi = 0.15*cos(phi); // 0; // change this!
     dsigp_dphi_1phi = 0.15*cos(phi); // 0; // change this!
-
-    sigp_Bphi = 0.8 + 0.15*cos(B*2*PI); // 1; // change this!
-    sigp_1phi = 0.8 + 0.15; // 1; // change this!
-    dsigp_dB_Bphi = -2*PI*0.15*sin(B*2*PI); // 0; // change this!
-    /* dsigp_dB_1phi = 0; // change this! */
-    dsigp_dphi_Bphi = 0; // 0; // change this!
-    dsigp_dphi_1phi = 0; // 0; // change this!
   }
   if(domain==2 || domain==3)
   {
@@ -1234,12 +1230,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     dsigp_dphi_Bphi = 0.1*cos(phi); // 0; // change this!
     dsigp_dphi_1phi = 0.1*cos(phi); // 0; // change this!
   }
-
-/* Begin HACK3a */
-//A=0.3;
-//B=0.35;
-//phi=0.4;
-/* End HACK3a */
 
   /* compute coord trafo for each domain */
   if(domain==0) /* use Eq. (24) */
@@ -1265,8 +1255,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                              Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
                              Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
                              0.25*fabs(dsigp_dphi_Bphi);
-    double ArgdCp_dphi_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B);
-
+    double ArgdCp_dphi_Bphi =-ArgCp_Bphi +
+                              2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B) +
+                              Arg(dsigp_dphi_Bphi, 0.0);
     /* double AbsdCp_dB_1phi =(0.5/AbsCp_1phi)*Abssech(0.25*sigp_1phi, 0.25*PI)*
                            Abssech(0.25*sigp_1phi, 0.25*PI)*
                            0.25*sqrt(dsigp_dB_1phi*dsigp_dB_1phi + PI*PI);
@@ -1276,7 +1267,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                              Abssech(0.25*sigp_1phi, 0.25*PI)*
                              Abssech(0.25*sigp_1phi, 0.25*PI)*
                              0.25*fabs(dsigp_dphi_1phi);
-    double ArgdCp_dphi_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI);
+    double ArgdCp_dphi_1phi =-ArgCp_1phi + 
+                              2.0*Argsech(0.25*sigp_1phi, 0.25*PI) +
+                              Arg(dsigp_dphi_1phi, 0.0);
 
     double dArgCp_dphi_1phi=(-(cosh(0.5*sigp_1phi))/
                               (sinh(0.5*sigp_1phi)*sinh(0.5*sigp_1phi)+ 1.0) )*
@@ -1369,8 +1362,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                              Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
                              Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
                              0.25*fabs(dsigp_dphi_Bphi);
-    double ArgdCp_dphi_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B);
-
+    double ArgdCp_dphi_Bphi =-ArgCp_Bphi +
+                              2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B) +
+                              Arg(dsigp_dphi_Bphi, 0.0);
     /* double AbsdCp_dB_1phi =(0.5/AbsCp_1phi)*Abssech(0.25*sigp_1phi, 0.25*PI)*
                            Abssech(0.25*sigp_1phi, 0.25*PI)*
                            0.25*sqrt(dsigp_dB_1phi*dsigp_dB_1phi + PI*PI);
@@ -1380,7 +1374,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                              Abssech(0.25*sigp_1phi, 0.25*PI)*
                              Abssech(0.25*sigp_1phi, 0.25*PI)*
                              0.25*fabs(dsigp_dphi_1phi);
-    double ArgdCp_dphi_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI);
+    double ArgdCp_dphi_1phi =-ArgCp_1phi +
+                              2.0*Argsech(0.25*sigp_1phi, 0.25*PI) +
+                              Arg(dsigp_dphi_1phi, 0.0);
 
     double dArgCp_dphi_1phi=(-(cosh(0.5*sigp_1phi))/
                               (sinh(0.5*sigp_1phi)*sinh(0.5*sigp_1phi)+ 1.0) )*
@@ -1443,6 +1439,41 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 //        AbsCp_Bphi, ArgCp_Bphi);
 /* End HACK3b */
 
+/* Begin HACK3c */
+//printf("domain=%d\n", domain);
+////printf("AbsCp_Bphi=%f ArgCp_Bphi=%f\n",AbsCp_Bphi,ArgCp_Bphi);
+//printf("dXdA=%g dRdA=%g dXdB=%g dRdB=%g dXdphi=%g dRdphi=%g\n",
+//        dXdA,dRdA,dXdB,dRdB,dXdphi,dRdphi);
+//printf("dABphi_dXRphi[1][1]=%f\n", dABphi_dXRphi[1][1]);
+//printf("dABphi_dXRphi[1][2]=%f\n", dABphi_dXRphi[1][2]);
+//printf("dABphi_dXRphi[1][3]=%f\n", dABphi_dXRphi[1][3]);
+//printf("dABphi_dXRphi[2][1]=%f\n", dABphi_dXRphi[2][1]);
+//printf("dABphi_dXRphi[2][2]=%f\n", dABphi_dXRphi[2][2]);
+//printf("dABphi_dXRphi[2][3]=%f\n", dABphi_dXRphi[2][3]);
+//printf("dABphi_dXRphi[3][1]=%f\n", dABphi_dXRphi[3][1]);
+//printf("dABphi_dXRphi[3][2]=%f\n", dABphi_dXRphi[3][2]);
+//printf("dABphi_dXRphi[3][3]=%f\n", dABphi_dXRphi[3][3]);
+//printf("dArgCp_dphi_1phi=%f\n",dArgCp_dphi_1phi);
+////printf("RedCp_dB_Bphi=%f ImdCp_dB_Bphi=%f\n",
+////        RedCp_dB_Bphi, ImdCp_dB_Bphi);
+////printf("AbsdCp_dB_Bphi=%f ArgdCp_dB_Bphi=%f\n",
+////        AbsdCp_dB_Bphi, ArgdCp_dB_Bphi);
+////printf("AbsCp_Bphi=%f ArgCp_Bphi=%f\n",
+////        AbsCp_Bphi, ArgCp_Bphi);
+//printf("RedCp_dphi_Bphi=%f ImdCp_dphi_Bphi=%f\n",
+//        RedCp_dphi_Bphi, ImdCp_dphi_Bphi);
+//printf("AbsdCp_dphi_Bphi=%f ArgdCp_dphi_Bphi=%f\n",
+//        AbsdCp_dphi_Bphi, ArgdCp_dphi_Bphi);
+////printf("AbsCp_Bphi=%f ArgCp_Bphi=%f\n",
+////        AbsCp_Bphi, ArgCp_Bphi);
+//printf("RedCp_dphi_1phi=%f ImdCp_dphi_1phi=%f\n",
+//        RedCp_dphi_1phi, ImdCp_dphi_1phi);
+//printf("AbsdCp_dphi_1phi=%f ArgdCp_dphi_1phi=%f\n",
+//        AbsdCp_dphi_1phi, ArgdCp_dphi_1phi);
+////printf("AbsCp_1phi=%f ArgCp_1phi=%f\n",
+////        AbsCp_1phi, ArgCp_1phi);
+/* End HACK3c */
+
     /* use Eq. (22) */
     X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
         B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
@@ -1472,8 +1503,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                              Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
                              Abssech(0.25*sigp_Bphi, 0.25*PI*B)*
                              0.25*fabs(dsigp_dphi_Bphi);
-    double ArgdCp_dphi_Bphi =-ArgCp_Bphi+2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B);
-
+    double ArgdCp_dphi_Bphi =-ArgCp_Bphi +
+                              2.0*Argsech(0.25*sigp_Bphi, 0.25*PI*B) +
+                              Arg(dsigp_dphi_Bphi, 0.0);
     /* double AbsdCp_dB_1phi =(0.5/AbsCp_1phi)*Abssech(0.25*sigp_1phi, 0.25*PI)*
                            Abssech(0.25*sigp_1phi, 0.25*PI)*
                            0.25*sqrt(dsigp_dB_1phi*dsigp_dB_1phi + PI*PI);
@@ -1483,7 +1515,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                              Abssech(0.25*sigp_1phi, 0.25*PI)*
                              Abssech(0.25*sigp_1phi, 0.25*PI)*
                              0.25*fabs(dsigp_dphi_1phi);
-    double ArgdCp_dphi_1phi =-ArgCp_1phi+2.0*Argsech(0.25*sigp_1phi, 0.25*PI);
+    double ArgdCp_dphi_1phi =-ArgCp_1phi +
+                              2.0*Argsech(0.25*sigp_1phi, 0.25*PI) +
+                              Arg(dsigp_dphi_1phi, 0.0);
 
     double dArgCp_dphi_1phi=(-(cosh(0.5*sigp_1phi))/
                               (sinh(0.5*sigp_1phi)*sinh(0.5*sigp_1phi)+ 1.0) )*
