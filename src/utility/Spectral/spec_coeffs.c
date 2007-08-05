@@ -224,6 +224,13 @@ void get_spec_functionpointers(tBox *box, int direc,
     *filter_coeffs = fd2_filter;
     *coeffs_of_2ndderiv = fd2_2ndderiv_periodic;
   }
+  else if( Getv(str, "ChebZeros") )
+  {
+    *get_coeffs = cheb_coeffs_fromZeros;
+    *coeffs_of_deriv = cheb_deriv;
+    *eval_onPoints = cheb_eval_onZeros;
+    *filter_coeffs = cheb_filter;
+  }
   else
   {
     printf("get_spec_functionpointers: %s=%s is unknown!\n", str, Gets(str));
