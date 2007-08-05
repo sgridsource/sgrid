@@ -67,7 +67,8 @@ void output0d_boxvar(tBox *box, char *name)
     VolIntergral = spec_3dIntegral;
     forallpoints(box ,i) VolJac[i] = 1.0;
     printf("Defaulting to same method as for Cartesian coordinates.\n");
-    printf("WARNING: 0doutput of %s may be meaningless!!!\n", name);
+    printf("WARNING: 0doutput of %s in box %d may be meaningless!!!\n",
+            name, box->b);
     prdivider(0);
   }
           
