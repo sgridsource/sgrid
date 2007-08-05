@@ -1653,12 +1653,12 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     
     if( !(dequal(R,0.0)&&dequal(X,1.0)) && !(dequal(R,1.0)&&dequal(X,0.0)) )
     {
-    det = -(drhodX*dxdR) + drhodR*dxdX;
+      det = -(drhodX*dxdR) + drhodR*dxdX;
       /* M = {{dxdX, dxdR}, {drhodX, drhodR}}
          Inverse[M]*det = {{drhodR, -dxdR}, {-drhodX, dxdX}}  */
       dXdx   = drhodR/det;
-      dXdrho = -dxdR/det;
-      dRdx   = -drhodX/det;
+      dXdrho =-dxdR/det;
+      dRdx   =-drhodX/det;
       dRdrho = dxdX/det;
     }
     else /* we are at (X,R)=(1,0) or  (X,R)=(0,1) */
