@@ -224,4 +224,10 @@ void get_spec_functionpointers(tBox *box, int direc,
     *filter_coeffs = fd2_filter;
     *coeffs_of_2ndderiv = fd2_2ndderiv_periodic;
   }
+  else
+  {
+    printf("get_spec_functionpointers: %s=%s is unknown!\n", str, Gets(str));
+    errorexits("get_spec_functionpointers: don't know what to do "
+               "with %s" , Gets(str));
+  }
 }
