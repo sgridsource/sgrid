@@ -26,6 +26,7 @@ tGrid *make_grid(int pr)
   int b, i, j, k, ijk;
   int n1, n2, n3;
   int nboxes = Geti("nboxes");
+  int basis;
 
   /* print info */
   if (pr) {
@@ -105,6 +106,7 @@ tGrid *make_grid(int pr)
 	node[ijk].type = 1;
 
 	/* compute coordinate values */
+/*
 	snprintf(str, 999, "box%d_basis1", b);
 	if( Getv(str, "ChebExtrema") )
 	  box->v[var_X][ijk] 
@@ -146,6 +148,36 @@ tGrid *make_grid(int pr)
 	  box->v[var_Z][ijk] 
 	    = ( (box->bbox[5] - box->bbox[4])* ((double) k)/(n3-1) 
 	           +box->bbox[4]);
+*/        
+        for(basis=1; basis<=3 ; basis++)
+        {
+          int nb, bbi, varb, m;
+
+          nb=n1; bbi=0; varb=var_X; m=i; /* <--for basis=1 */
+          if(basis==2)
+          {
+            nb=n2; bbi=2; varb=var_Y; m=j;
+          }
+          else if(basis==3)
+          {
+            nb=n3; bbi=4; varb=var_Z; m=k;
+          }
+
+          /* compute coordinate values */
+	  snprintf(str, 999, "box%d_basis%d", b, basis);
+	  if( Getv(str, "ChebExtrema") )
+	    box->v[varb][ijk] 
+	      = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])*cos(m*PI/(nb-1)) 
+	             +(box->bbox[bbi] + box->bbox[bbi+1]));
+          else if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
+	    box->v[varb][ijk] 
+	      = ( (box->bbox[bbi+1] - box->bbox[bbi])* ((double) m)/nb 
+	             +box->bbox[bbi]);
+          else if( Getv(str, "fd2_onesided") )
+	    box->v[varb][ijk] 
+	      = ( (box->bbox[bbi+1] - box->bbox[bbi])* ((double) m)/(nb-1)
+	             +box->bbox[bbi]);
+        }/* end for basis */
         }
       }
     }  /* end for (k = 0; k < n3; k++) */
