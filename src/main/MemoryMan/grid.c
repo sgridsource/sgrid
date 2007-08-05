@@ -169,6 +169,11 @@ tGrid *make_grid(int pr)
 	    box->v[varb][ijk] 
 	      = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])*cos(m*PI/(nb-1)) 
 	             +(box->bbox[bbi] + box->bbox[bbi+1]));
+	  else if( Getv(str, "ChebZeros") )
+	    box->v[varb][ijk] 
+	      = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])
+	              *cos( ((double) m + 0.5)*PI/nb) 
+	             +(box->bbox[bbi] + box->bbox[bbi+1]));
           else if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
 	    box->v[varb][ijk] 
 	      = ( (box->bbox[bbi+1] - box->bbox[bbi])* ((double) m)/nb 
