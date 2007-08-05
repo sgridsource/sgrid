@@ -119,6 +119,7 @@ int TestDerivs_analyze(tGrid *grid)
         y = py[i];
         z = pz[i];
       }
+      if(fabs(x)+fabs(y)+fabs(z)>1e299) continue; /* give up if x,y,z is inf */
       /*
       u[i] = A*exp(-0.5*( 
                (x-x0)*(x-x0)/(sigmax*sigmax) + (y-y0)*(y-y0)/(sigmay*sigmay)
@@ -148,6 +149,7 @@ int TestDerivs_analyze(tGrid *grid)
       CForm[Simplify[D[u,z,z]/u]]
        = (-Power(sigmaz,2) + Power(z - z0,2))/Power(sigmaz,4)
       */
+//printf("z0=%f ",z0);
       ux[i] -= (-x + x0)/Power(sigmax,2) * u[i];
       uy[i] -= (-y + y0)/Power(sigmay,2) * u[i];
       uz[i] -= (-z + z0)/Power(sigmaz,2) * u[i];

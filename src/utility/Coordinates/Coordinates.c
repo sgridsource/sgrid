@@ -1143,7 +1143,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   Rsqr = R*R;
   Xsqr = X*X;
   Rsqr_p_Xsqr = (Rsqr + Xsqr);
-  if(Rsqr_p_Xsqr>0) /* if not at infinity */
+  if(Rsqr_p_Xsqr>0.0) /* if not at infinity */
   {
     double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
 
@@ -1635,7 +1635,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   Rsqr = R*R;
   Xsqr = X*X;
   Rsqr_p_Xsqr = (Rsqr + Xsqr);
-  if(Rsqr_p_Xsqr>0) /* if not at infinity */
+  if(Rsqr_p_Xsqr>0.0) /* if not at infinity */
   {
     double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
     double ooRsqr_p_Xsqr_cube = ooRsqr_p_Xsqr_sqr/Rsqr_p_Xsqr;
@@ -1692,13 +1692,17 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   }
   else  /* if we are at infinity */
   {
-    // printf("we are at infinity!!! Probably all dXRphi_dxyz are zero???\n");
+    //printf("we are at infinity!!! Probably all dXRphi_dxyz are zero???\n");
+    //printf("    Rsqr_p_Xsqr=%g:%d\n",Rsqr_p_Xsqr, Rsqr_p_Xsqr>0);
     /* Assume that all dXRphi_dxyz[l][m] are zero at infinity */
     // check this later!
     dXRphi_dxyz[1][1] = dXRphi_dxyz[1][2] = dXRphi_dxyz[1][3] = 0.0;
-    dXRphi_dxyz[2][1] = dXRphi_dxyz[2][3] = dXRphi_dxyz[2][2] = 0.0;
+    dXRphi_dxyz[2][1] = dXRphi_dxyz[2][2] = dXRphi_dxyz[2][3] = 0.0;
     dXRphi_dxyz[3][1] = dXRphi_dxyz[3][2] = dXRphi_dxyz[3][3] = 0.0;
-    
+    dABphi_dXRphi[1][1] = dABphi_dXRphi[1][2] = dABphi_dXRphi[1][3] = 0.0;
+    dABphi_dXRphi[2][1] = dABphi_dXRphi[2][2] = dABphi_dXRphi[2][3] = 0.0;
+    dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = dABphi_dXRphi[3][3] = 0.0;
+
     *x = *y = *z = 1.0e300;
   }
 /* Begin HACK2 */
@@ -1735,20 +1739,27 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   *dphidy=dXRphi_dxyz[3][2];
   *dphidz=dXRphi_dxyz[3][3];
 
-//if(domain==0 && A==1 && B==0)
-//for(l=1; l<=3; l++)
-//{
-//double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
-//double rho = b*(ooRsqr_p_Xsqr_sqr - 1.0)*R*X;
-////printf("dABphi_dXRphi[1][%d]=%f ", l, dABphi_dXRphi[1][l]); yo();
-//printf("dXRphi_dxyz[%d][1]=%f rho=%g\n", l, dXRphi_dxyz[l][1], rho);
-//}
-
   /* and save */
   xsav=*x; ysav=*y; zsav=*z;
   dAdxsav=*dAdx;     dAdysav=*dAdy;     dAdzsav=*dAdz;
   dBdxsav=*dBdx;     dBdysav=*dBdy;     dBdzsav=*dBdz;
   dphidxsav=*dphidx; dphidysav=*dphidy; dphidzsav=*dphidz;
+
+//if( !finite(*dAdx) || !finite(*dAdy) || !finite(*dAdz) ||  
+//    !finite(*dBdx) || !finite(*dBdy) || !finite(*dBdz) ||  
+//    !finite(*dphidx) || !finite(*dphidy) || !finite(*dphidz) )
+//{
+////int k,l;
+////for(k=1; k<=3; k++)
+////for(l=1; l<=3; l++)
+//{
+////printf("dABphi_dXRphi[%d][%d]=%f ",k,l, dABphi_dXRphi[k][l]);
+////printf("dXRphi_dxyz[%d][%d]=%f\n",k,l, dXRphi_dxyz[k][l]);
+////printf("dXRphi_dxyz[%d][1]=%f rho=%g\n", l, dXRphi_dxyz[l][1], rho);
+//printf("Rsqr_p_Xsqr=%g  %g %g %g  %g %g %g  %g %g %g\n",Rsqr_p_Xsqr, 
+//*dAdx,*dAdy,*dAdz, *dBdx,*dBdy,*dBdz, *dphidx,*dphidy,*dphidz);
+//}
+//}
 }
 
 /* Coord. trafos for domain 0 */

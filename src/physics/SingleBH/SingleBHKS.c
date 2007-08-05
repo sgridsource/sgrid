@@ -1,5 +1,5 @@
 /* SingleBHKS.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 9.5.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 2.8.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"

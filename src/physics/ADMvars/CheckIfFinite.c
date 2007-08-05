@@ -28,7 +28,7 @@ int CheckIfFinite(tGrid* grid, char *varname)
   */
   {
     double *sum;
-    tVarList *vl = VLPtrEnable1(grid, varname);
+    //tVarList *vl = VLPtrEnable1(grid, varname);
 
     // TODO: FIX this!!!!!
     //bampi_allreduce_sum(vl, &sum);  
@@ -39,7 +39,7 @@ int CheckIfFinite(tGrid* grid, char *varname)
     //free(sum);
 num = 0.1;
     
-    vlfree(vl);
+    //vlfree(vl);
     
     if(num==0.0) return 0;
     
