@@ -59,9 +59,18 @@ void output0d_boxvar(tBox *box, char *name)
     forallpoints(box ,i) VolJac[i] = 1.0; /* not r^2 sin(theta), since spec_sphericalDF3dIntegral is special */
   }
   else
-    errorexits("output0d_boxvar: I don't know how to do volume integrals in "
-               "%s coordinates", Gets(str));
-
+  {
+    prdivider(0);
+    printf("WARNING!!!\n");
+    printf("output0d_boxvar: I don't know how to do volume integrals in\n"
+           "%s coordinates...\n", Gets(str));
+    VolIntergral = spec_3dIntegral;
+    forallpoints(box ,i) VolJac[i] = 1.0;
+    printf("Defaulting to same method as for Cartesian coordinates.\n");
+    printf("WARNING: 0doutput of %s may be meaningless!!!\n", name);
+    prdivider(0);
+  }
+          
   /* compute volume */
   Vol=VolIntergral(box, VolJac, temp2);
 
