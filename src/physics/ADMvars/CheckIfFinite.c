@@ -73,9 +73,8 @@ num = 0.0;
 	x=box->v[Ind("x")];
 	y=box->v[Ind("y")];
 	z=box->v[Ind("z")];
-	
-	printf("NAN/INF: %s=%g at ccc=%d:  x=%g y=%g z=%g\n", 
-	       VarName(ivar), var[ccc], ccc, x[ccc], y[ccc], z[ccc]);
+	printf("NAN/INF: %s=%g at ccc=%d: box%d x=%g y=%g z=%g\n", 
+	       VarName(ivar), var[ccc], ccc, b, x[ccc], y[ccc], z[ccc]);
         }
         ccc_old=ccc;
         messageflag++;
@@ -84,8 +83,8 @@ num = 0.0;
       else
       {
         if(messageflag>1)
-          printf("NAN/INF: %s=%g til    %d:  x=%g y=%g z=%g\n",
-                 VarName(ivar), var[ccc_old], ccc_old,
+          printf("NAN/INF: %s=%g til    %d: box%d x=%g y=%g z=%g\n",
+                 VarName(ivar), var[ccc_old], ccc_old, b,
                  x[ccc_old], y[ccc_old], z[ccc_old]);
                        
         messageflag=0;
