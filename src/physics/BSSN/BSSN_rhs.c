@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 29.7.2006 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 6.8.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
