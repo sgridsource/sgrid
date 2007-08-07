@@ -21,10 +21,11 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
+  double (*basisfunc)(double a, double b, int k, double X)=NULL;
 
   get_spec_functionpointers(box, direc, &get_coeffs, &coeffs_of_deriv,
                             &coeffs_of_2ndderiv, &eval_onPoints,
-                            &filter_coeffs);
+                            &filter_coeffs, &basisfunc);
   if(direc==1)
   {
     linelen = n1;
@@ -195,6 +196,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
+  double (*basisfunc)(double a, double b, int k, double X)=NULL;
   double *pX = box->v[Ind("X")];
 
   /* do phi integral */
@@ -202,7 +204,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
 
   get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
                             &coeffs_of_2ndderiv, &eval_onPoints,
-                            &filter_coeffs);
+                            &filter_coeffs, &basisfunc);
   {
     linelen = n2;
 

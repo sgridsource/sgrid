@@ -182,7 +182,8 @@ void get_spec_functionpointers(tBox *box, int direc,
      void (**coeffs_of_deriv)(double, double, double *,double *, int),
      void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
      void (**eval_onPoints)(double *,double *, int),
-     void (**filter_coeffs)(double *, int, int) )
+     void (**filter_coeffs)(double *, int, int),
+     double (**basisfunc)(double a, double b, int k, double X) )
 {       
   char str[1000];
 
@@ -191,6 +192,7 @@ void get_spec_functionpointers(tBox *box, int direc,
   *coeffs_of_2ndderiv=NULL;
   *eval_onPoints=NULL;
   *filter_coeffs=NULL;
+  *basisfunc=NULL;
 
   snprintf(str, 999, "box%d_basis%d", box->b, direc);
   //printf("%s=%s\n", str, Gets(str));
@@ -237,4 +239,55 @@ void get_spec_functionpointers(tBox *box, int direc,
     errorexits("get_spec_functionpointers: don't know what to do "
                "with %s" , Gets(str));
   }
+}
+
+
+/* compute B_k(x) M_ki */
+/* Cu_k = M_ki u_i   <-- M is coeff matrix
+   u(x) = Cu_k B_k(x) = B_k(x) M_ki u_i = BM_i u_i */
+double spec_Basis_times_CoeffMatrix(tBox *box, int direc, 
+                                    double *BM, double X)
+{
+  int linelen;
+  double *M=NULL;
+  double *B=NULL;
+  int i;
+  double a,b;
+  void (*get_coeffs)(double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*eval_onPoints)(double *,double *, int)=NULL;
+  void (*filter_coeffs)(double *, int, int)=NULL;
+  double (*basisfunc)(double a, double b, int k, double X)=NULL;
+
+// basisfunc is something like cheb_eval
+
+  get_spec_functionpointers(box, direc, &get_coeffs, &coeffs_of_deriv,
+                            &coeffs_of_2ndderiv, &eval_onPoints,
+                            &filter_coeffs, &basisfunc);
+ 
+  if(direc==1)      { linelen = box->n1; a=box->bbox[0]; b=box->bbox[1]; }
+  else if(direc==2) { linelen = box->n2; a=box->bbox[2]; b=box->bbox[3]; }
+  else if(direc==3) { linelen = box->n3; a=box->bbox[4]; b=box->bbox[5]; }
+  else
+    errorexit("spec_Basis_times_CoeffMatrix: possible values for direction direc are 1,2,3.");
+    
+
+  /* initialize the matrix M used to compute coeffs */
+  M = (double *) calloc(linelen*linelen, sizeof(double));
+  initMatrix_ForCoeffs(M, linelen, get_coeffs);
+
+  /* initialize basis functions at point X */
+  B = (double *) calloc(linelen, sizeof(double));
+  for(i = 0; i < linelen; i++)  B[i] = basisfunc(a,b, i, X); // B[i]=B_i(X)
+
+  /* Cu_k = M_ki u_i   <-- M is coeff matrix
+     u(x) = Cu_k B_k(x) = B_k(x) M_ki u_i = BM_i u_i */
+
+  /* get BM_i = B_k(x) M_ki */
+  vector_times_matrix(B, M, BM, linelen);
+
+  /* free memory for  matrix M and basis funcs B */
+  free(M);
+  free(B);
 }

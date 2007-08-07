@@ -53,7 +53,8 @@ void get_spec_functionpointers(tBox *box, int direc,
      void (**coeffs_of_deriv)(double, double, double *,double *, int),
      void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
      void (**eval_onPoints)(double *,double *, int),
-     void (**filter_coeffs)(double *, int, int) );
+     void (**filter_coeffs)(double *, int, int),
+     double (**basisfunc)(double a, double b, int k, double X) );
 
 /* Functions from integrals.c */
 void spec_Integral1(tBox *box, int direc, double *u, double *U);

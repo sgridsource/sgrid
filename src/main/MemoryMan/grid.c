@@ -194,6 +194,7 @@ tGrid *make_grid(int pr)
        void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
        void (*eval_onPoints)(double *,double *, int)=NULL;
        void (*filter_coeffs)(double *, int, int)=NULL;
+       double (*basisfunc)(double a, double b, int k, double X)=NULL;
        int filt1, filt2, filt3;
 
        snprintf(str, 999, "box%d_filter1", b);
@@ -207,7 +208,7 @@ tGrid *make_grid(int pr)
   
        get_spec_functionpointers(box, 1, &get_coeffs, &coeffs_of_deriv,
                                  &coeffs_of_2ndderiv, &eval_onPoints, 
-                                 &filter_coeffs);
+                                 &filter_coeffs, &basisfunc);
        initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F1, n1+1-filt1, n1, 
@@ -219,7 +220,7 @@ tGrid *make_grid(int pr)
         
        get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
                                  &coeffs_of_2ndderiv, &eval_onPoints, 
-                                 &filter_coeffs);
+                                 &filter_coeffs, &basisfunc);
        initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F2, n2+1-filt2, n2, 
@@ -231,7 +232,7 @@ tGrid *make_grid(int pr)
 
        get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
                                  &coeffs_of_2ndderiv, &eval_onPoints, 
-                                 &filter_coeffs);
+                                 &filter_coeffs, &basisfunc);
        initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F3, n3+1-filt3, n3, 
