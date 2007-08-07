@@ -45,6 +45,6 @@ void vector_times_matrix(double *u, double *M, double *uM, int n)
   {
     sum=0.0;
     for(i=0; i<n; i++)  sum += u[i] * M[n*i + j];
-    Mu[j] = sum;
+    uM[j] = sum;
   }
 }
