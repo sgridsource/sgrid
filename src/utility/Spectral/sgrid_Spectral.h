@@ -55,6 +55,8 @@ void get_spec_functionpointers(tBox *box, int direc,
      void (**eval_onPoints)(double *,double *, int),
      void (**filter_coeffs)(double *, int, int),
      double (**basisfunc)(double a, double b, int k, double X) );
+double spec_Basis_times_CoeffMatrix(tBox *box, int direc, 
+                                    double *BM, double X);
 
 /* Functions from integrals.c */
 void spec_Integral1(tBox *box, int direc, double *u, double *U);

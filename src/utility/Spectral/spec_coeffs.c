@@ -244,9 +244,9 @@ void get_spec_functionpointers(tBox *box, int direc,
 }
 
 
-/* compute B_k(x) M_ki     <-- B_k is basis function k
+/* compute B_k(X) M_ki     <-- B_k is basis function k
    Cu_k = M_ki u_i         <-- M_ki is coeff matrix
-   u(x) = Cu_k B_k(x) = B_k(x) M_ki u_i = BM_i u_i      */
+   u(X) = Cu_k B_k(X) = B_k(X) M_ki u_i = BM_i u_i      */
 double spec_Basis_times_CoeffMatrix(tBox *box, int direc, 
                                     double *BM, double X)
 {
@@ -273,7 +273,6 @@ double spec_Basis_times_CoeffMatrix(tBox *box, int direc,
   else
     errorexit("spec_Basis_times_CoeffMatrix: possible values for direction direc are 1,2,3.");
     
-
   /* initialize the matrix M used to compute coeffs */
   M = (double *) calloc(linelen*linelen, sizeof(double));
   initMatrix_ForCoeffs(M, linelen, get_coeffs);
@@ -283,9 +282,9 @@ double spec_Basis_times_CoeffMatrix(tBox *box, int direc,
   for(i = 0; i < linelen; i++)  B[i] = basisfunc(a,b, i, X); // B[i]=B_i(X)
 
   /* Cu_k = M_ki u_i   <-- M is coeff matrix
-     u(x) = Cu_k B_k(x) = B_k(x) M_ki u_i = BM_i u_i */
+     u(X) = Cu_k B_k(X) = B_k(X) M_ki u_i = BM_i u_i */
 
-  /* get BM_i = B_k(x) M_ki */
+  /* get BM_i = B_k(X) M_ki */
   vector_times_matrix(B, M, BM, linelen);
 
   /* free memory for  matrix M and basis funcs B */
