@@ -202,6 +202,7 @@ void get_spec_functionpointers(tBox *box, int direc,
     *coeffs_of_deriv = cheb_deriv;
     *eval_onPoints = cheb_eval_onExtrema;
     *filter_coeffs = cheb_filter;
+    *basisfunc = cheb_basisfunc;
   }
   else if( Getv(str, "Fourier") )
   {
@@ -232,6 +233,7 @@ void get_spec_functionpointers(tBox *box, int direc,
     *coeffs_of_deriv = cheb_deriv;
     *eval_onPoints = cheb_eval_onZeros;
     *filter_coeffs = cheb_filter;
+    *basisfunc = cheb_basisfunc;
   }
   else
   {
