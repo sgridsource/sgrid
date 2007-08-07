@@ -30,6 +30,9 @@ void cheb_eval_onExtrema(double c[], double u[], int N);
 /* filter: zero all c[j] with k<=j<=n */
 void cheb_filter(double c[], int k, int n);
 
+/* find value of Cheb. basis function T_n at X (in [a,b]) */
+double cheb_basisfunc(double a, double b, int n, double X);
+
 
 /* Functions from explicit_Four_trafos.c */
 

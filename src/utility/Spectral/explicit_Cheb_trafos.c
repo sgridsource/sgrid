@@ -185,3 +185,29 @@ void cheb_filter(double c[], int k, int n)
   
   for(j=k;j<=n;j++) c[j]=0;
 }
+
+
+/* find value of Cheb. basis function T_n at X (in [a,b]) */
+double cheb_basisfunc(double a, double b, int n, double X)
+{
+  double d=0.0, dd=0.0, sv, y, y2;
+  int j;
+
+  if(n==0) return 0.5;  /* in numrec T_0 / 2 is used as basisfunc # 0 */
+
+  if ((X-a)*(X-b) > 0.0) printf("X not in range in routine cheb_basis\n");
+  y=(2.0*X-a-b)/(a-b);
+  y2=2.0*y;
+
+  sv=d;
+  d=y2*d-dd+ 1.0;
+  dd=sv;
+        
+  for(j=n-1;j>=1;j--)
+  {
+    sv=d;
+    d=y2*d-dd;
+    dd=sv;
+  }
+  return y*d-dd;
+}

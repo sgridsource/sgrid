@@ -242,9 +242,9 @@ void get_spec_functionpointers(tBox *box, int direc,
 }
 
 
-/* compute B_k(x) M_ki */
-/* Cu_k = M_ki u_i   <-- M is coeff matrix
-   u(x) = Cu_k B_k(x) = B_k(x) M_ki u_i = BM_i u_i */
+/* compute B_k(x) M_ki     <-- B_k is basis function k
+   Cu_k = M_ki u_i         <-- M_ki is coeff matrix
+   u(x) = Cu_k B_k(x) = B_k(x) M_ki u_i = BM_i u_i      */
 double spec_Basis_times_CoeffMatrix(tBox *box, int direc, 
                                     double *BM, double X)
 {
@@ -259,8 +259,7 @@ double spec_Basis_times_CoeffMatrix(tBox *box, int direc,
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(double a, double b, int k, double X)=NULL;
-
-// basisfunc is something like cheb_eval
+  /* basisfunc is something like cheb_basisfunc */
 
   get_spec_functionpointers(box, direc, &get_coeffs, &coeffs_of_deriv,
                             &coeffs_of_2ndderiv, &eval_onPoints,
