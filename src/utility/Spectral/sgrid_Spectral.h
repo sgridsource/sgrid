@@ -31,6 +31,8 @@ void initdiffmatrix2(double a, double b, double *DD, int n1,
 
 /* Functions from matrices.c */
 void matrix_times_vector(double *M, double *u, double *Mu, int n);
+void matrix_times_matrix(double *M, double *D, double *MD, int n);
+void vector_times_matrix(double *u, double *M, double *uM, int n);
 
 /* Functions from filters.c */
 void initfiltermatrix(double *F, int k, int n1,
