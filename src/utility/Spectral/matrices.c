@@ -34,3 +34,17 @@ void matrix_times_matrix(double *M, double *D, double *MD, int n)
       MD[n*i + k] = sum;
     }
 }
+
+/* multiply vector transpose with matrix uM = u^T M ,  uM_j = u_i M_ij */
+void vector_times_matrix(double *u, double *M, double *uM, int n)
+{
+  int i,j;
+  double sum;
+  
+  for(j=0; j<n; j++)
+  {
+    sum=0.0;
+    for(i=0; i<n; i++)  sum += u[i] * M[n*i + j];
+    Mu[j] = sum;
+  }
+}
