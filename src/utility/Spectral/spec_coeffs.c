@@ -266,7 +266,13 @@ double spec_Basis_times_CoeffMatrix(tBox *box, int direc,
   get_spec_functionpointers(box, direc, &get_coeffs, &coeffs_of_deriv,
                             &coeffs_of_2ndderiv, &eval_onPoints,
                             &filter_coeffs, &basisfunc);
- 
+  if(basisfunc==NULL)
+  {
+    printf("spec_Basis_times_CoeffMatrix: box%d, direc=%d\n", box->b, direc);
+    errorexiti("spec_Basis_times_CoeffMatrix: "
+               "basisfunc=NULL (direc=%d)", direc);
+  }
+
   if(direc==1)      { linelen = box->n1; a=box->bbox[0]; b=box->bbox[1]; }
   else if(direc==2) { linelen = box->n2; a=box->bbox[2]; b=box->bbox[3]; }
   else if(direc==3) { linelen = box->n3; a=box->bbox[4]; b=box->bbox[5]; }
