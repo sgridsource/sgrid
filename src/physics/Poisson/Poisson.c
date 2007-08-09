@@ -7,11 +7,6 @@
 
 #define Power pow
 
-// remove this
-int linSol(tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
-	     int imax, double tol, double *res,
-	     void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
-	     void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
 
 /* initialize Poisson */
 int Poisson_startup(tGrid *grid)
@@ -64,7 +59,7 @@ int Poisson_startup(tGrid *grid)
         z = pz[i];
       }
       /* set Psi */
-      Psi[i] = 2.0;
+      Psi[i] = x*y*z; // 1.0/sqrt(x*x + y*y + z*z);
     }
   }
 
@@ -104,24 +99,24 @@ int Poisson_solve(tGrid *grid)
   vlFu = AddDuplicateEnable(vlu,  "res");
 
   /* now duplicate vlu and vluDerivs for linarized Eqs. */
-  vldu       = AddDuplicateEnable(vlu,  "l");
-  vlr        = AddDuplicateEnable(vlFu, "l");
-  vlduDerivs = AddDuplicateEnable(vluDerivs, "l");
+  vldu       = AddDuplicateEnable(vlu,  "_l");
+  vlr        = AddDuplicateEnable(vlFu, "_l");
+  vlduDerivs = vluDerivs; /* maybe: vlduDerivs=AddDuplicateEnable(vluDerivs, "_l"); */
 
   /* call Newton solver */
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, 0,
          itmax, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlu,
          linSolver_itmax, linSolver_tolFac);
-
+/*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, 0,
          itmax, tol, &normresnonlin, 1,
          linSol, Precon_I, vldu, vlr, vlduDerivs, vlu,
          linSolver_itmax, linSolver_tolFac);
-
+*/
   /* free varlists */     
   VLDisableFree(vldu);
-  VLDisableFree(vlduDerivs);
+  /* VLDisableFree(vlduDerivs); */
   VLDisableFree(vlr);     
   vlfree(vlu);
   vlfree(vluDerivs);
@@ -144,7 +139,7 @@ int Poisson_analyze(tGrid *grid)
   double y0        = Getd("Poisson_y0");
   double z0        = Getd("Poisson_z0");
 */
-  printf("Poisson: computing absolute error in derivatives\n");
+  printf("Poisson: computing absolute error\n");
   
   /* set initial data in boxes */
   forallboxes(grid,b)
@@ -175,7 +170,7 @@ int Poisson_analyze(tGrid *grid)
         z = pz[i];
       }
 
-      PsiErr[i] = Psi[i]-0;
+      PsiErr[i] = Psi[i]-1.0/sqrt(x*x + y*y + z*z);
     }
   }
   return 0;
@@ -187,25 +182,39 @@ void F_Poisson(tVarList *vlFu, tVarList *vlu,
                tVarList *vluDerivs, tVarList *vlc2)
 {
   tGrid *grid = vlu->grid;
-  int i,j,b;
+  int b;
   	
-  for(j = 0; j < vlu->n; j++)
-    forallboxes(grid, b)
-    {
-      tBox *box = grid->box[b];
-      double *Fu = box->v[vlFu->index[j]];
-      double *u  = box->v[vlu->index[j]];
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    double *Fu = box->v[vlFu->index[0]];
+    double *u  = box->v[vlu->index[0]];
+    double *uxx = box->v[vluDerivs->index[3]];
+    double *uyy = box->v[vluDerivs->index[6]];
+    double *uzz = box->v[vluDerivs->index[8]];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int i,j,k;
 
-//    /* compute the derivs */
-//    if(Getv("Poisson_useDD", "yes"))
-//      allDerivsOf_S(box, Ind("Poisson_u"), Ind("Poisson_Err_dux"), 
-//                    Ind("Poisson_Err_dduxx"));
-//    else
-//      FirstAndSecondDerivsOf_S(box, Ind("Poisson_u"), Ind("Poisson_Err_dux"),
-//                               Ind("Poisson_Err_dduxx"));
+    /* compute the derivs */
+    if(Getv("Poisson_useDD", "yes"))
+      allDerivsOf_S(box, vlu->index[0], vluDerivs->index[0],
+                    vluDerivs->index[3]);
+    else
+      FirstAndSecondDerivsOf_S(box, vlu->index[0], vluDerivs->index[0],
+                               vluDerivs->index[3]);
 
-      forallpoints(box, i)  Fu[i] = u[i]*u[i] - 9.0;
-    }
+//    forallpoints(box, i)  Fu[i] = u[i]*u[i] - 9.0;
+    forallpoints(box, i)  Fu[i] = uxx[i] + uyy[i] + uzz[i];
+
+    /* BCs */
+    forplane1(i,j,k, n1,n2,n3, 0)
+      Fu[Index(i,j,k)] = u[Index(i,j,k)] - 1.0;
+
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+      Fu[Index(i,j,k)] = u[Index(i,j,k)] - 0.5;
+  }
 }
 
 /* evaluate linearized Laplace */
@@ -213,18 +222,39 @@ void J_Poisson(tVarList *vlJdu, tVarList *vldu,
                tVarList *vlduDerivs, tVarList *vlu)
 {
   tGrid *grid = vldu->grid;
-  int i,j,b;
+  int b;
   	
-  for(j = 0; j < vldu->n; j++)
-    forallboxes(grid, b)
-    {
-      tBox *box = grid->box[b];
-      double *Jdu = box->v[vlJdu->index[j]];
-      double *du  = box->v[vldu->index[j]];
-      double *u   = box->v[vlu->index[j]];
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    double *Jdu = box->v[vlJdu->index[0]];
+    double *du  = box->v[vldu->index[0]];
+    double *duxx = box->v[vlduDerivs->index[3]];
+    double *duyy = box->v[vlduDerivs->index[6]];
+    double *duzz = box->v[vlduDerivs->index[8]];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int i,j,k;
 
-      forallpoints(box, i)  Jdu[i] = 2.0*u[i]*du[i];
-    }
+    /* compute the derivs */
+    if(Getv("Poisson_useDD", "yes"))
+      allDerivsOf_S(box, vldu->index[0], vlduDerivs->index[0],
+                    vlduDerivs->index[3]);
+    else
+      FirstAndSecondDerivsOf_S(box, vldu->index[0], vlduDerivs->index[0],
+                               vlduDerivs->index[3]);
+
+//    forallpoints(box, i)  Jdu[i] = 2.0*u[i]*du[i];
+    forallpoints(box, i)  Jdu[i] = duxx[i] + duyy[i] + duzz[i];
+
+    /* BCs */
+    forplane1(i,j,k, n1,n2,n3, 0)
+      Jdu[Index(i,j,k)] = du[Index(i,j,k)];
+
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+      Jdu[Index(i,j,k)] = du[Index(i,j,k)];
+  }
 }  
 
 /* Einheitsmatrix als Precon */ 
@@ -243,27 +273,4 @@ void Precon_I(tVarList *vlJdu, tVarList *vldu,
 
       forallpoints(box, i)  Jdu[i] = du[i];
     }
-}
-
-int linSol(tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
-	     int imax, double tol, double *res,
-	     void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
-	     void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
-{
-  tGrid *grid = b->grid;
-  int i,j,bi;
-  	
-//  lop(r, , c);
-
-  for(j = 0; j < b->n; j++)
-    forallboxes(grid, bi)
-    {
-      tBox *box = grid->box[bi];
-      double *px = box->v[x->index[j]];
-      double *pb = box->v[b->index[j]];
-      double *pc2= box->v[c2->index[j]];
-
-      forallpoints(box, i)  px[i] = pb[i]/(2*pc2[i]);
-    }
-  return 666;
 }
