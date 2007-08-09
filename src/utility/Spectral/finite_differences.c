@@ -97,3 +97,43 @@ void fd2_filter(double c[], int k, int n)
   /* not yet done !*/
   return ;
 }
+
+
+/* compute coeffs cder[0...n] of centered deriv from coeffs c[0...n] for
+   a non-periodic grid with non-uniform grid spacing: x_j,  j=0, ..., n */
+void fdcentered_deriv_onesidedBC(double x[], double c[], double cder[], int n)
+{
+  int j;
+
+  for (j=1;j<n;j++)
+    cder[j] =  0.5 * (c[j+1] - c[j-1]) / (x[j+1] - x[j-1]);
+
+  cder[0] = (c[1] - c[0])  /(x[1] - x[0]);
+  cder[n] = (c[n] - c[n-1])/(x[n] - x[n-1]);
+}
+
+
+/* compute coeffs cder[0...n] of deriv D^+ from coeffs c[0...n] for
+   a non-periodic grid with non-uniform grid spacing: x_j,  j=0, ..., n */
+void fdDp_deriv_onesidedBC(double x[], double c[], double cder[], int n)
+{
+  int j;
+
+  for (j=0;j<n;j++)
+    cder[j] =  (c[j+1] - c[j]) / (x[j+1] - x[j]);
+
+  cder[n] = (c[n] - c[n-1])/(x[n] - x[n-1]);
+}
+
+
+/* compute coeffs cder[0...n] of deriv D^- from coeffs c[0...n] for
+   a non-periodic grid with non-uniform grid spacing: x_j,  j=0, ..., n */
+void fdDm_deriv_onesidedBC(double x[], double c[], double cder[], int n)
+{
+  int j;
+
+  for (j=1;j<=n;j++)
+    cder[j] =  (c[j] - c[j-1]) / (x[j] - x[j-1]);
+
+  cder[0] = (c[1] - c[0])/(x[1] - x[0]);
+}
