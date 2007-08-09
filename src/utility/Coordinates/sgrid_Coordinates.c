@@ -17,9 +17,15 @@ int sgrid_Coordinates(void)
          "initialize coords and coord transforms");
 
   /* variables */
-  AddConstantVar("x", "", "cartesian x coordinate");
-  AddConstantVar("y", "", "cartesian y coordinate");
-  AddConstantVar("z", "", "cartesian z coordinate");
+  AddVar("x", "", "cartesian x coordinate");
+  AddVar("y", "", "cartesian y coordinate");
+  AddVar("z", "", "cartesian z coordinate");
+  AddVar("dXd", "i", "coordinate derivative dX/dx^i");
+  AddVar("dYd", "i", "coordinate derivative dY/dx^i");
+  AddVar("dZd", "i", "coordinate derivative dZ/dx^i");
+  AddVar("ddXdd", "(ij)", "2nd coordinate derivative d^2 X/dx^i dx^j");
+  AddVar("ddYdd", "(ij)", "2nd coordinate derivative d^2 Y/dx^i dx^j");
+  AddVar("ddZdd", "(ij)", "2nd coordinate derivative d^2 Z/dx^i dx^j");
 
   /* parameters */
   for(b=0; b<nboxes; b++)
@@ -28,9 +34,11 @@ int sgrid_Coordinates(void)
 
     snprintf(str, 999, "box%d_Coordinates", b);
     AddPar(str, "Cartesian", 
-           "coordinates used in box [Cartesian, Polar]");
+           "coordinates used in box [Cartesian, Polar, ...]");
   }
 
+  AddPar("CoordinateTransforms_stored", "no",
+         "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");
   AddPar("compactSphericalDF_r0", "-1", "radius r at xi=0");
   AddPar("tan_stretch_s", "0", "how much we stretch [0,Xmax]");
 

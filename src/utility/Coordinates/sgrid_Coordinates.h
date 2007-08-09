@@ -5,6 +5,7 @@
 
 /* Coordinates.c */
 int init_CoordTransform_And_Derivs(tGrid *grid);
+int compute_xyz_dXYZdxyz_ddXYZddxyz(tGrid *grid);
 
 /* cartesianDerivs.c */
 void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3);

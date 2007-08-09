@@ -18,13 +18,16 @@
 /* initialize the coord transforms */
 int init_CoordTransform_And_Derivs(tGrid *grid)
 {
-  int var_X = Ind("X");
-  int var_Y = Ind("Y");
-  int var_Z = Ind("Z");
   int var_x = Ind("x");
   int var_y = Ind("y");
   int var_z = Ind("z");
-  int b, ind;
+  int dXd = Ind("dXdx");
+  int dYd = Ind("dYdx");
+  int dZd = Ind("dZdx");
+  int ddXdd = Ind("ddXddxx");
+  int ddYdd = Ind("ddYddxx");
+  int ddZdd = Ind("ddZddxx");
+  int b;
 
   for (b = 0; b < grid->nboxes; b++)
   {
@@ -284,21 +287,99 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     else
       errorexit("Coordinates: unknown coordinates...");
 
-    /* compute cartesian coordinates x,y,z from X,Y,Z */
+    /* enable cartesian coordinates x,y,z */
     enablevar_inbox(box, var_x);
     enablevar_inbox(box, var_y);
     enablevar_inbox(box, var_z);
 
+    /* enable storage for trafos? */
+    if(Getv("CoordinateTransforms_stored", "yes"))
+    {
+      if( box->dX_dx[1][1] != NULL )
+      {
+        enablevar_inbox(box, dXd);
+        enablevar_inbox(box, dYd);
+        enablevar_inbox(box, dZd);
+      }
+      if( box->ddX_dxdx[1][1][1] != NULL )
+      {
+        enablevar_inbox(box, ddXdd);
+        enablevar_inbox(box, ddYdd);
+        enablevar_inbox(box, ddZdd);
+      }
+    }
+  } /* end for b */
+
+  /* compute cartesian coordinates x,y,z from X,Y,Z */
+  compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
+
+  return 0;
+}
+
+
+/* compute coord values and coord trafos and store them in
+   x,y,z, dXdx,dXdy,... , ddXddxx,ddXddxy,...               */
+int compute_xyz_dXYZdxyz_ddXYZddxyz(tGrid *grid)
+{
+  int var_X = Ind("X");
+  int var_Y = Ind("Y");
+  int var_Z = Ind("Z");
+  int var_x = Ind("x");
+  int var_y = Ind("y");
+  int var_z = Ind("z");
+  int dXd = Ind("dXdx");
+  int dYd = Ind("dYdx");
+  int dZd = Ind("dZdx");
+  int ddXdd = Ind("ddXddxx");
+  int ddYdd = Ind("ddYddxx");
+  int ddZdd = Ind("ddZddxx");
+  int b, ind;
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+
     if( box->x_of_X[1] != NULL )
+    {
       forallpoints(box, ind)
       {
+        int j,k,n;
+
+        /* compute cartesian coordinates x,y,z from X,Y,Z */
         double X = box->v[var_X][ind];
         double Y = box->v[var_Y][ind];
         double Z = box->v[var_Z][ind];
         box->v[var_x][ind] = box->x_of_X[1]((void *) box, ind, X,Y,Z);
         box->v[var_y][ind] = box->x_of_X[2]((void *) box, ind, X,Y,Z);
         box->v[var_z][ind] = box->x_of_X[3]((void *) box, ind, X,Y,Z);
-      }
+        
+        /* compute dXdx, dXdy, ... */
+        if( box->v[dXd] != NULL )
+          for(j=1; j<=3; j++)
+          {
+            box->v[dXd + j-1][ind]=box->dX_dx[1][j]((void *) box, ind, X,Y,Z);
+            box->v[dYd + j-1][ind]=box->dX_dx[2][j]((void *) box, ind, X,Y,Z);
+            box->v[dZd + j-1][ind]=box->dX_dx[3][j]((void *) box, ind, X,Y,Z);
+          }
+
+        /* compute ddXddxx, ddXddxy, ... */
+        if( box->v[ddXdd] != NULL )
+        {
+          n=0;
+          for(j=1; j<=3; j++)
+          for(k=j; k<=3; k++)
+          {
+            box->v[ddXdd + n][ind] 
+              = box->ddX_dxdx[1][j][k]((void *) box, ind, X,Y,Z);
+            box->v[ddYdd + n][ind] 
+              = box->ddX_dxdx[2][j][k]((void *) box, ind, X,Y,Z);
+            box->v[ddZdd + n][ind] 
+              = box->ddX_dxdx[3][j][k]((void *) box, ind, X,Y,Z);
+            n++;
+          }
+        } /* end if( box->v[ddXdd] != NULL ) */
+      } /* end forallpoints */
+    }
     else
       forallpoints(box, ind)
       {
@@ -309,7 +390,6 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         box->v[var_y][ind] = Y;
         box->v[var_z][ind] = Z;
       }
-
   }
   return 0;
 }
