@@ -9,17 +9,17 @@
    It takes the function F(u), its linearization J(du), some var lists and
    pars as well as a linear Solver and a Preconditioner as arguments.      */
 int Newton(
-  void  (*Fu)(tVarList *vl_Fu,  tVarList *vl_u,  tVarList *vl_aux),
-  void (*Jdu)(tVarList *vl_Jdu, tVarList *vl_du, tVarList *vl_aux2),
-  tVarList *vlu, tVarList *vlFu, tVarList *vlaux, 
-  int itmax, double tol,double *normres, int pr,
+  void  (*Fu)(tVarList *vl_Fu,  tVarList *vl_u,  tVarList *vl_c1, tVarList *vl_c2),
+  void (*Jdu)(tVarList *vl_Jdu, tVarList *vl_du, tVarList *vl_d1, tVarList *vl_d2),
+  tVarList *vlu, tVarList *vlFu, tVarList *vlc1, tVarList *vlc2,
+  int itmax, double tol, double *normres, int pr,
   int (*linSolver)(tVarList *vl_du, tVarList *vl_Fu, 
-                    tVarList *vl_res, tVarList *vl_aux2,
-                    int lin_itmax, double lin_tol, double *lin_normres,
-	            void (*J_du)(tVarList *, tVarList *, tVarList *), 
-	            void (*lin_precon)(tVarList *, tVarList *, tVarList *)),
-  void (*linPrecon)(tVarList *Hinv_v, tVarList *v, tVarList *),
-  tVarList *vldu, tVarList *vlres, tVarList *vlaux2,
+                   tVarList *vl_res, tVarList *vl_d1, tVarList *vl_d2,
+                   int lin_itmax, double lin_tol, double *lin_normres,
+	           void (*J_du)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	           void (*lin_precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
+  void (*linPrecon)(tVarList *Hinv_v, tVarList *v, tVarList *, tVarList *),
+  tVarList *vldu, tVarList *vlres, tVarList *vld1, tVarList *vld2,
   int linSolv_itmax, double linSolv_tolFac )
 {
   tGrid *grid = vlFu->grid;
@@ -32,7 +32,7 @@ int Newton(
   for (inewton = 0; inewton <= itmax; inewton++)
   {
     /* compute vlFu = F(u) */
-    Fu(vlFu, vlu, vlaux);
+    Fu(vlFu, vlu, vlc1, vlc2);
     res = norm2(vlFu);
     *normres = res;
 
@@ -47,7 +47,7 @@ int Newton(
     if (*normres <= tol) break;
 
     /* solve linear equation */
-    lin_its=linSolver(vldu, vlFu, vlres, vlaux2, 
+    lin_its=linSolver(vldu, vlFu, vlres, vld1, vld2, 
                       linSolv_itmax, (*normres)*linSolv_tolFac, &lin_normres,
 	              Jdu, linPrecon);
     /* if(pr) printf("Newton: after linSolver: %e\n",lin_normres); */
@@ -66,19 +66,19 @@ int Newton(
           du[i] = 0;      /* reset du to zero */
         }
       }
-    
+
     /* sync vlu. sync is not needed if du is synced */
     /* bampi_vlsynchronize(vlu); */
 
     /* boundary conditions for vlu are set in the function
-       Fu(vlFu, vlu, vlaux);  supplied by the user.         */
+       Fu(vlFu, vlu, vlc1, vlc2);  supplied by the user.         */
   } 
 
   /* warn if we didn't converge */
   if (inewton > itmax)
   {
     printf("Newton warning: *** Too many Newton steps! *** \n");
-    Fu(vlFu, vlu, vlaux);
+    Fu(vlFu, vlu, vlc1, vlc2);
     res = norm2(vlFu);
     *normres = res;
     printf("Newton: Residual after %d Newton steps:"

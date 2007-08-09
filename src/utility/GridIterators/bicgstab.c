@@ -10,10 +10,10 @@
 
 
 
-int bicgstab(tVarList *x, tVarList *b, tVarList *r, tVarList *c,
+int bicgstab(tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
 	     int itmax, double tol, double *normres,
-	     void (*lop)(tVarList *, tVarList *, tVarList *), 
-	     void (*precon)(tVarList *, tVarList *, tVarList *))
+	     void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	     void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
 {
   tGrid *grid = b->grid;
   int boxi;
@@ -45,7 +45,7 @@ int bicgstab(tVarList *x, tVarList *b, tVarList *r, tVarList *c,
   if (pr) printf("bicgstab:  itmax %d, tol %e\n", itmax, tol);
 
   /* compute initial residual rt = r = b - A x */
-  lop(r, x, c);
+  lop(r, x, c1, c2);
   for (j = 0; j < r->n; j++)
     forallboxes(grid,boxi)
     {
@@ -82,8 +82,8 @@ int bicgstab(tVarList *x, tVarList *b, tVarList *r, tVarList *c,
     }
 
     /* compute direction adjusting vector ph and scalar alpha */
-    precon(ph, p, c);
-    lop(v, ph, c);
+    precon(ph, p, c1, c2);
+    lop(v, ph, c1, c2);
     alpha = rho/dot(rt, v);
     for (j = 0; j < r->n; j++)
       forallboxes(grid,boxi)
@@ -114,8 +114,8 @@ int bicgstab(tVarList *x, tVarList *b, tVarList *r, tVarList *c,
     }
 
     /* compute stabilizer vector sh and scalar omega */
-    precon(sh, s, c);
-    lop(t, sh, c);
+    precon(sh, s, c1, c2);
+    lop(t, sh, c1, c2);
     omega = dot(t, s) / dot (t, t);
 
     /* compute new solution approximation */
