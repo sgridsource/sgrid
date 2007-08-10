@@ -37,7 +37,7 @@ int sgrid_Coordinates(void)
            "coordinates used in box [Cartesian, Polar, ...]");
   }
 
-  AddPar("CoordinateTransforms_stored", "no",
+  AddPar("CoordinateTransforms_stored", "yes",
          "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");
   AddPar("compactSphericalDF_r0", "-1", "radius r at xi=0");
   AddPar("tan_stretch_s", "0", "how much we stretch [0,Xmax]");
