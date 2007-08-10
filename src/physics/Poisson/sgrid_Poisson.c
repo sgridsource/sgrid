@@ -20,6 +20,10 @@ int sgrid_Poisson()
   AddVar("Poisson_Psi",     "i",    "1st deriv of Psi");
   AddVar("Poisson_Psi",     "(ij)", "2nd deriv of Psi");
   AddVar("Poisson_Err_Psi", "",     "Error in Psi");
+  AddVar("Poisson_Chi",     "",     "another function that satisfies Poisson");
+  AddVar("Poisson_Chi",     "i",    "1st deriv of Chi");
+  AddVar("Poisson_Chi",     "(ij)", "2nd deriv of Chi");
+  AddVar("Poisson_Err_Chi", "",     "Error in Chi");
    
   /* parameters */
   AddPar("Poisson_useDD", "no",

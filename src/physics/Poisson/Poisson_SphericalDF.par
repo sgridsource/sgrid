@@ -2,6 +2,8 @@
 
 physics = Poisson
 
+CoordinateTransforms_stored = no
+
 Poisson_useDD = no # yes
 
 evolution_method = rk # icn # euler # rk
