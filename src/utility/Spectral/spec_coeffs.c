@@ -272,8 +272,8 @@ USE something like this before calling spec_Basis_times_CoeffMatrix:
   else
     errorexit("spec_Basis_times_CoeffMatrix: possible values for direction direc are 1,2,3.");
 */
-double spec_Basis_times_CoeffMatrix(double a, double b, int n,
-                                    double *BM, double X,
+void spec_Basis_times_CoeffMatrix(double a, double b, int n,
+                                  double *BM, double X,
                     void   (*get_coeffs)(double *,double *, int),
                     double (*basisfunc)(double a, double b, int k, double X))
 {			  /* basisfunc is something like cheb_basisfunc */
