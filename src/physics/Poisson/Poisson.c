@@ -79,7 +79,7 @@ int Poisson_startup(tGrid *grid)
         rh1[i] = 0.0;
         rh2[i] = 0.0;
         if(b==1)  rh1[i] = 4.0*PI;
-        if(b==1)  rh2[i] = 8.0*PI;
+        if(b==2)  rh2[i] = 8.0*PI;
       }
     }
   }
