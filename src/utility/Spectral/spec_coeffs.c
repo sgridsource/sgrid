@@ -277,16 +277,19 @@ double spec_Basis_times_CoeffMatrix(double a, double b, int n,
                     void   (*get_coeffs)(double *,double *, int),
                     double (*basisfunc)(double a, double b, int k, double X))
 {			  /* basisfunc is something like cheb_basisfunc */
-  double *M=NULL;
-  double *B=NULL;
+  double *M;
+  double *B;
   int i;
+
+  M = (double *) calloc(n*n, sizeof(double));
+  B = (double *) calloc(n, sizeof(double));
+
+  if( !(M && B) ) errorexit("spec_Basis_times_CoeffMatrix: out of memory for M, B");
     
   /* initialize the matrix M used to compute coeffs */
-  M = (double *) calloc(n*n, sizeof(double));
   initMatrix_ForCoeffs(M, n, get_coeffs);
 
   /* initialize basis functions at point X */
-  B = (double *) calloc(n, sizeof(double));
   for(i = 0; i < n; i++)  B[i] = basisfunc(a,b, i, X); // B[i]=B_i(X)
 
   /* Cu_k = M_ki u_i   <-- M is coeff matrix
@@ -295,7 +298,7 @@ double spec_Basis_times_CoeffMatrix(double a, double b, int n,
   /* get BM_i = B_k(X) M_ki */
   vector_times_matrix(B, M, BM, n);
 
-  /* free memory for  matrix M and basis funcs B */
+  /* free memory for matrix M and basis funcs B */
   free(M);
   free(B);
 }
