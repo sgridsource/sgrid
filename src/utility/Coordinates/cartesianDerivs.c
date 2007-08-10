@@ -149,7 +149,14 @@ double ddX_dxdx(int i, int m, int n, int ddXdd,
                 tBox *box, int ind, double X, double Y, double Z)
 {
   if(box->v[ddXdd])
-    return box->v[ddXdd +6*(i-1) +(m==1)*(n-1) +m+n-1][ind];
+  {
+    int vi;
+
+    if(m==1)  vi=ddXdd +6*(i-1) +(n-1);
+    else      vi=ddXdd +6*(i-1) +m+n-1;
+
+    return box->v[vi][ind];
+  }
   else
     return box->ddX_dxdx[i][m][n]((void *) box, ind, X,Y,Z);
 }
