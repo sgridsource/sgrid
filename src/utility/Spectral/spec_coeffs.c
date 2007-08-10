@@ -47,7 +47,7 @@ void initMatrix_ToEvaluate(double *M, int n1,
   u = (double *) calloc(n1, sizeof(double));
   c = (double *) calloc(n1, sizeof(double));
 
-  if( !(u && c) ) errorexit("initMatrix_ForCoeffs: out of memory for u, c");
+  if( !(u && c) ) errorexit("initMatrix_ToEvaluate: out of memory for u, c");
 
 
   /* read matrix from functions */
