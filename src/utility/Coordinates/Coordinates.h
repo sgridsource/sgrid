@@ -1,6 +1,13 @@
 /* Coordinates.h */
 /* Wolfgang Tichy 4/2005 */
 
+
+/* from cartesianDerivs.c */
+double dX_dx(int i, int m, int dXd,
+             tBox *box, int ind, double X, double Y, double Z);
+double ddX_dxdx(int i, int m, int n, int ddXdd,
+                tBox *box, int ind, double X, double Y, double Z);
+
 /* from doubleCovering.c */
 void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);
 

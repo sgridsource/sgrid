@@ -135,6 +135,26 @@ void cart_partial_all_old(tBox *box, double *u, double *u1, double *u2, double *
 }
 
 
+/* corrdinate trafos used in cart_partials and cart_partial_all */
+double dX_dx(int i, int m, int dXd,
+             tBox *box, int ind, double X, double Y, double Z)
+{
+  if(box->v[dXd])
+    return box->v[dXd + 3*(i-1) + m-1][ind];
+  else
+    return box->dX_dx[i][m]((void *) box, ind, X,Y,Z);
+}
+
+double ddX_dxdx(int i, int m, int n, int ddXdd,
+                tBox *box, int ind, double X, double Y, double Z)
+{
+  if(box->v[ddXdd])
+    return box->v[ddXdd +6*(i-1) +(m==1)*(n-1) +m+n-1][ind];
+  else
+    return box->ddX_dxdx[i][m][n]((void *) box, ind, X,Y,Z);
+}
+
+
 /* compute du/dx_m  where m=1,2,3 */
 /* Note dX_dx[l][m] = dX_l/dx_m where x_m is the mth cartesian coord,
    i.e x_m=(x,y,z) and X_l is e.g. X_l=(rho,phi,z)*/
@@ -152,7 +172,6 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
     double *Xp = box->v[Ind("X")];
     double *Yp = box->v[Ind("Y")];
     double *Zp = box->v[Ind("Z")];
-    double dXi_dxm;
     double *du[4];
     double dv[4];
 
@@ -164,22 +183,14 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
       double X = Xp[ind];
       double Y = Yp[ind];
       double Z = Zp[ind];
-
+    
       /* Transform derivs to cartesian coords */
       for(m=1; m<=3; m++)
       {
         dv[m] = 0.0;
           
         for(i=1; i<=3; i++)
-        {
-          /* dv[m] += box->dX_dx[i][m]((void *) box, ind, X,Y,Z) * du[i][ind]; */
-          if(box->v[dXd])
-            dXi_dxm = box->v[dXd + 3*(i-1) + m-1][ind];
-          else
-            dXi_dxm = box->dX_dx[i][m]((void *) box, ind, X,Y,Z);
-
-          dv[m] += dXi_dxm * du[i][ind];
-        }
+          dv[m] += dX_dx(i,m, dXd, box, ind, X,Y,Z) * du[i][ind];
       }
       /* copy dv into du */
       for(m=1; m<=3; m++)
@@ -218,9 +229,6 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
     double *Xp = box->v[Ind("X")];
     double *Yp = box->v[Ind("Y")];
     double *Zp = box->v[Ind("Z")];
-    double dXi_dxm;
-    double dXj_dxn;
-    double ddXi_dxmdxn;
     double *du[4];
     double *ddu[4][4];
     double dv[4];
@@ -253,44 +261,20 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
         dv[m] = 0.0;
         
         for(i=1; i<=3; i++)
-        {
-           /* dv[m] += box->dX_dx[i][m]((void *) box, ind, X,Y,Z)  *  du[i][ind]; */
-          if(box->v[dXd])
-            dXi_dxm = box->v[dXd + 3*(i-1) + m-1][ind];
-          else
-            dXi_dxm = box->dX_dx[i][m]((void *) box, ind, X,Y,Z);
-
-          dv[m] += dXi_dxm * du[i][ind];
-        }
+          dv[m] += dX_dx(i,m, dXd, box, ind, X,Y,Z) * du[i][ind];
 
         for(n=m; n<=3; n++)
         {
           ddv[m][n] = 0.0;
 
           for(i=1; i<=3; i++)
-          {
-            if(box->v[ddXdd])
-              ddXi_dxmdxn = box->v[ddXdd +6*(i-1) +(m==1)*(n-1) +m+n-1][ind];
-            else
-              ddXi_dxmdxn = box->ddX_dxdx[i][m][n]((void *) box, ind, X,Y,Z);
-            ddv[m][n] += ddXi_dxmdxn * du[i][ind];
-          }
+            ddv[m][n] += ddX_dxdx(i,m,n, ddXdd, box, ind, X,Y,Z) * du[i][ind];
 
           for(i=1; i<=3; i++)
             for(j=1; j<=3; j++)
-            {
-              if(box->v[dXd])
-              {
-                dXi_dxm = box->v[dXd + 3*(i-1) + m-1][ind];
-                dXj_dxn = box->v[dXd + 3*(j-1) + n-1][ind];
-              }
-              else
-              {
-                dXi_dxm = box->dX_dx[i][m]((void *) box, ind, X,Y,Z);
-                dXj_dxn = box->dX_dx[j][n]((void *) box, ind, X,Y,Z);
-              }
-              ddv[m][n] += dXi_dxm * dXj_dxn * ddu[i][j][ind];
-            }
+              ddv[m][n] += dX_dx(i,m, dXd, box, ind, X,Y,Z) *
+                           dX_dx(j,n, dXd, box, ind, X,Y,Z) *
+                           ddu[i][j][ind];
         }
       }
 
