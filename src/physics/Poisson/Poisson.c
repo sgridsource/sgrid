@@ -390,22 +390,23 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         /* values at A=0 are equal in box0 and box1 */
         P = grid->box[1]->v[vlu->index[0]]; /* values in box1 */
         C = grid->box[1]->v[vlu->index[1]];
-        spec_Basis_times_CoeffMatrix(0.0,1.0, n1, BM, 0,
+        spec_Basis_times_CoeffMatrix(0.0,1.0, n1, BM, 0.0,
                                      cheb_coeffs_fromZeros, cheb_basisfunc);
         forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
         {
           int l;
-          double line[n1]; // fixme!!!!!!!
+          double *line = (double *) calloc(n1, sizeof(double));
           double U0;
 
           /* find values U0 in box0 at A=0*/
           get_memline(Psi, line, 1, j,k, n1,n2,n3);
-          for(U0=0.0, l=0; l<=n1; l++)  U0 += BM[l]*line[l];
+          for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
           FPsi[Index(i,j,k)] = U0 - P[Index(i,j,k)];
 
           get_memline(Chi, line, 1, j,k, n1,n2,n3);
-          for(U0=0.0, l=0; l<=n1; l++)  U0 += BM[l]*line[l];
+          for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
           FChi[Index(i,j,k)] = U0 - C[Index(i,j,k)];
+          free(line);
         }
         free(BM);
       }
@@ -416,22 +417,23 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         /* values at A=0 are equal in box3 and box2 */
         P = grid->box[2]->v[vlu->index[0]]; /* values in box2 */
         C = grid->box[2]->v[vlu->index[1]];
-        spec_Basis_times_CoeffMatrix(0.0,1.0, n1, BM, 0,
+        spec_Basis_times_CoeffMatrix(0.0,1.0, n1, BM, 0.0,
                                      cheb_coeffs_fromZeros, cheb_basisfunc);
         forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
         {
           int l;
-          double line[n1]; // fixme!!!!!!!
+          double *line = (double *) calloc(n1, sizeof(double));
           double U0;
 
           /* find values U0 in box3 at A=0*/
           get_memline(Psi, line, 1, j,k, n1,n2,n3);
-          for(U0=0.0, l=0; l<=n1; l++)  U0 += BM[l]*line[l];
+          for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
           FPsi[Index(i,j,k)] = U0 - P[Index(i,j,k)];
 
           get_memline(Chi, line, 1, j,k, n1,n2,n3);
-          for(U0=0.0, l=0; l<=n1; l++)  U0 += BM[l]*line[l];
+          for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
           FChi[Index(i,j,k)] = U0 - C[Index(i,j,k)];
+          free(line);
         }
         free(BM);
       }
@@ -464,21 +466,22 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         {
           double B   = box->v[Ind("Y")][Index(i,j,k)];
           double phi = box->v[Ind("Z")][Index(i,j,k)];
-          double DP[3], DC[3];
+          double DP[4], DC[4];
           int m,l;
           /* find derivs of Psi, Chi at A=0 in box0 
              and store them in DP[m], DC[m] */
           for(m=1; m<=3; m++)
           {
             int n1 = grid->box[0]->n1;
-            double line[n1]; // fixme!!!!!!!
+            double *line = (double *) calloc(n1, sizeof(double));
 
             DP[m] = 0.0;
             get_memline(dP[m], line, 1, j,k, n1,n2,n3);
-            for(l=0; l<=n1; l++)  DP[m] += BM[l]*line[l];
+            for(l=0; l<n1; l++)  DP[m] += BM[l]*line[l];
             DC[m] = 0.0;
             get_memline(dC[m], line, 1, j,k, n1,n2,n3);
-            for(l=0; l<=n1; l++)  DC[m] += BM[l]*line[l];
+            for(l=0; l<n1; l++)  DC[m] += BM[l]*line[l];
+            free(line);
           }
           FPsi[Index(i,j,k)] = 
            cos(PI*B)         * (Psix[Index(i,j,k)] - DP[1]) +
@@ -527,21 +530,22 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         {
           double B   = box->v[Ind("Y")][Index(i,j,k)];
           double phi = box->v[Ind("Z")][Index(i,j,k)];
-          double DP[3], DC[3];
+          double DP[4], DC[4];
           int m,l;
           /* find derivs of Psi, Chi at A=0 in box3 
              and store them in DP[m], DC[m] */
           for(m=1; m<=3; m++)
           {
             int n1 = grid->box[3]->n1;
-            double line[n1]; // fixme!!!!!!!
+            double *line = (double *) calloc(n1, sizeof(double));
 
             DP[m] = 0.0;
             get_memline(dP[m], line, 1, j,k, n1,n2,n3);
-            for(l=0; l<=n1; l++)  DP[m] += BM[l]*line[l];
+            for(l=0; l<n1; l++)  DP[m] += BM[l]*line[l];
             DC[m] = 0.0;
             get_memline(dC[m], line, 1, j,k, n1,n2,n3);
-            for(l=0; l<=n1; l++)  DC[m] += BM[l]*line[l];
+            for(l=0; l<n1; l++)  DC[m] += BM[l]*line[l];
+            free(line);
           }
           FPsi[Index(i,j,k)] = 
            cos(PI*B)         * (Psix[Index(i,j,k)] - DP[1]) +
