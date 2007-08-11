@@ -74,12 +74,15 @@ int Poisson_startup(tGrid *grid)
       }
       else if (Getv("Poisson_grid", "AnsorgNS"))
       {
+/*
         Psi[i] = 0.0;
         Chi[i] = 0.0;
         rh1[i] = 0.0;
         rh2[i] = 0.0;
         if(b==0)  rh1[i] = 4.0*PI;
         if(b==3)  rh2[i] = 8.0*PI;
+*/
+        Psi[i] = b*b;
       }
     }
   }
@@ -120,14 +123,16 @@ int Poisson_solve(tGrid *grid)
   /* add Poisson_rh1 and Poisson_rh2 to vlrhs */
   vlpush(vlrhs, Ind("Poisson_rh1"));
   vlpush(vlrhs, Ind("Poisson_rh2"));
+
+  /* add Poisson_Err_Psi and Poisson_Err_Chi to vlFu */
+  vlpush(vlFu, Ind("Poisson_Err_Psi"));
+  vlpush(vlFu, Ind("Poisson_Err_Chi"));
     
   /* enable vlu, vluDerivs, vlrhs */
   enablevarlist(vlu);
   enablevarlist(vluDerivs); 
   enablevarlist(vlrhs);
-
-  /* now duplicate vlu for result of F(u) */
-  vlFu = AddDuplicateEnable(vlu,  "res");
+  enablevarlist(vlFu);
 
   /* now duplicate vlu and vluDerivs for linarized Eqs. */
   vldu       = AddDuplicateEnable(vlu,  "_l");
@@ -135,14 +140,11 @@ int Poisson_solve(tGrid *grid)
   vlduDerivs = vluDerivs; /* maybe: vlduDerivs=AddDuplicateEnable(vluDerivs, "_l"); */
 
   /* call Newton solver */
+F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
+/*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-         linSolver_itmax, linSolver_tolFac);
-/*
-  Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, 0,
-         itmax, tol, &normresnonlin, 1,
-         linSol, Precon_I, vldu, vlr, vlduDerivs, vlu,
          linSolver_itmax, linSolver_tolFac);
 */
   /* free varlists */     
@@ -199,16 +201,17 @@ int Poisson_analyze(tGrid *grid)
       }
       if(Getv("Poisson_grid", "SphericalDF"))
       {
-        PsiErr[i] = Psi[i]-1.0/sqrt(x*x + y*y + z*z);
-        ChiErr[i] = Chi[i]-2.0/sqrt(x*x + y*y + z*z);
+        //PsiErr[i] = Psi[i]-1.0/sqrt(x*x + y*y + z*z);
+        //ChiErr[i] = Chi[i]-2.0/sqrt(x*x + y*y + z*z);
       }
       else if (Getv("Poisson_grid", "AnsorgNS"))
       {
-        if(b==1||b==2)
-        {
+/*
+        if(b==1||b==2||b==3)
           PsiErr[i] = Psi[i]-1.0/sqrt((x-1)*(x-1) + y*y + z*z);
+        if(b==0||b==1||b==2)
           ChiErr[i] = Chi[i]-2.0/sqrt((x+1)*(x+1) + y*y + z*z);
-        }
+*/
       }
     }
   }
@@ -429,7 +432,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           get_memline(Psi, line, 1, j,k, n1,n2,n3);
           for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
           FPsi[Index(i,j,k)] = U0 - P[Index(i,j,k)];
-
+printf("U0=%f P[Index(i,j,k)]=%f\n", U0, P[Index(i,j,k)]);
           get_memline(Chi, line, 1, j,k, n1,n2,n3);
           for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
           FChi[Index(i,j,k)] = U0 - C[Index(i,j,k)];
