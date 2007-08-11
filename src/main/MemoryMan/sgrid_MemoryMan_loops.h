@@ -21,16 +21,16 @@
 
 /* loop over planes e.g. i=p plane */
 #define  forplane1(i,j,k, n1,n2,n3, p) \
-  for(i=p, k = 0; k < n3; k++) \
-    for(   j = 0; j < n2; j++)
+  for(i=(p), k = 0; k < (n3); k++) \
+    for(     j = 0; j < (n2); j++)
 
 #define  forplane2(i,j,k, n1,n2,n3, p) \
-  for(j=p, k = 0; k < n3; k++) \
-    for(   i = 0; i < n1; i++)
+  for(j=(p), k = 0; k < (n3); k++) \
+    for(     i = 0; i < (n1); i++)
 
 #define  forplane3(i,j,k, n1,n2,n3, p) \
-  for(k=p, j = 0; j < n2; j++) \
-    for(   i = 0; i < n1; i++)
+  for(k=(p), j = 0; j < (n2); j++) \
+    for(     i = 0; i < (n1); i++)
 
 
 
