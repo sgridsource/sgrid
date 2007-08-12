@@ -1134,6 +1134,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   double Rsqr, Xsqr, Rsqr_p_Xsqr;
   double b, lep;
   double sigp_Bphi, sigp_1phi;
+  double Ap;
 
   /* check if we have saved values */  
   if(ind==indsav && domain==domainsav) 
@@ -1148,12 +1149,14 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   if(domain==0 || domain==1)
   {
     lep = -1.5; // Getd("BNS_log_epsp");
+    Ap = sinh(A*lep)/sinh(lep);
     sigp_Bphi = 0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
     sigp_1phi = 0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
   }
   if(domain==2 || domain==3)
   {
     lep = -1; // Getd("BNS_log_epsm");
+    Ap = sinh(A*lep)/sinh(lep);
     sigp_Bphi = -1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
     sigp_1phi = -1.2 + 0.1 + 0.1*sin(phi); // -1; // change this!
   }
@@ -1161,7 +1164,6 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   /* compute coord trafo for each domain */
   if(domain==0) /* use Eq. (24) */
   {
-    double Ap = sinh(A*lep)/sinh(lep);
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
     double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
@@ -1179,7 +1181,6 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   }
   if(domain==1 || domain==2) /* use Eq. (22) */
   {
-    double Ap = sinh(A*lep)/sinh(lep);
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
     double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
@@ -1197,7 +1198,6 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   }
   if(domain==3) /* use Eq. (23) */
   {
-    double Ap = sinh(A*lep)/sinh(lep);
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
     double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
@@ -1270,6 +1270,8 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   double b, lep;
   double sigp_Bphi, sigp_1phi;
   double dsigp_dphi_Bphi, dsigp_dphi_1phi, dsigp_dB_Bphi; /* dsigp_dB_1phi */
+  double Ap;
+  double dApdA;
 
   /* check if we have saved values */  
   if(ind==indsav && domain==domainsav) 
@@ -1293,6 +1295,8 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   if(domain==0 || domain==1)
   {
     lep = -1.5; // Getd("BNS_log_epsp");
+    Ap = sinh(A*lep)/sinh(lep);
+    dApdA = lep*cosh(A*lep)/sinh(lep);
     sigp_Bphi = 0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
     sigp_1phi = 0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
     dsigp_dB_Bphi = -2*PI*0.15*sin(B*2*PI); // 0; // change this!
@@ -1303,6 +1307,8 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   if(domain==2 || domain==3)
   {
     lep = -1; // Getd("BNS_log_epsm");
+    Ap = sinh(A*lep)/sinh(lep);
+    dApdA = lep*cosh(A*lep)/sinh(lep);
     sigp_Bphi = -1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
     sigp_1phi = -1.2 + 0.1 + 0.1*sin(phi); // -1; // change this!
     dsigp_dB_Bphi = -2*PI*0.1*sin(B*2*PI); // 0; // change this!
@@ -1314,9 +1320,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   /* compute coord trafo for each domain */
   if(domain==0) /* use Eq. (24) */
   {
-    double Ap = sinh(A*lep)/sinh(lep);
-    double dApdA = lep*cosh(A*lep)/sinh(lep);
-
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
     double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
@@ -1438,9 +1441,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 
   if(domain==1 || domain==2) /* use Eq. (22) */
   {
-    double Ap = sinh(A*lep)/sinh(lep);
-    double dApdA = lep*cosh(A*lep)/sinh(lep);
-
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
     double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
@@ -1579,9 +1579,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   }
   if(domain==3) /* use Eq. (23) */
   {
-    double Ap = sinh(A*lep)/sinh(lep);
-    double dApdA = lep*cosh(A*lep)/sinh(lep);
-
     double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
     double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
     double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
