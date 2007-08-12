@@ -1150,6 +1150,11 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   {
     lep = -1.5; // Getd("BNS_log_epsp");
     Ap = sinh(A*lep)/sinh(lep);
+    if(domain==0)
+    {
+      double rootpower = 6;  // Getd("BNS_rootpower");
+      Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
+    }
     sigp_Bphi = 0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
     sigp_1phi = 0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
   }
@@ -1157,6 +1162,11 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   {
     lep = -1; // Getd("BNS_log_epsm");
     Ap = sinh(A*lep)/sinh(lep);
+    if(domain==3)
+    {
+      double rootpower = 6;  // Getd("BNS_rootpower");
+      Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
+    }
     sigp_Bphi = -1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
     sigp_1phi = -1.2 + 0.1 + 0.1*sin(phi); // -1; // change this!
   }
@@ -1297,6 +1307,12 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     lep = -1.5; // Getd("BNS_log_epsp");
     Ap = sinh(A*lep)/sinh(lep);
     dApdA = lep*cosh(A*lep)/sinh(lep);
+    if(domain==0)
+    {
+      double rootpower = 6;  // Getd("BNS_rootpower");
+      Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
+      dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
+    }
     sigp_Bphi = 0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
     sigp_1phi = 0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
     dsigp_dB_Bphi = -2*PI*0.15*sin(B*2*PI); // 0; // change this!
@@ -1309,6 +1325,12 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     lep = -1; // Getd("BNS_log_epsm");
     Ap = sinh(A*lep)/sinh(lep);
     dApdA = lep*cosh(A*lep)/sinh(lep);
+    if(domain==3)
+    {
+      double rootpower = 6;  // Getd("BNS_rootpower");
+      Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
+      dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
+    }
     sigp_Bphi = -1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
     sigp_1phi = -1.2 + 0.1 + 0.1*sin(phi); // -1; // change this!
     dsigp_dB_Bphi = -2*PI*0.1*sin(B*2*PI); // 0; // change this!
