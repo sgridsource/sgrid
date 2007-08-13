@@ -1152,7 +1152,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     Ap = sinh(A*lep)/sinh(lep);
     if(domain==0)
     {
-      double rootpower = 6;  // Getd("BNS_rootpower");
+      double rootpower = 1;  // Getd("BNS_rootpower");
       Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
     }
     sigp_Bphi = 0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
@@ -1164,7 +1164,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     Ap = sinh(A*lep)/sinh(lep);
     if(domain==3)
     {
-      double rootpower = 6;  // Getd("BNS_rootpower");
+      double rootpower = 1;  // Getd("BNS_rootpower");
       Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
     }
     sigp_Bphi = -1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
@@ -1309,7 +1309,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     dApdA = lep*cosh(A*lep)/sinh(lep);
     if(domain==0)
     {
-      double rootpower = 6;  // Getd("BNS_rootpower");
+      double rootpower = 1;  // Getd("BNS_rootpower");
       Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
       dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
     }
@@ -1327,7 +1327,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     dApdA = lep*cosh(A*lep)/sinh(lep);
     if(domain==3)
     {
-      double rootpower = 6;  // Getd("BNS_rootpower");
+      double rootpower = 1;  // Getd("BNS_rootpower");
       Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
       dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
     }
