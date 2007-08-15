@@ -13,7 +13,12 @@
 #define Cot(x)     (1.0/tan((double) (x)))
 #define pow2(x)    ((x)*(x))
 #define pow2inv(x) (1.0/((x)*(x)))
-
+#define ArcTan(x)  atan(x)
+#define Cosh(x)    cosh(x)
+#define Sinh(x)    sinh(x)
+#define Csch(x)    (1.0/sinh(x))
+#define Sech(x)    (1.0/cosh(x))
+#define Coth(x)    (1.0/tanh(x))
 
 /* initialize the coord transforms */
 int init_CoordTransform_And_Derivs(tGrid *grid)
@@ -1867,9 +1872,44 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 /* compute d^2(x,y,z)/(d(A,B,phi)d(A,B,phi)) */
 void ddxyz_ddABphi_AnsorgNS(tBox *box, int ind, int domain,
                           double A, double B, double phi, 
-                          double ddxyz_ddABphi[4][4][4])
+                          double ddxyzddABphi[4][4][4])
 {
-  ddxyz_ddABphi[1][1][1] = 0; // ... 
+/*
+#define Pi PI
+#define Ap(A) Ap_A
+#define dApdA(A) dApdA_A
+#define ddApddA(A) ddApddA_A
+#define sigp1(phi) sigp_1phi
+#define dsigpdB1(phi) dsigpdB_1phi
+#define dsigpdphi1(phi) dsigpdphi_1phi
+#define ddsigpddB1(phi) dsigpddB_1phi
+#define ddsigpdBdphi1(phi) dsigpdBdphi_1phi
+#define ddsigpddphi1(phi) dsigpddphi_1phi
+#define sigp(B,phi) sigp_Bphi
+#define dsigpdB(B,phi) dsigpdB_Bphi
+#define dsigpdphi(B,phi) dsigpdphi_Bphi
+#define ddsigpddB(B,phi) dsigpddB_Bphi
+#define ddsigpdBdphi(B,phi) dsigpdBdphi_Bphi
+#define ddsigpddphi(B,phi) dsigpddphi_Bphi
+double b;                // we still have to set all those!
+double Ap_A;
+double dApdA_A;
+double ddApddA_A;
+double sigp_1phi;
+double dsigpdB_1phi;
+double dsigpdphi_1phi;
+double dsigpddB_1phi;
+double dsigpdBdphi_1phi;
+double dsigpddphi_1phi;
+double sigp_Bphi;
+double dsigpdB_Bphi;
+double dsigpdphi_Bphi;
+double dsigpddB_Bphi;
+double dsigpdBdphi_Bphi;
+double dsigpddphi_Bphi;
+// include math code 
+#include "ddxyzddABphi_AnsorgNS0.c"
+*/
 }
 
 /* compute d^2(A,B,phi)/(d(x,y,z)d(x,y,z)) */
