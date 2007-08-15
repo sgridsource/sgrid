@@ -17,7 +17,7 @@ d^2 X^i /(dx^j dx^k) + (dX^i/dx^n)(dX^m/dx^j)(dX^l/dx^k) d^2 x^n/(dX^m dX^l)=0
 
 
 /* compute dX^i/dx^n from dx^n/dX^l */
-void dXdx_from_dxdX(double dXdx[][], double dxdX[][])
+void dXdx_from_dxdX(double dXdx[4][4], double dxdX[4][4])
 {
   /* M = {{m11,m12,m13},{m21,m22,m23},{m31,m32,m33}} 
      Det[M] = m11*m22*m33 - m13*m22*m31 + m12*m23*m31 +
@@ -44,9 +44,10 @@ void dXdx_from_dxdX(double dXdx[][], double dxdX[][])
 }
 
 /* compute d^2 X^i /(dx^j dx^k) from dx^n/dX^l and d^2 x^n/(dX^m dX^l) */
-void ddXdxdx_from_dXdx_ddxdXdX(double ddXdxdx[][][],
-                               double dXdx[][], double ddxdXdX[][][])
+void ddXdxdx_from_dXdx_ddxdXdX(double ddXdxdx[4][4][4],
+                               double dXdx[4][4], double ddxdXdX[4][4][4])
 {
+  int i,j,k, n,m,l;
   for(i=1;i<=3;i++)
   for(j=1;j<=3;j++)
   for(k=j;k<=3;k++)

@@ -1864,6 +1864,32 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 //}
 }
 
+/* compute d^2(x,y,z)/(d(A,B,phi)d(A,B,phi)) */
+void ddxyz_ddABphi_AnsorgNS(tBox *box, int ind, int domain,
+                          double A, double B, double phi, 
+                          double ddxyz_ddABphi[4][4][4])
+{
+  ddxyz_ddABphi[1][1][1] = 0; // ... 
+}
+
+/* compute d^2(A,B,phi)/(d(x,y,z)d(x,y,z)) */
+void ddABphi_ddxyz_AnsorgNS(tBox *box, int ind, int domain,
+                          double A, double B, double phi, 
+                          double ddABphi_ddxyz[4][4][4])
+{
+  double ddxyz_ddABphi[4][4][4];
+  double x,y,z;
+  double dABphi_dxyz[4][4];
+                                                      
+  ddxyz_ddABphi_AnsorgNS(box, ind, domain, A,B,phi, ddxyz_ddABphi);
+  dABphi_dxyz_AnsorgNS(box, ind, domain, A,B,phi, &x,&y,&z,
+                  &dABphi_dxyz[1][1], &dABphi_dxyz[1][2], &dABphi_dxyz[1][3],
+                  &dABphi_dxyz[2][1], &dABphi_dxyz[2][2], &dABphi_dxyz[2][3],
+                  &dABphi_dxyz[3][1], &dABphi_dxyz[3][2], &dABphi_dxyz[3][3]);
+
+  ddXdxdx_from_dXdx_ddxdXdX(ddABphi_ddxyz, dABphi_dxyz, ddxyz_ddABphi);
+}
+
 /* Coord. trafos for domain 0 */
 double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
 {
