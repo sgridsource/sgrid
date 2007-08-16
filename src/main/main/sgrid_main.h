@@ -106,6 +106,7 @@ void VarNameSetConstantFlag(char *name);
 int VarConstantFlag(int i);
 
 void prvarlist(tVarList *v);
+void prvarlist_inbox(tBox *box, tVarList *v);
 tVarList *vlalloc(tGrid *grid);
 void vlenable(tVarList *v);
 void vlenablegrid(tGrid *grid, tVarList *v);

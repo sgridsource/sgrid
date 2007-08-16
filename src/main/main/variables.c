@@ -223,18 +223,28 @@ void prvarlist(tVarList *v)
 {
   int i, j;
 
-  printf("VarList:  n = %d\n", v->n);
-  for (i = 0; i < v->n; i++) {
+  printf("VarList=%p  grid=%p  n=%d\n", v, v->grid, v->n);
+  for (i = 0; i < v->n; i++)
+  {
     j = v->index[i];
-    if (v->grid)
-      printf(" %2d i=%3d grid=%p %s\n", 
-	i, j, v->grid, VarName(v->index[i]));
-    else
-      printf(" %2d i=%3d grid=%p %s\n", i, j, v->grid, VarName(v->index[i]));
+    printf(" %d  VarIndex=%d  %s\n", i, j, VarName(j));
   }
 }
 
+/* print variable list in one box */
+void prvarlist_inbox(tBox *box, tVarList *v)
+{
+  int i, j;
 
+  printf("box%d=%p: VarList=%p  grid=%p  n=%d\n",
+          box->b, box, v, v->grid, v->n);
+  for (i = 0; i < v->n; i++)
+  {
+    j = v->index[i];
+    printf(" %d  VarIndex=%d  box->v[%d]=%p  %s\n",
+           i, j, j, box->v[j], VarName(j));
+  }
+}
 
 
 /* allocate an empty variable list */
