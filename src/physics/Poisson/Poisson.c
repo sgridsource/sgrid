@@ -83,6 +83,11 @@ int Poisson_startup(tGrid *grid)
         if(b==3)  rh2[i] = 8.0*PI;
 */
         Psi[i] = b*b;
+        Psi[i] = 1*exp(-0.5*(
+                 (x-1)*(x-1)/(1*1) + (y-0)*(y-0)/(1.5*1.5)
+               + (z-0.5)*(z-0.5)/(2*2)   ) );
+        Psi[i] = exp(-0.5*x*x);
+        Psi[i] = 1.0/sqrt(x*x + y*y + z*z+1);
       }
     }
   }
@@ -219,13 +224,78 @@ int Poisson_analyze(tGrid *grid)
 }
 
 
+void filterSing(tBox *box, double *u)
+{
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  int filt2=n2-1;
+  int filt3=n3-1; // n3-1; // n3/2;
+  int i,j,k;
+  void (*get_coeffs)(double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*eval_onPoints)(double *,double *, int)=NULL;
+  void (*filter_coeffs)(double *, int, int)=NULL;
+  double (*basisfunc)(double a, double b, int k, double X)=NULL;
+  static int linelen=0;
+  static double *uline=NULL;
+  static double *ufline=NULL;
+  int m3;
+
+  get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
+                            &coeffs_of_2ndderiv, &eval_onPoints, 
+                            &filter_coeffs, &basisfunc);
+  initfiltermatrix(box->F2, n2+1-filt2, n2, 
+                   get_coeffs, filter_coeffs, eval_onPoints);
+
+  get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
+                            &coeffs_of_2ndderiv, &eval_onPoints, 
+                            &filter_coeffs, &basisfunc);
+  initfiltermatrix(box->F3, n3+1-filt3, n3, 
+                   get_coeffs, filter_coeffs, eval_onPoints);
+
+  /* static memory for lines */
+  m3=max3(box->n1, box->n2, box->n3);
+  if(m3>linelen)
+  {
+    linelen = m3;
+    uline = (double*) realloc(uline, linelen * sizeof(double));
+    ufline = (double*) realloc(ufline, linelen * sizeof(double));
+  }
+
+  i=box->n1-1;
+//  /* filter along phi-direc if A=1 for B=Bmin and B=Bmax */
+//  for(j=0;j<n2;j=j+n2-1)
+  /* filter along phi-direc if A=1 for all B */
+  for(j=0;j<n2;j++)
+  {
+    get_memline(u, uline,  3, i, j, n1, n2, n3);
+    matrix_times_vector(box->F3 , uline, ufline, box->n3);
+    put_memline(u, ufline, 3, i, j, n1, n2, n3);
+  }
+  /* filter along B-direc if A=1 for all phi */
+  for(k=0;k<n3;k++)
+  {
+    get_memline(u, uline,  2, i, k, n1, n2, n3);
+    matrix_times_vector(box->F2, uline, ufline, box->n2);
+    put_memline(u, ufline, 2, i, k, n1, n2, n3);
+  }
+  /* filter along phi-direc if A=1 for B=Bmin and B=Bmax */
+  //  for(j=0;j<n2;j=j+n2-1)
+
+}                
+
+
+
+
 /* evaluate Poisson eqn for vlu */
 void F_Poisson(tVarList *vlFu, tVarList *vlu,
                tVarList *vluDerivs, tVarList *vlrhs)
 {
   tGrid *grid = vlu->grid;
   int b;
-  	
+
   forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
@@ -258,6 +328,28 @@ void F_Poisson(tVarList *vlFu, tVarList *vlu,
       FirstAndSecondDerivsOf_S(box, vlu->index[1], vluDerivs->index[9],
                                vluDerivs->index[12]);
     }
+    
+    if(b==0 & 0)
+    {
+      double *Psix = box->v[vluDerivs->index[0]];
+      double *Psiy = box->v[vluDerivs->index[1]];
+      double *Psiz = box->v[vluDerivs->index[2]];
+      double *Psixy = box->v[vluDerivs->index[4]];
+      double *Psixz = box->v[vluDerivs->index[5]];
+      double *Psiyz = box->v[vluDerivs->index[7]];
+      // //FirstDerivsOf_S(box, vlu->index[0], vluDerivs->index[0]);
+      filterSing(box, Psix); // ???
+      filterSing(box, Psiy);
+      filterSing(box, Psiz);
+      FirstDerivsOf_S(box, vluDerivs->index[2],vluDerivs->index[6]);
+      FirstDerivsOf_S(box, vluDerivs->index[1],vluDerivs->index[5]);
+      FirstDerivsOf_S(box, vluDerivs->index[0],vluDerivs->index[3]);
+      //filterSing(box, Psixx);
+      //filterSing(box, Psiyy);
+      //filterSing(box, Psizz);
+      ////filterSing(box, Psiyz);
+    }
+
 //    forallpoints(box, i)  FPsi[i] = Psi[i]*Psi[i] - 9.0;
     forallpoints(box, i)
     {
@@ -265,8 +357,38 @@ void F_Poisson(tVarList *vlFu, tVarList *vlu,
       FChi[i] = Chixx[i] + Chiyy[i] + Chizz[i] - rh2[i];
     }
 
+
+double *Psi  = box->v[vlu->index[0]];
+double *Psix = box->v[vluDerivs->index[0]];
+double *Psiy = box->v[vluDerivs->index[1]];
+double *Psiz = box->v[vluDerivs->index[2]];
+double *Psixy = box->v[vluDerivs->index[4]];
+double *Psixz = box->v[vluDerivs->index[5]];
+double *Psiyz = box->v[vluDerivs->index[7]];
+
+
+spec_Deriv1(box, 1, Psi, Psix);
+spec_Deriv1(box, 2, Psi, Psiy);
+spec_Deriv1(box, 3, Psi, Psiz);
+
+/*
+cart_partials(box, Psi, Psix,Psiy,Psiz);
+
+spec_Deriv1(box, 1, Psix, Psixx);
+spec_Deriv1(box, 2, Psix, Psixy);
+spec_Deriv1(box, 3, Psix, Psixz);
+
+spec_Deriv1(box, 1, Psiy, Psixy);
+spec_Deriv1(box, 2, Psiy, Psiyy);
+spec_Deriv1(box, 3, Psiy, Psiyz);
+
+spec_Deriv1(box, 1, Psiz, Psixz);
+spec_Deriv1(box, 2, Psiz, Psiyz);
+spec_Deriv1(box, 3, Psiz, Psizz);
+*/
+
     /* BCs */
-    set_BCs(vlFu, vlu, vluDerivs, 1);
+//    set_BCs(vlFu, vlu, vluDerivs, 1);
   }
 }
 
