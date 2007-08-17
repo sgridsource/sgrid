@@ -110,3 +110,14 @@ void four_filter(double c[], int k, int n)
 
   for(j=k;j<=n;j++) c[j]=0;
 }
+
+
+/* find value of Fourier basis function B_n at X (in [a,b]) */
+double four_basisfunc(double a, double b, int n, double X)
+{
+  double k = 2.0*PI/(b-a);
+
+  if(n%2!=0) return cos(k*X);
+  if(n==0)   return 1.0;
+  return sin(k*X);
+}

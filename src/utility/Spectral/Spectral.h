@@ -48,6 +48,9 @@ void four_eval(double c[], double u[], int N);
 /* filter: zero all c[j] with k<=j<=n */
 void four_filter(double c[], int k, int N);
 
+/* find value of Fourier basis function B_n at X (in [a,b]) */
+double four_basisfunc(double a, double b, int n, double X);
+
 
 /* Functions from finite_differences.c */
 
