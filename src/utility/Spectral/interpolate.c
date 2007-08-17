@@ -20,9 +20,10 @@ void spec_Coeffs(tBox *box, double *u, double *c)
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(double a, double b, int k, double X)=NULL;
+  int m3 = max3(n1,n2,n3);
 
   /* memory for matrix and temp var d */
-  M = (double*) calloc( max3(n1,n2,n3), sizeof(double) );
+  M = (double*) calloc( m3*m3, sizeof(double) );
   d = (double*) calloc( n1*n2*n3, sizeof(double) );
   if( !(M && d) ) errorexit("spec_Coeffs: out of memory for M, d");
          

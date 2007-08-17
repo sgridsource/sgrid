@@ -117,7 +117,7 @@ double four_basisfunc(double a, double b, int n, double X)
 {
   double k = 2.0*PI/(b-a);
 
-  if(n%2!=0) return cos(k*X);
+  if(n%2!=0) return cos(n*k*X);
   if(n==0)   return 1.0;
-  return sin(k*X);
+  return sin(n*k*X);
 }
