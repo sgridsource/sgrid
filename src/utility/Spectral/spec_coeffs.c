@@ -210,6 +210,7 @@ void get_spec_functionpointers(tBox *box, int direc,
     *coeffs_of_deriv = four_deriv;
     *eval_onPoints = four_eval;
     *filter_coeffs = four_filter;
+    *basisfunc = four_basisfunc;
   }
   else if( Getv(str, "fd2_onesided") )
   {
