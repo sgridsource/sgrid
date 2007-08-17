@@ -34,6 +34,9 @@ typedef struct tBOX {
   double *F1;		/* filter matrix for direction 1 */
   double *F2;		/* filter matrix for direction 2 */
   double *F3;		/* filter matrix for direction 3 */
+  double (*basis1)(double a, double b, int k, double X); /* basisfunction k in direction 1 */
+  double (*basis2)(double a, double b, int k, double X); /* basisfunction k in direction 2 */
+  double (*basis3)(double a, double b, int k, double X); /* basisfunction k in direction 3 */
   double bbox[6];	/* global bounding box */
   int ibbox[6];	/* global bounding box in index range */
 } tBox;
