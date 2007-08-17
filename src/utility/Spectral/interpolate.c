@@ -74,10 +74,11 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
   if(box->basis1==NULL || box->basis2==NULL || box->basis3==NULL)
     errorexiti("spec_interpolate: box%d: one box->basis1/2/3 is NULL",box->b);
 
-  forallijk(i,j,k)
-  {
+  for(k = n3-1; k >=0; k--)
+  for(j = n2-1; j >=0; j--)
+  for(i = n1-1; i >=0; i--)
     sum += c[Index(i,j,k)] * box->basis1(a1,b1, i, X) * 
            box->basis2(a2,b2, j, Y) * box->basis3(a3,b3, k, Z);
-  }
+
   return sum;
 }
