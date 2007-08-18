@@ -75,7 +75,7 @@ void four_coeffs_alt(double c[], double u[], int n)
 }
 
 
-/* find function u from Four coeffs c[0...n], computed with four_coeffs */
+/* find function u from Four coeffs c[0...n], computed with four_coeffs_alt */
 void four_eval_alt(double c[], double u[], int n)
 {
   int k, j;
@@ -107,7 +107,7 @@ void four_eval_alt(double c[], double u[], int n)
 
 /* compute Four coeffs c[0...n] from function u 
    at x_k = k/N, k=0,...,N-1 , N=n+1 
-NOTE: four_coeffsN returns c[] that are N times of those of four_coeffs */
+NOTE: four_coeffs returns c[] that are N times of those of four_coeffs_alt */
 void four_coeffs(double c[], double u[], int n)
 {
   int k, j;
@@ -136,7 +136,7 @@ void four_coeffs(double c[], double u[], int n)
 }
 
 
-/* find function u from Four coeffs c[0...n], computed with four_coeffsN */
+/* find function u from Four coeffs c[0...n], computed with four_coeffs */
 void four_eval(double c[], double u[], int n)
 {
   int k, j;
