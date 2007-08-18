@@ -27,3 +27,7 @@ double Argtanh(double x, double y);
 double Abstanh(double x, double y);
 double Argsech(double x, double y);
 double Abssech(double x, double y);
+
+/* from findXYZ_of_xyz.c */
+void XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
+                double x, double y, double z);
