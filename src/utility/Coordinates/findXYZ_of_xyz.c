@@ -12,7 +12,7 @@ double desired_z;
 tBox *box_for_xyz_VectorFunc;
 
 
-/* funtion to be passed into newton_lnsrch */
+/* funtion to be passed into newton_lnsrch by XYZ_of_xyz */
 void xyz_VectorFunc(int n, double *XYZvec, double *fvec)
 {
   double xg,yg,zg;
@@ -29,7 +29,7 @@ void xyz_VectorFunc(int n, double *XYZvec, double *fvec)
   fvec[3] = zg-desired_z;
 }
 
-/* find X,Y,Z from x,y,z */
+/* find X,Y,Z from x,y,z (Note: X,Y,Z also contains initial guess) */
 void XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                 double x, double y, double z)
 {
