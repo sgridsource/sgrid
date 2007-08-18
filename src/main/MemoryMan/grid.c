@@ -194,7 +194,7 @@ tGrid *make_grid(int pr)
        void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
        void (*eval_onPoints)(double *,double *, int)=NULL;
        void (*filter_coeffs)(double *, int, int)=NULL;
-       double (*basisfunc)(double a, double b, int k, double X)=NULL;
+       double (*basisfunc)(double a, double b, int k, int N, double X)=NULL;
        int filt1, filt2, filt3;
 
        snprintf(str, 999, "box%d_filter1", b);
