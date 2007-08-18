@@ -61,3 +61,31 @@ void XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
 
   if(check) printf("XYZ_of_xyz: check=%d\n", check);  
 }
+
+/* find nearest X,Y,Z on grid from x,y,z */
+double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
+                         double x, double y, double z)
+{
+  int i;
+  double *pX = box->v[Ind("X")];
+  double *pY = box->v[Ind("Y")];
+  double *pZ = box->v[Ind("Z")];
+  double dxi, dyi, dzi, r, rmin=-1.0;
+
+  forallpoints(box, i)
+  {
+    dxi = box->x_of_X[1]((void *) box, i, pX[i], pY[i], pZ[i]) - x;
+    dyi = box->x_of_X[2]((void *) box, i, pX[i], pY[i], pZ[i]) - y;
+    dzi = box->x_of_X[3]((void *) box, i, pX[i], pY[i], pZ[i]) - z;
+    r = dxi*dxi + dyi*dyi + dzi*dzi;
+    if(r<=rmin || rmin<0.0 )
+    {
+      rmin = r;
+      *ind = i;
+      *X = pX[i];
+      *Y = pY[i];
+      *Z = pZ[i];
+    } 
+  }
+  return rmin;
+}
