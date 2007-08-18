@@ -72,7 +72,8 @@ int Poisson_startup(tGrid *grid)
         rh1[i] = 0.0;
         rh2[i] = 0.0;
       }
-      else if (Getv("Poisson_grid", "AnsorgNS"))
+      else if(Getv("Poisson_grid", "AnsorgNS") || 
+              Getv("Poisson_grid", "4ABphi_2xyz"))
       {
 /*
         Psi[i] = 0.0;
@@ -209,7 +210,8 @@ int Poisson_analyze(tGrid *grid)
         //PsiErr[i] = Psi[i]-1.0/sqrt(x*x + y*y + z*z);
         //ChiErr[i] = Chi[i]-2.0/sqrt(x*x + y*y + z*z);
       }
-      else if (Getv("Poisson_grid", "AnsorgNS"))
+      else if(Getv("Poisson_grid", "AnsorgNS") || 
+              Getv("Poisson_grid", "4ABphi_2xyz"))
       {
 /*
         if(b==1||b==2||b==3)
