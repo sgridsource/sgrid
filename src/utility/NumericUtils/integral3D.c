@@ -30,6 +30,11 @@ static double (*y_lim2func)(double);
 static double (*z_lim1func)(double,double);
 static double (*z_lim2func)(double,double);
 
+static double f1(double x);
+static double f2(double y);
+static double f3(double z);
+
+        
 
 
 double integral3D(double (*int_meth)(double (*f_int)(double), 
@@ -43,8 +48,6 @@ double integral3D(double (*int_meth)(double (*f_int)(double),
                   double sx, double sy, double sz, 
                   int maxx, int maxy, int maxz)
 {
-	static double f1(double x);
-        
         sy_sav=sy;
         sz_sav=sz;
         maxy_sav=maxy;
@@ -64,8 +67,6 @@ double integral3D(double (*int_meth)(double (*f_int)(double),
 
 static double f1(double x)
 {
-	static double f2(double y);
-
 	x_sav=x;
 	return integrator(f2, (*y_lim1func)(x), (*y_lim2func)(x), 
 	                  sy_sav, maxy_sav);
@@ -73,8 +74,6 @@ static double f1(double x)
 
 static double f2(double y)
 {
-	static double f3(double z);
-
 	y_sav=y;
 	return integrator(f3, (*z_lim1func)(x_sav,y), (*z_lim2func)(x_sav,y),
 	                  sz_sav, maxz_sav);
