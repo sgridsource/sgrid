@@ -19,7 +19,7 @@ void spec_Coeffs(tBox *box, double *u, double *c)
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
-  double (*basisfunc)(double a, double b, int k, double X)=NULL;
+  double (*basisfunc)(double a, double b, int k, int n1, double X)=NULL;
   int m3 = max3(n1,n2,n3);
 
   /* memory for matrix and temp var d */
@@ -77,8 +77,8 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
   for(k = n3-1; k >=0; k--)
   for(j = n2-1; j >=0; j--)
   for(i = n1-1; i >=0; i--)
-    sum += c[Index(i,j,k)] * box->basis1(a1,b1, i, X) * 
-           box->basis2(a2,b2, j, Y) * box->basis3(a3,b3, k, Z);
+    sum += c[Index(i,j,k)] * box->basis1(a1,b1, i,n1, X) * 
+           box->basis2(a2,b2, j,n2, Y) * box->basis3(a3,b3, k,n3, Z);
 
   return sum;
 }

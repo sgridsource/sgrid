@@ -43,7 +43,7 @@ void four_deriv(double a, double b, double c[], double cder[], int n)
 
 /* compute Four coeffs c[0...n] from function u 
    at x_k = k/N, k=0,...,N-1 , N=n+1 */
-void four_coeffs(double c[], double u[], int n)
+void four_coeffs_alt(double c[], double u[], int n)
 {
   int k, j;
   double Re_c_j, Im_c_j, PI2oN, toN;
@@ -76,7 +76,7 @@ void four_coeffs(double c[], double u[], int n)
 
 
 /* find function u from Four coeffs c[0...n], computed with four_coeffs */
-void four_eval(double c[], double u[], int n)
+void four_eval_alt(double c[], double u[], int n)
 {
   int k, j;
   double sum, Re_c_k, Im_c_k, PI2oN;
@@ -108,7 +108,7 @@ void four_eval(double c[], double u[], int n)
 /* compute Four coeffs c[0...n] from function u 
    at x_k = k/N, k=0,...,N-1 , N=n+1 
 NOTE: four_coeffsN returns c[] that are N times of those of four_coeffs */
-void four_coeffsN(double c[], double u[], int n)
+void four_coeffs(double c[], double u[], int n)
 {
   int k, j;
   double Re_c_j, Im_c_j, PI2oN;
@@ -137,7 +137,7 @@ void four_coeffsN(double c[], double u[], int n)
 
 
 /* find function u from Four coeffs c[0...n], computed with four_coeffsN */
-void four_evalN(double c[], double u[], int n)
+void four_eval(double c[], double u[], int n)
 {
   int k, j;
   double sum, Re_c_k, Im_c_k, PI2oN;
@@ -176,7 +176,7 @@ void four_filter(double c[], int k, int n)
 
 
 /* find value of Fourier basis function B_n at X (in [a,b]) */
-double four_basisfunc(double a, double b, int n, double X)
+double four_basisfunc_alt(double a, double b, int n, int N, double X)
 {
   double K = 2.0*PI/(b-a);
   int j = n/2 + n%2;
@@ -184,4 +184,17 @@ double four_basisfunc(double a, double b, int n, double X)
   if(n%2!=0) return cos(j*K*X);
   if(n==0)   return 1.0;
   return sin(j*K*X);
+}
+
+
+/* find value of Fourier basis function B_k at X (in [a,b]) */
+double four_basisfunc(double a, double b, int k, int N, double X)
+{
+  double K = 2.0*PI/(b-a);
+  int j = k/2 + k%2;
+
+  if(k==0)              return 1.0/N;
+  if(k==N-1 && N%2==0)  return cos(j*K*X)*1.0/N;;
+  if(k%2!=0)            return cos(j*K*X)*2.0/N;
+  return sin(j*K*X)*2.0/N;
 }

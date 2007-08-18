@@ -31,10 +31,10 @@ void cheb_eval_onExtrema(double c[], double u[], int N);
 void cheb_filter(double c[], int k, int n);
 
 /* find value of Cheb. basis function T_n at X (in [a,b]) */
-double cheb_basisfunc(double a, double b, int n, double X);
+double cheb_basisfunc(double a, double b, int n, int n1, double X);
 
 /* find value of Cheb. basis function T_n at X (in [a,b]) */
-double cheb_basisfunc_FromSum(double a, double b, int n, double X);
+double cheb_basisfunc_FromSum(double a, double b, int n, int n1, double X);
 
 
 /* Functions from explicit_Four_trafos.c */
@@ -52,7 +52,7 @@ void four_eval(double c[], double u[], int N);
 void four_filter(double c[], int k, int N);
 
 /* find value of Fourier basis function B_n at X (in [a,b]) */
-double four_basisfunc(double a, double b, int n, double X);
+double four_basisfunc(double a, double b, int n, int N, double X);
 
 
 /* Functions from finite_differences.c */

@@ -188,7 +188,7 @@ void cheb_filter(double c[], int k, int n)
 
 
 /* find value of Cheb. basis function T_n at X (in [a,b]) */
-double cheb_basisfunc_FromSum(double a, double b, int n, double X)
+double cheb_basisfunc_FromSum(double a, double b, int n, int n1, double X)
 {
   double d=0.0, dd=0.0, sv, y, y2;
   int j;
@@ -214,7 +214,7 @@ double cheb_basisfunc_FromSum(double a, double b, int n, double X)
 
 
 /* find value of Cheb. basis function T_n at X (in [a,b]) */
-double cheb_basisfunc(double a, double b, int n, double X)
+double cheb_basisfunc(double a, double b, int n, int n1, double X)
 {
   double y;
   if(n==0) return 0.5;  /* in numrec T_0 / 2 is used as basisfunc # 0 */
