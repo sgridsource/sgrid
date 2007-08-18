@@ -873,12 +873,14 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         spec_Coeffs(grid->box[0], P, Pcoeffs);
         spec_Coeffs(grid->box[0], C, Ccoeffs);
         for(pl=0; pl<n1; pl=pl+n1-1)
+        {
+          int i0;
+          int ind=Index(pl,0,0);
+          nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi,
+                            X[ind],Y[ind],Z[ind]);          
           forplane1(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
           {
-            int i0;
-            int ind=Index(i,j,k);
-            nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
-                              X[ind],Y[ind],Z[ind]);
+            ind=Index(i,j,k);
             XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
@@ -886,13 +888,16 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             FPsi[ind] = Psi[ind] - Pinterp;
             FChi[ind] = Chi[ind] - Cinterp;
           }
+        }
         for(pl=0; pl<n2; pl=pl+n2-1)
+        {
+          int i0;
+          int ind=Index(0,pl,0);
+          nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
+                            X[ind],Y[ind],Z[ind]);
           forplane2(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
           {
-            int i0;
-            int ind=Index(i,j,k);
-            nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
-                              X[ind],Y[ind],Z[ind]);
+            ind=Index(i,j,k);
             XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
@@ -900,13 +905,16 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             FPsi[ind] = Psi[ind] - Pinterp;
             FChi[ind] = Chi[ind] - Cinterp;
           }
+        }
         for(pl=0; pl<n3; pl=pl+n3-1)
+        {
+          int i0;
+          int ind=Index(0,0,pl);
+          nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
+                            X[ind],Y[ind],Z[ind]);
           forplane3(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
           {
-            int i0;
-            int ind=Index(i,j,k);
-            nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
-                              X[ind],Y[ind],Z[ind]);
+            ind=Index(i,j,k);
             XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
@@ -914,6 +922,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             FPsi[ind] = Psi[ind] - Pinterp;
             FChi[ind] = Chi[ind] - Cinterp;
           }
+        }
       }
       else if(b==4)  /* in box4 */
       {
@@ -930,12 +939,14 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         spec_Coeffs(grid->box[3], P, Pcoeffs);
         spec_Coeffs(grid->box[3], C, Ccoeffs);
         for(pl=0; pl<n1; pl=pl+n1-1)
+        {
+          int i0;
+          int ind=Index(pl,0,0);
+          nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
+                            X[ind],Y[ind],Z[ind]);
           forplane1(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
           {
-            int i0;
-            int ind=Index(i,j,k);
-            nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
-                              X[ind],Y[ind],Z[ind]);
+            ind=Index(i,j,k);
             XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
@@ -943,13 +954,16 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             FPsi[ind] = Psi[ind] - Pinterp;
             FChi[ind] = Chi[ind] - Cinterp;
           }
+        }
         for(pl=0; pl<n2; pl=pl+n2-1)
+        {
+          int i0;
+          int ind=Index(0,pl,0);
+          nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
+                            X[ind],Y[ind],Z[ind]);
           forplane2(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
           {
-            int i0;
-            int ind=Index(i,j,k);
-            nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
-                              X[ind],Y[ind],Z[ind]);
+            ind=Index(i,j,k);
             XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
@@ -957,13 +971,16 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             FPsi[ind] = Psi[ind] - Pinterp;
             FChi[ind] = Chi[ind] - Cinterp;
           }
+        }
         for(pl=0; pl<n3; pl=pl+n3-1)
+        {
+          int i0;
+          int ind=Index(0,0,pl);
+          nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
+                            X[ind],Y[ind],Z[ind]);
           forplane3(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
           {
-            int i0;
-            int ind=Index(i,j,k);
-            nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
-                              X[ind],Y[ind],Z[ind]);
+            ind=Index(i,j,k);
             XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
@@ -971,6 +988,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             FPsi[ind] = Psi[ind] - Pinterp;
             FChi[ind] = Chi[ind] - Cinterp;
           }
+        }
       }
       else errorexiti("b=%d should be impossible!", b);
     } /* end: else if (Getv("Poisson_grid", "4ABphi_2xyz")) */
