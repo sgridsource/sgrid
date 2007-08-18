@@ -357,7 +357,7 @@ void F_Poisson(tVarList *vlFu, tVarList *vlu,
       FChi[i] = Chixx[i] + Chiyy[i] + Chizz[i] - rh2[i];
     }
 
-
+/*
 double *Psi  = box->v[vlu->index[0]];
 double *Psix = box->v[vluDerivs->index[0]];
 double *Psiy = box->v[vluDerivs->index[1]];
@@ -375,27 +375,23 @@ spec_Coeffs(box, Psi, c);
 double X,Y,Z;
 double x,y,z;
 
-X=0.110441827875;
-Y=0.304059296944;
-Z=PI-PI/4;
-x=box->x_of_X[1](box, 0, X,Y,Z);
-y=box->x_of_X[2](box, 0, X,Y,Z);
-z=box->x_of_X[3](box, 0, X,Y,Z);
 
-XYZ_of_xyz(box, &X,&Y,&Z, x,y,z);
-printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
-
+if(b<4)
+{
 x=1.2; y=-0.5; z=0.5;
-X=0.1; Y=0.3; Z=PI-PI/4;
+printf("nearestXYZ=%f ", nearestXYZ_of_xyz(box, &i, &X,&Y,&Z, x,y,z));
+printf("(X,Y,Z)=(%.12f,%.12f,%.12f)\n", X,Y,Z);
+//X=0.1; Y=0.3; 
+Z=PI-PI/4;
 XYZ_of_xyz(box, &X,&Y,&Z, x,y,z);
 printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
 printf("##### Psi=%.12f\n", spec_interpolate(box, c, X,Y,Z));
-
-
+}
+*/
 
 
     /* BCs */
-//    set_BCs(vlFu, vlu, vluDerivs, 1);
+    set_BCs(vlFu, vlu, vluDerivs, 1);
   }
 }
 
@@ -561,7 +557,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           get_memline(Psi, line, 1, j,k, n1,n2,n3);
           for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
           FPsi[Index(i,j,k)] = U0 - P[Index(i,j,k)];
-printf("U0=%f P[Index(i,j,k)]=%f\n", U0, P[Index(i,j,k)]);
+//printf("U0=%f P[Index(i,j,k)]=%f\n", U0, P[Index(i,j,k)]);
           get_memline(Chi, line, 1, j,k, n1,n2,n3);
           for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
           FChi[Index(i,j,k)] = U0 - C[Index(i,j,k)];
@@ -701,6 +697,283 @@ printf("U0=%f P[Index(i,j,k)]=%f\n", U0, P[Index(i,j,k)]);
       }
       else errorexiti("b=%d should be impossible!", b);
     } /* end: else if (Getv("Poisson_grid", "AnsorgNS")) */
+    else if (Getv("Poisson_grid", "4ABphi_2xyz"))
+    {
+      double *P;
+      double *dP[4];
+      double *C;
+      double *dC[4];
+      double *X, *Y, *Z;
+      double *Pcoeffs, *Ccoeffs;
+      double Pinterp, Cinterp;
+      double x,y,z;
+
+      if(b==0)  /* in box0 */
+      {
+        /* values at A=0 are equal in box0 and box1 */
+        P = grid->box[1]->v[vlu->index[0]]; /* values in box1 */
+        C = grid->box[1]->v[vlu->index[1]];
+        forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
+        {
+          FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
+          FChi[Index(i,j,k)] = Chi[Index(i,j,k)] - C[Index(i,j,k)];
+        }
+        /* values at A=Amin are interpolated from box5 */
+        X = box->v[Ind("X")];
+        Y = box->v[Ind("Y")];
+        Z = box->v[Ind("Z")];
+        P = grid->box[5]->v[vlu->index[0]]; /* values in box5 */
+        C = grid->box[5]->v[vlu->index[1]];
+        Pcoeffs = grid->box[5]->v[Ind("temp1")];
+        Ccoeffs = grid->box[5]->v[Ind("temp2")];
+        spec_Coeffs(grid->box[5], P, Pcoeffs);
+        spec_Coeffs(grid->box[5], C, Ccoeffs);
+        forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=Amin */
+        {
+          int ind=Index(i,j,k);
+          x = box->x_of_X[1]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
+          y = box->x_of_X[2]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
+          z = box->x_of_X[3]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
+          Pinterp = spec_interpolate(grid->box[5], Pcoeffs, x,y,z);
+          Cinterp = spec_interpolate(grid->box[5], Ccoeffs, x,y,z);
+          FPsi[ind] = Psi[ind] - Pinterp;
+          FChi[ind] = Chi[ind] - Cinterp;
+        }
+      }
+      else if(b==3)  /* in box3 */
+      {
+        /* values at A=0 are equal in box3 and box2 */
+        P = grid->box[2]->v[vlu->index[0]]; /* values in box2 */
+        C = grid->box[2]->v[vlu->index[1]];
+        forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
+        {
+          FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
+          FChi[Index(i,j,k)] = Chi[Index(i,j,k)] - C[Index(i,j,k)];
+        }
+        /* values at A=Amin are interpolated from box4 */
+        X = box->v[Ind("X")];
+        Y = box->v[Ind("Y")];
+        Z = box->v[Ind("Z")];
+        P = grid->box[4]->v[vlu->index[0]]; /* values in box4 */
+        C = grid->box[4]->v[vlu->index[1]];
+        Pcoeffs = grid->box[4]->v[Ind("temp1")];
+        Ccoeffs = grid->box[4]->v[Ind("temp2")];
+        spec_Coeffs(grid->box[4], P, Pcoeffs);
+        spec_Coeffs(grid->box[4], C, Ccoeffs);
+        forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=Amin */
+        {
+          int ind=Index(i,j,k);
+          x = box->x_of_X[1]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
+          y = box->x_of_X[2]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
+          z = box->x_of_X[3]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
+          Pinterp = spec_interpolate(grid->box[4], Pcoeffs, x,y,z);
+          Cinterp = spec_interpolate(grid->box[4], Ccoeffs, x,y,z);
+          FPsi[ind] = Psi[ind] - Pinterp;
+          FChi[ind] = Chi[ind] - Cinterp;
+        }
+      }
+      else if(b==1)  /* in box1 */
+      {
+        /* normal derivs (d/dx) at A=1 are equal in box1 and box2 */
+        dP[1] = grid->box[2]->v[vluDerivs->index[0]];
+        dC[1] = grid->box[2]->v[vluDerivs->index[9]];
+        forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=1 */
+        {
+          FPsi[Index(i,j,k)] = Psix[Index(i,j,k)] - dP[1][Index(i,j,k)];
+          FChi[Index(i,j,k)] = Chix[Index(i,j,k)] - dC[1][Index(i,j,k)];
+        }
+
+        /* normal derivs (~d/dA) at A=0 are equal in box1 and box0 */
+        /* Below we use the approximate normal vec 
+           ( cos(PI*B), sin(PI*B)*cos(phi), sin(PI*B)*sin(phi) ) */
+        dP[1] = grid->box[0]->v[vluDerivs->index[0]];
+        dP[2] = grid->box[0]->v[vluDerivs->index[1]];
+        dP[3] = grid->box[0]->v[vluDerivs->index[2]];
+        dC[1] = grid->box[0]->v[vluDerivs->index[9]];
+        dC[2] = grid->box[0]->v[vluDerivs->index[10]];
+        dC[3] = grid->box[0]->v[vluDerivs->index[11]];
+        forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
+        {
+          double B   = box->v[Ind("Y")][Index(i,j,k)];
+          double phi = box->v[Ind("Z")][Index(i,j,k)];
+
+          FPsi[Index(i,j,k)] = 
+           cos(PI*B)         * (Psix[Index(i,j,k)] - dP[1][Index(i,j,k)]) +
+           sin(PI*B)*cos(phi)* (Psiy[Index(i,j,k)] - dP[2][Index(i,j,k)]) +
+           sin(PI*B)*sin(phi)* (Psiz[Index(i,j,k)] - dP[3][Index(i,j,k)]);
+          FChi[Index(i,j,k)] = 
+           cos(PI*B)         * (Chix[Index(i,j,k)] - dC[1][Index(i,j,k)]) +
+           sin(PI*B)*cos(phi)* (Chiy[Index(i,j,k)] - dC[2][Index(i,j,k)]) +
+           sin(PI*B)*sin(phi)* (Chiz[Index(i,j,k)] - dC[3][Index(i,j,k)]);
+        }
+        
+        /* Psi=Chi=0 at infinity */
+        // fixme: B=0 is not on grid!!!
+        for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+        {
+          FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)];
+          FChi[Index(n1-1,0,k)] = Chi[Index(n1-1,0,k)];
+        }
+      }
+      else if(b==2)  /* in box2 */
+      {
+        /* values at A=1 are equal in box1 and box2 */
+        P  = grid->box[1]->v[vlu->index[0]]; /* values in box1 */
+        C  = grid->box[1]->v[vlu->index[1]];
+        forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=1 */
+        {
+          FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
+          FChi[Index(i,j,k)] = Chi[Index(i,j,k)] - C[Index(i,j,k)];
+        }
+
+        /* normal derivs (d/d?) at A=0 are equal in box2 and box3 */
+        /* Below we use the approximate normal vec 
+           ( cos(PI*B), sin(PI*B)*cos(phi), sin(PI*B)*sin(phi) ) */
+        dP[1] = grid->box[3]->v[vluDerivs->index[0]];
+        dP[2] = grid->box[3]->v[vluDerivs->index[1]];
+        dP[3] = grid->box[3]->v[vluDerivs->index[2]];
+        dC[1] = grid->box[3]->v[vluDerivs->index[9]];
+        dC[2] = grid->box[3]->v[vluDerivs->index[10]];
+        dC[3] = grid->box[3]->v[vluDerivs->index[11]];
+        forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
+        {
+          double B   = box->v[Ind("Y")][Index(i,j,k)];
+          double phi = box->v[Ind("Z")][Index(i,j,k)];
+
+          FPsi[Index(i,j,k)] = 
+           cos(PI*B)         * (Psix[Index(i,j,k)] - dP[1][Index(i,j,k)]) +
+           sin(PI*B)*cos(phi)* (Psiy[Index(i,j,k)] - dP[2][Index(i,j,k)]) +
+           sin(PI*B)*sin(phi)* (Psiz[Index(i,j,k)] - dP[3][Index(i,j,k)]);
+          FChi[Index(i,j,k)] = 
+           cos(PI*B)         * (Chix[Index(i,j,k)] - dC[1][Index(i,j,k)]) +
+           sin(PI*B)*cos(phi)* (Chiy[Index(i,j,k)] - dC[2][Index(i,j,k)]) +
+           sin(PI*B)*sin(phi)* (Chiz[Index(i,j,k)] - dC[3][Index(i,j,k)]);
+        }
+
+        /* Psi=Chi=0 at infinity */
+        // fixme: B=0 is not on grid!!!
+        for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+        {
+          FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)];
+          FChi[Index(n1-1,0,k)] = Chi[Index(n1-1,0,k)];
+        }
+      }
+      else if(b==5)  /* in box5 */
+      {
+        /* values at border are interpolated from box0 */
+        double A,B,phi;
+        int pl;
+        X = box->v[Ind("X")];
+        Y = box->v[Ind("Y")];
+        Z = box->v[Ind("Z")];
+        P = grid->box[0]->v[vlu->index[0]]; /* values in box0 */
+        C = grid->box[0]->v[vlu->index[1]];
+        Pcoeffs = grid->box[0]->v[Ind("temp1")];
+        Ccoeffs = grid->box[0]->v[Ind("temp2")];
+        spec_Coeffs(grid->box[0], P, Pcoeffs);
+        spec_Coeffs(grid->box[0], C, Ccoeffs);
+        for(pl=0; pl<n1; pl=pl+n1-1)
+          forplane1(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
+          {
+            int i0;
+            int ind=Index(i,j,k);
+            nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
+                              X[ind],Y[ind],Z[ind]);
+            XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+                           
+            Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
+            Cinterp = spec_interpolate(grid->box[0], Ccoeffs, A,B,phi);
+            FPsi[ind] = Psi[ind] - Pinterp;
+            FChi[ind] = Chi[ind] - Cinterp;
+          }
+        for(pl=0; pl<n2; pl=pl+n2-1)
+          forplane2(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
+          {
+            int i0;
+            int ind=Index(i,j,k);
+            nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
+                              X[ind],Y[ind],Z[ind]);
+            XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+                           
+            Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
+            Cinterp = spec_interpolate(grid->box[0], Ccoeffs, A,B,phi);
+            FPsi[ind] = Psi[ind] - Pinterp;
+            FChi[ind] = Chi[ind] - Cinterp;
+          }
+        for(pl=0; pl<n3; pl=pl+n3-1)
+          forplane3(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
+          {
+            int i0;
+            int ind=Index(i,j,k);
+            nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
+                              X[ind],Y[ind],Z[ind]);
+            XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+                           
+            Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
+            Cinterp = spec_interpolate(grid->box[0], Ccoeffs, A,B,phi);
+            FPsi[ind] = Psi[ind] - Pinterp;
+            FChi[ind] = Chi[ind] - Cinterp;
+          }
+      }
+      else if(b==4)  /* in box4 */
+      {
+        /* values at border are interpolated from box3 */
+        double A,B,phi;
+        int pl;
+        X = box->v[Ind("X")];
+        Y = box->v[Ind("Y")];
+        Z = box->v[Ind("Z")];
+        P = grid->box[3]->v[vlu->index[0]]; /* values in box3 */
+        C = grid->box[3]->v[vlu->index[1]];
+        Pcoeffs = grid->box[3]->v[Ind("temp1")];
+        Ccoeffs = grid->box[3]->v[Ind("temp2")];
+        spec_Coeffs(grid->box[3], P, Pcoeffs);
+        spec_Coeffs(grid->box[3], C, Ccoeffs);
+        for(pl=0; pl<n1; pl=pl+n1-1)
+          forplane1(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
+          {
+            int i0;
+            int ind=Index(i,j,k);
+            nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
+                              X[ind],Y[ind],Z[ind]);
+            XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+                           
+            Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
+            Cinterp = spec_interpolate(grid->box[3], Ccoeffs, A,B,phi);
+            FPsi[ind] = Psi[ind] - Pinterp;
+            FChi[ind] = Chi[ind] - Cinterp;
+          }
+        for(pl=0; pl<n2; pl=pl+n2-1)
+          forplane2(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
+          {
+            int i0;
+            int ind=Index(i,j,k);
+            nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
+                              X[ind],Y[ind],Z[ind]);
+            XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+                           
+            Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
+            Cinterp = spec_interpolate(grid->box[3], Ccoeffs, A,B,phi);
+            FPsi[ind] = Psi[ind] - Pinterp;
+            FChi[ind] = Chi[ind] - Cinterp;
+          }
+        for(pl=0; pl<n3; pl=pl+n3-1)
+          forplane3(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
+          {
+            int i0;
+            int ind=Index(i,j,k);
+            nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
+                              X[ind],Y[ind],Z[ind]);
+            XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+                           
+            Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
+            Cinterp = spec_interpolate(grid->box[3], Ccoeffs, A,B,phi);
+            FPsi[ind] = Psi[ind] - Pinterp;
+            FChi[ind] = Chi[ind] - Cinterp;
+          }
+      }
+      else errorexiti("b=%d should be impossible!", b);
+    } /* end: else if (Getv("Poisson_grid", "4ABphi_2xyz")) */
 
   }
 }
