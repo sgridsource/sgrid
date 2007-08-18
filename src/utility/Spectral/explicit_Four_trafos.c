@@ -46,16 +46,16 @@ void four_deriv(double a, double b, double c[], double cder[], int n)
 void four_coeffs(double c[], double u[], int n)
 {
   int k, j;
-  double Re_c_j, Im_c_j, PI2oN, ooN;
+  double Re_c_j, Im_c_j, PI2oN, toN;
   int N=n+1;
 
-  ooN=1.0/N;
-  PI2oN=2.0*PI*ooN;
+  toN=2.0/N;
+  PI2oN=PI*toN;
 
   /* first j=0 , i.e. c_0 */
   c[0] = 0.0;
   for(k=0;k<N;k++)  c[0] += u[k];
-  c[0]*=ooN;
+  c[0] = c[0]/N;
 
   for(j=1; j<=N/2; j++)
   {
@@ -65,10 +65,12 @@ void four_coeffs(double c[], double u[], int n)
       Re_c_j += cos(j*PI2oN*k)*u[k];
       Im_c_j += sin(j*PI2oN*k)*u[k];
     }
-    c[2*j-1] = Re_c_j * ooN; /* real part of c_j */
+    c[2*j-1] = Re_c_j * toN; /* real part of c_j */
     if(2*j<N)
-      c[2*j] = Im_c_j * ooN; /* imaginary part of c_j */
+      c[2*j] = Im_c_j * toN; /* imaginary part of c_j */
   }
+  if( N%2 == 0 )
+    c[N-1] = 0.5*c[N-1];
   /* we should use a FFT for everything above this line */
 }
 
@@ -95,9 +97,9 @@ void four_eval(double c[], double u[], int n)
       sum += cos(k*PI2oN*j)*Re_c_k + sin(k*PI2oN*j)*Im_c_k;
     }
     if( N%2 == 0 )
-      u[j] = ( c[0] + 2.0*sum - c[N-1]*cos(PI*j) );
+      u[j] = ( c[0] + sum - c[N-1]*cos(PI*j) );
     else
-      u[j] = ( c[0] + 2.0*sum );
+      u[j] = ( c[0] + sum );
   }
   /* we should use a FFT for eveything above this line */
 }
