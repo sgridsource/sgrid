@@ -237,7 +237,7 @@ void filterSing(tBox *box, double *u)
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
-  double (*basisfunc)(double a, double b, int k, double X)=NULL;
+  double (*basisfunc)(double a, double b, int k, int N, double X)=NULL;
   static int linelen=0;
   static double *uline=NULL;
   static double *ufline=NULL;
@@ -366,26 +366,33 @@ double *Psixy = box->v[vluDerivs->index[4]];
 double *Psixz = box->v[vluDerivs->index[5]];
 double *Psiyz = box->v[vluDerivs->index[7]];
 
+double *M = box->v[vluDerivs->index[4]];
+double *c = box->v[vluDerivs->index[5]];
+double *d = box->v[vluDerivs->index[7]];
 
-spec_Deriv1(box, 1, Psi, Psix);
-spec_Deriv1(box, 2, Psi, Psiy);
-spec_Deriv1(box, 3, Psi, Psiz);
+spec_Coeffs(box, Psi, c);
 
-/*
-cart_partials(box, Psi, Psix,Psiy,Psiz);
+double X,Y,Z;
+double x,y,z;
 
-spec_Deriv1(box, 1, Psix, Psixx);
-spec_Deriv1(box, 2, Psix, Psixy);
-spec_Deriv1(box, 3, Psix, Psixz);
+X=0.110441827875;
+Y=0.304059296944;
+Z=PI-PI/4;
+x=box->x_of_X[1](box, 0, X,Y,Z);
+y=box->x_of_X[2](box, 0, X,Y,Z);
+z=box->x_of_X[3](box, 0, X,Y,Z);
 
-spec_Deriv1(box, 1, Psiy, Psixy);
-spec_Deriv1(box, 2, Psiy, Psiyy);
-spec_Deriv1(box, 3, Psiy, Psiyz);
+XYZ_of_xyz(box, &X,&Y,&Z, x,y,z);
+printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
 
-spec_Deriv1(box, 1, Psiz, Psixz);
-spec_Deriv1(box, 2, Psiz, Psiyz);
-spec_Deriv1(box, 3, Psiz, Psizz);
-*/
+x=1.2; y=-0.5; z=0.5;
+X=0.1; Y=0.3; Z=PI-PI/4;
+XYZ_of_xyz(box, &X,&Y,&Z, x,y,z);
+printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
+printf("##### Psi=%.12f\n", spec_interpolate(box, c, X,Y,Z));
+
+
+
 
     /* BCs */
 //    set_BCs(vlFu, vlu, vluDerivs, 1);
