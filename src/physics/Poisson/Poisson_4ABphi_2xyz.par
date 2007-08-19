@@ -2,8 +2,8 @@
 
 physics = ADMvars Poisson
 
-Coordinates_newtTOLF	= 1e-4
-Coordinates_newtMAXITS	= 2000
+#Coordinates_newtTOLF	= 1e-4
+#Coordinates_newtMAXITS	= 2000
 
 Poisson_useDD	= no # yes
 Poisson_grid	= 4ABphi_2xyz # AnsorgNS

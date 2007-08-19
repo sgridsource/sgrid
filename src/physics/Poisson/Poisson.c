@@ -146,13 +146,12 @@ int Poisson_solve(tGrid *grid)
   vlduDerivs = vluDerivs; /* maybe: vlduDerivs=AddDuplicateEnable(vluDerivs, "_l"); */
 
   /* call Newton solver */
-F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
-/*
+//F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
          linSolver_itmax, linSolver_tolFac);
-*/
+
   /* free varlists */     
   VLDisableFree(vldu);
   /* VLDisableFree(vlduDerivs); */
