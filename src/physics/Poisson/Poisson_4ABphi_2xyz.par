@@ -139,22 +139,18 @@ box5_max3 = 0.5
 2doutput	= Poisson_Err_Chi Poisson_Chi Poisson_Err_Psi Poisson_Psi Poisson_rh1 Poisson_rh2 Poisson_Psix Poisson_Psixx
 2doutputall	= yes
 
-outputX0_box0 = 0.3
-outputY0_box0 = 0.35
-outputZ0_box0 = 0.4
-
-outputX0_box1 = 0.3
-outputY0_box1 = 0.35
-outputZ0_box1 = 0.4
-
-outputX0_box2 = 0.3
-outputY0_box2 = 0.35
-outputZ0_box2 = 0.4
-
-outputX0_box3 = 0.3
-outputY0_box3 = 0.35
-outputZ0_box3 = 0.4
-
+#outputX0_box0 = 0.3
+#outputY0_box0 = 0.35
+#outputZ0_box0 = 0.4
+#outputX0_box1 = 0.3
+#outputY0_box1 = 0.35
+#outputZ0_box1 = 0.4
+#outputX0_box2 = 0.3
+#outputY0_box2 = 0.35
+#outputZ0_box2 = 0.4
+#outputX0_box3 = 0.3
+#outputY0_box3 = 0.35
+#outputZ0_box3 = 0.4
 
 outputReplaceXby_box0 = x
 outputReplaceYby_box0 = y
