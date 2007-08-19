@@ -72,6 +72,9 @@ double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
   double *pZ = box->v[Ind("Z")];
   double dxi, dyi, dzi, r, rmin=-1.0;
 
+  if(box->x_of_X[1]==NULL)
+    errorexit("nearestXYZ_of_xyz: box->x_of_X[1] = NULL");
+
   forallpoints(box, i)
   {
     dxi = box->x_of_X[1]((void *) box, i, pX[i], pY[i], pZ[i]) - x;
@@ -87,5 +90,80 @@ double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
       *Z = pZ[i];
     } 
   }
+  return rmin;
+}
+
+/* find nearest X,Y,Z in grid-plane from x,y,z */
+double nearestXYZ_of_xyz_inplane(tBox *box, int *ind, 
+                                 double *X, double *Y, double *Z,
+                                 double x, double y, double z,
+                                 int plane, int pind)
+{
+  int i,j,k, in;
+  double *pX = box->v[Ind("X")];
+  double *pY = box->v[Ind("Y")];
+  double *pZ = box->v[Ind("Z")];
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  double dx, dy, dz, r, rmin=-1.0;
+
+  if(box->x_of_X[1]==NULL)
+    errorexit("nearestXYZ_of_xyz_inplane: box->x_of_X[1] = NULL");
+
+  if(plane==1)
+    forplane1(i,j,k, n1,n2,n3, pind)
+    {
+      in = Index(i,j,k);
+      dx = box->x_of_X[1]((void *) box, in, pX[in],pY[in],pZ[in]) - x;
+      dy = box->x_of_X[2]((void *) box, in, pX[in],pY[in],pZ[in]) - y;
+      dz = box->x_of_X[3]((void *) box, in, pX[in],pY[in],pZ[in]) - z;
+      r = dx*dx + dy*dy + dz*dz;
+      if(r<=rmin || rmin<0.0 )
+      {
+        rmin = r;
+        *ind = in;
+        *X = pX[in];
+        *Y = pY[in];
+        *Z = pZ[in];
+      } 
+    }
+  else if(plane==2)
+    forplane2(i,j,k, n1,n2,n3, pind)
+    {
+      in = Index(i,j,k);
+      dx = box->x_of_X[1]((void *) box, in, pX[in],pY[in],pZ[in]) - x;
+      dy = box->x_of_X[2]((void *) box, in, pX[in],pY[in],pZ[in]) - y;
+      dz = box->x_of_X[3]((void *) box, in, pX[in],pY[in],pZ[in]) - z;
+      r = dx*dx + dy*dy + dz*dz;
+      if(r<=rmin || rmin<0.0 )
+      {
+        rmin = r;
+        *ind = in;
+        *X = pX[in];
+        *Y = pY[in];
+        *Z = pZ[in];
+      } 
+    }
+  else if(plane==3)
+    forplane3(i,j,k, n1,n2,n3, pind)
+    {
+      in = Index(i,j,k);
+      dx = box->x_of_X[1]((void *) box, in, pX[in],pY[in],pZ[in]) - x;
+      dy = box->x_of_X[2]((void *) box, in, pX[in],pY[in],pZ[in]) - y;
+      dz = box->x_of_X[3]((void *) box, in, pX[in],pY[in],pZ[in]) - z;
+      r = dx*dx + dy*dy + dz*dz;
+      if(r<=rmin || rmin<0.0 )
+      {
+        rmin = r;
+        *ind = in;
+        *X = pX[in];
+        *Y = pY[in];
+        *Z = pZ[in];
+      } 
+    }
+  else
+    errorexit("nearestXYZ_of_xyz_inplane: plane has to be 1, 2 or 3");
+
   return rmin;
 }

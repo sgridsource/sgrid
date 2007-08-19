@@ -33,3 +33,7 @@ void XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                 double x, double y, double z);
 double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
                          double x, double y, double z);
+double nearestXYZ_of_xyz_inplane(tBox *box, int *ind, 
+                                 double *X, double *Y, double *Z,
+                                 double x, double y, double z,
+                                 int plane, int pind);
