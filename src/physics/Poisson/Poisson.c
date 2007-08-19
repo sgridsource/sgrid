@@ -878,8 +878,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         {
           int i0;
           int ind=Index(pl,0,0);
-          //nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi,
-          //                  X[ind],Y[ind],Z[ind]);
           phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
           k_phi = grid->box[0]->n3 * phi/(2.0*PI);
           nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
@@ -891,12 +889,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
             Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
             Cinterp = spec_interpolate(grid->box[0], Ccoeffs, A,B,phi);
-if(!finite(Pinterp))
-{
-printf("(z,y,z)=(%f,%f,%f)\n", X[ind],Y[ind],Z[ind]);
-printf("(i,j,k)=(%d,%d,%d)\n", i,j,k);
-printf("(A,B,phi)=(%f,%f,%f)\n", A,B,phi);
-}
             FPsi[ind] = Psi[ind] - Pinterp;
             FChi[ind] = Chi[ind] - Cinterp;
           }
@@ -905,8 +897,6 @@ printf("(A,B,phi)=(%f,%f,%f)\n", A,B,phi);
         {
           int i0;
           int ind=Index(0,pl,0);
-          //nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
-          //                  X[ind],Y[ind],Z[ind]);
           phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
           k_phi = grid->box[0]->n3 * phi/(2.0*PI);
           nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
@@ -927,8 +917,6 @@ printf("(A,B,phi)=(%f,%f,%f)\n", A,B,phi);
         {
           int i0;
           int ind=Index(0,0,pl);
-          //nearestXYZ_of_xyz(grid->box[0], &i0, &A,&B,&phi, 
-          //                  X[ind],Y[ind],Z[ind]);
           phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
           k_phi = grid->box[0]->n3 * phi/(2.0*PI);
           nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
@@ -964,8 +952,6 @@ printf("(A,B,phi)=(%f,%f,%f)\n", A,B,phi);
         {
           int i0;
           int ind=Index(pl,0,0);
-          //nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
-          //                  X[ind],Y[ind],Z[ind]);
           phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
           k_phi = grid->box[0]->n3 * phi/(2.0*PI);
           nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
@@ -986,8 +972,6 @@ printf("(A,B,phi)=(%f,%f,%f)\n", A,B,phi);
         {
           int i0;
           int ind=Index(0,pl,0);
-          //nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
-          //                  X[ind],Y[ind],Z[ind]);
           phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
           k_phi = grid->box[0]->n3 * phi/(2.0*PI);
           nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
@@ -1008,8 +992,6 @@ printf("(A,B,phi)=(%f,%f,%f)\n", A,B,phi);
         {
           int i0;
           int ind=Index(0,0,pl);
-          //nearestXYZ_of_xyz(grid->box[3], &i0, &A,&B,&phi, 
-          //                  X[ind],Y[ind],Z[ind]);
           phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
           k_phi = grid->box[0]->n3 * phi/(2.0*PI);
           nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
