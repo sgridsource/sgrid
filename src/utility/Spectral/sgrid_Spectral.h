@@ -17,6 +17,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du);
 void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
                     double *u11,double *u12,double *u13,
                     double *u22,double *u23,double *u33 );
+void spec_Deriv2(tBox *box, int direc, double *u, double *du);
 
 
 /* Functions from diffmatrices.c */

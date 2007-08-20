@@ -662,3 +662,67 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     uline = duline = dduline = NULL;
   */
 }
+
+
+/* compute 2nd deriv of 3d var u in dirction direc on a box */
+void spec_Deriv2(tBox *box, int direc, double *u, double *du)
+{
+  static int linelen=0;
+  static double *uline=NULL;
+  static double *duline=NULL;
+  int i,j,k, m3;
+    
+  /* static memory for lines */
+  m3=max3(box->n1, box->n2, box->n3);
+  if(m3>linelen)
+  {
+    linelen = m3;
+    uline = (double*) realloc(uline, linelen * sizeof(double));
+    duline = (double*) realloc(duline, linelen * sizeof(double));
+  }
+
+  if(direc==1)
+  {
+    for (k = 0; k < box->n3; k++)
+      for (j = 0; j < box->n2; j++)
+      {
+        /* 
+        get_memline(u, uline, 1, j, k, box->n1, box->n2, box->n3);
+        matrix_times_vector(box->DD1, uline, duline, box->n1);
+        put_memline(du, duline, 1, j, k, box->n1, box->n2, box->n3);        
+        */
+        int n1=box->n1;
+        int n2=box->n2;
+        matrix_times_vector(box->DD1, u+Index(0,j,k), du+Index(0,j,k), n1);
+      }
+  }
+  else if(direc==2)
+  {
+    for (k = 0; k < box->n3; k++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
+        matrix_times_vector(box->DD2, uline, duline, box->n2);
+        put_memline(du, duline, 2, i, k, box->n1, box->n2, box->n3);        
+      }
+  }
+  else if(direc==3)
+  {
+    for (j = 0; j < box->n2; j++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
+        matrix_times_vector(box->DD3 , uline, duline, box->n3);
+        put_memline(du, duline, 3, i, j, box->n1, box->n2, box->n3);
+      }
+  }
+  else
+    errorexit("spec_Deriv2: possible values for direction direc are 1,2,3.");
+  /* free memory for lines */
+  /*
+    linelen=0;
+    free(uline);
+    free(duline);
+    uline = duline = NULL;
+  */
+}
