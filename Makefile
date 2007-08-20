@@ -40,7 +40,7 @@ OFLAGS = -O2
 libpaths = src/main/MemoryMan 
 libpaths += src/utility/output src/utility/evolve
 libpaths += src/utility/Coordinates src/utility/Spectral
-#libpaths += src/utility/NumericUtils
+libpaths += src/utility/NumericUtils
 
 # --------------------------------------------------------------------------
 # the user choses the libraries and some options in the file MyConfig
