@@ -29,7 +29,14 @@ int sgrid_Poisson()
   AddVar("Poisson_Chi",     "(ij)", "2nd deriv of Chi");
   AddVar("Poisson_rh2",     "",     "Source on RHS2");
   AddVar("Poisson_Err_Chi", "",     "Error in Chi");
-   
+
+  AddVar("Poisson_temp1", "", 	"temporary variable(e.g. to store derivs)");
+  AddVar("Poisson_temp2", "", 	"temporary variable(e.g. to store derivs)");
+  AddVar("Poisson_temp3", "", 	"temporary variable(e.g. to store derivs)");
+  AddVar("Poisson_temp4", "", 	"temporary variable(e.g. to store derivs)");
+  AddVar("Poisson_temp5", "", 	"temporary variable(e.g. to store derivs)");
+  AddVar("Poisson_temp6", "",   "temporary variable(e.g. to store derivs)");
+     
   /* parameters */
   AddPar("Poisson_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");

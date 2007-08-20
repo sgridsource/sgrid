@@ -36,6 +36,12 @@ int Poisson_startup(tGrid *grid)
   enablevar(grid, Ind("Poisson_Chix"));
   enablevar(grid, Ind("Poisson_Chixx"));
   enablevar(grid, Ind("Poisson_Err_Chi"));
+  enablevar(grid, Ind("Poisson_temp1"));
+  enablevar(grid, Ind("Poisson_temp2"));
+  enablevar(grid, Ind("Poisson_temp3"));
+  enablevar(grid, Ind("Poisson_temp4"));
+  enablevar(grid, Ind("Poisson_temp5"));
+  enablevar(grid, Ind("Poisson_temp6"));
   
   /* set initial values in all in boxes */
   forallboxes(grid,b)
@@ -735,8 +741,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         Z = box->v[Ind("Z")];
         P = grid->box[5]->v[vlu->index[0]]; /* values in box5 */
         C = grid->box[5]->v[vlu->index[1]];
-        Pcoeffs = grid->box[5]->v[Ind("temp1")];
-        Ccoeffs = grid->box[5]->v[Ind("temp2")];
+        Pcoeffs = grid->box[5]->v[Ind("Poisson_temp1")];
+        Ccoeffs = grid->box[5]->v[Ind("Poisson_temp2")];
         spec_Coeffs(grid->box[5], P, Pcoeffs);
         spec_Coeffs(grid->box[5], C, Ccoeffs);
         forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=Amin */
@@ -767,8 +773,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         Z = box->v[Ind("Z")];
         P = grid->box[4]->v[vlu->index[0]]; /* values in box4 */
         C = grid->box[4]->v[vlu->index[1]];
-        Pcoeffs = grid->box[4]->v[Ind("temp1")];
-        Ccoeffs = grid->box[4]->v[Ind("temp2")];
+        Pcoeffs = grid->box[4]->v[Ind("Poisson_temp1")];
+        Ccoeffs = grid->box[4]->v[Ind("Poisson_temp2")];
         spec_Coeffs(grid->box[4], P, Pcoeffs);
         spec_Coeffs(grid->box[4], C, Ccoeffs);
         forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=Amin */
@@ -819,7 +825,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         }
         
         /* Psi=Chi=0 at infinity */
-        // fixme: B=0 is not on grid!!!
+        // fixme: B=0 is not on grid for ChebZeros!!!
         for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
         {
           FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)];
@@ -862,7 +868,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         }
 
         /* Psi=Chi=0 at infinity */
-        // fixme: B=0 is not on grid!!!
+        // fixme: B=0 is not on grid for ChebZeros!!!
         for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
         {
           FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)];
@@ -879,8 +885,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         Z = box->v[Ind("Z")];
         P = grid->box[0]->v[vlu->index[0]]; /* values in box0 */
         C = grid->box[0]->v[vlu->index[1]];
-        Pcoeffs = grid->box[0]->v[Ind("temp1")];
-        Ccoeffs = grid->box[0]->v[Ind("temp2")];
+        Pcoeffs = grid->box[0]->v[Ind("Poisson_temp1")];
+        Ccoeffs = grid->box[0]->v[Ind("Poisson_temp2")];
         spec_Coeffs(grid->box[0], P, Pcoeffs);
         spec_Coeffs(grid->box[0], C, Ccoeffs);
         for(pl=0; pl<n1; pl=pl+n1-1)
@@ -953,8 +959,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         Z = box->v[Ind("Z")];
         P = grid->box[3]->v[vlu->index[0]]; /* values in box3 */
         C = grid->box[3]->v[vlu->index[1]];
-        Pcoeffs = grid->box[3]->v[Ind("temp1")];
-        Ccoeffs = grid->box[3]->v[Ind("temp2")];
+        Pcoeffs = grid->box[3]->v[Ind("Poisson_temp1")];
+        Ccoeffs = grid->box[3]->v[Ind("Poisson_temp2")];
         spec_Coeffs(grid->box[3], P, Pcoeffs);
         spec_Coeffs(grid->box[3], C, Ccoeffs);
         for(pl=0; pl<n1; pl=pl+n1-1)
@@ -1019,6 +1025,56 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         }
       }
       else errorexiti("b=%d should be impossible!", b);
+      
+      /* special rho=0 case??? */
+      if(b==0 || b==1 || b==2 || b==3)
+      {
+        int pl;
+        char str[1000];
+        snprintf(str, 999, "box%d_basis2", b);
+        if(Getv(str, "ChebExtrema"))  /* treat rho=0 case */
+        {
+          double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
+          double *Chi_phi_phi = box->v[Ind("Poisson_temp2")];
+          double *Psi_y_phi_phi = box->v[Ind("Poisson_temp3")];
+          double *Chi_y_phi_phi = box->v[Ind("Poisson_temp4")];
+          double *temp5 = box->v[Ind("Poisson_temp5")];
+          double *temp6 = box->v[Ind("Poisson_temp6")];
+
+          /* get u_phi_phi */
+          spec_Deriv2(box, 3, Psi, Psi_phi_phi);
+          spec_Deriv2(box, 3, Chi, Chi_phi_phi);
+          
+          /* get u_rho_phi_phi at phi=0 */
+          /* d/drho = dx^i/drho d/dx^i, 
+             dx/drho=0, dy/drho=cos(phi), dz/drho=sin(phi)
+             ==> d/drho u = d/dy u  at phi=0 */           
+          /* get u_rho_phi_phi at phi=0: u_rho_phi_phi = d/dy u_phi_phi */
+          cart_partials(box, Psi_phi_phi, temp5, Psi_y_phi_phi, temp6);
+          cart_partials(box, Chi_phi_phi, temp5, Chi_y_phi_phi, temp6);
+
+          /* loop over rho=0 boundary */
+          for(pl=0; pl<n2; pl=pl+n2-1)  /* <-- B=0 and B=1 */
+            forplane2(i,j,k, n1,n2,n3, pl)
+            {
+              if(k>0) /* phi>0: impose u_phi_phi=0 */
+              {
+                FPsi[Index(i,j,k)] = Psi_phi_phi[Index(i,j,k)];
+                FChi[Index(i,j,k)] = Chi_phi_phi[Index(i,j,k)];
+              }
+              else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
+              {
+                double Psi_rho = Psiy[Index(i,j,k)];
+                double Chi_rho = Chiy[Index(i,j,k)];
+                double Psi_rho_phi_phi = Psi_y_phi_phi[Index(i,j,k)];
+                double Chi_rho_phi_phi = Chi_y_phi_phi[Index(i,j,k)];
+                FPsi[Index(i,j,k)] = Psi_rho + Psi_rho_phi_phi;
+                FChi[Index(i,j,k)] = Chi_rho + Chi_rho_phi_phi;
+              }
+            }
+        }
+      } /* end: special rho=0 case??? */
+
     } /* end: else if (Getv("Poisson_grid", "4ABphi_2xyz")) */
 
   }
