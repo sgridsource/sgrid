@@ -32,6 +32,18 @@
   for(k=(p), j = 0; j < (n2); j++) \
     for(     i = 0; i < (n1); i++)
 
+/* loop over planes smoothly without any jumping in i,j or k */
+#define  forplane1_nojump(i,j,k, n1,n2,n3, p) \
+  for(i=(p), k = 0; k < (n3); k++) \
+    for(j =((n2)-1)*(k%2); j < (n2) && j >= 0; j=j+1-2*(k%2))
+
+#define  forplane2_nojump(i,j,k, n1,n2,n3, p) \
+  for(j=(p), k = 0; k < (n3); k++) \
+    for(i =((n1)-1)*(k%2); i < (n1) && i >= 0; i=i+1-2*(k%2))
+
+#define  forplane3_nojump(i,j,k, n1,n2,n3, p) \
+  for(k=(p), j = 0; j < (n2); j++) \
+    for(i =((n1)-1)*(j%2); i < (n1) && i >= 0; i=i+1-2*(j%2))
 
 
 /**************************************************************************/
