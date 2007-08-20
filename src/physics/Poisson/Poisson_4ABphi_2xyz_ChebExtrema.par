@@ -1,0 +1,166 @@
+#storage_verbose = yes
+
+physics = ADMvars Poisson
+
+#Coordinates_newtTOLF	= 1e-4
+#Coordinates_newtMAXITS	= 2000
+
+Poisson_useDD	= no # yes
+Poisson_grid	= 4ABphi_2xyz # AnsorgNS
+
+evolution_method = rk # icn # euler # rk
+
+nboxes = 6
+
+box0_n1 = 18
+box0_n2 = 18
+box0_n3 = 21
+box1_n1 = 18
+box1_n2 = 18
+box1_n3 = 21
+box2_n1 = 18
+box2_n2 = 18
+box2_n3 = 21
+box3_n1 = 18
+box3_n2 = 18
+box3_n3 = 21
+
+box4_n1 = 18
+box4_n2 = 18
+box4_n3 = 18
+box5_n1 = 18
+box5_n2 = 18
+box5_n3 = 18
+
+dt=0.001 # 0.002 # 0.002
+
+finaltime = 0
+
+box0_Coordinates = AnsorgNS0
+
+box0_basis1 = ChebExtrema
+box0_min1 = 0
+box0_max1 = 0.5
+
+box0_basis2 = ChebExtrema
+box0_min2 = 0
+box0_max2 = 1.0
+
+box0_basis3 = Fourier
+box0_min3 = 0
+box0_max3 = 2*pi
+
+
+box1_Coordinates = AnsorgNS1
+
+box1_basis1 = ChebExtrema
+box1_min1 = 0
+box1_max1 = 1.0
+
+box1_basis2 = ChebExtrema
+box1_min2 = 0
+box1_max2 = 1.0
+
+box1_basis3 = Fourier
+box1_min3 = 0
+box1_max3 = 2*pi
+
+
+box2_Coordinates = AnsorgNS2
+
+box2_basis1 = ChebExtrema
+box2_min1 = 0
+box2_max1 = 1.0
+
+box2_basis2 = ChebExtrema
+box2_min2 = 0
+box2_max2 = 1.0
+
+box2_basis3 = Fourier
+box2_min3 = 0
+box2_max3 = 2*pi
+
+
+box3_Coordinates = AnsorgNS3
+
+box3_basis1 = ChebExtrema
+box3_min1 = 0
+box3_max1 = 0.5
+
+box3_basis2 = ChebExtrema
+box3_min2 = 0
+box3_max2 = 1.0
+
+box3_basis3 = Fourier
+box3_min3 = 0
+box3_max3 = 2*pi
+
+
+box4_Coordinates = Cartesian
+
+box4_basis1 = ChebExtrema
+box4_min1 =-1.4
+box4_max1 =-0.8
+
+box4_basis2 = ChebExtrema
+box4_min2 =-0.3
+box4_max2 = 0.3
+
+box4_basis3 = ChebExtrema
+box4_min3 =-0.3
+box4_max3 = 0.3
+
+
+box5_Coordinates = Cartesian
+
+box5_basis1 = ChebExtrema
+box5_min1 = 0.7
+box5_max1 = 1.7
+
+box5_basis2 = ChebExtrema
+box5_min2 =-0.5
+box5_max2 = 0.5
+
+box5_basis3 = ChebExtrema
+box5_min3 =-0.5
+box5_max3 = 0.5
+
+
+
+#0douttime	= 0.1
+#0doutput	= TestDerivs_Err_dux TestDerivs_Err_dduxx
+#0doutputall	= yes
+
+1douttime	= 0.1
+1doutput	= Poisson_Err_Chi Poisson_Chi Poisson_Err_Psi Poisson_Psi Poisson_rh1 Poisson_rh2 Poisson_Psix Poisson_Psixx  x y z  X Y Z
+1doutputall	= yes
+
+2douttime	= 0.1
+2doutput	= Poisson_Err_Chi Poisson_Chi Poisson_Err_Psi Poisson_Psi Poisson_rh1 Poisson_rh2 Poisson_Psix Poisson_Psixx
+2doutputall	= yes
+
+#outputX0_box0 = 0.3
+#outputY0_box0 = 0.35
+#outputZ0_box0 = 0.4
+#outputX0_box1 = 0.3
+#outputY0_box1 = 0.35
+#outputZ0_box1 = 0.4
+#outputX0_box2 = 0.3
+#outputY0_box2 = 0.35
+#outputZ0_box2 = 0.4
+#outputX0_box3 = 0.3
+#outputY0_box3 = 0.35
+#outputZ0_box3 = 0.4
+
+outputReplaceXby_box0 = x
+outputReplaceYby_box0 = y
+outputReplaceZby_box0 = z
+outputReplaceXby_box1 = x
+outputReplaceYby_box1 = y
+outputReplaceZby_box1 = z
+outputReplaceXby_box2 = x
+outputReplaceYby_box2 = y
+outputReplaceZby_box2 = z
+outputReplaceXby_box3 = x
+outputReplaceYby_box3 = y
+outputReplaceZby_box3 = z
