@@ -18,7 +18,7 @@ int LinSolve_withLAPACK(tVarList *x, tVarList *b,
   int line, nlines, nvars, ok;
   tSparseVector **Aline;
 
-  if(pr) printf("LinSolve_withLAPACK:\n");
+  if(pr) printf("LinSolve_withLAPACK: ");
 
   /* allocate Aline */
   nvars=x->n; 
@@ -26,15 +26,15 @@ int LinSolve_withLAPACK(tVarList *x, tVarList *b,
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
   Aline = calloc(nlines, sizeof(*Aline));
   if(Aline)  if(pr) printf("allocated %d matrix lines\n", nlines);
-  else       errorexit("LinSolve_withLAPACK: no memory for Aline");
+  else       errorexit("no memory for Aline");
   for(line=0; line<nlines; line++)  Aline[line]=AllocateSparseVector();
 
   /* set Aline */                
-  SetMatrixLines_slowly(Aline, lop, r, x, c1, c2);
+  SetMatrixLines_slowly(Aline, lop, r, x, c1, c2, pr);
 
   /* solve A x = b with lapack's dgesv */
-  ok=lapack_dgesv(Aline, x, b);
-  if(pr) printf(" ok=%d\n", ok);
+  ok=lapack_dgesv(Aline, x, b, pr);
+  if(pr) printf("LinSolve_withLAPACK: lapack_dgesv returned ok=%d\n", ok);
 
   return ok;
 }
