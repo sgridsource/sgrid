@@ -8,11 +8,8 @@
 
 
 /* debug */
-void yo() {fprintf(stdout, "Yo!\n");fflush(stdout);}
-void yo1() {fprintf(stdout, "Yo1!\n");fflush(stdout);}
-void yo2() {fprintf(stdout, "Yo2!\n");fflush(stdout);}
-void yo3() {fprintf(stdout, "Yo3!\n");fflush(stdout);}
-
+void yo(void)     {fprintf(stdout, "yo!\n");fflush(stdout);}
+void Yo(double x) {fprintf(stdout, "Yo! %g\n", x);fflush(stdout);}
 
 
 

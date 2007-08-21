@@ -67,7 +67,8 @@ void errorexiti(char *file, int line, char *s, int i);
 #define errorexits(s,t) errorexits(__FILE__, __LINE__, (s), (t))
 #define errorexiti(s,i) errorexiti(__FILE__, __LINE__, (s), (i))
 
-void yo(), yo1(), yo2(), yo3(), yob();
+void yo(void);
+void Yo(double x);
 void prdivider(int n);
 double min2(double x, double y);
 double min3(double x, double y, double z);
