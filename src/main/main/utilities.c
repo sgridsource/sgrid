@@ -9,7 +9,7 @@
 
 /* debug */
 void yo(void)     {fprintf(stdout, "yo!\n");fflush(stdout);}
-void Yo(double x) {fprintf(stdout, "Yo! %g\n", x);fflush(stdout);}
+void Yo(double x) {fprintf(stdout, "Yo:%g\n", x);fflush(stdout);}
 
 
 
