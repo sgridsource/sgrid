@@ -595,8 +595,8 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList*b)
     for (n = 0; n < r->n; n++)
     {
       pr = box->v[r->index[n]];
-      pa = box->v[a->index[n]];
-      pb = box->v[b->index[n]];
+      if(ca!=0)  pa = box->v[a->index[n]];
+      if(cb!=0)  pb = box->v[b->index[n]];
 
       if (ca == 0 && cb == 0)
         for (i = 0; i < nnodes; i++) pr[i] = 0;
