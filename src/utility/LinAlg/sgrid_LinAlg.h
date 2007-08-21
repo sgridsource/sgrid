@@ -25,4 +25,7 @@ double GetSparseVectorComponent(tSparseVector *SV, int comp);
 /* ReadMatrixFrom_Fx.c */
 void SetMatrixLines_slowly(tSparseVector **Aline,
     void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
-    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2);
+    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
+
+/* lapack_interface.c */
+int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr);

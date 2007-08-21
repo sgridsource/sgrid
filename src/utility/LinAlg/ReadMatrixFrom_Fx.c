@@ -47,7 +47,7 @@
    be called for each of these points!!! */
 void SetMatrixLines_slowly(tSparseVector **Aline,
     void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
-    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2)
+    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr)
 {
   tGrid *grid = vlx->grid;
   int b, col, line;
@@ -62,6 +62,11 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
     tBox *box = grid->box[b];
     int i,j, bb;
 
+    if(pr)
+    {
+      printf("\n"); prdivider(0);  
+      printf("SetMatrixLines_slowly: working on box%d\ncol=",b);
+    }
     forallpoints(box,i)
       for(j = 0; j < vlx->n; j++)
       {
@@ -69,6 +74,7 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
 
         // col  = offset[b] + i*vlx->n + j;  
         // where: offset[b] = grid->box[b-1]->nnodes
+        if(pr) { printf("%d ",col); fflush(stdout);}
 
         /* put a single 1 into x at point i, i.e. in line=col */
         x[i]=1;
@@ -100,4 +106,7 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
         col++;
       }
   } /* end: forallboxes(grid,b) */
+  if(pr) printf("\nSetMatrixLines_slowly: "
+                "the %d*%d matrix Aline=%p is now set!\n",
+                col, col, Aline);
 }

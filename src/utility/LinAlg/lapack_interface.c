@@ -7,7 +7,7 @@
 
 
 /* solve A x = b with lapack's dgesv */
-int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb)
+int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
 {
   tGrid *grid = vlx->grid;
   int bi, line;
@@ -15,7 +15,7 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb)
   int nlines=0;
   double *xb;
   double *AT;
-  int i,j, c1,c2, *pivot, ok;
+  int i,j, *pivot, ok=-666, c2=1;
 
   /* figure out number of lines */
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
@@ -50,14 +50,19 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb)
     for(j = 0; j < nlines; j++)
       AT[j+nlines*i] = GetSparseVectorComponent(Aline[j],i);
 
+  if(pr) printf("lapack_dgesv: the %d*%d matrix AT=%p is now set!\n",
+                nlines, nlines, AT);
+
 #ifdef LAPACK
   /* call lapack routine */
-  dgesv_(&c1, &c2, AT, &c1, pivot, xb, &c1, &ok);
+  if(pr) printf("lapack_dgesv: calling lapack's dgesv\n");
+  dgesv_(&nlines, &c2, AT, &nlines, pivot, xb, &nlines, &ok);
 #else
   errorexit("lapack_dgesv: in order to compile with lapack use MyConfig with\n"
             "DFLAGS += -DLAPACK\n"
             "SPECIALLIBS += -llapack");
 #endif
+  if(pr) printf("lapack_dgesv: dgesv -> ok=%d\n", ok);
   
   /* set vlx = xb */
   line = 0;
