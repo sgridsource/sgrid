@@ -15,7 +15,7 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
   int nlines=0;
   double *xb;
   double *AT;
-  int i,j, *pivot, ok=-666, c2=1;
+  int i,j, *IPIV, INFO, NRHS=1;
 
   /* figure out number of lines */
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
@@ -26,8 +26,8 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
   /* allocate memory matrix AT = A^T*/
   AT=calloc(nlines*nlines, sizeof(double));
 
-  /* allocate memory for pivot */
-  pivot=calloc(nlines, sizeof(int));
+  /* allocate memory for IPIV */
+  IPIV=calloc(nlines, sizeof(int));
 
   /* set xb = vlb */
   line = 0;
@@ -56,14 +56,25 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
 #ifdef LAPACK
   /* call lapack routine */
   if(pr) printf("lapack_dgesv: calling lapack's dgesv\n");
-  dgesv_(&nlines, &c2, AT, &nlines, pivot, xb, &nlines, &ok);
+  dgesv_(&nlines, &NRHS, AT, &nlines, IPIV, xb, &nlines, &INFO);
 #else
   errorexit("lapack_dgesv: in order to compile with lapack use MyConfig with\n"
             "DFLAGS += -DLAPACK\n"
             "SPECIALLIBS += -llapack");
 #endif
-  if(pr) printf("lapack_dgesv: dgesv -> ok=%d\n", ok);
-  
+  if(pr) printf("lapack_dgesv: dgesv -> INFO=%d\n", INFO);
+
+  if(INFO!=0)
+  {
+    printf("INFO=%d\n", INFO);
+    printf("  if INFO<0: INFO =-i, the i-th argument had an illegal value\n");
+    printf("  if INFO>0: INFO = i, U(i,i) is exactly zero.\n"
+           "    The factorization has been completed, but the factor U is "
+           "exactly singular,\n"
+           "    so the solution could not be computed.\n");
+    errorexit("lapack_dgesv: dgesv returned INFO!=0");
+  }
+
   /* set vlx = xb */
   line = 0;
   forallboxes(grid,bi)
@@ -82,7 +93,7 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
 
   free(xb);
   free(AT);
-  free(pivot);
+  free(IPIV);
 
-  return ok;
+  return INFO;
 }
