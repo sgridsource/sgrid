@@ -157,18 +157,23 @@ int Poisson_solve(tGrid *grid)
 
   /* call Newton solver */
 //F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
-
+/*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
          linSolver_itmax, linSolver_tolFac);
-
+*/
+  Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
+         itmax, tol, &normresnonlin, 1,
+         LinSolve_withLAPACK, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
+         linSolver_itmax, linSolver_tolFac);
 /*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          1, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
          2, linSolver_tolFac);
 */
+
   /* free varlists */     
   VLDisableFree(vldu);
   /* VLDisableFree(vlduDerivs); */
