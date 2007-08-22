@@ -96,7 +96,7 @@ int Poisson_startup(tGrid *grid)
                + (z-0.5)*(z-0.5)/(2*2)   ) );
         Psi[i] = exp(-0.5*x*x);
         Psi[i] = 1.0/sqrt(x*x + y*y + z*z+1);
-        //Psi[i] = 0.0;
+        //Psi[i] = 0.0001*(b+1)/sqrt(x*x + y*y + z*z+1);
         //if(b==0 || b==3)
         //  Psi[i] = (b-1)*x;
       }
@@ -157,16 +157,19 @@ int Poisson_solve(tGrid *grid)
 
   /* call Newton solver */
 //F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
-/*
+
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
          linSolver_itmax, linSolver_tolFac);
-*/
+
+/*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          LinSolve_withLAPACK, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
          linSolver_itmax, linSolver_tolFac);
+*/
+
 /*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          1, tol, &normresnonlin, 1,
@@ -730,6 +733,55 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
       double Pinterp, Cinterp;
       double x,y,z;
 
+      /* special rho=0 case??? */
+      if(b==0 || b==1 || b==2 || b==3)
+      {
+        int pl;
+        char str[1000];
+        snprintf(str, 999, "box%d_basis2", b);
+        if(Getv(str, "ChebExtrema"))  /* treat rho=0 case */
+        {
+          double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
+          double *Chi_phi_phi = box->v[Ind("Poisson_temp2")];
+          double *Psi_y_phi_phi = box->v[Ind("Poisson_temp3")];
+          double *Chi_y_phi_phi = box->v[Ind("Poisson_temp4")];
+          double *temp5 = box->v[Ind("Poisson_temp5")];
+          double *temp6 = box->v[Ind("Poisson_temp6")];
+
+          /* get u_phi_phi */
+          spec_Deriv2(box, 3, Psi, Psi_phi_phi);
+          spec_Deriv2(box, 3, Chi, Chi_phi_phi);
+          
+          /* get u_rho_phi_phi at phi=0 */
+          /* d/drho = dx^i/drho d/dx^i, 
+             dx/drho=0, dy/drho=cos(phi), dz/drho=sin(phi)
+             ==> d/drho u = d/dy u  at phi=0 */           
+          /* get u_rho_phi_phi at phi=0: u_rho_phi_phi = d/dy u_phi_phi */
+          cart_partials(box, Psi_phi_phi, temp5, Psi_y_phi_phi, temp6);
+          cart_partials(box, Chi_phi_phi, temp5, Chi_y_phi_phi, temp6);
+
+          /* loop over rho=0 boundary */
+          for(pl=0; pl<n2; pl=pl+n2-1)  /* <-- B=0 and B=1 */
+            forplane2(i,j,k, n1,n2,n3, pl)
+            {
+              if(k>0) /* phi>0: impose u_phi_phi=0 */
+              {
+                FPsi[Index(i,j,k)] = Psi_phi_phi[Index(i,j,k)];
+                FChi[Index(i,j,k)] = Chi_phi_phi[Index(i,j,k)];
+              }
+              else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
+              {
+                double Psi_rho = Psiy[Index(i,j,k)];
+                double Chi_rho = Chiy[Index(i,j,k)];
+                double Psi_rho_phi_phi = Psi_y_phi_phi[Index(i,j,k)];
+                double Chi_rho_phi_phi = Chi_y_phi_phi[Index(i,j,k)];
+                FPsi[Index(i,j,k)] = Psi_rho + Psi_rho_phi_phi;
+                FChi[Index(i,j,k)] = Chi_rho + Chi_rho_phi_phi;
+              }
+            }
+        }
+      } /* end: special rho=0 case??? */
+
       if(b==0)  /* in box0 */
       {
         /* values at A=0 are equal in box0 and box1 */
@@ -1030,55 +1082,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         }
       }
       else errorexiti("b=%d should be impossible!", b);
-      
-      /* special rho=0 case??? */
-      if(b==0 || b==1 || b==2 || b==3)
-      {
-        int pl;
-        char str[1000];
-        snprintf(str, 999, "box%d_basis2", b);
-        if(Getv(str, "ChebExtrema"))  /* treat rho=0 case */
-        {
-          double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
-          double *Chi_phi_phi = box->v[Ind("Poisson_temp2")];
-          double *Psi_y_phi_phi = box->v[Ind("Poisson_temp3")];
-          double *Chi_y_phi_phi = box->v[Ind("Poisson_temp4")];
-          double *temp5 = box->v[Ind("Poisson_temp5")];
-          double *temp6 = box->v[Ind("Poisson_temp6")];
-
-          /* get u_phi_phi */
-          spec_Deriv2(box, 3, Psi, Psi_phi_phi);
-          spec_Deriv2(box, 3, Chi, Chi_phi_phi);
-          
-          /* get u_rho_phi_phi at phi=0 */
-          /* d/drho = dx^i/drho d/dx^i, 
-             dx/drho=0, dy/drho=cos(phi), dz/drho=sin(phi)
-             ==> d/drho u = d/dy u  at phi=0 */           
-          /* get u_rho_phi_phi at phi=0: u_rho_phi_phi = d/dy u_phi_phi */
-          cart_partials(box, Psi_phi_phi, temp5, Psi_y_phi_phi, temp6);
-          cart_partials(box, Chi_phi_phi, temp5, Chi_y_phi_phi, temp6);
-
-          /* loop over rho=0 boundary */
-          for(pl=0; pl<n2; pl=pl+n2-1)  /* <-- B=0 and B=1 */
-            forplane2(i,j,k, n1,n2,n3, pl)
-            {
-              if(k>0) /* phi>0: impose u_phi_phi=0 */
-              {
-                FPsi[Index(i,j,k)] = Psi_phi_phi[Index(i,j,k)];
-                FChi[Index(i,j,k)] = Chi_phi_phi[Index(i,j,k)];
-              }
-              else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
-              {
-                double Psi_rho = Psiy[Index(i,j,k)];
-                double Chi_rho = Chiy[Index(i,j,k)];
-                double Psi_rho_phi_phi = Psi_y_phi_phi[Index(i,j,k)];
-                double Chi_rho_phi_phi = Chi_y_phi_phi[Index(i,j,k)];
-                FPsi[Index(i,j,k)] = Psi_rho + Psi_rho_phi_phi;
-                FChi[Index(i,j,k)] = Chi_rho + Chi_rho_phi_phi;
-              }
-            }
-        }
-      } /* end: special rho=0 case??? */
 
     } /* end: else if (Getv("Poisson_grid", "4ABphi_2xyz")) */
 
