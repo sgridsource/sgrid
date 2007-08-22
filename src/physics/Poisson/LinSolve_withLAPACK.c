@@ -31,6 +31,8 @@ int LinSolve_withLAPACK(tVarList *x, tVarList *b,
 
   /* set Aline */                
   SetMatrixLines_slowly(Aline, lop, r, x, c1, c2, pr);
+  if(pr&&1) 
+    for(line=0; line<nlines; line++) prSparseVector(Aline[line]);
 
   /* solve A x = b with lapack's dgesv */
   INFO=lapack_dgesv(Aline, x, b, pr);

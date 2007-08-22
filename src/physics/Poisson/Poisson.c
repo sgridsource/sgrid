@@ -96,11 +96,12 @@ int Poisson_startup(tGrid *grid)
                  (x-1)*(x-1)/(1*1) + (y-0)*(y-0)/(1.5*1.5)
                + (z-0.5)*(z-0.5)/(2*2)   ) );
         Psi[i] = exp(-0.5*x*x);
+*/
         Psi[i] = 1.0/sqrt(x*x + y*y + z*z+1);
+        Psi[i] = 1.0/sqrt(x*x + (y-1)*(y-1) + (z-0.2)*(z-0.2)+1);
         //Psi[i] = 0.0001*(b+1)/sqrt(x*x + y*y + z*z+1);
         //if(b==0 || b==3)
         //  Psi[i] = (b-1)*x;
-*/
       }
     }
   }
@@ -158,6 +159,7 @@ int Poisson_solve(tGrid *grid)
   vlduDerivs = vluDerivs; /* maybe: vlduDerivs=AddDuplicateEnable(vluDerivs, "_l"); */
 
   /* call Newton solver */
+/*
 {
 double Y;
 double X=1;
@@ -173,6 +175,8 @@ grid->box[1]->x_of_X[1]((void *) grid->box[1], 0, X, Y, 0),
 grid->box[1]->x_of_X[2]((void *) grid->box[1], 0, X, Y, 0));
 }
 }
+*/
+/*
 {
 double X,Y,Z;
 double x,y,z;
@@ -185,12 +189,16 @@ Y+=1e-10;
 ABphi_of_xyz(box, &X,&Y,&Z, x,y,z);
 printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
 }
-printf("calling write_grid(grid)\n");
-write_grid(grid);
+*/
+//printf("calling write_grid(grid)\n");
+//write_grid(grid);
 F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
 printf("calling write_grid(grid)\n");
 write_grid(grid);
-//exit(11);
+exit(11);
+vlu->n=1; vlFu->n=1; vluDerivs->n=1; vlrhs->n=1;
+vldu->n=1; vlr->n=1; vlduDerivs->n=1; vlrhs->n=1;
+
 /*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
