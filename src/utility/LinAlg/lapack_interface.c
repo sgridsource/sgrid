@@ -80,10 +80,11 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
     printf("INFO=%d\n", INFO);
     printf("  if INFO<0: INFO =-i, the i-th argument had an illegal value\n");
     printf("  if INFO>0: INFO = i, U(i,i) is exactly zero.\n"
-           "    The factorization has been completed, but the factor U is "
-           "exactly singular,\n"
-           "    so the solution could not be computed.\n");
-    errorexit("lapack_dgesv: dgesv returned INFO!=0");
+           "             The factorization has been completed, "
+           "but the factor U is\n"
+           "             exactly singular, "
+           "so the solution could not be computed.\n");
+    errorexiti("lapack_dgesv: dgesv returned INFO=%d", INFO);
   }
 
   /* set vlx = xb */
