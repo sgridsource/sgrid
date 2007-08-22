@@ -53,6 +53,17 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
   if(pr) printf("lapack_dgesv: the %d*%d matrix AT=%p is now set!\n",
                 nlines, nlines, AT);
 
+  if(pr&&1)
+  {
+    printf("AT[i][j]:\n");
+    for(i = 0; i < nlines; i++)
+    {
+      printf("AT[%d][j]=", i);
+      for(j = 0; j < nlines; j++)  printf("%g ", AT[j+nlines*i]);
+      printf("\n");
+    }
+  }
+
 #ifdef LAPACK
   /* call lapack routine */
   if(pr) printf("lapack_dgesv: calling lapack's dgesv\n");
