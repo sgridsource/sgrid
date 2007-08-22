@@ -10,6 +10,8 @@
 
 
 void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);
+void ABphi_of_xyz(tBox *box, double *A, double *B, double *phi,
+                  double x, double y, double z);
 
 
 /* initialize Poisson */
@@ -156,11 +158,39 @@ int Poisson_solve(tGrid *grid)
   vlduDerivs = vluDerivs; /* maybe: vlduDerivs=AddDuplicateEnable(vluDerivs, "_l"); */
 
   /* call Newton solver */
-//printf("calling write_grid(grid)\n");
-//write_grid(grid);
-//F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
-//printf("calling write_grid(grid)\n");
-//write_grid(grid);
+{
+double Y;
+double X=1;
+for(Y=0;Y<=1;Y+=0.1)
+{
+printf("X=%g Y=%g: ",X,Y);
+printf("x0=%g y0=%g  ",
+grid->box[0]->x_of_X[1]((void *) grid->box[0], 0, X, Y, 0),
+grid->box[0]->x_of_X[2]((void *) grid->box[0], 0, X, Y, 0));
+
+printf("x1=%g y1=%g\n",
+grid->box[1]->x_of_X[1]((void *) grid->box[1], 0, X, Y, 0),
+grid->box[1]->x_of_X[2]((void *) grid->box[1], 0, X, Y, 0));
+}
+}
+{
+double X,Y,Z;
+double x,y,z;
+int i;
+tBox *box=grid->box[0];
+x=0.6; y=0.0; z=0.0;
+printf("nearestXYZ=%f ", nearestXYZ_of_xyz(box, &i, &X,&Y,&Z, x,y,z));
+printf("(X,Y,Z)=(%.12f,%.12f,%.12f)\n", X,Y,Z);
+Y+=1e-10;
+ABphi_of_xyz(box, &X,&Y,&Z, x,y,z);
+printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
+}
+printf("calling write_grid(grid)\n");
+write_grid(grid);
+F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
+printf("calling write_grid(grid)\n");
+write_grid(grid);
+//exit(11);
 /*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
@@ -960,8 +990,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           forplane1_nojump(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
           {
             ind=Index(i,j,k);
-            phi = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+            ABphi_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+
             Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
             Cinterp = spec_interpolate(grid->box[0], Ccoeffs, A,B,phi);
             FPsi[ind] = Psi[ind] - Pinterp;
@@ -979,8 +1009,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           forplane2_nojump(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
           {
             ind=Index(i,j,k);
-            phi = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+            ABphi_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
             Cinterp = spec_interpolate(grid->box[0], Ccoeffs, A,B,phi);
@@ -999,8 +1028,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           forplane3_nojump(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
           {
             ind=Index(i,j,k);
-            phi = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            XYZ_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+            ABphi_of_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
             Cinterp = spec_interpolate(grid->box[0], Ccoeffs, A,B,phi);
@@ -1034,8 +1062,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           forplane1_nojump(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
           {
             ind=Index(i,j,k);
-            phi = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+            ABphi_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
             Cinterp = spec_interpolate(grid->box[3], Ccoeffs, A,B,phi);
@@ -1054,8 +1081,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           forplane2_nojump(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
           {
             ind=Index(i,j,k);
-            phi = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+            ABphi_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
             Cinterp = spec_interpolate(grid->box[3], Ccoeffs, A,B,phi);
@@ -1074,8 +1100,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           forplane3_nojump(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
           {
             ind=Index(i,j,k);
-            phi = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            XYZ_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+            ABphi_of_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
                            
             Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
             Cinterp = spec_interpolate(grid->box[3], Ccoeffs, A,B,phi);
@@ -1089,4 +1114,20 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
     } /* end: else if (Getv("Poisson_grid", "4ABphi_2xyz")) */
 
   }
+}
+
+/* compute A,B,phi from x,y,z */
+void ABphi_of_xyz(tBox *box, double *A, double *B, double *phi,
+                  double x, double y, double z)
+{
+  if(*A==0.0) *A+=1e-10;
+  if(*A==1.0) *A-=1e-10;
+  if(*B==0.0) *B+=1e-10;
+  if(*B==1.0) *B-=1e-10;
+  *phi = Arg(y,z);   if(*phi<0) *phi = 2.0*PI + *phi;
+  XYZ_of_xyz(box, A,B,phi, x,y,z);
+  if(*A<0.0) *A=0.0;
+  if(*A>1.0) *A=1.0;
+  if(*B<0.0) *B=0.0;
+  if(*B>1.0) *B=1.0;
 }
