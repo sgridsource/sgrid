@@ -82,14 +82,13 @@ int Poisson_startup(tGrid *grid)
       else if(Getv("Poisson_grid", "AnsorgNS") || 
               Getv("Poisson_grid", "4ABphi_2xyz"))
       {
-/*
         Psi[i] = 0.0;
         Chi[i] = 0.0;
         rh1[i] = 0.0;
         rh2[i] = 0.0;
-        if(b==0)  rh1[i] = 4.0*PI;
-        if(b==3)  rh2[i] = 8.0*PI;
-*/
+        if(b==0 || b==5)  rh1[i] = -4.0*PI;
+        if(b==3 || b==4)  rh2[i] = -8.0*PI;
+/*
         Psi[i] = b*b;
         Psi[i] = 1*exp(-0.5*(
                  (x-1)*(x-1)/(1*1) + (y-0)*(y-0)/(1.5*1.5)
@@ -99,6 +98,7 @@ int Poisson_startup(tGrid *grid)
         //Psi[i] = 0.0001*(b+1)/sqrt(x*x + y*y + z*z+1);
         //if(b==0 || b==3)
         //  Psi[i] = (b-1)*x;
+*/
       }
     }
   }
@@ -156,19 +156,22 @@ int Poisson_solve(tGrid *grid)
   vlduDerivs = vluDerivs; /* maybe: vlduDerivs=AddDuplicateEnable(vluDerivs, "_l"); */
 
   /* call Newton solver */
+//printf("calling write_grid(grid)\n");
+//write_grid(grid);
 //F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
-
+//printf("calling write_grid(grid)\n");
+//write_grid(grid);
+/*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
          linSolver_itmax, linSolver_tolFac);
+*/
 
-/*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          LinSolve_withLAPACK, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
          linSolver_itmax, linSolver_tolFac);
-*/
 
 /*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,

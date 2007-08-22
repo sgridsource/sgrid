@@ -15,7 +15,7 @@ int LinSolve_withLAPACK(tVarList *x, tVarList *b,
   tGrid *grid = b->grid;
   int bi;
   int pr = 1;
-  int line, nlines, nvars, ok;
+  int line, nlines, nvars, INFO;
   tSparseVector **Aline;
 
   if(pr) printf("LinSolve_withLAPACK: ");
@@ -33,8 +33,8 @@ int LinSolve_withLAPACK(tVarList *x, tVarList *b,
   SetMatrixLines_slowly(Aline, lop, r, x, c1, c2, pr);
 
   /* solve A x = b with lapack's dgesv */
-  ok=lapack_dgesv(Aline, x, b, pr);
-  if(pr) printf("LinSolve_withLAPACK: lapack_dgesv returned ok=%d\n", ok);
+  INFO=lapack_dgesv(Aline, x, b, pr);
+  if(pr) printf("LinSolve_withLAPACK: lapack_dgesv returned INFO=%d\n", INFO);
 
-  return ok;
+  return INFO;
 }
