@@ -58,7 +58,7 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
     printf("AT[i][j]:\n");
     for(i = 0; i < nlines; i++)
     {
-      printf("AT[%d][j]=", i);
+      printf("AT[%d][j] = ", i);
       for(j = 0; j < nlines; j++)  printf("%g ", AT[j+nlines*i]);
       printf("\n");
     }
