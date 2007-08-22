@@ -94,6 +94,7 @@ tVarList *AddDuplicateEnable(tVarList *vl, char *postfix);
 
 char *VarName(int i);
 int VarNComponents(int i);
+int VarComponent(int i);
 int IndComponent0(int i);
 char *VarNameComponent0(char *name);
 char *VarTensorIndices(int i);

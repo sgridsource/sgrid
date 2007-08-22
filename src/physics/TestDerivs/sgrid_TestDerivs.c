@@ -7,7 +7,7 @@
 
 int sgrid_TestDerivs() 
 {
-  if (!Getv("physics", "TestDerivs")) return;
+  if (!Getv("physics", "TestDerivs")) return 0;
   printf("Adding TestDerivs\n");
 
   /* functions */

@@ -37,8 +37,8 @@ double integral(double (*func)(double), double a, double b, double s, int max)
  double itold,itnew,d;
  int j;
  
- itnew=trapezit(func,a,b,1,itold);  /* 1. Iterationsstartwert berechnen    */
- itold=itnew;                       /* 1. Iterationsstartwert in itold tun */
+ itnew=trapezit(func,a,b,1,0.0);  /* 1. Iterationsstartwert berechnen    */
+ itold=itnew;                     /* 1. Iterationsstartwert in itold tun */
  for(j=2;j<=max;j++)
  {
    itnew=trapezit(func,a,b,j,itold);

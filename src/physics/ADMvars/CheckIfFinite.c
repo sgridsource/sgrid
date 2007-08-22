@@ -33,7 +33,7 @@ int CheckIfFinite(tGrid* grid, char *varname)
     // TODO: FIX this!!!!!
     //bampi_allreduce_sum(vl, &sum);  
 
-    if(!finite(*sum)) num=0.1;
+    //if(!finite(*sum)) num=0.1;
 
     // TODO: FIX this!!!!!
     //free(sum);

@@ -7,7 +7,7 @@
 
 int sgrid_SingleBH() 
 {
-  if (!Getv("physics", "SingleBH")) return;
+  if (!Getv("physics", "SingleBH")) return 0;
   printf("Adding SingleBH\n");
 
   /* functions: */

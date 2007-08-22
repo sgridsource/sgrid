@@ -350,7 +350,7 @@ void realloc_gridvariables(tGrid *grid, int nvariables)
   tBox *box;
 
   if (PR) printf("realloc_gridvariables from %d to %d\n", 
-		 box->grid->nvariables, nvariables);
+		 grid->nvariables, nvariables);
 
   for (b = 0; b < grid->nboxes; b++)
   {
