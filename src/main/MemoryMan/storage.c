@@ -103,6 +103,14 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
   if( !(box->F1 && box->F2 && box->F3) )
     errorexit("alloc_box: out of memory for filter matrices");
 
+  /* get mem. for matrices to obtain coeffs */
+  box->Mcoeffs1 = box->Mcoeffs2 = box->Mcoeffs3 = NULL;
+  box->Mcoeffs1 = (double *) calloc( n1*n1, sizeof(double) );
+  box->Mcoeffs2 = (double *) calloc( n2*n2, sizeof(double) );
+  box->Mcoeffs3 = (double *) calloc( n3*n3, sizeof(double) );
+  if( !(box->Mcoeffs1 && box->Mcoeffs2 && box->Mcoeffs3) )
+    errorexit("alloc_box: out of memory for matrices to obtain coeffs");
+
   return box;
 } 
 
@@ -148,6 +156,9 @@ void free_box(tBox *box)
   free(box->F1);
   free(box->F2);
   free(box->F3);
+  free(box->Mcoeffs1);
+  free(box->Mcoeffs2);
+  free(box->Mcoeffs3);
   
   free(box);
 }
@@ -347,7 +358,6 @@ void enablesamevars(tGrid *grid, tGrid *newgrid)
 void realloc_gridvariables(tGrid *grid, int nvariables)
 {
   int b;
-  tBox *box;
 
   if (PR) printf("realloc_gridvariables from %d to %d\n", 
 		 grid->nvariables, nvariables);

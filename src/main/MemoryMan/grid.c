@@ -218,6 +218,7 @@ tGrid *make_grid(int pr)
          initdiffmatrix2(box->bbox[0], box->bbox[1], box->DD1, n1,
                          get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
        box->basis1=basisfunc;
+       initMatrix_ForCoeffs(box->Mcoeffs1, n1, get_coeffs);
 
        /* direction 2 */
        get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
@@ -231,6 +232,7 @@ tGrid *make_grid(int pr)
          initdiffmatrix2(box->bbox[2], box->bbox[3], box->DD2, n2,
                          get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
        box->basis2=basisfunc;
+       initMatrix_ForCoeffs(box->Mcoeffs2, n2, get_coeffs);
 
        /* direction 3 */
        get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
@@ -244,6 +246,7 @@ tGrid *make_grid(int pr)
          initdiffmatrix2(box->bbox[4], box->bbox[5], box->DD3, n3,
                          get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
        box->basis3=basisfunc;
+       initMatrix_ForCoeffs(box->Mcoeffs3, n3, get_coeffs);
     }
   }
 

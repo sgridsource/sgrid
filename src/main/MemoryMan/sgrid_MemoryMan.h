@@ -37,6 +37,9 @@ typedef struct tBOX {
   double (*basis1)(double a, double b, int k, int n1, double X); /* basisfunction k in direction 1 */
   double (*basis2)(double a, double b, int k, int n2, double X); /* basisfunction k in direction 2 */
   double (*basis3)(double a, double b, int k, int n3, double X); /* basisfunction k in direction 3 */
+  double *Mcoeffs1;	/* matrix to obtain coeffs in direction 1 */
+  double *Mcoeffs2;	/* matrix to obtain coeffs in direction 2 */
+  double *Mcoeffs3;	/* matrix to obtain coeffs in direction 3 */
   double bbox[6];	/* global bounding box */
   int ibbox[6];	/* global bounding box in index range */
 } tBox;
