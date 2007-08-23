@@ -84,12 +84,23 @@ int Poisson_startup(tGrid *grid)
       else if(Getv("Poisson_grid", "AnsorgNS") || 
               Getv("Poisson_grid", "4ABphi_2xyz"))
       {
+        double xmax1 = grid->box[0]->x_of_X[1](
+                        (void *) grid->box[0], 0, 0.0,0.0,0.0);
+        double xmin1 = grid->box[0]->x_of_X[1](
+                        (void *) grid->box[0], 0, 0.0,1.0,0.0);
+        double xmax2 = grid->box[3]->x_of_X[1](
+                        (void *) grid->box[3], 0, 0.0,1.0,0.0);
+        double xmin2 = grid->box[3]->x_of_X[1](
+                        (void *) grid->box[3], 0, 0.0,0.0,0.0);
+        double R1  = 0.5*(xmax1-xmin1);
+        double R2  = 0.5*(xmax2-xmin2);
+
         Psi[i] = 0.0;
         Chi[i] = 0.0;
         rh1[i] = 0.0;
         rh2[i] = 0.0;
-        if(b==0 || b==5)  rh1[i] = -4.0*PI;
-        if(b==3 || b==4)  rh2[i] = -8.0*PI;
+        if(b==0 || b==5)  rh1[i] = -3.0/(R1*R1*R1);
+        if(b==3 || b==4)  rh2[i] = -6.0/(R2*R2*R2);;
 /*
         Psi[i] = b*b;
         Psi[i] = 1*exp(-0.5*(
@@ -97,8 +108,8 @@ int Poisson_startup(tGrid *grid)
                + (z-0.5)*(z-0.5)/(2*2)   ) );
         Psi[i] = exp(-0.5*x*x);
 */
-        Psi[i] = 1.0/sqrt(x*x + y*y + z*z+1);
-        Psi[i] = 1.0/sqrt(x*x + (y-1)*(y-1) + (z-0.2)*(z-0.2)+1);
+        //Psi[i] = 1.0/sqrt(x*x + y*y + z*z+1);
+        //Psi[i] = 1.0/sqrt(x*x + (y-1)*(y-1) + (z-0.2)*(z-0.2)+1);
         //Psi[i] = 0.0001*(b+1)/sqrt(x*x + y*y + z*z+1);
         //if(b==0 || b==3)
         //  Psi[i] = (b-1)*x;
@@ -159,45 +170,14 @@ int Poisson_solve(tGrid *grid)
   vlduDerivs = vluDerivs; /* maybe: vlduDerivs=AddDuplicateEnable(vluDerivs, "_l"); */
 
   /* call Newton solver */
-/*
-{
-double Y;
-double X=1;
-for(Y=0;Y<=1;Y+=0.1)
-{
-printf("X=%g Y=%g: ",X,Y);
-printf("x0=%g y0=%g  ",
-grid->box[0]->x_of_X[1]((void *) grid->box[0], 0, X, Y, 0),
-grid->box[0]->x_of_X[2]((void *) grid->box[0], 0, X, Y, 0));
-
-printf("x1=%g y1=%g\n",
-grid->box[1]->x_of_X[1]((void *) grid->box[1], 0, X, Y, 0),
-grid->box[1]->x_of_X[2]((void *) grid->box[1], 0, X, Y, 0));
-}
-}
-*/
-/*
-{
-double X,Y,Z;
-double x,y,z;
-int i;
-tBox *box=grid->box[0];
-x=0.6; y=0.0; z=0.0;
-printf("nearestXYZ=%f ", nearestXYZ_of_xyz(box, &i, &X,&Y,&Z, x,y,z));
-printf("(X,Y,Z)=(%.12f,%.12f,%.12f)\n", X,Y,Z);
-Y+=1e-10;
-ABphi_of_xyz(box, &X,&Y,&Z, x,y,z);
-printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
-}
-*/
 //printf("calling write_grid(grid)\n");
 //write_grid(grid);
 F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
 printf("calling write_grid(grid)\n");
 write_grid(grid);
 //exit(11);
-vlu->n=1; vlFu->n=1; vluDerivs->n=1; vlrhs->n=1;
-vldu->n=1; vlr->n=1; vlduDerivs->n=1; vlrhs->n=1;
+//vlu->n=1; vlFu->n=1; vluDerivs->n=1; vlrhs->n=1;
+//vldu->n=1; vlr->n=1; vlduDerivs->n=1; vlrhs->n=1;
 
 /*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
@@ -278,12 +258,39 @@ int Poisson_analyze(tGrid *grid)
       else if(Getv("Poisson_grid", "AnsorgNS") || 
               Getv("Poisson_grid", "4ABphi_2xyz"))
       {
-/*
-        if(b==1||b==2||b==3)
-          PsiErr[i] = Psi[i]-1.0/sqrt((x-1)*(x-1) + y*y + z*z);
-        if(b==0||b==1||b==2)
-          ChiErr[i] = Chi[i]-2.0/sqrt((x+1)*(x+1) + y*y + z*z);
-*/
+        double xmax1 = grid->box[0]->x_of_X[1](
+                        (void *) grid->box[0], 0, 0.0,0.0,0.0);
+        double xmin1 = grid->box[0]->x_of_X[1](
+                        (void *) grid->box[0], 0, 0.0,1.0,0.0);
+        double xmax2 = grid->box[3]->x_of_X[1](
+                        (void *) grid->box[3], 0, 0.0,1.0,0.0);
+        double xmin2 = grid->box[3]->x_of_X[1](
+                        (void *) grid->box[3], 0, 0.0,0.0,0.0);
+        double R1  = 0.5*(xmax1-xmin1);
+        double xc1 = 0.5*(xmax1+xmin1);
+        double R2  = 0.5*(xmax2-xmin2);
+        double xc2 = 0.5*(xmax2+xmin2);
+
+//if(i==0) printf("R1=%g xc1=%g\n", R1, xc1);
+
+        if(b==1||b==2||b==3||b==4)
+        {
+          PsiErr[i] = Psi[i]-1.0/sqrt((x-xc1)*(x-xc1) + y*y + z*z);
+        }
+        if(b==0||b==5)
+        {
+          PsiErr[i] = Psi[i]-( -(x-xc1)*(x-xc1) -y*y -z*z  + 1/R1 + R1*R1);
+        }
+        if(b==1||b==2||b==0||b==5)
+        {
+          ChiErr[i] = Chi[i]-2.0/sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+        }
+        if(b==3||b==4)
+        {
+          ChiErr[i] = 
+            Chi[i]-( -2*(x-xc2)*(x-xc2) -2*y*y -2*z*z  + 2/R2 + 2*R2*R2);
+        }
+
       }
     }
   }
