@@ -2525,17 +2525,10 @@ void set_d_dz_at_rhoEQzero_AnsorgNS(void *bo, void *va,
     errorexiti("set_d_dz_at_rhoEQzero_AnsorgNS: "
                "box[%d]->n3 has to be divisible by 4.", box->b);
   /* take deriv d/dy at phi=pi/2 (k=n3/4) <=> y=0 and use it everywhere */
-/*
   for(k=0; k<n3; k++)
     for(j=0; j<n2; j=j+n2-1)
       for(i=0; i<n1; i++)
         vz[Index(i,j,k)] = vz[Index(i,j,n3/4)];
-*/
-  for(k=0; k<n3; k++)
-    for(j=0; j<n2; j=j+n2-1)
-      for(i=0; i<n1; i++)
-      {  vz[Index(i,j,n3/4)]=11;}
-
 }
 /* second coord. derivs are currently not implemented */
 
