@@ -49,7 +49,9 @@ int sgrid_Poisson()
          "tol for linSolver is tol * linSolver_tolFac");
 
   AddPar("Poisson_grid", "SphericalDF",
-         "what grid we use [SphericalDF, AnsorgNS]");
+         "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");
+  AddPar("Poisson_4ABphi_2xyz", "regularity_on_axis",
+         "optins for Poisson_grid=4ABphi_2xyz [regularity_on_axis]");
 	     	   	   	 
   return 0;
 }

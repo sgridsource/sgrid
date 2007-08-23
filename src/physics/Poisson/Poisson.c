@@ -821,8 +821,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
               }
             }
         }
-#if 0
-        else /* same as before, but also interpolate to rho=0 */
+        /* same as before, but also interpolate to rho=0 */
+        else if(Getv("Poisson_4ABphi_2xyz", "regularity_on_axis"))
         {
           double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
           double *Chi_phi_phi = box->v[Ind("Poisson_temp2")];
@@ -904,7 +904,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           free(BM[1]);
           free(line);
         }
-#endif
       } /* end: special rho=0 case??? */
 
       if(b==0)  /* in box0 */
@@ -1007,11 +1006,36 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         }
         
         /* Psi=Chi=0 at infinity */
-        // fixme: B=0 is not on grid for ChebZeros!!!
-        for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+        if(Getv("box1_basis2", "ChebExtrema"))
+          for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+          {
+            FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)];
+            FChi[Index(n1-1,0,k)] = Chi[Index(n1-1,0,k)];
+          }
+        else // fix: B=0 is not on grid for ChebZeros!!!
         {
-          FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)];
-          FChi[Index(n1-1,0,k)] = Chi[Index(n1-1,0,k)];
+          int l;
+          double U0;
+          double *BM = (double *) calloc(n2, sizeof(double));
+          double *line = (double *) calloc(n2, sizeof(double));
+
+          /* obtain BM vector for interpolation along B */
+          spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM, 0.0,
+                                       cheb_coeffs_fromZeros, cheb_basisfunc);
+          for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+          {
+            /* find value of Psi at A=1, B=0 */
+            get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
+            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            FPsi[Index(n1-1,0,k)] = U0;
+
+            /* find value of Chi at A=1, B=0 */
+            get_memline(Chi, line, 2, n1-1,k, n1,n2,n3);
+            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            FChi[Index(n1-1,0,k)] = U0;
+          }
+          free(line);
+          free(BM);
         }
       }
       else if(b==2)  /* in box2 */
@@ -1050,11 +1074,36 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
         }
 
         /* Psi=Chi=0 at infinity */
-        // fixme: B=0 is not on grid for ChebZeros!!!
-        for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+        if(Getv("box2_basis2", "ChebExtrema"))
+          for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+          {
+            FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)];
+            FChi[Index(n1-1,0,k)] = Chi[Index(n1-1,0,k)];
+          }
+        else // fix: B=0 is not on grid for ChebZeros!!!
         {
-          FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)];
-          FChi[Index(n1-1,0,k)] = Chi[Index(n1-1,0,k)];
+          int l;
+          double U0;
+          double *BM = (double *) calloc(n2, sizeof(double));
+          double *line = (double *) calloc(n2, sizeof(double));
+
+          /* obtain BM vector for interpolation along B */
+          spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM, 0.0,
+                                       cheb_coeffs_fromZeros, cheb_basisfunc);
+          for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)~(1,0) */
+          {
+            /* find value of Psi at A=1, B=0 */
+            get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
+            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            FPsi[Index(n1-1,0,k)] = U0;
+
+            /* find value of Chi at A=1, B=0 */
+            get_memline(Chi, line, 2, n1-1,k, n1,n2,n3);
+            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            FChi[Index(n1-1,0,k)] = U0;
+          }
+          free(line);
+          free(BM);
         }
       }
       else if(b==5)  /* in box5 */
