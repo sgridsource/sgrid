@@ -195,7 +195,7 @@ printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
 F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
 printf("calling write_grid(grid)\n");
 write_grid(grid);
-exit(11);
+//exit(11);
 vlu->n=1; vlFu->n=1; vluDerivs->n=1; vlrhs->n=1;
 vldu->n=1; vlr->n=1; vlduDerivs->n=1; vlrhs->n=1;
 
@@ -821,6 +821,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
               }
             }
         }
+#if 0
         else /* same as before, but also interpolate to rho=0 */
         {
           double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
@@ -903,6 +904,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           free(BM[1]);
           free(line);
         }
+#endif
       } /* end: special rho=0 case??? */
 
       if(b==0)  /* in box0 */

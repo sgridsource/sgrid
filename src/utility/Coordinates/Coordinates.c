@@ -238,8 +238,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphi_dy_AnsorgNS0;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS0;
       
-      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
-      box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+      //box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
+      //box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS1") )
     {
@@ -258,8 +258,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphi_dy_AnsorgNS1;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS1;
       
-      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
-      box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+      //box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
+      //box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS2") )
     {
@@ -278,8 +278,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphi_dy_AnsorgNS2;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS2;
       
-      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
-      box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+      //box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
+      //box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS3") )
     {
@@ -298,8 +298,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphi_dy_AnsorgNS3;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS3;
       
-      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
-      box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+      //box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
+      //box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
     }
     else
       errorexit("Coordinates: unknown coordinates...");
