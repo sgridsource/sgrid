@@ -56,6 +56,8 @@ void get_spec_functionpointers(tBox *box, int direc,
      void (**eval_onPoints)(double *,double *, int),
      void (**filter_coeffs)(double *, int, int),
      double (**basisfunc)(double a, double b, int k, int n1, double X) );
+void get_spec_functionpointerTO_get_coeffs(tBox *box, int direc,
+                               void (**get_coeffs)(double *,double *, int));
 void spec_Basis_times_CoeffMatrix(double a, double b, int n,
                                   double *BM, double X,
                     void   (*get_coeffs)(double *,double *, int),

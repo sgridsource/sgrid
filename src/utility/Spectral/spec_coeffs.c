@@ -244,6 +244,21 @@ void get_spec_functionpointers(tBox *box, int direc,
   }
 }
 
+/* get func pointer to get_coeffs */
+void get_spec_functionpointerTO_get_coeffs(tBox *box, int direc,
+                               void (**get_coeffs)(double *,double *, int))
+{
+  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*eval_onPoints)(double *,double *, int)=NULL;
+  void (*filter_coeffs)(double *, int, int)=NULL;
+  double (*basisfunc)(double a, double b, int k, int n1, double X)=NULL;
+           
+  get_spec_functionpointers(box, direc, get_coeffs, &coeffs_of_deriv,
+                            &coeffs_of_2ndderiv, &eval_onPoints,
+                            &filter_coeffs, &basisfunc);
+}
+
 
 /* compute B_k(X) M_ki     <-- B_k is basis function k
    Cu_k = M_ki u_i         <-- M_ki is coeff matrix
