@@ -2489,6 +2489,70 @@ double dphi_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
   return dphidz;                                                                                                          
 }
 /* functions to treat cartesian derivs at singular points */
+#if 0
+void copy_var_along_x_AnsorgNS(tBox *box, int vi, int K0)
+{
+  double *u = box->v[vi];
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i,j,k;
+  double *uline, *cline;
+
+  /* take deriv d/dy at phi=pi/2 (k=K0) <=> y=0 and use it everywhere */
+  uline = (double *) calloc(n1, sizeof(double));
+  cline = (double *) calloc(n1, sizeof(double));
+
+  /* loop over all points with B=0 and B=1 */  
+  for(j=0; j<n2; j=j+n2-1)
+  {
+    int m;
+    double a1=box->bbox[0];
+    double b1=box->bbox[1];
+        
+    /* get coeffs of u along B=0 or B=1 */
+    get_memline(u, uline, 1, j,K0, n1,n2,n3);
+    matrix_times_vector(box->Mcoeffs1, uline, cline, n1);
+
+    for(k=0; k<n3; k++)
+    {
+      if(k==K0) continue;
+      
+      for(i=0; i<n1; i++)
+      {
+        double x = box->v[Ind("x")][Index(i,j,k)];
+        double sum = 0.0;
+        double X = box->v[Ind("X")][Index(i,j,k)];
+        double Y = box->v[Ind("Y")][Index(i,j,k)];
+        double Z = 0.0;
+        double x1, x2, x3, x4, xswap;
+        x1 = box->v[Ind("x")][Index(n1-1,n2-1,K0)];
+        x2 = box->v[Ind("x")][Index(0,n2-1,K0)];
+        x3 = box->v[Ind("x")][Index(0,0,K0)];
+        x4 = box->v[Ind("x")][Index(n1-1,0,K0)];
+        if(x2<0) { xswap = x1;  x1=x2;  x2=xswap; }
+        if(x3<0) { xswap = x3;  x3=x4;  x4=xswap; }
+        if(x3<0 && x4>1e+299) x4=-x4;
+        if( (x>x2 || x<x1) && (x>x4 || x<x3) )
+        {
+          errorexit("x out of range");
+        }
+        else
+        {
+          if(X==0.0) X+=1e-7;
+          if(X==1.0) X-=1e-7;
+          X_of_x_forgiven_YZ(box, &X, x, Y,Z);
+          /* interpolate u to X */
+          for(m=0; m<n1; m++)  sum += cline[m] * box->basis1(a1,b1, m,n1, X);
+          u[Index(i,j,k)] = sum;
+        }
+      }
+    }
+  }
+  free(uline);
+  free(cline);
+}
+#endif
 void set_d_dy_at_rhoEQzero_AnsorgNS(void *bo, void *va, 
                                     void *v1,void *v2,void *v3)
 {
@@ -2575,6 +2639,7 @@ void set_d_dz_at_rhoEQzero_AnsorgNS_new(void *bo, void *va,
       for(i=0; i<n1; i++)
       {
         double x = box->v[Ind("x")][Index(i,j,k)];
+//        double xmin0 = box->v[Ind("x")][Index(i,j,n3/4)];
         double sum = 0.0;
         double X = box->v[Ind("X")][Index(i,j,k)];
         double Y = box->v[Ind("Y")][Index(i,j,k)];
