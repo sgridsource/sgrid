@@ -2530,6 +2530,69 @@ void set_d_dz_at_rhoEQzero_AnsorgNS(void *bo, void *va,
       for(i=0; i<n1; i++)
         vz[Index(i,j,k)] = vz[Index(i,j,n3/4)];
 }
+void set_d_dz_at_rhoEQzero_AnsorgNS_new(void *bo, void *va, 
+                                    void *v1,void *v2,void *v3)
+{
+  tBox *box = (tBox *) bo;
+  double *u = (double *) va;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i,j,k;
+  double rho_0 = box->v[Ind("y")][Index(0,0,0)];
+  double *M, *uline, *cline;
+  void (*get_coeffs)(double *,double *, int)=NULL;
+  
+  if(fabs(rho_0)>0.0) return;
+
+  if(n3 % 4)
+    errorexiti("set_d_dz_at_rhoEQzero_AnsorgNS: "
+               "box[%d]->n3 has to be divisible by 4.", box->b);
+
+  /* take deriv d/dy at phi=pi/2 (k=n3/4) <=> y=0 and use it everywhere */
+  uline = (double *) calloc(n1, sizeof(double));
+  cline = (double *) calloc(n1, sizeof(double));
+  M = (double*) calloc(n1*n1, sizeof(double));
+
+  get_spec_functionpointerTO_get_coeffs(box, 1, &get_coeffs);
+  initMatrix_ForCoeffs(M, n1, get_coeffs);
+
+  /* loop over all points with B=0 and B=1 */  
+  for(j=0; j<n2; j=j+n2-1)
+  {
+    int m;
+    double a1=box->bbox[0];
+    double b1=box->bbox[1];
+        
+    /* get coeffs of u along B=0 or B=1 */
+    get_memline(u, uline, 1, j,n3/4, n1,n2,n3);
+    matrix_times_vector(M, uline, cline, n1);
+
+    for(k=0; k<n3; k++)
+    {
+      if(k==n3/4) continue;
+      
+      for(i=0; i<n1; i++)
+      {
+        double x = box->v[Ind("x")][Index(i,j,k)];
+        double sum = 0.0;
+        double X = box->v[Ind("X")][Index(i,j,k)];
+        double Y = box->v[Ind("Y")][Index(i,j,k)];
+        double Z = 0.0;;
+        if(Y==0) Y+=1e-7;
+        if(Y==1) Y-=1e-7;
+        XYZ_of_xyz(box, &X,&Y,&Z, x,0.0,0.0);
+                        
+        /* interpolate u to X */
+        for(m=0; m<n1; m++)  sum += cline[m] * box->basis1(a1,b1, m,n1, x);
+        u[Index(i,j,k)] = sum;
+      }
+    }
+  }
+  free(uline);
+  free(cline);
+  free(M);
+}
 /* second coord. derivs are currently not implemented */
 
 /* end: _AnsorgNS coordinates: */
