@@ -167,3 +167,39 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
 
   return rmin;
 }
+
+/* function to be passed into newton_lnsrch by X_of_x_forgiven_YZ */
+void x_VectorFunc_YZ(int n, double *XYZvec, double *fvec)
+{
+  double xg;
+  int ind=0; /* works only if the x_of_X[i] don't use ind */
+
+  xg = box_for_xyz_VectorFunc->x_of_X[1]((void *) box_for_xyz_VectorFunc,
+                                          ind, XYZvec[1],XYZvec[2],XYZvec[3]);
+  fvec[1] = xg-desired_x;
+}
+
+/* find X from x for a given Y,Z (Note: X also contains initial guess) */
+void X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z)
+{
+  double XYZvec[4];
+  int check;
+
+  box_for_xyz_VectorFunc = box;
+  desired_x = x;
+
+  /* initial guess supplied by caller */
+  XYZvec[1] = *X;
+  
+  /* Y,Z are fixed */
+  XYZvec[2] = Y;
+  XYZvec[3] = Z;
+      
+  /* do newton_lnsrch iterations: */
+  newton_lnsrch(XYZvec, 1, &check, x_VectorFunc_YZ, 
+ 		Geti("Coordinates_newtMAXITS"),
+    		Getd("Coordinates_newtTOLF") );
+  *X = XYZvec[1];
+
+  if(check) printf("X_of_x_forgiven_YZ: check=%d\n", check);  
+}

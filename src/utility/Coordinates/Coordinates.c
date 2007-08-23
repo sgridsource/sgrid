@@ -2578,13 +2578,12 @@ void set_d_dz_at_rhoEQzero_AnsorgNS_new(void *bo, void *va,
         double sum = 0.0;
         double X = box->v[Ind("X")][Index(i,j,k)];
         double Y = box->v[Ind("Y")][Index(i,j,k)];
-        double Z = 0.0;;
-        if(Y==0) Y+=1e-7;
-        if(Y==1) Y-=1e-7;
-        XYZ_of_xyz(box, &X,&Y,&Z, x,0.0,0.0);
-                        
+        double Z = 0.0;
+        if(X==0.0) X+=1e-7;
+        if(X==1.0) X-=1e-7;
+        X_of_x_forgiven_YZ(box, &X, x, Y,Z);
         /* interpolate u to X */
-        for(m=0; m<n1; m++)  sum += cline[m] * box->basis1(a1,b1, m,n1, x);
+        for(m=0; m<n1; m++)  sum += cline[m] * box->basis1(a1,b1, m,n1, X);
         u[Index(i,j,k)] = sum;
       }
     }
