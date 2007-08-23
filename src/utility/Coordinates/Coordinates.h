@@ -182,3 +182,7 @@ double dB_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
 double dphi_dx_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
 double dphi_dy_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
 double dphi_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi);
+void set_d_dy_at_rhoEQzero_AnsorgNS(void *bo, void *va, 
+                                    void *v1,void *v2,void *v3);
+void set_d_dz_at_rhoEQzero_AnsorgNS(void *bo, void *va, 
+                                    void *v1,void *v2,void *v3);

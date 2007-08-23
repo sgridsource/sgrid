@@ -47,21 +47,21 @@ void write_plane(tBox *box, FILE *fp, int normal, int plane, int iv)
     p1 = box->v[iy];
     p2 = box->v[iz];
     imin = imax = plane;
-    fprintf(fp, ", i=%d, X=%g\n", plane, box->v[Ind("X")][Index(plane,0,0)]);
+    fprintf(fp, ", i=%d, X=%.16g\n", plane, box->v[Ind("X")][Index(plane,0,0)]);
   }
   else if(normal==2)
   {
     p1 = box->v[ix];
     p2 = box->v[iz];
     jmin = jmax = plane;
-    fprintf(fp, ", j=%d, Y=%g\n", plane, box->v[Ind("Y")][Index(0,plane,0)]);
+    fprintf(fp, ", j=%d, Y=%.16g\n", plane, box->v[Ind("Y")][Index(0,plane,0)]);
   }
   else
   {
     p1 = box->v[ix];
     p2 = box->v[iy];
     kmin = kmax = plane;
-    fprintf(fp, ", k=%d, Z=%g\n", plane, box->v[Ind("Z")][Index(0,0,plane)]);
+    fprintf(fp, ", k=%d, Z=%.16g\n", plane, box->v[Ind("Z")][Index(0,0,plane)]);
   }
 
   /* go over plane, with normal */

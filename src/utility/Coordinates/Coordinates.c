@@ -237,6 +237,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dphi_dx_AnsorgNS0;
       box->dX_dx[3][2] = dphi_dy_AnsorgNS0;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS0;
+      
+      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
+      box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS1") )
     {
@@ -254,6 +257,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dphi_dx_AnsorgNS1;
       box->dX_dx[3][2] = dphi_dy_AnsorgNS1;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS1;
+      
+      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
+      box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS2") )
     {
@@ -271,6 +277,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dphi_dx_AnsorgNS2;
       box->dX_dx[3][2] = dphi_dy_AnsorgNS2;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS2;
+      
+      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
+      box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS3") )
     {
@@ -288,6 +297,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dphi_dx_AnsorgNS3;
       box->dX_dx[3][2] = dphi_dy_AnsorgNS3;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS3;
+      
+      box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
+      box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
     }
     else
       errorexit("Coordinates: unknown coordinates...");
@@ -2475,6 +2487,55 @@ double dphi_dz_AnsorgNS3(void *aux, int ind, double A, double B, double phi)
                        &dBdx,   &dBdy,   &dBdz,
                        &dphidx, &dphidy, &dphidz);
   return dphidz;                                                                                                          
+}
+/* functions to treat cartesian derivs at singular points */
+void set_d_dy_at_rhoEQzero_AnsorgNS(void *bo, void *va, 
+                                    void *v1,void *v2,void *v3)
+{
+  tBox *box = (tBox *) bo;
+  double *vy = (double *) va;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i,j,k;
+  double rho_0 = box->v[Ind("y")][Index(0,0,0)];
+  
+  if(fabs(rho_0)>0.0) return;
+
+  /* take deriv d/dy at phi=0 (k=0) <=> z=0 and use it everywhere */
+  for(k=0; k<n3; k++)
+    for(j=0; j<n2; j=j+n2-1)
+      for(i=0; i<n1; i++)
+        vy[Index(i,j,k)] = vy[Index(i,j,0)];
+}
+void set_d_dz_at_rhoEQzero_AnsorgNS(void *bo, void *va, 
+                                    void *v1,void *v2,void *v3)
+{
+  tBox *box = (tBox *) bo;
+  double *vz = (double *) va;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i,j,k;
+  double rho_0 = box->v[Ind("y")][Index(0,0,0)];
+
+  if(fabs(rho_0)>0.0) return;
+
+  if(n3 % 4)
+    errorexiti("set_d_dz_at_rhoEQzero_AnsorgNS: "
+               "box[%d]->n3 has to be divisible by 4.", box->b);
+  /* take deriv d/dy at phi=pi/2 (k=n3/4) <=> y=0 and use it everywhere */
+/*
+  for(k=0; k<n3; k++)
+    for(j=0; j<n2; j=j+n2-1)
+      for(i=0; i<n1; i++)
+        vz[Index(i,j,k)] = vz[Index(i,j,n3/4)];
+*/
+  for(k=0; k<n3; k++)
+    for(j=0; j<n2; j=j+n2-1)
+      for(i=0; i<n1; i++)
+      {  vz[Index(i,j,n3/4)]=11;}
+
 }
 /* second coord. derivs are currently not implemented */
 

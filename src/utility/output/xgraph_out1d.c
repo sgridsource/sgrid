@@ -51,7 +51,7 @@ void write_line(tBox *box, FILE *fp, int line, int iv)
     snprintf(str, 999, "outputZ0_box%d", box->b);
     kmin = kmax = find_ind_closest_to_Z0(box,Getd(str));
 
-    fprintf(fp, ", j=%d, k=%d, Y=%g, Z=%g\n", jmin, kmin, 
+    fprintf(fp, ", j=%d, k=%d, Y=%.16g, Z=%.16g\n", jmin, kmin, 
             box->v[Ind("Y")][Index(0,jmin,kmin)],
             box->v[Ind("Z")][Index(0,jmin,kmin)]);
   }
@@ -65,7 +65,7 @@ void write_line(tBox *box, FILE *fp, int line, int iv)
     snprintf(str, 999, "outputZ0_box%d", box->b);
     kmin = kmax = find_ind_closest_to_Z0(box,Getd(str));
 
-    fprintf(fp, ", i=%d, k=%d, X=%g, Z=%g\n", imin, kmin, 
+    fprintf(fp, ", i=%d, k=%d, X=%.16g, Z=%.16g\n", imin, kmin, 
             box->v[Ind("X")][Index(imin,0,kmin)],
             box->v[Ind("Z")][Index(imin,0,kmin)]);
   }
@@ -79,7 +79,7 @@ void write_line(tBox *box, FILE *fp, int line, int iv)
     snprintf(str, 999, "outputY0_box%d", box->b);
     jmin = jmax = find_ind_closest_to_Y0(box,Getd(str));
 
-    fprintf(fp, ", i=%d, j=%d, X=%g, Y=%g\n", imin, jmin, 
+    fprintf(fp, ", i=%d, j=%d, X=%.16g, Y=%.16g\n", imin, jmin, 
             box->v[Ind("X")][Index(imin,jmin,0)],
             box->v[Ind("Y")][Index(imin,jmin,0)]);
   }
