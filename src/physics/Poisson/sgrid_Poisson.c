@@ -50,7 +50,7 @@ int sgrid_Poisson()
 
   AddPar("Poisson_grid", "SphericalDF",
          "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");
-  AddPar("Poisson_4ABphi_2xyz", "regularity_on_axis",
+  AddPar("Poisson_4ABphi_2xyz", "NOregularity_on_axis",
          "optins for Poisson_grid=4ABphi_2xyz [regularity_on_axis]");
 	     	   	   	 
   return 0;
