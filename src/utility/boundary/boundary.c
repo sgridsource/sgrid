@@ -4,6 +4,8 @@
 #include "sgrid.h"
 #include "boundary.h"
 
+#define PR 0
+
 /* here we use:
    tPointList *radiativeBoundaryPointList;
    tPointList *ExcisionBoundaryPointList; */
@@ -59,8 +61,8 @@ int initialize_BoundaryPointLists(tGrid *grid)
          AddToPointList(boxBoundaryPointList, bi, Index(i,j,k));
      }
   }
-  printf("boxBoundaryPointList:\n");
-  prPointList(boxBoundaryPointList);
+  printf("boxBoundaryPointList is set:\n");
+  if(PR) prPointList(boxBoundaryPointList);
 
   
   /* radiative boundary condition */
