@@ -20,23 +20,19 @@ void printgrid(tGrid *g)
   }
 }
 
-
-
-
 void printbox(tBox *box) 
 {
   printf(" box %p: grid=%p, b=%d, n1=%d n2=%d n3=%d,\n"
          " nnodes=%d, node=%p, v=%p,\n"
          " D1 =%p D2 =%p D3 =%p,\n"
          " DD1=%p DD2=%p DD3=%p,\n"
-         " F1 =%p F2 =%p F3 =%p\n",
+         " F1 =%p F2 =%p F3 =%p,\n"
+         " Mcoeffs1=%p Mcoeffs2=%p Mcoeffs3=%p\n",
 	 box, box->grid, box->b, box->n1, box->n2, box->n3, box->nnodes, 
 	 box->node, box->v, box->D1, box->D2, box->D3,
-	 box->DD1, box->DD2, box->DD3,   box->F1, box->F2, box->F3);
+	 box->DD1, box->DD2, box->DD3,  box->F1, box->F2, box->F3,
+	 box->Mcoeffs1, box->Mcoeffs2, box->Mcoeffs3);
 }
-
-
-
 
 void printnode(tNode *n) 
 {
@@ -44,8 +40,17 @@ void printnode(tNode *n)
   printf("\n");
 }
 
-
-
+void printmatrix(double *M, int n)
+{
+  int i,j;
+  
+  for(i=0; i<n; i++)
+  {
+    printf("M_{%d j}= ", i);
+    for(j=0; j<n; j++) printf("%g ", M[n*i + j]);
+    printf("\n");
+  }
+}
 
 void printbbox(tBox *box, double *bbox, int *ibbox)
 {
