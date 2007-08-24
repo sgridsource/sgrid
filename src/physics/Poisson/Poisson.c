@@ -279,7 +279,8 @@ int Poisson_analyze(tGrid *grid)
         }
         if(b==0||b==5)
         {
-          PsiErr[i] = Psi[i]-( -(x-xc1)*(x-xc1) -y*y -z*z  + 1/R1 + R1*R1);
+          PsiErr[i] = 
+            Psi[i]-(-0.5*((x-xc1)*(x-xc1)+y*y+z*z)/(R1*R1*R1)+ 1/R1 + 0.5/R1);
         }
         if(b==1||b==2||b==0||b==5)
         {
@@ -288,7 +289,7 @@ int Poisson_analyze(tGrid *grid)
         if(b==3||b==4)
         {
           ChiErr[i] = 
-            Chi[i]-( -2*(x-xc2)*(x-xc2) -2*y*y -2*z*z  + 2/R2 + 2*R2*R2);
+            Chi[i]-(-((x-xc2)*(x-xc2)+y*y+z*z)/(R2*R2*R2) + 2/R2 + 1/R2);
         }
 
       }
