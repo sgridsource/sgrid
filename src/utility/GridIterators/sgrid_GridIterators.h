@@ -19,3 +19,16 @@ int Newton(
   void (*linPrecon)(tVarList *Hinv_v, tVarList *v, tVarList *, tVarList *),
   tVarList *vldu, tVarList *vlres, tVarList *vld1, tVarList *vld2,
   int linSolv_itmax, double linSolv_tolFac );
+
+
+/* wrappers from funcs from templates */
+int templates_gmres_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int templates_bicgstab_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
