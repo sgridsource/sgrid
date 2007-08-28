@@ -14,7 +14,7 @@
 "DFLAGS += -DTEMPLATES\n"\
 "TEMPLATESDIR = /home/wolf/Packages/dctemplates\n"\
 "SPECIALLIBS += -L$(TEMPLATESDIR) -L$(TEMPLATESDIR)/F2CLIBS \\\n"\
-"-lF77 -lI77 -literatortemplates\n", (str))
+"-literatortemplates # -lI77 -lF77\n", (str))
 
 
 
@@ -138,9 +138,9 @@ int templates_gmres_wrapper(
   LDH = (RESTRT+1) + 1;
   ITER = itmax;
   RESID = tol;
-  if(pr) printf("templates_gmres_wrapper: itmax=%d tol=%g "
+  if(pr) printf("  templates_gmres_wrapper: itmax=%d tol=%.3e "
                 "N=%d LDW=%d\n"
-                "                         "
+                "                           "
                 "RESTRT=%d LDH=%d\n",
                 itmax, tol, N, LDW, RESTRT, LDH);
   
@@ -150,7 +150,8 @@ int templates_gmres_wrapper(
   WORK = (double *) calloc(LDW*(RESTRT+4), sizeof(double));
   H = (double *) calloc(LDH*(RESTRT+2), sizeof(double));
   if(B==NULL || X==NULL || WORK==NULL || H==NULL)
-    errorexit("templates_gmres_wrapper: out of memory for X, B, WORK, H");
+    errorexit("templates_gmres_wrapper: out of memory for X, B, WORK, H\n"
+              "  consider reducing GridIterators_GMRES_restart");
 
 
   /* setup global vars and functions needed in matvec and psolve */
@@ -185,7 +186,7 @@ int templates_gmres_wrapper(
   free(WORK);
   free(H);
 
-  if(pr) printf("templates_gmres_wrapper: ITER=%d RESID=%g INFO=%d\n",
+  if(pr) printf("  templates_gmres_wrapper: ITER=%d RESID=%.3e INFO=%d\n",
                 ITER, RESID, INFO);
 
   /* iteration failed */
@@ -223,7 +224,7 @@ int templates_bicgstab_wrapper(
   LDW = (N) + 1; 
   ITER = itmax;
   RESID = tol;
-  if(pr) printf("templates_bicgstab_wrapper: itmax=%d tol=%g "
+  if(pr) printf("  templates_bicgstab_wrapper: itmax=%d tol=%.3e "
                 "N=%d LDW=%d\n", itmax, tol, N, LDW);
   
   /* temporary storage */
@@ -264,7 +265,7 @@ int templates_bicgstab_wrapper(
   free(X);
   free(WORK);
 
-  if(pr) printf("templates_bicgstab_wrapper: ITER=%d RESID=%g INFO=%d\n",
+  if(pr) printf("  templates_bicgstab_wrapper: ITER=%d RESID=%.3e INFO=%d\n",
                 ITER, RESID, INFO);
 
   /* iteration failed */
@@ -302,7 +303,7 @@ int templates_cgs_wrapper(
   LDW = (N) + 1; 
   ITER = itmax;
   RESID = tol;
-  if(pr) printf("templates_cgs_wrapper: itmax=%d tol=%g "
+  if(pr) printf("  templates_cgs_wrapper: itmax=%d tol=%.3e "
                 "N=%d LDW=%d\n", itmax, tol, N, LDW);
   
   /* temporary storage */
@@ -343,7 +344,7 @@ int templates_cgs_wrapper(
   free(X);
   free(WORK);
 
-  if(pr) printf("templates_cgs_wrapper: ITER=%d RESID=%g INFO=%d\n",
+  if(pr) printf("  templates_cgs_wrapper: ITER=%d RESID=%.3e INFO=%d\n",
                 ITER, RESID, INFO);
 
   /* iteration failed */
