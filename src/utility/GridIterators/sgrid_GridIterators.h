@@ -18,7 +18,7 @@ int Newton(
 	           void (*lin_precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
   void (*linPrecon)(tVarList *Hinv_v, tVarList *v, tVarList *, tVarList *),
   tVarList *vldu, tVarList *vlres, tVarList *vld1, tVarList *vld2,
-  int linSolv_itmax, double linSolv_tolFac );
+  int linSolv_itmax, double linSolv_tolFac, double linSolv_tol);
 
 
 /* wrappers from funcs from templates */

@@ -20,7 +20,7 @@ int Newton(
 	           void (*lin_precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
   void (*linPrecon)(tVarList *Hinv_v, tVarList *v, tVarList *, tVarList *),
   tVarList *vldu, tVarList *vlres, tVarList *vld1, tVarList *vld2,
-  int linSolv_itmax, double linSolv_tolFac )
+  int linSolv_itmax, double linSolv_tolFac, double linSolv_tol)
 {
   tGrid *grid = vlFu->grid;
   int i, j, inewton, b;
@@ -48,7 +48,9 @@ int Newton(
 
     /* solve linear equation */
     lin_its=linSolver(vldu, vlFu, vlres, vld1, vld2, 
-                      linSolv_itmax, (*normres)*linSolv_tolFac, &lin_normres,
+                      linSolv_itmax, 
+                      max2( (*normres)*linSolv_tolFac, linSolv_tol ),
+                      &lin_normres,
 	              Jdu, linPrecon);
     /* if(pr) printf("Newton: after linSolver: %e\n",lin_normres); */
 
