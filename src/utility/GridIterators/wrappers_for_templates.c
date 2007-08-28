@@ -25,7 +25,7 @@ tVarList *r_fortemplates;
 tVarList *x_fortemplates;
 tVarList *c1_fortemplates;
 tVarList *c2_fortemplates;
-int dim_fortemplates;
+long int dim_fortemplates;
 
 
 /* copy var list vlx into array xa. The outer loop is over vars in vlx. */
@@ -116,17 +116,17 @@ int templates_gmres_wrapper(
   tGrid *grid = b->grid;
   int pr = Getv("GridIterators_verbose", "yes");
   int i,j;
-  int N; /* dim of matrix */
+  long int N; /* dim of matrix */
   double *B;
   double *X;
-  int RESTRT;
-  double *WORK;		int LDW;
-  double *H;		int LDH;
-  int ITER;
+  long int RESTRT;
+  double *WORK;		long int LDW;
+  double *H;		long int LDH;
+  long int ITER;
   double RESID;
-  int INFO;
+  long int INFO;
 
-  /* set int vars */
+  /* set long int vars */
   N = 0 ;
   for(j = 0; j < b->n; j++)
     forallboxes(grid,i)  N += grid->box[i]->nnodes;
@@ -208,15 +208,15 @@ int templates_bicgstab_wrapper(
   tGrid *grid = b->grid;
   int pr = Getv("GridIterators_verbose", "yes");
   int i,j;
-  int N; /* dim of matrix */
+  long int N; /* dim of matrix */
   double *B;
   double *X;
-  double *WORK;		int LDW;
-  int ITER;
+  double *WORK;		long int LDW;
+  long int ITER;
   double RESID;
-  int INFO;
+  long int INFO;
 
-  /* set int vars */
+  /* set long int vars */
   N = 0 ;
   for(j = 0; j < b->n; j++)
     forallboxes(grid,i)  N += grid->box[i]->nnodes;
@@ -287,15 +287,15 @@ int templates_cgs_wrapper(
   tGrid *grid = b->grid;
   int pr = Getv("GridIterators_verbose", "yes");
   int i,j;
-  int N; /* dim of matrix */
+  long int N; /* dim of matrix */
   double *B;
   double *X;
-  double *WORK;		int LDW;
-  int ITER;
+  double *WORK;		long int LDW;
+  long int ITER;
   double RESID;
-  int INFO;
+  long int INFO;
 
-  /* set int vars */
+  /* set long int vars */
   N = 0 ;
   for(j = 0; j < b->n; j++)
     forallboxes(grid,i)  N += grid->box[i]->nnodes;
