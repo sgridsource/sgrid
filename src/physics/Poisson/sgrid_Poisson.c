@@ -45,8 +45,10 @@ int sgrid_Poisson()
 //  AddPar("Poisson_linSolver", "bicgstab", 
 //         "linear solver used [bicgstab, HYPRE, gaussseidel]");
   AddPar("Poisson_linSolver_itmax", "20", "max num of linSolver iterations");
-  AddPar("Poisson_linSolver_tolFac","0.1", 
-         "tol for linSolver is tol * linSolver_tolFac");
+  AddPar("Poisson_linSolver_tolFac","0.1", "tol for linSolver is " 
+         "max2((*normres)*linSolv_tolFac, linSolv_tol)");
+  AddPar("Poisson_linSolver_tol","0", "tol for linSolver is "
+         "max2((*normres)*linSolv_tolFac, linSolv_tol)");
 
   AddPar("Poisson_grid", "SphericalDF",
          "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");

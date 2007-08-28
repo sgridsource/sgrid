@@ -128,6 +128,7 @@ int Poisson_solve(tGrid *grid)
   double tol   = Getd("Poisson_tol");
   int    linSolver_itmax  = Geti("Poisson_linSolver_itmax");
   double linSolver_tolFac = Getd("Poisson_linSolver_tolFac");
+  double linSolver_tol    = Getd("Poisson_linSolver_tol");
   double normresnonlin;
 
   tVarList *vlu, *vlFu, *vluDerivs;
@@ -183,19 +184,25 @@ write_grid(grid);
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-         linSolver_itmax, linSolver_tolFac);
+         linSolver_itmax, linSolver_tolFac, linSolver_tol);
 */
+  Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
+         itmax, tol, &normresnonlin, 1,
+         templates_cgs_wrapper, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
+         linSolver_itmax, linSolver_tolFac, linSolver_tol);
 
+
+/*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
          LinSolve_withLAPACK, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-         linSolver_itmax, linSolver_tolFac);
-
+         linSolver_itmax, linSolver_tolFac, linSolver_tol);
+*/
 /*
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          1, tol, &normresnonlin, 1,
          bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-         2, linSolver_tolFac);
+         2, linSolver_tolFac, linSolver_tol);
 */
 
   /* free varlists */     
