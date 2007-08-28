@@ -8,6 +8,16 @@
 #include "GridIterators.h"
 #include "wrappers_for_templates.h"
 
+
+#define COMPILETEMPLATES(str) errorexits("templates_%s_wrapper: "\
+"to compile with templates use MyConfig with\n"\
+"DFLAGS += -DTEMPLATES\n"\
+"TEMPLATESDIR = /home/wolf/Packages/dctemplates\n"\
+"SPECIALLIBS += -L$(TEMPLATESDIR) -L$(TEMPLATESDIR)/F2CLIBS \\\n"\
+"-lF77 -lI77 -literatortemplates\n", (str))
+
+
+
 /* global vars in this file */
 void (*lop_fortemplates)(tVarList *, tVarList *, tVarList *, tVarList *);
 void (*precon_fortemplates)(tVarList *, tVarList *, tVarList *, tVarList *);
@@ -121,14 +131,18 @@ int templates_gmres_wrapper(
   for(j = 0; j < b->n; j++)
     forallboxes(grid,i)  N += grid->box[i]->nnodes;
   N = (b->n) * N; 
-  RESTRT = 1000;
+  if(Getv("GridIterators_GMRES_restart", "max"))  RESTRT = N;
+  else	RESTRT = Geti("GridIterators_GMRES_restart");
+  if(RESTRT>N) RESTRT = N;
   LDW = (N) + 1; 
   LDH = (RESTRT+1) + 1;
   ITER = itmax;
   RESID = tol;
   if(pr) printf("templates_gmres_wrapper: itmax=%d tol=%g "
-                "N=%d RESTRT=%d LDW=%d LDH=%d\n",
-                itmax, tol, N, RESTRT, LDW, LDH);
+                "N=%d LDW=%d\n"
+                "                         "
+                "RESTRT=%d LDH=%d\n",
+                itmax, tol, N, LDW, RESTRT, LDH);
   
   /* temporary storage */
   B = (double *) calloc(N, sizeof(double));
@@ -158,12 +172,7 @@ int templates_gmres_wrapper(
   gmres_(&N, B, X, &RESTRT, WORK, &LDW, H, &LDH, &ITER, &RESID,
           matvec, psolve, &INFO);
 #else
-  errorexit("templates_gmres_wrapper: to compile with templates "
-            "use MyConfig with\n"
-            "DFLAGS += -DTEMPLATES\n"
-            "SPECIALLIBS += -l~/Packages/dctemplates/libiteratortemplatates.a "
-            "-l~/Packages/dctemplates/F2CLIBS/libF77.a "
-            "-l~/Packages/dctemplates/F2CLIBS/libI77.a");
+  COMPILETEMPLATES("gmres");
 #endif
 
   /* read out vlx and normres */
@@ -243,12 +252,7 @@ int templates_bicgstab_wrapper(
   /* call bicgstab from templates */
   bicgstab_(&N, B, X, WORK, &LDW, &ITER, &RESID, matvec, psolve, &INFO);
 #else
-  errorexit("templates_bicgstab_wrapper: to compile with templates "
-            "use MyConfig with\n"
-            "DFLAGS += -DTEMPLATES\n"
-            "SPECIALLIBS += -l~/Packages/dctemplates/libiteratortemplatates.a "
-            "-l~/Packages/dctemplates/F2CLIBS/libF77.a "
-            "-l~/Packages/dctemplates/F2CLIBS/libI77.a");
+  COMPILETEMPLATES("bicgstab");
 #endif
 
   /* read out vlx and normres */
@@ -261,6 +265,85 @@ int templates_bicgstab_wrapper(
   free(WORK);
 
   if(pr) printf("templates_bicgstab_wrapper: ITER=%d RESID=%g INFO=%d\n",
+                ITER, RESID, INFO);
+
+  /* iteration failed */
+  if(INFO<0) return INFO;
+  if(INFO>0) return -ITER;
+  
+  /* success! */
+  return ITER;
+}
+
+
+/* call CGS from templates */
+int templates_cgs_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  tGrid *grid = b->grid;
+  int pr = Getv("GridIterators_verbose", "yes");
+  int i,j;
+  int N; /* dim of matrix */
+  double *B;
+  double *X;
+  double *WORK;		int LDW;
+  int ITER;
+  double RESID;
+  int INFO;
+
+  /* set int vars */
+  N = 0 ;
+  for(j = 0; j < b->n; j++)
+    forallboxes(grid,i)  N += grid->box[i]->nnodes;
+  N = (b->n) * N; 
+  LDW = (N) + 1; 
+  ITER = itmax;
+  RESID = tol;
+  if(pr) printf("templates_cgs_wrapper: itmax=%d tol=%g "
+                "N=%d LDW=%d\n", itmax, tol, N, LDW);
+  
+  /* temporary storage */
+  B = (double *) calloc(N, sizeof(double));
+  X = (double *) calloc(N, sizeof(double));
+  WORK = (double *) calloc(LDW*7, sizeof(double));
+  if(B==NULL || X==NULL || WORK==NULL)
+    errorexit("templates_cgs_wrapper: out of memory for X, B, WORK");
+
+  /* setup global vars and functions needed in matvec and psolve */
+  lop_fortemplates	= lop;
+  precon_fortemplates	= precon;
+  r_fortemplates	= r;
+  x_fortemplates	= x;
+  c1_fortemplates	= c1;
+  c2_fortemplates	= c2;
+  dim_fortemplates	= N;
+
+  /* setup local B and X */
+  copy_vl_into_array_outervlloop(b, B, N);
+  copy_vl_into_array_outervlloop(x, X, N);
+
+
+#ifdef TEMPLATES
+  /* call cgs from templates */
+  cgs_(&N, B, X, WORK, &LDW, &ITER, &RESID,
+          matvec, psolve, &INFO);
+#else
+  COMPILETEMPLATES("cgs");
+#endif
+
+  /* read out vlx and normres */
+  copy_array_into_vl_outervlloop(x, X, N);
+  *normres = RESID;
+
+  /* free temporary storage */
+  free(B);
+  free(X);
+  free(WORK);
+
+  if(pr) printf("templates_cgs_wrapper: ITER=%d RESID=%g INFO=%d\n",
                 ITER, RESID, INFO);
 
   /* iteration failed */

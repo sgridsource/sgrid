@@ -12,6 +12,8 @@ int sgrid_GridIterators()
 
   /* global parameter */
   AddPar("GridIterators_verbose", "yes", "talk about it");
+  AddPar("GridIterators_GMRES_restart", "max", 
+         "Restart parameter for GMRES[some #,max");
 
   /* check whether there is more to do */
   if (!Getv("physics", "GridIterators")) return 0;
