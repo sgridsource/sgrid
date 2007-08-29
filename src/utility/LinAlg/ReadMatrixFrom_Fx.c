@@ -110,3 +110,9 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
                 "the %d*%d matrix Aline=%p is now set!\n",
                 col, col, Aline);
 }
+/* NOTE: 
+In order to speed up SetMatrixLines_slowly we should make an Fx
+that computes vlFx only in the following planes:
++the three coord-planes containing the point where x=1 in the curreent box
++the faces of each box adjacent to the current box.
+Since only in those places vlFx can be non-zero if x=1 only at one point !!! */
