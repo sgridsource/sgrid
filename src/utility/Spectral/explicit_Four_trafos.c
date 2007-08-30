@@ -27,11 +27,10 @@ void four_deriv(double a, double b, double c[], double cder[], int n)
 
   PI2_con = 2.0*PI/(b-a);
 
-  for (j=1;j<=N/2;j++)
+  for(j=1; 2*j<N; j++)
   {
     cder[2*j-1] =  c[2*j] * PI2_con*j;
-    if(2*j<N)
-      cder[2*j]   = -c[2*j-1] * PI2_con*j;
+    cder[2*j]   = -c[2*j-1] * PI2_con*j;
   }
   cder[0] = 0.0;
   if( N%2 == 0 ) cder[N-1] = 0.0;
