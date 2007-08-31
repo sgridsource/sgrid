@@ -48,9 +48,26 @@ Sometimes we are left with a core file. This can be loaded with
 
 (gdb) <fill this in>
 
-
-
 --------
 
 Bracket the problem in time by checking out for different dates:
 cvs co -D 7/21/2003 sgrid
+
+--------
+
+
+Wolfgang's tips for finding seg faults:
+---------------------------------------
+
+If you need to debug segfaults with electric fence do this:
+-----------------------------------------------------------
+
+1. compile code with libefence liked in, e.g. add -lefence to SPECIALLIBS
+2. run code in gdb
+
+OR:
+1. execute the following (which loads the shared lib version of libefence):
+ LD_PRELOAD=libefence.so.0.0  ./sgrid test.par
+2. examine the core file from the crash with gdb:
+ gdb sgrid core.9073
+

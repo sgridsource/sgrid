@@ -1,5 +1,5 @@
 Command1:
-cp $1 l ; sed s/Bernd\ Bruegmann\*/"Wolfgang Tichy, April 2005  \&  "'&'/ l > $1
+cp $1 l ; sed s/W.\ T.\*/"Wolfgang Tichy, April 2005  \&  "'&'/ l > $1
 
 forCommand1:
 main/
