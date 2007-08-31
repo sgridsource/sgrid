@@ -138,9 +138,8 @@ int templates_gmres_wrapper(
   ITER = itmax;
   RESID = tol;
   if(pr) printf("  templates_gmres_wrapper: itmax=%d tol=%.3e "
-                "N=%d LDW=%d\n"
-                "                           "
-                "RESTRT=%d LDH=%d\n",
+                "N=%ld LDW=%ld\n"
+                "  RESTRT=%ld LDH=%ld\n",
                 itmax, tol, N, LDW, RESTRT, LDH);
   
   /* temporary storage */
@@ -185,7 +184,7 @@ int templates_gmres_wrapper(
   free(WORK);
   free(H);
 
-  if(pr) printf("  templates_gmres_wrapper: ITER=%d RESID=%.3e INFO=%d\n",
+  if(pr) printf("  templates_gmres_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
                 ITER, RESID, INFO);
 
   /* iteration failed */
@@ -223,7 +222,7 @@ int templates_bicgstab_wrapper(
   ITER = itmax;
   RESID = tol;
   if(pr) printf("  templates_bicgstab_wrapper: itmax=%d tol=%.3e "
-                "N=%d LDW=%d\n", itmax, tol, N, LDW);
+                "N=%ld LDW=%ld\n", itmax, tol, N, LDW);
   
   /* temporary storage */
   B = (double *) calloc(N, sizeof(double));
@@ -263,7 +262,7 @@ int templates_bicgstab_wrapper(
   free(X);
   free(WORK);
 
-  if(pr) printf("  templates_bicgstab_wrapper: ITER=%d RESID=%.3e INFO=%d\n",
+  if(pr) printf("  templates_bicgstab_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
                 ITER, RESID, INFO);
 
   /* iteration failed */
@@ -301,7 +300,7 @@ int templates_cgs_wrapper(
   ITER = itmax;
   RESID = tol;
   if(pr) printf("  templates_cgs_wrapper: itmax=%d tol=%.3e "
-                "N=%d LDW=%d\n", itmax, tol, N, LDW);
+                "N=%ld LDW=%ld\n", itmax, tol, N, LDW);
   
   /* temporary storage */
   B = (double *) calloc(N, sizeof(double));
@@ -341,7 +340,7 @@ int templates_cgs_wrapper(
   free(X);
   free(WORK);
 
-  if(pr) printf("  templates_cgs_wrapper: ITER=%d RESID=%.3e INFO=%d\n",
+  if(pr) printf("  templates_cgs_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
                 ITER, RESID, INFO);
 
   /* iteration failed */
