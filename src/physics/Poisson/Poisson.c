@@ -592,6 +592,223 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
       double *dC[4];
       double *BM;
 
+      /* special rho=0 case??? */
+      if(b==0 || b==1 || b==2 || b==3)
+      {
+        int pl;
+        char str[1000];
+        snprintf(str, 999, "box%d_basis2", b);
+        if(Getv(str, "ChebExtrema"))  /* treat rho=0 case */
+        {
+          double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
+          double *Chi_phi_phi = box->v[Ind("Poisson_temp2")];
+          double *Psi_y_phi_phi = box->v[Ind("Poisson_temp3")];
+          double *Chi_y_phi_phi = box->v[Ind("Poisson_temp4")];
+          double *temp5 = box->v[Ind("Poisson_temp5")];
+          double *temp6 = box->v[Ind("Poisson_temp6")];
+
+          /* get u_phi_phi */
+          spec_Deriv2(box, 3, Psi, Psi_phi_phi);
+          spec_Deriv2(box, 3, Chi, Chi_phi_phi);
+          
+          /* get u_rho_phi_phi at phi=0 */
+          /* d/drho = dx^i/drho d/dx^i, 
+             dx/drho=0, dy/drho=cos(phi), dz/drho=sin(phi)
+             ==> d/drho u = d/dy u  at phi=0 */           
+          /* get u_rho_phi_phi at phi=0: u_rho_phi_phi = d/dy u_phi_phi */
+          cart_partials(box, Psi_phi_phi, temp5, Psi_y_phi_phi, temp6);
+          cart_partials(box, Chi_phi_phi, temp5, Chi_y_phi_phi, temp6);
+
+          /* loop over rho=0 boundary */
+          for(pl=0; pl<n2; pl=pl+n2-1)  /* <-- B=0 and B=1 */
+            forplane2(i,j,k, n1,n2,n3, pl)
+            {
+              if(k>0) /* phi>0: impose u_phi_phi=0 */
+              {
+                FPsi[Index(i,j,k)] = Psi_phi_phi[Index(i,j,k)];
+                FChi[Index(i,j,k)] = Chi_phi_phi[Index(i,j,k)];
+              }
+              else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
+              {
+                double Psi_rho = Psiy[Index(i,j,k)];
+                double Chi_rho = Chiy[Index(i,j,k)];
+                double Psi_rho_phi_phi = Psi_y_phi_phi[Index(i,j,k)];
+                double Chi_rho_phi_phi = Chi_y_phi_phi[Index(i,j,k)];
+                FPsi[Index(i,j,k)] = Psi_rho + Psi_rho_phi_phi;
+                FChi[Index(i,j,k)] = Chi_rho + Chi_rho_phi_phi;
+              }
+            }
+        }
+        /* same as before, but also interpolate to rho=0 */
+        else if(Getv("Poisson_regularization", "regularity_on_axis"))
+        {
+          double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
+          double *Chi_phi_phi = box->v[Ind("Poisson_temp2")];
+          double *Psi_y_phi_phi = box->v[Ind("Poisson_temp3")];
+          double *Chi_y_phi_phi = box->v[Ind("Poisson_temp4")];
+          double *temp5 = box->v[Ind("Poisson_temp5")];
+          double *temp6 = box->v[Ind("Poisson_temp6")];
+          double *line = (double *) calloc(n2, sizeof(double));
+          double *BM[2];
+          BM[0] = (double *) calloc(n2, sizeof(double));
+          BM[1] = (double *) calloc(n2, sizeof(double));
+
+          /* get u_phi_phi */
+          spec_Deriv2(box, 3, Psi, Psi_phi_phi);
+          spec_Deriv2(box, 3, Chi, Chi_phi_phi);
+          
+          /* get u_rho_phi_phi at phi=0 */
+          /* d/drho = dx^i/drho d/dx^i, 
+             dx/drho=0, dy/drho=cos(phi), dz/drho=sin(phi)
+             ==> d/drho u = d/dy u  at phi=0 */           
+          /* get u_rho_phi_phi at phi=0: u_rho_phi_phi = d/dy u_phi_phi */
+          cart_partials(box, Psi_phi_phi, temp5, Psi_y_phi_phi, temp6);
+          cart_partials(box, Chi_phi_phi, temp5, Chi_y_phi_phi, temp6);
+
+          /* obtain BM vectors for interpolation along B */
+          spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[0], 0,
+                                       cheb_coeffs_fromZeros, cheb_basisfunc);
+          spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[1], 1,
+                                       cheb_coeffs_fromZeros, cheb_basisfunc);
+
+          /* loop over rho~0 boundary */
+          for(pl=0; pl<n2; pl=pl+n2-1)  /* <-- B~0 and B~1 */
+          {
+            int l;
+            double U0, V0;
+
+            forplane2(i,j,k, n1,n2,n3, pl)
+            {
+              if(k>0) /* phi>0: impose u_phi_phi=0 */
+              {
+                /* find value Psi_phi_phi at B=0 or 1 */
+                get_memline(Psi_phi_phi, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                FPsi[Index(i,j,k)] = U0;
+
+                /* find value Chi_phi_phi at B=0 or 1 */
+                get_memline(Chi_phi_phi, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                FChi[Index(i,j,k)] = U0;
+              }
+              else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
+              { /* Psi_rho = Psiy  
+                   Chi_rho = Chiy
+                   Psi_rho_phi_phi = Psi_y_phi_phi
+                   Chi_rho_phi_phi = Chi_y_phi_phi */
+                /* find value Psi_rho at B=0 or 1 */
+                get_memline(Psiy, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+
+                /* find value Psi_rho_phi_phi at B=0 or 1 */
+                get_memline(Psi_y_phi_phi, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+
+                FPsi[Index(i,j,k)] = U0 + V0;
+
+                /* find value Chi_rho at B=0 or 1 */
+                get_memline(Chiy, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+
+                /* find value Chi_rho_phi_phi at B=0 or 1 */
+                get_memline(Chi_y_phi_phi, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+
+                FChi[Index(i,j,k)] = U0 + V0;
+              }
+            }
+          }
+          free(BM[0]);
+          free(BM[1]);
+          free(line);
+        }
+        /* same as before, but do it only in box0/3 at A,B=1,0 and A,B=1,1 */
+        else if(Getv("Poisson_regularization", 
+                     "regularity_on_axis_at_center") && (b==0 || b==3) )
+        {
+          double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
+          double *Chi_phi_phi = box->v[Ind("Poisson_temp2")];
+          double *Psi_y_phi_phi = box->v[Ind("Poisson_temp3")];
+          double *Chi_y_phi_phi = box->v[Ind("Poisson_temp4")];
+          double *temp5 = box->v[Ind("Poisson_temp5")];
+          double *temp6 = box->v[Ind("Poisson_temp6")];
+          double *line = (double *) calloc(n2, sizeof(double));
+          double *BM[2];
+          BM[0] = (double *) calloc(n2, sizeof(double));
+          BM[1] = (double *) calloc(n2, sizeof(double));
+
+          /* get u_phi_phi */
+          spec_Deriv2(box, 3, Psi, Psi_phi_phi);
+          spec_Deriv2(box, 3, Chi, Chi_phi_phi);
+          
+          /* get u_rho_phi_phi at phi=0 */
+          /* d/drho = dx^i/drho d/dx^i, 
+             dx/drho=0, dy/drho=cos(phi), dz/drho=sin(phi)
+             ==> d/drho u = d/dy u  at phi=0 */           
+          /* get u_rho_phi_phi at phi=0: u_rho_phi_phi = d/dy u_phi_phi */
+          cart_partials(box, Psi_phi_phi, temp5, Psi_y_phi_phi, temp6);
+          cart_partials(box, Chi_phi_phi, temp5, Chi_y_phi_phi, temp6);
+
+          /* obtain BM vectors for interpolation along B */
+          spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[0], 0,
+                                       cheb_coeffs_fromZeros, cheb_basisfunc);
+          spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[1], 1,
+                                       cheb_coeffs_fromZeros, cheb_basisfunc);
+
+          /* loop over rho~0 boundary */
+          for(pl=0; pl<n2; pl=pl+n2-1)  /* <-- B~0 and B~1 */
+          {
+            int l;
+            double U0, V0;
+
+            i=n1-1;   /* do it only at A=1 */
+            for(k=0; k<n3; k++)
+            {
+              if(k>0) /* phi>0: impose u_phi_phi=0 */
+              {
+                /* find value Psi_phi_phi at B=0 or 1 */
+                get_memline(Psi_phi_phi, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                FPsi[Index(i,j,k)] = U0;
+
+                /* find value Chi_phi_phi at B=0 or 1 */
+                get_memline(Chi_phi_phi, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                FChi[Index(i,j,k)] = U0;
+              }
+              else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
+              { /* Psi_rho = Psiy  
+                   Chi_rho = Chiy
+                   Psi_rho_phi_phi = Psi_y_phi_phi
+                   Chi_rho_phi_phi = Chi_y_phi_phi */
+                /* find value Psi_rho at B=0 or 1 */
+                get_memline(Psiy, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+
+                /* find value Psi_rho_phi_phi at B=0 or 1 */
+                get_memline(Psi_y_phi_phi, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+
+                FPsi[Index(i,j,k)] = U0 + V0;
+
+                /* find value Chi_rho at B=0 or 1 */
+                get_memline(Chiy, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+
+                /* find value Chi_rho_phi_phi at B=0 or 1 */
+                get_memline(Chi_y_phi_phi, line, 2, i,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+
+                FChi[Index(i,j,k)] = U0 + V0;
+              }
+            }
+          }
+          free(BM[0]);
+          free(BM[1]);
+          free(line);
+        }
+      } /* end: special rho=0 case??? */
+
       if(b==0)  /* in box0 */
       {
         BM = (double *) calloc(n1, sizeof(double));

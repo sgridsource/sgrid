@@ -53,7 +53,8 @@ int sgrid_Poisson()
   AddPar("Poisson_grid", "SphericalDF",
          "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");
   AddPar("Poisson_regularization", "none",
-         "options for 4ABphi_2xyz and AnsorgNS [regularity_on_axis]");
+         "options for 4ABphi_2xyz and AnsorgNS " 
+         "[regularity_on_axis,regularity_on_axis_at_center]");
 	     	   	   	 
   return 0;
 }
