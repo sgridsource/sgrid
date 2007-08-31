@@ -762,6 +762,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             double U0, V0;
 
             i=n1-1;   /* do it only at A=1 */
+            j=pl;
             for(k=0; k<n3; k++)
             {
               if(k>0) /* phi>0: impose u_phi_phi=0 */
