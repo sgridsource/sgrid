@@ -38,5 +38,9 @@ int LinSolve_withLAPACK(tVarList *x, tVarList *b,
   INFO=lapack_dgesv(Aline, x, b, pr);
   if(pr) printf("LinSolve_withLAPACK: lapack_dgesv returned INFO=%d\n", INFO);
 
+  /* free matrix Aline */
+  for(line=0; line<nlines; line++)  FreeSparseVector(Aline[line]);
+  free(Aline);
+
   return INFO;
 }
