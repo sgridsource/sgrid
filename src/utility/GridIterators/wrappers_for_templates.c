@@ -128,8 +128,7 @@ int templates_gmres_wrapper(
 
   /* set long int vars */
   N = 0 ;
-  for(j = 0; j < b->n; j++)
-    forallboxes(grid,i)  N += grid->box[i]->nnodes;
+  forallboxes(grid,i)  N += grid->box[i]->nnodes;
   N = (b->n) * N; 
   if(Getv("GridIterators_GMRES_restart", "max"))  RESTRT = N;
   else	RESTRT = Geti("GridIterators_GMRES_restart");
@@ -218,8 +217,7 @@ int templates_bicgstab_wrapper(
 
   /* set long int vars */
   N = 0 ;
-  for(j = 0; j < b->n; j++)
-    forallboxes(grid,i)  N += grid->box[i]->nnodes;
+  forallboxes(grid,i)  N += grid->box[i]->nnodes;
   N = (b->n) * N; 
   LDW = (N) + 1; 
   ITER = itmax;
@@ -297,8 +295,7 @@ int templates_cgs_wrapper(
 
   /* set long int vars */
   N = 0 ;
-  for(j = 0; j < b->n; j++)
-    forallboxes(grid,i)  N += grid->box[i]->nnodes;
+  forallboxes(grid,i)  N += grid->box[i]->nnodes;
   N = (b->n) * N; 
   LDW = (N) + 1; 
   ITER = itmax;
