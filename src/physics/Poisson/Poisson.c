@@ -109,7 +109,7 @@ int Poisson_startup(tGrid *grid)
         Psi[i] = exp(-0.5*x*x);
 */
         //Psi[i] = 1.0/sqrt(x*x + y*y + z*z+1);
-        //Psi[i] = 1.0/sqrt(x*x + (y-1)*(y-1) + (z-0.2)*(z-0.2)+1);
+        //Psi[i] = 1.0/sqrt(x*x + (y-1.5)*(y-1.5) + (z-0.2)*(z-0.2)+1);
         //Psi[i] = 0.0001*(b+1)/sqrt(x*x + y*y + z*z+1);
         //if(b==0 || b==3)
         //  Psi[i] = (b-1)*x;
@@ -884,7 +884,7 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             }
         }
         /* same as before, but also interpolate to rho=0 */
-        else if(Getv("Poisson_4ABphi_2xyz", "regularity_on_axis"))
+        else if(Getv("Poisson_regularization", "regularity_on_axis"))
         {
           double *Psi_phi_phi = box->v[Ind("Poisson_temp1")];
           double *Chi_phi_phi = box->v[Ind("Poisson_temp2")];

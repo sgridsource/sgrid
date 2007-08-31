@@ -8,7 +8,7 @@ physics = ADMvars Poisson
 Poisson_useDD	= no # yes
 Poisson_grid	= 4ABphi_2xyz # AnsorgNS
 Poisson_linSolver_itmax	= 2500
-Poisson_4ABphi_2xyz	= noregularity_on_axis
+Poisson_regularization	= none
 
 
 evolution_method = rk # icn # euler # rk
