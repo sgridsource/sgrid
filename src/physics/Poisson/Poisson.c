@@ -683,12 +683,12 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
               {
                 /* find value Psi_phi_phi at B=0 or 1 */
                 get_memline(Psi_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
                 FPsi[Index(i,j,k)] = U0;
 
                 /* find value Chi_phi_phi at B=0 or 1 */
                 get_memline(Chi_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
                 FChi[Index(i,j,k)] = U0;
               }
               else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
@@ -698,21 +698,21 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
                    Chi_rho_phi_phi = Chi_y_phi_phi */
                 /* find value Psi_rho at B=0 or 1 */
                 get_memline(Psiy, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
 
                 /* find value Psi_rho_phi_phi at B=0 or 1 */
                 get_memline(Psi_y_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+                for(V0=0.0, l=0; l<n2; l++)  V0 += BM[j>0][l]*line[l];
 
                 FPsi[Index(i,j,k)] = U0 + V0;
 
                 /* find value Chi_rho at B=0 or 1 */
                 get_memline(Chiy, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
 
                 /* find value Chi_rho_phi_phi at B=0 or 1 */
                 get_memline(Chi_y_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+                for(V0=0.0, l=0; l<n2; l++)  V0 += BM[j>0][l]*line[l];
 
                 FChi[Index(i,j,k)] = U0 + V0;
               }
@@ -769,12 +769,12 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
               {
                 /* find value Psi_phi_phi at B=0 or 1 */
                 get_memline(Psi_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
                 FPsi[Index(i,j,k)] = U0;
 
                 /* find value Chi_phi_phi at B=0 or 1 */
                 get_memline(Chi_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
                 FChi[Index(i,j,k)] = U0;
               }
               else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
@@ -784,21 +784,21 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
                    Chi_rho_phi_phi = Chi_y_phi_phi */
                 /* find value Psi_rho at B=0 or 1 */
                 get_memline(Psiy, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
 
                 /* find value Psi_rho_phi_phi at B=0 or 1 */
                 get_memline(Psi_y_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+                for(V0=0.0, l=0; l<n2; l++)  V0 += BM[j>0][l]*line[l];
 
                 FPsi[Index(i,j,k)] = U0 + V0;
 
                 /* find value Chi_rho at B=0 or 1 */
                 get_memline(Chiy, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
 
                 /* find value Chi_rho_phi_phi at B=0 or 1 */
                 get_memline(Chi_y_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+                for(V0=0.0, l=0; l<n2; l++)  V0 += BM[j>0][l]*line[l];
 
                 FChi[Index(i,j,k)] = U0 + V0;
               }
@@ -940,12 +940,12 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           {
             /* find value of Psi at A=1, B=0 */
             get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
-            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
             FPsi[Index(n1-1,0,k)] = U0;
 
             /* find value of Chi at A=1, B=0 */
             get_memline(Chi, line, 2, n1-1,k, n1,n2,n3);
-            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
             FChi[Index(n1-1,0,k)] = U0;
           }
           free(line);
@@ -1028,12 +1028,12 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           {
             /* find value of Psi at A=1, B=0 */
             get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
-            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
             FPsi[Index(n1-1,0,k)] = U0;
 
             /* find value of Chi at A=1, B=0 */
             get_memline(Chi, line, 2, n1-1,k, n1,n2,n3);
-            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
             FChi[Index(n1-1,0,k)] = U0;
           }
           free(line);
@@ -1145,12 +1145,12 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
               {
                 /* find value Psi_phi_phi at B=0 or 1 */
                 get_memline(Psi_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
                 FPsi[Index(i,j,k)] = U0;
 
                 /* find value Chi_phi_phi at B=0 or 1 */
                 get_memline(Chi_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
                 FChi[Index(i,j,k)] = U0;
               }
               else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
@@ -1160,21 +1160,21 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
                    Chi_rho_phi_phi = Chi_y_phi_phi */
                 /* find value Psi_rho at B=0 or 1 */
                 get_memline(Psiy, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
 
                 /* find value Psi_rho_phi_phi at B=0 or 1 */
                 get_memline(Psi_y_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+                for(V0=0.0, l=0; l<n2; l++)  V0 += BM[j>0][l]*line[l];
 
                 FPsi[Index(i,j,k)] = U0 + V0;
 
                 /* find value Chi_rho at B=0 or 1 */
                 get_memline(Chiy, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  U0 += BM[j>0][l]*line[l];
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[j>0][l]*line[l];
 
                 /* find value Chi_rho_phi_phi at B=0 or 1 */
                 get_memline(Chi_y_phi_phi, line, 2, i,k, n1,n2,n3);
-                for(U0=0.0, l=0; l<n1; l++)  V0 += BM[j>0][l]*line[l];
+                for(V0=0.0, l=0; l<n2; l++)  V0 += BM[j>0][l]*line[l];
 
                 FChi[Index(i,j,k)] = U0 + V0;
               }
@@ -1306,12 +1306,12 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           {
             /* find value of Psi at A=1, B=0 */
             get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
-            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
             FPsi[Index(n1-1,0,k)] = U0;
 
             /* find value of Chi at A=1, B=0 */
             get_memline(Chi, line, 2, n1-1,k, n1,n2,n3);
-            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
             FChi[Index(n1-1,0,k)] = U0;
           }
           free(line);
@@ -1374,12 +1374,12 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           {
             /* find value of Psi at A=1, B=0 */
             get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
-            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
             FPsi[Index(n1-1,0,k)] = U0;
 
             /* find value of Chi at A=1, B=0 */
             get_memline(Chi, line, 2, n1-1,k, n1,n2,n3);
-            for(U0=0.0, l=0; l<n1; l++)  U0 += BM[l]*line[l];
+            for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
             FChi[Index(n1-1,0,k)] = U0;
           }
           free(line);
