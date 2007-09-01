@@ -38,7 +38,8 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
     spec_analysis1(box, direc, M, u, U);
 
     /* write cheb-integral from a to b into U */
-    if(get_coeffs==cheb_coeffs_fromExtrema)
+    if(get_coeffs==cheb_coeffs_fromExtrema ||
+       get_coeffs==cheb_coeffs_fromZeros)
       for(k = 0; k < n3; k++)
         for(j = 0; j < n2; j++)
         {
@@ -76,7 +77,8 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
     spec_analysis1(box, direc, M, u, U);
 
     /* write cheb-integral from a to b into U */
-    if(get_coeffs==cheb_coeffs_fromExtrema)
+    if(get_coeffs==cheb_coeffs_fromExtrema ||
+       get_coeffs==cheb_coeffs_fromZeros)
       for (k = 0; k < n3; k++)
         for (i = 0; i < n1; i++)
         {
@@ -114,7 +116,8 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
     spec_analysis1(box, direc, M, u, U);
 
     /* write cheb-integral from a to b into U */
-    if(get_coeffs==cheb_coeffs_fromExtrema)
+    if(get_coeffs==cheb_coeffs_fromExtrema ||
+       get_coeffs==cheb_coeffs_fromZeros)
       for (j = 0; j < n2; j++)
         for (i = 0; i < n1; i++)
         {
