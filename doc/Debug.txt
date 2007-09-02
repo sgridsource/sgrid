@@ -43,6 +43,8 @@ A simple debugger is gdb.
 
 (gdb) backtrace          ... to see calling stack
 
+... in order to print variables (e.g. vdb[1].name) ...
+(gdb) print vdb[ivar[0]].name
 
 Sometimes we are left with a core file. This can be loaded with
 
