@@ -477,7 +477,7 @@ double dphi_dy(void *aux, int ind, double rho, double phi, double Z)
 void set_d_dx_at_rhoEQzero(void *bo, void *va, void *v1,void *v2,void *v3)
 {
   tBox *box = (tBox *) bo;
-  double *vx = (double *) va;
+  double *vx = (double *) v1;
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
@@ -491,7 +491,7 @@ void set_d_dx_at_rhoEQzero(void *bo, void *va, void *v1,void *v2,void *v3)
 void set_d_dy_at_rhoEQzero(void *bo, void *va, void *v1,void *v2,void *v3)
 {
   tBox *box = (tBox *) bo;
-  double *vy = (double *) va;
+  double *vy = (double *) v2;
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
@@ -2557,7 +2557,7 @@ void set_d_dy_at_rhoEQzero_AnsorgNS(void *bo, void *va,
                                     void *v1,void *v2,void *v3)
 {
   tBox *box = (tBox *) bo;
-  double *vy = (double *) va;
+  double *vy = (double *) v2;
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
@@ -2576,7 +2576,7 @@ void set_d_dz_at_rhoEQzero_AnsorgNS(void *bo, void *va,
                                     void *v1,void *v2,void *v3)
 {
   tBox *box = (tBox *) bo;
-  double *vz = (double *) va;
+  double *vz = (double *) v3;
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
@@ -2598,7 +2598,7 @@ void set_d_dz_at_rhoEQzero_AnsorgNS_new(void *bo, void *va,
                                     void *v1,void *v2,void *v3)
 {
   tBox *box = (tBox *) bo;
-  double *u = (double *) va;
+  double *u = (double *) v3;
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;

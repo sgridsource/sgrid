@@ -48,7 +48,7 @@ void cart_partials_old(tBox *box, double *u, double *u1, double *u2, double *u3)
     for(m=1; m<=3; m++)
     {
       if( box->Sing_d_dx[m] != NULL )
-        box->Sing_d_dx[m]((void *) box,   (void *) du[m],
+        box->Sing_d_dx[m]((void *) box,   (void *) u,
                           (void *) du[1], (void *) du[2], (void *) du[3]);
     }
   }
@@ -208,7 +208,7 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
     for(m=1; m<=3; m++)
     {
       if( box->Sing_d_dx[m] != NULL )
-        box->Sing_d_dx[m]((void *) box,   (void *) du[m],
+        box->Sing_d_dx[m]((void *) box,   (void *) u,
                           (void *) du[1], (void *) du[2], (void *) du[3]);
     }
   }
