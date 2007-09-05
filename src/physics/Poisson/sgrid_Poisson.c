@@ -42,14 +42,15 @@ int sgrid_Poisson()
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("Poisson_itmax", "10", "maximal number of Newton iterations");
   AddPar("Poisson_tol",   "1e-6","tolerance for Newton step or multigrid");
-//  AddPar("Poisson_linSolver", "bicgstab", 
-//         "linear solver used [bicgstab, HYPRE, gaussseidel]");
+  AddPar("Poisson_linSolver", "LAPACK", 
+         "linear solver used [LAPACK,templates_GMRES,bicgstab]");
   AddPar("Poisson_linSolver_itmax", "20", "max num of linSolver iterations");
   AddPar("Poisson_linSolver_tolFac","0.1", "tol for linSolver is " 
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("Poisson_linSolver_tol","0", "tol for linSolver is "
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
-
+  AddPar("Poisson_guess", "zero", "initial guess [zero,exact]");
+         
   AddPar("Poisson_grid", "SphericalDF",
          "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");
   AddPar("Poisson_regularization", "none",

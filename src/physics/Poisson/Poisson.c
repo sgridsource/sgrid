@@ -100,19 +100,41 @@ int Poisson_startup(tGrid *grid)
         rh1[i] = 0.0;
         rh2[i] = 0.0;
         if(b==0 || b==5)  rh1[i] = -3.0/(R1*R1*R1);
-        if(b==3 || b==4)  rh2[i] = -6.0/(R2*R2*R2);;
+        if(b==3 || b==4)  rh2[i] = -6.0/(R2*R2*R2);
+
+        if(Getv("Poisson_guess", "exact"))
+        {
+          double xc1 = 0.5*(xmax1+xmin1);
+          double xc2 = 0.5*(xmax2+xmin2);
+
+          if(b==1||b==2||b==3||b==4)
+          {
+            Psi[i] = 1.0/sqrt((x-xc1)*(x-xc1) + y*y + z*z);
+          }
+          if(b==0||b==5)
+          {
+            Psi[i] = 
+              (-0.5*((x-xc1)*(x-xc1)+y*y+z*z)/(R1*R1*R1)+ 1/R1 + 0.5/R1);
+          }
+          if(b==1||b==2||b==0||b==5)
+          {
+            Chi[i] = 2.0/sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+          }
+          if(b==3||b==4)
+          {
+            Chi[i] = 
+              (-((x-xc2)*(x-xc2)+y*y+z*z)/(R2*R2*R2) + 2/R2 + 1/R2);
+          }
+        }
+
 /*
         Psi[i] = b*b;
         Psi[i] = 1*exp(-0.5*(
                  (x-1)*(x-1)/(1*1) + (y-0)*(y-0)/(1.5*1.5)
                + (z-0.5)*(z-0.5)/(2*2)   ) );
-        Psi[i] = exp(-0.5*x*x);
 */
         //Psi[i] = 1.0/sqrt(x*x + y*y + z*z+1);
         //Psi[i] = 1.0/sqrt(x*x + (y-1.5)*(y-1.5) + (z-0.2)*(z-0.2)+1);
-        //Psi[i] = 0.0001*(b+1)/sqrt(x*x + y*y + z*z+1);
-        //if(b==0 || b==3)
-        //  Psi[i] = (b-1)*x;
       }
     }
   }
@@ -130,6 +152,11 @@ int Poisson_solve(tGrid *grid)
   double linSolver_tolFac = Getd("Poisson_linSolver_tolFac");
   double linSolver_tol    = Getd("Poisson_linSolver_tol");
   double normresnonlin;
+  int (*linear_solver)(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
 
   tVarList *vlu, *vlFu, *vluDerivs;
   tVarList *vldu, *vlr, *vlduDerivs;
@@ -170,40 +197,29 @@ int Poisson_solve(tGrid *grid)
   vlr        = AddDuplicateEnable(vlFu, "_l");
   vlduDerivs = vluDerivs; /* maybe: vlduDerivs=AddDuplicateEnable(vluDerivs, "_l"); */
 
-  /* call Newton solver */
+  /* choose linear solver */
+  if(Getv("Poisson_linSolver", "bicgstab"))
+    linear_solver=bicgstab;
+  else if(Getv("Poisson_linSolver", "LAPACK"))
+    linear_solver=LinSolve_withLAPACK;
+  else if(Getv("Poisson_linSolver", "templates_GMRES"))
+    linear_solver=templates_gmres_wrapper;
+  else
+    errorexit("Poisson_solve: unknown Poisson_linSolver");
+
 //printf("calling write_grid(grid)\n");
 //write_grid(grid);
 F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
 printf("calling write_grid(grid)\n");
 write_grid(grid);
 //exit(11);
-//vlu->n=1; vlFu->n=1; vluDerivs->n=1; vlrhs->n=1;
-//vldu->n=1; vlr->n=1; vlduDerivs->n=1; vlrhs->n=1;
 
-/*
-  Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
-         itmax, tol, &normresnonlin, 1,
-         bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-         linSolver_itmax, linSolver_tolFac, linSolver_tol);
-*/
-  Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
-         itmax, tol, &normresnonlin, 1,
-         templates_gmres_wrapper, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-         linSolver_itmax, linSolver_tolFac, linSolver_tol);
-
-
-/*
-  Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
-         itmax, tol, &normresnonlin, 1,
-         LinSolve_withLAPACK, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-         linSolver_itmax, linSolver_tolFac, linSolver_tol);
-*/
-/*
-  Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
-         1, tol, &normresnonlin, 1,
-         bicgstab, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-         2, linSolver_tolFac, linSolver_tol);
-*/
+  /* call Newton solver */
+  if(itmax>0)
+    Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
+           itmax, tol, &normresnonlin, 1,
+           linear_solver, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
+           linSolver_itmax, linSolver_tolFac, linSolver_tol);
 
   /* free varlists */     
   VLDisableFree(vldu);
