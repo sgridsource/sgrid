@@ -117,7 +117,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   errorexit("umfpack_solve: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/ufsparse\n"
-            "SPECIALLIBS += -lumfpack -lamd");
+            "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr) printf("umfpack_solve: umfpack_di_solve -> INFO=%d\n", INFO);
 
