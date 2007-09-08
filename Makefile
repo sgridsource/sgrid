@@ -19,6 +19,7 @@ CC = gcc	# gcc or icc
 
 INCS = -I$(TOP)/src/main/main
 LIBS = -L$(TOP)/lib
+SPECIALINCS =
 SPECIALLIBS =
 libsys = -lm
 
@@ -87,7 +88,7 @@ autotext    = \/\* automatically generated from MyConfig \*\/
 # --------------------------------------------------------------------------
 # some of the above variables are meant to be global, so pass them on
 # to the shell 
-CFLAGS = $(DFLAGS) $(OFLAGS) $(INCS) $(MPIDIRI) $(HDF5DIRI) $(WARN)
+CFLAGS = $(DFLAGS) $(OFLAGS) $(INCS) $(MPIDIRI) $(HDF5DIRI) $(SPECIALINCS) $(WARN)
 export
 
 
