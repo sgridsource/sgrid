@@ -35,7 +35,7 @@ int LinSolve_withUMFPACK(tVarList *x, tVarList *b,
     for(line=0; line<nlines; line++) prSparseVector(Aline[line]);
 
   /* solve A x = b with umfpack */
-  INFO=umfpack_solve(Aline, x, b, pr);
+  INFO=umfpack_solve(Aline, x, b, 1e-12, pr);
   if(pr) printf("LinSolve_withUMFPACK: umfpack_solve returned INFO=%d\n",INFO);
 
   /* free matrix Aline */

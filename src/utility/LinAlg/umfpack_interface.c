@@ -11,7 +11,8 @@
 
 
 /* solve A x = b with umfpack's umfpack_di_solve */
-int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
+int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
+                  double dropbelow, int pr)
 {
   tGrid *grid = vlx->grid;
   int i,j,n;
@@ -81,7 +82,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
     for(i = 0; i < nlines; i++)
     {
       Aij = GetSparseVectorComponent(Aline[i],j);
-      if(Aij==0.0) continue;
+      if(fabs(Aij)<=dropbelow) continue;
       Ap[j+1]++;
       Ai[n] = i;
       Ax[n] = Aij;
@@ -91,6 +92,8 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
   if(pr) printf("umfpack_solve: the sparse %d*%d matrix "
                 "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
                 nlines, nlines, nlines, Ap[nlines], Ai, Ax);
+  if(pr) printf("umfpack_solve: %d entries < %g were dropped\n",
+                nz-Ap[nlines], dropbelow);
 
   if(pr&&0)
   {
