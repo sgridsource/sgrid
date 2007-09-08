@@ -29,3 +29,6 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
 
 /* lapack_interface.c */
 int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr);
+
+/* umfpack_interface.c */
+int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr);
