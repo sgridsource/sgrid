@@ -77,7 +77,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
   Ap[0] = n = 0;
   for(j = 0; j < nlines; j++)
   {
-    Ap[j+1] = 0;
+    Ap[j+1] = Ap[j];
     for(i = 0; i < nlines; i++)
     {
       Aij = GetSparseVectorComponent(Aline[i],j);
@@ -91,6 +91,16 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
   if(pr) printf("umfpack_solve: the sparse %d*%d matrix "
                 "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
                 nlines, nlines, nlines, Ap[nlines], Ai, Ax);
+
+  if(pr&&0)
+  {
+    printf("Ax = \n");
+    for(i = 0; i < nz; i++)
+    {
+      printf("%g ", Ax[i]);
+    }
+    printf("\n");
+  }
 
 #ifdef UMFPACK
   /* call umfpack routine */
