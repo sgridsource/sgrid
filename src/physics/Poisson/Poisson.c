@@ -204,6 +204,8 @@ int Poisson_solve(tGrid *grid)
     linear_solver=LinSolve_withLAPACK;
   else if(Getv("Poisson_linSolver", "templates_GMRES"))
     linear_solver=templates_gmres_wrapper;
+  else if(Getv("Poisson_linSolver", "UMFPACK"))
+    linear_solver=LinSolve_withUMFPACK;
   else
     errorexit("Poisson_solve: unknown Poisson_linSolver");
 
