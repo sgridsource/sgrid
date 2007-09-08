@@ -5,6 +5,10 @@
 #include "sgrid.h"
 #include "LinAlg.h"
 
+#ifdef UMFPACK
+#include "umfpack.h"
+#endif
+
 
 /* solve A x = b with umfpack's umfpack_di_solve */
 int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)

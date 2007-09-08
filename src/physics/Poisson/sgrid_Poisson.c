@@ -43,7 +43,7 @@ int sgrid_Poisson()
   AddPar("Poisson_itmax", "10", "maximal number of Newton iterations");
   AddPar("Poisson_tol",   "1e-6","tolerance for Newton step or multigrid");
   AddPar("Poisson_linSolver", "LAPACK", 
-         "linear solver used [LAPACK,templates_GMRES,bicgstab]");
+         "linear solver used [LAPACK,templates_GMRES,bicgstab,UMFPACK]");
   AddPar("Poisson_linSolver_itmax", "20", "max num of linSolver iterations");
   AddPar("Poisson_linSolver_tolFac","0.1", "tol for linSolver is " 
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
