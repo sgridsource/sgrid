@@ -276,6 +276,35 @@ aS3
 Sz
 ;
 
+
+
+/* conditional */
+if (M != 0) {
+
+aS0
+=
+aS0/M
+;
+
+aS1
+=
+aS1/M
+;
+
+aS2
+=
+aS2/M
+;
+
+aS3
+=
+aS3/M
+;
+
+}
+/* if (M != 0) */
+
+
 adotx
 =
 aS1*x1 + aS2*x2 + aS3*x3
@@ -1325,4 +1354,4 @@ Gamdo033*gup03[ijk] + Gamdo133*gup13[ijk] + Gamdo233*gup23[ijk] +
 }  /* end of function */
 
 /* Kerr.c */
-/* nvars = 64, n* = 851,  n/ = 68,  n+ = 598, n = 1517, O = 1 */
+/* nvars = 64, n* = 855,  n/ = 76,  n+ = 598, n = 1529, O = 1 */

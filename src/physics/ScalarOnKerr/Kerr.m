@@ -14,6 +14,10 @@ tocompute = {
  rho == sqrt[ x1*x1 + x2*x2 + x3*x3 ],
  aS[a] == If[a==1,Sx,If[a==2,Sy,If[a==3,Sz,0]]],
 
+ Cif == (M!=0),
+   aS[a] == aS[a]/M,
+ Cif == end,
+
  adotx == aS1*x1 + aS2*x2 + aS3*x3,
  a2    == aS1*aS1 + aS2*aS2 + aS3*aS3,
  Omega == sqrt[(rho^2 - a2)^2 + 4 adotx^2],
