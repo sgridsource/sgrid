@@ -277,6 +277,9 @@ int write_grid(tGrid *grid)
         vi = IndLax(str);
         if(vi<0) continue;
 
+        /* ignore variable if it is constant in time and iteration > 0 */
+        if (VarConstantFlag(vi) && grid->iteration) continue;
+
         /* check whether we do 1doutputall */
         if( all[0] )
         {
@@ -310,9 +313,12 @@ int write_grid(tGrid *grid)
         if(ou[1][start]==' ') start++;
         //printf("1dout |%s|\n",str);
   
-        /* check if str has an index exists */
+        /* check if str has an that index exists */
         vi = IndLax(str);
         if(vi<0) continue;
+
+        /* ignore variable if it is constant in time and iteration > 0 */
+        if (VarConstantFlag(vi) && grid->iteration) continue;
 
         /* check whether we do 1doutputall */
         if( all[1] )
@@ -347,9 +353,12 @@ int write_grid(tGrid *grid)
         if(ou[2][start]==' ') start++;
         //printf("2dout |%s|\n", str);
         
-        /* check if str has an index exists */
+        /* check if str has an index that exists */
         vi = IndLax(str);
         if(vi<0) continue;
+
+        /* ignore variable if it is constant in time and iteration > 0 */
+        if (VarConstantFlag(vi) && grid->iteration) continue;
 
         /* check whether we do 2doutputall */
         if( all[2] )
