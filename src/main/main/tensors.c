@@ -279,7 +279,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     printf("i, ij, (ij), [ij], ijk, i(jk), (ij)k [ij]k ijkl (ij)(kl)\n");
     printf("ij+ji, ij-ji, ijk+ikj, ijk+jik\n");
     printf("a, ab, ab+ba, abc+acb\n");
-    printf("(ab)c, (ab)i, (ab)(ij)\n");
+    printf("(ab), a(bc), (ab)c, (ab)i, (ab)(ij)\n");
     printf("Anything else can be easily added to main/tensors.c.\n");
     errorexit("");
   }
