@@ -220,6 +220,10 @@ double l0;
 double l1;
 double l2;
 double l3;
+double lup0;
+double lup1;
+double lup2;
+double lup3;
 double Omega;
 double r;
 double rho;
@@ -279,7 +283,7 @@ Sz
 
 
 /* conditional */
-if (M != 0) {
+if (M != 0.) {
 
 aS0
 =
@@ -302,7 +306,7 @@ aS3/M
 ;
 
 }
-/* if (M != 0) */
+/* if (M != 0.) */
 
 
 adotx
@@ -456,7 +460,27 @@ l3
 
 l0
 =
--1.
+1.
+;
+
+lup0
+=
+-l0
+;
+
+lup1
+=
+l1
+;
+
+lup2
+=
+l2
+;
+
+lup3
+=
+l3
 ;
 
 dl00
@@ -659,52 +683,52 @@ g33[ijk]
 
 gup00[ijk]
 =
--1. - 2.*H*pow2(l0)
+-1. - 2.*H*pow2(lup0)
 ;
 
 gup01[ijk]
 =
--2.*H*l0*l1
+-2.*H*lup0*lup1
 ;
 
 gup02[ijk]
 =
--2.*H*l0*l2
+-2.*H*lup0*lup2
 ;
 
 gup03[ijk]
 =
--2.*H*l0*l3
+-2.*H*lup0*lup3
 ;
 
 gup11[ijk]
 =
-1. - 2.*H*pow2(l1)
+1. - 2.*H*pow2(lup1)
 ;
 
 gup12[ijk]
 =
--2.*H*l1*l2
+-2.*H*lup1*lup2
 ;
 
 gup13[ijk]
 =
--2.*H*l1*l3
+-2.*H*lup1*lup3
 ;
 
 gup22[ijk]
 =
-1. - 2.*H*pow2(l2)
+1. - 2.*H*pow2(lup2)
 ;
 
 gup23[ijk]
 =
--2.*H*l2*l3
+-2.*H*lup2*lup3
 ;
 
 gup33[ijk]
 =
-1. - 2.*H*pow2(l3)
+1. - 2.*H*pow2(lup3)
 ;
 
 dg000

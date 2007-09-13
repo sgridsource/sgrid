@@ -14,7 +14,7 @@ tocompute = {
  rho == sqrt[ x1*x1 + x2*x2 + x3*x3 ],
  aS[a] == If[a==1,Sx,If[a==2,Sy,If[a==3,Sz,0]]],
 
- Cif == (M!=0),
+ Cif == (M!=0.0),
    aS[a] == aS[a]/M,
  Cif == end,
 
@@ -33,8 +33,10 @@ tocompute = {
  dH[a] == H/r (( 3 adotx^2 - r^4) dr[a] - 2 r adotx aS[a])/(r^4 + adotx^2),
  dH0 == 0,
 
+ (* l_a = -k_a^{in}  in MTW p. 903 *)
  l[a] == (r^2 x[a] - r acrossx[a] + adotx aS[a])/(r (r^2 + a2)),
- l0 == -1,
+ l0   == +1,
+ lup[a] == delta[a,b]*If[a==0,-1,1] l[b],
 
  (* dl[a,b] = d_b l_a *)
  dl[a,b] == (r^2 delta[a,b] - r ahat[a,b] + aS[a] aS[b])/(r^3 + a2 r) + (((a2 r^2 - r^4) x[a] + 2 r^3 acrossx[a] - (3 r^2 + a2) adotx aS[a]) dr[b])/(r^3 + a2 r)^2,
@@ -49,7 +51,7 @@ tocompute = {
  g[a,b] == delta[a,b]*If[a==0,-1,1] + 2 H l[a] l[b],
 
  (* the inverse metric *)
- gup[a,b] == delta[a,b]*If[a==0,-1,1] - 2 H l[a] l[b],
+ gup[a,b] == delta[a,b]*If[a==0,-1,1] - 2 H lup[a] lup[b],
 
  (* dg[a,b,c] = d_c g_ab *)
  dg[a,b,c] == 2 dH[c] l[a] l[b] + 2 H dl[a,c] l[b] + 2 H l[a] dl[b,c],
