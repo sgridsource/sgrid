@@ -330,6 +330,39 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   /* compute cartesian coordinates x,y,z from X,Y,Z */
   compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
 
+  /* print distances in cart. coordinates */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *x = box->v[Ind("x")];
+    double *y = box->v[Ind("y")];
+    double *z = box->v[Ind("z")];
+    printf("Cartesian distances in box%d:\n", b);
+    printf("X-direction: x[1]-x[0]=%g, ", x[1]-x[0]);
+    printf("y[1]-y[0]=%g, ",              y[1]-y[0]);
+    printf("z[1]-z[0]=%g\n   ==> ",       z[1]-z[0]);
+    printf("d=%g\n", sqrt((x[1]-x[0])*(x[1]-x[0]) + 
+                          (y[1]-y[0])*(y[1]-y[0]) +
+                          (z[1]-z[0])*(z[1]-z[0])));
+
+    printf("Y-direction: x[n1]-x[0]=%g, ", x[n1]-x[0]);
+    printf("y[n1]-y[0]=%g ",               y[n1]-y[0]);
+    printf("z[n1]-z[0]=%g\n   ==> ",       z[n1]-z[0]);
+    printf("d=%g\n", sqrt((x[n1]-x[0])*(x[n1]-x[0]) + 
+                          (y[n1]-y[0])*(y[n1]-y[0]) +
+                          (z[n1]-z[0])*(z[n1]-z[0])));
+
+    printf("Z-direction: x[n1*n2]-x[0]=%g, ", x[n1*n2]-x[0]);
+    printf("y[n1*n2]-y[0]=%g, ", 	      y[n1*n2]-y[0]);
+    printf("z[n1*n2]-z[0]=%g\n   ==> ",       z[n1*n2]-z[0]);
+    printf("d=%g\n", sqrt((x[n1*n2]-x[0])*(x[n1*n2]-x[0]) + 
+                          (y[n1*n2]-y[0])*(y[n1*n2]-y[0]) +
+                          (z[n1*n2]-z[0])*(z[n1*n2]-z[0])));
+  }
+
   return 0;
 }
 
