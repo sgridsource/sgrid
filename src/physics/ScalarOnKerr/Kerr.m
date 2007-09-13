@@ -40,7 +40,7 @@ tocompute = {
 
  (* dl[a,b] = d_b l_a *)
  dl[a,b] == (r^2 delta[a,b] - r ahat[a,b] + aS[a] aS[b])/(r^3 + a2 r) + (((a2 r^2 - r^4) x[a] + 2 r^3 acrossx[a] - (3 r^2 + a2) adotx aS[a]) dr[b])/(r^3 + a2 r)^2,
- dl00 == 0,
+ dl0[b] == 0,
  dl10 == 0,
  dl20 == 0,
  dl30 == 0,

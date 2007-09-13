@@ -1,5 +1,5 @@
 /* Kerr.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 12.9.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 13.9.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -612,6 +612,21 @@ dl33
 ;
 
 dl00
+=
+0
+;
+
+dl01
+=
+0
+;
+
+dl02
+=
+0
+;
+
+dl03
 =
 0
 ;
