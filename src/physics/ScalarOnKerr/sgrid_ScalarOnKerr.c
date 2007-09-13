@@ -43,7 +43,7 @@ int sgrid_ScalarOnKerr(void)
   AddPar("BHsx", "0.0", "spin_x of black hole");
   AddPar("BHsy", "0.0", "spin_y of black hole");
   AddPar("BHsz", "0.0", "spin_z of black hole");
-  AddPar("ScalarOnKerr_reset_doubleCoveredPoints", "no",
+  AddPar("ScalarOnKerr_reset_doubleCoveredPoints", "yes",
          "whether we reset double covered points after each evo step [no,yes]");
          
   return 0;

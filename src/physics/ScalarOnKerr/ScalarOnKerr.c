@@ -214,14 +214,22 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
                 2.0*(gxy[i]*psixy[i] + gxz[i]*psixz[i] + gyz[i]*psiyz[i]);
 
       /* get gG[a] = g^bc Gamma^a_bc */
-      gGt = gxx[i]*Gamtxx[i] + gyy[i]*Gamtyy[i] + gzz[i]*Gamtzz[i] +
-            2.0*(gxy[i]*Gamtxy[i] + gxz[i]*Gamtxz[i] + gyz[i]*Gamtyz[i]);
-      gGx = gxx[i]*Gamxxx[i] + gyy[i]*Gamxyy[i] + gzz[i]*Gamxzz[i] +
-            2.0*(gxy[i]*Gamxxy[i] + gxz[i]*Gamxxz[i] + gyz[i]*Gamxyz[i]);
-      gGy = gxx[i]*Gamyxx[i] + gyy[i]*Gamyyy[i] + gzz[i]*Gamyzz[i] +
-            2.0*(gxy[i]*Gamyxy[i] + gxz[i]*Gamyxz[i] + gyz[i]*Gamyyz[i]);
-      gGz = gxx[i]*Gamzxx[i] + gyy[i]*Gamzyy[i] + gzz[i]*Gamzzz[i] +
-            2.0*(gxy[i]*Gamzxy[i] + gxz[i]*Gamzxz[i] + gyz[i]*Gamzyz[i]);
+      gGt = gtt[i]*Gamttt[i] + 
+            gxx[i]*Gamtxx[i] + gyy[i]*Gamtyy[i] + gzz[i]*Gamtzz[i] +
+            2.0*(gtx[i]*Gamttx[i] + gty[i]*Gamtty[i] + gtz[i]*Gamttz[i] +
+                 gxy[i]*Gamtxy[i] + gxz[i]*Gamtxz[i] + gyz[i]*Gamtyz[i]);
+      gGx = gtt[i]*Gamxtt[i] + 
+            gxx[i]*Gamxxx[i] + gyy[i]*Gamxyy[i] + gzz[i]*Gamxzz[i] +
+            2.0*(gtx[i]*Gamxtx[i] + gty[i]*Gamxty[i] + gtz[i]*Gamxtz[i] +
+                 gxy[i]*Gamxxy[i] + gxz[i]*Gamxxz[i] + gyz[i]*Gamxyz[i]);
+      gGy = gtt[i]*Gamytt[i] + 
+            gxx[i]*Gamyxx[i] + gyy[i]*Gamyyy[i] + gzz[i]*Gamyzz[i] +
+            2.0*(gtx[i]*Gamytx[i] + gty[i]*Gamyty[i] + gtz[i]*Gamytz[i] +
+                 gxy[i]*Gamyxy[i] + gxz[i]*Gamyxz[i] + gyz[i]*Gamyyz[i]);
+      gGz = gtt[i]*Gamztt[i] + 
+            gxx[i]*Gamzxx[i] + gyy[i]*Gamzyy[i] + gzz[i]*Gamzzz[i] +
+            2.0*(gtx[i]*Gamztx[i] + gty[i]*Gamzty[i] + gtz[i]*Gamztz[i] +
+                 gxy[i]*Gamzxy[i] + gxz[i]*Gamzxz[i] + gyz[i]*Gamzyz[i]);
       gG_dpsi = gGt*cpsidot[i] + gGx*psix[i] + gGy*psiy[i] + gGz*psiz[i];
 
       /* source posistion */
