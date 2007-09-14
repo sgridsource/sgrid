@@ -19,12 +19,12 @@ int sgrid_ScalarOnKerr(void)
 
   /* variables */
   AddVar("ScalarOnKerr_psi", "", "scalar");
-  AddVar("ScalarOnKerr_pi",  "", "time deriv of scalar");
+  AddVar("ScalarOnKerr_Pi",  "", "time deriv of scalar");
 
   /* derivatives which need to be precomputed before each evo steo */
   AddVar("ScalarOnKerr_dpsi",  "i",    "1st spatial deriv of scalar");
   AddVar("ScalarOnKerr_ddpsi", "(ij)", "2nd spatial deriv of scalar");
-  AddVar("ScalarOnKerr_dpi",   "i",    "1st spatial deriv of pi");
+  AddVar("ScalarOnKerr_dPi",   "i",    "1st spatial deriv of Pi");
 
   /* Kerr background 4-metric */
   AddConstantVar("ScalarOnKerr_g",     "(ab)",  "Kerr metric");
