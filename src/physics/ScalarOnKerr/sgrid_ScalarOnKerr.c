@@ -18,18 +18,28 @@ int sgrid_ScalarOnKerr(void)
   AddFun(ANALYZE, ScalarOnKerr_analyze, "compute something useful");
 
   /* variables */
-  AddVar("ScalarOnKerr_psi",    "", "scalar");
-  AddVar("ScalarOnKerr_psidot", "", "time deriv of scalar");
+  AddVar("ScalarOnKerr_psi", "", "scalar");
+  AddVar("ScalarOnKerr_pi",  "", "time deriv of scalar");
 
   /* derivatives which need to be precomputed before each evo steo */
-  AddVar("ScalarOnKerr_dpsi",    "i",    "1st spatial deriv of scalar");
-  AddVar("ScalarOnKerr_ddpsi",   "(ij)", "2nd spatial deriv of scalar");
-  AddVar("ScalarOnKerr_dpsidot", "i",    "1st spatial deriv of psidot");
+  AddVar("ScalarOnKerr_dpsi",  "i",    "1st spatial deriv of scalar");
+  AddVar("ScalarOnKerr_ddpsi", "(ij)", "2nd spatial deriv of scalar");
+  AddVar("ScalarOnKerr_dpi",   "i",    "1st spatial deriv of pi");
 
-  /* Kerr beackground */
+  /* Kerr background 4-metric */
   AddConstantVar("ScalarOnKerr_g",     "(ab)",  "Kerr metric");
-  AddConstantVar("ScalarOnKerr_gup",   "(ab)",  "inverse Kerr metric");
-  AddConstantVar("ScalarOnKerr_Gamma", "a(bc)", "Christoffel symbol of Kerr metric");
+  AddConstantVar("ScalarOnKerr_gup",   "(AB)",  "inverse Kerr metric");
+  AddConstantVar("ScalarOnKerr_Gamma", "A(bc)", "Christoffel symbol of Kerr metric");
+
+  /* Kerr background in 3+1 split */
+  AddConstantVar("ScalarOnKerr3d_g",     "(ij)",  "Kerr 3-metric");
+  AddConstantVar("ScalarOnKerr3d_alpha", "",  	  "Kerr lapse");
+  AddConstantVar("ScalarOnKerr3d_beta",  "I",     "Kerr shift");
+  AddConstantVar("ScalarOnKerr3d_K",     "(ij)",  "extrinsic curv.");
+  AddConstantVar("ScalarOnKerr3d_TrK",   "",      "trace of K");
+  AddConstantVar("ScalarOnKerr3d_gup",   "(IJ)",  "inverse Kerr 3-metric");
+  AddConstantVar("ScalarOnKerr3d_Gamma", "I(jk)", "Christoffel symbol of 3-metric");
+  AddConstantVar("ScalarOnKerr3d_dalpha","i",     "1st spatial deriv of lapse");
 
   if(!Getv("physics", "ADMvars"))
   {
