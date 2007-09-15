@@ -160,6 +160,9 @@ void evolve_rk_generic(tGrid *grid, tButcher *rk)
     for (j = 0; j < i; j++) 
       vladd(u_c, 1.0, u_c, dt*rk->a[i][j], u_k[j]); 
 
+    /* set algebraic BCs for u_c, and any other stuff needed */
+    if(evolve_algebraicConditions) evolve_algebraicConditions(u_c, u_p);
+
     /* u_ki = F(u_c) 
        step size 0.0 means right-hand side is returned in u_ki
        u_p is not needed but passed in as dummy
@@ -174,6 +177,9 @@ void evolve_rk_generic(tGrid *grid, tButcher *rk)
   vlcopy(u_c, u_p);
   for (j = 0; j < rk->nstages; j++)
     vladd(u_c, 1.0, u_c, dt*rk->b[j], u_k[j]);
+
+  /* set algebraic BCs for u_c, and any other stuff needed */
+  if(evolve_algebraicConditions) evolve_algebraicConditions(u_c, u_p);
 }
 
 

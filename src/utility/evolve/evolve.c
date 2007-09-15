@@ -19,6 +19,13 @@ tVarList *u_pp = 0;
 void (*evolve_rhs)
   (tVarList *unew, tVarList *upre, double c, tVarList *ucur) = 0;
 
+/* Pointer to routine that can set algebraic Boundary Conditions
+   after each sub time step (e.g. in rk).
+   Note that any time deriv BCs such as d_t u = something, should be
+   set in evolve_rhs itself. Here we set only stuff like
+   unew = upre, or u1new = -u2new  <-- at new time */
+void (*evolve_algebraicConditions)
+  (tVarList *unew, tVarList *upre) = 0;
 
 
 
@@ -48,7 +55,11 @@ void evolve_rhsregister(void (*f)(tVarList *, tVarList *, double, tVarList *))
   evolve_rhs = f;
 }
 
-
+/* set pointer to evolve_algebraicConditions */
+void evolve_algebraicConditionsregister(void (*f)(tVarList *, tVarList *))
+{
+  evolve_algebraicConditions = f;
+}
 
 
 /* evolve wrapper for function skeleton */

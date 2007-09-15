@@ -6,3 +6,4 @@ void evolve_vlregister(tVarList *u);
 void evolve_vlretrieve(tVarList **vlu_c, tVarList **vlu_p, tVarList **vlu_pp);
 void addDissipation(tVarList *vlu_n, tVarList *vlu_p, double dt, 
                     tVarList *vlu_c);
+void evolve_algebraicConditionsregister(void (*f)(tVarList *, tVarList *));

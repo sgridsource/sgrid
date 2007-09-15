@@ -26,6 +26,9 @@ void evolve_icn(tGrid *grid)
     /* u_c = u_p + k F(u_q) */
     evolve_rhs(u_c, u_p, dt, u_q);
 
+    /* set algebraic BCs for u_c, and any other stuff needed */
+    if(evolve_algebraicConditions) evolve_algebraicConditions(u_c, u_p);
+
     /* synchronization */
     //bampi_vlsynchronize(u_c);
   }
@@ -47,6 +50,9 @@ void evolve_euler(tGrid *grid)
 
   /* u_c = u_p + k F(u_p) */  
   evolve_rhs(u_c, u_p, dt, u_p);
+
+  /* set algebraic BCs for u_c, and any other stuff needed */
+  if(evolve_algebraicConditions) evolve_algebraicConditions(u_c, u_p);
 
   /* synchronization */
   //bampi_vlsynchronize(u_c);

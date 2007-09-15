@@ -14,4 +14,4 @@ void evolve_rk(tGrid *grid);
 
 void (*evolve_rhs)
   (tVarList *unew, tVarList *upre, double c, tVarList *ucur);
-
+void (*evolve_algebraicConditions)(tVarList *unew, tVarList *upre);
