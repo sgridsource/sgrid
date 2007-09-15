@@ -45,6 +45,9 @@ int ScalarOnKerr_startup(tGrid *grid)
   /* register evolution routine */
   evolve_rhsregister(ScalarOnKerr_evolve);
 
+  /* register BC routine */
+  evolve_algebraicConditionsregister(set_boundary_ofPi);
+
   /* set initial data in boxes */
   forallboxes(grid,b)
   {  
@@ -398,7 +401,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
 
       /* set RHS of psi and Pi */
       rPi  = beta_dPi - ag_ddpsi + agG_dpsi - g_dpsi_da + aKPi  +
-              -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
+              (-1/alpha[i])*exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
       rpsi = beta_dpsi - alpha[i]*cPi[i];
 
       /* set new vars or RHS, depending in which integrator is used */
@@ -416,26 +419,54 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   }
 
   /* set BCs */
-  set_boundary(unew, upre, dt, ucur);
-/*
-  forallboxes(grid,b)
-  {
-    tBox *box = grid->box[b];
-    int n1=box->n1;
-    int n2=box->n2;
-    int n3=box->n3;
-    int i,j,k;
-
-    forplane1(i,j,k, n1,n2,n3, n1-1)
-      p
-  }
-*/
+//  set_boundary(unew, upre, dt, ucur);
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
 }
 
+/* set BC for Pi */
+void set_boundary_ofPi(tVarList *unew, tVarList *upre)
+{
+  int bi, pi, ijk;
+  int ipsi = unew->index[0];
+  int iPi  = unew->index[1];
+  tGrid *grid = (unew)->grid;
 
+  forallboxes(grid,bi)
+  {
+    tBox *box=grid->box[bi];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, i,j,k;
+    double *xp = box->v[Ind("x")];
+    double *yp = box->v[Ind("y")];
+    double *zp = box->v[Ind("z")];
+    double *psinew = box->v[ipsi];
+    double *Pinew = box->v[iPi];
+    double *dpsi_dx = box->v[Ind("temp1")];
+    double *dpsi_dy = box->v[Ind("temp2")];
+    double *dpsi_dz = box->v[Ind("temp3")];
+    double x,y,z, r, nx,ny,nz;
+
+    cart_partials(box, psinew, dpsi_dx, dpsi_dy, dpsi_dz); 
+
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+    {
+      ijk = Index(i,j,k);
+      x = xp[ijk];
+      y = yp[ijk];
+      z = zp[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r;
+      ny = y/r;
+      nz = z/r;
+
+      Pinew[ijk] = (nx*dpsi_dx[ijk] + ny*dpsi_dy[ijk] + nz*dpsi_dz[ijk]);
+    }
+  }
+}
 
 
 /* compute and integrals of rho */
