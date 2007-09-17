@@ -46,7 +46,7 @@ int ScalarOnKerr_startup(tGrid *grid)
   evolve_rhsregister(ScalarOnKerr_evolve);
 
   /* register BC routine */
-  evolve_algebraicConditionsregister(set_boundary_ofPi);
+//  evolve_algebraicConditionsregister(set_boundary_ofPi);
 
   /* set initial data in boxes */
   forallboxes(grid,b)
@@ -124,7 +124,7 @@ int ScalarOnKerr_startup(tGrid *grid)
 
 
 /* evolve and set boundary points */
-void ScalarOnKerr_evolve_old(tVarList *unew, tVarList *upre, double dt, 
+void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt, 
                              tVarList *ucur)
 {
   tGrid *grid = ucur->grid;
@@ -227,7 +227,7 @@ void ScalarOnKerr_evolve_old(tVarList *unew, tVarList *upre, double dt,
       double g_ddpsi, gGt,gGx,gGy,gGz, gG_dpsi;
       /* g is upper metric */
       /* get all terms with less than 2 time derivs in g^ab d_a d_b psi */
-      g_ddpsi = 2.0*(gtx[i]*Pix[i] +gty[i]*Piy[i] +gtz[i]*Piz[i]) + 
+      g_ddpsi = -2.0*(gtx[i]*Pix[i] +gty[i]*Piy[i] +gtz[i]*Piz[i]) + 
                 gxx[i]*psixx[i] + gyy[i]*psiyy[i] + gzz[i]*psizz[i] +
                 2.0*(gxy[i]*psixy[i] + gxz[i]*psixz[i] + gyz[i]*psiyz[i]);
 
@@ -248,16 +248,16 @@ void ScalarOnKerr_evolve_old(tVarList *unew, tVarList *upre, double dt,
             gxx[i]*Gamzxx[i] + gyy[i]*Gamzyy[i] + gzz[i]*Gamzzz[i] +
             2.0*(gtx[i]*Gamztx[i] + gty[i]*Gamzty[i] + gtz[i]*Gamztz[i] +
                  gxy[i]*Gamzxy[i] + gxz[i]*Gamzxz[i] + gyz[i]*Gamzyz[i]);
-      gG_dpsi = gGt*cPi[i] + gGx*psix[i] + gGy*psiy[i] + gGz*psiz[i];
+      gG_dpsi = -gGt*cPi[i] + gGx*psix[i] + gGy*psiy[i] + gGz*psiz[i];
 
-      /* source posistion */
+      /* source position */
       x0 = 10*cos(0.02*t);
       y0 = 10*sin(0.02*t);
 
       /* set RHS of psi and Pi */
-      rPi  = -(g_ddpsi - gG_dpsi)/gtt[i] + 
-                exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
-      rpsi = cPi[i];
+      rPi  = (g_ddpsi - gG_dpsi)/gtt[i] + 
+              -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
+      rpsi = -cPi[i];
 
       /* set new vars or RHS, depending in which integrator is used */
       if(dt!=0.0)
@@ -282,7 +282,7 @@ void ScalarOnKerr_evolve_old(tVarList *unew, tVarList *upre, double dt,
 
 
 /* evolve and set boundary points */
-void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt, 
+void ScalarOnKerr_evolve_new(tVarList *unew, tVarList *upre, double dt, 
                          tVarList *ucur)
 {
   tGrid *grid = ucur->grid;
@@ -388,14 +388,16 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
       /* get g_dpsi_da = g^ik dpsi_i dalpha_k */
       g_dpsi_da = gxx[i]*psix[i]*dalphax[i] + gyy[i]*psiy[i]*dalphay[i] +
                   gzz[i]*psiz[i]*dalphaz[i] +
-                  2.0*(gxy[i]*psix[i]*dalphay[i] + 
-                       gxz[i]*psix[i]*dalphaz[i] + gyz[i]*psiy[i]*dalphaz[i]);
+                  gxy[i]*(psix[i]*dalphay[i] + psiy[i]*dalphax[i]) + 
+                  gxz[i]*(psix[i]*dalphaz[i] + psiz[i]*dalphax[i]) +
+                  gyz[i]*(psiy[i]*dalphaz[i] + psiz[i]*dalphay[i]);
+
       aKPi = alpha[i]*(TrK[i]*cPi[i]);
 
       /* term on RHS of psi eqn */
       beta_dpsi = betax[i]*psix[i] + betay[i]*psiy[i] + betaz[i]*psiz[i];
 
-      /* source posistion */
+      /* source position */
       x0 = 10*cos(0.02*t);
       y0 = 10*sin(0.02*t);
 
@@ -419,7 +421,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   }
 
   /* set BCs */
-//  set_boundary(unew, upre, dt, ucur);
+  set_boundary(unew, upre, dt, ucur);
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
@@ -463,7 +465,8 @@ void set_boundary_ofPi(tVarList *unew, tVarList *upre)
       ny = y/r;
       nz = z/r;
 
-      Pinew[ijk] = (nx*dpsi_dx[ijk] + ny*dpsi_dy[ijk] + nz*dpsi_dz[ijk]);
+      Pinew[ijk] = (nx*dpsi_dx[ijk] + ny*dpsi_dy[ijk] + nz*dpsi_dz[ijk])
+                    - psinew[ijk]/r;
     }
   }
 }
