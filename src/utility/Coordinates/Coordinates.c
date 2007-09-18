@@ -8,6 +8,7 @@
 #define Log(x)     (log((double) (x)))
 #define Sin(x)     (sin((double) (x)))
 #define Cos(x)     (cos((double) (x)))
+#define Sec(x)     (1.0/cos((double) (x)))
 #define Csc(x)     (1.0/sin((double) (x)))
 #define Tan(x)     (tan((double) (x)))
 #define Cot(x)     (1.0/tan((double) (x)))
@@ -16,6 +17,7 @@
 #define ArcTan(x)  atan(x)
 #define Cosh(x)    cosh(x)
 #define Sinh(x)    sinh(x)
+#define Tanh(x)    tanh(x)
 #define Csch(x)    (1.0/sinh(x))
 #define Sech(x)    (1.0/cosh(x))
 #define Coth(x)    (1.0/tanh(x))
@@ -225,6 +227,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     else if( Getv(str, "Spherical2") )
     {
       printf("Coordinates: initializing Spherical2 coordinates...\n");
+      printf("WARNING!!! Spherical2 yields very inaccurate derivatives!!!\n");
       box->x_of_X[1] = x_ofSpherical2;
       box->x_of_X[2] = y_ofSpherical2;
       box->x_of_X[3] = z_ofSpherical2;
@@ -259,6 +262,44 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][2][2] = ddphi_Spherical2_dydy;
       box->ddX_dxdx[3][2][3] = ddphi_Spherical2_dydz;
       box->ddX_dxdx[3][3][3] = ddphi_Spherical2_dzdz;
+    }
+    else if( Getv(str, "Spherical3") )
+    {
+      printf("Coordinates: initializing Spherical3 coordinates...\n");
+      box->x_of_X[1] = x_ofSpherical3;
+      box->x_of_X[2] = y_ofSpherical3;
+      box->x_of_X[3] = z_ofSpherical3;
+
+      box->dX_dx[1][1] = dr_Spherical3_dx;
+      box->dX_dx[1][2] = dr_Spherical3_dy;
+      box->dX_dx[1][3] = dr_Spherical3_dz;
+      box->dX_dx[2][1] = dU_Spherical3_dx;
+      box->dX_dx[2][2] = dU_Spherical3_dy;
+      box->dX_dx[2][3] = dU_Spherical3_dz;
+      box->dX_dx[3][1] = dphi_Spherical3_dx;
+      box->dX_dx[3][2] = dphi_Spherical3_dy;
+      box->dX_dx[3][3] = zero_of_xyz;
+
+      box->ddX_dxdx[1][1][1] = ddr_Spherical3_dxdx;
+      box->ddX_dxdx[1][1][2] = ddr_Spherical3_dxdy;
+      box->ddX_dxdx[1][1][3] = ddr_Spherical3_dxdz;
+      box->ddX_dxdx[1][2][2] = ddr_Spherical3_dydy;
+      box->ddX_dxdx[1][2][3] = ddr_Spherical3_dydz;
+      box->ddX_dxdx[1][3][3] = ddr_Spherical3_dzdz;
+
+      box->ddX_dxdx[2][1][1] = ddU_Spherical3_dxdx;
+      box->ddX_dxdx[2][1][2] = ddU_Spherical3_dxdy;
+      box->ddX_dxdx[2][1][3] = ddU_Spherical3_dxdz;
+      box->ddX_dxdx[2][2][2] = ddU_Spherical3_dydy;
+      box->ddX_dxdx[2][2][3] = ddU_Spherical3_dydz;
+      box->ddX_dxdx[2][3][3] = ddU_Spherical3_dzdz;
+
+      box->ddX_dxdx[3][1][1] = ddphi_Spherical3_dxdx;
+      box->ddX_dxdx[3][1][2] = ddphi_Spherical3_dxdy;
+      box->ddX_dxdx[3][1][3] = ddphi_Spherical3_dxdz;
+      box->ddX_dxdx[3][2][2] = ddphi_Spherical3_dydy;
+      box->ddX_dxdx[3][2][3] = ddphi_Spherical3_dydz;
+      box->ddX_dxdx[3][3][3] = ddphi_Spherical3_dzdz;
     }
     else if( Getv(str, "tan_stretch") )
     {
@@ -1278,7 +1319,6 @@ return 0.;
 /* end: Spherical coordinates: */
 
 
-
 /* ****************************************************************** */
 /* start: Spherical2 coordinates:                                     */
 /* Coord. trafos */
@@ -1401,6 +1441,156 @@ double ddphi_Spherical2_dzdz(void *aux, int ind, double r, double U, double phi)
 return 0;
 }
 /* end of: Spherical2 coords */
+
+
+/* ****************************************************************** */
+/* start: Spherical2 coordinates:                                     */
+/* Coord. trafos */
+double x_ofSpherical3(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return r*Cos(phi)*Cos((PI*Csch(c)*Sinh(c*U))/2.);
+}
+double y_ofSpherical3(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return r*Cos((PI*Csch(c)*Sinh(c*U))/2.)*Sin(phi);
+}
+double z_ofSpherical3(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return r*Sin((PI*Csch(c)*Sinh(c*U))/2.);
+}
+/* 1st derivs */
+double dr_Spherical3_dx(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return Cos(phi)*Cos(1.5707963267948966192*Csch(c)*Sinh(c*U));
+}
+double dr_Spherical3_dy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sin(phi);
+}
+double dr_Spherical3_dz(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return Sin(1.5707963267948966192*Csch(c)*Sinh(c*U));
+}
+double dU_Spherical3_dx(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (-0.6366197723675813431*Cos(phi)*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sinh(c))/(c*r*Sqrt(Power(Cosh(c*U),2)));
+}
+double dU_Spherical3_dy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (-0.6366197723675813431*Sin(phi)*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sinh(c))/(c*r*Sqrt(Power(Cosh(c*U),2)));
+}
+double dU_Spherical3_dz(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (0.45015815807855303478*Sqrt(1. + Power(Cos(1.570796326794896619231322*Csch(c)*Sinh(c*U)),2) - Power(Sin(1.570796326794896619231322*Csch(c)*Sinh(c*U)),2))*Sinh(c))/(c*r*Sqrt(Power(Cosh(c*U),2)));
+}
+double dphi_Spherical3_dx(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return -((Sec(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sin(phi))/r);
+}
+double dphi_Spherical3_dy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (Cos(phi)*Sec(1.5707963267948966192*Csch(c)*Sinh(c*U)))/r;
+}
+/* 2nd derivs */
+double ddr_Spherical3_dxdx(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*Power(Sin(phi),2) + Power(Sin(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2))/r;
+}
+double ddr_Spherical3_dxdy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return -((Cos(phi)*Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*Sin(phi))/r);
+}
+double ddr_Spherical3_dxdz(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return -((Cos(phi)*Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U)))/r);
+}
+double ddr_Spherical3_dydy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (Power(Cos(phi),2)*Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2) + Power(Sin(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2))/r;
+}
+double ddr_Spherical3_dydz(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return -((Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sin(phi)*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U)))/r);
+}
+double ddr_Spherical3_dzdz(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)/r;
+}
+double ddU_Spherical3_dxdx(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (-0.20264236728467554289*Sinh(c)*(3.1415926535897932385*Power(Cosh(c*U),2)*(-2.*Power(Cos(phi),4)*Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2) - Power(Cos(phi),2)*Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*Power(Sin(phi),2) + Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*Power(Sin(phi),4) + Power(Sin(phi),2)*Power(Sin(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)) + 2.*Power(Cos(phi),2)*Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sinh(c)*Sinh(c*U))*Tan(1.5707963267948966192*Csch(c)*Sinh(c*U)))/(c*Power(r,2)*Power(Power(Cosh(c*U),2),1.5));
+}
+double ddU_Spherical3_dxdy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (0.20264236728467554289*Cos(phi)*Sin(phi)*Sinh(c)*(3.1415926535897932385*Power(Cosh(c*U),2)*(2. + Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2) - Power(Sin(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)) - 2.*Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sinh(c)*Sinh(c*U))*Tan(1.5707963267948966192*Csch(c)*Sinh(c*U)))/(c*Power(r,2)*Power(Power(Cosh(c*U),2),1.5));
+}
+double ddU_Spherical3_dxdz(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (0.20264236728467554289*Cos(phi)*Sinh(c)*(3.1415926535897932385*(-Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2) + Power(Sin(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)) + 2.*Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sech(c*U)*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sinh(c)*Tanh(c*U)))/(c*Power(r,2)*Sqrt(Power(Cosh(c*U),2)));
+}
+double ddU_Spherical3_dydy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (-0.20264236728467554289*Sinh(c)*(3.1415926535897932385*Power(Cosh(c*U),2)*(Power(Cos(phi),4)*Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2) - 2.*Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*Power(Sin(phi),4) + Power(Cos(phi),2)*(-(Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*Power(Sin(phi),2)) + Power(Sin(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2))) + 2.*Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Power(Sin(phi),2)*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sinh(c)*Sinh(c*U))*Tan(1.5707963267948966192*Csch(c)*Sinh(c*U)))/(c*Power(r,2)*Power(Power(Cosh(c*U),2),1.5));
+}
+double ddU_Spherical3_dydz(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (0.20264236728467554289*Sin(phi)*Sinh(c)*(3.1415926535897932385*(-Power(Cos(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2) + Power(Sin(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)) + 2.*Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sech(c*U)*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sinh(c)*Tanh(c*U)))/(c*Power(r,2)*Sqrt(Power(Cosh(c*U),2)));
+}
+double ddU_Spherical3_dzdz(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (-0.40528473456935108578*Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sinh(c)*(3.1415926535897932385*Sin(1.5707963267948966192*Csch(c)*Sinh(c*U)) + Cos(1.5707963267948966192*Csch(c)*Sinh(c*U))*Sech(c*U)*Sinh(c)*Tanh(c*U)))/(c*Power(r,2)*Sqrt(Power(Cosh(c*U),2)));
+}
+double ddphi_Spherical3_dxdx(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (2.*Cos(phi)*Power(Sec(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*Sin(phi))/Power(r,2);
+}
+double ddphi_Spherical3_dxdy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (Power(Cos(phi),2)*Power(Sec(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*(-1. + Power(Tan(phi),2)))/Power(r,2);
+}
+double ddphi_Spherical3_dxdz(void *aux, int ind, double r, double U, double phi)
+{
+return 0;
+}
+double ddphi_Spherical3_dydy(void *aux, int ind, double r, double U, double phi)
+{
+double c = Getd("Spherical3_c");
+return (-2.*Cos(phi)*Power(Sec(1.5707963267948966192313*Csch(c)*Sinh(c*U)),2)*Sin(phi))/Power(r,2);
+}
+double ddphi_Spherical3_dydz(void *aux, int ind, double r, double U, double phi)
+{
+return 0;
+}
+double ddphi_Spherical3_dzdz(void *aux, int ind, double r, double U, double phi)
+{
+return 0;
+}
+/* end of: Spherical3 */
 
 
 /* *********************************************** */
