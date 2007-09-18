@@ -192,7 +192,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
 
       box->dX_dx[1][1] = drSpherical_dx;
       box->dX_dx[1][2] = drSpherical_dy;
-      box->dX_dx[1][3] = drSpherical_dy;
+      box->dX_dx[1][3] = drSpherical_dz;
       box->dX_dx[2][1] = dthetaSpherical_dx;
       box->dX_dx[2][2] = dthetaSpherical_dy;
       box->dX_dx[2][3] = dthetaSpherical_dz;
