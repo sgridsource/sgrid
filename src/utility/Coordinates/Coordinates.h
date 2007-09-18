@@ -115,7 +115,7 @@ double ddphi_compactSphericalDF_dydy(void *aux, int ind, double xi, double thm, 
 double ddphi_compactSphericalDF_dydz(void *aux, int ind, double xi, double thm, double phi);
 double ddphi_compactSphericalDF_dzdz(void *aux, int ind, double xi, double thm, double phi);
 
-/*Spherical coordinates */
+/* Spherical coordinates */
 double x_ofSpherical(void *aux, int ind, double r, double theta, double phi);
 double y_ofSpherical(void *aux, int ind, double r, double theta, double phi);
 double z_ofSpherical(void *aux, int ind, double r, double theta, double phi);
