@@ -19,6 +19,7 @@
 #define Csch(x)    (1.0/sinh(x))
 #define Sech(x)    (1.0/cosh(x))
 #define Coth(x)    (1.0/tanh(x))
+#define Sqrt(x)    (sqrt(x))
 
 /* initialize the coord transforms */
 int init_CoordTransform_And_Derivs(tGrid *grid)
@@ -220,6 +221,44 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][2][2] = ddphi_Spherical_dydy;
       box->ddX_dxdx[3][2][3] = ddphi_Spherical_dydz;
       box->ddX_dxdx[3][3][3] = ddphi_Spherical_dzdz;
+    }
+    else if( Getv(str, "Spherical2") )
+    {
+      printf("Coordinates: initializing Spherical2 coordinates...\n");
+      box->x_of_X[1] = x_ofSpherical2;
+      box->x_of_X[2] = y_ofSpherical2;
+      box->x_of_X[3] = z_ofSpherical2;
+
+      box->dX_dx[1][1] = dr_Spherical2_dx;
+      box->dX_dx[1][2] = dr_Spherical2_dy;
+      box->dX_dx[1][3] = dr_Spherical2_dz;
+      box->dX_dx[2][1] = dU_Spherical2_dx;
+      box->dX_dx[2][2] = dU_Spherical2_dy;
+      box->dX_dx[2][3] = dU_Spherical2_dz;
+      box->dX_dx[3][1] = dphi_Spherical2_dx;
+      box->dX_dx[3][2] = dphi_Spherical2_dy;
+      box->dX_dx[3][3] = zero_of_xyz;
+
+      box->ddX_dxdx[1][1][1] = ddr_Spherical2_dxdx;
+      box->ddX_dxdx[1][1][2] = ddr_Spherical2_dxdy;
+      box->ddX_dxdx[1][1][3] = ddr_Spherical2_dxdz;
+      box->ddX_dxdx[1][2][2] = ddr_Spherical2_dydy;
+      box->ddX_dxdx[1][2][3] = ddr_Spherical2_dydz;
+      box->ddX_dxdx[1][3][3] = ddr_Spherical2_dzdz;
+
+      box->ddX_dxdx[2][1][1] = ddU_Spherical2_dxdx;
+      box->ddX_dxdx[2][1][2] = ddU_Spherical2_dxdy;
+      box->ddX_dxdx[2][1][3] = ddU_Spherical2_dxdz;
+      box->ddX_dxdx[2][2][2] = ddU_Spherical2_dydy;
+      box->ddX_dxdx[2][2][3] = ddU_Spherical2_dydz;
+      box->ddX_dxdx[2][3][3] = ddU_Spherical2_dzdz;
+
+      box->ddX_dxdx[3][1][1] = ddphi_Spherical2_dxdx;
+      box->ddX_dxdx[3][1][2] = ddphi_Spherical2_dxdy;
+      box->ddX_dxdx[3][1][3] = ddphi_Spherical2_dxdz;
+      box->ddX_dxdx[3][2][2] = ddphi_Spherical2_dydy;
+      box->ddX_dxdx[3][2][3] = ddphi_Spherical2_dydz;
+      box->ddX_dxdx[3][3][3] = ddphi_Spherical2_dzdz;
     }
     else if( Getv(str, "tan_stretch") )
     {
@@ -1237,6 +1276,131 @@ double ddphi_Spherical_dzdz(void *aux, int ind, double r, double theta, double p
 return 0.;
 }
 /* end: Spherical coordinates: */
+
+
+
+/* ****************************************************************** */
+/* start: Spherical2 coordinates:                                     */
+/* Coord. trafos */
+double x_ofSpherical2(void *aux, int ind, double r, double U, double phi)
+{
+return r*Sqrt(1 - (U*U))*Cos(phi);
+}
+double y_ofSpherical2(void *aux, int ind, double r, double U, double phi)
+{
+return r*Sqrt(1 - (U*U))*Sin(phi);
+}
+double z_ofSpherical2(void *aux, int ind, double r, double U, double phi)
+{
+return r*U;
+}
+/* 1st derivs */
+double dr_Spherical2_dx(void *aux, int ind, double r, double U, double phi)
+{
+return Sqrt(1. - (U*U))*Cos(phi);
+}
+double dr_Spherical2_dy(void *aux, int ind, double r, double U, double phi)
+{
+return Sqrt(1. - (U*U))*Sin(phi);
+}
+double dr_Spherical2_dz(void *aux, int ind, double r, double U, double phi)
+{
+return U;
+}
+double dU_Spherical2_dx(void *aux, int ind, double r, double U, double phi)
+{
+return -((U*Sqrt(1. - (U*U))*Cos(phi))/r);
+}
+double dU_Spherical2_dy(void *aux, int ind, double r, double U, double phi)
+{
+return -((U*Sqrt(1. - (U*U))*Sin(phi))/r);
+}
+double dU_Spherical2_dz(void *aux, int ind, double r, double U, double phi)
+{
+return (1. - (U*U))/r;
+}
+double dphi_Spherical2_dx(void *aux, int ind, double r, double U, double phi)
+{
+return -(Sin(phi)/(r*Sqrt(1. - (U*U))));
+}
+double dphi_Spherical2_dy(void *aux, int ind, double r, double U, double phi)
+{
+return Cos(phi)/(r*Sqrt(1. - (U*U)));
+}
+/* 2nd derivs */
+double ddr_Spherical2_dxdx(void *aux, int ind, double r, double U, double phi)
+{
+return ((U*U) - (-1. + (U*U))*(Sin(phi)*Sin(phi)))/r;
+}
+double ddr_Spherical2_dxdy(void *aux, int ind, double r, double U, double phi)
+{
+return ((-1. + (U*U))*Cos(phi)*Sin(phi))/r;
+}
+double ddr_Spherical2_dxdz(void *aux, int ind, double r, double U, double phi)
+{
+return -((U*Sqrt(1. - (U*U))*Cos(phi))/r);
+}
+double ddr_Spherical2_dydy(void *aux, int ind, double r, double U, double phi)
+{
+return ((U*U) - (-1. + (U*U))*(Cos(phi)*Cos(phi)))/r;
+}
+double ddr_Spherical2_dydz(void *aux, int ind, double r, double U, double phi)
+{
+return -((U*Sqrt(1. - (U*U))*Sin(phi))/r);
+}
+double ddr_Spherical2_dzdz(void *aux, int ind, double r, double U, double phi)
+{
+return (1. - (U*U))/r;
+}
+double ddU_Spherical2_dxdx(void *aux, int ind, double r, double U, double phi)
+{
+return (-0.5*U*(-1. + 3.*(U*U) + 3.*(-1. + (U*U))*Cos(2.*phi)))/(r*r);
+}
+double ddU_Spherical2_dxdy(void *aux, int ind, double r, double U, double phi)
+{
+return (-3.*U*(-1. + (U*U))*Cos(phi)*Sin(phi))/(r*r);
+}
+double ddU_Spherical2_dxdz(void *aux, int ind, double r, double U, double phi)
+{
+return (Sqrt(1. - (U*U))*(-1. + 3.*(U*U))*Cos(phi))/(r*r);
+}
+double ddU_Spherical2_dydy(void *aux, int ind, double r, double U, double phi)
+{
+return (0.5*U*(1. - 3.*(U*U) + 3.*(-1. + (U*U))*Cos(2.*phi)))/(r*r);
+}
+double ddU_Spherical2_dydz(void *aux, int ind, double r, double U, double phi)
+{
+return (Sqrt(1. - (U*U))*(-1. + 3.*(U*U))*Sin(phi))/(r*r);
+}
+double ddU_Spherical2_dzdz(void *aux, int ind, double r, double U, double phi)
+{
+return (3.*U*(-1. + (U*U)))/(r*r);
+}
+double ddphi_Spherical2_dxdx(void *aux, int ind, double r, double U, double phi)
+{
+return -(Sin(2.*phi)/((r*r)*(-1. + (U*U))));
+}
+double ddphi_Spherical2_dxdy(void *aux, int ind, double r, double U, double phi)
+{
+return Cos(2.*phi)/((r*r)*(-1. + (U*U)));
+}
+double ddphi_Spherical2_dxdz(void *aux, int ind, double r, double U, double phi)
+{
+return 0;
+}
+double ddphi_Spherical2_dydy(void *aux, int ind, double r, double U, double phi)
+{
+return Sin(2.*phi)/((r*r)*(-1. + (U*U)));
+}
+double ddphi_Spherical2_dydz(void *aux, int ind, double r, double U, double phi)
+{
+return 0;
+}
+double ddphi_Spherical2_dzdz(void *aux, int ind, double r, double U, double phi)
+{
+return 0;
+}
+/* end of: Spherical2 coords */
 
 
 /* *********************************************** */

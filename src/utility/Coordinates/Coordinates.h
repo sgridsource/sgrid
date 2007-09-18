@@ -146,6 +146,37 @@ double ddphi_Spherical_dydy(void *aux, int ind, double r, double theta, double p
 double ddphi_Spherical_dydz(void *aux, int ind, double r, double theta, double phi);
 double ddphi_Spherical_dzdz(void *aux, int ind, double r, double theta, double phi);
 
+/* Spherical2 coordinates */
+double x_ofSpherical2(void *aux, int ind, double r, double U, double phi);
+double y_ofSpherical2(void *aux, int ind, double r, double U, double phi);
+double z_ofSpherical2(void *aux, int ind, double r, double U, double phi);
+double dr_Spherical2_dx(void *aux, int ind, double r, double U, double phi);
+double dr_Spherical2_dy(void *aux, int ind, double r, double U, double phi);
+double dr_Spherical2_dz(void *aux, int ind, double r, double U, double phi);
+double dU_Spherical2_dx(void *aux, int ind, double r, double U, double phi);
+double dU_Spherical2_dy(void *aux, int ind, double r, double U, double phi);
+double dU_Spherical2_dz(void *aux, int ind, double r, double U, double phi);
+double dphi_Spherical2_dx(void *aux, int ind, double r, double U, double phi);
+double dphi_Spherical2_dy(void *aux, int ind, double r, double U, double phi);
+double ddr_Spherical2_dxdx(void *aux, int ind, double r, double U, double phi);
+double ddr_Spherical2_dxdy(void *aux, int ind, double r, double U, double phi);
+double ddr_Spherical2_dxdz(void *aux, int ind, double r, double U, double phi);
+double ddr_Spherical2_dydy(void *aux, int ind, double r, double U, double phi);
+double ddr_Spherical2_dydz(void *aux, int ind, double r, double U, double phi);
+double ddr_Spherical2_dzdz(void *aux, int ind, double r, double U, double phi);
+double ddU_Spherical2_dxdx(void *aux, int ind, double r, double U, double phi);
+double ddU_Spherical2_dxdy(void *aux, int ind, double r, double U, double phi);
+double ddU_Spherical2_dxdz(void *aux, int ind, double r, double U, double phi);
+double ddU_Spherical2_dydy(void *aux, int ind, double r, double U, double phi);
+double ddU_Spherical2_dydz(void *aux, int ind, double r, double U, double phi);
+double ddU_Spherical2_dzdz(void *aux, int ind, double r, double U, double phi);
+double ddphi_Spherical2_dxdx(void *aux, int ind, double r, double U, double phi);
+double ddphi_Spherical2_dxdy(void *aux, int ind, double r, double U, double phi);
+double ddphi_Spherical2_dxdz(void *aux, int ind, double r, double U, double phi);
+double ddphi_Spherical2_dydy(void *aux, int ind, double r, double U, double phi);
+double ddphi_Spherical2_dydz(void *aux, int ind, double r, double U, double phi);
+double ddphi_Spherical2_dzdz(void *aux, int ind, double r, double U, double phi);
+
 /* tan_stretch coordinates: */
 double x_of_xs(double xs);
 double dxs_dx(double xs);

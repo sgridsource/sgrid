@@ -1,7 +1,7 @@
 (* Mathematica utility to make C-functions for coord transform *)
 
 CoordTransfName = "SphericalDF";
-FuncArgs = "void *aux, double r, double thm, double phi";
+FuncArgs = "void *aux, int ind, double r, double thm, double phi";
 
 CCodeBeforeReturn =
 "tBox *box = (tBox *) aux;
