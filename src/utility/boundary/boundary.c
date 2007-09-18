@@ -70,7 +70,9 @@ int initialize_BoundaryPointLists(tGrid *grid)
   {
     bi=nboxes-1;
     snprintf(str, 99, "box%d_Coordinates", bi);
-    if(Getv(str, "SphericalDF") || Getv(str, "compactSphericalDF"))
+    if(Getv(str, "SphericalDF") ||
+       Getv(str, "compactSphericalDF") ||
+       Getv(str, "Spherical"))
     {
        n1=grid->box[bi]->n1;
        n2=grid->box[bi]->n2;
@@ -112,7 +114,9 @@ int initialize_BoundaryPointLists(tGrid *grid)
   {
     bi=nboxes-1;
     snprintf(str, 99, "box%d_Coordinates", bi);
-    if(Getv(str, "SphericalDF") || Getv(str, "compactSphericalDF"))
+    if(Getv(str, "SphericalDF") ||
+       Getv(str, "compactSphericalDF") ||
+       Getv(str, "Spherical"))
     {
        n1=grid->box[bi]->n1;
        n2=grid->box[bi]->n2;
@@ -154,7 +158,9 @@ int initialize_BoundaryPointLists(tGrid *grid)
   {
     bi=0;
     snprintf(str, 99, "box%d_Coordinates", bi);
-    if(Getv(str, "SphericalDF") || Getv(str, "compactSphericalDF"))
+    if(Getv(str, "SphericalDF") ||
+       Getv(str, "compactSphericalDF") ||
+       Getv(str, "Spherical"))
     {
        n1=grid->box[bi]->n1;
        n2=grid->box[bi]->n2;
@@ -173,7 +179,9 @@ int initialize_BoundaryPointLists(tGrid *grid)
   {
     bi=0;
     snprintf(str, 99, "box%d_Coordinates", bi);
-    if(Getv(str, "SphericalDF") || Getv(str, "compactSphericalDF"))
+    if(Getv(str, "SphericalDF") ||
+       Getv(str, "compactSphericalDF") ||
+       Getv(str, "Spherical"))
     {
        n1=grid->box[bi]->n1;
        n2=grid->box[bi]->n2;
@@ -192,7 +200,9 @@ int initialize_BoundaryPointLists(tGrid *grid)
   {
     bi=0;
     snprintf(str, 99, "box%d_Coordinates", bi);
-    if(Getv(str, "SphericalDF") || Getv(str, "compactSphericalDF"))
+    if(Getv(str, "SphericalDF") ||
+       Getv(str, "compactSphericalDF") ||
+       Getv(str, "Spherical"))
     {
        n1=grid->box[bi]->n1;
        n2=grid->box[bi]->n2;
