@@ -43,6 +43,8 @@ int sgrid_Coordinates(void)
   AddPar("Coordinates_newtMAXITS", "100000", "max. newton iterations");
   AddPar("compactSphericalDF_r0", "-1", "radius r at xi=0");
   AddPar("tan_stretch_s", "0", "how much we stretch [0,Xmax]");
+  AddPar("Coordinates_Spherical3_c",  "5",
+         "constant c in Spherical3 coord trafo");
 
   return 0;
 }
