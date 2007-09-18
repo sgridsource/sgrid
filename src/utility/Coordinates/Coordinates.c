@@ -183,6 +183,44 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][2][3] = ddphi_compactSphericalDF_dydz;
       box->ddX_dxdx[3][3][3] = ddphi_compactSphericalDF_dzdz;
     }
+    else if( Getv(str, "Spherical") )
+    {
+      printf("Coordinates: initializing Spherical coordinates...\n");
+      box->x_of_X[1] = x_ofSpherical;
+      box->x_of_X[2] = y_ofSpherical;
+      box->x_of_X[3] = z_ofSpherical;
+
+      box->dX_dx[1][1] = drSpherical_dx;
+      box->dX_dx[1][2] = drSpherical_dy;
+      box->dX_dx[1][3] = drSpherical_dy;
+      box->dX_dx[2][1] = dthetaSpherical_dx;
+      box->dX_dx[2][2] = dthetaSpherical_dy;
+      box->dX_dx[2][3] = dthetaSpherical_dz;
+      box->dX_dx[3][1] = dphiSpherical_dx;
+      box->dX_dx[3][2] = dphiSpherical_dy;
+      box->dX_dx[3][3] = zero_of_xyz;
+
+      box->ddX_dxdx[1][1][1] = ddr_Spherical_dxdx;
+      box->ddX_dxdx[1][1][2] = ddr_Spherical_dxdy;
+      box->ddX_dxdx[1][1][3] = ddr_Spherical_dxdz;
+      box->ddX_dxdx[1][2][2] = ddr_Spherical_dydy;
+      box->ddX_dxdx[1][2][3] = ddr_Spherical_dydz;
+      box->ddX_dxdx[1][3][3] = ddr_Spherical_dzdz;
+
+      box->ddX_dxdx[2][1][1] = ddtheta_Spherical_dxdx;
+      box->ddX_dxdx[2][1][2] = ddtheta_Spherical_dxdy;
+      box->ddX_dxdx[2][1][3] = ddtheta_Spherical_dxdz;
+      box->ddX_dxdx[2][2][2] = ddtheta_Spherical_dydy;
+      box->ddX_dxdx[2][2][3] = ddtheta_Spherical_dydz;
+      box->ddX_dxdx[2][3][3] = ddtheta_Spherical_dzdz;
+
+      box->ddX_dxdx[3][1][1] = ddphi_Spherical_dxdx;
+      box->ddX_dxdx[3][1][2] = ddphi_Spherical_dxdy;
+      box->ddX_dxdx[3][1][3] = ddphi_Spherical_dxdz;
+      box->ddX_dxdx[3][2][2] = ddphi_Spherical_dydy;
+      box->ddX_dxdx[3][2][3] = ddphi_Spherical_dydz;
+      box->ddX_dxdx[3][3][3] = ddphi_Spherical_dzdz;
+    }
     else if( Getv(str, "tan_stretch") )
     {
       printf("Coordinates: initializing tan_stretch coordinates...\n");
@@ -1053,6 +1091,152 @@ double ddphi_compactSphericalDF_dzdz(void *aux, int ind, double xi, double thm, 
 return 0.0;
 }
 /* end: compactSphericalDF coordinates: */
+
+
+/* ****************************************************************** */
+/* start: Spherical coordinates:                                      */
+/* Coord. trafos */
+double x_ofSpherical(void *aux, int ind, double r, double theta, double phi)
+{
+  return r*cos(phi)*sin(theta);
+}
+double y_ofSpherical(void *aux, int ind, double r, double theta, double phi)
+{
+  return r*sin(phi)*sin(theta);
+}
+double z_ofSpherical(void *aux, int ind, double r, double theta, double phi)
+{
+  return r*cos(theta);
+}
+
+/* first coord. derivs */
+double drSpherical_dx(void *aux, int ind, double r, double theta, double phi)
+{
+  return cos(phi)*sin(theta);
+}
+double drSpherical_dy(void *aux, int ind, double r, double theta, double phi)
+{
+  return sin(phi)*sin(theta);
+}
+double drSpherical_dz(void *aux, int ind, double r, double theta, double phi)
+{
+  return cos(theta);
+}
+double dthetaSpherical_dx(void *aux, int ind, double r, double theta, double phi)
+{
+  if(r>0.0) return cos(theta)*cos(phi)/r;
+  else      return 0.0; /* result if we go along y=0 line */
+}
+double dthetaSpherical_dy(void *aux, int ind, double r, double theta, double phi)
+{
+  if(r>0.0) return cos(theta)*sin(phi)/r;
+  else      return 0.0; /* result if we go along x=0 line */
+}
+double dthetaSpherical_dz(void *aux, int ind, double r, double theta, double phi)
+{
+  if(r>0.0) return -sin(theta)/r;
+  else      return 0.0; /* result if we go along z=0 line */
+}
+double dphiSpherical_dx(void *aux, int ind, double r, double theta, double phi)
+{
+  return -sin(phi)/(r*sin(theta));
+}
+double dphiSpherical_dy(void *aux, int ind, double r, double theta, double phi)
+{
+  return cos(phi)/(r*sin(theta));
+}
+
+/* second coord. derivs */
+double ddr_Spherical_dxdx(void *aux, int ind, double r, double theta, double phi)
+{
+return (Power(Cos(theta),2) + Power(Sin(phi),2)*Power(Sin(theta),2))/r;
+}
+
+double ddr_Spherical_dxdy(void *aux, int ind, double r, double theta, double phi)
+{
+return (-Cos(phi)*Sin(phi)*Power(Sin(theta),2))/r;
+}
+
+double ddr_Spherical_dxdz(void *aux, int ind, double r, double theta, double phi)
+{
+return (-Cos(phi)*Cos(theta)*Sin(theta))/r;
+}
+
+double ddr_Spherical_dydy(void *aux, int ind, double r, double theta, double phi)
+{
+return (Power(Cos(theta),2) + Power(Cos(phi),2)*Power(Sin(theta),2))/r;
+}
+
+double ddr_Spherical_dydz(void *aux, int ind, double r, double theta, double phi)
+{
+return (-Cos(theta)*Sin(phi)*Sin(theta))/r;
+}
+
+double ddr_Spherical_dzdz(void *aux, int ind, double r, double theta, double phi)
+{
+return Power(Sin(theta),2)/r;
+}
+
+double ddtheta_Spherical_dxdx(void *aux, int ind, double r, double theta, double phi)
+{
+return (-(Cos(2.*phi) - Power(Cos(phi),2)*Cos(2.*theta))*Cot(theta))/Power(r,2);
+}
+
+double ddtheta_Spherical_dxdy(void *aux, int ind, double r, double theta, double phi)
+{
+return (0.5*(-2. + Cos(2.*theta))*Cot(theta)*Sin(2.*phi))/Power(r,2);
+}
+
+double ddtheta_Spherical_dxdz(void *aux, int ind, double r, double theta, double phi)
+{
+return (-Cos(phi)*Cos(2.*theta))/Power(r,2);
+}
+
+double ddtheta_Spherical_dydy(void *aux, int ind, double r, double theta, double phi)
+{
+return (Cot(theta)*(Cos(2.*phi) + Cos(2.*theta)*Power(Sin(phi),2)))/Power(r,2);
+}
+
+double ddtheta_Spherical_dydz(void *aux, int ind, double r, double theta, double phi)
+{
+return (-Cos(2.*theta)*Sin(phi))/Power(r,2);
+}
+
+double ddtheta_Spherical_dzdz(void *aux, int ind, double r, double theta, double phi)
+{
+return Sin(2.*theta)/Power(r,2);
+}
+
+double ddphi_Spherical_dxdx(void *aux, int ind, double r, double theta, double phi)
+{
+return (Power(Csc(theta),2)*Sin(2.*phi))/Power(r,2);
+}
+
+double ddphi_Spherical_dxdy(void *aux, int ind, double r, double theta, double phi)
+{
+return (-Cos(2.*phi)*Power(Csc(theta),2))/Power(r,2);
+}
+
+double ddphi_Spherical_dxdz(void *aux, int ind, double r, double theta, double phi)
+{
+return 0.;
+}
+
+double ddphi_Spherical_dydy(void *aux, int ind, double r, double theta, double phi)
+{
+return (-Power(Csc(theta),2)*Sin(2.*phi))/Power(r,2);
+}
+
+double ddphi_Spherical_dydz(void *aux, int ind, double r, double theta, double phi)
+{
+return 0.;
+}
+
+double ddphi_Spherical_dzdz(void *aux, int ind, double r, double theta, double phi)
+{
+return 0.;
+}
+/* end: Spherical coordinates: */
 
 
 /* *********************************************** */
