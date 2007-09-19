@@ -40,6 +40,9 @@ typedef struct tBOX {
   double *Mcoeffs1;	/* matrix to obtain coeffs in direction 1 */
   double *Mcoeffs2;	/* matrix to obtain coeffs in direction 2 */
   double *Mcoeffs3;	/* matrix to obtain coeffs in direction 3 */
+  double *Meval1;	/* matrix to evaluate in direction 1 */
+  double *Meval2;	/* matrix to evaluate in direction 2 */
+  double *Meval3;	/* matrix to evaluate in direction 3 */
   double bbox[6];	/* global bounding box */
   int ibbox[6];	/* global bounding box in index range */
 } tBox;
