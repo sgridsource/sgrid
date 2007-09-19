@@ -9,6 +9,16 @@
 /* get c=c_ijk of var u */
 void spec_Coeffs(tBox *box, double *u, double *c)
 {
+  /* get c_ijk by calling spec_analysis1 in all 3 directions */
+  spec_analysis1(box, 1, box->Mcoeffs1, u, c);
+  spec_analysis1(box, 2, box->Mcoeffs2, c, c);
+  spec_analysis1(box, 3, box->Mcoeffs3, c, c);
+}
+
+
+/* old version of spec_Coeffs */
+void spec_Coeffs_old(tBox *box, double *u, double *c)
+{
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
