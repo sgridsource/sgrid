@@ -72,4 +72,5 @@ double spec_sphericalDF3dIntegral(tBox *box, double *u, double *U);
 
 /* Functions from interpolate.c */
 void spec_Coeffs(tBox *box, double *u, double *c);
+void spec_Eval(tBox *box, double *u, double *c);
 double spec_interpolate(tBox *box, double *c, double X, double Y, double Z);

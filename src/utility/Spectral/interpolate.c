@@ -16,6 +16,16 @@ void spec_Coeffs(tBox *box, double *u, double *c)
 }
 
 
+/* get var u from coeffs c=c_ijk */
+void spec_Eval(tBox *box, double *u, double *c)
+{
+  /* get u by calling spec_synthesis1 in all 3 directions */
+  spec_synthesis1(box, 1, box->Mcoeffs1, u, c);
+  spec_synthesis1(box, 2, box->Mcoeffs2, u, u);
+  spec_synthesis1(box, 3, box->Mcoeffs3, u, u);
+}
+
+
 /* old version of spec_Coeffs */
 void spec_Coeffs_old(tBox *box, double *u, double *c)
 {
