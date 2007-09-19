@@ -21,6 +21,10 @@ void coordinateDependentFilter(tVarList *unew)
     snprintf(str, 999, "box%d_Coordinates", bi);
     if( Getv(str, "SphericalDF") )
       coordinateDependentFilter_SphericalDF(box, unew);
+    else if(Getv(str, "Spherical")  ||
+            Getv(str, "Spherical2") ||
+            Getv(str, "Spherical3") )
+      coordinateDependentFilter_Spherical(box, unew);
   }
 }
 
@@ -38,9 +42,6 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
   n1 = box->n1;
   n2 = box->n2;
   n3 = box->n3;
-
-//for(i=0; i<n3*n3; i++)
-// printf("F[i]=%f B[i]=%f\n",F[i],B[i]);
 
   /* for all variables */
   for(vi = 0; vi < unew->n; vi++)
@@ -60,6 +61,59 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
          where N=n3/2                                                    */
       ms = n3/2;
       ms *= fabs(sin(theta));
+      ms++;
+      ks = 2*ms-1; // before we had: ks = n3*fabs(sin(theta)); if( ks%2 == 0 ) ks++;
+      if( ks >= n3) continue;
+      for(k = ks; k < n3; k++)
+        for(i = 0; i < n1; i++)
+          c[Index(i,j,k)] = 0.0;
+    }
+
+    /* get new u from new c */
+    spec_synthesis1(box, 3, box->Meval3, u, c);
+  }
+}
+
+
+/* Filter unew such that the the upper 1-sin(theta) portion of 
+   the Fourier coeffs in the phi direction is zero.            */
+void coordinateDependentFilter_Spherical(tBox *box, tVarList *unew)
+{
+  int vi;
+  int i,j,k, n1,n2,n3;
+  double *u;
+  double *c = box->v[Ind("temp1")]; /* we store the coeffs in the variable ADMVars temp1 */
+  double *xp = box->v[Ind("x")];
+  double *yp = box->v[Ind("y")];
+  double *zp = box->v[Ind("z")];
+
+  n1 = box->n1;
+  n2 = box->n2;
+  n3 = box->n3;
+
+  /* for all variables */
+  for(vi = 0; vi < unew->n; vi++)
+  {
+    u = box->v[unew->index[vi]];
+    
+    /* get spectral coeffs in c */
+    spec_analysis1(box, 3, box->Mcoeffs3, u, c);
+      
+    /* set the upper 1-sin(theta) portion of the coeffs c to zero */
+    for(j = 0; j < n2; j++)
+    {
+      int I0j0 = Index(0,j,0);
+      double x=xp[I0j0];
+      double y=yp[I0j0];
+      double z=zp[I0j0];
+      double r = sqrt(x*x + y*y + z*z);
+      double sintheta = sin(acos(z/r));
+      int ms, ks;
+
+      /* first m which we eliminate is m = ms = [N fabs(sin(theta)] + 1, 
+         where N=n3/2                                                    */
+      ms = n3/2;
+      ms *= fabs(sintheta);
       ms++;
       ks = 2*ms-1; // before we had: ks = n3*fabs(sin(theta)); if( ks%2 == 0 ) ks++;
       if( ks >= n3) continue;

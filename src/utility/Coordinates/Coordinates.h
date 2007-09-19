@@ -13,6 +13,7 @@ void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);
 
 /* from coordFilters.c */
 void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew);
+void coordinateDependentFilter_Spherical(tBox *box, tVarList *unew);
 
 /* from transfDerivs.c */
 void dXdx_from_dxdX(double dXdx[4][4], double dxdX[4][4]);
