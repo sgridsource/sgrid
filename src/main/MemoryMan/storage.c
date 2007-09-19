@@ -111,6 +111,14 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
   if( !(box->Mcoeffs1 && box->Mcoeffs2 && box->Mcoeffs3) )
     errorexit("alloc_box: out of memory for matrices to obtain coeffs");
 
+  /* get mem. for matrices for evaluation on points */
+  box->Meval1 = box->Meval2 = box->Meval3 = NULL;
+  box->Meval1 = (double *) calloc( n1*n1, sizeof(double) );
+  box->Meval2 = (double *) calloc( n2*n2, sizeof(double) );
+  box->Meval3 = (double *) calloc( n3*n3, sizeof(double) );
+  if( !(box->Meval1 && box->Meval2 && box->Meval3) )
+    errorexit("alloc_box: out of memory for matrices for evaluation on points");
+
   return box;
 } 
 
@@ -159,6 +167,9 @@ void free_box(tBox *box)
   free(box->Mcoeffs1);
   free(box->Mcoeffs2);
   free(box->Mcoeffs3);
+  free(box->Meval1);
+  free(box->Meval2);
+  free(box->Meval3);
   
   free(box);
 }

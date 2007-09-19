@@ -27,11 +27,13 @@ void printbox(tBox *box)
          " D1 =%p D2 =%p D3 =%p,\n"
          " DD1=%p DD2=%p DD3=%p,\n"
          " F1 =%p F2 =%p F3 =%p,\n"
-         " Mcoeffs1=%p Mcoeffs2=%p Mcoeffs3=%p\n",
+         " Mcoeffs1=%p Mcoeffs2=%p Mcoeffs3=%p,\n"
+         " Meval1  =%p Meval2  =%p Meval3  =%p\n",
 	 box, box->grid, box->b, box->n1, box->n2, box->n3, box->nnodes, 
 	 box->node, box->v, box->D1, box->D2, box->D3,
 	 box->DD1, box->DD2, box->DD3,  box->F1, box->F2, box->F3,
-	 box->Mcoeffs1, box->Mcoeffs2, box->Mcoeffs3);
+	 box->Mcoeffs1, box->Mcoeffs2, box->Mcoeffs3,
+	 box->Meval1, box->Meval2, box->Meval3);
 }
 
 void printnode(tNode *n) 
