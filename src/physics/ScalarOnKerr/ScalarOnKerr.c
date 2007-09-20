@@ -256,7 +256,8 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
 
       /* set RHS of psi and Pi */
       rPi  = (g_ddpsi - gG_dpsi)/gtt[i] + 
-              -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
+             -(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5));
+//             -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
       rpsi = -cPi[i];
 
       /* set new vars or RHS, depending in which integrator is used */
@@ -271,10 +272,34 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
         npsi[i] = rpsi;
       }
     }
-  }
-
+  } /* end forallboxes */
+      
   /* set BCs */
   set_boundary(unew, upre, dt, ucur);
+//  set_psi_Pi_boundary(unew, upre, dt, ucur);
+
+  /* filter near poles */
+  coordinateDependentFilter(unew);
+
+  /* filter high freq. angular modes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k, jf,kf;
+    double *nPi = vlldataptr(unew, box, 1);
+    double *temp1 = box->v[Ind("temp1")];
+
+    /* filter nPi */
+    spec_Coeffs(box, nPi, temp1);
+    kf=n3/3; kf*=2;
+    jf=n2/3; jf*=2;
+    forallijk(i,j,k)
+      if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
+    spec_Eval(box, nPi, temp1);
+  } /* end forallboxes */
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
@@ -403,7 +428,9 @@ void ScalarOnKerr_evolve_new(tVarList *unew, tVarList *upre, double dt,
 
       /* set RHS of psi and Pi */
       rPi  = beta_dPi - ag_ddpsi + agG_dpsi - g_dpsi_da + aKPi  +
-              (-1/alpha[i])*exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
+              (-1.0/alpha[i])*
+              (1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5));
+//              (-1/alpha[i])*exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
       rpsi = beta_dpsi - alpha[i]*cPi[i];
 
       /* set new vars or RHS, depending in which integrator is used */
@@ -467,6 +494,128 @@ void set_boundary_ofPi(tVarList *unew, tVarList *upre)
 
       Pinew[ijk] = (nx*dpsi_dx[ijk] + ny*dpsi_dy[ijk] + nz*dpsi_dz[ijk])
                     - psinew[ijk]/r;
+    }
+  }
+}
+
+/* set BC for old version */
+void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt, 
+                         tVarList *ucur)
+{
+  tGrid *grid = ucur->grid;
+  int b;
+  
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, i,j,k;
+    double *cpsi = vlldataptr(ucur, box, 0);
+    double *ppsi = vlldataptr(upre, box, 0);
+    double *npsi = vlldataptr(unew, box, 0);
+    double *cPi = vlldataptr(ucur, box, 1);
+    double *pPi = vlldataptr(upre, box, 1);
+    double *nPi = vlldataptr(unew, box, 1);
+    int ipsi = (ucur)->index[0];
+    int iPi  = (ucur)->index[1];
+    double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
+    double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+    double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
+    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
+    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_gup = Ind("ScalarOnKerr_guptt");
+    double *gtt = box->v[i_gup];
+    double *gtx = box->v[i_gup+1];
+    double *gty = box->v[i_gup+2];
+    double *gtz = box->v[i_gup+3];
+    double *gxx = box->v[i_gup+4];
+    double *gxy = box->v[i_gup+5];
+    double *gxz = box->v[i_gup+6];
+    double *gyy = box->v[i_gup+7];
+    double *gyz = box->v[i_gup+8];
+    double *gzz = box->v[i_gup+9];
+    int i_g3up = Ind("ScalarOnKerr3d_gupxx");
+    double *g3xx = box->v[i_g3up];
+    double *g3xy = box->v[i_g3up+1];
+    double *g3xz = box->v[i_g3up+2];
+    double *g3yy = box->v[i_g3up+3];
+    double *g3yz = box->v[i_g3up+4];
+    double *g3zz = box->v[i_g3up+5];
+    int i_alpha = Ind("ScalarOnKerr3d_alpha");
+    double *alpha = box->v[i_alpha];
+    int i_beta = Ind("ScalarOnKerr3d_betax");
+    double *betax = box->v[i_beta];
+    double *betay = box->v[i_beta+1];
+    double *betaz = box->v[i_beta+2];
+            
+    /* compute the spatial derivs */
+    FirstDerivsOf_S(box, ipsi, Ind("ScalarOnKerr_dpsix"));
+    FirstDerivsOf_S(box, iPi , Ind("ScalarOnKerr_dPix"));
+
+    /* loop over points and set RHS */
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+    {
+      double x,y,z;
+      double r, nx,ny,nz, Nx,Ny,Nz;
+      double rPi, rpsi, vx,vy,vz;
+
+      ijk = Index(i,j,k);
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r;
+      ny = y/r;
+      nz = z/r;
+      Nx = g3xx[ijk]*nx + g3xy[ijk]*ny + g3xz[ijk]*nz;
+      Ny = g3xy[ijk]*nx + g3yy[ijk]*ny + g3yz[ijk]*nz;
+      Nz = g3xz[ijk]*nx + g3yz[ijk]*ny + g3zz[ijk]*nz;
+//Nx=nx; Ny=ny; Nz=nz;  // this lasts longer
+//  Nx = gxx[ijk]*nx + gxy[ijk]*ny + gxz[ijk]*nz;
+//  Ny = gxy[ijk]*nx + gyy[ijk]*ny + gyz[ijk]*nz;
+//  Nz = gxz[ijk]*nx + gyz[ijk]*ny + gzz[ijk]*nz;
+
+      vx = betax[ijk]-alpha[ijk]*Nx;
+      vy = betay[ijk]-alpha[ijk]*Ny;
+      vz = betaz[ijk]-alpha[ijk]*Nz;
+//vx = -nx;
+//vy = -ny;
+//vz = -nz;
+
+      /* set RHS of psi and Pi */
+//      rPi  = vx* Pix[ijk] + vy* Piy[ijk] + vz* Piz[ijk] -0* cPi[ijk]/r;
+//      rpsi = vx*psix[ijk] + vy*psiy[ijk] + vz*psiz[ijk] -0*cpsi[ijk]/r;
+rPi  = vx* Pix[ijk] + vy* Piy[ijk] + vz* Piz[ijk] - 
+       (cPi[ijk] + betax[ijk]*psix[ijk] + betay[ijk]*psiy[ijk] +
+                   betaz[ijk]*psiz[ijk])/r;
+//rpsi = vx*psix[ijk] + vy*psiy[ijk] + vz*psiz[ijk] -
+//       0*(cpsi[ijk] + betax[ijk]*psix[ijk] + betay[ijk]*psiy[ijk] +
+//                    betaz[ijk]*psiz[ijk])/r;
+
+if(0)
+{
+printf("(%f,%f,%f), (%f,%f,%f), r=%f\n", nx,ny,nz, x,y,z, r);
+printf("(%d,%d,%d), ijk=%d\n", i,j,k, ijk);
+printf("%g %g ", psix[ijk], Pix[ijk]);
+}
+
+      /* set new vars or RHS, depending in which integrator is used */
+      if(dt!=0.0)
+      {
+        nPi[ijk]  = pPi[ijk]  + dt * rPi;
+//        npsi[ijk] = ppsi[ijk] + dt * rpsi;
+      }
+      else
+      {
+        nPi[ijk]  = rPi;
+//        npsi[ijk] = rpsi;
+      }
     }
   }
 }
