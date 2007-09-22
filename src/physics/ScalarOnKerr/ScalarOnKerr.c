@@ -45,8 +45,11 @@ int ScalarOnKerr_startup(tGrid *grid)
   /* register evolution routine */
   evolve_rhsregister(ScalarOnKerr_evolve);
 
-  /* register BC routine */
+//  /* register alternative BC routine */
 //  evolve_algebraicConditionsregister(set_boundary_ofPi);
+
+  /* filter all newly computed vars */
+  evolve_algebraicConditionsregister(filter_unew);
 
   /* set initial data in boxes */
   forallboxes(grid,b)
@@ -349,8 +352,14 @@ void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt,
   }
 }
 
+/* set BC for Pi */
+void filter_unew(tVarList *unew, tVarList *upre)
+{
+  coordinateDependentFilter(unew);
+}
 
-/* compute and integrals of rho */
+
+/* compute things */
 int ScalarOnKerr_analyze(tGrid *grid)
 {
   int b;
