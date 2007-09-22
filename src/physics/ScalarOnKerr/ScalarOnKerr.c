@@ -122,8 +122,6 @@ int ScalarOnKerr_startup(tGrid *grid)
 }
 
 
-
-
 /* evolve and set boundary points */
 void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt, 
                              tVarList *ucur)
@@ -255,6 +253,118 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
 }
 
 
+/* set BC for old version */
+void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt, 
+                         tVarList *ucur)
+{
+  tGrid *grid = ucur->grid;
+  int b;
+  
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, i,j,k;
+//    double *cpsi = vlldataptr(ucur, box, 0);
+//    double *ppsi = vlldataptr(upre, box, 0);
+//    double *npsi = vlldataptr(unew, box, 0);
+    double *cPi = vlldataptr(ucur, box, 1);
+    double *pPi = vlldataptr(upre, box, 1);
+    double *nPi = vlldataptr(unew, box, 1);
+//    int ipsi = (ucur)->index[0];
+    int iPi  = (ucur)->index[1];
+//    double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
+//    double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+//    double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
+    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
+    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_gup = Ind("ScalarOnKerr_guptt");
+    double *gtt = box->v[i_gup];
+    double *gtx = box->v[i_gup+1];
+    double *gty = box->v[i_gup+2];
+    double *gtz = box->v[i_gup+3];
+    double *gxx = box->v[i_gup+4];
+    double *gxy = box->v[i_gup+5];
+    double *gxz = box->v[i_gup+6];
+    double *gyy = box->v[i_gup+7];
+    double *gyz = box->v[i_gup+8];
+    double *gzz = box->v[i_gup+9];
+    int i_G = Ind("ScalarOnKerr_Gt");
+    double *Gt = box->v[i_G];
+    double *Gx = box->v[i_G+1];
+    double *Gy = box->v[i_G+2];
+    double *Gz = box->v[i_G+3];
+
+    /* compute the spatial derivs */
+//    FirstDerivsOf_S(box, ipsi, Ind("ScalarOnKerr_dpsix"));
+    FirstDerivsOf_S(box, iPi , Ind("ScalarOnKerr_dPix"));
+
+    /* loop over points and set RHS */
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+    {
+      double x,y,z;
+      double r, nx,ny,nz;
+      double rPi;
+      double betan, alpha, alpha2, gnn, Gn, gdn;
+      double ap,bp,cp, lambdap, dnPi;
+
+      ijk = Index(i,j,k);
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r;
+      ny = y/r;
+      nz = z/r;
+      alpha2 = -1.0/gtt[ijk];
+      alpha  = sqrt(alpha2);
+      betan = alpha2*(gtx[ijk]*nx +gty[ijk]*ny +gtz[ijk]*nz);
+      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+      Gn = Gx[ijk]*nx + Gy[ijk]*ny + Gz[ijk]*nz;
+      /* dn = d_i n_j = (delta_ij - n_i n_j)/r */
+      /* gdn = g^ij d_i n_j */
+      gdn = (gxx[ijk]+gyy[ijk]+gzz[ijk]-gnn)/r;
+      lambdap = betan + sqrt( betan*betan + alpha2*gnn);
+      ap = lambdap/(alpha2*gnn);
+      bp = 1.0;
+      cp = (gdn-Gn)/gnn;
+      dnPi = nx*Pix[ijk] + ny*Piy[ijk] + nz*Piz[ijk];
+      
+      /* set RHS of Pi */
+      rPi = -(bp*dnPi + cp*cPi[ijk])/ap;
+
+      /* set new vars or RHS, depending in which integrator is used */
+      if(dt!=0.0)
+        nPi[ijk]  = pPi[ijk]  + dt * rPi;
+      else
+        nPi[ijk]  = rPi;
+    }
+  }
+}
+
+
+/* compute and integrals of rho */
+int ScalarOnKerr_analyze(tGrid *grid)
+{
+  int b;
+
+// if( ! timeforoutput_index(grid, Ind("ScalarOnKerr_rho")) ) return 0;
+
+// do something useful here 
+
+  return 0;
+}
+
+
+/******************************************************************/
+/* another version of scalar evo: */
 /* evolve and set boundary points */
 void ScalarOnKerr_evolve_new(tVarList *unew, tVarList *upre, double dt, 
                          tVarList *ucur)
@@ -445,113 +555,4 @@ void set_boundary_ofPi(tVarList *unew, tVarList *upre)
                     - psinew[ijk]/r;
     }
   }
-}
-
-/* set BC for old version */
-void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt, 
-                         tVarList *ucur)
-{
-  tGrid *grid = ucur->grid;
-  int b;
-  
-  forallboxes(grid,b)
-  {
-    tBox *box = grid->box[b];
-    int n1=box->n1;
-    int n2=box->n2;
-    int n3=box->n3;
-    int ijk, i,j,k;
-//    double *cpsi = vlldataptr(ucur, box, 0);
-//    double *ppsi = vlldataptr(upre, box, 0);
-//    double *npsi = vlldataptr(unew, box, 0);
-    double *cPi = vlldataptr(ucur, box, 1);
-    double *pPi = vlldataptr(upre, box, 1);
-    double *nPi = vlldataptr(unew, box, 1);
-//    int ipsi = (ucur)->index[0];
-    int iPi  = (ucur)->index[1];
-//    double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
-//    double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
-//    double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
-    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
-    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
-    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
-    double *px = box->v[Ind("x")];
-    double *py = box->v[Ind("y")];
-    double *pz = box->v[Ind("z")];
-    int i_gup = Ind("ScalarOnKerr_guptt");
-    double *gtt = box->v[i_gup];
-    double *gtx = box->v[i_gup+1];
-    double *gty = box->v[i_gup+2];
-    double *gtz = box->v[i_gup+3];
-    double *gxx = box->v[i_gup+4];
-    double *gxy = box->v[i_gup+5];
-    double *gxz = box->v[i_gup+6];
-    double *gyy = box->v[i_gup+7];
-    double *gyz = box->v[i_gup+8];
-    double *gzz = box->v[i_gup+9];
-    int i_G = Ind("ScalarOnKerr_Gt");
-    double *Gt = box->v[i_G];
-    double *Gx = box->v[i_G+1];
-    double *Gy = box->v[i_G+2];
-    double *Gz = box->v[i_G+3];
-
-    /* compute the spatial derivs */
-//    FirstDerivsOf_S(box, ipsi, Ind("ScalarOnKerr_dpsix"));
-    FirstDerivsOf_S(box, iPi , Ind("ScalarOnKerr_dPix"));
-
-    /* loop over points and set RHS */
-    forplane1(i,j,k, n1,n2,n3, n1-1)
-    {
-      double x,y,z;
-      double r, nx,ny,nz;
-      double rPi;
-      double betan, alpha, alpha2, gnn, Gn, gdn;
-      double ap,bp,cp, lambdap, dnPi;
-
-      ijk = Index(i,j,k);
-      x = px[ijk];
-      y = py[ijk];
-      z = pz[ijk];
-      r = sqrt(x*x + y*y + z*z);
-      nx = x/r;
-      ny = y/r;
-      nz = z/r;
-      alpha2 = -1.0/gtt[ijk];
-      alpha  = sqrt(alpha2);
-      betan = alpha2*(gtx[ijk]*nx +gty[ijk]*ny +gtz[ijk]*nz);
-      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
-            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
-      Gn = Gx[ijk]*nx + Gy[ijk]*ny + Gz[ijk]*nz;
-      /* dn = d_i n_j = (delta_ij - n_i n_j)/r */
-      /* gdn = g^ij d_i n_j */
-      gdn = (gxx[ijk]+gyy[ijk]+gzz[ijk]-gnn)/r;
-      lambdap = betan + sqrt( betan*betan + alpha2*gnn);
-      ap = lambdap/(alpha2*gnn);
-      bp = 1.0;
-      cp = (gdn-Gn)/gnn;
-      dnPi = nx*Pix[ijk] + ny*Piy[ijk] + nz*Piz[ijk];
-      
-      /* set RHS of Pi */
-      rPi = -(bp*dnPi + cp*cPi[ijk])/ap;
-
-      /* set new vars or RHS, depending in which integrator is used */
-      if(dt!=0.0)
-        nPi[ijk]  = pPi[ijk]  + dt * rPi;
-      else
-        nPi[ijk]  = rPi;
-    }
-  }
-}
-
-
-/* compute and integrals of rho */
-int ScalarOnKerr_analyze(tGrid *grid)
-{
-  int b;
-
-// if( ! timeforoutput_index(grid, Ind("ScalarOnKerr_rho")) ) return 0;
-
-// do something useful here 
-
-  return 0;
 }
