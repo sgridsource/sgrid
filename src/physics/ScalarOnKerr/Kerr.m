@@ -4,7 +4,7 @@
 (* Compute metric and Gamma from x,y,z and M=BHmass1 *)
 
 (* variables *)
-variables = { xp[a], g[a,b], gup[a,b], Gam[a,b,c] }
+variables = { xp[a], g[a,b], gup[a,b], Gam[a,b,c], G[a] }
 
 (* compute in this order *)
 tocompute = {
@@ -59,9 +59,9 @@ tocompute = {
  (* lower Christoffel *)
  Gamdo[a,b,c] == ( dg[a,b,c] + dg[a,c,b] - dg[b,c,a] )/2,
 
- (* standard upper Christoffel *)
- Gam[a,b,c] == gup[a,d] Gamdo[d,b,c]
-
+ (* standard upper Christoffel, and its contraction *)
+ Gam[a,b,c] == gup[a,d] Gamdo[d,b,c],
+ G[a] == gup[b,c] Gam[a,b,c]
 }
 
 
@@ -107,7 +107,7 @@ BeginCFunction[] := Module[{},
 
   pr["\n\n\n"];
 
-  pr["void Kerr(tGrid *grid, int i_x, int i_g, int i_gup, int i_Gam)\n"];
+  pr["void Kerr(tGrid *grid, int i_x, int i_g, int i_gup, int i_Gam, int i_G)\n"];
   pr["{\n"];
   pr["int bi;\n"];
   pr["\n"];
@@ -139,6 +139,7 @@ variabledeclarations[] := Module[{},
   prdecvar[{g[a,b]},    	"i_g"];
   prdecvar[{gup[a,b]},		"i_gup"];
   prdecvar[{Gam[a,b,c]},	"i_Gam"];
+  prdecvar[{G[a]},		"i_G"];
   pr["\n"];
 ];    
 (* auxillary variables are automatically inserted here *)

@@ -30,6 +30,7 @@ int sgrid_ScalarOnKerr(void)
   AddConstantVar("ScalarOnKerr_g",     "(ab)",  "Kerr metric");
   AddConstantVar("ScalarOnKerr_gup",   "(AB)",  "inverse Kerr metric");
   AddConstantVar("ScalarOnKerr_Gamma", "A(bc)", "Christoffel symbol of Kerr metric");
+  AddConstantVar("ScalarOnKerr_G",     "A",     "G^A = Gamma^A_bc g^bc");
 
   /* Kerr background in 3+1 split */
   AddConstantVar("ScalarOnKerr3d_g",     "(ij)",  "Kerr 3-metric");

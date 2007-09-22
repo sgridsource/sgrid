@@ -1,5 +1,5 @@
 /* Kerr.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 13.9.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 21.9.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -14,7 +14,7 @@
 
 
 
-void Kerr(tGrid *grid, int i_x, int i_g, int i_gup, int i_Gam)
+void Kerr(tGrid *grid, int i_x, int i_g, int i_gup, int i_Gam, int i_G)
 {
 int bi;
 
@@ -93,6 +93,10 @@ double *Gam313 = box->v[i_Gam+36];
 double *Gam322 = box->v[i_Gam+37];
 double *Gam323 = box->v[i_Gam+38];
 double *Gam333 = box->v[i_Gam+39];
+double *G0 = box->v[i_G+0];
+double *G1 = box->v[i_G+1];
+double *G2 = box->v[i_G+2];
+double *G3 = box->v[i_G+3];
 
 
 double a2;
@@ -1386,6 +1390,42 @@ Gamdo033*gup03[ijk] + Gamdo133*gup13[ijk] + Gamdo233*gup23[ijk] +
   Gamdo333*gup33[ijk]
 ;
 
+G0[ijk]
+=
+Gam000[ijk]*gup00[ijk] + Gam011[ijk]*gup11[ijk] + Gam022[ijk]*gup22[ijk] + 
+  2.*(Gam001[ijk]*gup01[ijk] + Gam002[ijk]*gup02[ijk] + 
+     Gam003[ijk]*gup03[ijk] + Gam012[ijk]*gup12[ijk] + 
+     Gam013[ijk]*gup13[ijk] + Gam023[ijk]*gup23[ijk]) + 
+  Gam033[ijk]*gup33[ijk]
+;
+
+G1[ijk]
+=
+Gam100[ijk]*gup00[ijk] + Gam111[ijk]*gup11[ijk] + Gam122[ijk]*gup22[ijk] + 
+  2.*(Gam101[ijk]*gup01[ijk] + Gam102[ijk]*gup02[ijk] + 
+     Gam103[ijk]*gup03[ijk] + Gam112[ijk]*gup12[ijk] + 
+     Gam113[ijk]*gup13[ijk] + Gam123[ijk]*gup23[ijk]) + 
+  Gam133[ijk]*gup33[ijk]
+;
+
+G2[ijk]
+=
+Gam200[ijk]*gup00[ijk] + Gam211[ijk]*gup11[ijk] + Gam222[ijk]*gup22[ijk] + 
+  2.*(Gam201[ijk]*gup01[ijk] + Gam202[ijk]*gup02[ijk] + 
+     Gam203[ijk]*gup03[ijk] + Gam212[ijk]*gup12[ijk] + 
+     Gam213[ijk]*gup13[ijk] + Gam223[ijk]*gup23[ijk]) + 
+  Gam233[ijk]*gup33[ijk]
+;
+
+G3[ijk]
+=
+Gam300[ijk]*gup00[ijk] + Gam311[ijk]*gup11[ijk] + Gam322[ijk]*gup22[ijk] + 
+  2.*(Gam301[ijk]*gup01[ijk] + Gam302[ijk]*gup02[ijk] + 
+     Gam303[ijk]*gup03[ijk] + Gam312[ijk]*gup12[ijk] + 
+     Gam313[ijk]*gup13[ijk] + Gam323[ijk]*gup23[ijk]) + 
+  Gam333[ijk]*gup33[ijk]
+;
+
 } /* end of points */
 } /* end of boxes */
 
@@ -1393,4 +1433,4 @@ Gamdo033*gup03[ijk] + Gamdo133*gup13[ijk] + Gamdo233*gup23[ijk] +
 }  /* end of function */
 
 /* Kerr.c */
-/* nvars = 64, n* = 855,  n/ = 76,  n+ = 598, n = 1529, O = 1 */
+/* nvars = 68, n* = 903,  n/ = 76,  n+ = 642, n = 1621, O = 1 */
