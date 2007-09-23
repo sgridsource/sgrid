@@ -352,10 +352,37 @@ void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt,
   }
 }
 
-/* set BC for Pi */
+/* filter all newly computed vars */
 void filter_unew(tVarList *unew, tVarList *upre)
 {
+  tGrid *grid = unew->grid;
+  int b;
+
   coordinateDependentFilter(unew);
+
+  /* filter high freq. angular modes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k, jf,kf, vi;
+
+    /* filter all vars */
+    for(vi=0; vi<unew->n; vi++)
+    {
+      double *var = vlldataptr(unew, box, vi);
+      double *temp1 = box->v[Ind("temp1")];
+
+      kf=n3/3; kf*=2;
+      jf=n2/3; jf*=2;
+      spec_Coeffs(box, var, temp1);
+      forallijk(i,j,k)
+        if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
+      spec_Eval(box, var, temp1);
+    }
+  } /* end forallboxes */
 }
 
 
