@@ -223,7 +223,7 @@ void prvarlist(tVarList *v)
 {
   int i, j;
 
-  printf("VarList=%p  grid=%p  n=%d\n", v, v->grid, v->n);
+  printf("VarList=%p  grid=%p  time=%g  n=%d\n", v, v->grid, v->time, v->n);
   for (i = 0; i < v->n; i++)
   {
     j = v->index[i];
@@ -236,8 +236,8 @@ void prvarlist_inbox(tBox *box, tVarList *v)
 {
   int i, j;
 
-  printf("box%d=%p: VarList=%p  grid=%p  n=%d\n",
-          box->b, box, v, v->grid, v->n);
+  printf("box%d=%p: VarList=%p  grid=%p  time=%g  n=%d\n",
+          box->b, box, v, v->grid, v->time, v->n);
   for (i = 0; i < v->n; i++)
   {
     j = v->index[i];
@@ -254,6 +254,7 @@ tVarList *vlalloc(tGrid *grid)
 
   u = calloc(1, sizeof(tVarList));
   u->grid = grid;
+  if(grid) u->time = grid->time;
   return u;
 } 
 
@@ -317,6 +318,8 @@ tVarList *vlduplicate(tVarList *v)
 {
   int i;
   tVarList *u = vlalloc(v->grid);
+
+  u->time = v->time;
 
   for (i = 0; i < v->n; i++) 
     vlpushone(u, v->index[i]);
@@ -491,6 +494,9 @@ void vlcopy(tVarList *v, tVarList *u)
   int i, n;
   int b;
 
+  /* copy time */
+  v->time = u->time;
+
   for (b = 0; b < grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
@@ -513,7 +519,6 @@ void vlcopygrid(tGrid *grid, tVarList *v, tVarList *u)
   v->grid = u->grid = grid;
   vlcopy(v, u);
 }
-
 
 
 
@@ -541,6 +546,8 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
         pr[i] = c * (pa[i] + pb[i]);
     }
   }
+  /* average times as well */
+  r->time = c * (a->time + b->time);
 }
 
 
@@ -570,6 +577,8 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
         pr[i] = pa[i] - pb[i];
     }
   }
+  /* subtract times as well */
+  r->time = a->time - b->time;
 }
 
 
@@ -611,5 +620,9 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList*b)
         for (i = 0; i < nnodes; i++) pr[i] = ca * pa[i] + cb * pb[i];
     }
   }
+  /* add times as well */
+  if (ca == 0 && cb == 0) r->time = 0.0;
+  else if (ca == 0)	  r->time = cb * b->time;
+  else if (cb == 0)	  r->time = ca * a->time;
+  else			  r->time = ca * a->time + cb * b->time;
 }
-

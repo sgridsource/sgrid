@@ -66,6 +66,7 @@ typedef struct tGRID {
    there should be a better place for it */
 typedef struct tVARLIST {
   struct tGRID *grid;  /* struct tBOX *box;  is not needed in here */
+  double time;
   int n;
   int *index;
 } tVarList;
