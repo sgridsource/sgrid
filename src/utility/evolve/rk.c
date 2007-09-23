@@ -222,9 +222,9 @@ void evolve_rk(tGrid *grid)
   // strange bug? rk4 shadows rk4a
   // printf("%s, getv %d\n", Gets("evolution_method_rk"), Getv("evolution_method_rk", "rk3"));
 
-  /* store current grid and time in existing variable lists */
+  /* store current grid and time=1 in u_k[i] */
   for (i = 0; i < rk->nstages; i++)
-    if (u_k[i]) { u_k[i]->grid = grid;  u_k[i]->time = grid->time; }
+    if (u_k[i]) { u_k[i]->grid = grid;  u_k[i]->time = 1.0; }
 
   /* turn on memory (if varlist is non null) */
   for (i = 0; i < rk->nstages; i++)
