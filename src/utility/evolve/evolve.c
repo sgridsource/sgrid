@@ -76,8 +76,9 @@ int evolve(tGrid *grid)
   if (!u_c) 
     errorexit("evolve: no list of variables");
 
-  /* store grid for this call to evolve */
+  /* store grid and time for this call to evolve */
   u_c->grid = grid;
+  u_c->time = grid->time;
 
   /* add new variables before first time step */
   if (grid->iteration == 0) {
@@ -100,10 +101,10 @@ int evolve(tGrid *grid)
     //}
   }
 
-  /* store current grid in existing variable lists */
-  if (u_p) u_p->grid = grid;
-  if (u_q) u_q->grid = grid;
-  if (u_r) u_r->grid = grid;
+  /* store current grid and time in existing variable lists */
+  if (u_p) { u_p->grid = grid;  u_p->time = grid->time; }
+  if (u_q) { u_q->grid = grid;  u_q->time = grid->time; }
+  if (u_r) { u_r->grid = grid;  u_r->time = grid->time; }
   // if (u_pp) u_pp->grid = grid;
 
   /* turn on memory (if varlist is non null) */
