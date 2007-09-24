@@ -139,3 +139,33 @@ clean:
 cleantilde:
 	find . -name "*~" -exec rm {} \;
 
+# remove code that is not needed once the corresponding libs have been built
+rm_MemoryMan_code:
+	find src/main/MemoryMan/ -name "*.c*" -print -exec rm -rf '{}' \;
+	find src/main/MemoryMan/ -name "*.m*" -print -exec rm -rf '{}' \;
+	echo -e "ls:\n\tls *.h" > donothing_Makefile
+	find src/main/MemoryMan/ -name "Makefile" -print -exec cp -f donothing_Makefile '{}' \;
+	rm -f donothing_Makefile
+
+rm_Math_code:
+	rm -rf src/Math
+
+rm_utility_code:
+	find src/utility/ -name "*.c*" -print -exec rm -rf '{}' \;
+	find src/utility/ -name "*.m*" -print -exec rm -rf '{}' \;
+	echo -e "ls:\n\tls *.h" > donothing_Makefile
+	find src/utility/ -name "Makefile" -print -exec cp -f donothing_Makefile '{}' \;
+	rm -f donothing_Makefile
+
+rm_physics_code:
+	find src/physics/ -name "*.c*" -print -exec rm -rf '{}' \;
+	find src/physics/ -name "*.m*" -print -exec rm -rf '{}' \;
+	echo -e "ls:\n\tls *.h" > donothing_Makefile
+	find src/physics/ -name "Makefile" -print -exec cp -f donothing_Makefile '{}' \;
+	rm -f donothing_Makefile
+
+rm_code:
+	make rm_MemoryMan_code
+	make rm_Math_code
+	make rm_utility_code
+	make rm_physics_code
