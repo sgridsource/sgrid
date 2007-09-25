@@ -31,7 +31,10 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 
   if(Getv("BSSN_unewFilter", "yes"))
     filter_VarList(unew);
-  
+
+  if(Getv("BSSN_filter_unew", "yes"))
+    BSSN_filter_unew(unew, upre);
+
   if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
 }
@@ -196,6 +199,10 @@ int BSSN_startup(tGrid *grid)
   /* register evolution routine */
   evolve_rhsregister(BSSN_evolve);
 
+  /* filter all newly computed vars */
+  if(Getv("BSSN_filter_unew", "yes"))
+    evolve_algebraicConditionsregister(BSSN_filter_unew);
+
   /* set K identically to zero only if we are doing maximal slicing */
   if (Getv("BSSN_forceKzero", "yes")) {
     if (!GetvLax("Gauge", "maximal"))
@@ -300,4 +307,38 @@ int BSSN_filter(tGrid *grid)
   filter_VarList(BSSNvars);
 
   return 0;
+}
+
+
+/* filter all newly computed vars */
+void BSSN_filter_unew(tVarList *unew, tVarList *upre)
+{
+  tGrid *grid = unew->grid;
+  int b;
+
+  coordinateDependentFilter(unew);
+
+  /* filter high freq. angular modes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k, jf,kf, vi;
+
+    /* filter all vars */
+    for(vi=0; vi<unew->n; vi++)
+    {
+      double *var = vlldataptr(unew, box, vi);
+      double *temp1 = box->v[Ind("temp1")];
+
+      kf=n3/3; kf*=2;
+      jf=n2/3; jf*=2;
+      spec_Coeffs(box, var, temp1);
+      forallijk(i,j,k)
+        if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
+      spec_Eval(box, var, temp1);
+    }
+  } /* end forallboxes */
 }

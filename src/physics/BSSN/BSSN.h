@@ -14,3 +14,4 @@ int BSSNtoADM(tGrid *grid);
 
 int filter_VarList(tVarList *vl);
 int BSSN_filter(tGrid *grid);
+void BSSN_filter_unew(tVarList *unew, tVarList *upre);
