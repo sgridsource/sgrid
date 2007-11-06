@@ -132,12 +132,22 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   tGrid *grid = ucur->grid;
   int b;
   double t = ucur->time;
-  double x0, y0;
+  // double x0, y0;
+  double M = Getd("BHmass");
+  double r0, Omega, Dr, q, q22;
 
-  /* source position */
-  x0 = 10*cos(0.02*t);
-  y0 = 10*sin(0.02*t);
+  ///* old source position */
+  //x0 = 10*cos(0.02*t);
+  //y0 = 10*sin(0.02*t);
 
+  /* source parameters */
+  q  = 1.0;
+  r0 = 10.0*M;
+  Dr = 1.0*M;
+  q22= 4.0*PI*q/(r0*sqrt(1.0-3*M/r0))*sqrt(5.0/(96.0*PI))*3.0;
+  Omega = sqrt(M/(r0*r0*r0));
+
+  /* loop over all boxes */
   forallboxes(grid,b)
   {
     tBox *box = grid->box[b];
@@ -194,6 +204,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
       double x = px[i];
       double y = py[i];
       double z = pz[i];
+      double rho, r, phi, theta, Y22;
       double g_ddpsi, gG_dpsi;
       /* g is upper metric */
       /* get all terms with less than 2 time derivs in g^ab d_a d_b psi */
@@ -204,10 +215,18 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
       /* get G^a dpsi_a, where G[a] = g^bc Gamma^a_bc */
       gG_dpsi = -Gt[i]*cPi[i] + Gx[i]*psix[i] + Gy[i]*psiy[i] + Gz[i]*psiz[i];
 
+      /* source rho */
+      r     = sqrt(x*x + y*y + z*z);
+      theta = asin(z/r);
+      phi   = Arg(x,y); // returns value in (-PI,PI]
+      Y22 = sqrt(5.0/(96.0*PI))*1.5*(1.0 - cos(2.0*theta));
+      rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
+            cos(2.0*(Omega*t - phi)) * Y22;
+
       /* set RHS of psi and Pi */
-      rPi  = (g_ddpsi - gG_dpsi)/gtt[i] + 
-             -(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5));
-//             -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // source
+      rPi  = (g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
+             //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
+             //  -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // oldest source
       rpsi = -cPi[i];
 
       /* set new vars or RHS, depending in which integrator is used */
