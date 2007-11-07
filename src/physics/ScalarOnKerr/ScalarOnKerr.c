@@ -217,7 +217,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
 
       /* source rho */
       r     = sqrt(x*x + y*y + z*z);
-      theta = asin(z/r);
+      theta = 0.5*PI - asin(z/r);
       phi   = Arg(x,y); // returns value in (-PI,PI]
       Y22 = sqrt(5.0/(96.0*PI))*1.5*(1.0 - cos(2.0*theta));
       rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
