@@ -83,6 +83,11 @@ typedef struct tVARLIST {
 
 /* grid.c */
 tGrid *make_grid(int pr);
+tGrid *make_empty_grid(int nvariables, int pr);
+int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr);
+int copy_grid(tGrid *g_old, tGrid *g_new, int pr);
+int point_grid_tosamevars(tGrid *g_old, tGrid *g_new, int pr);
+int set_gridvars_toNULL(tGrid *g_new, int pr);
 
 
 /* print.c */

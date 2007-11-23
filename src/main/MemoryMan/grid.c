@@ -259,3 +259,237 @@ tGrid *make_grid(int pr)
   return g;
 }
 
+
+/* make an empty grid, into which we can e.g. copy the contents of
+   an existing grid */
+tGrid *make_empty_grid(int nvariables, int pr)
+{
+  tGrid *g;
+  tBox *box;
+  int b;
+  int n1, n2, n3;
+  int nboxes = Geti("nboxes");
+
+  /* print info */
+  if(pr) 
+  {
+    prdivider(0);
+    printf("make_empty_grid:\n");
+  }
+errorexit("make_empty_grid needs testing");
+
+  /* make grid structure with nboxes, nvariables */
+  g = alloc_grid(nboxes, nvariables);
+  printf("g->nboxes=%d  g->box=%p  nvariables=%d\n",
+         g->nboxes, g->box, nvariables);
+
+  /* make box structure with so many nodes and add it to g */
+  for(b=0; b<nboxes ; b++)
+  {  
+    char str[1000];
+  
+    snprintf(str, 999, "box%d_n1", b);
+    n1=Geti(str);
+    snprintf(str, 999, "box%d_n2", b);
+    n2=Geti(str);
+    snprintf(str, 999, "box%d_n3", b);
+    n3=Geti(str);
+
+    box = alloc_box(g, b, n1, n2, n3);
+  }
+  
+  /* time step */
+  g->dt = Getd("dt");
+
+  if(1) printgrid(g);
+
+  /* return pointer to newly created grid */
+  return g;
+}
+
+
+/* copy all the contents, except the vars, from g_old into g_new */
+int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
+{
+  int b, i, j, k, ijk;
+  int n1, n2, n3;
+
+  /* print info */
+  if(pr)
+  {
+    prdivider(0);
+    printf("copy_grid_withoutvars:\n");
+  }
+errorexit("copy_grid_withoutvars needs testing");
+
+  /* copy struct tGRID */
+  g_new->nboxes     = g_old->nboxes;
+  g_new->nvariables = g_old->nvariables;
+  g_new->iteration  = g_old->iteration;
+  g_new->time	    = g_old->time;
+  g_new->dt         = g_old->dt;
+
+  /* copy box contents */
+  for(b=0; b<g_new->nboxes ; b++)
+  {
+    /* copy values of bounding boxes */
+    for(i=0; i<6; i++)
+    {
+      g_new->box[b]->bbox[i]  = g_old->box[b]->bbox[i];
+      g_new->box[b]->ibbox[i] = g_old->box[b]->ibbox[i];
+    }
+
+    n1 = g_new->box[b]->n1;
+    n2 = g_new->box[b]->n2;
+    n3 = g_new->box[b]->n3;
+
+    /* copy nodes */
+    ijk = 0;
+    for (k = 0; k < n3; k++)
+      for (j = 0; j < n2; j++)
+        for (i = 0; i < n1; i++, ijk++)
+        {
+          /* copy nodes */
+          g_new->box[b]->node[ijk].i    = g_old->box[b]->node[ijk].i;	
+          g_new->box[b]->node[ijk].type = g_old->box[b]->node[ijk].type;
+        }
+
+    /* copy function pointers */
+    for (i = 0; i < 4; i++, ijk++)
+    {
+      g_new->box[b]->x_of_X[i]    = g_old->box[b]->x_of_X[i];
+      g_new->box[b]->Sing_d_dx[i] = g_old->box[b]->Sing_d_dx[i];
+      for (j = 0; j < 4; j++)
+      {
+        g_new->box[b]->dX_dx[i][j] = g_old->box[b]->dX_dx[i][j];
+        for (k = 0; k < 4; k++)
+          g_new->box[b]->ddX_dxdx[i][j][k] = g_old->box[b]->ddX_dxdx[i][j][k];
+      }
+    }
+    g_new->box[b]->basis1 = g_old->box[b]->basis1;
+    g_new->box[b]->basis2 = g_old->box[b]->basis2;
+    g_new->box[b]->basis3 = g_old->box[b]->basis3;
+
+    /* copy diff., filter matrices, ..., and all other arrays */
+    for (i = 0; i < n1; i++, ijk++)
+    {
+      g_new->box[b]->D1[i]  = g_old->box[b]->D1[i];
+      g_new->box[b]->DD1[i] = g_old->box[b]->DD1[i];
+      g_new->box[b]->F1[i]  = g_old->box[b]->F1[i];
+      g_new->box[b]->Mcoeffs1[i] = g_old->box[b]->Mcoeffs1[i];
+      g_new->box[b]->Meval1[i]   = g_old->box[b]->Meval1[i];
+    }
+    for (j = 0; j < n2; j++)
+    {
+      g_new->box[b]->D2[j]  = g_old->box[b]->D2[j];
+      g_new->box[b]->DD2[j] = g_old->box[b]->DD2[j];
+      g_new->box[b]->F2[j]  = g_old->box[b]->F2[j];
+      g_new->box[b]->Mcoeffs2[j] = g_old->box[b]->Mcoeffs2[j];
+      g_new->box[b]->Meval2[j]   = g_old->box[b]->Meval2[j];
+    }
+    for (k = 0; k < n3; k++)
+    {
+      g_new->box[b]->D3[k]  = g_old->box[b]->D3[k];
+      g_new->box[b]->DD3[k] = g_old->box[b]->DD3[k];
+      g_new->box[b]->F3[k]  = g_old->box[b]->F3[k];
+      g_new->box[b]->Mcoeffs3[k] = g_old->box[b]->Mcoeffs3[k];
+      g_new->box[b]->Meval3[k]   = g_old->box[b]->Meval3[k];
+    }
+  }
+  if(pr) printgrid(g_new);
+
+  return 1;
+}
+
+
+/* copy all the contents, including the vars, from g_old into g_new */
+int copy_grid(tGrid *g_old, tGrid *g_new, int pr)
+{
+  int b, ind, ijk;
+
+  /* print info */
+  if(pr)
+  {
+    prdivider(0);
+    printf("copy_grid:\n");
+  }
+errorexit("copy_grid needs testing");
+  
+  /* copy all the contents, except the vars, from g_old into g_new */
+  copy_grid_withoutvars(g_old, g_new, pr);
+
+  /* enable all vars needed io g_old */
+  enablesamevars(g_old, g_new);
+
+  /* copy all vars in all boxes */
+  forallboxes(g_new, b)
+  {
+    tBox *box_new = g_new->box[b];
+    tBox *box_old = g_old->box[b];
+
+    for(ind=0; ind<g_new->nvariables; ind++)
+      forallpoints(box_new, ijk)
+        box_new->v[ind][ijk] = box_old->v[ind][ijk];
+  }
+  if(pr) printgrid(g_new);
+
+  return 1;
+}
+
+
+/* let var pointers in g_new point to the same memory as in g_old */
+int point_grid_tosamevars(tGrid *g_old, tGrid *g_new, int pr)
+{
+  int b, ind;
+
+  /* print info */
+  if(pr)
+  {
+    prdivider(0);
+    printf("point_grid_tosamevars:\n");
+  }
+errorexit("point_grid_tosamevars needs testing");
+  
+  /* copy all var pointers in all boxes */
+  forallboxes(g_new, b)
+  {
+    tBox *box_new = g_new->box[b];
+    tBox *box_old = g_old->box[b];
+
+    for(ind=0; ind<g_new->nvariables; ind++)
+        box_new->v[ind] = box_old->v[ind];
+  }
+  if(pr) printgrid(g_new);
+
+  return 1;
+}
+
+
+/* let var pointers in g_new point to NULL */
+/* CAUTION: If we use free_grid after set_gridvars_toNULL the vars 
+            do not get freed, and if their pointers are not saved in 
+            another grid we get a memory leak! */
+int set_gridvars_toNULL(tGrid *g_new, int pr)
+{
+  int b, ind;
+
+  /* print info */
+  if(pr)
+  {
+    prdivider(0);
+    printf("set_gridvars_toNULL:\n");
+  }
+errorexit("set_gridvars_toNULL needs testing");
+
+  /* set var pointers in all boxes to NULL */
+  forallboxes(g_new, b)
+  {
+    tBox *box_new = g_new->box[b];
+
+    for(ind=0; ind<g_new->nvariables; ind++)
+        box_new->v[ind] = NULL;
+  }
+  if(pr) printgrid(g_new);
+
+  return 1;
+}
