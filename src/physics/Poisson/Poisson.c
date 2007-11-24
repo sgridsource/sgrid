@@ -12,6 +12,7 @@
 void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);
 void ABphi_of_xyz(tBox *box, double *A, double *B, double *phi,
                   double x, double y, double z);
+void convert_grid_to_fd(tGrid *grid);
 
 
 /* initialize Poisson */
@@ -209,8 +210,22 @@ int Poisson_solve(tGrid *grid)
   else
     errorexit("Poisson_solve: unknown Poisson_linSolver");
 
-//printf("calling write_grid(grid)\n");
-//write_grid(grid);
+tGrid *grid_bak=make_empty_grid(grid->nvariables, 1);
+copy_grid_withoutvars(grid, grid_bak, 1);
+point_grid_tosamevars(grid, grid_bak, 1);
+set_gridvars_toNULL(grid_bak, 1);
+printgrid(grid_bak);
+printgrid(grid);
+convert_grid_to_fd(grid);
+printmatrix(grid->box[3]->D1, 	  grid->box[3]->n1);
+printmatrix(grid_bak->box[3]->D1, grid_bak->box[3]->n1);
+printmatrix(grid->box[3]->Mcoeffs2,     grid->box[3]->n2);
+printmatrix(grid_bak->box[3]->Mcoeffs2, grid_bak->box[3]->n2);
+
+//convert_grid_to_fd(grid);
+//printgrid(grid);
+exit(11);
+
 F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
 printf("calling write_grid(grid)\n");
 write_grid(grid);
@@ -1350,42 +1365,16 @@ void convert_grid_to_fd(tGrid *grid)
 {
   int b;
 
+  convert_grid_to_fd_onesidedBC(grid);
+
+  /* make use of the fact that the phi-direction is periodic */
   forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
-    int n1 = box->n1;
-    int n2 = box->n2;
     int n3 = box->n3;
-    int vind;
-    int i;
-    double *temp;
 
-    /* direction 1 */
-    temp=box->Mcoeffs1; /* use box->Mcoeffs1 as temp storage, will be overwritten soon after */
-    vind=Ind("X");
-    for(i=0; i<n1; i++)  temp[i] = box->v[vind][Index(i,0,0)];
-    init_fdcentered_diffmatrix(temp, box->D1, n1, fdcentered_deriv_onesidedBC);
-    box->basis1=fd_basis1;
-    initMatrix_ForCoeffs(box->Mcoeffs1, n1, fd2_coeffs);
-    initMatrix_ToEvaluate(box->Meval1,  n1, fd2_eval);
-
-    /* direction 2 */
-    temp=box->Mcoeffs2; /* use box->Mcoeffs2 as temp storage, will be overwritten soon after */
-    vind=Ind("Y");
-    for(i=0; i<n2; i++)  temp[i] = box->v[vind][Index(0,i,0)];
-    init_fdcentered_diffmatrix(temp, box->D2, n2, fdcentered_deriv_onesidedBC);
-    box->basis2=fd_basis2;
-    initMatrix_ForCoeffs(box->Mcoeffs2, n2, fd2_coeffs);
-    initMatrix_ToEvaluate(box->Meval2,  n2, fd2_eval);
-
-    /* direction 3 */
-    temp=box->Mcoeffs3; /* use box->Mcoeffs3 as temp storage, will be overwritten soon after */
-    vind=Ind("Z");
-    for(i=0; i<n3; i++)  temp[i] = box->v[vind][Index(0,0,i)];
-    init_fdcentered_diffmatrix(temp, box->D3, n3, fdcentered_deriv_onesidedBC);
-    box->basis3=fd_basis3;
-    initMatrix_ForCoeffs(box->Mcoeffs3, n3, fd2_coeffs);
-    initMatrix_ToEvaluate(box->Meval3,  n3, fd2_eval);
+    initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
+                   fd2_coeffs, fd2_deriv_periodic, fd2_eval);
   }      
 }
 
