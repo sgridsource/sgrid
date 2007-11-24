@@ -94,3 +94,8 @@ void fdDp_deriv_onesidedBC(double x[], double c[], double cder[], int n);
 /* compute coeffs cder[0...n] of deriv D^- from coeffs c[0...n] for
    a non-periodic grid with non-uniform grid spacing: x_j,  j=0, ..., n */
 void fdDm_deriv_onesidedBC(double x[], double c[], double cder[], int n);
+
+/* basis functions for Kronecker delta basis */
+double fd_basis1(void *aux, double a, double b, int k, int N, double X);
+double fd_basis2(void *aux, double a, double b, int k, int N, double Y);
+double fd_basis3(void *aux, double a, double b, int k, int N, double Z);

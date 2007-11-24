@@ -137,3 +137,96 @@ void fdDm_deriv_onesidedBC(double x[], double c[], double cder[], int n)
 
   cder[0] = (c[1] - c[0])/(x[1] - x[0]);
 }
+
+
+/* basis functions for Kronecker delta basis */ 
+/* basis function in direction1 for Kronecker delta basis */
+double fd_basis1(void *aux, double a, double b, int k, int N, double X)
+{
+  tBox *box = (tBox *) aux;
+
+  if(box==NULL)
+  {
+    if(X<=a+dequaleps)      return (k == 0);
+    else if(X>=b-dequaleps) return (k == N-1);
+    else                    return (k == (X-a)/(b-a)*N);
+  }
+  else
+  {
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int iX;
+    int indX=Ind("X");
+    double XvarL, XvarR, Xd;
+
+    for(iX=0; iX<N-1; iX++)
+    {
+      XvarL = box->v[indX][Index(iX,0,0)];
+      XvarR = box->v[indX][Index(iX+1,0,0)];
+      Xd = (XvarL + XvarR)*0.5;
+      if(X<Xd) return k==iX;
+    }
+    return k==N-1;
+  }
+}
+/* basis function in direction2 for Kronecker delta basis */
+double fd_basis2(void *aux, double a, double b, int k, int N, double Y)
+{
+  tBox *box = (tBox *) aux;
+
+  if(box==NULL)
+  {
+    if(Y<=a+dequaleps)      return (k == 0);
+    else if(Y>=b-dequaleps) return (k == N-1);
+    else                    return (k == (Y-a)/(b-a)*N);
+  }
+  else
+  {
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int iY;
+    int indY=Ind("Y");
+    double YvarL, YvarR, Yd;
+
+    for(iY=0; iY<N-1; iY++)
+    {
+      YvarL = box->v[indY][Index(0,iY,0)];
+      YvarR = box->v[indY][Index(0,iY+1,0)];
+      Yd = (YvarL + YvarR)*0.5;
+      if(Y<Yd) return k==iY;
+    }
+    return k==N-1;
+  }
+}
+/* basis function in direction3 for Kronecker delta basis */
+double fd_basis3(void *aux, double a, double b, int k, int N, double Z)
+{
+  tBox *box = (tBox *) aux;
+
+  if(box==NULL)
+  {
+    if(Z<=a+dequaleps)      return (k == 0);
+    else if(Z>=b-dequaleps) return (k == N-1);
+    else                    return (k == (Z-a)/(b-a)*N);
+  }
+  else
+  {
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int iZ;
+    int indZ=Ind("Z");
+    double ZvarL, ZvarR, Zd;
+
+    for(iZ=0; iZ<N-1; iZ++)
+    {
+      ZvarL = box->v[indZ][Index(0,0,iZ)];
+      ZvarR = box->v[indZ][Index(0,0,iZ+1)];
+      Zd = (ZvarL + ZvarR)*0.5;
+      if(Z<Zd) return k==iZ;
+    }
+    return k==N-1;
+  }
+}
