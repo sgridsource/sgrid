@@ -29,6 +29,9 @@ void initdiffmatrix2(double a, double b, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
                     void (*coeffs_of_2ndderiv)(double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) );
+void init_fdcentered_diffmatrix(double *x, double *D, int n1,
+              void (*fd_deriv)(double *, double *,double *, int) );
+void convert_grid_to_fd_onesidedBC(tGrid *grid);
 
 /* Functions from matrices.c */
 void matrix_times_vector(double *M, double *u, double *Mu, int n);

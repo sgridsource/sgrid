@@ -165,3 +165,48 @@ void init_fdcentered_diffmatrix(double *x, double *D, int n1,
   free(c);
   free(d);
 }
+
+
+/* reset all matrices and basis funcs on grid to do finite differencing */
+void convert_grid_to_fd_onesidedBC(tGrid *grid)
+{
+  int b;
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int vind;
+    int i;
+    double *temp;
+
+    /* direction 1 */
+    temp=box->Mcoeffs1; /* use box->Mcoeffs1 as temp storage, will be overwritten soon after */
+    vind=Ind("X");
+    for(i=0; i<n1; i++)  temp[i] = box->v[vind][Index(i,0,0)];
+    init_fdcentered_diffmatrix(temp, box->D1, n1, fdcentered_deriv_onesidedBC);
+    box->basis1=fd_basis1;
+    initMatrix_ForCoeffs(box->Mcoeffs1, n1, fd2_coeffs);
+    initMatrix_ToEvaluate(box->Meval1,  n1, fd2_eval);
+
+    /* direction 2 */
+    temp=box->Mcoeffs2; /* use box->Mcoeffs2 as temp storage, will be overwritten soon after */
+    vind=Ind("Y");
+    for(i=0; i<n2; i++)  temp[i] = box->v[vind][Index(0,i,0)];
+    init_fdcentered_diffmatrix(temp, box->D2, n2, fdcentered_deriv_onesidedBC);
+    box->basis2=fd_basis2;
+    initMatrix_ForCoeffs(box->Mcoeffs2, n2, fd2_coeffs);
+    initMatrix_ToEvaluate(box->Meval2,  n2, fd2_eval);
+
+    /* direction 3 */
+    temp=box->Mcoeffs3; /* use box->Mcoeffs3 as temp storage, will be overwritten soon after */
+    vind=Ind("Z");
+    for(i=0; i<n3; i++)  temp[i] = box->v[vind][Index(0,0,i)];
+    init_fdcentered_diffmatrix(temp, box->D3, n3, fdcentered_deriv_onesidedBC);
+    box->basis3=fd_basis3;
+    initMatrix_ForCoeffs(box->Mcoeffs3, n3, fd2_coeffs);
+    initMatrix_ToEvaluate(box->Meval3,  n3, fd2_eval);
+  }      
+}
