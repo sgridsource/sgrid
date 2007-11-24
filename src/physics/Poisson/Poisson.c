@@ -1346,8 +1346,7 @@ void ABphi_of_xyz(tBox *box, double *A, double *B, double *phi,
 }
 
 /* reset matrices and basis funcs to do finite differencing */
-/*
-void reset_boxes_to_fd(tGrid *grid,
+void convert_grid_to_fd(tGrid *grid)
 {
   int b;
 
@@ -1357,47 +1356,39 @@ void reset_boxes_to_fd(tGrid *grid,
     int n1 = box->n1;
     int n2 = box->n2;
     int n3 = box->n3;
-    
-       // direction 1
+    int vind;
+    int i;
+    double *temp;
 
-       initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
-                      fd2_coeffs, fd2_deriv_periodic, fd2_eval);
-       box->basis1=basisfunc;
-       initMatrix_ForCoeffs(box->Mcoeffs1, n1, fd2_coeffs);
-       initMatrix_ToEvaluate(box->Meval1,  n1, fd2_eval);
+    /* direction 1 */
+    temp=box->Mcoeffs1; /* use box->Mcoeffs1 as temp storage, will be overwritten soon after */
+    vind=Ind("X");
+    for(i=0; i<n1; i++)  temp[i] = box->v[vind][Index(i,0,0)];
+    init_fdcentered_diffmatrix(temp, box->D1, n1, fdcentered_deriv_onesidedBC);
+    box->basis1=fd_basis1;
+    initMatrix_ForCoeffs(box->Mcoeffs1, n1, fd2_coeffs);
+    initMatrix_ToEvaluate(box->Meval1,  n1, fd2_eval);
 
-       // direction 2
-       get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
-                                 &coeffs_of_2ndderiv, &eval_onPoints, 
-                                 &filter_coeffs, &basisfunc);
-       initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
-                      get_coeffs, coeffs_of_deriv, eval_onPoints);
-       initfiltermatrix(box->F2, n2+1-filt2, n2, 
-                        get_coeffs, filter_coeffs, eval_onPoints);
-       if(coeffs_of_2ndderiv!=NULL)
-         initdiffmatrix2(box->bbox[2], box->bbox[3], box->DD2, n2,
-                         get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
-       box->basis2=basisfunc;
-       initMatrix_ForCoeffs(box->Mcoeffs2, n2, get_coeffs);
-       initMatrix_ToEvaluate(box->Meval2,  n2, eval_onPoints);
+    /* direction 2 */
+    temp=box->Mcoeffs2; /* use box->Mcoeffs2 as temp storage, will be overwritten soon after */
+    vind=Ind("Y");
+    for(i=0; i<n2; i++)  temp[i] = box->v[vind][Index(0,i,0)];
+    init_fdcentered_diffmatrix(temp, box->D2, n2, fdcentered_deriv_onesidedBC);
+    box->basis2=fd_basis2;
+    initMatrix_ForCoeffs(box->Mcoeffs2, n2, fd2_coeffs);
+    initMatrix_ToEvaluate(box->Meval2,  n2, fd2_eval);
 
-       // direction 3 
-       get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
-                                 &coeffs_of_2ndderiv, &eval_onPoints, 
-                                 &filter_coeffs, &basisfunc);
-       initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
-                      get_coeffs, coeffs_of_deriv, eval_onPoints);
-       initfiltermatrix(box->F3, n3+1-filt3, n3, 
-                        get_coeffs, filter_coeffs, eval_onPoints);
-       if(coeffs_of_2ndderiv!=NULL)
-         initdiffmatrix2(box->bbox[4], box->bbox[5], box->DD3, n3,
-                         get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
-       box->basis3=basisfunc;
-       initMatrix_ForCoeffs(box->Mcoeffs3, n3, get_coeffs);
-       initMatrix_ToEvaluate(box->Meval3,  n3, eval_onPoints);
+    /* direction 3 */
+    temp=box->Mcoeffs3; /* use box->Mcoeffs3 as temp storage, will be overwritten soon after */
+    vind=Ind("Z");
+    for(i=0; i<n3; i++)  temp[i] = box->v[vind][Index(0,0,i)];
+    init_fdcentered_diffmatrix(temp, box->D3, n3, fdcentered_deriv_onesidedBC);
+    box->basis3=fd_basis3;
+    initMatrix_ForCoeffs(box->Mcoeffs3, n3, fd2_coeffs);
+    initMatrix_ToEvaluate(box->Meval3,  n3, fd2_eval);
   }      
 }
-*/
+
 
 /**************************************************************/
 /* old stuff: */
