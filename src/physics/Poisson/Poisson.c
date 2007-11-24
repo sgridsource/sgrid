@@ -337,7 +337,7 @@ void filterSing(tBox *box, double *u)
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
-  double (*basisfunc)(double a, double b, int k, int N, double X)=NULL;
+  double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
   static int linelen=0;
   static double *uline=NULL;
   static double *ufline=NULL;
