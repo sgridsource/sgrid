@@ -454,7 +454,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     tBox *box = grid->box[b];
     int n1 = box->n1;
     int n2 = box->n2;
-    int n3 = box->n3;
+    //int n3 = box->n3;
     double *x = box->v[Ind("x")];
     double *y = box->v[Ind("y")];
     double *z = box->v[Ind("z")];
@@ -3219,7 +3219,8 @@ void set_d_dz_at_rhoEQzero_AnsorgNS_new(void *bo, void *va,
         if(X==1.0) X-=1e-7;
         X_of_x_forgiven_YZ(box, &X, x, Y,Z);
         /* interpolate u to X */
-        for(m=0; m<n1; m++)  sum += cline[m] * box->basis1(a1,b1, m,n1, X);
+        for(m=0; m<n1; m++)
+          sum += cline[m] * box->basis1((void *) box, a1,b1, m,n1, X);
         u[Index(i,j,k)] = sum;
       }
     }

@@ -175,7 +175,7 @@ void four_filter(double c[], int k, int n)
 
 
 /* find value of Fourier basis function B_n at X (in [a,b]) */
-double four_basisfunc_alt(double a, double b, int n, int N, double X)
+double four_basisfunc_alt(void *aux, double a, double b, int n, int N, double X)
 {
   double K = 2.0*PI/(b-a);
   int j = n/2 + n%2;
@@ -187,7 +187,7 @@ double four_basisfunc_alt(double a, double b, int n, int N, double X)
 
 
 /* find value of Fourier basis function B_k at X (in [a,b]) */
-double four_basisfunc(double a, double b, int k, int N, double X)
+double four_basisfunc(void *aux, double a, double b, int k, int N, double X)
 {
   double K = 2.0*PI/(b-a);
   int j = k/2 + k%2;

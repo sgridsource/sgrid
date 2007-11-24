@@ -1345,6 +1345,63 @@ void ABphi_of_xyz(tBox *box, double *A, double *B, double *phi,
   if(*B>1.0) *B=1.0;
 }
 
+/* reset matrices and basis funcs to do finite differencing */
+/*
+void reset_boxes_to_fd(tGrid *grid,
+{
+  int b;
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    
+       // direction 1
+
+       initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
+                      fd2_coeffs, fd2_deriv_periodic, fd2_eval);
+       box->basis1=basisfunc;
+       initMatrix_ForCoeffs(box->Mcoeffs1, n1, fd2_coeffs);
+       initMatrix_ToEvaluate(box->Meval1,  n1, fd2_eval);
+
+       // direction 2
+       get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
+                                 &coeffs_of_2ndderiv, &eval_onPoints, 
+                                 &filter_coeffs, &basisfunc);
+       initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
+                      get_coeffs, coeffs_of_deriv, eval_onPoints);
+       initfiltermatrix(box->F2, n2+1-filt2, n2, 
+                        get_coeffs, filter_coeffs, eval_onPoints);
+       if(coeffs_of_2ndderiv!=NULL)
+         initdiffmatrix2(box->bbox[2], box->bbox[3], box->DD2, n2,
+                         get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
+       box->basis2=basisfunc;
+       initMatrix_ForCoeffs(box->Mcoeffs2, n2, get_coeffs);
+       initMatrix_ToEvaluate(box->Meval2,  n2, eval_onPoints);
+
+       // direction 3 
+       get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
+                                 &coeffs_of_2ndderiv, &eval_onPoints, 
+                                 &filter_coeffs, &basisfunc);
+       initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
+                      get_coeffs, coeffs_of_deriv, eval_onPoints);
+       initfiltermatrix(box->F3, n3+1-filt3, n3, 
+                        get_coeffs, filter_coeffs, eval_onPoints);
+       if(coeffs_of_2ndderiv!=NULL)
+         initdiffmatrix2(box->bbox[4], box->bbox[5], box->DD3, n3,
+                         get_coeffs, coeffs_of_2ndderiv, eval_onPoints);
+       box->basis3=basisfunc;
+       initMatrix_ForCoeffs(box->Mcoeffs3, n3, get_coeffs);
+       initMatrix_ToEvaluate(box->Meval3,  n3, eval_onPoints);
+  }      
+}
+*/
+
+/**************************************************************/
+/* old stuff: */
+
 /* set BCs in the old way for Psi and Chi */
 void set_BCs_old(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
 {

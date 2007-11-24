@@ -39,7 +39,7 @@ void spec_Coeffs_old(tBox *box, double *u, double *c)
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
-  double (*basisfunc)(double a, double b, int k, int n1, double X)=NULL;
+  double (*basisfunc)(void *aux, double a, double b, int k, int n1, double X)=NULL;
   int m3 = max3(n1,n2,n3);
 
   /* memory for matrix and temp var d */
@@ -107,9 +107,9 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
     B3 = (double*) realloc(B3, linelen * sizeof(double));
   }
   /* set basis func values at X,Y,Z */
-  for(i = n1-1; i >=0; i--)  B1[i]=box->basis1(a1,b1, i,n1, X);
-  for(j = n2-1; j >=0; j--)  B2[j]=box->basis2(a2,b2, j,n2, Y);
-  for(k = n3-1; k >=0; k--)  B3[k]=box->basis3(a3,b3, k,n3, Z);
+  for(i = n1-1; i >=0; i--)  B1[i]=box->basis1((void *) box, a1,b1, i,n1, X);
+  for(j = n2-1; j >=0; j--)  B2[j]=box->basis2((void *) box, a2,b2, j,n2, Y);
+  for(k = n3-1; k >=0; k--)  B3[k]=box->basis3((void *) box, a3,b3, k,n3, Z);
 
   /* interpolate to X,Y,Z */
   for(k = n3-1; k >=0; k--)
