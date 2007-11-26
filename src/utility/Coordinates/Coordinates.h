@@ -280,3 +280,34 @@ void set_d_dy_at_rhoEQzero_AnsorgNS(void *bo, void *va,
                                     void *v1,void *v2,void *v3);
 void set_d_dz_at_rhoEQzero_AnsorgNS(void *bo, void *va, 
                                     void *v1,void *v2,void *v3);
+
+/* generic coord trafos */
+void init_dXdx_generic(tBox *box);
+void init_dXdx_ddXdxdx_generic(tBox *box);
+double dX_dx_generic(void *aux, int ind, double X, double Y, double Z);
+double dX_dy_generic(void *aux, int ind, double X, double Y, double Z);
+double dX_dz_generic(void *aux, int ind, double X, double Y, double Z);
+double dY_dx_generic(void *aux, int ind, double X, double Y, double Z);
+double dY_dy_generic(void *aux, int ind, double X, double Y, double Z);
+double dY_dz_generic(void *aux, int ind, double X, double Y, double Z);
+double dZ_dx_generic(void *aux, int ind, double X, double Y, double Z);
+double dZ_dy_generic(void *aux, int ind, double X, double Y, double Z);
+double dZ_dz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddX_dxdx_generic(void *aux, int ind, double X, double Y, double Z);
+double ddX_dxdy_generic(void *aux, int ind, double X, double Y, double Z);
+double ddX_dxdz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddX_dydy_generic(void *aux, int ind, double X, double Y, double Z);
+double ddX_dydz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddX_dzdz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddY_dxdx_generic(void *aux, int ind, double X, double Y, double Z);
+double ddY_dxdy_generic(void *aux, int ind, double X, double Y, double Z);
+double ddY_dxdz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddY_dydy_generic(void *aux, int ind, double X, double Y, double Z);
+double ddY_dydz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddY_dzdz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddZ_dxdx_generic(void *aux, int ind, double X, double Y, double Z);
+double ddZ_dxdy_generic(void *aux, int ind, double X, double Y, double Z);
+double ddZ_dxdz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddZ_dydy_generic(void *aux, int ind, double X, double Y, double Z);
+double ddZ_dydz_generic(void *aux, int ind, double X, double Y, double Z);
+double ddZ_dzdz_generic(void *aux, int ind, double X, double Y, double Z);

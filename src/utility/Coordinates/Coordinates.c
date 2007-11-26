@@ -443,6 +443,60 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         enablevar_inbox(box, ddZdd);
       }
     }
+
+    /* whether we use generic coordinate transforms */
+    if(Getv("CoordinateTransforms_generic", "dXdx"))
+    {
+      /* if we use CoordinateTransforms_generic = dXdx, we need storage */
+      enablevar_inbox(box, dXd);
+      enablevar_inbox(box, dYd);
+      enablevar_inbox(box, dZd);
+
+      box->dX_dx[1][1] = dX_dx_generic;
+      box->dX_dx[1][2] = dX_dy_generic;
+      box->dX_dx[1][3] = dX_dz_generic;
+      box->dX_dx[2][1] = dY_dx_generic;
+      box->dX_dx[2][2] = dY_dy_generic;
+      box->dX_dx[2][3] = dY_dz_generic;
+      box->dX_dx[3][1] = dZ_dx_generic;
+      box->dX_dx[3][2] = dZ_dy_generic;
+      box->dX_dx[3][3] = dZ_dz_generic;
+      /* initialize if we use generic */
+      init_dXdx_generic(box);
+    }
+    if(Getv("CoordinateTransforms_generic", "ddXdxdx"))
+    {
+      /* if we use CoordinateTransforms_generic = ddXdxdx, we need storage */
+      enablevar_inbox(box, dXd);
+      enablevar_inbox(box, dYd);
+      enablevar_inbox(box, dZd);
+      enablevar_inbox(box, ddXdd);
+      enablevar_inbox(box, ddYdd);
+      enablevar_inbox(box, ddZdd);
+
+      box->ddX_dxdx[1][1][1] = ddX_dxdx_generic;
+      box->ddX_dxdx[1][1][2] = ddX_dxdy_generic;
+      box->ddX_dxdx[1][1][3] = ddX_dxdz_generic;
+      box->ddX_dxdx[1][2][2] = ddX_dydy_generic;
+      box->ddX_dxdx[1][2][3] = ddX_dydz_generic;
+      box->ddX_dxdx[1][3][3] = ddX_dzdz_generic;
+
+      box->ddX_dxdx[2][1][1] = ddY_dxdx_generic;
+      box->ddX_dxdx[2][1][2] = ddY_dxdy_generic;
+      box->ddX_dxdx[2][1][3] = ddY_dxdz_generic;
+      box->ddX_dxdx[2][2][2] = ddY_dydy_generic;
+      box->ddX_dxdx[2][2][3] = ddY_dydz_generic;
+      box->ddX_dxdx[2][3][3] = ddY_dzdz_generic;
+
+      box->ddX_dxdx[3][1][1] = ddZ_dxdx_generic;
+      box->ddX_dxdx[3][1][2] = ddZ_dxdy_generic;
+      box->ddX_dxdx[3][1][3] = ddZ_dxdz_generic;
+      box->ddX_dxdx[3][2][2] = ddZ_dydy_generic;
+      box->ddX_dxdx[3][2][3] = ddZ_dydz_generic;
+      box->ddX_dxdx[3][3][3] = ddZ_dzdz_generic;
+      /* initialize generic */
+      init_dXdx_ddXdxdx_generic(box);
+    }
   } /* end for b */
 
   /* compute cartesian coordinates x,y,z from X,Y,Z */
@@ -3233,3 +3287,282 @@ void set_d_dz_at_rhoEQzero_AnsorgNS_new(void *bo, void *va,
 
 /* end: _AnsorgNS coordinates: */
 
+
+/* *********************************************************************** */
+/* start: generic coordinate derivs (computed with spectral accuracy):     */
+/* init. vars which hold 1st derivs */
+void init_dXdx_generic(tBox *box)
+{
+  int ix = Ind("x");
+  int iy = Ind("y");
+  int iz = Ind("z");
+  int dXd = Ind("dXdx");
+  int dYd = Ind("dYdx");
+  int dZd = Ind("dZdx");
+  int n;
+  int ind;
+  double dxdX[4][4];
+  double dXdx[4][4];
+
+  forallpoints(box, ind)
+  {
+    /* compute cartesian coordinates x,y,z from X,Y,Z */
+    double X = box->v[Ind("X")][ind];
+    double Y = box->v[Ind("Y")][ind];
+    double Z = box->v[Ind("Z")][ind];
+    box->v[Ind("x")][ind] = box->x_of_X[1]((void *) box, ind, X,Y,Z);
+    box->v[Ind("y")][ind] = box->x_of_X[2]((void *) box, ind, X,Y,Z);
+    box->v[Ind("z")][ind] = box->x_of_X[3]((void *) box, ind, X,Y,Z);
+  }
+
+  /* write dxdX temporarily into vars with index dXd, ... */
+  spec_Deriv1(box, 1, box->v[ix], box->v[dXd]);
+  spec_Deriv1(box, 2, box->v[ix], box->v[dXd+1]);
+  spec_Deriv1(box, 3, box->v[ix], box->v[dXd+2]);
+  spec_Deriv1(box, 1, box->v[iy], box->v[dYd]);
+  spec_Deriv1(box, 2, box->v[iy], box->v[dYd+1]);
+  spec_Deriv1(box, 3, box->v[iy], box->v[dYd+2]);
+  spec_Deriv1(box, 1, box->v[iz], box->v[dZd]);
+  spec_Deriv1(box, 2, box->v[iz], box->v[dZd+1]);
+  spec_Deriv1(box, 3, box->v[iz], box->v[dZd+2]);
+
+  /* loop over box */
+  forallpoints(box,ind)
+  {
+    /* set dxdX matrix */
+    for(n=1; n<=3; n++)
+    {
+      dxdX[1][n] = box->v[dXd + n-1][ind];
+      dxdX[2][n] = box->v[dYd + n-1][ind];
+      dxdX[3][n] = box->v[dZd + n-1][ind];
+    }
+    /* set dXdx matrix */
+    dXdx_from_dxdX(dXdx, dxdX);
+
+    /* write dXdx into vars with index dXd, ... */
+    for(n=1; n<=3; n++)
+    {
+      box->v[dXd + n-1][ind] = dXdx[1][n];
+      box->v[dYd + n-1][ind] = dXdx[2][n];
+      box->v[dZd + n-1][ind] = dXdx[3][n];
+    }
+  }
+}
+/* init. vars which hold 1st & 2nd derivs */
+void init_dXdx_ddXdxdx_generic(tBox *box)
+{
+  int ix = Ind("x");
+  int iy = Ind("y");
+  int iz = Ind("z");
+  int dXd = Ind("dXdx");
+  int dYd = Ind("dYdx");
+  int dZd = Ind("dZdx");
+  int ddXdd = Ind("ddXddxx");
+  int ddYdd = Ind("ddYddxx");
+  int ddZdd = Ind("ddZddxx");
+  int j,k,n;
+  int ind;
+  double ddXdxdx[4][4][4];
+  double dXdx[4][4];
+  double ddxdXdX[4][4][4];
+
+  forallpoints(box, ind)
+  {
+    /* compute cartesian coordinates x,y,z from X,Y,Z */
+    double X = box->v[Ind("X")][ind];
+    double Y = box->v[Ind("Y")][ind];
+    double Z = box->v[Ind("Z")][ind];
+    box->v[Ind("x")][ind] = box->x_of_X[1]((void *) box, ind, X,Y,Z);
+    box->v[Ind("y")][ind] = box->x_of_X[2]((void *) box, ind, X,Y,Z);
+    box->v[Ind("z")][ind] = box->x_of_X[3]((void *) box, ind, X,Y,Z);
+  }
+
+  /* write ddxdXX temporarily into vars with index ddXdd, ...  */
+  spec_allDerivs(box, box->v[ix], box->v[dXd], box->v[dXd+1], box->v[dXd+2],
+                 box->v[ddXdd],   box->v[ddXdd+1], box->v[ddXdd+2],
+                 box->v[ddXdd+3], box->v[ddXdd+4], box->v[ddXdd+5]);
+  spec_allDerivs(box, box->v[iy], box->v[dYd], box->v[dYd+1], box->v[dYd+2],
+                 box->v[ddYdd],   box->v[ddYdd+1], box->v[ddYdd+2],
+                 box->v[ddYdd+3], box->v[ddYdd+4], box->v[ddYdd+5]);
+  spec_allDerivs(box, box->v[iz], box->v[dZd], box->v[dZd+1], box->v[dZd+2],
+                 box->v[ddZdd],   box->v[ddZdd+1], box->v[ddZdd+2],
+                 box->v[ddZdd+3], box->v[ddZdd+4], box->v[ddZdd+5]);
+
+  /* now init. the 1st order derivs (which were overwritten just before this) */
+  init_dXdx_generic(box);
+
+  /* loop over box */
+  forallpoints(box,ind)
+  {
+    /* set dXdx matrix */
+    for(n=1; n<=3; n++)
+    {
+      dXdx[1][n] = box->v[dXd + n-1][ind];
+      dXdx[2][n] = box->v[dYd + n-1][ind];
+      dXdx[3][n] = box->v[dZd + n-1][ind];
+    }
+
+    /* set ddxdXdX matrix */
+    n=0;
+    for(j=1; j<=3; j++)
+    for(k=j; k<=3; k++)
+    {
+      ddxdXdX[1][j][k] = box->v[ddXdd + n][ind];
+      ddxdXdX[2][j][k] = box->v[ddYdd + n][ind];
+      ddxdXdX[3][j][k] = box->v[ddZdd + n][ind];
+      n++;
+    }
+    
+    /* set ddXdxdx matrix */
+    ddXdxdx_from_dXdx_ddxdXdX(ddXdxdx, dXdx, ddxdXdX);
+
+    /* write ddXdxdx into vars with index ddXdd, ... */
+    n=0;
+    for(j=1; j<=3; j++)
+    for(k=j; k<=3; k++)
+    {
+      box->v[ddXdd + n][ind] = ddXdxdx[1][j][k];
+      box->v[ddYdd + n][ind] = ddXdxdx[2][j][k];
+      box->v[ddZdd + n][ind] = ddXdxdx[3][j][k];
+      n++;
+    }
+  }
+}
+/* 1st derivs */
+double dX_dx_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dXdx");
+  return box->v[vind][ind];
+}
+double dX_dy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dXdx")+1;
+  return box->v[vind][ind];
+}
+double dX_dz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dXdx")+2;
+  return box->v[vind][ind];
+}
+double dY_dx_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dYdx");
+  return box->v[vind][ind];
+}
+double dY_dy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dYdx")+1;
+  return box->v[vind][ind];
+}
+double dY_dz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dYdx")+2;
+  return box->v[vind][ind];
+}
+double dZ_dx_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dZdx");
+  return box->v[vind][ind];
+}
+double dZ_dy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dZdx")+1;
+  return box->v[vind][ind];
+}
+double dZ_dz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("dZdx")+2;
+  return box->v[vind][ind];
+}
+/* 2nd derivs */
+double ddX_dxdx_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx");
+  return box->v[vind][ind];
+}
+double ddX_dxdy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+1;
+  return box->v[vind][ind];
+}
+double ddX_dxdz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+2;
+  return box->v[vind][ind];
+}
+double ddX_dydy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+3;
+  return box->v[vind][ind];
+}
+double ddX_dydz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+4;
+  return box->v[vind][ind];
+}
+double ddX_dzdz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+5;
+  return box->v[vind][ind];
+}
+double ddY_dxdx_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx");
+  return box->v[vind][ind];
+}
+double ddY_dxdy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+1;
+  return box->v[vind][ind];
+}
+double ddY_dxdz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+2;
+  return box->v[vind][ind];
+}
+double ddY_dydy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+3;
+  return box->v[vind][ind];
+}
+double ddY_dydz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+4;
+  return box->v[vind][ind];
+}
+double ddY_dzdz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+5;
+  return box->v[vind][ind];
+}
+double ddZ_dxdx_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx");
+  return box->v[vind][ind];
+}
+double ddZ_dxdy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+1;
+  return box->v[vind][ind];
+}
+double ddZ_dxdz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+2;
+  return box->v[vind][ind];
+}
+double ddZ_dydy_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+3;
+  return box->v[vind][ind];
+}
+double ddZ_dydz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+4;
+  return box->v[vind][ind];
+}
+double ddZ_dzdz_generic(void *aux, int ind, double X, double Y, double Z)
+{
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+5;
+  return box->v[vind][ind];
+}
+/* end of: generic coordinate derivs */
