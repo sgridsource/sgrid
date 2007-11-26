@@ -500,10 +500,10 @@ printf("(x,y,z)=(%f,%f,%f)   (X,Y,Z)=(%.12f,%.12f,%.12f)\n", x,y,z, X,Y,Z);
 printf("##### Psi=%.12f\n", spec_interpolate(box, c, X,Y,Z));
 }
 */
-
-    /* BCs */
-    set_BCs(vlFu, vlu, vluDerivs, 1);
   }
+
+  /* BCs */
+  set_BCs(vlFu, vlu, vluDerivs, 1);
 }
 
 
@@ -550,10 +550,10 @@ void J_Poisson(tVarList *vlJdu, tVarList *vldu,
       JdPsi[i] = dPsixx[i] + dPsiyy[i] + dPsizz[i];
       JdChi[i] = dChixx[i] + dChiyy[i] + dChizz[i];
     }
-
-    /* BCs */
-    set_BCs(vlJdu, vldu, vlduDerivs, 0);
   }
+
+  /* BCs */
+  set_BCs(vlJdu, vldu, vlduDerivs, 0);
 }
 
 
