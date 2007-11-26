@@ -210,21 +210,18 @@ int Poisson_solve(tGrid *grid)
   else
     errorexit("Poisson_solve: unknown Poisson_linSolver");
 
+// remove this later:
 tGrid *grid_bak=make_empty_grid(grid->nvariables, 1);
 copy_grid_withoutvars(grid, grid_bak, 1);
-point_grid_tosamevars(grid, grid_bak, 1);
-set_gridvars_toNULL(grid_bak, 1);
-printgrid(grid_bak);
-printgrid(grid);
 convert_grid_to_fd(grid);
-printmatrix(grid->box[3]->D1, 	  grid->box[3]->n1);
-printmatrix(grid_bak->box[3]->D1, grid_bak->box[3]->n1);
-printmatrix(grid->box[3]->Mcoeffs2,     grid->box[3]->n2);
-printmatrix(grid_bak->box[3]->Mcoeffs2, grid_bak->box[3]->n2);
+printmatrix(grid->box[0]->D3,     grid->box[0]->n3);
+printmatrix(grid->box[1]->D1, 	  grid->box[1]->n1);
+printmatrix(grid->box[2]->Mcoeffs2,     grid->box[2]->n2);
+printmatrix(grid->box[4]->D3, 	  grid->box[4]->n3);
+printmatrix(grid->box[3]->Meval3,     grid->box[3]->n3);
 
-//convert_grid_to_fd(grid);
-//printgrid(grid);
-exit(11);
+copy_grid_withoutvars(grid_bak, grid, 1);
+free_grid(grid_bak);
 
 F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
 printf("calling write_grid(grid)\n");
@@ -1363,12 +1360,14 @@ void ABphi_of_xyz(tBox *box, double *A, double *B, double *phi,
 /* reset matrices and basis funcs to do finite differencing */
 void convert_grid_to_fd(tGrid *grid)
 {
-  int b;
+  int b, bmax;
 
   convert_grid_to_fd_onesidedBC(grid);
 
   /* make use of the fact that the phi-direction is periodic */
-  forallboxes(grid, b)
+  if(Getv("Poisson_grid", "4ABphi_2xyz")) bmax=4;
+  else                                    bmax=grid->nboxes;
+  for(b=0; b<bmax; b++)
   {
     tBox *box = grid->box[b];
     int n3 = box->n3;
