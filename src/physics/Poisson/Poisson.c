@@ -600,10 +600,10 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
       if(Getv("Poisson_grid", "SphericalDF"))
       {
         forplane1(i,j,k, n1,n2,n3, 0)
-          FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - 1.0*nonlin;
+          FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - 1.0*(vind+1)*nonlin;
 
         forplane1(i,j,k, n1,n2,n3, n1-1)
-          FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - 0.5*nonlin;
+          FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - 0.5*(vind+1)*nonlin;
       }
       else if (Getv("Poisson_grid", "AnsorgNS"))
       {
