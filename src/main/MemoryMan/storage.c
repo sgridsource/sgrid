@@ -350,17 +350,29 @@ void disablevarlist(tVarList *v)
 /* enable all variables found on given grid */
 void enablesamevars(tGrid *grid, tGrid *newgrid)
 {
-  int i;
+  int i, b;
 
-  if (grid->nvariables != newgrid->nvariables) {
+  if (grid->nvariables != newgrid->nvariables)
+  {
     printf("nvariables: old %d, new %d\n", 
 	   grid->nvariables, newgrid->nvariables);
     errorexit("enablesamevars: need same number of variables");
   }
+  if (grid->nboxes != newgrid->nboxes)
+  {
+    printf("nboxes: old %d, new %d\n", 
+	   grid->nboxes, newgrid->nboxes);
+    errorexit("enablesamevars: need same number of boxes");
+  }
 
-  for (i = 0; i < grid->nvariables; i++)
-    if (grid->box[0]->v[i]) 
-      enablevarcomp(newgrid, i);
+  for (i = 0; i < newgrid->nvariables; i++)
+    for (b = 0; b < newgrid->nboxes; b++)
+    {
+      tBox *box = grid->box[b];
+      tBox *newbox = newgrid->box[b];
+      if(grid->box[b]->v[i])
+        enablevarcomp_inbox(newbox, i);
+    }
 }
 
 

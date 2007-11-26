@@ -276,7 +276,6 @@ tGrid *make_empty_grid(int nvariables, int pr)
     prdivider(0);
     printf("make_empty_grid:\n");
   }
-//errorexit("make_empty_grid needs testing");
 
   /* make grid structure with nboxes, nvariables */
   g = alloc_grid(nboxes, nvariables);
@@ -320,7 +319,6 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
     prdivider(0);
     printf("copy_grid_withoutvars:\n");
   }
-//errorexit("copy_grid_withoutvars needs testing");
 
   /* copy struct tGRID */
   g_new->nboxes     = g_old->nboxes;
@@ -413,7 +411,6 @@ int copy_grid(tGrid *g_old, tGrid *g_new, int pr)
     prdivider(0);
     printf("copy_grid:\n");
   }
-errorexit("copy_grid needs testing");
   
   /* copy all the contents, except the vars, from g_old into g_new */
   copy_grid_withoutvars(g_old, g_new, pr);
@@ -429,7 +426,8 @@ errorexit("copy_grid needs testing");
 
     for(ind=0; ind<g_new->nvariables; ind++)
       forallpoints(box_new, ijk)
-        box_new->v[ind][ijk] = box_old->v[ind][ijk];
+        if(box_new->v[ind])
+          box_new->v[ind][ijk] = box_old->v[ind][ijk];
   }
   if(pr) printgrid(g_new);
 
@@ -448,7 +446,6 @@ int point_grid_tosamevars(tGrid *g_old, tGrid *g_new, int pr)
     prdivider(0);
     printf("point_grid_tosamevars:\n");
   }
-//errorexit("point_grid_tosamevars needs testing");
   
   /* copy all var pointers in all boxes */
   forallboxes(g_new, b)
@@ -479,7 +476,6 @@ int set_gridvars_toNULL(tGrid *g_new, int pr)
     prdivider(0);
     printf("set_gridvars_toNULL:\n");
   }
-//errorexit("set_gridvars_toNULL needs testing");
 
   /* set var pointers in all boxes to NULL */
   forallboxes(g_new, b)
