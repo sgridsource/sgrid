@@ -452,6 +452,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       enablevar_inbox(box, dYd);
       enablevar_inbox(box, dZd);
 
+      /* initialize if we use generic */
+      init_dXdx_generic(box);
       box->dX_dx[1][1] = dX_dx_generic;
       box->dX_dx[1][2] = dX_dy_generic;
       box->dX_dx[1][3] = dX_dz_generic;
@@ -461,8 +463,6 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dZ_dx_generic;
       box->dX_dx[3][2] = dZ_dy_generic;
       box->dX_dx[3][3] = dZ_dz_generic;
-      /* initialize if we use generic */
-      init_dXdx_generic(box);
     }
     if(Getv("CoordinateTransforms_generic", "ddXdxdx"))
     {
@@ -474,6 +474,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       enablevar_inbox(box, ddYdd);
       enablevar_inbox(box, ddZdd);
 
+      /* initialize generic */
+      init_dXdx_ddXdxdx_generic(box);
       box->ddX_dxdx[1][1][1] = ddX_dxdx_generic;
       box->ddX_dxdx[1][1][2] = ddX_dxdy_generic;
       box->ddX_dxdx[1][1][3] = ddX_dxdz_generic;
@@ -494,8 +496,6 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][2][2] = ddZ_dydy_generic;
       box->ddX_dxdx[3][2][3] = ddZ_dydz_generic;
       box->ddX_dxdx[3][3][3] = ddZ_dzdz_generic;
-      /* initialize generic */
-      init_dXdx_ddXdxdx_generic(box);
     }
   } /* end for b */
 
