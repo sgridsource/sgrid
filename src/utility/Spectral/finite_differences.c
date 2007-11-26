@@ -149,7 +149,7 @@ double fd_basis1(void *aux, double a, double b, int k, int N, double X)
   {
     if(X<=a+dequaleps)      return (k == 0);
     else if(X>=b-dequaleps) return (k == N-1);
-    else                    return (k == (X-a)/(b-a)*N);
+    else                    return (k == (int) (N*(X-a)/(b-a)));
   }
   else
   {
@@ -179,7 +179,7 @@ double fd_basis2(void *aux, double a, double b, int k, int N, double Y)
   {
     if(Y<=a+dequaleps)      return (k == 0);
     else if(Y>=b-dequaleps) return (k == N-1);
-    else                    return (k == (Y-a)/(b-a)*N);
+    else                    return (k == (int) (N*(Y-a)/(b-a)));
   }
   else
   {
@@ -209,7 +209,7 @@ double fd_basis3(void *aux, double a, double b, int k, int N, double Z)
   {
     if(Z<=a+dequaleps)      return (k == 0);
     else if(Z>=b-dequaleps) return (k == N-1);
-    else                    return (k == (Z-a)/(b-a)*N);
+    else                    return (k == (int) (N*(Z-a)/(b-a)));
   }
   else
   {
