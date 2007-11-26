@@ -1444,7 +1444,7 @@ return 0;
 
 
 /* ****************************************************************** */
-/* start: Spherical2 coordinates:                                     */
+/* start: Spherical3 coordinates:                                     */
 /* Coord. trafos */
 double x_ofSpherical3(void *aux, int ind, double r, double U, double phi)
 {
