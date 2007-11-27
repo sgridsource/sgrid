@@ -443,9 +443,26 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         enablevar_inbox(box, ddZdd);
       }
     }
+  } /* end for b */
+
+  /* compute cartesian coordinates x,y,z from X,Y,Z */
+  compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
+
+  /* final box loop */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    /* int n3 = box->n3; */
+    double *x = box->v[Ind("x")];
+    double *y = box->v[Ind("y")];
+    double *z = box->v[Ind("z")];
+    char str[1000];
 
     /* whether we use generic coordinate transforms */
-    if(Getv("CoordinateTransforms_generic", "dXdx"))
+    snprintf(str, 999, "box%d_CoordinateTransforms_generic", b);
+    if(Getv(str, "dXdx"))
     {
       /* if we use CoordinateTransforms_generic = dXdx, we need storage */
       enablevar_inbox(box, dXd);
@@ -464,7 +481,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dZ_dy_generic;
       box->dX_dx[3][3] = dZ_dz_generic;
     }
-    if(Getv("CoordinateTransforms_generic", "ddXdxdx"))
+    if(Getv(str, "ddXdxdx"))
     {
       /* if we use CoordinateTransforms_generic = ddXdxdx, we need storage */
       enablevar_inbox(box, dXd);
@@ -497,21 +514,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[3][2][3] = ddZ_dydz_generic;
       box->ddX_dxdx[3][3][3] = ddZ_dzdz_generic;
     }
-  } /* end for b */
 
-  /* compute cartesian coordinates x,y,z from X,Y,Z */
-  compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
-
-  /* print distances in cart. coordinates */
-  forallboxes(grid,b)
-  {
-    tBox *box = grid->box[b];
-    int n1 = box->n1;
-    int n2 = box->n2;
-    //int n3 = box->n3;
-    double *x = box->v[Ind("x")];
-    double *y = box->v[Ind("y")];
-    double *z = box->v[Ind("z")];
+    /* print distances in cart. coordinates */
     printf("Cartesian distances in box%d:\n", b);
     printf("X-direction: x[1]-x[0]=%g, ", x[1]-x[0]);
     printf("y[1]-y[0]=%g, ",              y[1]-y[0]);
@@ -3304,16 +3308,16 @@ void init_dXdx_generic(tBox *box)
   double dxdX[4][4];
   double dXdx[4][4];
 
-  forallpoints(box, ind)
+  /* forallpoints(box, ind)
   {
-    /* compute cartesian coordinates x,y,z from X,Y,Z */
+    // compute cartesian coordinates x,y,z from X,Y,Z
     double X = box->v[Ind("X")][ind];
     double Y = box->v[Ind("Y")][ind];
     double Z = box->v[Ind("Z")][ind];
     box->v[Ind("x")][ind] = box->x_of_X[1]((void *) box, ind, X,Y,Z);
     box->v[Ind("y")][ind] = box->x_of_X[2]((void *) box, ind, X,Y,Z);
     box->v[Ind("z")][ind] = box->x_of_X[3]((void *) box, ind, X,Y,Z);
-  }
+  } */
 
   /* write dxdX temporarily into vars with index dXd, ... */
   spec_Deriv1(box, 1, box->v[ix], box->v[dXd]);
@@ -3369,16 +3373,16 @@ void init_ddXdxdx_generic(tBox *box)
   double dXdx[4][4];
   double ddxdXdX[4][4][4];
 
-  forallpoints(box, ind)
+  /* forallpoints(box, ind)
   {
-    /* compute cartesian coordinates x,y,z from X,Y,Z */
+    // compute cartesian coordinates x,y,z from X,Y,Z
     double X = box->v[Ind("X")][ind];
     double Y = box->v[Ind("Y")][ind];
     double Z = box->v[Ind("Z")][ind];
     box->v[Ind("x")][ind] = box->x_of_X[1]((void *) box, ind, X,Y,Z);
     box->v[Ind("y")][ind] = box->x_of_X[2]((void *) box, ind, X,Y,Z);
     box->v[Ind("z")][ind] = box->x_of_X[3]((void *) box, ind, X,Y,Z);
-  }
+  } */
 
   /* write ddxdXX temporarily into vars with index ddXdd, ...  */
   spec_allDerivs(box, box->v[ix], box->v[it1], box->v[it2], box->v[it3],

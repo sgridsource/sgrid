@@ -35,13 +35,15 @@ int sgrid_Coordinates(void)
     snprintf(str, 999, "box%d_Coordinates", b);
     AddPar(str, "Cartesian", 
            "coordinates used in box [Cartesian, Polar, ...]");
+
+    snprintf(str, 999, "box%d_CoordinateTransforms_generic", b);
+    AddPar(str, "no", 
+           "select dXdx or ddXdxdx, to compute them using spectral derivs "
+           "[dXdx,ddXdxdx]");
   }
 
   AddPar("CoordinateTransforms_stored", "yes",
          "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");
-  AddPar("CoordinateTransforms_generic", "no", 
-         "select dXdx or ddXdxdx, to compute them using spectral derivs "
-         "[dXdx,ddXdxdx]");
   
   AddPar("Coordinates_newtTOLF", "1e-10", "newton tolerence");
   AddPar("Coordinates_newtMAXITS", "100000", "max. newton iterations");
