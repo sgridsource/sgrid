@@ -283,7 +283,7 @@ void set_d_dz_at_rhoEQzero_AnsorgNS(void *bo, void *va,
 
 /* generic coord trafos */
 void init_dXdx_generic(tBox *box);
-void init_dXdx_ddXdxdx_generic(tBox *box);
+void init_ddXdxdx_generic(tBox *box);
 double dX_dx_generic(void *aux, int ind, double X, double Y, double Z);
 double dX_dy_generic(void *aux, int ind, double X, double Y, double Z);
 double dX_dz_generic(void *aux, int ind, double X, double Y, double Z);

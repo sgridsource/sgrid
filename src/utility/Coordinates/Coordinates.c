@@ -475,7 +475,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       enablevar_inbox(box, ddZdd);
 
       /* initialize generic */
-      init_dXdx_ddXdxdx_generic(box);
+      init_ddXdxdx_generic(box);
       box->ddX_dxdx[1][1][1] = ddX_dxdx_generic;
       box->ddX_dxdx[1][1][2] = ddX_dxdy_generic;
       box->ddX_dxdx[1][1][3] = ddX_dxdz_generic;
@@ -3349,11 +3349,14 @@ void init_dXdx_generic(tBox *box)
   }
 }
 /* init. vars which hold 1st & 2nd derivs */
-void init_dXdx_ddXdxdx_generic(tBox *box)
+void init_ddXdxdx_generic(tBox *box)
 {
   int ix = Ind("x");
   int iy = Ind("y");
   int iz = Ind("z");
+  int it1 = Ind("temp1");
+  int it2 = Ind("temp2");
+  int it3 = Ind("temp3");
   int dXd = Ind("dXdx");
   int dYd = Ind("dYdx");
   int dZd = Ind("dZdx");
@@ -3378,18 +3381,15 @@ void init_dXdx_ddXdxdx_generic(tBox *box)
   }
 
   /* write ddxdXX temporarily into vars with index ddXdd, ...  */
-  spec_allDerivs(box, box->v[ix], box->v[dXd], box->v[dXd+1], box->v[dXd+2],
+  spec_allDerivs(box, box->v[ix], box->v[it1], box->v[it2], box->v[it3],
                  box->v[ddXdd],   box->v[ddXdd+1], box->v[ddXdd+2],
                  box->v[ddXdd+3], box->v[ddXdd+4], box->v[ddXdd+5]);
-  spec_allDerivs(box, box->v[iy], box->v[dYd], box->v[dYd+1], box->v[dYd+2],
+  spec_allDerivs(box, box->v[iy], box->v[it1], box->v[it2], box->v[it3],
                  box->v[ddYdd],   box->v[ddYdd+1], box->v[ddYdd+2],
                  box->v[ddYdd+3], box->v[ddYdd+4], box->v[ddYdd+5]);
-  spec_allDerivs(box, box->v[iz], box->v[dZd], box->v[dZd+1], box->v[dZd+2],
+  spec_allDerivs(box, box->v[iz], box->v[it1], box->v[it2], box->v[it3],
                  box->v[ddZdd],   box->v[ddZdd+1], box->v[ddZdd+2],
                  box->v[ddZdd+3], box->v[ddZdd+4], box->v[ddZdd+5]);
-
-  /* now init. the 1st order derivs (which were overwritten just before this) */
-  init_dXdx_generic(box);
 
   /* loop over box */
   forallpoints(box,ind)
