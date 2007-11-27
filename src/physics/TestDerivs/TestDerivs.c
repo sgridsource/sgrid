@@ -58,6 +58,18 @@ int TestDerivs_startup(tGrid *grid)
     }
   }
 
+//convert_grid_to_fd_onesidedBC(grid);
+//forallboxes(grid,b)
+//{
+//tBox *box = grid->box[b];
+//int n2 = box->n2;
+//int n3 = box->n3;
+////initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
+////               fd2_coeffs, fd2_deriv_periodic, fd2_eval);
+//initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
+//               fd2_coeffs, fd2_deriv_periodic, fd2_eval);
+//}
+
   return 0;
 }
 
