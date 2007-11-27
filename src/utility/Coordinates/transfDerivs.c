@@ -26,21 +26,31 @@ void dXdx_from_dxdX(double dXdx[4][4], double dxdX[4][4])
        {{-(m23*m32) + m22*m33, m13*m32 - m12*m33, -(m13*m22) + m12*m23},
         {m23*m31 - m21*m33, -(m13*m31) + m11*m33, m13*m21 - m11*m23},
         {-(m22*m31) + m21*m32, m12*m31 - m11*m32, -(m12*m21) + m11*m22}}  */
-  double DetM = dxdX[1][1]*dxdX[2][2]*dxdX[3][3] - 
+  LDOUBLE DetM =dxdX[1][1]*dxdX[2][2]*dxdX[3][3] - 
                 dxdX[1][3]*dxdX[2][2]*dxdX[3][1] + 
                 dxdX[1][2]*dxdX[2][3]*dxdX[3][1] +
                 dxdX[1][3]*dxdX[2][1]*dxdX[3][2] - 
                 dxdX[1][1]*dxdX[2][3]*dxdX[3][2] - 
                 dxdX[1][2]*dxdX[2][1]*dxdX[3][3];
-  dXdx[1][1] = (-(dxdX[2][3]*dxdX[3][2]) + dxdX[2][2]*dxdX[3][3])/DetM;
-  dXdx[1][2] = (  dxdX[1][3]*dxdX[3][2]  - dxdX[1][2]*dxdX[3][3])/DetM;
-  dXdx[1][3] = (-(dxdX[1][3]*dxdX[2][2]) + dxdX[1][2]*dxdX[2][3])/DetM;
-  dXdx[2][1] = (  dxdX[2][3]*dxdX[3][1]  - dxdX[2][1]*dxdX[3][3])/DetM;
-  dXdx[2][2] = (-(dxdX[1][3]*dxdX[3][1]) + dxdX[1][1]*dxdX[3][3])/DetM;
-  dXdx[2][3] = (  dxdX[1][3]*dxdX[2][1]  - dxdX[1][1]*dxdX[2][3])/DetM;
-  dXdx[3][1] = (-(dxdX[2][2]*dxdX[3][1]) + dxdX[2][1]*dxdX[3][2])/DetM;
-  dXdx[3][2] = (  dxdX[1][2]*dxdX[3][1]  - dxdX[1][1]*dxdX[3][2])/DetM;
-  dXdx[3][3] = (-(dxdX[1][2]*dxdX[2][1]) + dxdX[1][1]*dxdX[2][2])/DetM;
+  LDOUBLE sum;
+  sum        = (-(dxdX[2][3]*dxdX[3][2]) + dxdX[2][2]*dxdX[3][3])/DetM;
+  dXdx[1][1] = sum;
+  sum        = (  dxdX[1][3]*dxdX[3][2]  - dxdX[1][2]*dxdX[3][3])/DetM;
+  dXdx[1][2] = sum;
+  sum        = (-(dxdX[1][3]*dxdX[2][2]) + dxdX[1][2]*dxdX[2][3])/DetM;
+  dXdx[1][3] = sum;
+  sum        = (  dxdX[2][3]*dxdX[3][1]  - dxdX[2][1]*dxdX[3][3])/DetM;
+  dXdx[2][1] = sum;
+  sum        = (-(dxdX[1][3]*dxdX[3][1]) + dxdX[1][1]*dxdX[3][3])/DetM;
+  dXdx[2][2] = sum;
+  sum        = (  dxdX[1][3]*dxdX[2][1]  - dxdX[1][1]*dxdX[2][3])/DetM;
+  dXdx[2][3] = sum;
+  sum        = (-(dxdX[2][2]*dxdX[3][1]) + dxdX[2][1]*dxdX[3][2])/DetM;
+  dXdx[3][1] = sum;
+  sum        = (  dxdX[1][2]*dxdX[3][1]  - dxdX[1][1]*dxdX[3][2])/DetM;
+  dXdx[3][2] = sum;
+  sum        = (-(dxdX[1][2]*dxdX[2][1]) + dxdX[1][1]*dxdX[2][2])/DetM;
+  dXdx[3][3] = sum;
 }
 
 /* compute d^2 X^i /(dx^j dx^k) from dx^n/dX^l and d^2 x^n/(dX^m dX^l) */
@@ -52,15 +62,16 @@ void ddXdxdx_from_dXdx_ddxdXdX(double ddXdxdx[4][4][4],
   for(j=1;j<=3;j++)
   for(k=j;k<=3;k++)
   {
-    ddXdxdx[i][j][k] = 0.0;
+    LDOUBLE ddXdxdx_ijk = 0.0;
     for(n=1;n<=3;n++)
     for(m=1;m<=3;m++)
     for(l=1;l<=3;l++)
     {
-      double ddxdXdX_nml;
+      LDOUBLE ddxdXdX_nml;
       if(l>=m)  ddxdXdX_nml = ddxdXdX[n][m][l];
       else      ddxdXdX_nml = ddxdXdX[n][l][m];
-      ddXdxdx[i][j][k] -= dXdx[i][n]*dXdx[m][j]*dXdx[l][k]*ddxdXdX_nml;
+      ddXdxdx_ijk -= dXdx[i][n]*dXdx[m][j]*dXdx[l][k]*ddxdXdX_nml;
     }
+    ddXdxdx[i][j][k] = ddXdxdx_ijk;
   }
 }

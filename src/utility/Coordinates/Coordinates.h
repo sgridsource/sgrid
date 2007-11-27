@@ -1,6 +1,9 @@
 /* Coordinates.h */
 /* Wolfgang Tichy 4/2005 */
 
+/* use we can use long double in some places */
+#define LDOUBLE long double
+
 
 /* from cartesianDerivs.c */
 double dX_dx(int i, int m, int dXd,
