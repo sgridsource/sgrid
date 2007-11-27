@@ -39,7 +39,7 @@ int sgrid_Coordinates(void)
     snprintf(str, 999, "box%d_CoordinateTransforms_generic", b);
     AddPar(str, "no", 
            "select dXdx or ddXdxdx, to compute them using spectral derivs "
-           "[dXdx,ddXdxdx]");
+           "[no,dXdx,ddXdxdx]");
   }
 
   AddPar("CoordinateTransforms_stored", "yes",

@@ -3374,7 +3374,9 @@ void init_ddXdxdx_generic(tBox *box)
   int ind;
   double ddXdxdx[4][4][4];
   double dXdx[4][4];
+  double dxdX[4][4];
   double ddxdXdX[4][4][4];
+  int compute_ddxdXX_from_xyz=1;
 
   /* forallpoints(box, ind)
   {
@@ -3388,17 +3390,100 @@ void init_ddXdxdx_generic(tBox *box)
   } */
 
   /* write ddxdXX temporarily into vars with index ddXdd, ...  */
-  spec_allDerivs(box, box->v[ix], box->v[it1], box->v[it2], box->v[it3],
-                 box->v[ddXdd],   box->v[ddXdd+1], box->v[ddXdd+2],
-                 box->v[ddXdd+3], box->v[ddXdd+4], box->v[ddXdd+5]);
-  spec_allDerivs(box, box->v[iy], box->v[it1], box->v[it2], box->v[it3],
-                 box->v[ddYdd],   box->v[ddYdd+1], box->v[ddYdd+2],
-                 box->v[ddYdd+3], box->v[ddYdd+4], box->v[ddYdd+5]);
-  spec_allDerivs(box, box->v[iz], box->v[it1], box->v[it2], box->v[it3],
-                 box->v[ddZdd],   box->v[ddZdd+1], box->v[ddZdd+2],
-                 box->v[ddZdd+3], box->v[ddZdd+4], box->v[ddZdd+5]);
+  if(compute_ddxdXX_from_xyz)
+  {
+    spec_allDerivs(box, box->v[ix], box->v[it1], box->v[it2], box->v[it3],
+                   box->v[ddXdd],   box->v[ddXdd+1], box->v[ddXdd+2],
+                   box->v[ddXdd+3], box->v[ddXdd+4], box->v[ddXdd+5]);
+    spec_allDerivs(box, box->v[iy], box->v[it1], box->v[it2], box->v[it3],
+                   box->v[ddYdd],   box->v[ddYdd+1], box->v[ddYdd+2],
+                   box->v[ddYdd+3], box->v[ddYdd+4], box->v[ddYdd+5]);
+    spec_allDerivs(box, box->v[iz], box->v[it1], box->v[it2], box->v[it3],
+                   box->v[ddZdd],   box->v[ddZdd+1], box->v[ddZdd+2],
+                   box->v[ddZdd+3], box->v[ddZdd+4], box->v[ddZdd+5]);
+  }
+  else /* compute ddxdXX from dxdX */
+  {
+    /* loop over box and set up dx/dX^i in temp1, temp2, temp3 */
+    forallpoints(box,ind)
+    {
+      /* set dXdx matrix */
+      for(n=1; n<=3; n++)
+      {
+        dXdx[1][n] = box->v[dXd + n-1][ind];
+        dXdx[2][n] = box->v[dYd + n-1][ind];
+        dXdx[3][n] = box->v[dZd + n-1][ind];
+      }
+      /* reverse order of dXdx, dxdX to get dxdX from dXdx */
+      dXdx_from_dxdX(dxdX, dXdx);
+      /* write dx/dX^i into vars with index it1, ... */
+      box->v[it1][ind] = dxdX[1][1];
+      box->v[it2][ind] = dxdX[1][2];
+      box->v[it3][ind] = dxdX[1][3];
+    }
+    /* compute d/dX^j dx/dX^i, 
+       and store temporarily into vars with index ddXdd */
+    spec_Deriv1(box, 1, box->v[it1], box->v[ddXdd]);
+    spec_Deriv1(box, 2, box->v[it1], box->v[ddXdd+1]);
+    spec_Deriv1(box, 3, box->v[it1], box->v[ddXdd+2]);
+    spec_Deriv1(box, 2, box->v[it2], box->v[ddXdd+3]);
+    spec_Deriv1(box, 3, box->v[it2], box->v[ddXdd+4]);
+    spec_Deriv1(box, 3, box->v[it3], box->v[ddXdd+5]);
 
-  /* loop over box */
+    /* loop over box and set up dy/dX^i in temp1, temp2, temp3 */
+    forallpoints(box,ind)
+    {
+      /* set dXdx matrix */
+      for(n=1; n<=3; n++)
+      {
+        dXdx[1][n] = box->v[dXd + n-1][ind];
+        dXdx[2][n] = box->v[dYd + n-1][ind];
+        dXdx[3][n] = box->v[dZd + n-1][ind];
+      }
+      /* reverse order of dXdx, dxdX to get dxdX from dXdx */
+      dXdx_from_dxdX(dxdX, dXdx);
+      /* write dy/dX^i into vars with index it1, ... */
+      box->v[it1][ind] = dxdX[2][1];
+      box->v[it2][ind] = dxdX[2][2];
+      box->v[it3][ind] = dxdX[2][3];
+    }
+    /* compute d/dX^j dy/dX^i, 
+       and store temporarily into vars with index ddYdd */
+    spec_Deriv1(box, 1, box->v[it1], box->v[ddYdd]);
+    spec_Deriv1(box, 2, box->v[it1], box->v[ddYdd+1]);
+    spec_Deriv1(box, 3, box->v[it1], box->v[ddYdd+2]);
+    spec_Deriv1(box, 2, box->v[it2], box->v[ddYdd+3]);
+    spec_Deriv1(box, 3, box->v[it2], box->v[ddYdd+4]);
+    spec_Deriv1(box, 3, box->v[it3], box->v[ddYdd+5]);
+
+    /* loop over box and set up dz/dX^i in temp1, temp2, temp3 */
+    forallpoints(box,ind)
+    {
+      /* set dXdx matrix */
+      for(n=1; n<=3; n++)
+      {
+        dXdx[1][n] = box->v[dXd + n-1][ind];
+        dXdx[2][n] = box->v[dYd + n-1][ind];
+        dXdx[3][n] = box->v[dZd + n-1][ind];
+      }
+      /* reverse order of dXdx, dxdX to get dxdX from dXdx */
+      dXdx_from_dxdX(dxdX, dXdx);
+      /* write dz/dX^i into vars with index it1, ... */
+      box->v[it1][ind] = dxdX[3][1];
+      box->v[it2][ind] = dxdX[3][2];
+      box->v[it3][ind] = dxdX[3][3];
+    }
+    /* compute d/dX^j dz/dX^i, 
+       and store temporarily into vars with index ddZdd */
+    spec_Deriv1(box, 1, box->v[it1], box->v[ddZdd]);
+    spec_Deriv1(box, 2, box->v[it1], box->v[ddZdd+1]);
+    spec_Deriv1(box, 3, box->v[it1], box->v[ddZdd+2]);
+    spec_Deriv1(box, 2, box->v[it2], box->v[ddZdd+3]);
+    spec_Deriv1(box, 3, box->v[it2], box->v[ddZdd+4]);
+    spec_Deriv1(box, 3, box->v[it3], box->v[ddZdd+5]);
+  }
+
+  /* loop over box to compute ddXdxdx from dXdx and ddxdXdX*/
   forallpoints(box,ind)
   {
     /* set dXdx matrix */
