@@ -51,8 +51,11 @@ void ddXdxdx_from_dXdx_ddxdXdX(double ddXdxdx[4][4][4],
   for(i=1;i<=3;i++)
   for(j=1;j<=3;j++)
   for(k=j;k<=3;k++)
+  {
+    ddXdxdx[i][j][k] = 0.0;
     for(n=1;n<=3;n++)
     for(m=1;m<=3;m++)
     for(l=m;l<=3;l++)
-      ddXdxdx[i][j][k] = -dXdx[i][n]*dXdx[m][j]*dXdx[l][k]*ddxdXdX[n][m][l];
+      ddXdxdx[i][j][k] -= dXdx[i][n]*dXdx[m][j]*dXdx[l][k]*ddxdXdX[n][m][l];
+  }
 }
