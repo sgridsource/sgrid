@@ -106,7 +106,7 @@ void fdcentered_deriv_onesidedBC(double x[], double c[], double cder[], int n)
   int j;
 
   for (j=1;j<n;j++)
-    cder[j] =  0.5 * (c[j+1] - c[j-1]) / (x[j+1] - x[j-1]);
+    cder[j] = (c[j+1] - c[j-1]) / (x[j+1] - x[j-1]);
 
   cder[0] = (c[1] - c[0])  /(x[1] - x[0]);
   cder[n] = (c[n] - c[n-1])/(x[n] - x[n-1]);
