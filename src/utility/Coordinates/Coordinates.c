@@ -490,6 +490,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       enablevar_inbox(box, ddXdd);
       enablevar_inbox(box, ddYdd);
       enablevar_inbox(box, ddZdd);
+      enablevar_inbox(box, Ind("temp1"));
+      enablevar_inbox(box, Ind("temp2"));
+      enablevar_inbox(box, Ind("temp3"));
 
       /* initialize generic */
       init_ddXdxdx_generic(box);
