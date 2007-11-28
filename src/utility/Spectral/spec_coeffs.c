@@ -260,6 +260,7 @@ void get_spec_functionpointerTO_get_coeffs(tBox *box, int direc,
 }
 
 
+/* THIS IS OLD USE: spec_Basis_times_CoeffMatrix_direc INSTEAD!!! */
 /* compute B_k(X) M_ki     <-- B_k is basis function k
    Cu_k = M_ki u_i         <-- M_ki is coeff matrix
    u(X) = Cu_k B_k(X) = B_k(X) M_ki u_i = BM_i u_i      */
@@ -319,5 +320,47 @@ void spec_Basis_times_CoeffMatrix(double a, double b, int n,
 
   /* free memory for matrix M and basis funcs B */
   free(M);
+  free(B);
+}
+
+/* like spec_Basis_times_CoeffMatrix, but we read all info from box */
+void spec_Basis_times_CoeffMatrix_direc(tBox *box, int dir, 
+                                        double *BM, double X)
+{
+  double *B;
+  int i;
+  int n=max3(box->n1, box->n2, box->n3);
+
+  B = (double *) calloc(n, sizeof(double));
+  if(!B) errorexit("spec_Basis_times_CoeffMatrix_inbox: out of memory for B");
+    
+  /* initialize basis functions at point X */
+  /* Cu_k = M_ki u_i   <-- M is coeff matrix
+     u(X) = Cu_k B_k(X) = B_k(X) M_ki u_i = BM_i u_i */
+  if(dir==1)
+  {
+    n=box->n1;
+    for(i=0; i<n; i++) // B[i]=B_i(X)
+      B[i]=box->basis1((void *) box, box->bbox[0],box->bbox[1], i,n, X);
+    vector_times_matrix(B, box->Mcoeffs1, BM, n); /* get BM_i = B_k(X) M_ki */
+  }
+  else if(dir==2)
+  {
+    n=box->n2;
+    for(i=0; i<n; i++) // B[i]=B_i(X)
+      B[i]=box->basis2((void *) box, box->bbox[2],box->bbox[3], i,n, X);
+    vector_times_matrix(B, box->Mcoeffs2, BM, n); /* get BM_i = B_k(X) M_ki */
+  }
+  else if(dir==3)
+  {
+    n=box->n3;
+    for(i=0; i<n; i++) // B[i]=B_i(X)
+      B[i]=box->basis3((void *) box, box->bbox[4],box->bbox[5], i,n, X);
+    vector_times_matrix(B, box->Mcoeffs3, BM, n); /* get BM_i = B_k(X) M_ki */
+  }
+  else
+    errorexit("spec_Basis_times_CoeffMatrix_inbox: dir must be 1,2 or 3");
+
+  /* free memory for basis funcs B */
   free(B);
 }

@@ -65,6 +65,8 @@ void spec_Basis_times_CoeffMatrix(double a, double b, int n,
                                   double *BM, double X,
                     void   (*get_coeffs)(double *,double *, int),
                     double (*basisfunc)(void *aux, double a, double b, int k, int n1, double X));
+void spec_Basis_times_CoeffMatrix_direc(tBox *box, int dir, 
+                                        double *BM, double X);
 
 /* Functions from integrals.c */
 void spec_Integral1(tBox *box, int direc, double *u, double *U);
