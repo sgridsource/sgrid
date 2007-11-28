@@ -687,10 +687,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             cart_partials(box, Psi_phi_phi, temp3, Psi_y_phi_phi, temp4);
 
             /* obtain BM vectors for interpolation along B */
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[0], 0,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[1], 1,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM[0], 0);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM[1], 1);
 
@@ -752,10 +748,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             cart_partials(box, Psi_phi_phi, temp3, Psi_y_phi_phi, temp4);
 
             /* obtain BM vectors for interpolation along B */
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[0], 0,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[1], 1,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM[0], 0);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM[1], 1);
 
@@ -803,8 +795,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
 
           /* values at A=0 are equal in box0 and box1 */
           P = grid->box[1]->v[vlu->index[vind]]; /* values in box1 */
-//          spec_Basis_times_CoeffMatrix(0.0,1.0, n1, BM, 0.0,
-//                                       cheb_coeffs_fromZeros, cheb_basisfunc);
           spec_Basis_times_CoeffMatrix_direc(box, 1, BM, 0.0);
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
           {
@@ -826,8 +816,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
 
           /* values at A=0 are equal in box3 and box2 */
           P = grid->box[2]->v[vlu->index[vind]]; /* values in box2 */
-//          spec_Basis_times_CoeffMatrix(0.0,1.0, n1, BM, 0.0,
-//                                       cheb_coeffs_fromZeros, cheb_basisfunc);
           spec_Basis_times_CoeffMatrix_direc(box, 1, BM, 0.0);
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
           {
@@ -859,8 +847,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           dP[1] = grid->box[0]->v[vluDerivs->index[vind*9]];
           dP[2] = grid->box[0]->v[vluDerivs->index[vind*9+1]];
           dP[3] = grid->box[0]->v[vluDerivs->index[vind*9+2]];
-//          spec_Basis_times_CoeffMatrix(0.0,1.0, grid->box[0]->n1, BM, 0,
-//                                       cheb_coeffs_fromZeros, cheb_basisfunc);
           spec_Basis_times_CoeffMatrix_direc(grid->box[0], 1, BM, 0);
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
           {
@@ -896,8 +882,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             double *line = (double *) calloc(n2, sizeof(double));
 
             /* obtain BM vector for interpolation along B */
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM, 0.0,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM, 0.0);
             for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
             {
@@ -926,8 +910,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
           dP[1] = grid->box[3]->v[vluDerivs->index[vind*9]];
           dP[2] = grid->box[3]->v[vluDerivs->index[vind*9+1]];
           dP[3] = grid->box[3]->v[vluDerivs->index[vind*9+2]];
-//          spec_Basis_times_CoeffMatrix(0.0,1.0, grid->box[3]->n1, BM, 0,
-//                                       cheb_coeffs_fromZeros, cheb_basisfunc);
           spec_Basis_times_CoeffMatrix_direc(grid->box[3], 1, BM, 0.0);
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
           {
@@ -963,8 +945,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             double *line = (double *) calloc(n2, sizeof(double));
 
             /* obtain BM vector for interpolation along B */
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM, 0.0,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM, 0.0);
             for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)~(1,0) */
             {
@@ -1049,10 +1029,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             cart_partials(box, Psi_phi_phi, temp3, Psi_y_phi_phi, temp4);
 
             /* obtain BM vectors for interpolation along B */
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[0], 0,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM[1], 1,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM[0], 0);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM[1], 1);
 
@@ -1174,8 +1150,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             double *line = (double *) calloc(n2, sizeof(double));
 
             /* obtain BM vector for interpolation along B */
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM, 0.0,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM, 0.0);
             for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
             {
@@ -1224,8 +1198,6 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             double *line = (double *) calloc(n2, sizeof(double));
 
             /* obtain BM vector for interpolation along B */
-//            spec_Basis_times_CoeffMatrix(box->bbox[2],box->bbox[3], n2, BM, 0.0,
-//                                         cheb_coeffs_fromZeros, cheb_basisfunc);
             spec_Basis_times_CoeffMatrix_direc(box, 2, BM, 0.0);
             for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)~(1,0) */
             {
