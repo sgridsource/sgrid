@@ -280,7 +280,7 @@ int ScalarWave_analyze(tGrid *grid)
                  + psix[i]*psix[i] + psiy[i]*psiy[i] + psiz[i]*psiz[i] )
                + nonlin*( psi[i]*psi[i] - log(1+psi[i]*psi[i]) )*0.5;
 
-    spec_sphericalDF2dIntegral(box, rho, I2rho);
+    //spec_sphericalDF2dIntegral(box, rho, I2rho);
     /* spec_Integral1(box, 1, I2rho, I3rho); */
   }
   return 0;
