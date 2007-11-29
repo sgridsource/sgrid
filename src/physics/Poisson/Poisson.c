@@ -215,7 +215,7 @@ tGrid *grid_bak=make_empty_grid(grid->nvariables, 1);
 copy_grid_withoutvars(grid, grid_bak, 1);
 convert_grid_to_fd(grid);
 int b;
-for(b=0;b<6;b++)
+for(b=0;b<grid->nboxes;b++)
 {
 printf("box%d D\n",b);
 printmatrix(grid->box[b]->D1, grid->box[b]->n1);

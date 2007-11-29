@@ -29,7 +29,7 @@ int Newton(
   
   /* solve with Newton-Raphson iterations: */
   if(pr) printf("Newton:  starting Newton iterations ...\n");
-  for (inewton = 0; inewton <= itmax; inewton++)
+  for (inewton = 0; inewton < itmax; inewton++)
   {
     /* compute vlFu = F(u) */
     Fu(vlFu, vlu, vlc1, vlc2);
@@ -77,9 +77,10 @@ int Newton(
   } 
 
   /* warn if we didn't converge */
-  if (inewton > itmax)
+  if (inewton >= itmax)
   {
-    printf("Newton warning: *** Too many Newton steps! *** \n");
+    printf("Newton warning: *** Too many Newton steps! ");
+    printf("Tolerance goal not reached! *** \n");
     Fu(vlFu, vlu, vlc1, vlc2);
     res = norm2(vlFu);
     *normres = res;
