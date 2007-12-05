@@ -1778,6 +1778,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   static int domainsav=-1;
   static double Asav=-1, Bsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
+  static int Bshift=-1;
   double X,R;
   double Rsqr, Xsqr, Rsqr_p_Xsqr;
   double b, lep;
@@ -1791,6 +1792,22 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     return;
   }
   Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
+
+  /* shift B coord, so that we can use Fourier in B without hitting B=0 */
+  if(Bshift<0) Bshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
+  if(Bshift)
+  {
+    int N = box->n2;
+    B = B + 0.5/((1+N%2)*N);
+  }
+
+  /* make xyz_of_AnsorgNS periodic in B */
+  if(B>1.0)
+  {
+    B=2.0-B;
+    if(phi<PI)	phi=phi+PI;
+    else	phi=phi-PI;
+  }
 
   /* set some pars */
   b = 1; // Getd("BNS_D")*0.5;
@@ -1919,6 +1936,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   static double dAdxsav,   dAdysav,   dAdzsav,
                 dBdxsav,   dBdysav,   dBdzsav,
                 dphidxsav, dphidysav, dphidzsav;
+  static int Bshift=-1;
   double X,R;
   double Rsqr, Xsqr, Rsqr_p_Xsqr;
   double dABphi_dXRphi[4][4]; /* dABphi_dXRphi[k][l] = dA^k/dX^l */
@@ -1940,6 +1958,22 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     return;
   }
   Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
+
+  /* shift B coord, so that we can use Fourier in B without hitting B=0 */
+  if(Bshift<0) Bshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
+  if(Bshift)
+    {
+    int N = box->n2;
+    B = B + 0.5/((1+N%2)*N);
+  }
+
+  /* make dABphi_dxyz_AnsorgNS periodic in B */
+  if(B>1.0)
+  {
+    B=2.0-B;
+    if(phi<PI)	phi=phi+PI;
+    else	phi=phi-PI;
+  }
 
 /* Begin HACK3a */
 //A=0.3;
