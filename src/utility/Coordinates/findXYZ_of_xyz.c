@@ -16,7 +16,7 @@ tBox *box_for_xyz_VectorFunc;
 void xyz_VectorFunc(int n, double *XYZvec, double *fvec)
 {
   double xg,yg,zg;
-  int ind=0; /* works only if the x_of_X[i] don't use ind */
+  int ind=-1; /* works only if the x_of_X[i] don't use ind */
 
   xg = box_for_xyz_VectorFunc->x_of_X[1]((void *) box_for_xyz_VectorFunc,
                                           ind, XYZvec[1],XYZvec[2],XYZvec[3]);
@@ -172,7 +172,7 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
 void x_VectorFunc_YZ(int n, double *XYZvec, double *fvec)
 {
   double xg;
-  int ind=0; /* works only if the x_of_X[i] don't use ind */
+  int ind=-1; /* works only if the x_of_X[i] don't use ind */
 
   xg = box_for_xyz_VectorFunc->x_of_X[1]((void *) box_for_xyz_VectorFunc,
                                           ind, XYZvec[1],XYZvec[2],XYZvec[3]);
