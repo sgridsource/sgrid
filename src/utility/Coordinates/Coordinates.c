@@ -1798,7 +1798,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   if(Bshift)
   {
     int N = box->n2;
-    B = B + 0.5/((1+N%2)*N);
+    B = B + 1.0/((1+N%2)*N);
   }
 
   /* make xyz_of_AnsorgNS periodic in B */
@@ -1964,7 +1964,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   if(Bshift)
     {
     int N = box->n2;
-    B = B + 0.5/((1+N%2)*N);
+    B = B + 1.0/((1+N%2)*N);
   }
 
   /* make dABphi_dxyz_AnsorgNS periodic in B */
