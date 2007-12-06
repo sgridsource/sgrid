@@ -79,11 +79,12 @@ int Newton(
   /* warn if we didn't converge */
   if (inewton >= itmax)
   {
-    printf("Newton warning: *** Too many Newton steps! ");
-    printf("Tolerance goal not reached! *** \n");
     Fu(vlFu, vlu, vlc1, vlc2);
     res = norm2(vlFu);
     *normres = res;
+    printf("Newton warning: *** Too many Newton steps! ");
+    if(*normres <= tol) printf("*** \n");
+    else		printf("Tolerance goal not reached! *** \n");
     printf("Newton: Residual after %d Newton steps:"
            "  Newton residual = %e\n", inewton, *normres);
   }
