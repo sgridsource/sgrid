@@ -245,11 +245,10 @@ write_grid(grid);
 //exit(11);
 
   /* call Newton solver */
-  if(itmax>0)
-    Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
-           itmax, tol, &normresnonlin, 1,
-           linear_solver, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
-           linSolver_itmax, linSolver_tolFac, linSolver_tol);
+  Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
+         itmax, tol, &normresnonlin, 1,
+         linear_solver, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
+         linSolver_itmax, linSolver_tolFac, linSolver_tol);
 
   /* free varlists */     
   VLDisableFree(vldu);
@@ -1289,8 +1288,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             int i0;
             int ind=Index(pl,0,0);
             phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            k_phi = grid->box[0]->n3 * phi/(2.0*PI);
-            nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
+            k_phi = grid->box[3]->n3 * phi/(2.0*PI);
+            nearestXYZ_of_xyz_inplane(grid->box[3], &i0, &A,&B,&phi,
                                       X[ind],Y[ind],Z[ind], 3, k_phi);
             forplane1_nojump(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
             {
@@ -1306,8 +1305,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             int i0;
             int ind=Index(0,pl,0);
             phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            k_phi = grid->box[0]->n3 * phi/(2.0*PI);
-            nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
+            k_phi = grid->box[3]->n3 * phi/(2.0*PI);
+            nearestXYZ_of_xyz_inplane(grid->box[3], &i0, &A,&B,&phi,
                                       X[ind],Y[ind],Z[ind], 3, k_phi);
             forplane2_nojump(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
             {
@@ -1323,8 +1322,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             int i0;
             int ind=Index(0,0,pl);
             phi   = Arg(Y[ind],Z[ind]);   if(phi<0) phi = 2.0*PI+phi;
-            k_phi = grid->box[0]->n3 * phi/(2.0*PI);
-            nearestXYZ_of_xyz_inplane(grid->box[0], &i0, &A,&B,&phi,
+            k_phi = grid->box[3]->n3 * phi/(2.0*PI);
+            nearestXYZ_of_xyz_inplane(grid->box[3], &i0, &A,&B,&phi,
                                       X[ind],Y[ind],Z[ind], 3, k_phi);
             forplane3_nojump(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
             {
