@@ -106,9 +106,13 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
         col++;
       }
   } /* end: forallboxes(grid,b) */
-  if(pr) printf("\nSetMatrixLines_slowly: "
-                "the %d*%d matrix Aline=%p is now set!\n",
-                col, col, Aline);
+  if(pr)
+  {
+    printf("\nSetMatrixLines_slowly: "
+           "the %d*%d matrix Aline=%p is now set!\n",
+           col, col, Aline);
+    fflush(stdout);
+  }
 }
 /* NOTE: 
 In order to speed up SetMatrixLines_slowly we should make an Fx

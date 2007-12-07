@@ -152,7 +152,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
       }
   }
   if(pr)
-  { printf("umfpack_solve: vector vlx=%p\n is now set!", vlx); fflush(stdout);}
+  { printf("umfpack_solve: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
 
   /* free mem. */
   free(b);
