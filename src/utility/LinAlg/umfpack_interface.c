@@ -30,6 +30,8 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   void *Symbolic, *Numeric;
   int INFO;
 
+  if(pr) { printf("umfpack_solve: setting sparse matrix\n"); fflush(stdout); }
+
   /* figure out number of lines */
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
 
@@ -107,7 +109,8 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
 
 #ifdef UMFPACK
   /* call umfpack routine */
-  if(pr) printf("umfpack_solve: calling umfpack_di_solve\n");
+  if(pr)
+  { printf("umfpack_solve: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
   INFO=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
@@ -119,7 +122,11 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
             "SPECIALINCS += -I/usr/include/ufsparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
-  if(pr) printf("umfpack_solve: umfpack_di_solve -> INFO=%d\n", INFO);
+  if(pr)
+  { 
+    printf("umfpack_solve: umfpack_di_solve -> INFO=%d\n", INFO); 
+    fflush(stdout);
+  }
 
   if(INFO!=0)
   {
@@ -128,6 +135,8 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   }
 
   /* set vlx = x */
+  if(pr)
+  { printf("umfpack_solve: setting solution vector\n"); fflush(stdout); }
   line = 0;
   forallboxes(grid,bi)
   {
@@ -142,6 +151,8 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
         line++;
       }
   }
+  if(pr)
+  { printf("umfpack_solve: vector vlx=%p\n is now set!", vlx); fflush(stdout);}
 
   /* free mem. */
   free(b);
