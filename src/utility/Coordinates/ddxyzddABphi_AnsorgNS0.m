@@ -38,7 +38,7 @@ R[A_,B_,Phi_] = (1-Ap[A])*(ImCp[B,phi] - B*ImCp[1,phi]) +
 
 
 (* Define x,y,z in terms of X,R,phi *)
-$Assumptions = X[A_,B_,Phi_]>=0  &&  R[A_,B_,Phi_]>=0 &&  phi>=0 && phi<2PiXR
+$Assumptions = X[A_,B_,Phi_]>=0  &&  R[A_,B_,Phi_]>=0 &&  phi>=0 && phi<2Pi
 
 XRtoXRofABphi = {R->R[A,B,Phi],X->X[A,B,Phi]}
 x[A_,B_,Phi_] = b (1/(R^2 + X^2)^2 + 1)(X^2 - R^2)/2 /. XRtoXRofABphi
