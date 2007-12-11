@@ -38,6 +38,8 @@ void output0d_boxvar(tBox *box, char *name)
   int i;
   double time=box->grid->time;
 
+  if(var==NULL) return;
+
   /* find max and min of var */
   max = min = var[0];
   forallpoints(box ,i)

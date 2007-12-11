@@ -105,6 +105,8 @@ void xgraph_out1_boxvar(tBox *box, char *name)
   char xfilename[1000];
   char yfilename[1000];
   char zfilename[1000];
+
+  if(box->v[Ind(name)]==NULL) return;
   
   snprintf(xfilename, 999, "%s/%s.X%d", Gets("outdir"), name, box->b);
   snprintf(yfilename, 999, "%s/%s.Y%d", Gets("outdir"), name, box->b);

@@ -90,7 +90,9 @@ void gnuplot_out2d_boxvar(tBox *box, char *name)
   char XZfilename[1000];
   char YZfilename[1000];
   char str[1000];
-  
+
+  if(box->v[Ind(name)]==NULL) return;
+
   snprintf(XYfilename, 999, "%s/%s.XY%d", Gets("outdir"), name, box->b);
   snprintf(XZfilename, 999, "%s/%s.XZ%d", Gets("outdir"), name, box->b);
   snprintf(YZfilename, 999, "%s/%s.YZ%d", Gets("outdir"), name, box->b);
