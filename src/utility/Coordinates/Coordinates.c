@@ -2580,8 +2580,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 double ddphi_dydy_AnsorgNS(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
-  double x,y,z, rhosqr;
-  xyz_of_AnsorgNS(box, ind, box->b, A,B,phi, &x,&y,&z);
+  double y,z, rhosqr;
+  y = box->x_of_X[2](aux, ind, A,B,phi);
+  z = box->x_of_X[3](aux, ind, A,B,phi);
   rhosqr=y*y+z*z;
   return 2.0*cos(phi)*sin(phi)/rhosqr;
 }
@@ -2589,8 +2590,9 @@ double ddphi_dydy_AnsorgNS(void *aux, int ind, double A, double B, double phi)
 double ddphi_dydz_AnsorgNS(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
-  double x,y,z, rhosqr, ssqr;
-  xyz_of_AnsorgNS(box, ind, box->b, A,B,phi, &x,&y,&z);
+  double y,z, rhosqr, ssqr;
+  y = box->x_of_X[2](aux, ind, A,B,phi);
+  z = box->x_of_X[3](aux, ind, A,B,phi);
   rhosqr=y*y+z*z;  ssqr=sin(phi);
   ssqr=ssqr*ssqr;
   return (2.0*ssqr-1.0)/rhosqr;
@@ -2599,8 +2601,9 @@ double ddphi_dydz_AnsorgNS(void *aux, int ind, double A, double B, double phi)
 double ddphi_dzdz_AnsorgNS(void *aux, int ind, double A, double B, double phi)
 {
   tBox *box = (tBox *) aux;
-  double x,y,z, rhosqr;
-  xyz_of_AnsorgNS(box, ind, box->b, A,B,phi, &x,&y,&z);
+  double y,z, rhosqr;
+  y = box->x_of_X[2](aux, ind, A,B,phi);
+  z = box->x_of_X[3](aux, ind, A,B,phi);
   rhosqr=y*y+z*z;
   return -2.0*cos(phi)*sin(phi)/rhosqr;
 }
