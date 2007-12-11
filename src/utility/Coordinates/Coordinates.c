@@ -569,6 +569,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
                           (y[n1*n2]-y[0])*(y[n1*n2]-y[0]) +
                           (z[n1*n2]-z[0])*(z[n1*n2]-z[0])));
   }
+  /* compute cartesian coordinates x,y,z and derivs again 
+     (in case generic changed some things) */
+  compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
 
   return 0;
 }
@@ -3658,92 +3661,92 @@ double dZ_dz_generic(void *aux, int ind, double X, double Y, double Z)
 /* 2nd derivs */
 double ddX_dxdx_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx");
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXddxx");
   return box->v[vind][ind];
 }
 double ddX_dxdy_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+1;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXddxx")+1;
   return box->v[vind][ind];
 }
 double ddX_dxdz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+2;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXddxx")+2;
   return box->v[vind][ind];
 }
 double ddX_dydy_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+3;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXddxx")+3;
   return box->v[vind][ind];
 }
 double ddX_dydz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+4;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXddxx")+4;
   return box->v[vind][ind];
 }
 double ddX_dzdz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddXdxdx")+5;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddXddxx")+5;
   return box->v[vind][ind];
 }
 double ddY_dxdx_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx");
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYddxx");
   return box->v[vind][ind];
 }
 double ddY_dxdy_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+1;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYddxx")+1;
   return box->v[vind][ind];
 }
 double ddY_dxdz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+2;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYddxx")+2;
   return box->v[vind][ind];
 }
 double ddY_dydy_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+3;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYddxx")+3;
   return box->v[vind][ind];
 }
 double ddY_dydz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+4;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYddxx")+4;
   return box->v[vind][ind];
 }
 double ddY_dzdz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddYdxdx")+5;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddYddxx")+5;
   return box->v[vind][ind];
 }
 double ddZ_dxdx_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx");
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZddxx");
   return box->v[vind][ind];
 }
 double ddZ_dxdy_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+1;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZddxx")+1;
   return box->v[vind][ind];
 }
 double ddZ_dxdz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+2;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZddxx")+2;
   return box->v[vind][ind];
 }
 double ddZ_dydy_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+3;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZddxx")+3;
   return box->v[vind][ind];
 }
 double ddZ_dydz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+4;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZddxx")+4;
   return box->v[vind][ind];
 }
 double ddZ_dzdz_generic(void *aux, int ind, double X, double Y, double Z)
 {
-  tBox *box = (tBox *) aux;    int vind = Ind("ddZdxdx")+5;
+  tBox *box = (tBox *) aux;    int vind = Ind("ddZddxx")+5;
   return box->v[vind][ind];
 }
 /* end of: generic coordinate derivs */
