@@ -358,6 +358,13 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+
+      box->ddX_dxdx[3][1][1] = zero_of_xyz;
+      box->ddX_dxdx[3][1][2] = zero_of_xyz;
+      box->ddX_dxdx[3][1][3] = zero_of_xyz;
+      box->ddX_dxdx[3][2][2] = ddphi_dydy_AnsorgNS;
+      box->ddX_dxdx[3][2][3] = ddphi_dydz_AnsorgNS;
+      box->ddX_dxdx[3][3][3] = ddphi_dzdz_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS1") )
     {
@@ -378,6 +385,13 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+
+      box->ddX_dxdx[3][1][1] = zero_of_xyz;
+      box->ddX_dxdx[3][1][2] = zero_of_xyz;
+      box->ddX_dxdx[3][1][3] = zero_of_xyz;
+      box->ddX_dxdx[3][2][2] = ddphi_dydy_AnsorgNS;
+      box->ddX_dxdx[3][2][3] = ddphi_dydz_AnsorgNS;
+      box->ddX_dxdx[3][3][3] = ddphi_dzdz_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS2") )
     {
@@ -398,6 +412,13 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+
+      box->ddX_dxdx[3][1][1] = zero_of_xyz;
+      box->ddX_dxdx[3][1][2] = zero_of_xyz;
+      box->ddX_dxdx[3][1][3] = zero_of_xyz;
+      box->ddX_dxdx[3][2][2] = ddphi_dydy_AnsorgNS;
+      box->ddX_dxdx[3][2][3] = ddphi_dydz_AnsorgNS;
+      box->ddX_dxdx[3][3][3] = ddphi_dzdz_AnsorgNS;
     }
     else if( Getv(str, "AnsorgNS3") )
     {
@@ -418,6 +439,13 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+
+      box->ddX_dxdx[3][1][1] = zero_of_xyz;
+      box->ddX_dxdx[3][1][2] = zero_of_xyz;
+      box->ddX_dxdx[3][1][3] = zero_of_xyz;
+      box->ddX_dxdx[3][2][2] = ddphi_dydy_AnsorgNS;
+      box->ddX_dxdx[3][2][3] = ddphi_dydz_AnsorgNS;
+      box->ddX_dxdx[3][3][3] = ddphi_dzdz_AnsorgNS;
     }
     else
       errorexit("Coordinates: unknown coordinates...");
@@ -471,15 +499,15 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
 
       /* initialize if we use generic */
       init_dXdx_generic(box);
-      box->dX_dx[1][1] = dX_dx_generic;
-      box->dX_dx[1][2] = dX_dy_generic;
-      box->dX_dx[1][3] = dX_dz_generic;
-      box->dX_dx[2][1] = dY_dx_generic;
-      box->dX_dx[2][2] = dY_dy_generic;
-      box->dX_dx[2][3] = dY_dz_generic;
-      box->dX_dx[3][1] = dZ_dx_generic;
-      box->dX_dx[3][2] = dZ_dy_generic;
-      box->dX_dx[3][3] = dZ_dz_generic;
+      if(box->dX_dx[1][1]==NULL) box->dX_dx[1][1] = dX_dx_generic;
+      if(box->dX_dx[1][2]==NULL) box->dX_dx[1][2] = dX_dy_generic;
+      if(box->dX_dx[1][3]==NULL) box->dX_dx[1][3] = dX_dz_generic;
+      if(box->dX_dx[2][1]==NULL) box->dX_dx[2][1] = dY_dx_generic;
+      if(box->dX_dx[2][2]==NULL) box->dX_dx[2][2] = dY_dy_generic;
+      if(box->dX_dx[2][3]==NULL) box->dX_dx[2][3] = dY_dz_generic;
+      if(box->dX_dx[3][1]==NULL) box->dX_dx[3][1] = dZ_dx_generic;
+      if(box->dX_dx[3][2]==NULL) box->dX_dx[3][2] = dZ_dy_generic;
+      if(box->dX_dx[3][3]==NULL) box->dX_dx[3][3] = dZ_dz_generic;
     }
     if(Getv(str, "ddXdxdx"))
     {
@@ -496,26 +524,26 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
 
       /* initialize generic */
       init_ddXdxdx_generic(box);
-      box->ddX_dxdx[1][1][1] = ddX_dxdx_generic;
-      box->ddX_dxdx[1][1][2] = ddX_dxdy_generic;
-      box->ddX_dxdx[1][1][3] = ddX_dxdz_generic;
-      box->ddX_dxdx[1][2][2] = ddX_dydy_generic;
-      box->ddX_dxdx[1][2][3] = ddX_dydz_generic;
-      box->ddX_dxdx[1][3][3] = ddX_dzdz_generic;
+      if(box->ddX_dxdx[1][1][1]==NULL) box->ddX_dxdx[1][1][1]=ddX_dxdx_generic;
+      if(box->ddX_dxdx[1][1][2]==NULL) box->ddX_dxdx[1][1][2]=ddX_dxdy_generic;
+      if(box->ddX_dxdx[1][1][3]==NULL) box->ddX_dxdx[1][1][3]=ddX_dxdz_generic;
+      if(box->ddX_dxdx[1][2][2]==NULL) box->ddX_dxdx[1][2][2]=ddX_dydy_generic;
+      if(box->ddX_dxdx[1][2][3]==NULL) box->ddX_dxdx[1][2][3]=ddX_dydz_generic;
+      if(box->ddX_dxdx[1][3][3]==NULL) box->ddX_dxdx[1][3][3]=ddX_dzdz_generic;
 
-      box->ddX_dxdx[2][1][1] = ddY_dxdx_generic;
-      box->ddX_dxdx[2][1][2] = ddY_dxdy_generic;
-      box->ddX_dxdx[2][1][3] = ddY_dxdz_generic;
-      box->ddX_dxdx[2][2][2] = ddY_dydy_generic;
-      box->ddX_dxdx[2][2][3] = ddY_dydz_generic;
-      box->ddX_dxdx[2][3][3] = ddY_dzdz_generic;
+      if(box->ddX_dxdx[2][1][1]==NULL) box->ddX_dxdx[2][1][1]=ddY_dxdx_generic;
+      if(box->ddX_dxdx[2][1][2]==NULL) box->ddX_dxdx[2][1][2]=ddY_dxdy_generic;
+      if(box->ddX_dxdx[2][1][3]==NULL) box->ddX_dxdx[2][1][3]=ddY_dxdz_generic;
+      if(box->ddX_dxdx[2][2][2]==NULL) box->ddX_dxdx[2][2][2]=ddY_dydy_generic;
+      if(box->ddX_dxdx[2][2][3]==NULL) box->ddX_dxdx[2][2][3]=ddY_dydz_generic;
+      if(box->ddX_dxdx[2][3][3]==NULL) box->ddX_dxdx[2][3][3]=ddY_dzdz_generic;
 
-      box->ddX_dxdx[3][1][1] = ddZ_dxdx_generic;
-      box->ddX_dxdx[3][1][2] = ddZ_dxdy_generic;
-      box->ddX_dxdx[3][1][3] = ddZ_dxdz_generic;
-      box->ddX_dxdx[3][2][2] = ddZ_dydy_generic;
-      box->ddX_dxdx[3][2][3] = ddZ_dydz_generic;
-      box->ddX_dxdx[3][3][3] = ddZ_dzdz_generic;
+      if(box->ddX_dxdx[3][1][1]==NULL) box->ddX_dxdx[3][1][1]=ddZ_dxdx_generic;
+      if(box->ddX_dxdx[3][1][2]==NULL) box->ddX_dxdx[3][1][2]=ddZ_dxdy_generic;
+      if(box->ddX_dxdx[3][1][3]==NULL) box->ddX_dxdx[3][1][3]=ddZ_dxdz_generic;
+      if(box->ddX_dxdx[3][2][2]==NULL) box->ddX_dxdx[3][2][2]=ddZ_dydy_generic;
+      if(box->ddX_dxdx[3][2][3]==NULL) box->ddX_dxdx[3][2][3]=ddZ_dydz_generic;
+      if(box->ddX_dxdx[3][3][3]==NULL) box->ddX_dxdx[3][3][3]=ddZ_dzdz_generic;
     }
 
     /* print distances in cart. coordinates */
@@ -2543,6 +2571,35 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 //*dAdx,*dAdy,*dAdz, *dBdx,*dBdy,*dBdz, *dphidx,*dphidy,*dphidz);
 //}
 //}
+}
+
+/* compute d^2 phi/dydy */
+double ddphi_dydy_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z, rhosqr;
+  xyz_of_AnsorgNS(box, ind, box->b, A,B,phi, &x,&y,&z);
+  rhosqr=y*y+z*z;
+  return 2.0*cos(phi)*sin(phi)/rhosqr;
+}
+/* compute d^2 phi/dydz */
+double ddphi_dydz_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z, rhosqr, ssqr;
+  xyz_of_AnsorgNS(box, ind, box->b, A,B,phi, &x,&y,&z);
+  rhosqr=y*y+z*z;  ssqr=sin(phi);
+  ssqr=ssqr*ssqr;
+  return (2.0*ssqr-1.0)/rhosqr;
+}
+/* compute d^2 phi/dzdz */
+double ddphi_dzdz_AnsorgNS(void *aux, int ind, double A, double B, double phi)
+{
+  tBox *box = (tBox *) aux;
+  double x,y,z, rhosqr;
+  xyz_of_AnsorgNS(box, ind, box->b, A,B,phi, &x,&y,&z);
+  rhosqr=y*y+z*z;
+  return -2.0*cos(phi)*sin(phi)/rhosqr;
 }
 
 /* compute d^2(x,y,z)/(d(A,B,phi)d(A,B,phi)) */

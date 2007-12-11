@@ -228,6 +228,9 @@ double ddzs_dzdz_tan_stretch(void *aux, int ind, double xs, double ys, double zs
 
 /* AnsorgNS coordinates:                                               */
 /* 4 domains: 0=inside NS+, 1=outside NS+, 2=outside NS-, 3=inside NS- */
+double ddphi_dydy_AnsorgNS(void *aux, int ind, double A, double B, double phi);
+double ddphi_dydz_AnsorgNS(void *aux, int ind, double A, double B, double phi);
+double ddphi_dzdz_AnsorgNS(void *aux, int ind, double A, double B, double phi);
 double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double y_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double z_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
