@@ -441,7 +441,8 @@ void F_Poisson(tVarList *vlFu, tVarList *vlu,
     int i;
 
     /* compute the derivs */
-    if(Getv("Poisson_useDD", "yes"))
+    if(Getv("Poisson_useDD", "yes") &&
+       (box->ddX_dxdx[1][1][1]!=NULL || box->x_of_X[1]==NULL))
     {
       allDerivsOf_S(box, vlu->index[0], vluDerivs->index[0],
                     vluDerivs->index[3]);
@@ -545,7 +546,8 @@ void J_Poisson(tVarList *vlJdu, tVarList *vldu,
     int i;
 
     /* compute the derivs */
-    if(Getv("Poisson_useDD", "yes"))
+    if(Getv("Poisson_useDD", "yes") && 
+       (box->ddX_dxdx[1][1][1]!=NULL || box->x_of_X[1]==NULL))
     {
       allDerivsOf_S(box, vldu->index[0], vlduDerivs->index[0],
                     vlduDerivs->index[3]);
