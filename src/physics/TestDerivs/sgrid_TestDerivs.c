@@ -22,13 +22,13 @@ int sgrid_TestDerivs()
   /* parameters */
   AddPar("TestDerivs_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
-  AddPar("TestDerivs_A",     "1", "amplitude of wave");
-  AddPar("TestDerivs_sigmax","1", "sigmax of Gaussian wavepacket");
-  AddPar("TestDerivs_sigmay","1", "sigmay of Gaussian wavepacket");
-  AddPar("TestDerivs_sigmaz","1", "sigmaz of Gaussian wavepacket");
-  AddPar("TestDerivs_x0",    "1", "x-location of Gaussian wavepacket");
-  AddPar("TestDerivs_y0",    "0", "y-location of Gaussian wavepacket");
-  AddPar("TestDerivs_z0",    "0", "z-location of Gaussian wavepacket");
+  AddPar("TestDerivs_A",     "1",   "amplitude of wave");
+  AddPar("TestDerivs_sigmax","1",   "sigmax of Gaussian wavepacket");
+  AddPar("TestDerivs_sigmay","1.3", "sigmay of Gaussian wavepacket");
+  AddPar("TestDerivs_sigmaz","0.7", "sigmaz of Gaussian wavepacket");
+  AddPar("TestDerivs_x0",    "1",   "x-location of Gaussian wavepacket");
+  AddPar("TestDerivs_y0",    "0.3", "y-location of Gaussian wavepacket");
+  AddPar("TestDerivs_z0",    "0.1", "z-location of Gaussian wavepacket");
 	     	   	   	 
   return 0;
 }
