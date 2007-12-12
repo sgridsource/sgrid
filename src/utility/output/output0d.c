@@ -50,7 +50,8 @@ void output0d_boxvar(tBox *box, char *name)
 
   /* determine function used to compute volume integrals */
   snprintf(str, 999, "box%d_Coordinates", box->b);
-  if( Getv(str, "Cartesian") )
+  if( Getv(str, "Cartesian") || 
+      Getv("0doutput_VolumeIntegralJacobian", "one") )
   {
     VolIntergral = spec_3dIntegral;
     forallpoints(box ,i) VolJac[i] = 1.0;

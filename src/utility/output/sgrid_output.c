@@ -34,6 +34,8 @@ int sgrid_output()
 	 "whether to interpolate onto standard coord");
   AddPar("3doutinterpolate", "no", 
 	 "whether to interpolate onto standard coord");
+  AddPar("0doutput_VolumeIntegralJacobian", "fromCoordinates", 
+	 "which Jacobian we use for vol. integrals [fromCoordinates,one]");
 
   AddPar("0doutput", "", "variables to output along axes");
   AddPar("1doutput", "", "variables to output along axes");
