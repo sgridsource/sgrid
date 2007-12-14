@@ -313,8 +313,9 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
         xp[i] = x[line];
         line++;
       }
-    } } if(pr) { printf("umfpack_solve_forSortedVars: vector vlx=%p is now
-  set!\n", vlx); fflush(stdout);}
+    } 
+  } 
+  if(pr) { printf("umfpack_solve_forSortedVars: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
 
   /* free mem. */
   free(b);
