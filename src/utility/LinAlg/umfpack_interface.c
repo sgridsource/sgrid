@@ -336,7 +336,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
                                double dropbelow, int pr)
 {
   tGrid *grid = vlx->grid;
-  int i,j,n;
+  int i,j,n, ent;
   double Aij;
   int bi, line;
   int nvars=vlx->n;
@@ -357,9 +357,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
 
   /* count number of entries in sparse matrix */
-  for(i = 0; i < nlines; i++)
-    for(j = 0; j < nlines; j++)
-      if(GetSparseVectorComponent(Acol[j],i)!=0.0) nz++;
+  for(j = 0; j < nlines; j++) nz+=Acol[j]->entries;
 
   /* allocate memory for b and x */
   b=calloc(nlines, sizeof(double));
@@ -402,9 +400,10 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   for(j = 0; j < nlines; j++)
   {
     Ap[j+1] = Ap[j];
-    for(i = 0; i < nlines; i++)
+    for(ent = 0; ent < Acol[j]->entries; ent++)
     {
-      Aij = GetSparseVectorComponent(Acol[j],i);
+      i   = Acol[j]->pos[ent];
+      Aij = Acol[j]->val[ent];
       if(fabs(Aij)<=dropbelow) continue;
       Ap[j+1]++;
       Ai[n] = i;
