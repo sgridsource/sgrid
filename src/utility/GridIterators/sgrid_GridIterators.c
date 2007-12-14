@@ -14,6 +14,9 @@ int sgrid_GridIterators()
   AddPar("GridIterators_verbose", "yes", "talk about it");
   AddPar("GridIterators_GMRES_restart", "max", 
          "Restart parameter for GMRES[some #,max");
+  AddPar("GridIterators_setABStozero_below", "0", 
+         "some numbers will be set equal to 0 if their magnitude "
+         "is below this value [any positive number]");
 
   /* check whether there is more to do */
   if (!Getv("physics", "GridIterators")) return 0;

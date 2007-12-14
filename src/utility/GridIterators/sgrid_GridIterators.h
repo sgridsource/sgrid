@@ -21,7 +21,7 @@ int Newton(
   int linSolv_itmax, double linSolv_tolFac, double linSolv_tol);
 
 
-/* wrappers from funcs from templates */
+/* wrappers for funcs from templates */
 int templates_gmres_wrapper(
             tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -34,6 +34,20 @@ int templates_bicgstab_wrapper(
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
 int templates_cgs_wrapper(
             tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+
+/* wrappers for LAPACK */
+int LAPACK_dgesv_wrapper(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+
+/* wrappers for UMFPACK */
+int UMFPACK_solve_wrapper(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
