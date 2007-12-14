@@ -158,10 +158,12 @@ int Poisson_solve(tGrid *grid)
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
-
   tVarList *vlu, *vlFu, *vluDerivs;
   tVarList *vldu, *vlr, *vlduDerivs;
   tVarList *vlrhs;
+
+  /* Set GridIterators_setABStozero_below to 1e-12 for compatibility */
+  Setd("GridIterators_setABStozero_below", 1e-12); // remove later
 
   /* allocate varlists */
   vlu  = vlalloc(grid);
@@ -202,11 +204,11 @@ int Poisson_solve(tGrid *grid)
   if(Getv("Poisson_linSolver", "bicgstab"))
     linear_solver=bicgstab;
   else if(Getv("Poisson_linSolver", "LAPACK"))
-    linear_solver=LinSolve_withLAPACK;
+    linear_solver=LAPACK_dgesv_wrapper;
   else if(Getv("Poisson_linSolver", "templates_GMRES"))
     linear_solver=templates_gmres_wrapper;
   else if(Getv("Poisson_linSolver", "UMFPACK"))
-    linear_solver=LinSolve_withUMFPACK;
+    linear_solver=UMFPACK_solve_wrapper;
   else
     errorexit("Poisson_solve: unknown Poisson_linSolver");
 
