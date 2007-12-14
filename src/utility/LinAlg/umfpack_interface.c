@@ -96,7 +96,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   if(pr) printf("umfpack_solve: the sparse %d*%d matrix "
                 "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
                 nlines, nlines, nlines, Ap[nlines], Ai, Ax);
-  if(pr) printf("umfpack_solve: %d entries < %g were dropped\n",
+  if(pr) printf("umfpack_solve: %d entries <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
   if(pr&&0)
@@ -256,7 +256,7 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   if(pr) printf("umfpack_solve_forSortedVars: the sparse %d*%d matrix "
                 "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
                 nlines, nlines, nlines, Ap[nlines], Ai, Ax);
-  if(pr) printf("umfpack_solve_forSortedVars: %d entries < %g were dropped\n",
+  if(pr) printf("umfpack_solve_forSortedVars: %d entries <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
   if(pr&&0)
