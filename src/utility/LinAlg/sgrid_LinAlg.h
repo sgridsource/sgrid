@@ -29,6 +29,9 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
 void SetMatrixColumns_slowly(tSparseVector **Acol,
     void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
+void SetMatrixColumns_forSortedVars_slowly(tSparseVector **Acol,
+    void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
+    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
 
 /* lapack_interface.c */
 int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr);
@@ -39,3 +42,6 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
 int umfpack_solve_fromAcolumns(tSparseVector **Acol,
                                tVarList *vlx, tVarList *vlb,
                                double dropbelow, int pr);
+int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
+      tVarList *vlx, tVarList *vlb,
+      double dropbelow, int pr);
