@@ -151,8 +151,10 @@ int VarNComponents(int i)
   if (i < 0 || i >= nvdb)
     errorexit("VarNComponents: index out of range");
   if (vdb[i].component != 0)
-    errorexit("VarNComponents: you have to use index of zeroth component");
- 
+  {
+    /* errorexit("VarNComponents: you have to use index of zeroth component"); */
+    i = IndComponent0(i);
+  }
   return vdb[i].ncomponents;
 }
 
