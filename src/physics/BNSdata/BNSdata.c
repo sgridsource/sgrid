@@ -24,7 +24,7 @@ int BNSdata_startup(tGrid *grid)
   printf("Initializing BNSdata:\n");
 
   /* set boundary information: farlimit, falloff, propagation speed */
-  VarNameSetBoundaryInfo("BNSdata_Psi",   1, 1, 1.0);
+  VarNameSetBoundaryInfo("BNSdata_Psi",   0*1, 1, 1.0);
   VarNameSetBoundaryInfo("betax",         0, 1, 1.0);
   VarNameSetBoundaryInfo("BNSdata_alphaP",0, 1, 1.0);
   VarNameSetBoundaryInfo("BNSdata_Sigma", 0, 1, 1.0);
@@ -188,15 +188,18 @@ int BNSdata_solve(tGrid *grid)
   else if(Getv("BNSdata_linSolver", "templates_GMRES"))
     linear_solver=templates_gmres_wrapper;
   else if(Getv("BNSdata_linSolver", "UMFPACK"))
-    linear_solver=UMFPACK_solve_wrapper;
+    linear_solver=UMFPACK_solve_forSortedVars_wrapper;
+      //   UMFPACK_solve_wrapper;
   else
     errorexit("BNSdata_solve: unknown BNSdata_linSolver");
 
 // remove this later:
-printf("%s", VarName(47));
-Yo(1);
-F_BNSdata(vlFu, vlu, vluDerivs, vlr);
+Setd("GridIterators_setABStozero_below", 1e-12); // remove later
+vlFu->n = vlu->n = vlr->n = vldu->n = 4;
+//Yo(1);
+//J_BNSdata(vlr, vldu, vlduDerivs, vlu);
 Yo(2);
+F_BNSdata(vlFu, vlu, vluDerivs, vlr);
 printf("calling write_grid(grid)\n");
 write_grid(grid);
 //exit(11);
@@ -346,14 +349,19 @@ void Precon_E(tVarList *vlJdu, tVarList *vldu,
 }
 
 /* set BCs for a varlist */
+/* NOTE: this works only for a varlist made up of scalars!!!
+         because to compute the varlist index of the derivs we
+         use stuff like vind*9 */
 void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
 {
   tGrid *grid = vlu->grid;
   int b;
   int vind;
+  int vindDerivs=0;
 
   for(vind=0; vind<vlu->n; vind++)
   {
+    int ncomp = VarNComponents(vlu->index[vind]);
     double PsiFarLimit = VarFarLimit(vlu->index[vind])*nonlin;
 
     forallboxes(grid, b)
@@ -361,9 +369,9 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
       tBox *box = grid->box[b];
       double *FPsi = box->v[vlFu->index[vind]];
       double *Psi  = box->v[vlu->index[vind]];
-      double *Psix = box->v[vluDerivs->index[9*vind]];
-      double *Psiy = box->v[vluDerivs->index[9*vind+1]];
-      double *Psiz = box->v[vluDerivs->index[9*vind+2]];
+      double *Psix = box->v[vluDerivs->index[vindDerivs]];
+      double *Psiy = box->v[vluDerivs->index[vindDerivs+1]];
+      double *Psiz = box->v[vluDerivs->index[vindDerivs+2]];
       int n1 = box->n1;
       int n2 = box->n2;
       int n3 = box->n3;
@@ -594,16 +602,16 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
                                  sizeof(double));
 
           /* normal derivs (d/dx) at A=1 are equal in box1 and box2 */
-          dP[1] = grid->box[2]->v[vluDerivs->index[vind*9]];
+          dP[1] = grid->box[2]->v[vluDerivs->index[vindDerivs]];
           forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=1 */
             FPsi[Index(i,j,k)] = Psix[Index(i,j,k)] - dP[1][Index(i,j,k)];
 
           /* normal derivs (~d/dA) at A=0 are equal in box1 and box0 */
           /* Below we use the approximate normal vec 
              ( cos(PI*B), sin(PI*B)*cos(phi), sin(PI*B)*sin(phi) ) */
-          dP[1] = grid->box[0]->v[vluDerivs->index[vind*9]];
-          dP[2] = grid->box[0]->v[vluDerivs->index[vind*9+1]];
-          dP[3] = grid->box[0]->v[vluDerivs->index[vind*9+2]];
+          dP[1] = grid->box[0]->v[vluDerivs->index[vindDerivs]];
+          dP[2] = grid->box[0]->v[vluDerivs->index[vindDerivs+1]];
+          dP[3] = grid->box[0]->v[vluDerivs->index[vindDerivs+2]];
           spec_Basis_times_CoeffMatrix_direc(grid->box[0], 1, BM, 0);
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
           {
@@ -664,9 +672,9 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
           /* normal derivs (d/d?) at A=0 are equal in box2 and box3 */
           /* Below we use the approximate normal vec 
              ( cos(PI*B), sin(PI*B)*cos(phi), sin(PI*B)*sin(phi) ) */
-          dP[1] = grid->box[3]->v[vluDerivs->index[vind*9]];
-          dP[2] = grid->box[3]->v[vluDerivs->index[vind*9+1]];
-          dP[3] = grid->box[3]->v[vluDerivs->index[vind*9+2]];
+          dP[1] = grid->box[3]->v[vluDerivs->index[vindDerivs]];
+          dP[2] = grid->box[3]->v[vluDerivs->index[vindDerivs+1]];
+          dP[3] = grid->box[3]->v[vluDerivs->index[vindDerivs+2]];
           spec_Basis_times_CoeffMatrix_direc(grid->box[3], 1, BM, 0.0);
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
           {
@@ -874,16 +882,16 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
         else if(b==1)  /* in box1 */
         {
           /* normal derivs (d/dx) at A=1 are equal in box1 and box2 */
-          dP[1] = grid->box[2]->v[vluDerivs->index[vind*9]];
+          dP[1] = grid->box[2]->v[vluDerivs->index[vindDerivs]];
           forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=1 */
             FPsi[Index(i,j,k)] = Psix[Index(i,j,k)] - dP[1][Index(i,j,k)];
 
           /* normal derivs (~d/dA) at A=0 are equal in box1 and box0 */
           /* Below we use the approximate normal vec 
              ( cos(PI*B), sin(PI*B)*cos(phi), sin(PI*B)*sin(phi) ) */
-          dP[1] = grid->box[0]->v[vluDerivs->index[vind*9]];
-          dP[2] = grid->box[0]->v[vluDerivs->index[vind*9+1]];
-          dP[3] = grid->box[0]->v[vluDerivs->index[vind*9+2]];
+          dP[1] = grid->box[0]->v[vluDerivs->index[vindDerivs]];
+          dP[2] = grid->box[0]->v[vluDerivs->index[vindDerivs+1]];
+          dP[3] = grid->box[0]->v[vluDerivs->index[vindDerivs+2]];
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
           {
             double B   = box->v[Ind("Y")][Index(i,j,k)];
@@ -929,9 +937,9 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
           /* normal derivs (d/d?) at A=0 are equal in box2 and box3 */
           /* Below we use the approximate normal vec 
              ( cos(PI*B), sin(PI*B)*cos(phi), sin(PI*B)*sin(phi) ) */
-          dP[1] = grid->box[3]->v[vluDerivs->index[vind*9]];
-          dP[2] = grid->box[3]->v[vluDerivs->index[vind*9+1]];
-          dP[3] = grid->box[3]->v[vluDerivs->index[vind*9+2]];
+          dP[1] = grid->box[3]->v[vluDerivs->index[vindDerivs]];
+          dP[2] = grid->box[3]->v[vluDerivs->index[vindDerivs+1]];
+          dP[3] = grid->box[3]->v[vluDerivs->index[vindDerivs+2]];
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
           {
             double B   = box->v[Ind("Y")][Index(i,j,k)];
@@ -1097,6 +1105,9 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
       } /* end: else if (Getv("BNSdata_grid", "4ABphi_2xyz")) */
 
     } /* end forallboxes */
+    /* increase index for derivs */
+    vindDerivs += 3;
+    if(VarComponent(vlu->index[vind])==ncomp-1) vindDerivs += 6*ncomp;
   } /* end loop over vars */
 }
 
