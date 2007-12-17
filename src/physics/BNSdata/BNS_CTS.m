@@ -8,10 +8,12 @@
 variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
               dPsi[a],   dB[a,b],   dalphaP[a],    dSigma[a],
              ddPsi[a,b],ddB[a,b,c],ddalphaP[a,b], ddSigma[a,b],
-	     LPsi,LB[a],LalphaP,LSigma, FLPsi,FLB[a],FLalphaP,FLSigma,
-              dLPsi[a],   dLB[a,b],   dLalphaP[a],    dLSigma[a],
-             ddLPsi[a,b],ddLB[a,b,c],ddLalphaP[a,b], ddLSigma[a,b],
-	     g[a,b],  K[a,b], q, vRS[a]}
+	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
+              dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
+             ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
+	     g[a,b], alpha, beta[a], K[a,b], q, vRS[a], x, y}
+
+constvariables = {OmegaCrossR[a]}
 
 (* compute in this order *)
 tocompute = {
@@ -26,14 +28,14 @@ tocompute = {
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_Sigma, \
 			Ind(\"BNSdata_Sigmax\"), Ind(\"BNSdata_Sigmaxx\"));",
   Cif == else,
-    Cinstruction == "FirstAndSecondDerivsOf_S(box, index_LPsi, \ 
-					index_dLPsi1, index_ddLPsi11);",
-    Cinstruction == "FirstAndSecondDerivsOf_Sa(box, index_LB1, \
-					index_dLB11, index_ddLB111);",
-    Cinstruction == "FirstAndSecondDerivsOf_S(box, index_LalphaP, \
-					index_dLalphaP1, index_ddLalphaP11);",
-    Cinstruction == "FirstAndSecondDerivsOf_S(box, index_LSigma, \
-					index_dLSigma1, index_ddLSigma11);",
+    Cinstruction == "FirstAndSecondDerivsOf_S(box, index_lPsi, \ 
+					index_dlPsi1, index_ddlPsi11);",
+    Cinstruction == "FirstAndSecondDerivsOf_Sa(box, index_lB1, \
+					index_dlB11, index_ddlB111);",
+    Cinstruction == "FirstAndSecondDerivsOf_S(box, index_lalphaP, \
+					index_dlalphaP1, index_ddlalphaP11);",
+    Cinstruction == "FirstAndSecondDerivsOf_S(box, index_lSigma, \
+					index_dlSigma1, index_ddlSigma11);",
   Cif == end,
 
   (* loop of all points *)
@@ -56,24 +58,122 @@ tocompute = {
         if(bi==0 || bi==5)  rh1 = -3.0/(R1*R1*R1);
         if(bi==3 || bi==4)  rh2 = -6.0/(R2*R2*R2); ",
 
-  (* inverse conformal metric *)
-  (*  detginv == 1/matrixdet[g],
-      ginv[a,b] == detginv matrixinvdet[g,a,b], *)
+n ==2,
+kappa==1,
+Omega ==0,
+
+  (* Omega \times r term *)
+  OmegaCrossR1 == - Omega y,
+  OmegaCrossR2 == + Omega x,
+  OmegaCrossR3 == 0,
+
+  (* shift beta[a] == B[a] + OmegaCrossR[a], *)
+  (* get 1st derivs of B *)
+  (* Note: if B^i = beta^i - (Omega \times r)^i 
+	=> vecLapB = vecLapbeta , LB = Lbeta, 
+	since the L of any Killingvec is zero *)
+  gdB == delta[a,b] dB[a,b],
+  LB[a,b] == dB[a,b] + dB[b,a] -(2/3) delta[a,b] gdB,
+  LBdo[a,b] == delta[a,c] delta[b,d] LB[c,d], 
+  LBLB == LB[a,b] LBdo[a,b],
+
+  (* some abbreviations *)
+  alpha  == alphaP/Psi,
+  alpha2 == alpha*alpha,
+  Psi2   == Psi*Psi,
+  Psi4   == Psi2*Psi2,
+  Psi5   == Psi*Psi4,
+
+  (* irrotational part of 3-vel in rotating frame*)
+  vRI[a] == dSigma[a],
+
+  (* vR[a] is 3-vel. in rotating frame *)
+  vR[a] == vRS[a] + vRI[a],
+
+  (* vI[a] is vel in inertial frame *)
+  vI[a] == vR[a] + OmegaCrossR[a],
+
+  (* compute square of u^0 *)
+  uzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c]),
+
+  (* rest mass density and pressure *)
+  rho0 == Power[q/kappa, n],
+  P    == q  rho0,
+
+  (* fluid vars in 3+1 *)
+  rho  == 0,
+  j[a] == 0,
+  S    == 0,
+
+  (* dLnalphaPsim6[i] = \partial_i ln(alpha Psi^{-6}) 
+			= \partial_i ln(alphaP Psi^{-7})
+			= Psi^7 alphaP^{-1} \partial_i(alphaP Psi^{-7}) *)
+  dLnalphaPsim6[a] == dalphaP[a]/alphaP - 7 dPsi[a]/Psi,
 
 
-  Cif == nonlin,
+  (* decide if use non-linear ot linear equations *)
+  Cif == nonlin, (* non-linear case *)
+
+    vecLapB[a] == delta[b,c] (ddB[a,b,c] + (1/3) ddB[b,c,a]),
+
     (* equations for Psi, B[a], alphaP, Sigma *)
-    FPsi    == delta[b,c] ddPsi[b,c] - rh1, 
-    FB[a]   == delta[b,c] ddB[a,b,c] - 0,
-    FalphaP == delta[b,c] ddalphaP[b,c] - rh2, 
-    FSigma  == delta[b,c] ddSigma[b,c] - 0, 
-  Cif == else,
+    FPsi    == delta[b,c] ddPsi[b,c] + Psi5 LBLB/(32 alpha2) +
+               2Pi Psi5 rho, 
+    FB[a]   == vecLapB[a] - LB[a,b] dLnalphaPsim6[b] -
+               16Pi alpha Psi4 j[a],
+    FalphaP == delta[b,c] ddalphaP[b,c] - alphaP (
+               (7/8) Psi4 LBLB/(4 alpha2) + 2Pi Psi4 (rho+2S) ),
+
+    Cif == (bi==0 || bi==3), (* ell. eqn. inside stars *)
+      FSigma  == delta[b,c] ddSigma[b,c] - 0,
+    Cif == else,
+      FSigma  == Sigma,  (* set Sigma=0 outside stars *)
+    Cif == end,
+
+  Cif == else, (* linear case *)
+
+    alphaP2 == alphaP*alphaP,
+    alphaP3 == alphaP2*alphaP,
+    Psi3    == Psi*Psi2,
+    Psi6    == Psi4*Psi2,
+    Psi7    == Psi4*Psi3,
+
+    gdlB == delta[a,b] dlB[a,b],
+    LlB[a,b] == dlB[a,b] + dlB[b,a] -(2/3) delta[a,b] gdlB,
+    LlBdo[a,b] == delta[a,c] delta[b,d] LlB[c,d], 
+    LlBLlB == LlB[a,b] LlBdo[a,b],
+    vecLaplB[a] == delta[b,c] (ddlB[a,b,c] + (1/3) ddlB[b,c,a]),
+
+    (* fluid vars in 3+1 *)
+    lrho  == 0,
+    lj[a] == 0,
+    lS    == 0,
+
+    ldLnalphaPsim6[a] == dlalphaP[a]/alphaP - dalphaP[a] lalphaP/alphaP2 -
+                         7 dlPsi[a]/Psi + 7 dPsi[a] lPsi/Psi2,
+
     (* linearized equations for Psi, B[a], alphaP, Sigma *)
-    FLPsi    == delta[b,c] ddLPsi[b,c] - 0, 
-    FLB[a]   == delta[b,c] ddLB[a,b,c] - 0,
-    FLalphaP == delta[b,c] ddLalphaP[b,c] - 0, 
-    FLSigma  == delta[b,c] ddLSigma[b,c] - 0, 
+    FlPsi    == delta[b,c] ddlPsi[b,c] + 7 Psi6 lPsi LBLB/(32 alphaP2) -
+                (Psi7 LBLB/(16 alphaP3)) lalphaP + 
+                (Psi5/(32 alpha2)) 2 LBdo[a,b] LlB[a,b] +
+                2Pi 5 Psi4 lPsi rho + 2Pi Psi5 lrho, 
+    FlB[a]   == vecLaplB[a] - LlB[a,b] dLnalphaPsim6[b] - 
+                LB[a,b] ldLnalphaPsim6[b] - 16Pi lalphaP Psi3 j[a] -
+                16Pi alphaP 3 Psi2 lPsi j[a] - 16Pi alpha Psi4 lj[a],
+    FlalphaP == delta[b,c] ddlalphaP[b,c] - lalphaP (
+                (-7/32) Psi6 LBLB/(alphaP2) + 2Pi Psi4 (rho+2S) ) - alphaP (
+                (21/16)Psi5 lPsi LBLB/(alphaP2) 
+                +(7/16) (Psi4/alpha2)LBdo[a,b] LlB[a,b] + 2Pi (
+                 4 Psi3 lPsi (rho+2S) + Psi4 (lrho+2lS) ) ), 
+
+    Cif == (bi==0 || bi==3), (* ell. eqn. inside stars *)
+      FlSigma  == delta[b,c] ddlSigma[b,c] - 0,
+    Cif == else,
+      FlSigma  == lSigma,  (* set Sigma=0 outside stars *)
+    Cif == end,
+
   Cif == end,
+
 
   Cinstruction == "} /* end of points loop */\n"
 }
@@ -87,14 +187,16 @@ ginv[a_,b_] := ginv[b,a] /; !OrderedQ[{a,b}]
 Kup[a_,b_]  := Kup[b,a]  /; !OrderedQ[{a,b}]
 
 ddPsi[a_,b_]     := ddPsi[b,a]    /; !OrderedQ[{a,b}]
-ddB[a_,b_,c_]    := ddB[a,c,b] /; !OrderedQ[{b,c}]
+ddB[a_,b_,c_]    := ddB[a,c,b]    /; !OrderedQ[{b,c}]
+LB[a_,b_]        := LB[b,a]       /; !OrderedQ[{a,b}]
 ddalphaP[a_,b_]  := ddalphaP[b,a] /; !OrderedQ[{a,b}]
 ddSigma[a_,b_]   := ddSigma[b,a]  /; !OrderedQ[{a,b}]
 
-ddLPsi[a_,b_]     := ddLPsi[b,a]    /; !OrderedQ[{a,b}]
-ddLB[a_,b_,c_]    := ddLB[a,c,b] /; !OrderedQ[{b,c}]
-ddLalphaP[a_,b_]  := ddLalphaP[b,a] /; !OrderedQ[{a,b}]
-ddLSigma[a_,b_]   := ddLSigma[b,a]  /; !OrderedQ[{a,b}]
+ddlPsi[a_,b_]     := ddlPsi[b,a]    /; !OrderedQ[{a,b}]
+ddlB[a_,b_,c_]    := ddlB[a,c,b]    /; !OrderedQ[{b,c}]
+LlB[a_,b_]        := LlB[b,a]       /; !OrderedQ[{a,b}]
+ddlalphaP[a_,b_]  := ddlalphaP[b,a] /; !OrderedQ[{a,b}]
+ddlSigma[a_,b_]   := ddlSigma[b,a]  /; !OrderedQ[{a,b}]
 
 (************************************************************************)
 (* information for C output *)
@@ -144,13 +246,13 @@ variabledeclarations[] := Module[{},
   prdecvl[{FPsi, FB[a], FalphaP ,FSigma}, "vlFu"];
   prdecvl[{ Psi,  B[a],  alphaP,  Sigma}, "vlu"];
 
-  prdecvl[{FLPsi, FLB[a], FLalphaP ,FLSigma}, "vlJdu"];
-  prdecvl[{ LPsi, LB[a], LalphaP, LSigma}, "vldu"];
-  prdecvl[{dLPsi[a],ddLPsi[a,b], dLB[a,b],ddLB[a,b,c], dLalphaP[a],ddLalphaP[a,b], dLSigma[a],ddLSigma[a,b]}, "vlduDerivs"];
+  prdecvl[{FlPsi, FlB[a], FlalphaP ,FlSigma}, "vlJdu"];
+  prdecvl[{ lPsi, lB[a], lalphaP, lSigma}, "vldu"];
+  prdecvl[{dlPsi[a],ddlPsi[a,b], dlB[a,b],ddlB[a,b,c], dlalphaP[a],ddlalphaP[a,b], dlSigma[a],ddlSigma[a,b]}, "vlduDerivs"];
 
   prdecvlindices[{ Psi,  B[a],  alphaP,  Sigma}, "vlu"];
-  prdecvlindices[{LPsi, LB[a], LalphaP, LSigma}, "vldu"];
-  prdecvlindices[{dLPsi[a],ddLPsi[a,b], dLB[a,b],ddLB[a,b,c], dLalphaP[a],ddLalphaP[a,b], dLSigma[a],ddLSigma[a,b]}, "vlduDerivs"];
+  prdecvlindices[{lPsi, lB[a], lalphaP, lSigma}, "vldu"];
+  prdecvlindices[{dlPsi[a],ddlPsi[a,b], dlB[a,b],ddlB[a,b,c], dlalphaP[a],ddlalphaP[a,b], dlSigma[a],ddlSigma[a,b]}, "vlduDerivs"];
 
   prdecvarname[{dPsi[a]},       "BNSdata_Psix"];
   prdecvarname[{ddPsi[a,b]},    "BNSdata_Psixx"];
@@ -161,7 +263,12 @@ variabledeclarations[] := Module[{},
   prdecvarname[{dSigma[a]},     "BNSdata_Sigmax"];
   prdecvarname[{ddSigma[a,b]},  "BNSdata_Sigmaxx"];
 
+  prdecvarname[{x},      "x"];
+  prdecvarname[{y},      "y"];
+
   prdecvarname[{g[a,b]}, "gxx"];
+  prdecvarname[{alpha},  "alpha"];
+  prdecvarname[{beta[a]},"betax"];
   prdecvarname[{K[a,b]}, "Kxx"];
   prdecvarname[{q},      "BNSdata_q"];
   prdecvarname[{vRS[a]}, "BNSdata_vRSx"];
@@ -189,8 +296,10 @@ EndCFunction[] := Module[{},
 (* to turn off optimization for development set optimizeflag = False *)
 optimizeflag = True;
 
+(* use 3d tensors the default is 3 *)
+TensorEquationsDim = 3;
 
 (************************************************************************)
 (* now we are ready to go *)
 
-<< "../../Math/MathToC/TensorEquations3dToC.m"
+<< "../../Math/MathToC/TensorEquationsToC.m"
