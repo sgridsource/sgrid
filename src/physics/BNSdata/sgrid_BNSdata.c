@@ -19,8 +19,9 @@ int sgrid_BNSdata()
   AddVar("BNSdata_Psi",     "",     "new conf. factor");
   AddVar("BNSdata_Psi",     "i",    "1st deriv of Psi");
   AddVar("BNSdata_Psi",     "(ij)", "2nd deriv of Psi");
-  AddVar("BNSdata_beta",    "Ij",   "1st deriv of beta^i");
-  AddVar("BNSdata_beta",    "I(jk)","2nd deriv of beta^i");
+  AddVar("BNSdata_B",       "I",    "beta - Omega cross r");
+  AddVar("BNSdata_B",       "Ij",   "1st deriv of B^i");
+  AddVar("BNSdata_B",       "I(jk)","2nd deriv of B^i");
   AddVar("BNSdata_alphaP",  "",     "lapse times Psi");
   AddVar("BNSdata_alphaP",  "i",    "1st deriv of alphaP");
   AddVar("BNSdata_alphaP",  "(ij)", "2nd deriv of alphaP");

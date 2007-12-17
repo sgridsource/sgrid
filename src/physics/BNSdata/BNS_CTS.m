@@ -5,12 +5,12 @@
 
 
 (* variables *)
-variables = {Psi, beta[a], alphaP, Sigma, FPsi, Fbeta[a], FalphaP ,FSigma,
-              dPsi[a],   dbeta[a,b],   dalphaP[a],    dSigma[a],
-             ddPsi[a,b],ddbeta[a,b,c],ddalphaP[a,b], ddSigma[a,b],
-	     LPsi,Lbeta[a],LalphaP,LSigma, FLPsi,FLbeta[a],FLalphaP,FLSigma,
-              dLPsi[a],   dLbeta[a,b],   dLalphaP[a],    dLSigma[a],
-             ddLPsi[a,b],ddLbeta[a,b,c],ddLalphaP[a,b], ddLSigma[a,b],
+variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
+              dPsi[a],   dB[a,b],   dalphaP[a],    dSigma[a],
+             ddPsi[a,b],ddB[a,b,c],ddalphaP[a,b], ddSigma[a,b],
+	     LPsi,LB[a],LalphaP,LSigma, FLPsi,FLB[a],FLalphaP,FLSigma,
+              dLPsi[a],   dLB[a,b],   dLalphaP[a],    dLSigma[a],
+             ddLPsi[a,b],ddLB[a,b,c],ddLalphaP[a,b], ddLSigma[a,b],
 	     g[a,b],  K[a,b], q, vRS[a]}
 
 (* compute in this order *)
@@ -19,8 +19,8 @@ tocompute = {
   Cif == nonlin,
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_Psi, \ 
 			Ind(\"BNSdata_Psix\"), Ind(\"BNSdata_Psixx\"));",
-    Cinstruction == "FirstAndSecondDerivsOf_Sa(box, index_beta1, \
-			Ind(\"BNSdata_betaxx\"), Ind(\"BNSdata_betaxxx\"));",
+    Cinstruction == "FirstAndSecondDerivsOf_Sa(box, index_B1, \
+			Ind(\"BNSdata_Bxx\"), Ind(\"BNSdata_Bxxx\"));",
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_alphaP, \
 			Ind(\"BNSdata_alphaPx\"), Ind(\"BNSdata_alphaPxx\"));",
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_Sigma, \
@@ -28,8 +28,8 @@ tocompute = {
   Cif == else,
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_LPsi, \ 
 					index_dLPsi1, index_ddLPsi11);",
-    Cinstruction == "FirstAndSecondDerivsOf_Sa(box, index_Lbeta1, \
-					index_dLbeta11, index_ddLbeta111);",
+    Cinstruction == "FirstAndSecondDerivsOf_Sa(box, index_LB1, \
+					index_dLB11, index_ddLB111);",
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_LalphaP, \
 					index_dLalphaP1, index_ddLalphaP11);",
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_LSigma, \
@@ -62,17 +62,17 @@ tocompute = {
 
 
   Cif == nonlin,
-    (* equations for Psi, beta[a], alphaP, Sigma *)
-    FPsi     == delta[b,c] ddPsi[b,c] - rh1, 
-    Fbeta[a] == delta[b,c] ddbeta[a,b,c] - 0,
-    FalphaP  == delta[b,c] ddalphaP[b,c] - 0, 
-    FSigma   == delta[b,c] ddSigma[b,c] - rh2, 
+    (* equations for Psi, B[a], alphaP, Sigma *)
+    FPsi    == delta[b,c] ddPsi[b,c] - rh1, 
+    FB[a]   == delta[b,c] ddB[a,b,c] - 0,
+    FalphaP == delta[b,c] ddalphaP[b,c] - rh2, 
+    FSigma  == delta[b,c] ddSigma[b,c] - 0, 
   Cif == else,
-    (* linearized equations for Psi, beta[a], alphaP, Sigma *)
-    FLPsi     == delta[b,c] ddLPsi[b,c] - 0, 
-    FLbeta[a] == delta[b,c] ddLbeta[a,b,c] - 0,
-    FLalphaP  == delta[b,c] ddLalphaP[b,c] - 0, 
-    FLSigma   == delta[b,c] ddLSigma[b,c] - 0, 
+    (* linearized equations for Psi, B[a], alphaP, Sigma *)
+    FLPsi    == delta[b,c] ddLPsi[b,c] - 0, 
+    FLB[a]   == delta[b,c] ddLB[a,b,c] - 0,
+    FLalphaP == delta[b,c] ddLalphaP[b,c] - 0, 
+    FLSigma  == delta[b,c] ddLSigma[b,c] - 0, 
   Cif == end,
 
   Cinstruction == "} /* end of points loop */\n"
@@ -87,12 +87,12 @@ ginv[a_,b_] := ginv[b,a] /; !OrderedQ[{a,b}]
 Kup[a_,b_]  := Kup[b,a]  /; !OrderedQ[{a,b}]
 
 ddPsi[a_,b_]     := ddPsi[b,a]    /; !OrderedQ[{a,b}]
-ddbeta[a_,b_,c_] := ddbeta[a,c,b] /; !OrderedQ[{b,c}]
+ddB[a_,b_,c_]    := ddB[a,c,b] /; !OrderedQ[{b,c}]
 ddalphaP[a_,b_]  := ddalphaP[b,a] /; !OrderedQ[{a,b}]
 ddSigma[a_,b_]   := ddSigma[b,a]  /; !OrderedQ[{a,b}]
 
 ddLPsi[a_,b_]     := ddLPsi[b,a]    /; !OrderedQ[{a,b}]
-ddLbeta[a_,b_,c_] := ddLbeta[a,c,b] /; !OrderedQ[{b,c}]
+ddLB[a_,b_,c_]    := ddLB[a,c,b] /; !OrderedQ[{b,c}]
 ddLalphaP[a_,b_]  := ddLalphaP[b,a] /; !OrderedQ[{a,b}]
 ddLSigma[a_,b_]   := ddLSigma[b,a]  /; !OrderedQ[{a,b}]
 
@@ -141,21 +141,21 @@ BeginCFunction[] := Module[{},
 *)
 variabledeclarations[] := Module[{},
 
-  prdecvl[{FPsi, Fbeta[a], FalphaP ,FSigma}, "vlFu"];
-  prdecvl[{ Psi,  beta[a],  alphaP,  Sigma}, "vlu"];
+  prdecvl[{FPsi, FB[a], FalphaP ,FSigma}, "vlFu"];
+  prdecvl[{ Psi,  B[a],  alphaP,  Sigma}, "vlu"];
 
-  prdecvl[{FLPsi, FLbeta[a], FLalphaP ,FLSigma}, "vlJdu"];
-  prdecvl[{ LPsi, Lbeta[a], LalphaP, LSigma}, "vldu"];
-  prdecvl[{dLPsi[a],ddLPsi[a,b], dLbeta[a,b],ddLbeta[a,b,c], dLalphaP[a],ddLalphaP[a,b], dLSigma[a],ddLSigma[a,b]}, "vlduDerivs"];
+  prdecvl[{FLPsi, FLB[a], FLalphaP ,FLSigma}, "vlJdu"];
+  prdecvl[{ LPsi, LB[a], LalphaP, LSigma}, "vldu"];
+  prdecvl[{dLPsi[a],ddLPsi[a,b], dLB[a,b],ddLB[a,b,c], dLalphaP[a],ddLalphaP[a,b], dLSigma[a],ddLSigma[a,b]}, "vlduDerivs"];
 
-  prdecvlindices[{ Psi,  beta[a],  alphaP,  Sigma}, "vlu"];
-  prdecvlindices[{LPsi, Lbeta[a], LalphaP, LSigma}, "vldu"];
-  prdecvlindices[{dLPsi[a],ddLPsi[a,b], dLbeta[a,b],ddLbeta[a,b,c], dLalphaP[a],ddLalphaP[a,b], dLSigma[a],ddLSigma[a,b]}, "vlduDerivs"];
+  prdecvlindices[{ Psi,  B[a],  alphaP,  Sigma}, "vlu"];
+  prdecvlindices[{LPsi, LB[a], LalphaP, LSigma}, "vldu"];
+  prdecvlindices[{dLPsi[a],ddLPsi[a,b], dLB[a,b],ddLB[a,b,c], dLalphaP[a],ddLalphaP[a,b], dLSigma[a],ddLSigma[a,b]}, "vlduDerivs"];
 
   prdecvarname[{dPsi[a]},       "BNSdata_Psix"];
   prdecvarname[{ddPsi[a,b]},    "BNSdata_Psixx"];
-  prdecvarname[{dbeta[a,b]}, 	"BNSdata_betaxx"];
-  prdecvarname[{ddbeta[a,b,c]}, "BNSdata_betaxxx"];
+  prdecvarname[{dB[a,b]}, 	"BNSdata_Bxx"];
+  prdecvarname[{ddB[a,b,c]},    "BNSdata_Bxxx"];
   prdecvarname[{dalphaP[a]},    "BNSdata_alphaPx"];
   prdecvarname[{ddalphaP[a,b]}, "BNSdata_alphaPxx"];
   prdecvarname[{dSigma[a]},     "BNSdata_Sigmax"];

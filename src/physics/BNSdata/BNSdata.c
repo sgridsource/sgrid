@@ -25,17 +25,17 @@ int BNSdata_startup(tGrid *grid)
 
   /* set boundary information: farlimit, falloff, propagation speed */
   VarNameSetBoundaryInfo("BNSdata_Psi",   0*1, 1, 1.0);
-  VarNameSetBoundaryInfo("betax",         0, 1, 1.0);
+  VarNameSetBoundaryInfo("BNSdata_Bx",    0, 1, 1.0);
   VarNameSetBoundaryInfo("BNSdata_alphaP",0, 1, 1.0);
   VarNameSetBoundaryInfo("BNSdata_Sigma", 0, 1, 1.0);
 
-  /* enable all vars */
+  /* enable all BNSdata vars */
   enablevar(grid, Ind("BNSdata_Psi"));
   enablevar(grid, Ind("BNSdata_Psix"));
   enablevar(grid, Ind("BNSdata_Psixx"));
-  enablevar(grid, Ind("betax"));
-  enablevar(grid, Ind("BNSdata_betaxx"));
-  enablevar(grid, Ind("BNSdata_betaxxx"));
+  enablevar(grid, Ind("BNSdata_Bx"));
+  enablevar(grid, Ind("BNSdata_Bxx"));
+  enablevar(grid, Ind("BNSdata_Bxxx"));
   enablevar(grid, Ind("BNSdata_alphaP"));
   enablevar(grid, Ind("BNSdata_alphaPx"));
   enablevar(grid, Ind("BNSdata_alphaPxx"));
@@ -48,6 +48,12 @@ int BNSdata_startup(tGrid *grid)
   enablevar(grid, Ind("BNSdata_temp2"));
   enablevar(grid, Ind("BNSdata_temp3"));
   enablevar(grid, Ind("BNSdata_temp4"));
+
+  /* enable some ADM vars */
+  enablevar(grid, Ind("gxx"));
+  enablevar(grid, Ind("alpha"));
+  enablevar(grid, Ind("betax"));
+  enablevar(grid, Ind("Kxx"));
   
   /* set initial values in all in boxes */
   forallboxes(grid,b)
@@ -61,7 +67,7 @@ int BNSdata_startup(tGrid *grid)
     double *py = box->v[Ind("y")];
     double *pz = box->v[Ind("z")];
     double *Psi   = box->v[Ind("BNSdata_Psi")];
-    double *Sigma = box->v[Ind("BNSdata_Sigma")];
+    double *alphaP = box->v[Ind("BNSdata_alphaP")];
 
     forallpoints(box,i)
     {
@@ -75,11 +81,11 @@ int BNSdata_startup(tGrid *grid)
         y = py[i];
         z = pz[i];
       }
-      /* set Psi and Sigma */
+      /* set Psi and alphaP */
       if(Getv("BNSdata_grid", "SphericalDF"))
       {
         Psi[i] = x*y*z; // 1.0/sqrt(x*x + y*y + z*z);
-        Sigma[i] = 0.0;
+        alphaP[i] = 0.0;
       }
       else if(Getv("BNSdata_grid", "AnsorgNS") || 
               Getv("BNSdata_grid", "4ABphi_2xyz"))
@@ -96,7 +102,7 @@ int BNSdata_startup(tGrid *grid)
         double R2  = 0.5*(xmax2-xmin2);
 
         Psi[i] = 0.0;
-        Sigma[i] = 0.0;
+        alphaP[i] = 0.0;
 
         if(Getv("BNSdata_guess", "exact"))
         {
@@ -114,11 +120,11 @@ int BNSdata_startup(tGrid *grid)
           }
           if(b==1||b==2||b==0||b==5)
           {
-            Sigma[i] = 2.0/sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+            alphaP[i] = 2.0/sqrt((x-xc2)*(x-xc2) + y*y + z*z);
           }
           if(b==3||b==4)
           {
-            Sigma[i] = 
+            alphaP[i] = 
               (-((x-xc2)*(x-xc2)+y*y+z*z)/(R2*R2*R2) + 2/R2 + 1/R2);
           }
         }
@@ -154,15 +160,15 @@ int BNSdata_solve(tGrid *grid)
 
   /* add all vars to vlu */
   vlpush(vlu, Ind("BNSdata_Psi"));
-  vlpush(vlu, Ind("betax"));
+  vlpush(vlu, Ind("BNSdata_Bx"));
   vlpush(vlu, Ind("BNSdata_alphaP"));
   vlpush(vlu, Ind("BNSdata_Sigma"));
 
   /* add derivs to vluDerivs */
   vlpush(vluDerivs, Ind("BNSdata_Psix"));
   vlpush(vluDerivs, Ind("BNSdata_Psixx"));
-  vlpush(vluDerivs, Ind("BNSdata_betaxx"));
-  vlpush(vluDerivs, Ind("BNSdata_betaxxx"));
+  vlpush(vluDerivs, Ind("BNSdata_Bxx"));
+  vlpush(vluDerivs, Ind("BNSdata_Bxxx"));
   vlpush(vluDerivs, Ind("BNSdata_alphaPx"));
   vlpush(vluDerivs, Ind("BNSdata_alphaPxx"));
   vlpush(vluDerivs, Ind("BNSdata_Sigmax"));
@@ -245,8 +251,8 @@ int BNSdata_analyze(tGrid *grid)
     double *pz = box->v[Ind("z")];
     double *Psi    = box->v[Ind("BNSdata_Psi")];
     double *PsiErr = box->v[Ind("BNSdata_Psi_Err")];
-    double *Sigma    = box->v[Ind("BNSdata_Sigma")];
-    double *SigmaErr = box->v[Ind("BNSdata_Sigma_Err")];
+    double *alphaP    = box->v[Ind("BNSdata_alphaP")];
+    double *alphaPErr = box->v[Ind("BNSdata_alphaP_Err")];
 
     /* subtract true values */
     forallpoints(box,i)
@@ -264,7 +270,7 @@ int BNSdata_analyze(tGrid *grid)
       if(Getv("BNSdata_grid", "SphericalDF"))
       {
         PsiErr[i] = Psi[i]-1.0/sqrt(x*x + y*y + z*z);
-        SigmaErr[i] = Sigma[i]-2.0/sqrt(x*x + y*y + z*z);
+        alphaPErr[i] = alphaP[i]-2.0/sqrt(x*x + y*y + z*z);
       }
       else if(Getv("BNSdata_grid", "AnsorgNS") || 
               Getv("BNSdata_grid", "4ABphi_2xyz"))
@@ -293,12 +299,12 @@ int BNSdata_analyze(tGrid *grid)
         }
         if(b==1||b==2||b==0||b==5)
         {
-          SigmaErr[i] = Sigma[i]-2.0/sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+          alphaPErr[i] = alphaP[i]-2.0/sqrt((x-xc2)*(x-xc2) + y*y + z*z);
         }
         if(b==3||b==4)
         {
-          SigmaErr[i] = 
-            Sigma[i]-(-((x-xc2)*(x-xc2)+y*y+z*z)/(R2*R2*R2) + 2/R2 + 1/R2);
+          alphaPErr[i] = 
+            alphaP[i]-(-((x-xc2)*(x-xc2)+y*y+z*z)/(R2*R2*R2) + 2/R2 + 1/R2);
         }
 
       }
