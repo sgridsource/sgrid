@@ -67,7 +67,9 @@ Omega ==0,
   OmegaCrossR2 == + Omega x,
   OmegaCrossR3 == 0,
 
-  (* shift beta[a] == B[a] + OmegaCrossR[a], *)
+  (* shift *)
+  beta[a] == B[a] + OmegaCrossR[a],
+
   (* get 1st derivs of B *)
   (* Note: if B^i = beta^i - (Omega \times r)^i 
 	=> vecLapB = vecLapbeta , LB = Lbeta, 
@@ -96,14 +98,15 @@ Omega ==0,
   (* compute square of u^0 *)
   uzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c]),
 
-  (* rest mass density and pressure *)
+  (* rest mass density, pressure, and total energy density *)
   rho0 == Power[q/kappa, n],
-  P    == q  rho0,
+  P    == q rho0,
+  rhoE == rho0 (1 + n q),
 
   (* fluid vars in 3+1 *)
-  rho  == 0,
-  j[a] == 0,
-  S    == 0,
+  rho  == alpha2 (rhoE + P) uzerosqr - P,
+  j[a] == alpha (rhoE + P) uzerosqr (vI[a]+beta[a]),
+  S    == 3P - rhoE + rho,
 
   (* dLnalphaPsim6[i] = \partial_i ln(alpha Psi^{-6}) 
 			= \partial_i ln(alphaP Psi^{-7})
@@ -126,6 +129,7 @@ Omega ==0,
 
     Cif == (bi==0 || bi==3), (* ell. eqn. inside stars *)
       FSigma  == delta[b,c] ddSigma[b,c] - 0,
+              (*   -(vRS[a] + dSigma[a])(...), *)
     Cif == else,
       FSigma  == Sigma,  (* set Sigma=0 outside stars *)
     Cif == end,
@@ -144,10 +148,25 @@ Omega ==0,
     LlBLlB == LlB[a,b] LlBdo[a,b],
     vecLaplB[a] == delta[b,c] (ddlB[a,b,c] + (1/3) ddlB[b,c,a]),
 
-    (* fluid vars in 3+1 *)
-    lrho  == 0,
-    lj[a] == 0,
-    lS    == 0,
+    (* linearized alpha == alphaP/Psi and vI[a] *)
+    lvI[a] == dlSigma[a], 
+    lalpha == lalphaP/Psi - alphaP lPsi/Psi2,
+    (* linearized
+      uzerosqr = alpha2 - Psi4 delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c])*)
+    luzerosqr == 2alpha lalpha - 
+                 4 Psi3 delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c]) -
+                 Psi4 delta[b,c] (lB[b] + lvI[b]) (lB[c] + lvI[c]),
+
+    (* rho  == alpha2 (rhoE + P) uzerosqr - P,
+       j[a] == alpha (rhoE + P) uzerosqr (vI[a]+beta[a]),
+       S    == 3P - rhoE + rho, *)
+    (* linearized fluid vars in 3+1 *)
+    lrho  == 2 alpha lalpha (rhoE + P) uzerosqr + 
+             alpha2 (rhoE + P) luzerosqr,
+    lj[a] == lalpha (rhoE + P) uzerosqr (vI[a]+beta[a]) + 
+             alpha (rhoE + P) luzerosqr (vI[a]+beta[a]) +
+             alpha (rhoE + P) uzerosqr (lB[a] + lvI[a]),
+    lS    == lrho,
 
     ldLnalphaPsim6[a] == dlalphaP[a]/alphaP - dalphaP[a] lalphaP/alphaP2 -
                          7 dlPsi[a]/Psi + 7 dPsi[a] lPsi/Psi2,

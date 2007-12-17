@@ -276,6 +276,7 @@ double j1;
 double j2;
 double j3;
 double kappa;
+double lalpha;
 double LB11;
 double LB12;
 double LB13;
@@ -316,6 +317,10 @@ double LlBdo33;
 double LlBLlB;
 double lrho;
 double lS;
+double luzerosqr;
+double lvI1;
+double lvI2;
+double lvI3;
 double n;
 double Omega;
 double OmegaCrossR1;
@@ -330,6 +335,7 @@ double Psi6;
 double Psi7;
 double rho;
 double rho0;
+double rhoE;
 double S;
 double uzerosqr;
 double vecLapB1;
@@ -421,6 +427,21 @@ Omega*x[ijk]
 OmegaCrossR3
 =
 0
+;
+
+beta1[ijk]
+=
+OmegaCrossR1 + B1[ijk]
+;
+
+beta2[ijk]
+=
+OmegaCrossR2 + B2[ijk]
+;
+
+beta3[ijk]
+=
+OmegaCrossR3 + B3[ijk]
 ;
 
 gdB
@@ -596,29 +617,34 @@ P
 rho0*q[ijk]
 ;
 
+rhoE
+=
+rho0 + n*rho0*q[ijk]
+;
+
 rho
 =
-0
+alpha2*rhoE*uzerosqr + P*(-1. + alpha2*uzerosqr)
 ;
 
 j1
 =
-0
+(P + rhoE)*uzerosqr*alpha[ijk]*(vI1 + beta1[ijk])
 ;
 
 j2
 =
-0
+(P + rhoE)*uzerosqr*alpha[ijk]*(vI2 + beta2[ijk])
 ;
 
 j3
 =
-0
+(P + rhoE)*uzerosqr*alpha[ijk]*(vI3 + beta3[ijk])
 ;
 
 S
 =
-0
+3.*P + rho - rhoE
 ;
 
 dLnalphaPsim61
@@ -843,29 +869,72 @@ vecLaplB3
   ddlB322[ijk] + 1.3333333333333333333*ddlB333[ijk]
 ;
 
+lvI1
+=
+dlSigma1[ijk]
+;
+
+lvI2
+=
+dlSigma2[ijk]
+;
+
+lvI3
+=
+dlSigma3[ijk]
+;
+
+lalpha
+=
+-((alphaP[ijk]*lPsi[ijk])/Psi2) + lalphaP[ijk]/Psi[ijk]
+;
+
+luzerosqr
+=
+2.*(lalpha*alpha[ijk] - Psi4*(lvI1*lB1[ijk] + lvI2*lB2[ijk] + 
+        lvI3*lB3[ijk])) - Psi3*
+   (8.*(vI1*beta1[ijk] + vI2*beta2[ijk] + vI3*beta3[ijk]) + 
+     4.*(pow2(vI1) + pow2(vI2) + pow2(vI3) + pow2(beta1[ijk]) + 
+        pow2(beta2[ijk]) + pow2(beta3[ijk]))) - 
+  Psi4*(pow2(lvI1) + pow2(lvI2) + pow2(lvI3) + pow2(lB1[ijk]) + 
+     pow2(lB2[ijk]) + pow2(lB3[ijk]))
+;
+
 lrho
 =
-0
+(P + rhoE)*(alpha2*luzerosqr + 2.*lalpha*uzerosqr*alpha[ijk])
 ;
 
 lj1
 =
-0
+luzerosqr*alpha[ijk]*((P + rhoE)*vI1 + P*beta1[ijk]) + 
+  rhoE*((lalpha*uzerosqr + luzerosqr*alpha[ijk])*beta1[ijk] + 
+     uzerosqr*alpha[ijk]*lB1[ijk]) + 
+  uzerosqr*(lalpha*((P + rhoE)*vI1 + P*beta1[ijk]) + 
+     alpha[ijk]*(lvI1*(P + rhoE) + P*lB1[ijk]))
 ;
 
 lj2
 =
-0
+luzerosqr*alpha[ijk]*((P + rhoE)*vI2 + P*beta2[ijk]) + 
+  rhoE*((lalpha*uzerosqr + luzerosqr*alpha[ijk])*beta2[ijk] + 
+     uzerosqr*alpha[ijk]*lB2[ijk]) + 
+  uzerosqr*(lalpha*((P + rhoE)*vI2 + P*beta2[ijk]) + 
+     alpha[ijk]*(lvI2*(P + rhoE) + P*lB2[ijk]))
 ;
 
 lj3
 =
-0
+luzerosqr*alpha[ijk]*((P + rhoE)*vI3 + P*beta3[ijk]) + 
+  rhoE*((lalpha*uzerosqr + luzerosqr*alpha[ijk])*beta3[ijk] + 
+     uzerosqr*alpha[ijk]*lB3[ijk]) + 
+  uzerosqr*(lalpha*((P + rhoE)*vI3 + P*beta3[ijk]) + 
+     alpha[ijk]*(lvI3*(P + rhoE) + P*lB3[ijk]))
 ;
 
 lS
 =
-0
+lrho
 ;
 
 ldLnalphaPsim61
@@ -973,4 +1042,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 154, n* = 394,  n/ = 69,  n+ = 420, n = 883, O = 1 */
+/* nvars = 154, n* = 480,  n/ = 71,  n+ = 490, n = 1041, O = 1 */
