@@ -61,6 +61,7 @@ tocompute = {
 n ==2,
 kappa==1,
 Omega ==0,
+q == 1,
 
   (* Omega \times r term *)
   OmegaCrossR1 == - Omega y,

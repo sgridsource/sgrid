@@ -414,6 +414,11 @@ Omega
 0
 ;
 
+q[ijk]
+=
+1.
+;
+
 OmegaCrossR1
 =
 -(Omega*y[ijk])

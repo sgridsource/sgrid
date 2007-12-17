@@ -24,9 +24,9 @@ int BNSdata_startup(tGrid *grid)
   printf("Initializing BNSdata:\n");
 
   /* set boundary information: farlimit, falloff, propagation speed */
-  VarNameSetBoundaryInfo("BNSdata_Psi",   0*1, 1, 1.0);
+  VarNameSetBoundaryInfo("BNSdata_Psi",   1, 1, 1.0);
   VarNameSetBoundaryInfo("BNSdata_Bx",    0, 1, 1.0);
-  VarNameSetBoundaryInfo("BNSdata_alphaP",0, 1, 1.0);
+  VarNameSetBoundaryInfo("BNSdata_alphaP",1, 1, 1.0);
   VarNameSetBoundaryInfo("BNSdata_Sigma", 0, 1, 1.0);
 
   /* enable all BNSdata vars */
