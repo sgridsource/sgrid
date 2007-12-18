@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 17.12.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 18.12.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -896,13 +896,12 @@ lalpha
 
 luzerosqr
 =
-2.*(lalpha*alpha[ijk] - Psi4*(lvI1*lB1[ijk] + lvI2*lB2[ijk] + 
-        lvI3*lB3[ijk])) - Psi3*
-   (8.*(vI1*beta1[ijk] + vI2*beta2[ijk] + vI3*beta3[ijk]) + 
+2.*(lalpha*alpha[ijk] - Psi4*((vI1 + beta1[ijk])*(lvI1 + lB1[ijk]) + 
+        (vI2 + beta2[ijk])*(lvI2 + lB2[ijk]) + 
+        (vI3 + beta3[ijk])*(lvI3 + lB3[ijk]))) - 
+  Psi3*lPsi[ijk]*(8.*(vI1*beta1[ijk] + vI2*beta2[ijk] + vI3*beta3[ijk]) + 
      4.*(pow2(vI1) + pow2(vI2) + pow2(vI3) + pow2(beta1[ijk]) + 
-        pow2(beta2[ijk]) + pow2(beta3[ijk]))) - 
-  Psi4*(pow2(lvI1) + pow2(lvI2) + pow2(lvI3) + pow2(lB1[ijk]) + 
-     pow2(lB2[ijk]) + pow2(lB3[ijk]))
+        pow2(beta2[ijk]) + pow2(beta3[ijk])))
 ;
 
 lrho

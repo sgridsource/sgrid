@@ -49,7 +49,7 @@ int sgrid_BNSdata()
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("BNSdata_linSolver_tol","0", "tol for linSolver is "
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
-  AddPar("BNSdata_guess", "zero", "initial guess [zero,exact]");
+  AddPar("BNSdata_guess", "test", "initial guess [test]");
          
   AddPar("BNSdata_grid", "SphericalDF",
          "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");

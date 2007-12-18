@@ -155,8 +155,8 @@ q == 1,
     (* linearized
       uzerosqr = alpha2 - Psi4 delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c])*)
     luzerosqr == 2alpha lalpha - 
-                 4 Psi3 delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c]) -
-                 Psi4 delta[b,c] (lB[b] + lvI[b]) (lB[c] + lvI[c]),
+                 4 Psi3 lPsi delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c]) -
+                 Psi4 delta[b,c] 2 (lB[b] + lvI[b]) (beta[c] + vI[c]),
 
     (* rho  == alpha2 (rhoE + P) uzerosqr - P,
        j[a] == alpha (rhoE + P) uzerosqr (vI[a]+beta[a]),
@@ -166,7 +166,7 @@ q == 1,
              alpha2 (rhoE + P) luzerosqr,
     lj[a] == lalpha (rhoE + P) uzerosqr (vI[a]+beta[a]) + 
              alpha (rhoE + P) luzerosqr (vI[a]+beta[a]) +
-             alpha (rhoE + P) uzerosqr (lB[a] + lvI[a]),
+             alpha (rhoE + P) uzerosqr (lvI[a]+lB[a]),
     lS    == lrho,
 
     ldLnalphaPsim6[a] == dlalphaP[a]/alphaP - dalphaP[a] lalphaP/alphaP2 -
@@ -182,8 +182,8 @@ q == 1,
                 16Pi alphaP 3 Psi2 lPsi j[a] - 16Pi alpha Psi4 lj[a],
     FlalphaP == delta[b,c] ddlalphaP[b,c] - lalphaP (
                 (-7/32) Psi6 LBLB/(alphaP2) + 2Pi Psi4 (rho+2S) ) - alphaP (
-                (21/16)Psi5 lPsi LBLB/(alphaP2) 
-                +(7/16) (Psi4/alpha2)LBdo[a,b] LlB[a,b] + 2Pi (
+                (21/16)Psi5 lPsi LBLB/(alphaP2) +
+                (7/16) (Psi4/alpha2)LBdo[a,b] LlB[a,b] + 2Pi (
                  4 Psi3 lPsi (rho+2S) + Psi4 (lrho+2lS) ) ), 
 
     Cif == (bi==0 || bi==3), (* ell. eqn. inside stars *)

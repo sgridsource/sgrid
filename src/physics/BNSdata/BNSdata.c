@@ -66,8 +66,9 @@ int BNSdata_startup(tGrid *grid)
     double *px = box->v[Ind("x")];
     double *py = box->v[Ind("y")];
     double *pz = box->v[Ind("z")];
-    double *Psi   = box->v[Ind("BNSdata_Psi")];
+    double *Psi    = box->v[Ind("BNSdata_Psi")];
     double *alphaP = box->v[Ind("BNSdata_alphaP")];
+    double *q      = box->v[Ind("BNSdata_q")];
 
     forallpoints(box,i)
     {
@@ -84,8 +85,9 @@ int BNSdata_startup(tGrid *grid)
       /* set Psi and alphaP */
       if(Getv("BNSdata_grid", "SphericalDF"))
       {
-        Psi[i] = x*y*z; // 1.0/sqrt(x*x + y*y + z*z);
-        alphaP[i] = 0.0;
+        Psi[i] = 1.0;
+        alphaP[i] = 1.0;
+        q[i]= 1.0;
       }
       else if(Getv("BNSdata_grid", "AnsorgNS") || 
               Getv("BNSdata_grid", "4ABphi_2xyz"))
@@ -101,31 +103,22 @@ int BNSdata_startup(tGrid *grid)
         double R1  = 0.5*(xmax1-xmin1);
         double R2  = 0.5*(xmax2-xmin2);
 
-        Psi[i] = 0.0;
-        alphaP[i] = 0.0;
+        Psi[i] = 1.0;
+        alphaP[i] = 1.0;
+        q[i]= 0.0;
 
-        if(Getv("BNSdata_guess", "exact"))
+        if(Getv("BNSdata_guess", "test"))
         {
           double xc1 = 0.5*(xmax1+xmin1);
           double xc2 = 0.5*(xmax2+xmin2);
 
-          if(b==1||b==2||b==3||b==4)
-          {
-            Psi[i] = 1.0/sqrt((x-xc1)*(x-xc1) + y*y + z*z);
-          }
           if(b==0||b==5)
           {
-            Psi[i] = 
-              (-0.5*((x-xc1)*(x-xc1)+y*y+z*z)/(R1*R1*R1)+ 1/R1 + 0.5/R1);
-          }
-          if(b==1||b==2||b==0||b==5)
-          {
-            alphaP[i] = 2.0/sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+            q[i] = 1.0;
           }
           if(b==3||b==4)
           {
-            alphaP[i] = 
-              (-((x-xc2)*(x-xc2)+y*y+z*z)/(R2*R2*R2) + 2/R2 + 1/R2);
+            q[i] = 1.0;
           }
         }
       }
