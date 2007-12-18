@@ -61,7 +61,6 @@ tocompute = {
 n ==2,
 kappa==1,
 Omega ==0,
-q == 1,
 
   (* Omega \times r term *)
   OmegaCrossR1 == - Omega y,
@@ -286,10 +285,9 @@ variabledeclarations[] := Module[{},
   prdecvarname[{x},      "x"];
   prdecvarname[{y},      "y"];
 
-  prdecvarname[{g[a,b]}, "gxx"];
+  (* prdecvarname[{g[a,b]}, "gxx"]; prdecvarname[{K[a,b]}, "Kxx"]; *)
   prdecvarname[{alpha},  "alpha"];
   prdecvarname[{beta[a]},"betax"];
-  prdecvarname[{K[a,b]}, "Kxx"];
   prdecvarname[{q},      "BNSdata_q"];
   prdecvarname[{vRS[a]}, "BNSdata_vRSx"];
 
