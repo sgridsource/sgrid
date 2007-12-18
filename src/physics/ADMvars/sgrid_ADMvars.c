@@ -17,18 +17,24 @@ int sgrid_ADMvars()
   AddFun(ANALYZE, computeADMconstraints, "compute ADM constraints");
   AddFun(PRE_INITIALDATA, allocateADMvars, "allocate mem. for some ADM vars");
 
-  /* variables */
-  AddVar("g",        "(ij)", "metric");
-  AddVar("K",        "(ij)", "extrinsic curvature");
-  AddVar("alpha",    "",      "lapse");
-  AddVar("beta",     "I",     "shift");
-  AddVar("betadot",  "I",     "time derivative of shift");
+  /* 3+1 field variables */
+  AddVar("g",      "(ij)", "metric");
+  AddVar("K",      "(ij)", "extrinsic curvature");
+  AddVar("alpha",  "",     "lapse");
+  AddVar("beta",   "I",    "shift");
+  AddVar("betadot","I",    "time derivative of shift");
 
-  AddVar("ham",      "",      "Hamiltonian constraint");
-  AddVar("mom",      "i",     "momentum constraint");
-  AddVar("trK",      "",
+  /* 3+1 matter variables */
+  AddVar("rho", "",     "rho = n_a n_b T^{ab}");
+  AddVar("j",   "i",    "j_i = g_{ik} j^k, j^a = -g^{ab} T_{bc} n^c");
+  AddVar("S",   "(ij)", "S_{ij} = g_{ik} g_{jl} S^{kl}, S^{ab} = g^{ac} g^{bd} T_{cd}");
+  
+  /* vars to be computed */
+  AddVar("ham",   "",      "Hamiltonian constraint");
+  AddVar("mom",   "i",     "momentum constraint");
+  AddVar("trK",   "",
 	 "trace of extrinsic curvature tensor (for output)");
-  AddVar("E_ADM",    "",      "ADM energy");
+  AddVar("E_ADM", "",      "ADM energy");
 
   AddPar("ADMvars_normalizedConstraints", "no",
          "whether we compute normalized constraints [no,yes]");

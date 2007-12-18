@@ -1,5 +1,5 @@
 /* ADMconstraints.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 2.8.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 18.12.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -54,15 +54,19 @@ double *K13 = vlldataptr(u, box, 8);
 double *K22 = vlldataptr(u, box, 9);
 double *K23 = vlldataptr(u, box, 10);
 double *K33 = vlldataptr(u, box, 11);
-double *ham = vlldataptr(u, box, 12);
-double *mom1 = vlldataptr(u, box, 13);
-double *mom2 = vlldataptr(u, box, 14);
-double *mom3 = vlldataptr(u, box, 15);
-double *trK = vlldataptr(u, box, 16);
-double *normham = vlldataptr(u, box, 17);
-double *normmom1 = vlldataptr(u, box, 18);
-double *normmom2 = vlldataptr(u, box, 19);
-double *normmom3 = vlldataptr(u, box, 20);
+double *rho = vlldataptr(u, box, 12);
+double *j1 = vlldataptr(u, box, 13);
+double *j2 = vlldataptr(u, box, 14);
+double *j3 = vlldataptr(u, box, 15);
+double *ham = vlldataptr(u, box, 16);
+double *mom1 = vlldataptr(u, box, 17);
+double *mom2 = vlldataptr(u, box, 18);
+double *mom3 = vlldataptr(u, box, 19);
+double *trK = vlldataptr(u, box, 20);
+double *normham = vlldataptr(u, box, 21);
+double *normmom1 = vlldataptr(u, box, 22);
+double *normmom2 = vlldataptr(u, box, 23);
+double *normmom3 = vlldataptr(u, box, 24);
 int index_ADMvars_dgxxx = Ind("ADMvars_dgxxx");
 double *dg111 = box->v[index_ADMvars_dgxxx + 0];
 double *dg112 = box->v[index_ADMvars_dgxxx + 1];
@@ -142,6 +146,7 @@ double *dK333 = box->v[index_ADMvars_dKxxx + 17];
 double denom;
 double detginvf;
 double f;
+double hamrhs;
 double K;
 double KudKud;
 double R;
@@ -410,6 +415,9 @@ double Kud23;
 double Kud31;
 double Kud32;
 double Kud33;
+double momrhs1;
+double momrhs2;
+double momrhs3;
 double momu1;
 double momu2;
 double momu3;
@@ -1871,9 +1879,67 @@ cdKudd333
 codelK133*ginv13 + codelK233*ginv23 + codelK333*ginv33
 ;
 
+
+if(rho==NULL) { 
+
+hamrhs
+=
+0
+;
+
+
+} else { 
+
+hamrhs
+=
+50.26548245743669182*rho[ijk]
+;
+
+
+} 
+
+
+if(j1==NULL) { 
+
+momrhs1
+=
+0
+;
+
+momrhs2
+=
+0
+;
+
+momrhs3
+=
+0
+;
+
+
+} else { 
+
+momrhs1
+=
+-25.132741228718345908*j1[ijk]
+;
+
+momrhs2
+=
+-25.132741228718345908*j2[ijk]
+;
+
+momrhs3
+=
+-25.132741228718345908*j3[ijk]
+;
+
+
+} 
+
 ham[ijk]
 =
--KudKud + R + pow2(K)
+-hamrhs - KudKud + R + pow2(K)
 ;
 
 momu1
@@ -1900,17 +1966,17 @@ momu3
 
 mom1[ijk]
 =
-f*(momu1*g11[ijk] + momu2*g12[ijk] + momu3*g13[ijk])
+-momrhs1 + f*(momu1*g11[ijk] + momu2*g12[ijk] + momu3*g13[ijk])
 ;
 
 mom2[ijk]
 =
-f*(momu1*g12[ijk] + momu2*g22[ijk] + momu3*g23[ijk])
+-momrhs2 + f*(momu1*g12[ijk] + momu2*g22[ijk] + momu3*g23[ijk])
 ;
 
 mom3[ijk]
 =
-f*(momu1*g13[ijk] + momu2*g23[ijk] + momu3*g33[ijk])
+-momrhs3 + f*(momu1*g13[ijk] + momu2*g23[ijk] + momu3*g33[ijk])
 ;
 
 trK[ijk]
@@ -2320,7 +2386,8 @@ ginv11*RD11 + ginv22*RD22 + 2.*(ginv12*RD12 + ginv13*RD13 + ginv23*RD23) +
 
 denom
 =
-fabs(KudKud) + fabs(RA) + fabs(RB) + fabs(RC) + fabs(RD) + pow2(K)
+fabs(hamrhs) + fabs(KudKud) + fabs(RA) + fabs(RB) + fabs(RC) + fabs(RD) + 
+  pow2(K)
 ;
 
 
@@ -2328,7 +2395,7 @@ fabs(KudKud) + fabs(RA) + fabs(RB) + fabs(RC) + fabs(RD) + pow2(K)
 
 denom
 =
-fabs(KudKud) + fabs(R) + pow2(K)
+fabs(hamrhs) + fabs(KudKud) + fabs(R) + pow2(K)
 ;
 
 }
@@ -2834,19 +2901,19 @@ codelKC311*ginv11 + codelKC322*ginv22 +
 denom1
 =
 fabs(cdKdA1) + fabs(cdKdB1) + fabs(cdKdC1) + fabs(codelTrKA1) + 
-  fabs(codelTrKB1) + fabs(codelTrKC1)
+  fabs(codelTrKB1) + fabs(codelTrKC1) + fabs(momrhs1)
 ;
 
 denom2
 =
 fabs(cdKdA2) + fabs(cdKdB2) + fabs(cdKdC2) + fabs(codelTrKA2) + 
-  fabs(codelTrKB2) + fabs(codelTrKC2)
+  fabs(codelTrKB2) + fabs(codelTrKC2) + fabs(momrhs2)
 ;
 
 denom3
 =
 fabs(cdKdA3) + fabs(cdKdB3) + fabs(cdKdC3) + fabs(codelTrKA3) + 
-  fabs(codelTrKB3) + fabs(codelTrKC3)
+  fabs(codelTrKB3) + fabs(codelTrKC3) + fabs(momrhs3)
 ;
 
 
@@ -2857,7 +2924,7 @@ denom1
 fabs(cdKudd111 + cdKudd212 + cdKudd313) + 
   fabs(codelK111*ginv11 + codelK122*ginv22 + 
     2.*(codelK112*ginv12 + codelK113*ginv13 + codelK123*ginv23) + 
-    codelK133*ginv33)
+    codelK133*ginv33) + fabs(momrhs1)
 ;
 
 denom2
@@ -2865,7 +2932,7 @@ denom2
 fabs(cdKudd112 + cdKudd222 + cdKudd323) + 
   fabs(codelK211*ginv11 + codelK222*ginv22 + 
     2.*(codelK212*ginv12 + codelK213*ginv13 + codelK223*ginv23) + 
-    codelK233*ginv33)
+    codelK233*ginv33) + fabs(momrhs2)
 ;
 
 denom3
@@ -2873,7 +2940,7 @@ denom3
 fabs(cdKudd113 + cdKudd223 + cdKudd333) + 
   fabs(codelK311*ginv11 + codelK322*ginv22 + 
     2.*(codelK312*ginv12 + codelK313*ginv13 + codelK323*ginv23) + 
-    codelK333*ginv33)
+    codelK333*ginv33) + fabs(momrhs3)
 ;
 
 }
@@ -2911,4 +2978,4 @@ Cal(denom <= 0.,0.,mom3[ijk]/denom)
 }  /* end of function */
 
 /* ADMconstraints.c */
-/* nvars = 103, n* = 1992,  n/ = 36,  n+ = 1936, n = 3964, O = 1 */
+/* nvars = 107, n* = 2000,  n/ = 36,  n+ = 1954, n = 3990, O = 1 */

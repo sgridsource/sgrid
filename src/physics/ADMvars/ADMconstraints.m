@@ -5,8 +5,9 @@
 
 
 (* variables *)
-variables = {g[a,b], K[a,b], psi, dpop[a], ddpop[a,b], ham, mom[a], trK,
-             normham, normmom[a], dg[a,b,c], ddg[a,b,c,d], dK[a,b,c]}
+variables = {g[a,b], K[a,b], rho, j[a], psi, dpop[a], ddpop[a,b], 
+             ham, mom[a], trK, normham, normmom[a], 
+             dg[a,b,c], ddg[a,b,c,d], dK[a,b,c]}
 
 
 
@@ -49,19 +50,32 @@ tocompute = {
   codelK[a,b,c] == delK[a,b,c] - gamma[d,a,b] K[d,c] - gamma[d,a,c] K[b,d],
   cdKudd[a,b,c] == ginv[a,d] codelK[d,b,c],
 
+  (* use matter terms, but only if the vars are enabled *)
+  Cinstruction == "if(rho==NULL) {",
+    hamrhs == 0,
+  Cinstruction == "} else {",
+    hamrhs == 16 Pi rho,
+  Cinstruction == "}",
+
+  Cinstruction == "if(j1==NULL) {",
+    momrhs[a] == 0,
+  Cinstruction == "} else {",
+    momrhs[a] == -8 Pi j[a],
+  Cinstruction == "}",
+
   (* Hamiltonian constraint *)
-  ham == R + K K - KudKud,
+  ham == R + K K - KudKud - hamrhs,
 
   (* momentum constraint *)
   momu[a] == ginv[a,b] cdKudd[c,b,d] delta[c,d] - ginv[b,c] cdKudd[a,b,c],
-  mom[a] == f g[a,b] momu[b],
+  mom[a] == f g[a,b] momu[b] - momrhs[a],
 
   trK == K,
 
   Cif == normConstr,
 
     (* normalized Hamiltonian constraint *)
-    (* normham == ham/(fabs[R] + K K + fabs[Kud[a,b] Kud[b,a]]), *)
+    (* normham == ham/(fabs[R] + K K + fabs[Kud[a,b] Kud[b,a]] + fabs[hamrhs]), *)
     Cif == TermByTerm,
       (* compute fabs of some terms in R separately *)
       RA[a,b] == ginv[c,d] * (-deldelg[c,d,a,b]),
@@ -72,10 +86,11 @@ tocompute = {
       RB == ginv[a,b] RB[a,b],
       RC == ginv[a,b] RC[a,b],
       RD == ginv[a,b] RD[a,b],
-      (* hamnum == RA + RB + RC + RD + K K - KudKud, *)
-      denom  == fabs[RA]+fabs[RB]+fabs[RC]+fabs[RD] + K K + fabs[KudKud],
+      (* hamnum == RA + RB + RC + RD + K K - KudKud - hamrhs, *)
+      denom  == fabs[RA]+fabs[RB]+fabs[RC]+fabs[RD] + K K + fabs[KudKud] +
+                fabs[hamrhs],
     Cif == else,
-      denom  == fabs[R] + K K + fabs[KudKud],
+      denom  == fabs[R] + K K + fabs[KudKud] + fabs[hamrhs],
     Cif == end,
 
     normham == Cal[denom <= 0.0, 0.0, ham/denom],
@@ -96,13 +111,13 @@ tocompute = {
       codelTrKC[a] == ginv[b,c] codelKC[a,b,c],
       (* note: mom[la] =  CD[ K[la,ue], le ] - CD[ TrK, la ] *)
       (* momnum[a] == cdKdA[a] + cdKdB[a] + cdKdC[a] -
-                      codelTrKA[a] - codelTrKB[a] - codelTrKC[a], *)
+                      codelTrKA[a] - codelTrKB[a] - codelTrKC[a] -momrhs[a], *)
       denom[a] ==  fabs[cdKdA[a]] + fabs[cdKdB[a]] + fabs[cdKdC[a]] +
                    fabs[codelTrKA[a]] + fabs[codelTrKB[a]] +
-                   fabs[codelTrKC[a]],
+                   fabs[codelTrKC[a]] + fabs[momrhs[a]],
     Cif == else,
       denom[a]  == fabs[cdKudd[c,a,d] delta[c,d]] + 
-                   fabs[ginv[b,c] codelK[a,b,c]],
+                   fabs[ginv[b,c] codelK[a,b,c]] + fabs[momrhs[a]],
     Cif == end,
 
     denom == denom1 + denom2 + denom3,
@@ -201,7 +216,7 @@ BeginCFunction[] := Module[{},
 variabledeclarations[] := Module[{},
 
   prdecvl[{psi, dpop[a], ddpop[a,b]}, "psiandderivs"];
-  prdecvl[{g[a,b], K[a,b], ham, mom[a], trK, normham, normmom[a]}, "u"];
+  prdecvl[{g[a,b], K[a,b], rho, j[a], ham, mom[a], trK, normham, normmom[a]}, "u"];
   prdecvarname[{dg[a,b,c]},    "ADMvars_dgxxx"];
   prdecvarname[{ddg[a,b,c,d]}, "ADMvars_ddgxxxx"];
   prdecvarname[{dK[a,b,c]},    "ADMvars_dKxxx"];
