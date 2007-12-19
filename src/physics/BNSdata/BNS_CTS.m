@@ -46,7 +46,7 @@ tocompute = {
   OmegaCrossR2 == + Omega x,
   OmegaCrossR3 == 0,
 
-  (* shift *)
+  (* shift in rotating frame (in the inertial frame beta^i = B^i) *)
   beta[a] == B[a] + OmegaCrossR[a],
 
   (* get 1st derivs of B *)
@@ -72,10 +72,10 @@ tocompute = {
   vR[a] == vRS[a] + vRI[a],
 
   (* vI[a] is vel in inertial frame *)
-  vI[a] == vR[a] + OmegaCrossR[a],
+  (* vI[a] == vR[a] + OmegaCrossR[a], *)
 
-  (* compute square of u^0 *)
-  uzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c]),
+  (* compute square of u^0 in rotating frame *)
+  uzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
 
   (* rest mass density, pressure, and total energy density *)
   rho0 == Power[q/kappa, n],
@@ -84,7 +84,7 @@ tocompute = {
 
   (* fluid vars in 3+1 *)
   rho  == alpha2 (rhoE + P) uzerosqr - P,
-  j[a] == alpha (rhoE + P) uzerosqr (vI[a]+beta[a]),
+  j[a] == alpha (rhoE + P) uzerosqr (vR[a]+beta[a]),
   S    == 3P - rhoE + rho,
 
   (* dLnalphaPsim6[i] = \partial_i ln(alpha Psi^{-6}) 
@@ -127,24 +127,24 @@ tocompute = {
     LlBLlB == LlB[a,b] LlBdo[a,b],
     vecLaplB[a] == delta[b,c] (ddlB[a,b,c] + (1/3) ddlB[b,c,a]),
 
-    (* linearized alpha == alphaP/Psi and vI[a] *)
-    lvI[a] == dlSigma[a], 
+    (* linearized alpha == alphaP/Psi and vR[a] *)
+    lvR[a] == dlSigma[a], 
     lalpha == lalphaP/Psi - alphaP lPsi/Psi2,
     (* linearized
-      uzerosqr = alpha2 - Psi4 delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c])*)
+      uzerosqr = alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c])*)
     luzerosqr == 2alpha lalpha - 
-                 4 Psi3 lPsi delta[b,c] (beta[b] + vI[b]) (beta[c] + vI[c]) -
-                 Psi4 delta[b,c] 2 (lB[b] + lvI[b]) (beta[c] + vI[c]),
+                 4 Psi3 lPsi delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]) -
+                 Psi4 delta[b,c] 2 (lB[b] + lvR[b]) (beta[c] + vR[c]),
 
     (* rho  == alpha2 (rhoE + P) uzerosqr - P,
-       j[a] == alpha (rhoE + P) uzerosqr (vI[a]+beta[a]),
+       j[a] == alpha (rhoE + P) uzerosqr (vR[a]+beta[a]),
        S    == 3P - rhoE + rho, *)
     (* linearized fluid vars in 3+1 *)
     lrho  == 2 alpha lalpha (rhoE + P) uzerosqr + 
              alpha2 (rhoE + P) luzerosqr,
-    lj[a] == lalpha (rhoE + P) uzerosqr (vI[a]+beta[a]) + 
-             alpha (rhoE + P) luzerosqr (vI[a]+beta[a]) +
-             alpha (rhoE + P) uzerosqr (lvI[a]+lB[a]),
+    lj[a] == lalpha (rhoE + P) uzerosqr (vR[a]+beta[a]) + 
+             alpha (rhoE + P) luzerosqr (vR[a]+beta[a]) +
+             alpha (rhoE + P) uzerosqr (lvR[a]+lB[a]),
     lS    == lrho,
 
     ldLnalphaPsim6[a] == dlalphaP[a]/alphaP - dalphaP[a] lalphaP/alphaP2 -

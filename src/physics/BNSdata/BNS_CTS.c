@@ -304,9 +304,9 @@ double LlBLlB;
 double lrho;
 double lS;
 double luzerosqr;
-double lvI1;
-double lvI2;
-double lvI3;
+double lvR1;
+double lvR2;
+double lvR3;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
@@ -328,9 +328,6 @@ double vecLapB3;
 double vecLaplB1;
 double vecLaplB2;
 double vecLaplB3;
-double vI1;
-double vI2;
-double vI3;
 double vR1;
 double vR2;
 double vR3;
@@ -551,25 +548,10 @@ vR3
 vRI3 + vRS3[ijk]
 ;
 
-vI1
-=
-OmegaCrossR1 + vR1
-;
-
-vI2
-=
-OmegaCrossR2 + vR2
-;
-
-vI3
-=
-OmegaCrossR3 + vR3
-;
-
 uzerosqr
 =
-alpha2 - Psi4*(2.*(vI1*beta1[ijk] + vI2*beta2[ijk] + vI3*beta3[ijk]) + 
-     pow2(vI1) + pow2(vI2) + pow2(vI3) + pow2(beta1[ijk]) + 
+alpha2 - Psi4*(2.*(vR1*beta1[ijk] + vR2*beta2[ijk] + vR3*beta3[ijk]) + 
+     pow2(vR1) + pow2(vR2) + pow2(vR3) + pow2(beta1[ijk]) + 
      pow2(beta2[ijk]) + pow2(beta3[ijk]))
 ;
 
@@ -595,17 +577,17 @@ alpha2*rhoE*uzerosqr + P*(-1. + alpha2*uzerosqr)
 
 j1
 =
-(P + rhoE)*uzerosqr*alpha[ijk]*(vI1 + beta1[ijk])
+(P + rhoE)*uzerosqr*alpha[ijk]*(vR1 + beta1[ijk])
 ;
 
 j2
 =
-(P + rhoE)*uzerosqr*alpha[ijk]*(vI2 + beta2[ijk])
+(P + rhoE)*uzerosqr*alpha[ijk]*(vR2 + beta2[ijk])
 ;
 
 j3
 =
-(P + rhoE)*uzerosqr*alpha[ijk]*(vI3 + beta3[ijk])
+(P + rhoE)*uzerosqr*alpha[ijk]*(vR3 + beta3[ijk])
 ;
 
 S
@@ -835,17 +817,17 @@ vecLaplB3
   ddlB322[ijk] + 1.3333333333333333333*ddlB333[ijk]
 ;
 
-lvI1
+lvR1
 =
 dlSigma1[ijk]
 ;
 
-lvI2
+lvR2
 =
 dlSigma2[ijk]
 ;
 
-lvI3
+lvR3
 =
 dlSigma3[ijk]
 ;
@@ -857,11 +839,11 @@ lalpha
 
 luzerosqr
 =
-2.*(lalpha*alpha[ijk] - Psi4*((vI1 + beta1[ijk])*(lvI1 + lB1[ijk]) + 
-        (vI2 + beta2[ijk])*(lvI2 + lB2[ijk]) + 
-        (vI3 + beta3[ijk])*(lvI3 + lB3[ijk]))) - 
-  Psi3*lPsi[ijk]*(8.*(vI1*beta1[ijk] + vI2*beta2[ijk] + vI3*beta3[ijk]) + 
-     4.*(pow2(vI1) + pow2(vI2) + pow2(vI3) + pow2(beta1[ijk]) + 
+2.*(lalpha*alpha[ijk] - Psi4*((vR1 + beta1[ijk])*(lvR1 + lB1[ijk]) + 
+        (vR2 + beta2[ijk])*(lvR2 + lB2[ijk]) + 
+        (vR3 + beta3[ijk])*(lvR3 + lB3[ijk]))) - 
+  Psi3*lPsi[ijk]*(8.*(vR1*beta1[ijk] + vR2*beta2[ijk] + vR3*beta3[ijk]) + 
+     4.*(pow2(vR1) + pow2(vR2) + pow2(vR3) + pow2(beta1[ijk]) + 
         pow2(beta2[ijk]) + pow2(beta3[ijk])))
 ;
 
@@ -872,29 +854,29 @@ lrho
 
 lj1
 =
-luzerosqr*alpha[ijk]*((P + rhoE)*vI1 + P*beta1[ijk]) + 
+luzerosqr*alpha[ijk]*((P + rhoE)*vR1 + P*beta1[ijk]) + 
   rhoE*((lalpha*uzerosqr + luzerosqr*alpha[ijk])*beta1[ijk] + 
      uzerosqr*alpha[ijk]*lB1[ijk]) + 
-  uzerosqr*(lalpha*((P + rhoE)*vI1 + P*beta1[ijk]) + 
-     alpha[ijk]*(lvI1*(P + rhoE) + P*lB1[ijk]))
+  uzerosqr*(lalpha*((P + rhoE)*vR1 + P*beta1[ijk]) + 
+     alpha[ijk]*(lvR1*(P + rhoE) + P*lB1[ijk]))
 ;
 
 lj2
 =
-luzerosqr*alpha[ijk]*((P + rhoE)*vI2 + P*beta2[ijk]) + 
+luzerosqr*alpha[ijk]*((P + rhoE)*vR2 + P*beta2[ijk]) + 
   rhoE*((lalpha*uzerosqr + luzerosqr*alpha[ijk])*beta2[ijk] + 
      uzerosqr*alpha[ijk]*lB2[ijk]) + 
-  uzerosqr*(lalpha*((P + rhoE)*vI2 + P*beta2[ijk]) + 
-     alpha[ijk]*(lvI2*(P + rhoE) + P*lB2[ijk]))
+  uzerosqr*(lalpha*((P + rhoE)*vR2 + P*beta2[ijk]) + 
+     alpha[ijk]*(lvR2*(P + rhoE) + P*lB2[ijk]))
 ;
 
 lj3
 =
-luzerosqr*alpha[ijk]*((P + rhoE)*vI3 + P*beta3[ijk]) + 
+luzerosqr*alpha[ijk]*((P + rhoE)*vR3 + P*beta3[ijk]) + 
   rhoE*((lalpha*uzerosqr + luzerosqr*alpha[ijk])*beta3[ijk] + 
      uzerosqr*alpha[ijk]*lB3[ijk]) + 
-  uzerosqr*(lalpha*((P + rhoE)*vI3 + P*beta3[ijk]) + 
-     alpha[ijk]*(lvI3*(P + rhoE) + P*lB3[ijk]))
+  uzerosqr*(lalpha*((P + rhoE)*vR3 + P*beta3[ijk]) + 
+     alpha[ijk]*(lvR3*(P + rhoE) + P*lB3[ijk]))
 ;
 
 lS
@@ -1007,4 +989,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 154, n* = 458,  n/ = 69,  n+ = 450, n = 977, O = 1 */
+/* nvars = 154, n* = 458,  n/ = 69,  n+ = 447, n = 974, O = 1 */
