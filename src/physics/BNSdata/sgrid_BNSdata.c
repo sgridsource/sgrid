@@ -31,6 +31,8 @@ int sgrid_BNSdata()
 
   AddVar("BNSdata_vRS", "I", "solenoidal velocity in rotating frame");
   AddVar("BNSdata_q",   "",  "q := P/rho0");
+  AddVar("BNSdata_vRS", "Ij","1st deriv of vRS");
+  AddVar("BNSdata_q",   "i", "1st deriv of q");
 
   AddVar("BNSdata_temp1", "", "temporary variable(e.g. to store derivs)");
   AddVar("BNSdata_temp2", "", "temporary variable(e.g. to store derivs)");

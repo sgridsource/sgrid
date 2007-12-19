@@ -11,9 +11,10 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
 	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
-	     g[a,b], alpha, beta[a], K[a,b], q, vRS[a], x, y}
+	     g[a,b], alpha, beta[a], K[a,b], 
+             q, vRS[a], dq[a], dvRS[a,b], x, y}
 
-constvariables = {OmegaCrossR[a]}
+constvariables = {OmegaCrossR[a], dbeta[a]}
 
 (* compute in this order *)
 tocompute = {
@@ -38,6 +39,10 @@ tocompute = {
 					index_dlSigma1, index_ddlSigma11);",
   Cif == end,
 
+  Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BNSdata_vRSx\"), \
+					 Ind(\"BNSdata_vRSxx\"));",
+  Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
+			                 Ind(\"BNSdata_qx\"));",
   (* loop of all points *)
   Cinstruction == "forallpoints(box, ijk) {",
 
@@ -62,6 +67,7 @@ tocompute = {
   alpha  == alphaP/Psi,
   alpha2 == alpha*alpha,
   Psi2   == Psi*Psi,
+  Psi3   == Psi*Psi2,
   Psi4   == Psi2*Psi2,
   Psi5   == Psi*Psi4,
 
@@ -92,6 +98,21 @@ tocompute = {
 			= Psi^7 alphaP^{-1} \partial_i(alphaP Psi^{-7}) *)
   dLnalphaPsim6[a] == dalphaP[a]/alphaP - 7 dPsi[a]/Psi,
 
+  (* more terms which we need inside the stars *)
+  Cif == (bi==0 || bi==3),
+    dLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a],
+    dalpha[a] == dalphaP[a]/Psi - alphaP dPsi[a]/Psi2,
+    dbeta[a,b] == dB[a,b] + epsmatrix3d[b,a,3] Omega,
+    dvR[a,b] == dvRS[a,b] + ddSigma[a,b],
+    duzerosqr[a] == 2 alpha dalpha[a] -
+                    4 Psi3 dPsi[a] delta[b,c] *
+                    (beta[b] + vR[b]) (beta[c] + vR[c]) -
+                    2 Psi4 delta[b,c] *
+                    (beta[b] + vR[b]) (dbeta[c,a] + dvR[c,a]),
+    dLnuzerosqr[a] == duzerosqr[a]/uzerosqr,
+    dLnalphaP[a] == dalphaP[a]/alphaP,
+    dLnPsi[a] == dPsi[a]/Psi,
+  Cif == end,
 
   (* decide if use non-linear ot linear equations *)
   Cif == nonlin, (* non-linear case *)
@@ -107,8 +128,9 @@ tocompute = {
                (7/8) Psi4 LBLB/(4 alpha2) + 2Pi Psi4 (rho+2S) ),
 
     Cif == (bi==0 || bi==3), (* ell. eqn. inside stars *)
-      FSigma  == delta[b,c] ddSigma[b,c] - 0,
-              (*   -(vRS[a] + dSigma[a])(...), *)
+      FSigma == delta[b,c] ddSigma[b,c] + 
+               (vRS[a] + dSigma[a]) *
+               (dLnrho0[a] + dLnuzerosqr[a]/2 + dLnalphaP[a] + 5 dLnPsi[a]), 
     Cif == else,
       FSigma  == Sigma,  (* set Sigma=0 outside stars *)
     Cif == end,
@@ -117,7 +139,6 @@ tocompute = {
 
     alphaP2 == alphaP*alphaP,
     alphaP3 == alphaP2*alphaP,
-    Psi3    == Psi*Psi2,
     Psi6    == Psi4*Psi2,
     Psi7    == Psi4*Psi3,
 
@@ -165,7 +186,28 @@ tocompute = {
                  4 Psi3 lPsi (rho+2S) + Psi4 (lrho+2lS) ) ), 
 
     Cif == (bi==0 || bi==3), (* ell. eqn. inside stars *)
-      FlSigma  == delta[b,c] ddlSigma[b,c] - 0,
+      dlalpha[a] == dlalphaP[a]/Psi - dalphaP[a] lPsi/Psi2 - 
+                    lalphaP dPsi[a]/Psi2 - alphaP dlPsi[a]/Psi2 +
+                    2 alphaP dPsi[a] lPsi/Psi3,
+      lduzerosqr[a] == 2 lalpha dalpha[a] + 2 alpha dlalpha[a] -
+                         (12 Psi2 lPsi dPsi[a] + 4 Psi3 dlPsi[a]) delta[b,c] *
+                         (beta[b] + vR[b]) (beta[c] + vR[c]) -
+                         4 Psi3 dPsi[a] delta[b,c] *
+                         2 (beta[b] + vR[b]) (lB[c] + dlSigma[c]) -
+                         8 Psi3 lPsi delta[b,c] *
+                         (beta[b] + vR[b]) (dbeta[c,a] + dvR[c,a]) -
+                         2 Psi4 delta[b,c] * (
+                          (lB[b] + dlSigma[b]) (dbeta[c,a] + dvR[c,a]) + 
+                          (beta[b] + vR[b]) (dlB[c,a] + ddlSigma[c,a]) ),
+
+      FlSigma  == delta[b,c] ddlSigma[b,c] + 
+               dlSigma[a] * ( 
+                dLnrho0[a] + dLnuzerosqr[a]/2 + dLnalphaP[a] + 5 dLnPsi[a] )+
+               (vRS[a] + dSigma[a]) * (
+                lduzerosqr[a]/(2 uzerosqr) - 
+                duzerosqr[a] luzerosqr /(2 uzerosqr*uzerosqr) +
+                dlalphaP[a]/alphaP - dalphaP[a] lalphaP/alphaP2 +
+                5 dlPsi[a]/Psi - 5 dPsi[a] lPsi/Psi2 ),
     Cif == else,
       FlSigma  == lSigma,  (* set Sigma=0 outside stars *)
     Cif == end,
@@ -271,10 +313,12 @@ variabledeclarations[] := Module[{},
   prdecvarname[{y},      "y"];
 
   (* prdecvarname[{g[a,b]}, "gxx"]; prdecvarname[{K[a,b]}, "Kxx"]; *)
-  prdecvarname[{alpha},  "alpha"];
-  prdecvarname[{beta[a]},"betax"];
-  prdecvarname[{q},      "BNSdata_q"];
-  prdecvarname[{vRS[a]}, "BNSdata_vRSx"];
+  prdecvarname[{alpha},   "alpha"];
+  prdecvarname[{beta[a]}, "betax"];
+  prdecvarname[{q},       "BNSdata_q"];
+  prdecvarname[{vRS[a]},  "BNSdata_vRSx"];
+  prdecvarname[{dq[a]},    "BNSdata_qx"];
+  prdecvarname[{dvRS[a,b]},"BNSdata_vRSxx"];
 
   pr["\n"];
 ];    
