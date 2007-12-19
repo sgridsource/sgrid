@@ -6,7 +6,7 @@
 
 (* variables *)
 variables = {Psi, B[a], alphaP, Sigma, dB[a,b], dSigma[a],
-	     g[a,b], alpha, beta[a], K[a,b], rho, jdo[a], Sdo[a,b],
+	     psi, g[a,b], alpha, beta[a], K[a,b], rho, jdo[a], Sdo[a,b],
              q, vRS[a], x, y}
 
 constvariables = {OmegaCrossR[a]}
@@ -44,7 +44,8 @@ tocompute = {
   LB[a,b] == dB[a,b] + dB[b,a] -(2/3) delta[a,b] gdB,
   LBdo[a,b] == delta[a,c] delta[b,d] LB[c,d], 
 
-  (* set g_ij and K_ij *)
+  (* set psi, g_ij and K_ij *)
+  psi == 1, (* set ADMvars psi to one *)
   g[a,b] == Psi4 delta[a,b],
   K[a,b] == Psi4 LBdo[a,b] / (2 alpha),
 
@@ -159,6 +160,7 @@ variabledeclarations[] := Module[{},
   prdecvarname[{y},      "y"];
 
   prdecvarname[{g[a,b]}, "gxx"];
+  prdecvarname[{psi}, "psi"];
   prdecvarname[{K[a,b]}, "Kxx"];
   prdecvarname[{alpha},  "alpha"];
   prdecvarname[{beta[a]},"betax"];

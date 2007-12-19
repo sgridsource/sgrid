@@ -234,7 +234,7 @@ int setBNSdata(tGrid *grid)
   enablevar(grid, Ind("Sxx"));
 
   /* set all ADM vars */
-  ;
+  setADMvars(grid);
 
   return 0;
 }
