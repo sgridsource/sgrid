@@ -193,6 +193,7 @@ BeginCFunction[] := Module[{},
 
   pr["int normConstr = Getv(\"ADMvars_normalizedConstraints\", \"yes\");\n"];
   pr["int TermByTerm = GetvLax(\"ADMvars_ConstraintNorm\", \"TermByTerm\");\n"];
+  pr["int useDD = GetvLax(\"ADMvars_useDD\", \"yes\");\n"];
   pr["\n"];
 
   pr["for(bi = 0; bi < grid->nboxes; bi++)\n"];
@@ -200,8 +201,10 @@ BeginCFunction[] := Module[{},
   pr["tBox *box = grid->box[bi];\n"];
   pr["int ijk;\n\n"];
 
-  pr["allDerivsOf_Sab(box, Ind(\"gxx\"), Ind(\"ADMvars_dgxxx\"),
-                      Ind(\"ADMvars_ddgxxxx\"));\n"];
+  pr["if(useDD) allDerivsOf_Sab(box, Ind(\"gxx\"), Ind(\"ADMvars_dgxxx\"),
+                                     Ind(\"ADMvars_ddgxxxx\"));\n"];
+  pr["else FirstAndSecondDerivsOf_Sab(box, Ind(\"gxx\"),Ind(\"ADMvars_dgxxx\"),
+                                      Ind(\"ADMvars_ddgxxxx\"));\n"];
   pr["FirstDerivsOf_Sab(box, Ind(\"Kxx\"), Ind(\"ADMvars_dKxxx\"));\n"];
   pr["\n"];
 

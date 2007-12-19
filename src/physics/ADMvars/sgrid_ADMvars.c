@@ -88,6 +88,9 @@ int sgrid_ADMvars()
          "whether memory is allocated for temp1, temp2, temp3");
   AddPar("ADMvars_memory_for_psiandderivs", "yes",
          "whether memory is allocated for psiandderivs");
-  
+
+  /* more pars to control ADMvars */
+  AddPar("ADMvars_useDD", "no", "whether we use DD to comput ham,mom");
+
   return 0;
 }

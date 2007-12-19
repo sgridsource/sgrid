@@ -1,5 +1,5 @@
 /* ADMconstraints.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 18.12.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 19.12.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -21,13 +21,15 @@ int bi;
 
 int normConstr = Getv("ADMvars_normalizedConstraints", "yes");
 int TermByTerm = GetvLax("ADMvars_ConstraintNorm", "TermByTerm");
+int useDD = GetvLax("ADMvars_useDD", "yes");
 
 for(bi = 0; bi < grid->nboxes; bi++)
 {
 tBox *box = grid->box[bi];
 int ijk;
 
-allDerivsOf_Sab(box, Ind("gxx"), Ind("ADMvars_dgxxx"),                       Ind("ADMvars_ddgxxxx"));
+if(useDD) allDerivsOf_Sab(box, Ind("gxx"), Ind("ADMvars_dgxxx"),                                      Ind("ADMvars_ddgxxxx"));
+else FirstAndSecondDerivsOf_Sab(box, Ind("gxx"),Ind("ADMvars_dgxxx"),                                       Ind("ADMvars_ddgxxxx"));
 FirstDerivsOf_Sab(box, Ind("Kxx"), Ind("ADMvars_dKxxx"));
 
 forallpoints(box, ijk)
