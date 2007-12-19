@@ -12,7 +12,7 @@ int sgrid_BNSdata()
 
   /* functions */
   AddFun(PRE_INITIALDATA, BNSdata_startup, "initialize BNSdata");
-  AddFun(INITIALDATA, BNSdata_solve, "solve BNSdata Eq.");
+  AddFun(INITIALDATA, setBNSdata, "set the BNS data");
 //  AddFun(ANALYZE, BNSdata_analyze, "compute error");
 
   /* variables */

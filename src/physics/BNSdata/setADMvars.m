@@ -1,25 +1,23 @@
-(* BNS_CTS.m 
+(* setADMvars.m 
    Wolfgang Tichy  12/2007       *)
 
 (* compute right hand side of BSSN equations *)
 
 
 (* variables *)
-variables = {Psi, B[a], alphaP, Sigma, 
-              dPsi[a],   dB[a,b],   dalphaP[a],    dSigma[a],
-             ddPsi[a,b],ddB[a,b,c],ddalphaP[a,b], ddSigma[a,b],
-	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
-              dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
-             ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
-	     g[a,b], alpha, beta[a], K[a,b], q, vRS[a], x, y}
+variables = {Psi, B[a], alphaP, Sigma, dB[a,b], dSigma[a],
+	     g[a,b], alpha, beta[a], K[a,b], rho, jdo[a], Sdo[a,b],
+             q, vRS[a], x, y}
 
 constvariables = {OmegaCrossR[a]}
 
 (* compute in this order *)
 tocompute = {
 
-  Cinstruction == "FirstDerivsOf_Sa(box, index_B1, Ind(\"BNSdata_Bxx\"));",
-  Cinstruction == "FirstDerivsOf_S(box,index_Sigma,Ind(\"BNSdata_Sigmax\"));",
+  Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BNSdata_Bx\"), 
+					 Ind(\"BNSdata_Bxx\"));",
+  Cinstruction == "FirstDerivsOf_S(box, Ind(\"BNSdata_Sigma\"),
+					Ind(\"BNSdata_Sigmax\"));",
 
   (* loop of all points *)
   Cinstruction == "forallpoints(box, ijk) {",
@@ -80,8 +78,9 @@ tocompute = {
 
 
 (* symmetries *)
-g[a_,b_] :=  g[b,a] /; !OrderedQ[{a,b}]
-K[a_,b_] :=  K[b,a] /; !OrderedQ[{a,b}]
+g[a_,b_]   :=  g[b,a] /; !OrderedQ[{a,b}]
+K[a_,b_]   :=  K[b,a] /; !OrderedQ[{a,b}]
+Sdo[a_,b_] :=  Sdo[b,a] /; !OrderedQ[{a,b}]
 
 ginv[a_,b_] := ginv[b,a] /; !OrderedQ[{a,b}]
 Kup[a_,b_]  := Kup[b,a]  /; !OrderedQ[{a,b}]
@@ -105,7 +104,7 @@ ddlSigma[a_,b_]   := ddlSigma[b,a]  /; !OrderedQ[{a,b}]
    the C file will be in Cfunctionfile 
 *)
 
-CFunctionFile = "BNS_CTS.c"
+CFunctionFile = "setADMvars.c"
 
 (* the head of the function *)
 BeginCFunction[] := Module[{},
@@ -121,12 +120,12 @@ BeginCFunction[] := Module[{},
 
   pr["\n\n\n"];
 
-  pr["void BNS_CTS(tGrid *grid)\n"];
+  pr["void setADMvars(tGrid *grid)\n"];
   pr["{\n"];
 
-  pr["double n = Getd(\"BNSdata_n\");"];
-  pr["double kappa = Getd(\"BNSdata_kappa\");"];
-  pr["double Omega = Getd(\"BNSdata_Omega\");"];
+  pr["double n = Getd(\"BNSdata_n\");\n"];
+  pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
+  pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
   pr["\n"];
 
   pr["int bi;\n"];
@@ -146,10 +145,10 @@ BeginCFunction[] := Module[{},
 *)
 variabledeclarations[] := Module[{},
 
-  prdecvarname[{Psi,     "BNSdata_Psi"];
-  prdecvarname[{B[a],    "BNSdata_Bx"];
-  prdecvarname[{alphaP,  "BNSdata_alphaP"];
-  prdecvarname[{Sigma,   "BNSdata_Sigma"];
+  prdecvarname[{Psi},     "BNSdata_Psi"];
+  prdecvarname[{B[a]},    "BNSdata_Bx"];
+  prdecvarname[{alphaP},  "BNSdata_alphaP"];
+  prdecvarname[{Sigma},   "BNSdata_Sigma"];
   prdecvarname[{q},      "BNSdata_q"];
   prdecvarname[{vRS[a]}, "BNSdata_vRSx"];
 

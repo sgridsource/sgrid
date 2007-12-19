@@ -16,7 +16,10 @@
 
 void BNS_CTS(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs,      int nonlin)
 {
-double n = Getd("BNSdata_n");double kappa = Getd("BNSdata_kappa");double Omega = Getd("BNSdata_Omega");
+double n = Getd("BNSdata_n");
+double kappa = Getd("BNSdata_kappa");
+double Omega = Getd("BNSdata_Omega");
+
 tGrid *grid = vlu->grid;
 int bi;
 

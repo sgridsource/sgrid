@@ -224,9 +224,9 @@ BeginCFunction[] := Module[{},
 		   int nonlin)\n"];
   pr["{\n"];
 
-  pr["double n = Getd(\"BNSdata_n\");"];
-  pr["double kappa = Getd(\"BNSdata_kappa\");"];
-  pr["double Omega = Getd(\"BNSdata_Omega\");"];
+  pr["double n = Getd(\"BNSdata_n\");\n"];
+  pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
+  pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
   pr["\n"];
 
   pr["tGrid *grid = vlu->grid;\n"];

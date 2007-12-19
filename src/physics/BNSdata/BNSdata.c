@@ -49,11 +49,9 @@ int BNSdata_startup(tGrid *grid)
   enablevar(grid, Ind("BNSdata_temp3"));
   enablevar(grid, Ind("BNSdata_temp4"));
 
-  /* enable some ADM vars */
-  enablevar(grid, Ind("gxx"));
+  /* enable some lapse and shift of ADMvars */
   enablevar(grid, Ind("alpha"));
   enablevar(grid, Ind("betax"));
-  enablevar(grid, Ind("Kxx"));
   
   /* set initial values in all in boxes */
   forallboxes(grid,b)
@@ -221,6 +219,25 @@ write_grid(grid);
   return 0;
 }
 
+int setBNSdata(tGrid *grid)
+{
+  /* call solver */
+  BNSdata_solve(grid);
+
+  /* enable all ADM vars */
+  enablevar(grid, Ind("gxx"));
+  enablevar(grid, Ind("alpha"));
+  enablevar(grid, Ind("betax"));
+  enablevar(grid, Ind("Kxx"));
+  enablevar(grid, Ind("rho"));
+  enablevar(grid, Ind("jx"));
+  enablevar(grid, Ind("Sxx"));
+
+  /* set all ADM vars */
+  ;
+
+  return 0;
+}
 
 /* compute absolute error in ANALYSIS */
 int BNSdata_analyze(tGrid *grid)
