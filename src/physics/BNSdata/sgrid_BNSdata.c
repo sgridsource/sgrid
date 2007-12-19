@@ -13,7 +13,7 @@ int sgrid_BNSdata()
   /* functions */
   AddFun(PRE_INITIALDATA, BNSdata_startup, "initialize BNSdata");
   AddFun(INITIALDATA, BNSdata_solve, "solve BNSdata Eq.");
-  AddFun(ANALYZE, BNSdata_analyze, "compute error");
+//  AddFun(ANALYZE, BNSdata_analyze, "compute error");
 
   /* variables */
   AddVar("BNSdata_Psi",     "",     "new conf. factor");
@@ -29,8 +29,8 @@ int sgrid_BNSdata()
   AddVar("BNSdata_Sigma",   "i",    "1st deriv of Sigma");
   AddVar("BNSdata_Sigma",   "(ij)", "2nd deriv of Sigma");
 
-  AddVar("BNSdata_vRS",   "I",    "some vel.");
-  AddVar("BNSdata_q",   "",    "???.");
+  AddVar("BNSdata_vRS", "I", "solenoidal velocity in rotating frame");
+  AddVar("BNSdata_q",   "",  "q := P/rho0");
 
   AddVar("BNSdata_temp1", "", "temporary variable(e.g. to store derivs)");
   AddVar("BNSdata_temp2", "", "temporary variable(e.g. to store derivs)");
@@ -38,6 +38,9 @@ int sgrid_BNSdata()
   AddVar("BNSdata_temp4", "", "temporary variable(e.g. to store derivs)");
      
   /* parameters */
+  AddPar("BNSdata_n",     "1", "polytropic index n, Gamma = 1 + 1/n");
+  AddPar("BNSdata_kappa", "1", "kappa in EOS: P = kappa rho0^Gamma");
+  AddPar("BNSdata_Omega", "0", "orbital angular velocity");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "maximal number of Newton iterations");

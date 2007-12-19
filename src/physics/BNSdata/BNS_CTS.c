@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 18.12.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 19.12.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -16,6 +16,7 @@
 
 void BNS_CTS(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs,      int nonlin)
 {
+double n = Getd("BNSdata_n");double kappa = Getd("BNSdata_kappa");double Omega = Getd("BNSdata_Omega");
 tGrid *grid = vlu->grid;
 int bi;
 
@@ -236,26 +237,12 @@ int index_x = Ind("x");
 double *x = box->v[index_x + 0];
 int index_y = Ind("y");
 double *y = box->v[index_y + 0];
-int index_gxx = Ind("gxx");
-double *g11 = box->v[index_gxx + 0];
-double *g12 = box->v[index_gxx + 1];
-double *g13 = box->v[index_gxx + 2];
-double *g22 = box->v[index_gxx + 3];
-double *g23 = box->v[index_gxx + 4];
-double *g33 = box->v[index_gxx + 5];
 int index_alpha = Ind("alpha");
 double *alpha = box->v[index_alpha + 0];
 int index_betax = Ind("betax");
 double *beta1 = box->v[index_betax + 0];
 double *beta2 = box->v[index_betax + 1];
 double *beta3 = box->v[index_betax + 2];
-int index_Kxx = Ind("Kxx");
-double *K11 = box->v[index_Kxx + 0];
-double *K12 = box->v[index_Kxx + 1];
-double *K13 = box->v[index_Kxx + 2];
-double *K22 = box->v[index_Kxx + 3];
-double *K23 = box->v[index_Kxx + 4];
-double *K33 = box->v[index_Kxx + 5];
 int index_BNSdata_q = Ind("BNSdata_q");
 double *q = box->v[index_BNSdata_q + 0];
 int index_BNSdata_vRSx = Ind("BNSdata_vRSx");
@@ -275,7 +262,6 @@ double gdlB;
 double j1;
 double j2;
 double j3;
-double kappa;
 double lalpha;
 double LB11;
 double LB12;
@@ -321,8 +307,6 @@ double luzerosqr;
 double lvI1;
 double lvI2;
 double lvI3;
-double n;
-double Omega;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
@@ -395,29 +379,6 @@ FirstAndSecondDerivsOf_S(box, index_lSigma,      index_dlSigma1, index_ddlSigma1
 
 
 forallpoints(box, ijk) { 
-
-
-         double xmax1 = grid->box[0]->x_of_X[1](                         (void *) grid->box[0], 0, 0.0,0.0,0.0);         double xmin1 = grid->box[0]->x_of_X[1](                         (void *) grid->box[0], 0, 0.0,1.0,0.0);         double xmax2 = grid->box[3]->x_of_X[1](                         (void *) grid->box[3], 0, 0.0,1.0,0.0);         double xmin2 = grid->box[3]->x_of_X[1](                         (void *) grid->box[3], 0, 0.0,0.0,0.0);         double R1  = 0.5*(xmax1-xmin1);         double R2  = 0.5*(xmax2-xmin2); double rh1 = 0.0;         double rh2 = 0.0;          if(bi==0 || bi==5)  rh1 = -3.0/(R1*R1*R1);         if(bi==3 || bi==4)  rh2 = -6.0/(R2*R2*R2);  
-
-n
-=
-2.
-;
-
-kappa
-=
-1.
-;
-
-Omega
-=
-0
-;
-
-q[ijk]
-=
-1.
-;
 
 OmegaCrossR1
 =
@@ -1046,4 +1007,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 154, n* = 480,  n/ = 71,  n+ = 490, n = 1041, O = 1 */
+/* nvars = 154, n* = 458,  n/ = 69,  n+ = 450, n = 977, O = 1 */

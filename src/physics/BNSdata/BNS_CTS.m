@@ -41,27 +41,6 @@ tocompute = {
   (* loop of all points *)
   Cinstruction == "forallpoints(box, ijk) {",
 
-  Cinstruction == "
-        double xmax1 = grid->box[0]->x_of_X[1](
-                        (void *) grid->box[0], 0, 0.0,0.0,0.0);
-        double xmin1 = grid->box[0]->x_of_X[1](
-                        (void *) grid->box[0], 0, 0.0,1.0,0.0);
-        double xmax2 = grid->box[3]->x_of_X[1](
-                        (void *) grid->box[3], 0, 0.0,1.0,0.0);
-        double xmin2 = grid->box[3]->x_of_X[1](
-                        (void *) grid->box[3], 0, 0.0,0.0,0.0);
-        double R1  = 0.5*(xmax1-xmin1);
-        double R2  = 0.5*(xmax2-xmin2);
-	double rh1 = 0.0;
-        double rh2 = 0.0;
-
-        if(bi==0 || bi==5)  rh1 = -3.0/(R1*R1*R1);
-        if(bi==3 || bi==4)  rh2 = -6.0/(R2*R2*R2); ",
-
-n ==2,
-kappa==1,
-Omega ==0,
-
   (* Omega \times r term *)
   OmegaCrossR1 == - Omega y,
   OmegaCrossR2 == + Omega x,
@@ -244,6 +223,12 @@ BeginCFunction[] := Module[{},
 		   tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs, \
 		   int nonlin)\n"];
   pr["{\n"];
+
+  pr["double n = Getd(\"BNSdata_n\");"];
+  pr["double kappa = Getd(\"BNSdata_kappa\");"];
+  pr["double Omega = Getd(\"BNSdata_Omega\");"];
+  pr["\n"];
+
   pr["tGrid *grid = vlu->grid;\n"];
   pr["int bi;\n"];
   pr["\n"];
