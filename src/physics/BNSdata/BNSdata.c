@@ -194,7 +194,7 @@ int BNSdata_solve(tGrid *grid)
 
 // remove this later:
 Setd("GridIterators_setABStozero_below", 1e-12); // remove later
-vlFu->n = vlu->n = vlr->n = vldu->n = 5;
+//vlFu->n = vlu->n = vlr->n = vldu->n = 5;
 //Yo(1);
 //J_BNSdata(vlr, vldu, vlduDerivs, vlu);
 Yo(2);
