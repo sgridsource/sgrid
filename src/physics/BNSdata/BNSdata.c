@@ -114,11 +114,11 @@ int BNSdata_startup(tGrid *grid)
 
           if(b==0||b==5)
           {
-            q[i] = 0.1;
+            q[i] = 0.01*( 1.0 - ((x-xc1)*(x-xc1) + y*y + z*z) )/(R1*R1);
           }
           if(b==3||b==4)
           {
-            q[i] = 0.0;
+            q[i] = 0.01*( 1.0 - ((x-xc2)*(x-xc2) + y*y + z*z) )/(R2*R2);
           }
         }
       }
