@@ -14,7 +14,7 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
 	     g[a,b], alpha, beta[a], K[a,b], 
              q, vRS[a], dq[a], dvRS[a,b], x, y}
 
-constvariables = {OmegaCrossR[a], dbeta[a]}
+constvariables = {OmegaCrossR[a]}
 
 (* compute in this order *)
 tocompute = {
