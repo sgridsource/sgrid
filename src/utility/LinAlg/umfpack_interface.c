@@ -30,7 +30,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   double *Ax;
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
-  int INFO;
+  int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_solve: setting sparse matrix\n"); fflush(stdout); }
 
@@ -113,8 +113,8 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   /* call umfpack routine */
   if(pr)
   { printf("umfpack_solve: calling umfpack_di_solve\n"); fflush(stdout); }
-  INFO=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
@@ -132,7 +132,9 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
 
   if(INFO!=0)
   {
-    printf("INFO=%d\n", INFO);
+    printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
+    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
+    printf("umfpack_di_solve returned INFO=%d\n", INFO);
     errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
   }
 
@@ -188,7 +190,7 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   double *Ax;
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
-  int INFO;
+  int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_solve_forSortedVars: setting sparse matrix\n"); fflush(stdout); }
 
@@ -273,8 +275,8 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   /* call umfpack routine */
   if(pr)
   { printf("umfpack_solve_forSortedVars: calling umfpack_di_solve\n"); fflush(stdout); }
-  INFO=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
@@ -292,7 +294,9 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
 
   if(INFO!=0)
   {
-    printf("INFO=%d\n", INFO);
+    printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
+    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
+    printf("umfpack_di_solve returned INFO=%d\n", INFO);
     errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
   }
 
@@ -349,7 +353,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   double *Ax;
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
-  int INFO;
+  int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_solve_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
 
@@ -431,8 +435,8 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   /* call umfpack routine */
   if(pr)
   { printf("umfpack_solve_fromAcolumns: calling umfpack_di_solve\n"); fflush(stdout); }
-  INFO=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
@@ -450,7 +454,9 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
 
   if(INFO!=0)
   {
-    printf("INFO=%d\n", INFO);
+    printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
+    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
+    printf("umfpack_di_solve returned INFO=%d\n", INFO);
     errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
   }
 
@@ -506,7 +512,7 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   double *Ax;
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
-  int INFO;
+  int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_solve_forSortedVars_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
 
@@ -590,8 +596,8 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   /* call umfpack routine */
   if(pr)
   { printf("umfpack_solve_forSortedVars_fromAcolumns: calling umfpack_di_solve\n"); fflush(stdout); }
-  INFO=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
@@ -609,7 +615,9 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
 
   if(INFO!=0)
   {
-    printf("INFO=%d\n", INFO);
+    printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
+    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
+    printf("umfpack_di_solve returned INFO=%d\n", INFO);
     errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
   }
 
