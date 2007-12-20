@@ -60,7 +60,7 @@ tocompute = {
   Cinstruction == "if(j1==NULL) {",
     momrhs[a] == 0,
   Cinstruction == "} else {",
-    momrhs[a] == -8 Pi j[a],
+    momrhs[a] == 8 Pi j[a],
   Cinstruction == "}",
 
   (* Hamiltonian constraint *)
