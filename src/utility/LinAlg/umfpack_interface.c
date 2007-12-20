@@ -135,6 +135,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
     printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
     printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
     printf("umfpack_di_solve returned INFO=%d\n", INFO);
+    fflush(stdout);
     errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
   }
 
@@ -297,6 +298,7 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
     printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
     printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
     printf("umfpack_di_solve returned INFO=%d\n", INFO);
+    fflush(stdout);
     errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
   }
 
@@ -457,6 +459,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
     printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
     printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
     printf("umfpack_di_solve returned INFO=%d\n", INFO);
+    fflush(stdout);
     errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
   }
 
@@ -618,6 +621,7 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
     printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
     printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
     printf("umfpack_di_solve returned INFO=%d\n", INFO);
+    fflush(stdout);
     errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
   }
 
