@@ -73,3 +73,26 @@ double GetSparseVectorComponent(tSparseVector *SV, int comp)
     if(SV->pos[i]==comp) return SV->val[i];
   return 0.0;
 }
+
+/* matrix times vector for a matrix Aline made up of lines of tSparseVector
+   vectors. Initialize like Aline this: 
+    tSparseVector **Aline;
+    Aline = calloc(nlines, sizeof(*Aline));
+    AddToSparseVector(Aline[line], col, value);  */
+void SparseMatrixLines_times_vector(tSparseVector **Aline, int nlines,
+                                    double *x, double *f)
+{
+  int i,j,ent;
+  double Aij;
+
+  for(i=0; i<nlines; i++)
+  {
+    f[i] = 0.0; 
+    for(ent = 0; ent < Aline[j]->entries; ent++)
+    {
+       j   = Aline[i]->pos[ent];
+       Aij = Aline[j]->val[ent];
+       f[i] += Aij * x[j];
+    }
+  }
+}

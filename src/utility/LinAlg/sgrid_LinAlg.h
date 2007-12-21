@@ -21,7 +21,9 @@ void AddToSparseVector(tSparseVector *SV, int newpos, double newval);
 void FreeSparseVector(tSparseVector *SV);
 void prSparseVector(tSparseVector *SV);
 double GetSparseVectorComponent(tSparseVector *SV, int comp);
-
+void SparseMatrixLines_times_vector(tSparseVector **Aline, int nlines,
+                                    double *x, double *f);
+ 
 /* ReadMatrixFrom_Fx.c */
 void SetMatrixLines_slowly(tSparseVector **Aline,
     void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),

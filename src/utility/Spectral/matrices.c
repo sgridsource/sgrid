@@ -48,3 +48,12 @@ void vector_times_matrix(double *u, double *M, double *uM, int n)
     uM[j] = sum;
   }
 }
+
+/* scalarproduct of 2 vectors */
+double scalarproduct_vectors(double *v, double *w, int n)
+{
+  int i;
+  double sum=0.0;
+  for(i=0; i<n; i++)  sum += v[i]*w[i];
+  return sum;
+}

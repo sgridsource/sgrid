@@ -37,6 +37,7 @@ void convert_grid_to_fd_onesidedBC(tGrid *grid);
 void matrix_times_vector(double *M, double *u, double *Mu, int n);
 void matrix_times_matrix(double *M, double *D, double *MD, int n);
 void vector_times_matrix(double *u, double *M, double *uM, int n);
+double scalarproduct_vectors(double *v, double *w, int n);
 
 /* Functions from filters.c */
 void initfiltermatrix(double *F, int k, int n1,
