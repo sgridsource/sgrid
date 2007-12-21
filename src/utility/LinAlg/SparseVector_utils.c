@@ -88,10 +88,10 @@ void SparseMatrixLines_times_vector(tSparseVector **Aline, int nlines,
   for(i=0; i<nlines; i++)
   {
     f[i] = 0.0; 
-    for(ent = 0; ent < Aline[j]->entries; ent++)
+    for(ent = 0; ent < Aline[i]->entries; ent++)
     {
        j   = Aline[i]->pos[ent];
-       Aij = Aline[j]->val[ent];
+       Aij = Aline[i]->val[ent];
        f[i] += Aij * x[j];
     }
   }
