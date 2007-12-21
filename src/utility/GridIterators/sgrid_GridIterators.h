@@ -56,3 +56,10 @@ int UMFPACK_solve_forSortedVars_wrapper(tVarList *x, tVarList *b,
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+
+/* from WTsolver.c */
+int WTsolver(tVarList *vlx, tVarList *vlb, 
+             tVarList *r, tVarList *c1,tVarList *c2,
+	     int itmax, double tol, double *normres,
+	     void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	     void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
