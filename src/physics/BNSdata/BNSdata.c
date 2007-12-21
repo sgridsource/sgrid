@@ -187,14 +187,15 @@ int BNSdata_solve(tGrid *grid)
   else if(Getv("BNSdata_linSolver", "templates_GMRES"))
     linear_solver=templates_gmres_wrapper;
   else if(Getv("BNSdata_linSolver", "UMFPACK"))
-    linear_solver=UMFPACK_solve_forSortedVars_wrapper;
-      //   UMFPACK_solve_wrapper;
+    linear_solver=UMFPACK_solve_forSortedVars_wrapper; // UMFPACK_solve_wrapper;
+  else if(Getv("BNSdata_linSolver", "WTsolver"))
+    linear_solver=WTsolver;
   else
     errorexit("BNSdata_solve: unknown BNSdata_linSolver");
 
 // remove this later:
-Setd("GridIterators_setABStozero_below", 1e-12); // remove later
-//vlFu->n = vlu->n = vlr->n = vldu->n = 5;
+//Setd("GridIterators_setABStozero_below", 1e-12); // remove later
+vlFu->n = vlu->n = vlr->n = vldu->n = 1;
 //Yo(1);
 //J_BNSdata(vlr, vldu, vlduDerivs, vlu);
 Yo(2);
