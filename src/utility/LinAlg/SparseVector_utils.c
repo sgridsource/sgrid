@@ -96,3 +96,45 @@ void SparseMatrixLines_times_vector(tSparseVector **Aline, int nlines,
     }
   }
 }
+
+/* transpose vector times a matrix Aline made up of lines of tSparseVector
+   vectors. Initialize like Aline this: 
+    tSparseVector **Aline;
+    Aline = calloc(nlines, sizeof(*Aline));
+    AddToSparseVector(Aline[line], col, value);  */
+void vector_times_SparseMatrixLines(double *x, tSparseVector **Aline, 
+                                    int nlines, double *f)
+{
+  int j,k,ent;
+  double Akj;
+
+  for(k=0; k<nlines; k++) f[k] = 0.0;
+  for(k=0; k<nlines; k++)
+    for(ent = 0; ent < Aline[k]->entries; ent++)
+    {
+       j   = Aline[k]->pos[ent];
+       Akj = Aline[k]->val[ent];
+       f[j] += x[k] * Akj;
+    }
+}
+
+/* matrix times vector for the transpose of Aline.  Aline is made up 
+   of lines of tSparseVector vectors. Initialize like Aline this: 
+    tSparseVector **Aline;
+    Aline = calloc(nlines, sizeof(*Aline));
+    AddToSparseVector(Aline[line], col, value);  */
+void SparseMatrixLinesTranspose_times_vector(tSparseVector **Aline, int nlines,
+                                             double *x, double *f)
+{
+  int i,j,ent;
+  double Aij;
+ 
+  for(i=0; i<nlines; i++) f[i] = 0.0;
+  for(i=0; i<nlines; i++)
+    for(ent = 0; ent < Aline[i]->entries; ent++)
+    {
+       j   = Aline[i]->pos[ent];
+       Aij = Aline[i]->val[ent];
+       f[j] += Aij * x[i];
+    }
+}
