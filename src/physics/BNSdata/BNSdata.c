@@ -186,6 +186,10 @@ int BNSdata_solve(tGrid *grid)
     linear_solver=LAPACK_dgesv_wrapper;
   else if(Getv("BNSdata_linSolver", "templates_GMRES"))
     linear_solver=templates_gmres_wrapper;
+  else if(Getv("BNSdata_linSolver", "templates_BICGSTAB"))
+    linear_solver=templates_bicgstab_wrapper;
+  else if(Getv("BNSdata_linSolver", "templates_CGS"))
+    linear_solver=templates_cgs_wrapper;
   else if(Getv("BNSdata_linSolver", "UMFPACK"))
     linear_solver=UMFPACK_solve_forSortedVars_wrapper; // UMFPACK_solve_wrapper;
   else if(Getv("BNSdata_linSolver", "WTsolver"))
