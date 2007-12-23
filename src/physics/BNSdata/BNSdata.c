@@ -191,7 +191,9 @@ int BNSdata_solve(tGrid *grid)
   else if(Getv("BNSdata_linSolver", "templates_CGS"))
     linear_solver=templates_cgs_wrapper;
   else if(Getv("BNSdata_linSolver", "UMFPACK"))
-    linear_solver=UMFPACK_solve_forSortedVars_wrapper; // UMFPACK_solve_wrapper;
+    linear_solver=UMFPACK_solve_wrapper;
+  else if(Getv("BNSdata_linSolver", "UMFPACK_forSortedVars"))
+    linear_solver=UMFPACK_solve_forSortedVars_wrapper;
   else if(Getv("BNSdata_linSolver", "WTsolver"))
     linear_solver=WTsolver;
   else
@@ -199,7 +201,7 @@ int BNSdata_solve(tGrid *grid)
 
 // remove this later:
 //Setd("GridIterators_setABStozero_below", 1e-12); // remove later
-vlFu->n = vlu->n = vlr->n = vldu->n = 1;
+//vlFu->n = vlu->n = vlr->n = vldu->n = 1;
 //Yo(1);
 //J_BNSdata(vlr, vldu, vlduDerivs, vlu);
 Yo(2);
