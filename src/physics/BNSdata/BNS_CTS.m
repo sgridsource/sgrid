@@ -99,7 +99,7 @@ tocompute = {
   dLnalphaPsim6[a] == dalphaP[a]/alphaP - 7 dPsi[a]/Psi,
 
   (* more terms which we need inside the stars *)
-  Cif == (bi==0 || bi==3),
+  Cif == (bi==0 || bi==3 || bi==4 || bi==5),
     dLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a],
     dalpha[a] == dalphaP[a]/Psi - alphaP dPsi[a]/Psi2,
     dbeta[a,b] == dB[a,b] + epsmatrix3d[b,a,3] Omega,
@@ -127,7 +127,7 @@ tocompute = {
     FalphaP == delta[b,c] ddalphaP[b,c] - alphaP (
                (7/8) Psi4 LBLB/(4 alpha2) + 2Pi Psi4 (rho+2S) ),
 
-    Cif == (bi==0 || bi==3), (* ell. eqn. inside stars *)
+    Cif == (bi==0 || bi==3 || bi==4 || bi==5), (* ell. eqn. inside stars *)
       FSigma == delta[b,c] ddSigma[b,c] + 
                (vRS[a] + dSigma[a]) *
                (dLnrho0[a] + dLnuzerosqr[a]/2 + dLnalphaP[a] + 5 dLnPsi[a]), 
@@ -185,7 +185,7 @@ tocompute = {
                 (7/16) (Psi4/alpha2)LBdo[a,b] LlB[a,b] + 2Pi (
                  4 Psi3 lPsi (rho+2S) + Psi4 (lrho+2lS) ) ), 
 
-    Cif == (bi==0 || bi==3), (* ell. eqn. inside stars *)
+    Cif == (bi==0 || bi==3 || bi==4 || bi==5), (* ell. eqn. inside stars *)
       dlalpha[a] == dlalphaP[a]/Psi - dalphaP[a] lPsi/Psi2 - 
                     lalphaP dPsi[a]/Psi2 - alphaP dlPsi[a]/Psi2 +
                     2 alphaP dPsi[a] lPsi/Psi3,

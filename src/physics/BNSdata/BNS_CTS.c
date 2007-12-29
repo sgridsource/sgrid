@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 19.12.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 29.12.2007 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -683,7 +683,7 @@ dalphaP3[ijk]/alphaP[ijk] - (7.*dPsi3[ijk])/Psi[ijk]
 
 
 /* conditional */
-if (bi == 0 || bi == 3) {
+if (bi == 0 || bi == 3 || bi == 4 || bi == 5) {
 
 dLnrho01
 =
@@ -881,7 +881,7 @@ dPsi3[ijk]/Psi[ijk]
 ;
 
 }
-/* if (bi == 0 || bi == 3) */
+/* if (bi == 0 || bi == 3 || bi == 4 || bi == 5) */
 
 
 
@@ -940,7 +940,7 @@ FalphaP[ijk]
 
 
 /* conditional */
-if (bi == 0 || bi == 3) {
+if (bi == 0 || bi == 3 || bi == 4 || bi == 5) {
 
 FSigma[ijk]
 =
@@ -954,7 +954,7 @@ ddSigma11[ijk] + ddSigma22[ijk] + ddSigma33[ijk] +
 ;
 
 
-} else { /* if (!bi == 0 || bi == 3) */
+} else { /* if (!bi == 0 || bi == 3 || bi == 4 || bi == 5) */
 
 FSigma[ijk]
 =
@@ -962,11 +962,11 @@ Sigma[ijk]
 ;
 
 }
-/* if (bi == 0 || bi == 3) */
+/* if (bi == 0 || bi == 3 || bi == 4 || bi == 5) */
 
 
 
-} else { /* if (!bi == 0 || bi == 3) */
+} else { /* if (!bi == 0 || bi == 3 || bi == 4 || bi == 5) */
 
 alphaP2
 =
@@ -1232,7 +1232,7 @@ ddlalphaP11[ijk] + ddlalphaP22[ijk] + ddlalphaP33[ijk] +
 
 
 /* conditional */
-if (bi == 0 || bi == 3) {
+if (bi == 0 || bi == 3 || bi == 4 || bi == 5) {
 
 dlalpha1
 =
@@ -1348,7 +1348,7 @@ ddlSigma11[ijk] + ddlSigma22[ijk] + ddlSigma33[ijk] +
 ;
 
 
-} else { /* if (!bi == 0 || bi == 3) */
+} else { /* if (!bi == 0 || bi == 3 || bi == 4 || bi == 5) */
 
 FlSigma[ijk]
 =
@@ -1356,11 +1356,11 @@ lSigma[ijk]
 ;
 
 }
-/* if (bi == 0 || bi == 3) */
+/* if (bi == 0 || bi == 3 || bi == 4 || bi == 5) */
 
 
 }
-/* if (bi == 0 || bi == 3) */
+/* if (bi == 0 || bi == 3 || bi == 4 || bi == 5) */
 
 
 
