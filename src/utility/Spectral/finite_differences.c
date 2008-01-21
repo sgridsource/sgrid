@@ -155,7 +155,7 @@ double fd_basis1(void *aux, double a, double b, int k, int N, double X)
   {
     int n1 = box->n1;
     int n2 = box->n2;
-    int n3 = box->n3;
+    /* int n3 = box->n3; */
     int iX;
     int indX=Ind("X");
     double XvarL, XvarR, Xd;
@@ -185,7 +185,7 @@ double fd_basis2(void *aux, double a, double b, int k, int N, double Y)
   {
     int n1 = box->n1;
     int n2 = box->n2;
-    int n3 = box->n3;
+    /* int n3 = box->n3; */
     int iY;
     int indY=Ind("Y");
     double YvarL, YvarR, Yd;
@@ -215,7 +215,7 @@ double fd_basis3(void *aux, double a, double b, int k, int N, double Z)
   {
     int n1 = box->n1;
     int n2 = box->n2;
-    int n3 = box->n3;
+    /* int n3 = box->n3; */
     int iZ;
     int indZ=Ind("Z");
     double ZvarL, ZvarR, Zd;

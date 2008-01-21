@@ -368,7 +368,6 @@ void enablesamevars(tGrid *grid, tGrid *newgrid)
   for (i = 0; i < newgrid->nvariables; i++)
     for (b = 0; b < newgrid->nboxes; b++)
     {
-      tBox *box = grid->box[b];
       tBox *newbox = newgrid->box[b];
       if(grid->box[b]->v[i])
         enablevarcomp_inbox(newbox, i);
