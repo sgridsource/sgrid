@@ -1847,32 +1847,39 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   /* deform BB, so that B is not to close to either 0 or 1:
      B = func(BB) */
   /* BB = sin(B*k)/sin(k);  B = asin(BB*sin(k))/k; */
-  B = asin(BB*sin(B_BB_c1))/B_BB_c1;
-B = BB;
+  /* B = asin(BB*sin(B_BB_c1))/B_BB_c1; */
+  B = BB; /* we use B=BB for now */
+
+  /* using Ap = A seems better to me */
+  Ap = A;
 
   /* set some pars */
   b = 1; // Getd("BNS_D")*0.5;
   if(domain==0 || domain==1)
   {
-    lep = -1.5; // Getd("BNS_log_epsp");
-    Ap = sinh(A*lep)/sinh(lep);
-    if(domain==0)
-    {
-      double rootpower = 1;  // Getd("BNS_rootpower");
-      Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
-    }
+    /*
+      lep = -1.5; // Getd("BNS_log_epsp");
+      Ap = sinh(A*lep)/sinh(lep);
+      if(domain==0)
+      {
+        double rootpower = 1;  // Getd("BNS_rootpower");
+        Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
+      }
+    */
     sigp_Bphi = 1; //0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
     sigp_1phi = 1; //0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
   }
   if(domain==2 || domain==3)
   {
-    lep = -1; // Getd("BNS_log_epsm");
-    Ap = sinh(A*lep)/sinh(lep);
-    if(domain==3)
-    {
-      double rootpower = 1;  // Getd("BNS_rootpower");
-      Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
-    }
+    /*
+      lep = -1; // Getd("BNS_log_epsm");
+      Ap = sinh(A*lep)/sinh(lep);
+      if(domain==3)
+      {
+        double rootpower = 1;  // Getd("BNS_rootpower");
+        Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
+      }
+    */
     sigp_Bphi = -1;// -1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
     sigp_1phi = -1;// -1.2 + 0.1 + 0.1*sin(phi); // -1; // change this!
   }
@@ -2012,24 +2019,30 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   /* deform BB, so that B is not to close to either 0 or 1:
      B = func(BB) */
   /* BB = sin(B*k)/sin(k);  B = asin(BB*sin(k))/k; */
-  B = asin(BB*sin(B_BB_c1))/B_BB_c1;
-  dBBdB = B_BB_c1*cos(B*B_BB_c1)/sin(B_BB_c1);
-B = BB;
-dBBdB = 1.0;
+  /* B = asin(BB*sin(B_BB_c1))/B_BB_c1;
+     dBBdB = B_BB_c1*cos(B*B_BB_c1)/sin(B_BB_c1);  */
+  B = BB; /* we use B=BB for now */
+  dBBdB = 1.0;
+
+  /* using Ap = A seems better to me */
+  Ap = A;
+  dApdA = 1.0;
 
   /* set some pars */
   b = 1; // Getd("BNS_D")*0.5;
   if(domain==0 || domain==1)
   {
-    lep = -1.5; // Getd("BNS_log_epsp");
-    Ap = sinh(A*lep)/sinh(lep);
-    dApdA = lep*cosh(A*lep)/sinh(lep);
-    if(domain==0)
-    {
-      double rootpower = 1;  // Getd("BNS_rootpower");
-      Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
-      dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
-    }
+    /*
+      lep = -1.5; // Getd("BNS_log_epsp");
+      Ap = sinh(A*lep)/sinh(lep);
+      dApdA = lep*cosh(A*lep)/sinh(lep);
+      if(domain==0)
+      {
+        double rootpower = 1;  // Getd("BNS_rootpower");
+        Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
+        dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
+      }
+    */
     sigp_Bphi = 1;// 0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
     sigp_1phi = 1;//0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
     dsigp_dB_Bphi = 0;//-2*PI*0.15*sin(B*2*PI); // 0; // change this!
@@ -2039,15 +2052,17 @@ dBBdB = 1.0;
   }
   if(domain==2 || domain==3)
   {
-    lep = -1; // Getd("BNS_log_epsm");
-    Ap = sinh(A*lep)/sinh(lep);
-    dApdA = lep*cosh(A*lep)/sinh(lep);
-    if(domain==3)
-    {
-      double rootpower = 1;  // Getd("BNS_rootpower");
-      Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
-      dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
-    }
+    /*
+      lep = -1; // Getd("BNS_log_epsm");
+      Ap = sinh(A*lep)/sinh(lep);
+      dApdA = lep*cosh(A*lep)/sinh(lep);
+      if(domain==3)
+      {
+        double rootpower = 1;  // Getd("BNS_rootpower");
+        Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
+        dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
+      }
+    */
     sigp_Bphi = -1;//-1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
     sigp_1phi = -1;//-1.2 + 0.1 + 0.1*sin(phi); // -1; // change this!
     dsigp_dB_Bphi = 0;//-2*PI*0.1*sin(B*2*PI); // 0; // change this!
