@@ -22,6 +22,7 @@
 #define Sech(x)    (1.0/cosh(x))
 #define Coth(x)    (1.0/tanh(x))
 #define Sqrt(x)    (sqrt(x))
+#define B_BB_c1    1.0   /* const1 in func B = func(BB) */
 
 /* initialize the coord transforms */
 int init_CoordTransform_And_Derivs(tGrid *grid)
@@ -1796,49 +1797,58 @@ double ddzs_dzdz_tan_stretch(void *aux, int ind, double xs, double ys, double zs
 /* see gr-qc/0612081 v1							*/
 /* A,B,phi are computational coords					*/
 /* We need to do several coord. trafos:					*/
+/* (A,BB,phi) -> (A,B,phi)						*/
 /* (A,B,phi) -> (X,R,phi)=C -> (x,rho,phi)=c -> (x,y,z)			*/
 /* we may skip over (x,rho,phi)... */
 
 
-/* compute (x,y,z) from (A,B,ph) and save result to speed up
+/* compute (x,y,z) from (A,BB,ph) and save result to speed up
    repeated calls */
 void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
-                     double A, double B, double phi, 
+                     double A, double BB, double phi, 
                      double *x, double *y, double *z)
 {
   static int domainsav=-1;
-  static double Asav=-1, Bsav=-1, phisav=-1;
+  static double Asav=-1, BBsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
-  static int Bshift=-1;
+  static int BBshift=-1;
   double X,R;
   double Rsqr, Xsqr, Rsqr_p_Xsqr;
   double b, lep;
   double sigp_Bphi, sigp_1phi;
   double Ap;
+  double B;  /* NOTE: B is Ansorg's B coord, while BB is my 
+                computational Y-coord. I use B = func(BB) */
 
   /* check if we have saved values */  
-  if(A==Asav && B==Bsav && phi==phisav && domain==domainsav)
+  if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav)
   {
     *x=xsav; *y=ysav; *z=zsav;
     return;
   }
-  Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
+  Asav=A;  BBsav=BB;  phisav=phi;  domainsav=domain;
 
-  /* shift B coord, so that we can use Fourier in B without hitting B=0 */
-  if(Bshift<0) Bshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
-  if(Bshift)
+  /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
+  if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
+  if(BBshift)
   {
     int N = box->n2;
-    B = B + 1.0/((1+N%2)*N);
+    BB = BB + 1.0/((1+N%2)*N);
   }
 
-  /* make xyz_of_AnsorgNS periodic in B */
-  if(B>1.0)
+  /* make xyz_of_AnsorgNS periodic in BB */
+  if(BB>1.0)
   {
-    B=2.0-B;
+    BB=2.0-BB;
     if(phi<PI)	phi=phi+PI;
     else	phi=phi-PI;
   }
+
+  /* deform BB, so that B is not to close to either 0 or 1:
+     B = func(BB) */
+  /* BB = sin(B*k)/sin(k);  B = asin(BB*sin(k))/k; */
+  B = asin(BB*sin(B_BB_c1))/B_BB_c1;
+B = BB;
 
   /* set some pars */
   b = 1; // Getd("BNS_D")*0.5;
@@ -1920,11 +1930,6 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
         B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
   }
 
-/* Begin HACK1 */
-//X=A;
-//R=B;
-/* End HACK1 */
-
   /* compute x,y,z */
   Rsqr = R*R;
   Xsqr = X*X;
@@ -1942,32 +1947,27 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     *x = *y = *z = 1.0e300;
   }
         
-/* Begin HACK2 */
-//*x=X;
-//*y=R;
-//*z=phi;
-/* End HACK2 */
-
   /* and save x,y,z */
   xsav=*x; ysav=*y; zsav=*z;
 }
 
-/* compute d(A,B,ph)/d(x,y,z) and save result to speed up
+/* compute d(A,BB,ph)/d(x,y,z) and save result to speed up
    repeated calls */
 void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
-                          double A, double B, double phi, 
+                          double A, double BB, double phi, 
                           double *x, double *y, double *z,
                           double *dAdx,   double *dAdy,   double *dAdz,
-                          double *dBdx,   double *dBdy,   double *dBdz,
+                          double *dBBdx,  double *dBBdy,  double *dBBdz,
                           double *dphidx, double *dphidy, double *dphidz)
 {
   static int domainsav=-1;
-  static double Asav=-1, Bsav=-1, phisav=-1;
+  static double Asav=-1, BBsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
   static double dAdxsav,   dAdysav,   dAdzsav,
-                dBdxsav,   dBdysav,   dBdzsav,
+                dBBdxsav,  dBBdysav,  dBBdzsav,
                 dphidxsav, dphidysav, dphidzsav;
-  static int Bshift=-1;
+  double dBdx, dBdy, dBdz;
+  static int BBshift=-1;
   double X,R;
   double Rsqr, Xsqr, Rsqr_p_Xsqr;
   double dABphi_dXRphi[4][4]; /* dABphi_dXRphi[k][l] = dA^k/dX^l */
@@ -1978,39 +1978,44 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   double dsigp_dphi_Bphi, dsigp_dphi_1phi, dsigp_dB_Bphi; /* dsigp_dB_1phi */
   double Ap;
   double dApdA;
+  double B;  /* NOTE: B is Ansorg's B coord, while BB is my 
+                computational Y-coord. I use B = func(BB) */
+  double dBBdB;
 
   /* check if we have saved values */  
-  if(A==Asav && B==Bsav && phi==phisav && domain==domainsav)
+  if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav)
   {
     *x=xsav; *y=ysav; *z=zsav;
     *dAdx=dAdxsav;     *dAdy=dAdysav;     *dAdz=dAdzsav;
-    *dBdx=dBdxsav;     *dBdy=dBdysav;     *dBdz=dBdzsav;
+    *dBBdx=dBBdxsav;   *dBBdy=dBBdysav;   *dBBdz=dBBdzsav;
     *dphidx=dphidxsav; *dphidy=dphidysav; *dphidz=dphidzsav;
     return;
   }
-  Asav=A;  Bsav=B;  phisav=phi;  domainsav=domain;
+  Asav=A;  BBsav=BB;  phisav=phi;  domainsav=domain;
 
-  /* shift B coord, so that we can use Fourier in B without hitting B=0 */
-  if(Bshift<0) Bshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
-  if(Bshift)
+  /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
+  if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
+  if(BBshift)
     {
     int N = box->n2;
-    B = B + 1.0/((1+N%2)*N);
+    BB = BB + 1.0/((1+N%2)*N);
   }
 
-  /* make dABphi_dxyz_AnsorgNS periodic in B */
-  if(B>1.0)
+  /* make dABphi_dxyz_AnsorgNS periodic in BB */
+  if(BB>1.0)
   {
-    B=2.0-B;
+    BB=2.0-BB;
     if(phi<PI)	phi=phi+PI;
     else	phi=phi-PI;
   }
 
-/* Begin HACK3a */
-//A=0.3;
-//B=0.35;
-//phi=2;
-/* End HACK3a */
+  /* deform BB, so that B is not to close to either 0 or 1:
+     B = func(BB) */
+  /* BB = sin(B*k)/sin(k);  B = asin(BB*sin(k))/k; */
+  B = asin(BB*sin(B_BB_c1))/B_BB_c1;
+  dBBdB = B_BB_c1*cos(B*B_BB_c1)/sin(B_BB_c1);
+B = BB;
+dBBdB = 1.0;
 
   /* set some pars */
   b = 1; // Getd("BNS_D")*0.5;
@@ -2140,10 +2145,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
       dAdR   =-dXdBodRdB/(dXdA - dRdA*dXdBodRdB);
       dAdphi = (dRdphi*dXdBodRdB - dXdphi)/(dXdA - dRdA*dXdBodRdB);
       dBdX   = dBdR = dBdphi = 0.0; /* allowed since  du/dB=0 at A=1 */
-////printf("dXdBodRdB=%f/n", dXdBodRdB);
-//printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
-//if(A==1 && B==0)
-//printf("dAdX=%f  dAdR=%f  dAdphi=%f\n", dAdX,dAdR,dAdphi);
     }
     /* dphidX=0; dphidR=0; dphidphi=1; */
     dABphi_dXRphi[1][1] = dAdX;
@@ -2154,17 +2155,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     dABphi_dXRphi[2][3] = dBdphi;
     dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = 0.0;
     dABphi_dXRphi[3][3] = 1.0;
-
-/* Begin HACK3b */
-//printf("dXdA=%f dRdA=%f dXdB=%f dRdB=%f dXdphi=%f dRdphi=%f\n",
-//        dXdA,dRdA,dXdB,dRdB,dXdphi,dRdphi);
-//printf("RedCp_dB_Bphi=%f ImdCp_dB_Bphi=%f\n",        
-//        RedCp_dB_Bphi, ImdCp_dB_Bphi);
-//printf("AbsdCp_dB_Bphi=%f ArgdCp_dB_Bphi=%f\n",
-//        AbsdCp_dB_Bphi, ArgdCp_dB_Bphi);
-//printf("AbsCp_Bphi=%f ArgCp_Bphi=%f\n",
-//        AbsCp_Bphi, ArgCp_Bphi);
-/* End HACK3b */
 
     /* use Eq. (24) */
     X = (1.0-Ap)*(ReCp_Bphi - B*ReCp_1phi) + 
@@ -2519,21 +2509,11 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 
     *x = *y = *z = 1.0e300;
   }
-/* Begin HACK2 */
-//*x=X;
-//*y=R;
-//*z=phi;
-//dXRphi_dxyz[1][1] = 1;
-//dXRphi_dxyz[1][2] = dXRphi_dxyz[1][3] = 0;
-//dXRphi_dxyz[2][1] = dXRphi_dxyz[2][3] = 0;
-//dXRphi_dxyz[2][2] = 1;
-//dXRphi_dxyz[3][1] = dXRphi_dxyz[3][2] = 0.0;
-//dXRphi_dxyz[3][3] = 1.0;
-/* End HACK2 */
 
   /* compute dA^k/dx^m */
-  *dAdx = *dAdy = *dAdz = 0.0;
-  *dBdx = *dBdy = *dBdz = 0.0;
+  *dAdx  = *dAdy  = *dAdz  = 0.0;
+  *dBBdx = *dBBdy = *dBBdz = 0.0;
+  dBdx = dBdy = dBdz = 0.0;
   /* *dphidx=*dphidy=*dphidz=0.0; */
   for(l=1; l<=3; l++)
   {
@@ -2541,9 +2521,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     *dAdy+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][2];
     *dAdz+=dABphi_dXRphi[1][l]*dXRphi_dxyz[l][3];
 
-    *dBdx+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][1];
-    *dBdy+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][2];
-    *dBdz+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][3];
+    dBdx+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][1];
+    dBdy+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][2];
+    dBdz+=dABphi_dXRphi[2][l]*dXRphi_dxyz[l][3];
 
     /*  *dphidx+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][1];
         *dphidy+=dABphi_dXRphi[3][l]*dXRphi_dxyz[l][2];
@@ -2553,14 +2533,20 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   *dphidy=dXRphi_dxyz[3][2];
   *dphidz=dXRphi_dxyz[3][3];
 
+  /* finally get *dBBdx,*dBBdy,*dBBdz from dBdx,dBdy,dBdz: 
+     dBBdx = dBBdB dBdx , ... */
+  *dBBdx = dBBdB * dBdx;
+  *dBBdy = dBBdB * dBdy;
+  *dBBdz = dBBdB * dBdz;
+
   /* and save */
   xsav=*x; ysav=*y; zsav=*z;
   dAdxsav=*dAdx;     dAdysav=*dAdy;     dAdzsav=*dAdz;
-  dBdxsav=*dBdx;     dBdysav=*dBdy;     dBdzsav=*dBdz;
+  dBBdxsav=*dBBdx;   dBBdysav=*dBBdy;   dBBdzsav=*dBBdz;
   dphidxsav=*dphidx; dphidysav=*dphidy; dphidzsav=*dphidz;
 
 //if( !finite(*dAdx) || !finite(*dAdy) || !finite(*dAdz) ||  
-//    !finite(*dBdx) || !finite(*dBdy) || !finite(*dBdz) ||  
+//    !finite(*dBBdx) || !finite(*dBBdy) || !finite(*dBBdz) ||  
 //    !finite(*dphidx) || !finite(*dphidy) || !finite(*dphidz) )
 //{
 ////int k,l;
