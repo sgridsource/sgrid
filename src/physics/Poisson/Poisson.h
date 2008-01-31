@@ -10,5 +10,3 @@ void F_Poisson(tVarList *vlFu, tVarList *vlu,
                tVarList *vluDerivs, tVarList *vlc2);
 void J_Poisson(tVarList *vlJdu, tVarList *vldu,
                tVarList *vlduDerivs, tVarList *vlu);
-void Precon_I(tVarList *vlJdu, tVarList *vldu,
-              tVarList *vlduDerivs, tVarList *vlu);

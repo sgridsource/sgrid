@@ -252,7 +252,7 @@ write_grid(grid);
   /* call Newton solver */
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
-         linear_solver, Precon_I, vldu, vlr, vlduDerivs, vlrhs,
+         linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlrhs,
          linSolver_itmax, linSolver_tolFac, linSolver_tol);
 
   /* free varlists */     
@@ -576,25 +576,6 @@ void J_Poisson(tVarList *vlJdu, tVarList *vldu,
 
   /* BCs */
   set_BCs(vlJdu, vldu, vlduDerivs, 0);
-}
-
-
-/* Einheitsmatrix als Precon */ 
-void Precon_I(tVarList *vlJdu, tVarList *vldu,
-              tVarList *vlduDerivs, tVarList *vlu)
-{
-  tGrid *grid = vldu->grid;
-  int i,j,b;
-  	
-  for(j = 0; j < vldu->n; j++)
-    forallboxes(grid, b)
-    {
-      tBox *box = grid->box[b];
-      double *Jdu = box->v[vlJdu->index[j]];
-      double *du  = box->v[vldu->index[j]];
-
-      forallpoints(box, i)  Jdu[i] = du[i];
-    }
 }
 
 /* set BCs for a varlist */
