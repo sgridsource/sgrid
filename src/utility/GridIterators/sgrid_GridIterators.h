@@ -20,6 +20,8 @@ int Newton(
   tVarList *vldu, tVarList *vlres, tVarList *vld1, tVarList *vld2,
   int linSolv_itmax, double linSolv_tolFac, double linSolv_tol);
 
+void Preconditioner_I(tVarList *vlJdu, tVarList *vldu,
+                      tVarList *vlduDerivs, tVarList *vlu);
 
 /* wrappers for funcs from templates */
 int templates_gmres_wrapper(
