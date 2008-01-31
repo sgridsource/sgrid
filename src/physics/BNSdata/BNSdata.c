@@ -8,11 +8,21 @@
 #define Power pow
 
 
+/* global var lists */
+tVarList *vlu, *vlFu, *vluDerivs;
+tVarList *vldu, *vlJdu, *vlduDerivs;
 
+
+/* functions in this file */
 void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);
 void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
                             double x, double y, double z);
-
+void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
+     tVarList **vlw,  tVarList **vlwDerivs,  tVarList **vlFw, 
+     tVarList **vldw, tVarList **vldwDerivs, tVarList **vlJdw, char *Name);
+void free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(
+     tVarList *vlw,  tVarList *vlwDerivs,  tVarList *vlFw,
+     tVarList *vldw, tVarList *vldwDerivs, tVarList *vlJdw);
 
 /* initialize BNSdata */
 int BNSdata_startup(tGrid *grid)
@@ -143,8 +153,6 @@ int BNSdata_solve(tGrid *grid)
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
-  tVarList *vlu, *vlFu, *vluDerivs;
-  tVarList *vldu, *vlr, *vlduDerivs;
   tVarList *vldummy;
 
   /* choose linear solver */
@@ -167,242 +175,149 @@ int BNSdata_solve(tGrid *grid)
   else
     errorexit("BNSdata_solve: unknown BNSdata_linSolver");
 
+  /* allocate varlists */
+  vlu  = vlalloc(grid);
+  vluDerivs= vlalloc(grid);
+
+  /* add all vars to vlu */
+  vlpush(vlu, Ind("BNSdata_Psi"));
+  vlpush(vlu, Ind("BNSdata_Bx"));
+  vlpush(vlu, Ind("BNSdata_alphaP"));
+  vlpush(vlu, Ind("BNSdata_Sigma"));
+
+  /* add derivs to vluDerivs */
+  vlpush(vluDerivs, Ind("BNSdata_Psix"));
+  vlpush(vluDerivs, Ind("BNSdata_Psixx"));
+  vlpush(vluDerivs, Ind("BNSdata_Bxx"));
+  vlpush(vluDerivs, Ind("BNSdata_Bxxx"));
+  vlpush(vluDerivs, Ind("BNSdata_alphaPx"));
+  vlpush(vluDerivs, Ind("BNSdata_alphaPxx"));
+  vlpush(vluDerivs, Ind("BNSdata_Sigmax"));
+  vlpush(vluDerivs, Ind("BNSdata_Sigmaxx"));
+
+  /* enable vlu, vluDerivs */
+  enablevarlist(vlu);
+  enablevarlist(vluDerivs); 
+
+  /* now duplicate vlu to get vlFu */  
+  vlFu = AddDuplicateEnable(vlu, "_Err");
+
+  /* now duplicate vlFu, vlu and vluDerivs for linarized Eqs. */
+  vlJdu      = AddDuplicateEnable(vlFu, "_l");
+  vldu       = AddDuplicateEnable(vlu,  "_l");
+  vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
+
   /* How we solve the coupled ell. eqns */
   if(Getv("BNSdata_EllSolver_method", "allatonce"))
   { /* solve the coupled ell. eqns all together */
-
-    /* allocate varlists */
-    vlu  = vlalloc(grid);
-    vluDerivs= vlalloc(grid);
-
-    /* add all vars to vlu */
-    vlpush(vlu, Ind("BNSdata_Psi"));
-    vlpush(vlu, Ind("BNSdata_Bx"));
-    vlpush(vlu, Ind("BNSdata_alphaP"));
-    vlpush(vlu, Ind("BNSdata_Sigma"));
-
-    /* add derivs to vluDerivs */
-    vlpush(vluDerivs, Ind("BNSdata_Psix"));
-    vlpush(vluDerivs, Ind("BNSdata_Psixx"));
-    vlpush(vluDerivs, Ind("BNSdata_Bxx"));
-    vlpush(vluDerivs, Ind("BNSdata_Bxxx"));
-    vlpush(vluDerivs, Ind("BNSdata_alphaPx"));
-    vlpush(vluDerivs, Ind("BNSdata_alphaPxx"));
-    vlpush(vluDerivs, Ind("BNSdata_Sigmax"));
-    vlpush(vluDerivs, Ind("BNSdata_Sigmaxx"));
-
-    /* enable vlu, vluDerivs */
-    enablevarlist(vlu);
-    enablevarlist(vluDerivs); 
-
-    /* now duplicate vlu to get vlFu */  
-    vlFu = AddDuplicateEnable(vlu, "_Err");
-
-    /* now duplicate vlFu, vlu and vluDerivs for linarized Eqs. */
-    vlr        = AddDuplicateEnable(vlFu, "_l");
-    vldu       = AddDuplicateEnable(vlu,  "_l");
-    vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
-
-
 // remove this later:
 //Setd("GridIterators_setABStozero_below", 1e-12); // remove later
-//vlFu->n = vlu->n = vlr->n = vldu->n = 1;
+//vlFu->n = vlu->n = vlJdu->n = vldu->n = 1;
 //Yo(1);
-//J_BNSdata(vlr, vldu, vlduDerivs, vlu);
+//J_BNSdata(vlJdu, vldu, vlduDerivs, vlu);
 Yo(2);
-F_BNSdata(vlFu, vlu, vluDerivs, vlr);
+F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
 printf("calling write_grid(grid)\n");
 write_grid(grid);
 //exit(11);
 
     /* call Newton solver */
-    vldummy = vlr;
+    vldummy = vlJdu;
     Newton(F_BNSdata, J_BNSdata, vlu, vlFu, vluDerivs, vldummy,
            itmax, tol, &normresnonlin, 1,
-           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linear_solver, Preconditioner_I, vldu, vlJdu, vlduDerivs, vlu,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
   }
   else if(Getv("BNSdata_EllSolver_method", "sequential"))
   { /* solve the coupled ell. eqns one after an other */
+    tVarList *vlw, *vlwDerivs, *vlFw, *vldw, *vldwDerivs, *vlJdw;
 
-    /* allocate varlists */
-    vlu  = vlalloc(grid);
-    vluDerivs= vlalloc(grid);
-
-    /* add Psi and its derivs to vlu and vluDerivs */
-    vlpushone(vlu, Ind("BNSdata_Psi"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psix"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psiy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psiz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psixx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psixy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psixz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psiyy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psiyz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Psizz"));
-
-    /* enable vlu, vluDerivs */
-    enablevarlist(vlu);
-    enablevarlist(vluDerivs); 
-
-    /* now duplicate vlu to get vlFu */  
-    vlFu = AddDuplicateEnable(vlu, "_Err");
-
-    /* now duplicate vlFu, vlu and vluDerivs for linarized Eqs. */
-    vlr        = AddDuplicateEnable(vlFu, "_l");
-    vldu       = AddDuplicateEnable(vlu,  "_l");
-    vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
+    make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+             &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw, "BNSdata_Psi");
 
     /* call Newton solver for Psi */
     printf("Solving elliptic Eqn for BNSdata_Psi:\n");
-    vldummy = vlr;
-    errorexit("BNSdata_solve: implement sequential");
-/*
-    Newton(F_ham, J_ham, vlu, vlFu, vluDerivs, vldummy,
+    Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
            itmax, tol, &normresnonlin, 1,
-           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
-*/
+    free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                           vldw, vldwDerivs, vlJdw);
 
-    /* make new vlu, vluDerivs for Bx */
-    vlfree(vlu);
-    vlfree(vluDerivs);
-    vlu  = vlalloc(grid);
-    vluDerivs= vlalloc(grid);
-    vlpushone(vlu, Ind("BNSdata_Bx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxxx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxxy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxxz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxyy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxyz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bxzz"));
-    enablevarlist(vlu);
-    enablevarlist(vluDerivs); 
+    /* make new vlw, ... for Bx */
+    make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+             &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw, "BNSdata_Bx");
 
     /* call Newton solver for Bx */
     printf("Solving elliptic Eqn for BNSdata_Bx:\n");
-    vldummy = vlr;
 /*
-    Newton(F_momx, J_momx, vlu, vlFu, vluDerivs, vldummy,
+    Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
            itmax, tol, &normresnonlin, 1,
-           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
 */
+    free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                           vldw, vldwDerivs, vlJdw);
 
-    /* make new vlu, vluDerivs for By */
-    vlfree(vlu);
-    vlfree(vluDerivs);
-    vlu  = vlalloc(grid);
-    vluDerivs= vlalloc(grid);
-    vlpushone(vlu, Ind("BNSdata_By"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byxx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byxy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byxz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byyy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byyz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Byzz"));
-    enablevarlist(vlu);
-    enablevarlist(vluDerivs); 
+    /* make new vlw, ... for By */
+    make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+             &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw, "BNSdata_By");
 
     /* call Newton solver for By */
     printf("Solving elliptic Eqn for BNSdata_By:\n");
-    vldummy = vlr;
 /*
-    Newton(F_momy, J_momy, vlu, vlFu, vluDerivs, vldummy,
+    Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
            itmax, tol, &normresnonlin, 1,
-           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
 */
+    free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                           vldw, vldwDerivs, vlJdw);
 
-    /* make new vlu, vluDerivs for Bz */
-    vlfree(vlu);
-    vlfree(vluDerivs);
-    vlu  = vlalloc(grid);
-    vluDerivs= vlalloc(grid);
-    vlpushone(vlu, Ind("BNSdata_Bz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzxx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzxy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzxz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzyy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzyz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Bzzz"));
-    enablevarlist(vlu);
-    enablevarlist(vluDerivs); 
+    /* make new vlw, ... for Bz */
+    make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+             &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw, "BNSdata_Bz");
 
     /* call Newton solver for Bz */
     printf("Solving elliptic Eqn for BNSdata_Bz:\n");
-    vldummy = vlr;
 /*
-    Newton(F_momz, J_momz, vlu, vlFu, vluDerivs, vldummy,
+    Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
            itmax, tol, &normresnonlin, 1,
-           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
 */
+    free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                           vldw, vldwDerivs, vlJdw);
 
-    /* make new vlu, vluDerivs for alphaP */
-    vlfree(vlu);
-    vlfree(vluDerivs);
-    vlu  = vlalloc(grid);
-    vluDerivs= vlalloc(grid);
-    vlpushone(vlu, Ind("BNSdata_alphaP"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPx"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPy"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPz"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPxx"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPxy"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPxz"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPyy"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPyz"));
-    vlpushone(vluDerivs, Ind("BNSdata_alphaPzz"));
-    enablevarlist(vlu);
-    enablevarlist(vluDerivs); 
+    /* make new vlw, ... for alphaP */
+    make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+             &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw, "BNSdata_alphaP");
 
     /* call Newton solver for alphaP */
     printf("Solving elliptic Eqn for BNSdata_alphaP:\n");
-    vldummy = vlr;
 /*
-    Newton(F_lapse, J_lapse, vlu, vlFu, vluDerivs, vldummy,
+    Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
            itmax, tol, &normresnonlin, 1,
-           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
 */
+    free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                           vldw, vldwDerivs, vlJdw);
 
-    /* make new vlu, vluDerivs for Sigma */
-    vlfree(vlu);
-    vlfree(vluDerivs);
-    vlu  = vlalloc(grid);
-    vluDerivs= vlalloc(grid);
-    vlpushone(vlu, Ind("BNSdata_Sigma"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmax"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmay"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmaz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmaxx"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmaxy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmaxz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmayy"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmayz"));
-    vlpushone(vluDerivs, Ind("BNSdata_Sigmazz"));
-    enablevarlist(vlu);
-    enablevarlist(vluDerivs); 
+    /* make new vlw, ... for Sigma */
+    make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+             &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw, "BNSdata_Sigma");
 
     /* call Newton solver for Sigma */
     printf("Solving elliptic Eqn for BNSdata_Sigma:\n");
-    vldummy = vlr;
 /*
-    Newton(F_Sigma, J_Sigma, vlu, vlFu, vluDerivs, vldummy,
+    Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
            itmax, tol, &normresnonlin, 1,
-           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
 */
+    free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                           vldw, vldwDerivs, vlJdw);
   }
   else
     errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
@@ -410,7 +325,7 @@ write_grid(grid);
   /* free varlists */     
   VLDisableFree(vldu);
   VLDisableFree(vlduDerivs);
-  VLDisableFree(vlr);     
+  VLDisableFree(vlJdu);     
   vlfree(vlu);
   vlfree(vluDerivs);
   vlfree(vlFu);
@@ -533,7 +448,6 @@ void F_BNSdata(tVarList *vlFu, tVarList *vlu,
   set_BNSdata_BCs(vlFu, vlu, vluDerivs, 1);
 }
 
-
 /* evaluate linearized BNSdata eqns */
 void J_BNSdata(tVarList *vlJdu, tVarList *vldu,
                tVarList *vlduDerivs, tVarList *vlu)
@@ -542,6 +456,29 @@ void J_BNSdata(tVarList *vlJdu, tVarList *vldu,
         /* ^--not used by BNS_CTS if nonlin=0 */
   /* BCs */
   set_BNSdata_BCs(vlJdu, vldu, vlduDerivs, 0);
+}
+
+
+/* evaluate eqn for a SINGLE one comp. var vlw */
+void F_oneComp(tVarList *vlFw, tVarList *vlw,
+               tVarList *vlwDerivs, tVarList *vlc2)
+{
+  /* Note: vlFu,vlu contains vlFw,vlw */
+  BNS_CTS(vlFu,vlu,  vlJdu,vldu,vlduDerivs, 1);
+                   /* ^-----^----^--------not used by BNS_CTS if nonlin=1 */
+  /* BCs */
+  set_BNSdata_BCs(vlFw, vlw, vlwDerivs, 1);
+}
+
+/* evaluate linearized eqn for a SINGLE one comp. var for vldw */
+void J_oneComp(tVarList *vlJdw, tVarList *vldw,
+               tVarList *vldwDerivs, tVarList *vlw)
+{
+  /* Note: vlJdu,vldu contains vlJdw,vldw */
+  BNS_CTS(vlFu,vlu,  vlJdu,vldu,vlduDerivs, 0);
+        /* ^--not used by BNS_CTS if nonlin=0 */
+  /* BCs */
+  set_BNSdata_BCs(vlJdw, vldw, vldwDerivs, 0);
 }
 
 
@@ -1334,3 +1271,60 @@ void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
   if(*B<0.0) *B=0.0;
   if(*B>1.0) *B=1.0;
 }
+
+/* make var lists that contain VarComp Name, its derivs, its errors,
+   and the linearized var and its derivs and errors */
+void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
+     tVarList **vlw,  tVarList **vlwDerivs,  tVarList **vlFw, 
+     tVarList **vldw, tVarList **vldwDerivs, tVarList **vlJdw, char *Name)
+{
+  char *str;
+  
+  str = (char *) calloc(strlen(Name)+20, sizeof(char) );
+
+  /* allocate varlists */
+  *vlw       = vlalloc(grid);
+  *vlwDerivs = vlalloc(grid);
+  *vlFw      = vlalloc(grid);
+  *vldw      = vlalloc(grid);
+  *vldwDerivs= vlalloc(grid);
+  *vlJdw     = vlalloc(grid);
+
+  /* add Name to vlw, ... */
+  sprintf(str, "%s", Name);        vlpushone(*vlw,       Ind(str));
+  sprintf(str, "%sx", Name);       vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%sy", Name);       vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%sz", Name);       vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%sxx", Name);      vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%sxy", Name);      vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%sxz", Name);      vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%syy", Name);      vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%syz", Name);      vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%szz", Name);      vlpushone(*vlwDerivs, Ind(str));
+  sprintf(str, "%s_Err", Name);    vlpushone(*vlFw,      Ind(str));
+  sprintf(str, "%s_l", Name);      vlpushone(*vldw,       Ind(str));
+  sprintf(str, "%sx_l", Name);     vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%sy_l", Name);     vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%sz_l", Name);     vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%sxx_l", Name);    vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%sxy_l", Name);    vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%sxz_l", Name);    vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%syy_l", Name);    vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%syz_l", Name);    vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%szz_l", Name);    vlpushone(*vldwDerivs, Ind(str));
+  sprintf(str, "%s_Err_l", Name);  vlpushone(*vlJdw,      Ind(str));
+  free(str);
+}
+
+/* the var lists vlw, vlwDerivs, vlFw, vldw, vldwDerivs, vlJdw */
+void free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(
+     tVarList *vlw,  tVarList *vlwDerivs,  tVarList *vlFw,
+     tVarList *vldw, tVarList *vldwDerivs, tVarList *vlJdw)
+{
+  vlfree(vlw);
+  vlfree(vlwDerivs);
+  vlfree(vlFw);
+  vlfree(vldw);
+  vlfree(vldwDerivs);
+  vlfree(vlJdw);
+}          
