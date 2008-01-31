@@ -241,6 +241,9 @@ printmatrix(grid->box[b]->Meval3, grid->box[b]->n3);
 copy_grid_withoutvars(grid_bak, grid, 1);
 free_grid(grid_bak);
 
+
+//vlFu->n = vlu->n = vlr->n = vldu->n = 1;
+
 F_Poisson(vlFu, vlu, vluDerivs, vlrhs);
 printf("calling write_grid(grid)\n");
 write_grid(grid);
@@ -999,8 +1002,8 @@ void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
             for(pl=0; pl<n2; pl=pl+n2-1)  /* <-- B=0 and B=1 */
               forplane2(i,j,k, n1,n2,n3, pl)
               {
-                if(k>0) /* phi>0: impose u_phi_phi=0 */
-                  FPsi[Index(i,j,k)] = Psi_phi_phi[Index(i,j,k)];
+                if(k>0) /* phi>0: impose u_ijk = u_ij0 (not u_phi_phi=0) */
+                  FPsi[Index(i,j,k)] = Psi[Index(i,j,k)]-Psi[Index(i,j,0)];
                 else /* phi=0: impose u_rho + u_rho_phi_phi=0 */
                 {
                   double Psi_rho = Psiy[Index(i,j,k)];
