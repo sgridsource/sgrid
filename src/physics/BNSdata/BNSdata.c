@@ -167,13 +167,13 @@ int BNSdata_solve(tGrid *grid)
   else
     errorexit("BNSdata_solve: unknown BNSdata_linSolver");
 
-  /* allocate varlists */
-  vlu  = vlalloc(grid);
-  vluDerivs= vlalloc(grid);
-
   /* How we solve the coupled ell. eqns */
   if(Getv("BNSdata_EllSolver_method", "allatonce"))
   { /* solve the coupled ell. eqns all together */
+
+    /* allocate varlists */
+    vlu  = vlalloc(grid);
+    vluDerivs= vlalloc(grid);
 
     /* add all vars to vlu */
     vlpush(vlu, Ind("BNSdata_Psi"));
@@ -225,6 +225,10 @@ write_grid(grid);
   else if(Getv("BNSdata_EllSolver_method", "sequential"))
   { /* solve the coupled ell. eqns one after an other */
 
+    /* allocate varlists */
+    vlu  = vlalloc(grid);
+    vluDerivs= vlalloc(grid);
+
     /* add Psi and its derivs to vlu and vluDerivs */
     vlpushone(vlu, Ind("BNSdata_Psi"));
     vlpushone(vluDerivs, Ind("BNSdata_Psix"));
@@ -255,6 +259,146 @@ write_grid(grid);
     errorexit("BNSdata_solve: implement sequential");
 /*
     Newton(F_ham, J_ham, vlu, vlFu, vluDerivs, vldummy,
+           itmax, tol, &normresnonlin, 1,
+           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linSolver_itmax, linSolver_tolFac, linSolver_tol);
+*/
+
+    /* make new vlu, vluDerivs for Bx */
+    vlfree(vlu);
+    vlfree(vluDerivs);
+    vlu  = vlalloc(grid);
+    vluDerivs= vlalloc(grid);
+    vlpushone(vlu, Ind("BNSdata_Bx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxxx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxxy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxxz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxyy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxyz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bxzz"));
+    enablevarlist(vlu);
+    enablevarlist(vluDerivs); 
+
+    /* call Newton solver for Bx */
+    printf("Solving elliptic Eqn for BNSdata_Bx:\n");
+    vldummy = vlr;
+/*
+    Newton(F_momx, J_momx, vlu, vlFu, vluDerivs, vldummy,
+           itmax, tol, &normresnonlin, 1,
+           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linSolver_itmax, linSolver_tolFac, linSolver_tol);
+*/
+
+    /* make new vlu, vluDerivs for By */
+    vlfree(vlu);
+    vlfree(vluDerivs);
+    vlu  = vlalloc(grid);
+    vluDerivs= vlalloc(grid);
+    vlpushone(vlu, Ind("BNSdata_By"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byxx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byxy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byxz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byyy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byyz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Byzz"));
+    enablevarlist(vlu);
+    enablevarlist(vluDerivs); 
+
+    /* call Newton solver for By */
+    printf("Solving elliptic Eqn for BNSdata_By:\n");
+    vldummy = vlr;
+/*
+    Newton(F_momy, J_momy, vlu, vlFu, vluDerivs, vldummy,
+           itmax, tol, &normresnonlin, 1,
+           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linSolver_itmax, linSolver_tolFac, linSolver_tol);
+*/
+
+    /* make new vlu, vluDerivs for Bz */
+    vlfree(vlu);
+    vlfree(vluDerivs);
+    vlu  = vlalloc(grid);
+    vluDerivs= vlalloc(grid);
+    vlpushone(vlu, Ind("BNSdata_Bz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzxx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzxy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzxz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzyy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzyz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Bzzz"));
+    enablevarlist(vlu);
+    enablevarlist(vluDerivs); 
+
+    /* call Newton solver for Bz */
+    printf("Solving elliptic Eqn for BNSdata_Bz:\n");
+    vldummy = vlr;
+/*
+    Newton(F_momz, J_momz, vlu, vlFu, vluDerivs, vldummy,
+           itmax, tol, &normresnonlin, 1,
+           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linSolver_itmax, linSolver_tolFac, linSolver_tol);
+*/
+
+    /* make new vlu, vluDerivs for alphaP */
+    vlfree(vlu);
+    vlfree(vluDerivs);
+    vlu  = vlalloc(grid);
+    vluDerivs= vlalloc(grid);
+    vlpushone(vlu, Ind("BNSdata_alphaP"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPx"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPy"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPz"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPxx"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPxy"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPxz"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPyy"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPyz"));
+    vlpushone(vluDerivs, Ind("BNSdata_alphaPzz"));
+    enablevarlist(vlu);
+    enablevarlist(vluDerivs); 
+
+    /* call Newton solver for alphaP */
+    printf("Solving elliptic Eqn for BNSdata_alphaP:\n");
+    vldummy = vlr;
+/*
+    Newton(F_lapse, J_lapse, vlu, vlFu, vluDerivs, vldummy,
+           itmax, tol, &normresnonlin, 1,
+           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linSolver_itmax, linSolver_tolFac, linSolver_tol);
+*/
+
+    /* make new vlu, vluDerivs for Sigma */
+    vlfree(vlu);
+    vlfree(vluDerivs);
+    vlu  = vlalloc(grid);
+    vluDerivs= vlalloc(grid);
+    vlpushone(vlu, Ind("BNSdata_Sigma"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmax"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmay"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmaz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmaxx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmaxy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmaxz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmayy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmayz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Sigmazz"));
+    enablevarlist(vlu);
+    enablevarlist(vluDerivs); 
+
+    /* call Newton solver for Sigma */
+    printf("Solving elliptic Eqn for BNSdata_Sigma:\n");
+    vldummy = vlr;
+/*
+    Newton(F_Sigma, J_Sigma, vlu, vlFu, vluDerivs, vldummy,
            itmax, tol, &normresnonlin, 1,
            linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
