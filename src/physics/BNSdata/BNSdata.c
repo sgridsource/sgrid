@@ -147,38 +147,6 @@ int BNSdata_solve(tGrid *grid)
   tVarList *vldu, *vlr, *vlduDerivs;
   tVarList *vldummy;
 
-  /* allocate varlists */
-  vlu  = vlalloc(grid);
-  vluDerivs= vlalloc(grid);
-
-  /* add all vars to vlu */
-  vlpush(vlu, Ind("BNSdata_Psi"));
-  vlpush(vlu, Ind("BNSdata_Bx"));
-  vlpush(vlu, Ind("BNSdata_alphaP"));
-  vlpush(vlu, Ind("BNSdata_Sigma"));
-
-  /* add derivs to vluDerivs */
-  vlpush(vluDerivs, Ind("BNSdata_Psix"));
-  vlpush(vluDerivs, Ind("BNSdata_Psixx"));
-  vlpush(vluDerivs, Ind("BNSdata_Bxx"));
-  vlpush(vluDerivs, Ind("BNSdata_Bxxx"));
-  vlpush(vluDerivs, Ind("BNSdata_alphaPx"));
-  vlpush(vluDerivs, Ind("BNSdata_alphaPxx"));
-  vlpush(vluDerivs, Ind("BNSdata_Sigmax"));
-  vlpush(vluDerivs, Ind("BNSdata_Sigmaxx"));
-
-  /* enable vlu, vluDerivs */
-  enablevarlist(vlu);
-  enablevarlist(vluDerivs); 
-
-  /* now duplicate vlu to get vlFu */  
-  vlFu = AddDuplicateEnable(vlu, "_Err");
-
-  /* now duplicate vlFu, vlu and vluDerivs for linarized Eqs. */
-  vlr        = AddDuplicateEnable(vlFu, "_l");
-  vldu       = AddDuplicateEnable(vlu,  "_l");
-  vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
-
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
     linear_solver=bicgstab;
@@ -199,6 +167,43 @@ int BNSdata_solve(tGrid *grid)
   else
     errorexit("BNSdata_solve: unknown BNSdata_linSolver");
 
+  /* allocate varlists */
+  vlu  = vlalloc(grid);
+  vluDerivs= vlalloc(grid);
+
+  /* How we solve the coupled ell. eqns */
+  if(Getv("BNSdata_EllSolver_method", "allatonce"))
+  { /* solve the coupled ell. eqns all together */
+
+    /* add all vars to vlu */
+    vlpush(vlu, Ind("BNSdata_Psi"));
+    vlpush(vlu, Ind("BNSdata_Bx"));
+    vlpush(vlu, Ind("BNSdata_alphaP"));
+    vlpush(vlu, Ind("BNSdata_Sigma"));
+
+    /* add derivs to vluDerivs */
+    vlpush(vluDerivs, Ind("BNSdata_Psix"));
+    vlpush(vluDerivs, Ind("BNSdata_Psixx"));
+    vlpush(vluDerivs, Ind("BNSdata_Bxx"));
+    vlpush(vluDerivs, Ind("BNSdata_Bxxx"));
+    vlpush(vluDerivs, Ind("BNSdata_alphaPx"));
+    vlpush(vluDerivs, Ind("BNSdata_alphaPxx"));
+    vlpush(vluDerivs, Ind("BNSdata_Sigmax"));
+    vlpush(vluDerivs, Ind("BNSdata_Sigmaxx"));
+
+    /* enable vlu, vluDerivs */
+    enablevarlist(vlu);
+    enablevarlist(vluDerivs); 
+
+    /* now duplicate vlu to get vlFu */  
+    vlFu = AddDuplicateEnable(vlu, "_Err");
+
+    /* now duplicate vlFu, vlu and vluDerivs for linarized Eqs. */
+    vlr        = AddDuplicateEnable(vlFu, "_l");
+    vldu       = AddDuplicateEnable(vlu,  "_l");
+    vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
+
+
 // remove this later:
 //Setd("GridIterators_setABStozero_below", 1e-12); // remove later
 //vlFu->n = vlu->n = vlr->n = vldu->n = 1;
@@ -210,12 +215,53 @@ printf("calling write_grid(grid)\n");
 write_grid(grid);
 //exit(11);
 
-  /* call Newton solver */
-  vldummy = vlr;
-  Newton(F_BNSdata, J_BNSdata, vlu, vlFu, vluDerivs, vldummy,
-         itmax, tol, &normresnonlin, 1,
-         linear_solver, Precon_E, vldu, vlr, vlduDerivs, vlu,
-         linSolver_itmax, linSolver_tolFac, linSolver_tol);
+    /* call Newton solver */
+    vldummy = vlr;
+    Newton(F_BNSdata, J_BNSdata, vlu, vlFu, vluDerivs, vldummy,
+           itmax, tol, &normresnonlin, 1,
+           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linSolver_itmax, linSolver_tolFac, linSolver_tol);
+  }
+  else if(Getv("BNSdata_EllSolver_method", "sequential"))
+  { /* solve the coupled ell. eqns one after an other */
+
+    /* add Psi and its derivs to vlu and vluDerivs */
+    vlpushone(vlu, Ind("BNSdata_Psi"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psix"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psiy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psiz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psixx"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psixy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psixz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psiyy"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psiyz"));
+    vlpushone(vluDerivs, Ind("BNSdata_Psizz"));
+
+    /* enable vlu, vluDerivs */
+    enablevarlist(vlu);
+    enablevarlist(vluDerivs); 
+
+    /* now duplicate vlu to get vlFu */  
+    vlFu = AddDuplicateEnable(vlu, "_Err");
+
+    /* now duplicate vlFu, vlu and vluDerivs for linarized Eqs. */
+    vlr        = AddDuplicateEnable(vlFu, "_l");
+    vldu       = AddDuplicateEnable(vlu,  "_l");
+    vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
+
+    /* call Newton solver for Psi */
+    printf("Solving elliptic Eqn for BNSdata_Psi:\n");
+    vldummy = vlr;
+    errorexit("BNSdata_solve: implement sequential");
+/*
+    Newton(F_ham, J_ham, vlu, vlFu, vluDerivs, vldummy,
+           itmax, tol, &normresnonlin, 1,
+           linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlu,
+           linSolver_itmax, linSolver_tolFac, linSolver_tol);
+*/
+  }
+  else
+    errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
   /* free varlists */     
   VLDisableFree(vldu);
@@ -354,24 +400,6 @@ void J_BNSdata(tVarList *vlJdu, tVarList *vldu,
   set_BNSdata_BCs(vlJdu, vldu, vlduDerivs, 0);
 }
 
-
-/* Einheitsmatrix als Precon */ 
-void Precon_E(tVarList *vlJdu, tVarList *vldu,
-              tVarList *vlduDerivs, tVarList *vlu)
-{
-  tGrid *grid = vldu->grid;
-  int i,j,b;
-  	
-  for(j = 0; j < vldu->n; j++)
-    forallboxes(grid, b)
-    {
-      tBox *box = grid->box[b];
-      double *Jdu = box->v[vlJdu->index[j]];
-      double *du  = box->v[vldu->index[j]];
-
-      forallpoints(box, i)  Jdu[i] = du[i];
-    }
-}
 
 /* set BCs for a varlist */
 /* NOTE: this works only for a varlist made up of scalars!!!

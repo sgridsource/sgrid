@@ -47,6 +47,8 @@ int sgrid_BNSdata()
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "maximal number of Newton iterations");
   AddPar("BNSdata_tol",   "1e-6","tolerance for Newton step");
+  AddPar("BNSdata_EllSolver_method", "allatonce",
+         "how we solve for Psi,B^i,alphaP,Sigma [allatonce, sequential]");
   AddPar("BNSdata_linSolver", "UMFPACK", 
          "linear solver used [LAPACK,templates_GMRES,bicgstab,UMFPACK]");
   AddPar("BNSdata_linSolver_itmax", "20", "max num of linSolver iterations");
@@ -56,7 +58,7 @@ int sgrid_BNSdata()
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("BNSdata_guess", "test", "initial guess [test]");
          
-  AddPar("BNSdata_grid", "SphericalDF",
+  AddPar("BNSdata_grid", "4ABphi_2xyz",
          "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");
   AddPar("BNSdata_regularization", "none",
          "options for 4ABphi_2xyz and AnsorgNS " 
