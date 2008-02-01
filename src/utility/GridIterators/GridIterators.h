@@ -2,9 +2,10 @@
 /* Wolfgang Tichy 8/2008 */
 
 
-/* from utility.c */
-double dot(tVarList *u, tVarList *v);
-double norm2(tVarList *u);
+/* abbreviations used in GridIterators for funcs from utility.c */
+#define dot(vlu,vlv)  GridDotProduct((vlu), (vlv))
+#define norm2(vlu)    GridL2Norm((vlu))
+
 
 /* from WTsolver.c */
 void copy_varlist_into_array(tVarList *vlx, double *x);

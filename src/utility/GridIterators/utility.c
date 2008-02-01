@@ -6,7 +6,7 @@
 
 
 
-double dot(tVarList *vlu, tVarList *vlv)
+double GridDotProduct(tVarList *vlu, tVarList *vlv)
 {
   int i, j, b;
   double sum = 0;
@@ -26,7 +26,7 @@ double dot(tVarList *vlu, tVarList *vlv)
 
 
 
-double norm2(tVarList *vlu)
+double GridL2Norm(tVarList *vlu)
 {
   double sum=0;
   tGrid *grid = vlu->grid;

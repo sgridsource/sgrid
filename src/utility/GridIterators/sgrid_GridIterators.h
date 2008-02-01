@@ -1,6 +1,11 @@
 /* sgrid_GridIterators.h */
 /* Wolfgang Tichy 8/2008 */
 
+/* dot product and L2-Norm over entire grid for varlists */
+double GridDotProduct(tVarList *vlu, tVarList *vlv);
+double GridL2Norm(tVarList *vlu);
+
+/* functions for grid iterations */
 int bicgstab(tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
 	     int imax, double tol, double *res,
 	     void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
