@@ -1274,6 +1274,17 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
   {
     tVarList *vlw, *vlwDerivs, *vlFw, *vldw, *vldwDerivs, *vlJdw;
 
+    /* compute error vlFu = F(u) */
+    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+    *normres = GridL2Norm(vlFu);
+    if(pr)
+    {
+      prdivider(1);
+      printf("BNS_Eqn_Iterator step %d residual = %.4e\n", it, *normres);
+      fflush(stdout);
+    }
+    if (*normres <= tol) break;
+
     /* make new vlw, ... for Psi */
     make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
              &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw, "BNSdata_Psi");
@@ -1352,22 +1363,18 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
     free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
                                            vldw, vldwDerivs, vlJdw);
 
-    /* compute error vlFu = F(u) */
-    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
-    *normres = GridL2Norm(vlFu);
-    if(pr)
-    {
-      printf("BNS_Eqn_Iterator step %d residual = %.4e\n", it, *normres);
-      fflush(stdout);
-    }
-    if (*normres <= tol) break;
   }
   /* warn if we didn't converge */
   if (it >= itmax)
   {
+    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+    *normres = GridL2Norm(vlFu);
+    prdivider(1);
     printf("BNS_Eqn_Iterator: *** Too many steps! ");
     if(*normres <= tol) printf("*** \n");
     else		printf("Tolerance goal not reached! *** \n");
+    printf("BNS_Eqn_Iterator: Residual after %d steps:"
+           "  residual = %e\n", it, *normres);
   }
   return it;
 }
