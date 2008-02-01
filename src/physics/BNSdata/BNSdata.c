@@ -1266,7 +1266,7 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
   double linSolver_tol    = Getd("BNSdata_linSolver_tol");
   double normresnonlin;
   int it;
-  int prN=0;
+  int prN=pr;
 
   if(pr) printf("BNS_Eqn_Iterator:  starting iterations ...\n");
 
