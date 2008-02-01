@@ -49,6 +49,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_tol",   "1e-6","tolerance for Newton step");
   AddPar("BNSdata_EllSolver_method", "allatonce",
          "how we solve for Psi,B^i,alphaP,Sigma [allatonce, sequential]");
+  AddPar("BNSdata_Newton_itmax", "10", "maximal number of Newton iterations");
+  AddPar("BNSdata_Newton_tol",   "1e-6","tolerance for Newton step");
   AddPar("BNSdata_linSolver", "UMFPACK", 
          "linear solver used [LAPACK,templates_GMRES,bicgstab,UMFPACK]");
   AddPar("BNSdata_linSolver_itmax", "20", "max num of linSolver iterations");

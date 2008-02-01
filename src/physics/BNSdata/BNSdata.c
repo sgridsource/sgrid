@@ -142,8 +142,8 @@ int BNSdata_startup(tGrid *grid)
 /* Solve the Equations */
 int BNSdata_solve(tGrid *grid)
 {
-  int    itmax = Geti("BNSdata_itmax");
-  double tol   = Getd("BNSdata_tol");
+  int    Newton_itmax = Geti("BNSdata_Newton_itmax");
+  double Newton_tol   = Getd("BNSdata_Newton_tol");
   int    linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
   double linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
   double linSolver_tol    = Getd("BNSdata_linSolver_tol");
@@ -224,7 +224,7 @@ write_grid(grid);
     /* call Newton solver */
     vldummy = vlJdu;
     Newton(F_BNSdata, J_BNSdata, vlu, vlFu, vluDerivs, vldummy,
-           itmax, tol, &normresnonlin, 1,
+           Newton_itmax, Newton_tol, &normresnonlin, 1,
            linear_solver, Preconditioner_I, vldu, vlJdu, vlduDerivs, vlu,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
   }
@@ -238,7 +238,7 @@ write_grid(grid);
     /* call Newton solver for Psi */
     printf("Solving elliptic Eqn for BNSdata_Psi:\n");
     Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
-           itmax, tol, &normresnonlin, 1,
+           Newton_itmax, Newton_tol, &normresnonlin, 1,
            linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
     free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
@@ -251,7 +251,7 @@ write_grid(grid);
     /* call Newton solver for Bx */
     printf("Solving elliptic Eqn for BNSdata_Bx:\n");
     Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
-           itmax, tol, &normresnonlin, 1,
+           Newton_itmax, Newton_tol, &normresnonlin, 1,
            linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
     free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
@@ -264,7 +264,7 @@ write_grid(grid);
     /* call Newton solver for By */
     printf("Solving elliptic Eqn for BNSdata_By:\n");
     Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
-           itmax, tol, &normresnonlin, 1,
+           Newton_itmax, Newton_tol, &normresnonlin, 1,
            linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
     free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
@@ -277,7 +277,7 @@ write_grid(grid);
     /* call Newton solver for Bz */
     printf("Solving elliptic Eqn for BNSdata_Bz:\n");
     Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
-           itmax, tol, &normresnonlin, 1,
+           Newton_itmax, Newton_tol, &normresnonlin, 1,
            linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
     free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
@@ -290,7 +290,7 @@ write_grid(grid);
     /* call Newton solver for alphaP */
     printf("Solving elliptic Eqn for BNSdata_alphaP:\n");
     Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
-           itmax, tol, &normresnonlin, 1,
+           Newton_itmax, Newton_tol, &normresnonlin, 1,
            linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
     free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
@@ -303,7 +303,7 @@ write_grid(grid);
     /* call Newton solver for Sigma */
     printf("Solving elliptic Eqn for BNSdata_Sigma:\n");
     Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
-           itmax, tol, &normresnonlin, 1,
+           Newton_itmax, Newton_tol, &normresnonlin, 1,
            linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
            linSolver_itmax, linSolver_tolFac, linSolver_tol);
     free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
