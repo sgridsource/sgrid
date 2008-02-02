@@ -1,0 +1,14 @@
+ode_initialval: ode_initialval.o nrutil.o odeintegrate.o rkqs.o rkck.o  
+	gcc -o  ode_initialval ode_initialval.o nrutil.o odeintegrate.o rkqs.o rkck.o -lm
+
+# benoetigte Objekt Dateien
+ode_initialval.o: ode_initialval.c
+	gcc -c -ansi -pedantic   ode_initialval.c 
+nrutil.o: nrutil.c
+	gcc -c  -ansi  nrutil.c
+odeintegrate.o:  odeintegrate.c
+	gcc -c  -ansi  odeintegrate.c
+rkqs.o: rkqs.c
+	gcc -c  -ansi  rkqs.c
+rkck.o: rkck.c
+	gcc -c  -ansi  rkck.c
