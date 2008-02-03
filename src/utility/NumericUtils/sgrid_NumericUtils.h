@@ -27,3 +27,14 @@ double integral3D(double (*int_meth)(double (*f_int)(double),
 
 /* Attenuation functions */
 double Attenuation01(double x, double s, double p);
+
+/* for ODEs */
+void odeintegrate(double ystart[], int nvar, double x1, double x2,
+	double eps, double h1, double hmin, int *nok, int *nbad,
+	void (*derivs)(double, double [], double []),
+	void (*rkqs)(double [], double [], int, double *, double, double, double [],
+	double *, double *, void (*)(double, double [], double [])),
+	int kmax, int *kcount, double *xp, double **yp, double dxsav);
+void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
+	double yscal[], double *hdid, double *hnext,
+	void (*derivs)(double, double [], double []));
