@@ -1286,6 +1286,9 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
     }
     if (*normres <= tol) break;
 
+    /* set Newton_tol */
+    Newton_tol = (*normres)*0.05;
+
     /* make new vlw, ... for Psi */
     make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
              &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw, "BNSdata_Psi");
