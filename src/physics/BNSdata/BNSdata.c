@@ -238,7 +238,8 @@ write_grid(grid);
   }
   else if(Getv("BNSdata_EllSolver_method", "sequential"))
   { /* solve the coupled ell. eqns one after an other */
-    BNS_Eqn_Iterator(grid, 2, 1e-7, &normresnonlin, linear_solver, 1);
+    BNS_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
+                     linear_solver, 1);
   }
   else
     errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
@@ -1259,8 +1260,8 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
   int pr)
 {
-  int    Newton_itmax = Geti("BNSdata_Newton_itmax");
-  double Newton_tol   = Getd("BNSdata_Newton_tol");
+  int    Newton_itmax = itmax;    /* Geti("BNSdata_Newton_itmax"); */
+  double Newton_tol   = tol*0.1;  /* Getd("BNSdata_Newton_tol"); */
   int    linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
   double linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
   double linSolver_tol    = Getd("BNSdata_linSolver_tol");
