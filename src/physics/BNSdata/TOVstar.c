@@ -30,6 +30,7 @@ int ode1()
   int   nok,nbad;        /* # of ok steps, # of bad steps    */
   int i, stat;
   double rfe, ret;
+  double mc, Pc, Phic, Psic, zeroP;
 
   y =vector(1,nvar);   /* The functions y1, y2, ... */
   dy=vector(1,nvar);   /* The functions' derivs dy1, dy2, ... */
@@ -37,32 +38,61 @@ int ode1()
   rfp=vector(1,kmax);         /* output of odeint */
   yp=matrix(1,nvar,1,kmax);
 
-
-  /* Programmanfang*/
-  printf("#  ODE as an Initial Value Problem: \n\n");
-  printf("integrate using rkqs:\n");
-
+  /* set Gamm, K */
   Gamma = 1.6666666666666666;
 //  K = 5.38e9;
   K = 1;
   printf("parameter Gamma=%g :\n",Gamma);
 
-  rf1=0.0;   
-  rf2=50;
+  /* initial values */
+  mc = 0.0;
+  Pc = K*pow(4, Gamma);
+  Phic = 1.0;
+  Psic =1.0;
 
-  y[1]=0;   /* initial values */
-  y[2]=K*pow(4, Gamma); // P=pow(rhoc0,Gamma);
-  y[3]=1.0;
-  y[4]=1.0;
-  
+  printf("#  ODE as an Initial Value Problem: \n\n");
+  printf("integrate using rkqs:\n");
+
+
+  rf1=0.0;   
+
+  /* set initial values in y vec. */
+  y[1]=mc;
+  y[2]=Pc;
+  y[3]=Phic;
+  y[4]=Psic;
+
+  printf("rf1=%g:  y[1]=%g  y[2]=%g  y[3]=%g  y[4]=%g\n",
+         rf1, y[1], y[2], y[3], y[4]);
+
+  /* find rf2 where P is approx zero */
+  rf2=rf1;
+  hmin=1e-4;
+  while(y[2]>=0.0)  /* y[2]=P */
+  {
+    zeroP = y[2]; /* save last val of P*/
+    TOV_ODEs(rf2, y, dy);
+    y[1] += dy[1]*hmin;
+    y[2] += dy[2]*hmin;
+    y[3] += dy[3]*hmin; 
+    y[4] += dy[4]*hmin; 
+    rf2 += hmin;
+  }
+  /*increase rf2 by 10% */
+  rf2 *= 1.1;
+  printf("rf2=%g zeroP=%g\n", rf2, zeroP);
+
+  /* reset initial values in y vec. */
+  y[1]=mc;
+  y[2]=Pc;
+  y[3]=Phic;
+  y[4]=Psic;
+
+  /* pars for odeintegrate */
   h1=1e-10;
   hmin=1e-10;
   eps=1e-12;
   drfsav=0.1;
-  printf("drfsav=%g :\n",drfsav);
-
-  printf("rf1=%g:  y[1]=%g  y[2]=%g  y[3]=%g  y[4]=%g\n",
-         rf1, y[1], y[2], y[3], y[4]);
 
   /* make one step to get away from rf=0 */
   TOV_ODEs(rf1, y, dy);
@@ -81,7 +111,11 @@ int ode1()
 
   printf("rf=rf1=%g:  y[1]=%g  y[2]=%g  y[3]=%g  y[4]=%g\n",
          rf1, y[1], y[2], y[3], y[4]);
-  
+
+  /* Here we use odeintegrate not ONLY to integrate, but also to find
+     the rfe where P=0. The way we do this is odd, because we rely
+     soly on the fact that odeintegrate will fail at P=0. If it does not
+     fail we need a root finder to determine where P=0. */  
   rfe=rf2;
   for(;;)
   {
@@ -91,10 +125,11 @@ int ode1()
     if(ret<rfe) rfe=ret;
     else break;
   }
-  
   printf("rf=rfe=%g:  y[1]=%g  y[2]=%g  y[3]=%g  y[4]=%g\n\n",
          rf1, y[1], y[2], y[3], y[4]);
-
+  if( fabs((rfe-rf2)/rf2)> 0.3 || fabs(y[2])>1e-6*fabs(Pc))
+    errorexit("we need a real root finder to find the rf where P=0");
+ 
   for(i=1; i<=kount; i++)
     printf("rf=%g:  m=%g  P=%g  Phi=%g  Psi=%g\n",
            rfp[i], yp[1][i], yp[2][i], yp[3][i], yp[4][i]);
