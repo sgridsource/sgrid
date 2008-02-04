@@ -6,9 +6,9 @@
 
 /* odeintegrate.c is like odeint.c, except that no global vars are needed,
  and that it returns 
-  0 if all seems ok
- -1 if "Step size too small in odeintegrate"
- -2 if "Too many steps in routine odeintegrate" */
+  x2 if all seems ok
+  x  if "Step size too small in odeintegrate"
+  x  if "Too many steps in routine odeintegrate" */
 
 /* From Fortran version:
 c Integrator driver with adaptive stepsize control.  Integrate the NVAR 
@@ -39,7 +39,7 @@ Allocate y, dy, xp, yp like this:
  xp=vector(1,kmax);
  yp=matrix(1,nvar,1,kmax);
 */
-int odeintegrate(double ystart[], int nvar, double x1, double x2,
+double odeintegrate(double ystart[], int nvar, double x1, double x2,
 	double eps, double h1, double hmin, int *nok, int *nbad,
 	void (*derivs)(double, double [], double []),
 	void (*rkqs)(double [], double [], int, double *, double, double, double [],
@@ -81,14 +81,14 @@ int odeintegrate(double ystart[], int nvar, double x1, double x2,
 			free_vector(y,1,nvar);
 			free_vector(yscal,1,nvar);
 			*kcount = kount;
-			return 0;
+			return x2;
 		}
 		if(fabs(hnext) <= hmin) /* nrerror("Step size too small in odeintegrate"); */
-		  return -1;
+		  return x;
 		h=hnext;
 	}
 	/* nrerror("Too many steps in routine odeintegrate"); */
-	return -2;
+	return x;
 }
 #undef MAXSTP
 #undef TINY
