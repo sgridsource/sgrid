@@ -1,6 +1,10 @@
 /* sgrid_NumericUtils.h */
 /* Wolfgang Tichy */
 
+
+#include "nrutil.h"
+
+
 /* Functions */
 
 /* for Newton-Raphson with line searches */
