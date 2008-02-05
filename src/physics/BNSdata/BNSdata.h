@@ -3,6 +3,7 @@
 
 
 /* main functions */
+int BNSdata_setup_boxsizes(tGrid *grid);
 int BNSdata_startup(tGrid *grid);
 int BNSdata_analyze(tGrid *grid);
 int BNSdata_solve(tGrid *grid);

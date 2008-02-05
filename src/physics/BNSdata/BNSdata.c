@@ -32,6 +32,33 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
   int pr);
 
 
+
+
+/* setup initial boxsizes */
+int BNSdata_setup_boxsizes(tGrid *grid)
+{
+  double sigp1, sigp2;
+  double rf_surf;
+  double m, P, Phi, Psi;
+  double Phi_c;
+  double Psi_c;
+  double kappa     = Getd("BNSdata_kappa");
+  double BNSdata_n = Getd("BNSdata_n");
+  double Gamma     = 1.0 + 1.0/BNSdata_n;
+  double Pc1=0.5; // change this: P_c = Getd("BNSdata_Pc1");
+  double Pc2=0.5; // change this: P_c = Getd("BNSdata_Pc2");
+
+  TOV_init(Pc1, kappa, Gamma, &rf_surf, &m, &Phi_c, &Psi_c);
+  sigp1 = rf_surf; //check???
+
+  TOV_init(Pc1, kappa, Gamma, &rf_surf, &m, &Phi_c, &Psi_c);
+  sigp2 = rf_surf; //check???
+// set box sizes
+// ...
+  return 0;
+}
+
+
 /* initialize BNSdata */
 int BNSdata_startup(tGrid *grid)
 {
@@ -40,27 +67,7 @@ int BNSdata_startup(tGrid *grid)
   double A         = Getd("BNSdata_A");
 */
   printf("Initializing BNSdata:\n");
-{
-double rf=1.02822;
-double rf_surf;
-double m, P, Phi, Psi;
-double Phi_c;
-double Psi_c;
-double kappa=1.0;
-TOV_init(kappa*pow(4, 1.6666666666666666), kappa, 1.6666666666666666, 
-             &rf_surf, &m, &Phi_c, &Psi_c);
-printf("check rf_surf=%g: m=%g Phi_c=%g Psi_c=%g\n", rf_surf,m,Phi_c,Psi_c);
-rf=1.02822;
-TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf, kappa, 1.6666666666666666,
-                      kappa*pow(4, 1.6666666666666666), Phi_c, Psi_c, 
-                      &m, &P, &Phi, &Psi);
-printf("check rf=%g: m=%g P=%g Phi=%g Psi=%g\n", rf,m,P,Phi,Psi);
-rf=1.12;
-TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf, kappa, 1.6666666666666666,
-                      kappa*pow(4, 1.6666666666666666), Phi_c, Psi_c, 
-                      &m, &P, &Phi, &Psi);
-printf("check rf=%g: m=%g P=%g Phi=%g Psi=%g\n", rf,m,P,Phi,Psi);
-}
+
   /* set boundary information: farlimit, falloff, propagation speed */
   VarNameSetBoundaryInfo("BNSdata_Psi",   1, 1, 1.0);
   VarNameSetBoundaryInfo("BNSdata_Bx",    0, 1, 1.0);

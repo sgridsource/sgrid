@@ -11,6 +11,7 @@ int sgrid_BNSdata()
   printf("Adding BNSdata\n");
 
   /* functions */
+  AddFun(PRE_GRID, BNSdata_setup_boxsizes, "setup initial box sizes");
   AddFun(PRE_INITIALDATA, BNSdata_startup, "initialize BNSdata");
   AddFun(INITIALDATA, setBNSdata, "set the BNS data");
 //  AddFun(ANALYZE, BNSdata_analyze, "compute error");
