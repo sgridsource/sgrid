@@ -46,17 +46,18 @@ double rf_surf;
 double m, P, Phi, Psi;
 double Phi_c;
 double Psi_c;
-TOV_init(pow(4, 1.6666666666666666), 1, 1.6666666666666666, 
+double kappa=1.0;
+TOV_init(kappa*pow(4, 1.6666666666666666), kappa, 1.6666666666666666, 
              &rf_surf, &m, &Phi_c, &Psi_c);
 printf("check rf_surf=%g: m=%g Phi_c=%g Psi_c=%g\n", rf_surf,m,Phi_c,Psi_c);
 rf=1.02822;
-TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf, 1, 1.6666666666666666,
-                      pow(4, 1.6666666666666666), Phi_c, Psi_c, 
+TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf, kappa, 1.6666666666666666,
+                      kappa*pow(4, 1.6666666666666666), Phi_c, Psi_c, 
                       &m, &P, &Phi, &Psi);
 printf("check rf=%g: m=%g P=%g Phi=%g Psi=%g\n", rf,m,P,Phi,Psi);
 rf=1.12;
-TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf, 1, 1.6666666666666666,
-                      pow(4, 1.6666666666666666), Phi_c, Psi_c, 
+TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf, kappa, 1.6666666666666666,
+                      kappa*pow(4, 1.6666666666666666), Phi_c, Psi_c, 
                       &m, &P, &Phi, &Psi);
 printf("check rf=%g: m=%g P=%g Phi=%g Psi=%g\n", rf,m,P,Phi,Psi);
 ode1();

@@ -14,7 +14,7 @@ double A,B,C,D,E,F; /* Parameters in OV Eqn */
 double R,S;         /* Parameters for rho(P) */
 /* scaling as in gr1.c: GR HW 1
 const double rhob=1e15, Ms=1.99e33, rb=1e6, G=6.67e-8, c=3.00e10, Kb=5.38e9;
-const double Gammab=1.666666666666666666666666666666667;  */
+const double Gammab=1.666666666666666666666666666666667; */
 /* no scaling: just G=c=1 */
 const double rhob=1.0, Ms=1.0, rb=1.0, G=1.0, c=1.0, Kb=1.0;
 const double Gammab=1.0;
@@ -65,8 +65,11 @@ int TOV_init(double Pc, double kappa, double Gam,
   D=4*PI*Pb*rb*rb*rb/(Ms*c*c);
   E=G*Ms/(rb*c*c);
   F=E;
-  R=pow(Pb/K,1.0/Gamma)/rhob;
+  R=pow(Pb/Kb,1.0/Gamma)/rhob;
   S=Pb/((Gamma-1)*c*c*rhob);
+  printf(" gr1 constants set to: G=%g c=%g\n", G, c);
+  printf(" A=%g B=%g C=%g D=%g E=%g=F=%g\n K=%g Gamma=%g  R=%g S=%g\n",
+         A,B,C,D,E,F, K,Gamma, R,S);
 
   /* allocate mem. */
   y =vector(1,nvar);   /* The functions y1, y2, ... */
@@ -153,12 +156,12 @@ int TOV_init(double Pc, double kappa, double Gam,
   M = y[1];         /* total mass */
   Psi_surf = y[4];   /* current Psi at surface */
   r = rfe*Psi_surf*Psi_surf;  /* Schw. r at surface, current rf at surface */
-  Psi_surf_new = sqrt( (2*r)/(r-M +sqrt(r*r-2*M*r)) ); /* desired Psi at surf. */
+  Psi_surf_new = sqrt( (2*r)/(r-E*M +sqrt(r*r-2*E*M*r)) ); /* desired Psi at surf. */
   Psic = Psic * Psi_surf_new/Psi_surf; /* rescale Psi at center */ 
   rfe = r/(Psi_surf_new*Psi_surf_new); /* rescale surface radius rfe */
   rf2 = rfe;
   /* add const to Phi. We need e^{2Phi} = (1.0 - 2.0*M/r) outside */
-  Phi_surf_new = 0.5*log(1.0 - 2.0*M/r);
+  Phi_surf_new = 0.5*log(1.0 - 2.0*E*M/r);
   Phic = Phic + (Phi_surf_new-y[3]);
   /* make one step to get away from rf=0 */
   rf1 = 0.0;
@@ -282,9 +285,9 @@ int TOV_m_P_Phi_Psi_OF_rf(double rf, double rf_surf,
     double r;
 
     *P   = 0.0;
-    *Psi = 1.0 + (*m)/(2*rf);
+    *Psi = 1.0 + E*(*m)/(2*rf);
     r = rf*(*Psi)*(*Psi);  /* Schw. r at surface, current rf at surface */
-    *Phi =0.5*log(1.0 - 2.0*(*m)/r);
+    *Phi =0.5*log(1.0 - 2.0*E*(*m)/r);
   }
   
   free_vector(dy, 1,nvar);
@@ -324,10 +327,6 @@ int ode1()
   rfp=vector(1,kmax);         /* output of odeint */
   yp=matrix(1,nvar,1,kmax);
 
-  /* set Gamm, K */
-  Gamma = 1.6666666666666666;
-//  K = 5.38e9;
-  K = 1;
   printf("parameter Gamma=%g :\n",Gamma);
 
   /* initial values */
@@ -501,6 +500,7 @@ void TOV_ODEs(double rf, double *y, double *dy)
   dy[2] = dP_drf;
   dy[3] = dPhi_drf;
   dy[4] = dPsi_drf;
+
 /*
 printf("r=%g m=%g ", r, m);
 printf("P=%g ", P);
@@ -512,5 +512,6 @@ printf("dP_dr=%g ", dP_dr);
 printf("dPhi_dr=%g ", dPhi_dr);
 printf("dPsi_dr=%g ", dPsi_dr);
 printf("\n");
+exit(22);
 */
 }
