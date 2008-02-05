@@ -194,8 +194,10 @@ int TOV_init(double Pc, double kappa, double Gam,
 
 
   /* output results */
+  printf("   rf              m               P               "
+         "Phi             Psi\n");
   for(i=1; i<=kount; i++)
-    printf(" rf=%g:  m=%g  P=%g  Phi=%g  Psi=%g\n",
+    printf(" %.8e  %.8e %+.8e %+.8e %.8e\n",
            rfp[i], yp[1][i], yp[2][i], yp[3][i], yp[4][i]);
 
   /* compute *rf_surf,*m,*Phi_c,*Psi_c */
