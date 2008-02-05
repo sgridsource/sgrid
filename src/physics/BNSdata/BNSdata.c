@@ -60,7 +60,6 @@ TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf, kappa, 1.6666666666666666,
                       kappa*pow(4, 1.6666666666666666), Phi_c, Psi_c, 
                       &m, &P, &Phi, &Psi);
 printf("check rf=%g: m=%g P=%g Phi=%g Psi=%g\n", rf,m,P,Phi,Psi);
-ode1();
 }
   /* set boundary information: farlimit, falloff, propagation speed */
   VarNameSetBoundaryInfo("BNSdata_Psi",   1, 1, 1.0);
