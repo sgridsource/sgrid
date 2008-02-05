@@ -157,8 +157,8 @@ int TOV_init(double Pc, double kappa, double Gam,
   Psic = Psic * Psi_surf_new/Psi_surf; /* rescale Psi at center */ 
   rfe = r/(Psi_surf_new*Psi_surf_new); /* rescale surface radius rfe */
   rf2 = rfe;
-  /* add const to Phi */
-  Phi_surf_new = -log(1.0 - 2.0*M/r); // ??? check this!!!!
+  /* add const to Phi. We need e^{2Phi} = (1.0 - 2.0*M/r) outside */
+  Phi_surf_new = 0.5*log(1.0 - 2.0*M/r);
   Phic = Phic + (Phi_surf_new-y[3]);
   /* make one step to get away from rf=0 */
   rf1 = 0.0;
@@ -284,7 +284,7 @@ int TOV_m_P_Phi_Psi_OF_rf(double rf, double rf_surf,
     *P   = 0.0;
     *Psi = 1.0 + (*m)/(2*rf);
     r = rf*(*Psi)*(*Psi);  /* Schw. r at surface, current rf at surface */
-    *Phi =-log(1.0 - 2.0*(*m)/r); // ??? check this!!!!
+    *Phi =0.5*log(1.0 - 2.0*(*m)/r);
   }
   
   free_vector(dy, 1,nvar);
