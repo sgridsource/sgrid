@@ -8,6 +8,15 @@
 #define Power pow
 
 
+/* from Coordinates.c */
+extern double  (*Coordinates_AnsorgNS_sigmap)(tBox *box, int ind, double B, double phi);
+extern double (*Coordinates_AnsorgNS_dsigmap_dB)(tBox *box, int ind, double B, double phi);
+extern double (*Coordinates_AnsorgNS_dsigmap_dphi)(tBox *box, int ind, double B, double phi);
+extern double  (*Coordinates_AnsorgNS_sigmam)(tBox *box, int ind, double B, double phi);
+extern double (*Coordinates_AnsorgNS_dsigmam_dB)(tBox *box, int ind, double B, double phi);
+extern double (*Coordinates_AnsorgNS_dsigmam_dphi)(tBox *box, int ind, double B, double phi);
+
+
 /* global var lists */
 tVarList *vlu, *vlFu, *vluDerivs;
 tVarList *vldu, *vlJdu, *vlduDerivs;
@@ -52,6 +61,7 @@ int BNSdata_setup_boxsizes(tGrid *grid)
   sigp2 = rf_surf2; //check???
 // set box sizes
 // ...
+//Sets("Coordinates_AnsorgNS_set_sigma_pm_pointers", "no");
   return 0;
 }
 
