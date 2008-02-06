@@ -51,11 +51,14 @@ int BNSdata_setup_boxsizes(tGrid *grid)
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_n = Getd("BNSdata_n");
   double Gamma     = 1.0 + 1.0/BNSdata_n;
-  double Pc1=0.5; // change this: Pc1 = Getd("BNSdata_Pc1");
-  double Pc2=0.5; // change this: Pc2 = Getd("BNSdata_Pc2");
+  double Pc1=0.5; // change this: find Pc1 s.t. m01 = Getd("BNSdata_m01");
+  double Pc2=0.5; // ???
 
+  /* TOV_init yields m01 for a given Pc1 */
   TOV_init(Pc1, kappa, Gamma, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
-  sigp1 = rf_surf1; //check???
+  sigp1 = rf_surf1; //check??? not true!!!
+  /* find sigp1, s.t. radius is rf_surf1 */
+  //..
   printf(" rf_surf1=%g m1=%g Phic1=%g Psic1=%g m01=%g\n",
          rf_surf1, m1, Phic1, Psic1, m01);
 {
