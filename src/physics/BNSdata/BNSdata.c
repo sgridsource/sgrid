@@ -58,6 +58,14 @@ int BNSdata_setup_boxsizes(tGrid *grid)
   sigp1 = rf_surf1; //check???
   printf(" rf_surf1=%g m1=%g Phic1=%g Psic1=%g m01=%g\n",
          rf_surf1, m1, Phic1, Psic1, m01);
+{
+double m,P,Phi,Psi,m0;
+double rf=1.02822;
+TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf1, kappa, Gamma,
+                      Pc1, Phic1, Psic1,
+                      &m, &P, &Phi, &Psi, &m0);
+printf(" check rf=%g: m=%g P=%g Phi=%g Psi=%g m0=%g\n", rf,m,P,Phi,Psi,m0);
+}
   TOV_init(Pc2, kappa, Gamma, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
   sigp2 = rf_surf2; //check???
 // set box sizes
