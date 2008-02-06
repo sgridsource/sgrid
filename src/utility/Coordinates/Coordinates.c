@@ -34,6 +34,7 @@ double (*Coordinates_AnsorgNS_dsigmap_dphi)(tBox *box, int ind, double B, double
 double  (*Coordinates_AnsorgNS_sigmam)(tBox *box, int ind, double B, double phi);
 double (*Coordinates_AnsorgNS_dsigmam_dB)(tBox *box, int ind, double B, double phi);
 double (*Coordinates_AnsorgNS_dsigmam_dphi)(tBox *box, int ind, double B, double phi);
+double Coordinates_AnsorgNS_b; /* value of x if A=1 in AnsorgNS0/3 */
 
 
 
@@ -513,6 +514,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigma_zero;
     }
   }
+  /* read par Coordinates_AnsorgNS_b */
+  Coordinates_AnsorgNS_b = Getd("Coordinates_AnsorgNS_b");
   /* END: Special initializations */
 
   /* compute cartesian coordinates x,y,z from X,Y,Z */
@@ -1895,7 +1898,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   Ap = A;
 
   /* set some pars */
-  b = 1; // Getd("BNS_D")*0.5;
+  b = Coordinates_AnsorgNS_b; // Getd("BNS_D")*0.5;
   if(domain==0 || domain==1)
   {
     /*
@@ -2044,7 +2047,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
   if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
   if(BBshift)
-    {
+  {
     int N = box->n2;
     BB = BB + 1.0/((1+N%2)*N);
   }
@@ -2070,7 +2073,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   dApdA = 1.0;
 
   /* set some pars */
-  b = 1; // Getd("BNS_D")*0.5;
+  b = Coordinates_AnsorgNS_b; // Getd("BNS_D")*0.5;
   if(domain==0 || domain==1)
   {
     /*

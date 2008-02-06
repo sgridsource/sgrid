@@ -53,6 +53,7 @@ int sgrid_Coordinates(void)
          "constant c in Spherical3 coord trafo");
   AddPar("Coordinates_AnsorgNS_sigma_pm_vars", "no",
          "create vars that contain sigma_{+-} and their derivs [yes,no]");
+  AddPar("Coordinates_AnsorgNS_b", "1", "value of x if A=1 in AnsorgNS0/3");
   AddPar("Coordinates_AnsorgNS_set_sigma_pm_pointers", "yes",
          "initialize sigma_{+-} in init_CoordTransform_And_Derivs [yes,no]");
   AddPar("Coordinates_AnsorgNS_Bshift", "no",
