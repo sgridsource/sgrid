@@ -41,6 +41,7 @@ void Appends(char *name, char *value);
 enum
 {
   PRE_GRID,
+  POST_GRID,
   PRE_INITIALDATA,
   INITIALDATA,
   POST_INITIALDATA,
