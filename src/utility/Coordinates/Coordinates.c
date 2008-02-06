@@ -488,15 +488,32 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   } /* end for b */
 
   /* Special initializations: */
+  /* set sigma_{+-} func pointers */
   if(Getv("Coordinates_AnsorgNS_set_sigma_pm_pointers", "yes"))
-  { /* set sigma_{+-} func pointers */
-    Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigmap;
-    Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigmap_dB;
-    Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigmap_dphi;
-    Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigmam;
-    Coordinates_AnsorgNS_dsigmam_dB   = AnsorgNS_dsigmam_dB;
-    Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigmam_dphi;
+  {
+    if(Getv("Coordinates_AnsorgNS_sigma_pm_vars", "yes"))
+    {
+      enablevar(grid, Ind("Coordinates_AnsorgNS_dsigma_pm"));
+      enablevar(grid, Ind("Coordinates_AnsorgNS_dsigma_pm_dB"));
+      enablevar(grid, Ind("Coordinates_AnsorgNS_dsigma_pm_dphi"));
+      Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigmap;
+      Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigmap_dB;
+      Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigmap_dphi;
+      Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigmam;
+      Coordinates_AnsorgNS_dsigmam_dB   = AnsorgNS_dsigmam_dB;
+      Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigmam_dphi;
+    }
+    else
+    {
+      Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigma_p_one;
+      Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigmam_m_one;
+      Coordinates_AnsorgNS_dsigmam_dB   = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigma_zero;
+    }
   }
+  /* END: Special initializations */
 
   /* compute cartesian coordinates x,y,z from X,Y,Z */
   compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
@@ -2719,6 +2736,19 @@ double AnsorgNS_dsigmam_dphi(tBox *box, int ind, double B, double phi)
   return 0.0; // change this!
 }
 
+/* defaults for Ansorg's sigma_{+-} computed without var sigma_pm */
+double AnsorgNS_sigma_p_one(tBox *box, int ind, double B, double phi)
+{
+  return 1.0;
+}
+double AnsorgNS_dsigma_zero(tBox *box, int ind, double B, double phi)
+{
+  return 0.0;
+}
+double AnsorgNS_sigmam_m_one(tBox *box, int ind, double B, double phi)
+{
+  return -1.0;
+}
 
 /* Coord. trafos for domain 0 */
 double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi)
