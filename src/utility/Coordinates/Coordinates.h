@@ -231,6 +231,12 @@ double ddzs_dzdz_tan_stretch(void *aux, int ind, double xs, double ys, double zs
 double ddphi_dydy_AnsorgNS(void *aux, int ind, double A, double B, double phi);
 double ddphi_dydz_AnsorgNS(void *aux, int ind, double A, double B, double phi);
 double ddphi_dzdz_AnsorgNS(void *aux, int ind, double A, double B, double phi);
+double AnsorgNS_sigmap(tBox *box, int ind, double B, double phi);
+double AnsorgNS_dsigmap_dB(tBox *box, int ind, double B, double phi);
+double AnsorgNS_dsigmap_dphi(tBox *box, int ind, double B, double phi);
+double AnsorgNS_sigmam(tBox *box, int ind, double B, double phi);
+double AnsorgNS_dsigmam_dB(tBox *box, int ind, double B, double phi);
+double AnsorgNS_dsigmam_dphi(tBox *box, int ind, double B, double phi);
 double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double y_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double z_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);

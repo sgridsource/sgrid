@@ -24,6 +24,19 @@
 #define Sqrt(x)    (sqrt(x))
 #define B_BB_c1    1.0   /* const1 in func B = func(BB) */
 
+/* Global Vars: */
+/* the sigma_+ and sigma_- functions and their derivs for AnsorgNS 
+   Coordinates_AnsorgNS_sigmap = sigma_+
+   Coordinates_AnsorgNS_sigmam = sigma_-   */
+double  (*Coordinates_AnsorgNS_sigmap)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_dsigmap_dB)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_dsigmap_dphi)(tBox *box, int ind, double B, double phi);
+double  (*Coordinates_AnsorgNS_sigmam)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_dsigmam_dB)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_dsigmam_dphi)(tBox *box, int ind, double B, double phi);
+
+
+
 /* initialize the coord transforms */
 int init_CoordTransform_And_Derivs(tGrid *grid)
 {
@@ -473,6 +486,17 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       }
     }
   } /* end for b */
+
+  /* Special initializations: */
+  if(Getv("Coordinates_AnsorgNS_set_sigma_pm_pointers", "yes"))
+  { /* set sigma_{+-} func pointers */
+    Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigmap;
+    Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigmap_dB;
+    Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigmap_dphi;
+    Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigmam;
+    Coordinates_AnsorgNS_dsigmam_dB   = AnsorgNS_dsigmam_dB;
+    Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigmam_dphi;
+  }
 
   /* compute cartesian coordinates x,y,z from X,Y,Z */
   compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
@@ -1866,8 +1890,8 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
         Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
       }
     */
-    sigp_Bphi = 1; //0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
-    sigp_1phi = 1; //0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
+    sigp_Bphi = Coordinates_AnsorgNS_sigmap(box, ind, B, phi);
+    sigp_1phi = Coordinates_AnsorgNS_sigmap(box, -1, 1.0, phi);
   }
   if(domain==2 || domain==3)
   {
@@ -1880,8 +1904,8 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
         Ap = 1.0 - pow(1.0-A, 1.0/rootpower);
       }
     */
-    sigp_Bphi = -1;// -1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
-    sigp_1phi = -1;// -1.2 + 0.1 + 0.1*sin(phi); // -1; // change this!
+    sigp_Bphi = Coordinates_AnsorgNS_sigmam(box, ind, B, phi);
+    sigp_1phi = Coordinates_AnsorgNS_sigmam(box, -1, 1.0, phi);
   }
 
   /* compute coord trafo for each domain */
@@ -2043,12 +2067,11 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
         dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
       }
     */
-    sigp_Bphi = 1;// 0.8 + 0.15*cos(B*2*PI) + 0.15*sin(phi); // 1; // change this!
-    sigp_1phi = 1;//0.8 + 0.15 + 0.15*sin(phi); // 1; // change this!
-    dsigp_dB_Bphi = 0;//-2*PI*0.15*sin(B*2*PI); // 0; // change this!
-    /* dsigp_dB_1phi = 0; // change this! */
-    dsigp_dphi_Bphi = 0;//0.15*cos(phi); // 0; // change this!
-    dsigp_dphi_1phi = 0;//0.15*cos(phi); // 0; // change this!
+    sigp_Bphi = Coordinates_AnsorgNS_sigmap(box, ind, B, phi);
+    sigp_1phi = Coordinates_AnsorgNS_sigmap(box, -1, 1.0, phi);
+    dsigp_dB_Bphi = Coordinates_AnsorgNS_dsigmap_dB(box, ind, B, phi);
+    dsigp_dphi_Bphi = Coordinates_AnsorgNS_dsigmap_dphi(box, ind, B, phi);
+    dsigp_dphi_1phi = Coordinates_AnsorgNS_dsigmap_dphi(box, -1, 1.0, phi);
   }
   if(domain==2 || domain==3)
   {
@@ -2063,12 +2086,11 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
         dApdA = pow(1.0-A, 1.0/rootpower - 1.0)/rootpower;
       }
     */
-    sigp_Bphi = -1;//-1.2 + 0.1*cos(B*2*PI) + 0.1*sin(phi); // -1; // change this!
-    sigp_1phi = -1;//-1.2 + 0.1 + 0.1*sin(phi); // -1; // change this!
-    dsigp_dB_Bphi = 0;//-2*PI*0.1*sin(B*2*PI); // 0; // change this!
-    /* dsigp_dB_1phi = 0; // change this! */
-    dsigp_dphi_Bphi = 0;//0.1*cos(phi); // 0; // change this!
-    dsigp_dphi_1phi = 0;//0.1*cos(phi); // 0; // change this!
+    sigp_Bphi = Coordinates_AnsorgNS_sigmam(box, ind, B, phi);
+    sigp_1phi = Coordinates_AnsorgNS_sigmam(box, -1, 1.0, phi);
+    dsigp_dB_Bphi = Coordinates_AnsorgNS_dsigmam_dB(box, ind, B, phi);
+    dsigp_dphi_Bphi = Coordinates_AnsorgNS_dsigmam_dphi(box, ind, B, phi);
+    dsigp_dphi_1phi = Coordinates_AnsorgNS_dsigmam_dphi(box, -1, 1.0, phi);
   }
 
   /* compute coord trafo for each domain */
@@ -2669,6 +2691,34 @@ void ddABphi_ddxyz_AnsorgNS(tBox *box, int ind, int domain,
 
   ddXdxdx_from_dXdx_ddxdXdX(ddABphi_ddxyz, dABphi_dxyz, ddxyz_ddABphi);
 }
+
+/* Ansorg's sigma_{+-} computed from var sigma_pm */
+// finish this:
+double AnsorgNS_sigmap(tBox *box, int ind, double B, double phi)
+{
+  return 1.0; // change this!
+}
+double AnsorgNS_dsigmap_dB(tBox *box, int ind, double B, double phi)
+{
+  return 0.0; // change this!
+}
+double AnsorgNS_dsigmap_dphi(tBox *box, int ind, double B, double phi)
+{
+  return 0.0; // change this!
+}
+double AnsorgNS_sigmam(tBox *box, int ind, double B, double phi)
+{
+  return -1.0; // change this!
+}
+double AnsorgNS_dsigmam_dB(tBox *box, int ind, double B, double phi)
+{
+  return 0.0; // change this!
+}
+double AnsorgNS_dsigmam_dphi(tBox *box, int ind, double B, double phi)
+{
+  return 0.0; // change this!
+}
+
 
 /* Coord. trafos for domain 0 */
 double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi)

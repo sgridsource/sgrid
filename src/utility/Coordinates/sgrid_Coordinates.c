@@ -51,6 +51,8 @@ int sgrid_Coordinates(void)
   AddPar("tan_stretch_s", "0", "how much we stretch [0,Xmax]");
   AddPar("Coordinates_Spherical3_c",  "5",
          "constant c in Spherical3 coord trafo");
+  AddPar("Coordinates_AnsorgNS_set_sigma_pm_pointers", "yes",
+         "initialize sigma_{+-} in init_CoordTransform_And_Derivs [yes,no]");
   AddPar("Coordinates_AnsorgNS_Bshift", "no",
          "shift B by 0.5/((1+N mod 2)*N) [no,yes]");
 
