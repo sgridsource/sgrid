@@ -46,18 +46,19 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 /* setup initial boxsizes */
 int BNSdata_setup_boxsizes(tGrid *grid)
 {
-  double sigp1, rf_surf1, m1, Phic1, Psic1;
-  double sigp2, rf_surf2, m2, Phic2, Psic2;
+  double sigp1, rf_surf1, m1, Phic1, Psic1, m01;
+  double sigp2, rf_surf2, m2, Phic2, Psic2, m02;
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_n = Getd("BNSdata_n");
   double Gamma     = 1.0 + 1.0/BNSdata_n;
   double Pc1=0.5; // change this: Pc1 = Getd("BNSdata_Pc1");
   double Pc2=0.5; // change this: Pc2 = Getd("BNSdata_Pc2");
 
-  TOV_init(Pc1, kappa, Gamma, &rf_surf1, &m1, &Phic1, &Psic1);
+  TOV_init(Pc1, kappa, Gamma, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
   sigp1 = rf_surf1; //check???
-
-  TOV_init(Pc2, kappa, Gamma, &rf_surf2, &m2, &Phic2, &Psic2);
+  printf(" rf_surf1=%g m1=%g Phic1=%g Psic1=%g m01=%g\n",
+         rf_surf1, m1, Phic1, Psic1, m01);
+  TOV_init(Pc2, kappa, Gamma, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
   sigp2 = rf_surf2; //check???
 // set box sizes
 // ...
