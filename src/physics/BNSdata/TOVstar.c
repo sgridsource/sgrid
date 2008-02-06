@@ -211,7 +211,7 @@ int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
 
 /* find *m, *P, *Phi, *Psi at rf, 
    for a given rf_surf, kappa, Gam, Pc, Phic, Psic */
-int TOV_m_P_Phi_Psi_OF_rf(double rf, double rf_surf,
+int TOV_m_P_Phi_Psi_m0_OF_rf(double rf, double rf_surf,
                           double kappa, double Gam,
                           double Pc, double Phic, double Psic,
                           double *m, double *P, double *Phi, double *Psi,

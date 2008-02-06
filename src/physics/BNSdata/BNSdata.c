@@ -61,7 +61,7 @@ int BNSdata_setup_boxsizes(tGrid *grid)
 {
 double m,P,Phi,Psi,m0;
 double rf=1.02822;
-TOV_m_P_Phi_Psi_OF_rf(rf, rf_surf1, kappa, Gamma,
+TOV_m_P_Phi_Psi_m0_OF_rf(rf, rf_surf1, kappa, Gamma,
                       Pc1, Phic1, Psic1,
                       &m, &P, &Phi, &Psi, &m0);
 printf(" check rf=%g: m=%g P=%g Phi=%g Psi=%g m0=%g\n", rf,m,P,Phi,Psi,m0);
