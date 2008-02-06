@@ -493,9 +493,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   {
     if(Getv("Coordinates_AnsorgNS_sigma_pm_vars", "yes"))
     {
-      enablevar(grid, Ind("Coordinates_AnsorgNS_dsigma_pm"));
-      enablevar(grid, Ind("Coordinates_AnsorgNS_dsigma_pm_dB"));
-      enablevar(grid, Ind("Coordinates_AnsorgNS_dsigma_pm_dphi"));
+      if(grid->box[0]->v[Ind("Coordinates_AnsorgNS_sigma_pm")] == NULL)
+        errorexit("Coordinates: the var Coordinates_AnsorgNS_sigma_pm "
+                  "has to be set in POST_GRID.");
       Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigmap;
       Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigmap_dB;
       Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigmap_dphi;
