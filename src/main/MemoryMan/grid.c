@@ -255,6 +255,9 @@ tGrid *make_grid(int pr)
 
   if(1) printgrid(g);
 
+  /* provide a hook for special treatmet after grid creation */
+  RunFun(POST_GRID, g);
+
   /* return pointer to newly created grid */
   return g;
 }
