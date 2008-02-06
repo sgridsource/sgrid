@@ -11,7 +11,8 @@ int sgrid_BNSdata()
   printf("Adding BNSdata\n");
 
   /* functions */
-  AddFun(PRE_GRID, BNSdata_setup_boxsizes, "setup initial box sizes");
+  AddFun(PRE_GRID, set_boxsizes, "setup initial box sizes");
+  AddFun(POST_GRID, set_sigma_pm_vars, "setup the sigma_{+-} vars from AnsorgNS");
   AddFun(PRE_INITIALDATA, BNSdata_startup, "initialize BNSdata");
   AddFun(INITIALDATA, setBNSdata, "set the BNS data");
 //  AddFun(ANALYZE, BNSdata_analyze, "compute error");
@@ -41,6 +42,7 @@ int sgrid_BNSdata()
   AddVar("BNSdata_temp4", "", "temporary variable(e.g. to store derivs)");
      
   /* parameters */
+  AddPar("BNSdata_b",     "1", "separation parameter (distance~2b)");
   AddPar("BNSdata_n",     "1", "polytropic index n, Gamma = 1 + 1/n");
   AddPar("BNSdata_kappa", "1", "kappa in EOS: P = kappa rho0^Gamma");
   AddPar("BNSdata_Omega", "0", "orbital angular velocity");

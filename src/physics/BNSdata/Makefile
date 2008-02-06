@@ -1,7 +1,7 @@
 # BNSdata/Makefile
 
 NAME := BNSdata
-OBJS := sgrid_$(NAME).o BNSdata.o BNS_CTS.o setADMvars.o TOVstar.o
+OBJS := sgrid_$(NAME).o BNSdata.o BNS_CTS.o setADMvars.o TOVstar.o BNSgrid.o
 
 include $(TOP)/Makefile.subdirs
 

@@ -8,14 +8,6 @@
 #define Power pow
 
 
-/* from Coordinates.c */
-extern double  (*Coordinates_AnsorgNS_sigmap)(tBox *box, int ind, double B, double phi);
-extern double (*Coordinates_AnsorgNS_dsigmap_dB)(tBox *box, int ind, double B, double phi);
-extern double (*Coordinates_AnsorgNS_dsigmap_dphi)(tBox *box, int ind, double B, double phi);
-extern double  (*Coordinates_AnsorgNS_sigmam)(tBox *box, int ind, double B, double phi);
-extern double (*Coordinates_AnsorgNS_dsigmam_dB)(tBox *box, int ind, double B, double phi);
-extern double (*Coordinates_AnsorgNS_dsigmam_dphi)(tBox *box, int ind, double B, double phi);
-
 
 /* global var lists */
 tVarList *vlu, *vlFu, *vluDerivs;
@@ -40,42 +32,6 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
   int pr);
 
-
-
-
-/* setup initial boxsizes */
-int BNSdata_setup_boxsizes(tGrid *grid)
-{
-  double sigp1, rf_surf1, m1, Phic1, Psic1, m01;
-  double sigp2, rf_surf2, m2, Phic2, Psic2, m02;
-  double kappa     = Getd("BNSdata_kappa");
-  double BNSdata_n = Getd("BNSdata_n");
-  double Gamma     = 1.0 + 1.0/BNSdata_n;
-  double Pc1=0.5; // change this: find Pc1 s.t. m01 = Getd("BNSdata_m01");
-  double Pc2=0.5; // ???
-
-  /* TOV_init yields m01 for a given Pc1 */
-  TOV_init(Pc1, kappa, Gamma, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
-  sigp1 = rf_surf1; //check??? not true!!!
-  /* find sigp1, s.t. radius is rf_surf1 */
-  //..
-  printf(" rf_surf1=%g m1=%g Phic1=%g Psic1=%g m01=%g\n",
-         rf_surf1, m1, Phic1, Psic1, m01);
-{
-double m,P,Phi,Psi,m0;
-double rf=1.02822;
-TOV_m_P_Phi_Psi_m0_OF_rf(rf, rf_surf1, kappa, Gamma,
-                      Pc1, Phic1, Psic1,
-                      &m, &P, &Phi, &Psi, &m0);
-printf(" check rf=%g: m=%g P=%g Phi=%g Psi=%g m0=%g\n", rf,m,P,Phi,Psi,m0);
-}
-  TOV_init(Pc2, kappa, Gamma, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
-  sigp2 = rf_surf2; //check???
-// set box sizes
-// ...
-//Sets("Coordinates_AnsorgNS_set_sigma_pm_pointers", "no");
-  return 0;
-}
 
 
 /* initialize BNSdata */

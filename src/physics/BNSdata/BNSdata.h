@@ -34,3 +34,7 @@ int TOV_m_P_Phi_Psi_m0_OF_rf(double rf, double rf_surf,
                           double Pc, double Phic, double Psic,
                           double *m, double *P, double *Phi, double *Psi,
                           double *m0);
+
+/* from grid_setup.c */
+int set_boxsizes(tGrid *grid);
+int set_sigma_pm_vars(tGrid *grid);
