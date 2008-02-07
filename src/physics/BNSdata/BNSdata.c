@@ -795,7 +795,7 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
       {
         double *P;
         double *dP[4];
-        double *X, *Y, *Z;
+        double *X, *Y, *Z,  *xp, *yp, *zp;
         double *Pcoeffs;
         double Pinterp;
         double x,y,z;
@@ -906,18 +906,18 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
             FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
           /* values at A=Amin are interpolated from box5 */
-          X = box->v[Ind("X")];
-          Y = box->v[Ind("Y")];
-          Z = box->v[Ind("Z")];
+          xp = box->v[Ind("x")];
+          yp = box->v[Ind("y")];
+          zp = box->v[Ind("z")];
           P = grid->box[5]->v[vlu->index[vind]]; /* values in box5 */
           Pcoeffs = grid->box[5]->v[Ind("BNSdata_temp1")];
           spec_Coeffs(grid->box[5], P, Pcoeffs);
           forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=Amin */
           {
             int ind=Index(i,j,k);
-            x = box->x_of_X[1]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
-            y = box->x_of_X[2]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
-            z = box->x_of_X[3]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
+            x = xp[ind]; 
+            y = yp[ind]; 
+            z = zp[ind];
             Pinterp = spec_interpolate(grid->box[5], Pcoeffs, x,y,z);
             FPsi[ind] = Psi[ind] - Pinterp;
           }
@@ -929,18 +929,18 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
           forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
             FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
           /* values at A=Amin are interpolated from box4 */
-          X = box->v[Ind("X")];
-          Y = box->v[Ind("Y")];
-          Z = box->v[Ind("Z")];
+          xp = box->v[Ind("x")];
+          yp = box->v[Ind("y")];
+          zp = box->v[Ind("z")];
           P = grid->box[4]->v[vlu->index[vind]]; /* values in box4 */
           Pcoeffs = grid->box[4]->v[Ind("BNSdata_temp1")];
           spec_Coeffs(grid->box[4], P, Pcoeffs);
           forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=Amin */
           {
             int ind=Index(i,j,k);
-            x = box->x_of_X[1]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
-            y = box->x_of_X[2]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
-            z = box->x_of_X[3]((void *) box, ind, X[ind],Y[ind],Z[ind]); 
+            x = xp[ind]; 
+            y = yp[ind]; 
+            z = zp[ind]; 
             Pinterp = spec_interpolate(grid->box[4], Pcoeffs, x,y,z);
             FPsi[ind] = Psi[ind] - Pinterp;
           }

@@ -50,7 +50,7 @@ int sgrid_BNSdata()
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "maximal number of Newton iterations");
   AddPar("BNSdata_tol",   "1e-6","tolerance for Newton step");
-  AddPar("BNSdata_EllSolver_method", "allatonce",
+  AddPar("BNSdata_EllSolver_method", "sequential",
          "how we solve for Psi,B^i,alphaP,Sigma [allatonce, sequential]");
   AddPar("BNSdata_Newton_itmax", "10", "maximal number of Newton iterations");
   AddPar("BNSdata_Newton_tol",   "1e-6","tolerance for Newton step");
