@@ -26,7 +26,8 @@ int sgrid_Coordinates(void)
   AddVar("ddXdd", "(ij)", "2nd coordinate derivative d^2 X/dx^i dx^j");
   AddVar("ddYdd", "(ij)", "2nd coordinate derivative d^2 Y/dx^i dx^j");
   AddVar("ddZdd", "(ij)", "2nd coordinate derivative d^2 Z/dx^i dx^j");
-
+  AddVar("Temp1", "",     "temporary variable(e.g. to store coeffs)");
+  
   /* parameters */
   for(b=0; b<nboxes; b++)
   {

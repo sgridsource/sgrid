@@ -266,6 +266,7 @@ int set_sigma_pm_vars(tGrid *grid)
   sigma_pm = Ind("Coordinates_AnsorgNS_sigma_pm");  
   dsigma_pm_dB = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
   dsigma_pm_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+  enablevar(grid, Ind("Temp1")); /* for coeffs in interpolation */
 
   /* set Coordinates_AnsorgNS_sigma_pm */
   for(boxindex=0; boxindex <=3; boxindex++)

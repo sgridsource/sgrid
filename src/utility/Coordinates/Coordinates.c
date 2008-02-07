@@ -2713,50 +2713,89 @@ void ddABphi_ddxyz_AnsorgNS(tBox *box, int ind, int domain,
 }
 
 /* Ansorg's sigma_{+-} computed from var sigma_pm */
-// finish this:
 double AnsorgNS_sigmap(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
-  static int sigma_pm, dsigma_pm_dB, dsigma_pm_dphi;
+  static int isig;
 
-  if(firstcall)
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_sigma_pm");  
+  if(ind>=0) return box->v[isig][ind];
+  else
   {
-    sigma_pm = Ind("Coordinates_AnsorgNS_sigma_pm");  
-    dsigma_pm_dB = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
-    dsigma_pm_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+    double *c = box->v[Ind("Temp1")];
+    spec_Coeffs(box, box->v[isig], c);
+    return spec_interpolate(box, c, 0.0,B,phi);
   }
-  if(ind>=0) return box->v[sigma_pm][ind];
-  else       return box->v[sigma_pm][0]; // change this!
 }
 double AnsorgNS_dsigmap_dB(tBox *box, int ind, double B, double phi)
 {
-  return 0.0; // change this!
+  static int firstcall=1;
+  static int isig;
+
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+  if(ind>=0) return box->v[isig][ind];
+  else
+  {
+    double *c = box->v[Ind("Temp1")];
+    spec_Coeffs(box, box->v[isig], c);
+    return spec_interpolate(box, c, 0.0,B,phi);
+  }
 }
 double AnsorgNS_dsigmap_dphi(tBox *box, int ind, double B, double phi)
 {
-  return 0.0; // change this!
+  static int firstcall=1;
+  static int isig;
+
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+  if(ind>=0) return box->v[isig][ind];
+  else
+  {
+    double *c = box->v[Ind("Temp1")];
+    spec_Coeffs(box, box->v[isig], c);
+    return spec_interpolate(box, c, 0.0,B,phi);
+  }
 }
 double AnsorgNS_sigmam(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
-  static int sigma_pm, dsigma_pm_dB, dsigma_pm_dphi;
+  static int isig;
 
-  if(firstcall)
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_sigma_pm");  
+  if(ind>=0) return box->v[isig][ind];
+  else
   {
-    sigma_pm = Ind("Coordinates_AnsorgNS_sigma_pm");  
-    dsigma_pm_dB = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
-    dsigma_pm_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+    double *c = box->v[Ind("Temp1")];
+    spec_Coeffs(box, box->v[isig], c);
+    return spec_interpolate(box, c, 0.0,B,phi);
   }
-  if(ind>=0) return box->v[sigma_pm][ind];
-  else       return box->v[sigma_pm][0]; // change this!
 }
 double AnsorgNS_dsigmam_dB(tBox *box, int ind, double B, double phi)
 {
-  return 0.0; // change this!
+  static int firstcall=1;
+  static int isig;
+
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+  if(ind>=0) return box->v[isig][ind];
+  else
+  {
+    double *c = box->v[Ind("Temp1")];
+    spec_Coeffs(box, box->v[isig], c);
+    return spec_interpolate(box, c, 0.0,B,phi);
+  }
 }
 double AnsorgNS_dsigmam_dphi(tBox *box, int ind, double B, double phi)
 {
-  return 0.0; // change this!
+  static int firstcall=1;
+  static int isig;
+
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+  if(ind>=0) return box->v[isig][ind];
+  else
+  {
+    double *c = box->v[Ind("Temp1")];
+    spec_Coeffs(box, box->v[isig], c);
+    return spec_interpolate(box, c, 0.0,B,phi);
+  }
 }
 
 /* defaults for Ansorg's sigma_{+-} computed without var sigma_pm */
