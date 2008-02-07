@@ -187,15 +187,43 @@ rf,rf*Psi*Psi,m,P,Phi,Psi,m0);
   sigma2 = vec[1];
   printf(" setting: sigma2=%g\n", sigma2);
 
-//remove this
-sigma1=1;
-sigma2=-1;
-
   printf(" => radius of domain0 = %g,   radius of domain3 = %g\n", 
          0.5*(x_of_AnsorgNS0(NULL, -1, 0.0,0.0,0.0)-
               x_of_AnsorgNS0(NULL, -1, 0.0,1.0,0.0)),
          0.5*(x_of_AnsorgNS3(NULL, -1, 0.0,1.0,0.0)-
               x_of_AnsorgNS3(NULL, -1, 0.0,0.0,0.0)) );
+
+  /* set max A inside stars and adjust boxes4/5 accordingly */
+  if(Getv("BNSdata_grid", "4ABphi_2xyz"))
+  {
+    double box0_max1 = 0.85;
+    double box3_max1 = 0.85;
+    double scal = 1.05;      /* make box4/5 5% larger than needed */
+    double xr, xmax, xmin;
+    double b = Coordinates_AnsorgNS_b;
+
+    Setd("box0_max1", box0_max1);
+    xmin = x_of_AnsorgNS0(NULL, -1, box0_max1,1.0,0.0);
+    xmax = x_of_AnsorgNS0(NULL, -1, box0_max1,0.0,0.0);
+    xr = scal * 0.5*(xmax-xmin);
+    Setd("box5_min1", b - xr);
+    Setd("box5_max1", b + xr);
+    Setd("box5_min2", -xr);
+    Setd("box5_max2",  xr);
+    Setd("box5_min3", -xr);
+    Setd("box5_max3",  xr);
+
+    Setd("box3_max1", box3_max1);
+    xmin = x_of_AnsorgNS3(NULL, -1, box3_max1,0.0,0.0);
+    xmax = x_of_AnsorgNS3(NULL, -1, box3_max1,1.0,0.0);
+    xr = scal * 0.5*(xmax-xmin);
+    Setd("box4_min1", -b - xr);
+    Setd("box4_max1", -b + xr);
+    Setd("box4_min2", -xr);
+    Setd("box4_max2",  xr);
+    Setd("box4_min3", -xr);
+    Setd("box4_max3",  xr);
+  }
 
   return 0;
 }
