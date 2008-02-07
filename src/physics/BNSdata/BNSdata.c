@@ -227,8 +227,8 @@ int BNSdata_solve(tGrid *grid)
 //J_BNSdata(vlJdu, vldu, vlduDerivs, vlu);
 Yo(2);
 F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
-printf("calling write_grid(grid)\n");
-write_grid(grid);
+//printf("calling write_grid(grid)\n");
+//write_grid(grid);
 //exit(11);
 
   /* How we solve the coupled ell. eqns */
@@ -1069,15 +1069,9 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
             forplane1_nojump(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
             {
               ind=Index(i,j,k);
-              compute_ABphi_from_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
-             // A=pA[ind];  B=pB[ind];  phi=pphi[ind];
-if(fabs(A-pA[ind])>0.0001)
-printf("|%g,%g,%g: dA%g|", X[ind],Y[ind],Z[ind],A-pA[ind]);
-if(fabs(B-pB[ind])>0.0001)
-printf("|%g,%g,%g: dB%g, B=%g,pB=%g|", 
-X[ind],Y[ind],Z[ind],B-pB[ind], B, pB[ind]);
-if(fabs(phi-pphi[ind])>0.0001)
-printf("|%g,%g,%g: dphi%g|", X[ind],Y[ind],Z[ind],phi-pphi[ind]);
+              //compute_ABphi_from_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+              A=pA[ind];  B=pB[ind];  phi=pphi[ind];
+
               Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
               FPsi[ind] = Psi[ind] - Pinterp;
             }
@@ -1093,7 +1087,8 @@ printf("|%g,%g,%g: dphi%g|", X[ind],Y[ind],Z[ind],phi-pphi[ind]);
             forplane2_nojump(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
             {
               ind=Index(i,j,k);
-              compute_ABphi_from_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+              //compute_ABphi_from_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+              A=pA[ind];  B=pB[ind];  phi=pphi[ind];
                              
               Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
               FPsi[ind] = Psi[ind] - Pinterp;
@@ -1110,8 +1105,9 @@ printf("|%g,%g,%g: dphi%g|", X[ind],Y[ind],Z[ind],phi-pphi[ind]);
             forplane3_nojump(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
             {
               ind=Index(i,j,k);
-              compute_ABphi_from_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
-                             
+              //compute_ABphi_from_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+              A=pA[ind];  B=pB[ind];  phi=pphi[ind];
+
               Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
               FPsi[ind] = Psi[ind] - Pinterp;
             }
@@ -1122,6 +1118,9 @@ printf("|%g,%g,%g: dphi%g|", X[ind],Y[ind],Z[ind],phi-pphi[ind]);
           /* values at border are interpolated from box3 */
           double A,B,phi;
           int pl, k_phi;
+          double *pA = box->v[Ind("BNSdata_A")];
+          double *pB = box->v[Ind("BNSdata_B")];
+          double *pphi = box->v[Ind("BNSdata_phi")];
           X = box->v[Ind("X")];
           Y = box->v[Ind("Y")];
           Z = box->v[Ind("Z")];
@@ -1139,8 +1138,9 @@ printf("|%g,%g,%g: dphi%g|", X[ind],Y[ind],Z[ind],phi-pphi[ind]);
             forplane1_nojump(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
             {
               ind=Index(i,j,k);
-              compute_ABphi_from_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
-                             
+              //compute_ABphi_from_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+              A=pA[ind];  B=pB[ind];  phi=pphi[ind];
+
               Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
               FPsi[ind] = Psi[ind] - Pinterp;
             }
@@ -1156,8 +1156,9 @@ printf("|%g,%g,%g: dphi%g|", X[ind],Y[ind],Z[ind],phi-pphi[ind]);
             forplane2_nojump(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
             {
               ind=Index(i,j,k);
-              compute_ABphi_from_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
-                             
+              //compute_ABphi_from_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+              A=pA[ind];  B=pB[ind];  phi=pphi[ind];
+
               Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
               FPsi[ind] = Psi[ind] - Pinterp;
             }
@@ -1173,8 +1174,9 @@ printf("|%g,%g,%g: dphi%g|", X[ind],Y[ind],Z[ind],phi-pphi[ind]);
             forplane3_nojump(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
             {
               ind=Index(i,j,k);
-              compute_ABphi_from_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
-                             
+              //compute_ABphi_from_xyz(grid->box[3], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
+              A=pA[ind];  B=pB[ind];  phi=pphi[ind];
+
               Pinterp = spec_interpolate(grid->box[3], Pcoeffs, A,B,phi);
               FPsi[ind] = Psi[ind] - Pinterp;
             }
@@ -1213,12 +1215,15 @@ void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
 void set_BNSdata_ABphi(tGrid *grid)
 {
   double A, B, phi;
-  int b, i, i03, k_phi;
+  int b, ind, i03, pl, i,j,k, k_phi;
 
   for(b=4; b<=5; b++) /* go only over b=4,5 */
   {
     tBox *box = grid->box[b];
     tBox *box03 = grid->box[3*(b==4)]; /* box03 = box0 if b=5, box3 if b=4 */ 
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
     double *pX = box->v[Ind("X")];
     double *pY = box->v[Ind("Y")];
     double *pZ = box->v[Ind("Z")];
@@ -1230,19 +1235,70 @@ void set_BNSdata_ABphi(tGrid *grid)
     pA = box->v[Ind("BNSdata_A")];
     pB = box->v[Ind("BNSdata_B")];
     pphi = box->v[Ind("BNSdata_phi")];
-    forallpoints(box, i)
+    forallpoints(box, ind)
     {
-      phi   = Arg(pY[i],pZ[i]);   if(phi<0) phi = 2.0*PI+phi;
+      phi   = Arg(pY[ind],pZ[ind]);   if(phi<0) phi = 2.0*PI+phi;
       k_phi = box03->n3 * phi/(2.0*PI);
       nearestXYZ_of_xyz_inplane(box03, &i03, &A,&B,&phi,
-                                pX[i],pY[i],pZ[i], 3, k_phi);
-      compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[i],pY[i],pZ[i]);
+                                pX[ind],pY[ind],pZ[ind], 3, k_phi);
+      compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[ind],pY[ind],pZ[ind]);
       /* do it twice in case it fails and gets A or B = 0 or 1 */
-      compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[i],pY[i],pZ[i]);
-      pA[i] = A;
-      pB[i] = B;
-      pphi[i] = phi;
+      compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[ind],pY[ind],pZ[ind]);
+      pA[ind] = A;
+      pB[ind] = B;
+      pphi[ind] = phi;
     }
+    /* go over outer faces of box4/5 again, but in a better way */
+    for(pl=0; pl<n1; pl=pl+n1-1)
+    {
+      int ind=Index(pl,0,0);
+      phi   = Arg(pY[ind],pZ[ind]);   if(phi<0) phi = 2.0*PI+phi;
+      k_phi = box03->n3 * phi/(2.0*PI);
+      nearestXYZ_of_xyz_inplane(box03, &i03, &A,&B,&phi,
+                                pX[ind],pY[ind],pZ[ind], 3, k_phi);
+      forplane1_nojump(i,j,k, n1,n2,n3, pl) /* <-- x=xmin and xmax */
+      {
+        ind=Index(i,j,k);
+        compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[ind],pY[ind],pZ[ind]);
+        pA[ind] = A;
+        pB[ind] = B;
+        pphi[ind] = phi;
+      }
+    }
+    for(pl=0; pl<n2; pl=pl+n2-1)
+    {
+      int ind=Index(0,pl,0);
+      phi   = Arg(pY[ind],pZ[ind]);   if(phi<0) phi = 2.0*PI+phi;
+      k_phi = box03->n3 * phi/(2.0*PI);
+      nearestXYZ_of_xyz_inplane(box03, &i03, &A,&B,&phi,
+                                pX[ind],pY[ind],pZ[ind], 3, k_phi);
+      forplane2_nojump(i,j,k, n1,n2,n3, pl) /* <-- y=ymin and ymax */
+      {
+        ind=Index(i,j,k);
+        compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[ind],pY[ind],pZ[ind]);
+        pA[ind] = A;
+        pB[ind] = B;
+        pphi[ind] = phi;
+      }
+    }
+    for(pl=0; pl<n3; pl=pl+n3-1)
+    {
+      int ind=Index(0,0,pl);
+      phi   = Arg(pY[ind],pZ[ind]);   if(phi<0) phi = 2.0*PI+phi;
+      k_phi = box03->n3 * phi/(2.0*PI);
+      nearestXYZ_of_xyz_inplane(box03, &i03, &A,&B,&phi,
+                                pX[ind],pY[ind],pZ[ind], 3, k_phi);
+      forplane3_nojump(i,j,k, n1,n2,n3, pl) /* <-- z=zmin and zmax */
+      {
+        ind=Index(i,j,k);
+        compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[ind],pY[ind],pZ[ind]);
+        pA[ind] = A;
+        pB[ind] = B;
+        pphi[ind] = phi;
+      }
+    }
+
+
   }
 }
 
