@@ -18,6 +18,7 @@ tVarList *vldu, *vlJdu, *vlduDerivs;
 void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);
 void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
                             double x, double y, double z);
+void set_BNSdata_ABphi(tGrid *grid);
 void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
      tVarList **vlw,  tVarList **vlwDerivs,  tVarList **vlFw, 
      tVarList **vldw, tVarList **vldwDerivs, tVarList **vlJdw, char *Name);
@@ -39,7 +40,7 @@ int BNSdata_startup(tGrid *grid)
 {
   int b;
 /*
-  double A         = Getd("BNSdata_A");
+  double BNSdata_b = Getd("BNSdata_b");
 */
   printf("Initializing BNSdata:\n");
 
@@ -76,6 +77,8 @@ int BNSdata_startup(tGrid *grid)
   enablevar(grid, Ind("betax"));
   
   /* set initial values in all in boxes */
+  set_BNSdata_ABphi(grid);
+
   forallboxes(grid,b)
   {  
     tBox *box = grid->box[b];
@@ -217,9 +220,6 @@ int BNSdata_solve(tGrid *grid)
   vldu       = AddDuplicateEnable(vlu,  "_l");
   vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
 
-  /* How we solve the coupled ell. eqns */
-  if(Getv("BNSdata_EllSolver_method", "allatonce"))
-  { /* solve the coupled ell. eqns all together */
 // remove this later:
 //Setd("GridIterators_setABStozero_below", 1e-12); // remove later
 //vlFu->n = vlu->n = vlJdu->n = vldu->n = 1;
@@ -231,6 +231,9 @@ printf("calling write_grid(grid)\n");
 write_grid(grid);
 //exit(11);
 
+  /* How we solve the coupled ell. eqns */
+  if(Getv("BNSdata_EllSolver_method", "allatonce"))
+  { /* solve the coupled ell. eqns all together */
     /* call Newton solver */
     vldummy = vlJdu;
     Newton(F_BNSdata, J_BNSdata, vlu, vlFu, vluDerivs, vldummy,
@@ -1046,6 +1049,9 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
           /* values at border are interpolated from box0 */
           double A,B,phi;
           int pl, k_phi;
+          double *pA = box->v[Ind("BNSdata_A")];
+          double *pB = box->v[Ind("BNSdata_B")];
+          double *pphi = box->v[Ind("BNSdata_phi")];
           X = box->v[Ind("X")];
           Y = box->v[Ind("Y")];
           Z = box->v[Ind("Z")];
@@ -1064,7 +1070,14 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
             {
               ind=Index(i,j,k);
               compute_ABphi_from_xyz(grid->box[0], &A,&B,&phi, X[ind],Y[ind],Z[ind]);
-
+             // A=pA[ind];  B=pB[ind];  phi=pphi[ind];
+if(fabs(A-pA[ind])>0.0001)
+printf("|%g,%g,%g: dA%g|", X[ind],Y[ind],Z[ind],A-pA[ind]);
+if(fabs(B-pB[ind])>0.0001)
+printf("|%g,%g,%g: dB%g, B=%g,pB=%g|", 
+X[ind],Y[ind],Z[ind],B-pB[ind], B, pB[ind]);
+if(fabs(phi-pphi[ind])>0.0001)
+printf("|%g,%g,%g: dphi%g|", X[ind],Y[ind],Z[ind],phi-pphi[ind]);
               Pinterp = spec_interpolate(grid->box[0], Pcoeffs, A,B,phi);
               FPsi[ind] = Psi[ind] - Pinterp;
             }
@@ -1194,6 +1207,43 @@ void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
   if(*A>1.0) *A=1.0;
   if(*B<0.0) *B=0.0;
   if(*B>1.0) *B=1.0;
+}
+
+/* set BNSdata_A/B/phi from x,y,z in box4/5 */
+void set_BNSdata_ABphi(tGrid *grid)
+{
+  double A, B, phi;
+  int b, i, i03, k_phi;
+
+  for(b=4; b<=5; b++) /* go only over b=4,5 */
+  {
+    tBox *box = grid->box[b];
+    tBox *box03 = grid->box[3*(b==4)]; /* box03 = box0 if b=5, box3 if b=4 */ 
+    double *pX = box->v[Ind("X")];
+    double *pY = box->v[Ind("Y")];
+    double *pZ = box->v[Ind("Z")];
+    double *pA, *pB, *pphi;
+
+    enablevar_inbox(box, Ind("BNSdata_A"));
+    enablevar_inbox(box, Ind("BNSdata_B"));
+    enablevar_inbox(box, Ind("BNSdata_phi"));
+    pA = box->v[Ind("BNSdata_A")];
+    pB = box->v[Ind("BNSdata_B")];
+    pphi = box->v[Ind("BNSdata_phi")];
+    forallpoints(box, i)
+    {
+      phi   = Arg(pY[i],pZ[i]);   if(phi<0) phi = 2.0*PI+phi;
+      k_phi = box03->n3 * phi/(2.0*PI);
+      nearestXYZ_of_xyz_inplane(box03, &i03, &A,&B,&phi,
+                                pX[i],pY[i],pZ[i], 3, k_phi);
+      compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[i],pY[i],pZ[i]);
+      /* do it twice in case it fails and gets A or B = 0 or 1 */
+      compute_ABphi_from_xyz(box03, &A,&B,&phi, pX[i],pY[i],pZ[i]);
+      pA[i] = A;
+      pB[i] = B;
+      pphi[i] = phi;
+    }
+  }
 }
 
 /* make var lists that contain VarComp Name, its derivs, its errors,

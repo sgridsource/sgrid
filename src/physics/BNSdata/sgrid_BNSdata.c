@@ -36,6 +36,10 @@ int sgrid_BNSdata()
   AddVar("BNSdata_vRS", "Ij","1st deriv of vRS");
   AddVar("BNSdata_q",   "i", "1st deriv of q");
 
+  AddVar("BNSdata_A", "", "store value of A in box4/5");
+  AddVar("BNSdata_B", "", "store value of B in box4/5");
+  AddVar("BNSdata_phi", "", "store value of phi in box4/5");
+
   AddVar("BNSdata_temp1", "", "temporary variable(e.g. to store derivs)");
   AddVar("BNSdata_temp2", "", "temporary variable(e.g. to store derivs)");
   AddVar("BNSdata_temp3", "", "temporary variable(e.g. to store derivs)");
