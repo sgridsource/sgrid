@@ -70,6 +70,9 @@ double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
   double *pX = box->v[Ind("X")];
   double *pY = box->v[Ind("Y")];
   double *pZ = box->v[Ind("Z")];
+  double *px = box->v[Ind("x")];
+  double *py = box->v[Ind("y")];
+  double *pz = box->v[Ind("z")];
   double dxi, dyi, dzi, r, rmin=-1.0;
 
   if(box->x_of_X[1]==NULL)
@@ -77,9 +80,9 @@ double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
 
   forallpoints(box, i)
   {
-    dxi = box->x_of_X[1]((void *) box, i, pX[i], pY[i], pZ[i]) - x;
-    dyi = box->x_of_X[2]((void *) box, i, pX[i], pY[i], pZ[i]) - y;
-    dzi = box->x_of_X[3]((void *) box, i, pX[i], pY[i], pZ[i]) - z;
+    dxi = px[i] - x;
+    dyi = py[i] - y;
+    dzi = pz[i] - z;
     r = dxi*dxi + dyi*dyi + dzi*dzi;
     if(r<=rmin || rmin<0.0 )
     {
@@ -103,6 +106,9 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
   double *pX = box->v[Ind("X")];
   double *pY = box->v[Ind("Y")];
   double *pZ = box->v[Ind("Z")];
+  double *px = box->v[Ind("x")];
+  double *py = box->v[Ind("y")];
+  double *pz = box->v[Ind("z")];
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
@@ -115,9 +121,9 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
     forplane1(i,j,k, n1,n2,n3, pind)
     {
       in = Index(i,j,k);
-      dx = box->x_of_X[1]((void *) box, in, pX[in],pY[in],pZ[in]) - x;
-      dy = box->x_of_X[2]((void *) box, in, pX[in],pY[in],pZ[in]) - y;
-      dz = box->x_of_X[3]((void *) box, in, pX[in],pY[in],pZ[in]) - z;
+      dx = px[in] - x;
+      dy = py[in] - y;
+      dz = pz[in] - z;
       r = dx*dx + dy*dy + dz*dz;
       if(r<=rmin || rmin<0.0 )
       {
@@ -132,9 +138,9 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
     forplane2(i,j,k, n1,n2,n3, pind)
     {
       in = Index(i,j,k);
-      dx = box->x_of_X[1]((void *) box, in, pX[in],pY[in],pZ[in]) - x;
-      dy = box->x_of_X[2]((void *) box, in, pX[in],pY[in],pZ[in]) - y;
-      dz = box->x_of_X[3]((void *) box, in, pX[in],pY[in],pZ[in]) - z;
+      dx = px[in] - x;
+      dy = py[in] - y;
+      dz = pz[in] - z;
       r = dx*dx + dy*dy + dz*dz;
       if(r<=rmin || rmin<0.0 )
       {
@@ -149,9 +155,9 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
     forplane3(i,j,k, n1,n2,n3, pind)
     {
       in = Index(i,j,k);
-      dx = box->x_of_X[1]((void *) box, in, pX[in],pY[in],pZ[in]) - x;
-      dy = box->x_of_X[2]((void *) box, in, pX[in],pY[in],pZ[in]) - y;
-      dz = box->x_of_X[3]((void *) box, in, pX[in],pY[in],pZ[in]) - z;
+      dx = px[in] - x;
+      dy = py[in] - y;
+      dz = pz[in] - z;
       r = dx*dx + dy*dy + dz*dz;
       if(r<=rmin || rmin<0.0 )
       {
