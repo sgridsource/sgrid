@@ -26,6 +26,8 @@ double rf_surf2; /* radius of star2 */
 /* funs in this file */
 void rf_surf1_VectorFunc(int n, double *vec, double *fvec);
 void rf_surf2_VectorFunc(int n, double *vec, double *fvec);
+void m01_VectorFunc(int n, double *vec, double *fvec);
+void m02_VectorFunc(int n, double *vec, double *fvec);
 
 
 
@@ -47,17 +49,17 @@ double return_sigma2(tBox *box, int ind, double B, double phi)
 /* setup initial boxsizes */
 int set_boxsizes(tGrid *grid)
 {
-  double m1, Phic1, Psic1, m01;
-  double m2, Phic2, Psic2, m02;
+  double m1, Phic1, Psic1;
+  double m2, Phic2, Psic2;
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_n = Getd("BNSdata_n");
   double BNSdata_b = Getd("BNSdata_b");
+  double m01 = Getd("BNSdata_m01");
+  double m02 = Getd("BNSdata_m02");
   double Gamma     = 1.0 + 1.0/BNSdata_n;
   double vec[2];
   int check;
-
-  double Pc1=0.01; // change this: find Pc1 s.t. m01 = Getd("BNSdata_m01");
-  double Pc2=0.01; // ???
+  double Pc1, Pc2; /* core pressures */
 
   printf("set_boxsizes: setting box sizes and coordinates used ...\n");
   
@@ -127,27 +129,43 @@ int set_boxsizes(tGrid *grid)
     Sets("box5_basis3", "ChebExtrema");
   }
 
+  /* find Pc1, s.t. rest mass is m01 */
+  vec[1] = 1e-10;   /* initial guess */
+  /* do newton_lnsrch iterations: */
+  newton_lnsrch(vec, 1, &check, m01_VectorFunc, 
+ 		Geti("Coordinates_newtMAXITS"),
+    		Getd("Coordinates_newtTOLF") );
+  if(check) printf(": check=%d\n", check);  
+  Pc1 = vec[1];
+  printf(" setting: Pc1=%g\n", Pc1);
+
+  /* find Pc2, s.t. rest mass is m02 */
+  vec[1] = 1e-10;   /* initial guess */
+  /* do newton_lnsrch iterations: */
+  newton_lnsrch(vec, 1, &check, m02_VectorFunc, 
+ 		Geti("Coordinates_newtMAXITS"),
+    		Getd("Coordinates_newtTOLF") );
+  if(check) printf(": check=%d\n", check);  
+  Pc2 = vec[1];
+  printf(" setting: Pc2=%g\n", Pc2);
+
   /* TOV_init yields m01 for a given Pc1 */
-  TOV_init(Pc1, kappa, Gamma, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
-  sigma1 = 1.0; // rf_surf1; //check??? not true!!!
-
-
-  printf(" rf_surf1=%g m1=%g Phic1=%g Psic1=%g m01=%g\n",
+  TOV_init(Pc1, kappa, Gamma, 1, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
+  printf(" rf_surf1=%g: m1=%g Phic1=%g Psic1=%g m01=%g\n",
          rf_surf1, m1, Phic1, Psic1, m01);
 {
 double m,P,Phi,Psi,m0;
-double rf=1.02822;
+double rf=rf_surf1;
 TOV_m_P_Phi_Psi_m0_OF_rf(rf, rf_surf1, kappa, Gamma,
                       Pc1, Phic1, Psic1,
                       &m, &P, &Phi, &Psi, &m0);
-printf(" check rf=%g: m=%g P=%g Phi=%g Psi=%g m0=%g\n", rf,m,P,Phi,Psi,m0);
+printf(" check rf=%g: r=%g m=%g P=%g Phi=%g Psi=%g m0=%g\n", 
+rf,rf*Psi*Psi,m,P,Phi,Psi,m0);
 }
-  TOV_init(Pc2, kappa, Gamma, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
-  sigma2 = rf_surf2; //check???
-// set box sizes
-// ...
-//Sets("Coordinates_AnsorgNS_set_sigma_pm_pointers", "no");
-
+  /* TOV_init yields m02 for a given Pc2 */
+  TOV_init(Pc2, kappa, Gamma, 1, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
+  printf(" rf_surf2=%g: m2=%g Phic2=%g Psic2=%g m02=%g\n",
+         rf_surf2, m2, Phic2, Psic2, m02);
 
   /* find sigma1, s.t. radius is rf_surf1 */
   vec[1] = 1.0/rf_surf1;   /* initial guess */
@@ -237,4 +255,31 @@ int set_sigma_pm_vars(tGrid *grid)
     }
   }
   return 0;
+}
+
+/* funtion to be passed into newton_lnsrch to find Pc1 from m01 */
+void m01_VectorFunc(int n, double *vec, double *fvec)
+{
+  double kappa     = Getd("BNSdata_kappa");
+  double BNSdata_n = Getd("BNSdata_n");
+  double m01       = Getd("BNSdata_m01");
+  double Gamma     = 1.0 + 1.0/BNSdata_n;
+  double Pc, m, Phic, Psic, m0;
+
+  Pc = vec[1];
+  TOV_init(Pc, kappa, Gamma, 0, &rf_surf1, &m, &Phic, &Psic, &m0);
+  fvec[1] = m0-m01;
+}
+/* funtion to be passed into newton_lnsrch to find Pc2 from m02 */
+void m02_VectorFunc(int n, double *vec, double *fvec)
+{
+  double kappa     = Getd("BNSdata_kappa");
+  double BNSdata_n = Getd("BNSdata_n");
+  double m02       = Getd("BNSdata_m02");
+  double Gamma     = 1.0 + 1.0/BNSdata_n;
+  double Pc, m, Phic, Psic, m0;
+
+  Pc = vec[1];
+  TOV_init(Pc, kappa, Gamma, 0, &rf_surf2, &m, &Phic, &Psic, &m0);
+  fvec[1] = m0-m02;
 }

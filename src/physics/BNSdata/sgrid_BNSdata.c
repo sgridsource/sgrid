@@ -46,6 +46,8 @@ int sgrid_BNSdata()
   AddVar("BNSdata_temp4", "", "temporary variable(e.g. to store derivs)");
      
   /* parameters */
+  AddPar("BNSdata_m01",   "0.141202", "rest mass of NS1");
+  AddPar("BNSdata_m02",   "0.141202", "rest mass of NS2");
   AddPar("BNSdata_b",     "1", "separation parameter (distance~2b)");
   AddPar("BNSdata_n",     "1", "polytropic index n, Gamma = 1 + 1/n");
   AddPar("BNSdata_kappa", "1", "kappa in EOS: P = kappa rho0^Gamma");

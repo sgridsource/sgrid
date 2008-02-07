@@ -29,7 +29,7 @@ void TOV_ODEs(double rf, double *y, double *dy);
 
 /* initialize the global vars A,B,C,D,E,F, R,S, Gamma, K
    compute *rf_surf,*m,*Phi_c,*Psi_c for a given Pc, K=kappa, Gamma=Gam */
-int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
+int TOV_init(double Pc, double kappa, double Gam, int pr, double *rf_surf,
              double *m, double *Phi_c, double *Psi_c, double *m0)
 {
   /* Variablen fuer odeint.c */
@@ -51,7 +51,7 @@ int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
   double Pb; /* Pbar */
 
   /* initialize TOV */
-  printf("TOV_init: \n");
+  if(pr) printf("TOV_init: \n");
 
   /* set Gamma, K */
   Gamma = Gam;
@@ -67,9 +67,9 @@ int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
   F=E;
   R=pow(Pb/Kb,1.0/Gamma)/rhob;
   S=Pb/((Gamma-1)*c*c*rhob);
-  printf(" gr1 constants set to: G=%g c=%g\n", G, c);
-  printf(" A=%g B=%g C=%g D=%g E=%g=F=%g\n K=%g Gamma=%g  R=%g S=%g\n",
-         A,B,C,D,E,F, K,Gamma, R,S);
+  if(pr) printf(" gr1 constants set to: G=%g c=%g\n", G, c);
+  if(pr) printf(" A=%g B=%g C=%g D=%g E=%g=F=%g\n K=%g Gamma=%g  R=%g S=%g\n",
+                A,B,C,D,E,F, K,Gamma, R,S);
 
   /* allocate mem. */
   y =vector(1,nvar);   /* The functions y1, y2, ... */
@@ -104,7 +104,7 @@ int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
   }
   /*increase rf2 by 10% */
   rf2 *= 1.1;
-  // printf("rf2=%g zeroP=%g\n", rf2, zeroP);
+  // printf("rf2=%g zeroP=%g y[2]=%g\n", rf2, zeroP, y[2]); exit(22);
   // printf("rf=%g: y[1]=%g y[2]=%g y[3]=%g y[4]=%g y[5]=%g\n",
   //       rf2, y[1], y[2], y[3], y[4], y[5]);
 
@@ -139,7 +139,7 @@ int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
   {
     ret=odeintegrate(y,nvar,rf1,rfe,eps,h1,hmin,&nok,&nbad,TOV_ODEs,rkqs,
                      kmax,&kount,rfp,yp,drfsav,&stat);  
-    printf(" ret=%g stat=%d ", ret, stat);
+    if(pr) printf(" ret=%g stat=%d ", ret, stat);
     if(ret<rfe) rfe=ret;
     else break;
   }
@@ -177,7 +177,7 @@ int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
   {
     ret=odeintegrate(y,nvar,rf1,rfe,eps,h1,hmin,&nok,&nbad,TOV_ODEs,rkqs,
                      kmax,&kount,rfp,yp,drfsav,&stat);  
-    printf(" ret=%g stat=%d\n", ret, stat);
+    if(pr) printf(" ret=%g stat=%d\n", ret, stat);
     if(ret<rfe) rfe=ret;
     else break;
   }
@@ -188,11 +188,11 @@ int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
 
 
   /* output results */
-  printf("   rf              m               P               "
-         "Phi             Psi\n");
+  if(pr) printf("   rf              m               P               "
+                "Phi             Psi\n");
   for(i=1; i<=kount; i++)
-    printf(" %.8e  %.8e %+.8e %+.8e %.8e\n",
-           rfp[i], yp[1][i], yp[2][i], yp[3][i], yp[4][i]);
+    if(pr) printf(" %.8e  %.8e %+.8e %+.8e %.8e\n",
+                  rfp[i], yp[1][i], yp[2][i], yp[3][i], yp[4][i]);
 
   /* compute *rf_surf,*m,*Phi_c,*Psi_c */
   *rf_surf=rfe;
@@ -338,7 +338,7 @@ void TOV_ODEs(double rf, double *y, double *dy)
   
   /* derivs with respect to r */
   dm_dr = A*rho*r*r;
-  if(r>(1e-4)*E) // funny, 1e-5 does not work!!! ???
+  if(r>(1e-4)) // (1e-4)*E) // funny, 1e-5 does not work!!! ???
   {
     dP_dr   =-B*rho*m/(r*r)*(1.0+C*P/rho)*(1.0+D*P*r*r*r/m)/(1.0-E*2.0*m/r);
     dPhi_dr = F*m/(r*r)*(1.0+D*P*r*r*r/m)/(1.0-E*2.0*m/r);

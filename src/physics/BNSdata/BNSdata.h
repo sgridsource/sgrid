@@ -27,7 +27,7 @@ void J_oneComp(tVarList *vlJdw, tVarList *vldw,
                tVarList *vldwDerivs, tVarList *vlw);
 
 /* funcs from TOV */
-int TOV_init(double Pc, double kappa, double Gam,  double *rf_surf,
+int TOV_init(double Pc, double kappa, double Gam, int pr, double *rf_surf,
              double *m, double *Phi_c, double *Psi_c, double *m0);
 int TOV_m_P_Phi_Psi_m0_OF_rf(double rf, double rf_surf,
                           double kappa, double Gam,
