@@ -22,6 +22,8 @@ double sigma1; /* initial sigma_+ */
 double sigma2; /* initial sigma_- */
 double rf_surf1; /* radius of star1 */
 double rf_surf2; /* radius of star2 */
+double P_core1;  /* core pressure of star1 */
+double P_core2;  /* core pressure of star2 */
 
 /* funs in this file */
 void rf_surf1_VectorFunc(int n, double *vec, double *fvec);
@@ -59,7 +61,6 @@ int set_boxsizes(tGrid *grid)
   double Gamma     = 1.0 + 1.0/BNSdata_n;
   double vec[2];
   int check;
-  double Pc1, Pc2; /* core pressures */
 
   printf("set_boxsizes: setting box sizes and coordinates used ...\n");
   
@@ -129,41 +130,41 @@ int set_boxsizes(tGrid *grid)
     Sets("box5_basis3", "ChebExtrema");
   }
 
-  /* find Pc1, s.t. rest mass is m01 */
+  /* find P_core1, s.t. rest mass is m01 */
   vec[1] = 1e-10;   /* initial guess */
   /* do newton_lnsrch iterations: */
   newton_lnsrch(vec, 1, &check, m01_VectorFunc, 
  		Geti("Coordinates_newtMAXITS"),
     		Getd("Coordinates_newtTOLF") );
   if(check) printf(": check=%d\n", check);  
-  Pc1 = vec[1];
-  printf(" setting: Pc1=%g\n", Pc1);
+  P_core1 = vec[1];
+  printf(" setting: P_core1=%g\n", P_core1);
 
-  /* find Pc2, s.t. rest mass is m02 */
+  /* find P_core2, s.t. rest mass is m02 */
   vec[1] = 1e-10;   /* initial guess */
   /* do newton_lnsrch iterations: */
   newton_lnsrch(vec, 1, &check, m02_VectorFunc, 
  		Geti("Coordinates_newtMAXITS"),
     		Getd("Coordinates_newtTOLF") );
   if(check) printf(": check=%d\n", check);  
-  Pc2 = vec[1];
-  printf(" setting: Pc2=%g\n", Pc2);
+  P_core2 = vec[1];
+  printf(" setting: P_core2=%g\n", P_core2);
 
-  /* TOV_init yields m01 for a given Pc1 */
-  TOV_init(Pc1, kappa, Gamma, 1, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
+  /* TOV_init yields m01 for a given P_core1 */
+  TOV_init(P_core1, kappa, Gamma, 1, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
   printf(" rf_surf1=%g: m1=%g Phic1=%g Psic1=%g m01=%g\n",
          rf_surf1, m1, Phic1, Psic1, m01);
 {
 double m,P,Phi,Psi,m0;
 double rf=rf_surf1;
 TOV_m_P_Phi_Psi_m0_OF_rf(rf, rf_surf1, kappa, Gamma,
-                      Pc1, Phic1, Psic1,
+                      P_core1, Phic1, Psic1,
                       &m, &P, &Phi, &Psi, &m0);
 printf(" check rf=%g: r=%g m=%g P=%g Phi=%g Psi=%g m0=%g\n", 
 rf,rf*Psi*Psi,m,P,Phi,Psi,m0);
 }
-  /* TOV_init yields m02 for a given Pc2 */
-  TOV_init(Pc2, kappa, Gamma, 1, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
+  /* TOV_init yields m02 for a given P_core2 */
+  TOV_init(P_core2, kappa, Gamma, 1, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
   printf(" rf_surf2=%g: m2=%g Phic2=%g Psic2=%g m02=%g\n",
          rf_surf2, m2, Phic2, Psic2, m02);
 
@@ -286,7 +287,7 @@ int set_sigma_pm_vars(tGrid *grid)
   return 0;
 }
 
-/* funtion to be passed into newton_lnsrch to find Pc1 from m01 */
+/* funtion to be passed into newton_lnsrch to find P_core1 from m01 */
 void m01_VectorFunc(int n, double *vec, double *fvec)
 {
   double kappa     = Getd("BNSdata_kappa");
@@ -299,7 +300,7 @@ void m01_VectorFunc(int n, double *vec, double *fvec)
   TOV_init(Pc, kappa, Gamma, 0, &rf_surf1, &m, &Phic, &Psic, &m0);
   fvec[1] = m0-m01;
 }
-/* funtion to be passed into newton_lnsrch to find Pc2 from m02 */
+/* funtion to be passed into newton_lnsrch to find P_core2 from m02 */
 void m02_VectorFunc(int n, double *vec, double *fvec)
 {
   double kappa     = Getd("BNSdata_kappa");

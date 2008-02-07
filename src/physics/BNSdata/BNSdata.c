@@ -7,7 +7,11 @@
 
 #define Power pow
 
-
+/* global vars */
+extern double rf_surf1; /* radius of star1 */
+extern double rf_surf2; /* radius of star2 */
+extern double P_core1;  /* core pressure of star1 */
+extern double P_core2;  /* core pressure of star2 */
 
 /* global var lists */
 tVarList *vlu, *vlFu, *vluDerivs;
@@ -39,9 +43,13 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 int BNSdata_startup(tGrid *grid)
 {
   int b;
-/*
+  double kappa     = Getd("BNSdata_kappa");
   double BNSdata_b = Getd("BNSdata_b");
-*/
+  double BNSdata_n = Getd("BNSdata_n");
+  double Gamma     = 1.0 + 1.0/BNSdata_n;
+  double rs1, m1, Phic1, Psic1, m01;
+  double rs2, m2, Phic2, Psic2, m02;
+
   printf("Initializing BNSdata:\n");
 
   /* set boundary information: farlimit, falloff, propagation speed */
@@ -76,9 +84,14 @@ int BNSdata_startup(tGrid *grid)
   enablevar(grid, Ind("alpha"));
   enablevar(grid, Ind("betax"));
   
-  /* set initial values in all in boxes */
+  /* set values of A,B,phi in box4/5 */
   set_BNSdata_ABphi(grid);
 
+  /* set rs, m, Phic, Psic, m0 for both stars */
+  TOV_init(P_core1, kappa, Gamma, 1, &rs1, &m1, &Phic1, &Psic1, &m01);
+  TOV_init(P_core2, kappa, Gamma, 1, &rs2, &m2, &Phic2, &Psic2, &m02);
+
+  /* set initial values in all in boxes */
   forallboxes(grid,b)
   {  
     tBox *box = grid->box[b];
@@ -89,10 +102,21 @@ int BNSdata_startup(tGrid *grid)
     double *px = box->v[Ind("x")];
     double *py = box->v[Ind("y")];
     double *pz = box->v[Ind("z")];
-    double *Psi    = box->v[Ind("BNSdata_Psi")];
-    double *alphaP = box->v[Ind("BNSdata_alphaP")];
-    double *q      = box->v[Ind("BNSdata_q")];
-
+    double *BNSdata_Psi    = box->v[Ind("BNSdata_Psi")];
+    double *BNSdata_alphaP = box->v[Ind("BNSdata_alphaP")];
+    double *BNSdata_q      = box->v[Ind("BNSdata_q")];
+    double r, m, P, Phi, Psi, m0, rho0;
+    double xmax1 = grid->box[0]->x_of_X[1](
+                       (void *) grid->box[0], 0, 0.0,0.0,0.0);
+    double xmin1 = grid->box[0]->x_of_X[1](
+                       (void *) grid->box[0], 0, 0.0,1.0,0.0);
+    double xmax2 = grid->box[3]->x_of_X[1](
+                       (void *) grid->box[3], 0, 0.0,1.0,0.0);
+    double xmin2 = grid->box[3]->x_of_X[1](
+                       (void *) grid->box[3], 0, 0.0,0.0,0.0);
+    double xc1 = 0.5*(xmax1+xmin1);
+    double xc2 = 0.5*(xmax2+xmin2);
+         
     forallpoints(box,i)
     {
       double x = pX[i];
@@ -105,46 +129,15 @@ int BNSdata_startup(tGrid *grid)
         y = py[i];
         z = pz[i];
       }
-      /* set Psi and alphaP */
-      if(Getv("BNSdata_grid", "SphericalDF"))
-      {
-        Psi[i] = 1.0;
-        alphaP[i] = 1.0;
-        q[i]= 1.0;
-      }
-      else if(Getv("BNSdata_grid", "AnsorgNS") || 
-              Getv("BNSdata_grid", "4ABphi_2xyz"))
-      {
-        double xmax1 = grid->box[0]->x_of_X[1](
-                        (void *) grid->box[0], 0, 0.0,0.0,0.0);
-        double xmin1 = grid->box[0]->x_of_X[1](
-                        (void *) grid->box[0], 0, 0.0,1.0,0.0);
-        double xmax2 = grid->box[3]->x_of_X[1](
-                        (void *) grid->box[3], 0, 0.0,1.0,0.0);
-        double xmin2 = grid->box[3]->x_of_X[1](
-                        (void *) grid->box[3], 0, 0.0,0.0,0.0);
-        double R1  = 0.5*(xmax1-xmin1);
-        double R2  = 0.5*(xmax2-xmin2);
-
-        Psi[i] = 1.0;
-        alphaP[i] = 1.0;
-        q[i]= 0.0;
-
-        if(Getv("BNSdata_guess", "test"))
-        {
-          double xc1 = 0.5*(xmax1+xmin1);
-          double xc2 = 0.5*(xmax2+xmin2);
-
-          if(b==0||b==5)
-          {
-            q[i] = 0.01*( 1.0 - ((x-xc1)*(x-xc1) + y*y + z*z) )/(R1*R1);
-          }
-          if(b==3||b==4)
-          {
-            q[i] = 0.01*( 1.0 - ((x-xc2)*(x-xc2) + y*y + z*z) )/(R2*R2);
-          }
-        }
-      }
+      /* set Psi, alphaP, q */
+      r = sqrt((x-xc1)*(x-xc1) + y*y + z*z);
+      TOV_m_P_Phi_Psi_m0_OF_rf(r, rs1, kappa, Gamma,
+                               P_core1, Phic1, Psic1,
+                               &m, &P, &Phi, &Psi, &m0);
+      BNSdata_Psi[i]   = Psi;
+      BNSdata_alphaP[i]= exp(Phi)*Psi;
+      BNSdata_q[i]     = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+                         pow(P, 1.0/(1.0 + BNSdata_n));
     }
   }
 
@@ -227,8 +220,8 @@ int BNSdata_solve(tGrid *grid)
 //J_BNSdata(vlJdu, vldu, vlduDerivs, vlu);
 Yo(2);
 F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
-//printf("calling write_grid(grid)\n");
-//write_grid(grid);
+printf("calling write_grid(grid)\n");
+write_grid(grid);
 //exit(11);
 
   /* How we solve the coupled ell. eqns */
