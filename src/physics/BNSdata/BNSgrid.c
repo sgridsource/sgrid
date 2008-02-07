@@ -56,8 +56,8 @@ int set_boxsizes(tGrid *grid)
   double vec[2];
   int check;
 
-  double Pc1=0.5; // change this: find Pc1 s.t. m01 = Getd("BNSdata_m01");
-  double Pc2=0.5; // ???
+  double Pc1=0.01; // change this: find Pc1 s.t. m01 = Getd("BNSdata_m01");
+  double Pc2=0.01; // ???
 
   printf("set_boxsizes: setting box sizes and coordinates used ...\n");
   
@@ -150,7 +150,7 @@ printf(" check rf=%g: m=%g P=%g Phi=%g Psi=%g m0=%g\n", rf,m,P,Phi,Psi,m0);
 
 
   /* find sigma1, s.t. radius is rf_surf1 */
-  vec[1] = rf_surf1;   /* initial guess */
+  vec[1] = 1.0/rf_surf1;   /* initial guess */
   /* do newton_lnsrch iterations: */
   newton_lnsrch(vec, 1, &check, rf_surf1_VectorFunc, 
  		Geti("Coordinates_newtMAXITS"),
@@ -160,7 +160,7 @@ printf(" check rf=%g: m=%g P=%g Phi=%g Psi=%g m0=%g\n", rf,m,P,Phi,Psi,m0);
   printf(" setting: sigma1=%g\n", sigma1);
 
   /* find sigma2, s.t. radius is rf_surf2 */
-  vec[1] = -rf_surf2;   /* initial guess */
+  vec[1] = -1.0/rf_surf2;   /* initial guess */
   /* do newton_lnsrch iterations: */
   newton_lnsrch(vec, 1, &check, rf_surf2_VectorFunc, 
  		Geti("Coordinates_newtMAXITS"),
@@ -168,6 +168,10 @@ printf(" check rf=%g: m=%g P=%g Phi=%g Psi=%g m0=%g\n", rf,m,P,Phi,Psi,m0);
   if(check) printf(": check=%d\n", check);  
   sigma2 = vec[1];
   printf(" setting: sigma2=%g\n", sigma2);
+
+//remove this
+sigma1=1;
+sigma2=-1;
 
   printf(" => radius of domain0 = %g,   radius of domain3 = %g\n", 
          0.5*(x_of_AnsorgNS0(NULL, -1, 0.0,0.0,0.0)-

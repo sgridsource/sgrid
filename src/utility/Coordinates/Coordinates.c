@@ -2715,24 +2715,18 @@ void ddABphi_ddxyz_AnsorgNS(tBox *box, int ind, int domain,
 /* Ansorg's sigma_{+-} computed from var sigma_pm */
 // finish this:
 double AnsorgNS_sigmap(tBox *box, int ind, double B, double phi)
-{ return 1.0; }
-double AAAnsorgNS_sigmap(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
   static int sigma_pm, dsigma_pm_dB, dsigma_pm_dphi;
-  static double Bsav=-1, phisav=-1;
-  static double sigsav;
 
-  if(B==Bsav && phi==phisav) return sigsav;
   if(firstcall)
   {
     sigma_pm = Ind("Coordinates_AnsorgNS_sigma_pm");  
     dsigma_pm_dB = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
     dsigma_pm_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
   }
-  if(ind>=0) sigsav = box->v[sigma_pm][ind];
-  else       sigsav = box->v[sigma_pm][0]; // change this!
-  return sigsav;
+  if(ind>=0) return box->v[sigma_pm][ind];
+  else       return box->v[sigma_pm][0]; // change this!
 }
 double AnsorgNS_dsigmap_dB(tBox *box, int ind, double B, double phi)
 {
@@ -2743,8 +2737,6 @@ double AnsorgNS_dsigmap_dphi(tBox *box, int ind, double B, double phi)
   return 0.0; // change this!
 }
 double AnsorgNS_sigmam(tBox *box, int ind, double B, double phi)
-{ return -1.0; }
-double AAAnsorgNS_sigmam(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
   static int sigma_pm, dsigma_pm_dB, dsigma_pm_dphi;
@@ -2755,10 +2747,8 @@ double AAAnsorgNS_sigmam(tBox *box, int ind, double B, double phi)
     dsigma_pm_dB = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
     dsigma_pm_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
   }
-  if(ind>=0)
-    return box->v[sigma_pm][ind];
-  else
-    return box->v[sigma_pm][0]; // change this!
+  if(ind>=0) return box->v[sigma_pm][ind];
+  else       return box->v[sigma_pm][0]; // change this!
 }
 double AnsorgNS_dsigmam_dB(tBox *box, int ind, double B, double phi)
 {
