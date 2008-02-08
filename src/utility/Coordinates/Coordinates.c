@@ -3434,7 +3434,7 @@ void set_d_dy_at_rhoEQzero_AnsorgNS(void *bo, void *va,
   int i,j,k;
   double rho_0 = box->v[Ind("y")][Index(0,0,0)];
   
-  if(fabs(rho_0)>0.0) return;
+  if(fabs(rho_0)>dequaleps) return;
 
   /* take deriv d/dy at phi=0 (k=0) <=> z=0 and use it everywhere */
   for(k=0; k<n3; k++)
@@ -3453,7 +3453,7 @@ void set_d_dz_at_rhoEQzero_AnsorgNS(void *bo, void *va,
   int i,j,k;
   double rho_0 = box->v[Ind("y")][Index(0,0,0)];
 
-  if(fabs(rho_0)>0.0) return;
+  if(fabs(rho_0)>dequaleps) return;
 
   if(n3 % 4)
     errorexiti("set_d_dz_at_rhoEQzero_AnsorgNS: "
@@ -3477,7 +3477,7 @@ void set_d_dz_at_rhoEQzero_AnsorgNS_new(void *bo, void *va,
   double *M, *uline, *cline;
   void (*get_coeffs)(double *,double *, int)=NULL;
   
-  if(fabs(rho_0)>0.0) return;
+  if(fabs(rho_0)>dequaleps) return;
 
   if(n3 % 4)
     errorexiti("set_d_dz_at_rhoEQzero_AnsorgNS: "
