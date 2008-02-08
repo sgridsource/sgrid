@@ -239,7 +239,7 @@ double AnsorgNS_dsigmam_dB(tBox *box, int ind, double B, double phi);
 double AnsorgNS_dsigmam_dphi(tBox *box, int ind, double B, double phi);
 double AnsorgNS_sigma_p_one(tBox *box, int ind, double B, double phi);
 double AnsorgNS_dsigma_zero(tBox *box, int ind, double B, double phi);
-double AnsorgNS_sigmam_m_one(tBox *box, int ind, double B, double phi);
+double AnsorgNS_sigma_m_one(tBox *box, int ind, double B, double phi);
 double x_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double y_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);
 double z_of_AnsorgNS0(void *aux, int ind, double A, double B, double phi);

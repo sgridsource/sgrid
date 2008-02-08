@@ -509,7 +509,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigma_p_one;
       Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigma_zero;
       Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigma_zero;
-      Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigmam_m_one;
+      Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigma_m_one;
       Coordinates_AnsorgNS_dsigmam_dB   = AnsorgNS_dsigma_zero;
       Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigma_zero;
     }
@@ -2807,7 +2807,7 @@ double AnsorgNS_dsigma_zero(tBox *box, int ind, double B, double phi)
 {
   return 0.0;
 }
-double AnsorgNS_sigmam_m_one(tBox *box, int ind, double B, double phi)
+double AnsorgNS_sigma_m_one(tBox *box, int ind, double B, double phi)
 {
   return -1.0;
 }
