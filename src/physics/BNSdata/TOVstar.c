@@ -342,8 +342,9 @@ void TOV_ODEs(double rf, double *y, double *dy)
   {
     dP_dr   =-B*rho*m/(r*r)*(1.0+C*P/rho)*(1.0+D*P*r*r*r/m)/(1.0-E*2.0*m/r);
     dPhi_dr = F*m/(r*r)*(1.0+D*P*r*r*r/m)/(1.0-E*2.0*m/r);
-    dPsi_dr = 0.5*(1/r - 1/sqrt(r*r - 2.0*E*m*r))*Psi;
+    dPsi_dr = 0.5*(1.0/r - 1.0/sqrt(r*r - 2.0*E*m*r))*Psi;
     dm0_dr  = A*rho0*r*r/sqrt(1.0-E*2.0*m/r);
+    /* dr_drf = Psi*Psi*sqrt(1.0-E*2.0*m/r); */
   }
   else
   {
@@ -352,10 +353,11 @@ void TOV_ODEs(double rf, double *y, double *dy)
     dPhi_dr = A*F/3.0*rho*r*(1.0+D*3.0/A*P/rho)/(1.0-A/3.0*E*2.0*rho*r*r);
     dPsi_dr = 0.5*(-A*E*rho*r/3.0)*Psi;
     dm0_dr = A*rho0*r*r/sqrt(1.0-E*2.0*A*rho*r*r/3.0);
+    /* dr_drf = Psi*Psi*sqrt(1.0-E*2.0*A*rho*r*r/3.0); */
   }
 
   /* derivs with respect to rf */
-  dr_drf   = Psi*Psi/(1 - 2.0*rf*Psi*dPsi_dr);
+  dr_drf   = Psi*Psi/(1.0 - 2.0*rf*Psi*dPsi_dr);
   dm_drf   = dm_dr * dr_drf;
   dP_drf   = dP_dr * dr_drf;
   dPhi_drf = dPhi_dr * dr_drf;

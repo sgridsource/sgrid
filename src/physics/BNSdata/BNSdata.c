@@ -218,10 +218,11 @@ int BNSdata_solve(tGrid *grid)
 //vlFu->n = vlu->n = vlJdu->n = vldu->n = 1;
 //Yo(1);
 //J_BNSdata(vlJdu, vldu, vlduDerivs, vlu);
-Yo(2);
-F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
-printf("calling write_grid(grid)\n");
-write_grid(grid);
+
+//Yo(2);
+//F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+//printf("calling write_grid(grid)\n");
+//write_grid(grid);
 //exit(11);
 
   /* How we solve the coupled ell. eqns */

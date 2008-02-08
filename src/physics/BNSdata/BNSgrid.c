@@ -199,16 +199,18 @@ rf,rf*Psi*Psi,m,P,Phi,Psi,m0);
   {
     double box0_max1 = 0.85;
     double box3_max1 = 0.85;
-    double scal = 1.05;      /* make box4/5 5% larger than needed */
-    double xr, xmax, xmin;
+    double scal = 1.05; //1.551108723489246  /* make box4/5 5% larger than needed */
+    double xr, xp, xm, xmax, xmin;
     double b = Coordinates_AnsorgNS_b;
 
     Setd("box0_max1", box0_max1);
     xmin = x_of_AnsorgNS0(NULL, -1, box0_max1,1.0,0.0);
     xmax = x_of_AnsorgNS0(NULL, -1, box0_max1,0.0,0.0);
     xr = scal * 0.5*(xmax-xmin);
-    Setd("box5_min1", b - xr);
-    Setd("box5_max1", b + xr);
+    xm = scal * (xmin-b);
+    xp = scal * (xmax-b);
+    Setd("box5_min1", b + xm);
+    Setd("box5_max1", b + xp);
     Setd("box5_min2", -xr);
     Setd("box5_max2",  xr);
     Setd("box5_min3", -xr);
@@ -218,8 +220,10 @@ rf,rf*Psi*Psi,m,P,Phi,Psi,m0);
     xmin = x_of_AnsorgNS3(NULL, -1, box3_max1,0.0,0.0);
     xmax = x_of_AnsorgNS3(NULL, -1, box3_max1,1.0,0.0);
     xr = scal * 0.5*(xmax-xmin);
-    Setd("box4_min1", -b - xr);
-    Setd("box4_max1", -b + xr);
+    xm = scal * (xmin+b);
+    xp = scal * (xmax+b);
+    Setd("box4_min1", -b + xm);
+    Setd("box4_max1", -b + xp);
     Setd("box4_min2", -xr);
     Setd("box4_max2",  xr);
     Setd("box4_min3", -xr);
