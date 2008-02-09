@@ -1,7 +1,7 @@
 (* setADMvars.m 
    Wolfgang Tichy  12/2007       *)
 
-(* compute right hand side of BSSN equations *)
+(* compute ADMvars from the BNSdata vars *)
 
 
 (* variables *)
@@ -62,6 +62,11 @@ tocompute = {
   rho0 == Power[q/kappa, n],
   P    == q rho0,
   rhoE == rho0 (1 + n q),
+
+  (* if q=0 all matter vars are zero, which can be enforced by uzerosqr=0 *)
+  Cif == (q==0),
+    uzerosqr == 0,
+  Cif == end,
 
   (* set fluid vars in 3+1 *)
   rho  == alpha2 (rhoE + P) uzerosqr - P,

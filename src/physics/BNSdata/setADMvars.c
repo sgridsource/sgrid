@@ -1,5 +1,5 @@
 /* setADMvars.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 19.12.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 9.2.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -413,6 +413,20 @@ rhoE
 rho0 + n*rho0*q[ijk]
 ;
 
+
+
+/* conditional */
+if (q[ijk] == 0) {
+
+uzerosqr
+=
+0
+;
+
+}
+/* if (q[ijk] == 0) */
+
+
 rho[ijk]
 =
 alpha2*rhoE*uzerosqr + P*(-1. + alpha2*uzerosqr)
@@ -505,4 +519,4 @@ P*g33[ijk] + (P + rhoE)*uzerosqr*pow2(vRplusbetado3)
 }  /* end of function */
 
 /* setADMvars.c */
-/* nvars = 51, n* = 155,  n/ = 26,  n+ = 173, n = 354, O = 1 */
+/* nvars = 51, n* = 159,  n/ = 30,  n+ = 173, n = 362, O = 1 */
