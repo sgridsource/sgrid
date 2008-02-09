@@ -81,7 +81,8 @@ tocompute = {
   (* vI[a] == vR[a] + OmegaCrossR[a], *)
 
   (* compute square of u^0 in rotating frame *)
-  uzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
+  oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
+  uzerosqr == 1.0/oouzerosqr,
 
   (* rest mass density, pressure, and total energy density *)
   rho0 == Power[q/kappa, n],

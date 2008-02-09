@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 29.12.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 9.2.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -369,6 +369,7 @@ double lvR3;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
+double oouzerosqr;
 double P;
 double Psi2;
 double Psi3;
@@ -618,11 +619,16 @@ vR3
 vRI3 + vRS3[ijk]
 ;
 
-uzerosqr
+oouzerosqr
 =
 alpha2 - Psi4*(2.*(vR1*beta1[ijk] + vR2*beta2[ijk] + vR3*beta3[ijk]) + 
      pow2(vR1) + pow2(vR2) + pow2(vR3) + pow2(beta1[ijk]) + 
      pow2(beta2[ijk]) + pow2(beta3[ijk]))
+;
+
+uzerosqr
+=
+1./oouzerosqr
 ;
 
 rho0
@@ -1372,4 +1378,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 166, n* = 684,  n/ = 118,  n+ = 774, n = 1576, O = 1 */
+/* nvars = 166, n* = 684,  n/ = 119,  n+ = 774, n = 1577, O = 1 */
