@@ -105,11 +105,12 @@ tocompute = {
     dalpha[a] == dalphaP[a]/Psi - alphaP dPsi[a]/Psi2,
     dbeta[a,b] == dB[a,b] + epsmatrix3d[b,a,3] Omega,
     dvR[a,b] == dvRS[a,b] + ddSigma[a,b],
-    duzerosqr[a] == 2 alpha dalpha[a] -
+    doouzerosqr[a] == 2 alpha dalpha[a] -
                     4 Psi3 dPsi[a] delta[b,c] *
                     (beta[b] + vR[b]) (beta[c] + vR[c]) -
                     2 Psi4 delta[b,c] *
                     (beta[b] + vR[b]) (dbeta[c,a] + dvR[c,a]),
+    duzerosqr[a] == -uzerosqr^2 doouzerosqr[a],
     dLnuzerosqr[a] == duzerosqr[a]/uzerosqr,
     dLnalphaP[a] == dalphaP[a]/alphaP,
     dLnPsi[a] == dPsi[a]/Psi,
@@ -153,10 +154,11 @@ tocompute = {
     lvR[a] == dlSigma[a], 
     lalpha == lalphaP/Psi - alphaP lPsi/Psi2,
     (* linearized
-      uzerosqr = alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c])*)
-    luzerosqr == 2alpha lalpha - 
+      oouzerosqr = alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c])*)
+    loouzerosqr == 2alpha lalpha - 
                  4 Psi3 lPsi delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]) -
                  Psi4 delta[b,c] 2 (lB[b] + lvR[b]) (beta[c] + vR[c]),
+    luzerosqr == -uzerosqr^2 loouzerosqr,
 
     (* rho  == alpha2 (rhoE + P) uzerosqr - P,
        j[a] == alpha (rhoE + P) uzerosqr (vR[a]+beta[a]),
@@ -190,7 +192,7 @@ tocompute = {
       dlalpha[a] == dlalphaP[a]/Psi - dalphaP[a] lPsi/Psi2 - 
                     lalphaP dPsi[a]/Psi2 - alphaP dlPsi[a]/Psi2 +
                     2 alphaP dPsi[a] lPsi/Psi3,
-      lduzerosqr[a] == 2 lalpha dalpha[a] + 2 alpha dlalpha[a] -
+      ldoouzerosqr[a] == 2 lalpha dalpha[a] + 2 alpha dlalpha[a] -
                          (12 Psi2 lPsi dPsi[a] + 4 Psi3 dlPsi[a]) delta[b,c] *
                          (beta[b] + vR[b]) (beta[c] + vR[c]) -
                          4 Psi3 dPsi[a] delta[b,c] *
@@ -200,6 +202,8 @@ tocompute = {
                          2 Psi4 delta[b,c] * (
                           (lB[b] + dlSigma[b]) (dbeta[c,a] + dvR[c,a]) + 
                           (beta[b] + vR[b]) (dlB[c,a] + ddlSigma[c,a]) ),
+      lduzerosqr[a] == -2 uzerosqr luzerosqr doouzerosqr[a] - 
+                        uzerosqr^2 ldoouzerosqr[a],
 
       FlSigma  == delta[b,c] ddlSigma[b,c] + 
                dlSigma[a] * ( 

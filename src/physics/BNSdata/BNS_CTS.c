@@ -301,6 +301,9 @@ double dLnrho03;
 double dLnuzerosqr1;
 double dLnuzerosqr2;
 double dLnuzerosqr3;
+double doouzerosqr1;
+double doouzerosqr2;
+double doouzerosqr3;
 double duzerosqr1;
 double duzerosqr2;
 double duzerosqr3;
@@ -338,6 +341,9 @@ double LBLB;
 double ldLnalphaPsim61;
 double ldLnalphaPsim62;
 double ldLnalphaPsim63;
+double ldoouzerosqr1;
+double ldoouzerosqr2;
+double ldoouzerosqr3;
 double lduzerosqr1;
 double lduzerosqr2;
 double lduzerosqr3;
@@ -360,6 +366,7 @@ double LlBdo31;
 double LlBdo32;
 double LlBdo33;
 double LlBLlB;
+double loouzerosqr;
 double lrho;
 double lS;
 double luzerosqr;
@@ -811,7 +818,7 @@ dvR33
 ddSigma33[ijk] + dvRS33[ijk]
 ;
 
-duzerosqr1
+doouzerosqr1
 =
 2.*(dalpha1*alpha[ijk] - Psi4*((dbeta11 + dvR11)*(vR1 + beta1[ijk]) + 
         (dbeta21 + dvR21)*(vR2 + beta2[ijk]) + 
@@ -821,7 +828,7 @@ duzerosqr1
         pow2(beta2[ijk]) + pow2(beta3[ijk])))
 ;
 
-duzerosqr2
+doouzerosqr2
 =
 2.*(dalpha2*alpha[ijk] - Psi4*((dbeta12 + dvR12)*(vR1 + beta1[ijk]) + 
         (dbeta22 + dvR22)*(vR2 + beta2[ijk]) + 
@@ -831,7 +838,7 @@ duzerosqr2
         pow2(beta2[ijk]) + pow2(beta3[ijk])))
 ;
 
-duzerosqr3
+doouzerosqr3
 =
 2.*(dalpha3*alpha[ijk] - Psi4*((dbeta13 + dvR13)*(vR1 + beta1[ijk]) + 
         (dbeta23 + dvR23)*(vR2 + beta2[ijk]) + 
@@ -839,6 +846,21 @@ duzerosqr3
   Psi3*dPsi3[ijk]*(8.*(vR1*beta1[ijk] + vR2*beta2[ijk] + vR3*beta3[ijk]) + 
      4.*(pow2(vR1) + pow2(vR2) + pow2(vR3) + pow2(beta1[ijk]) + 
         pow2(beta2[ijk]) + pow2(beta3[ijk])))
+;
+
+duzerosqr1
+=
+-(doouzerosqr1*pow2(uzerosqr))
+;
+
+duzerosqr2
+=
+-(doouzerosqr2*pow2(uzerosqr))
+;
+
+duzerosqr3
+=
+-(doouzerosqr3*pow2(uzerosqr))
 ;
 
 dLnuzerosqr1
@@ -1118,7 +1140,7 @@ lalpha
 -((alphaP[ijk]*lPsi[ijk])/Psi2) + lalphaP[ijk]/Psi[ijk]
 ;
 
-luzerosqr
+loouzerosqr
 =
 2.*(lalpha*alpha[ijk] - Psi4*((vR1 + beta1[ijk])*(lvR1 + lB1[ijk]) + 
         (vR2 + beta2[ijk])*(lvR2 + lB2[ijk]) + 
@@ -1126,6 +1148,11 @@ luzerosqr
   Psi3*lPsi[ijk]*(8.*(vR1*beta1[ijk] + vR2*beta2[ijk] + vR3*beta3[ijk]) + 
      4.*(pow2(vR1) + pow2(vR2) + pow2(vR3) + pow2(beta1[ijk]) + 
         pow2(beta2[ijk]) + pow2(beta3[ijk])))
+;
+
+luzerosqr
+=
+-(loouzerosqr*pow2(uzerosqr))
 ;
 
 lrho
@@ -1261,7 +1288,7 @@ dlalpha3
      dalphaP3[ijk]*lPsi[ijk])/Psi2 + dlalphaP3[ijk]/Psi[ijk]
 ;
 
-lduzerosqr1
+ldoouzerosqr1
 =
 2.*(dalpha1*lalpha + dlalpha1*alpha[ijk] - 
      Psi4*((vR1 + beta1[ijk])*(ddlSigma11[ijk] + dlB11[ijk]) + 
@@ -1285,7 +1312,7 @@ lduzerosqr1
            pow2(beta2[ijk]) + pow2(beta3[ijk]))))
 ;
 
-lduzerosqr2
+ldoouzerosqr2
 =
 2.*(dalpha2*lalpha + dlalpha2*alpha[ijk] - 
      Psi4*((vR1 + beta1[ijk])*(ddlSigma12[ijk] + dlB12[ijk]) + 
@@ -1309,7 +1336,7 @@ lduzerosqr2
            pow2(beta2[ijk]) + pow2(beta3[ijk]))))
 ;
 
-lduzerosqr3
+ldoouzerosqr3
 =
 2.*(dalpha3*lalpha + dlalpha3*alpha[ijk] - 
      Psi4*((vR1 + beta1[ijk])*(ddlSigma13[ijk] + dlB13[ijk]) + 
@@ -1331,6 +1358,21 @@ lduzerosqr3
      dlPsi3[ijk]*(8.*(vR1*beta1[ijk] + vR2*beta2[ijk] + vR3*beta3[ijk]) + 
         4.*(pow2(vR1) + pow2(vR2) + pow2(vR3) + pow2(beta1[ijk]) + 
            pow2(beta2[ijk]) + pow2(beta3[ijk]))))
+;
+
+lduzerosqr1
+=
+-2.*doouzerosqr1*luzerosqr*uzerosqr - ldoouzerosqr1*pow2(uzerosqr)
+;
+
+lduzerosqr2
+=
+-2.*doouzerosqr2*luzerosqr*uzerosqr - ldoouzerosqr2*pow2(uzerosqr)
+;
+
+lduzerosqr3
+=
+-2.*doouzerosqr3*luzerosqr*uzerosqr - ldoouzerosqr3*pow2(uzerosqr)
 ;
 
 FlSigma[ijk]
@@ -1378,4 +1420,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 166, n* = 684,  n/ = 119,  n+ = 774, n = 1577, O = 1 */
+/* nvars = 166, n* = 700,  n/ = 119,  n+ = 784, n = 1603, O = 1 */
