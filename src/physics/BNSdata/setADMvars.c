@@ -123,6 +123,7 @@ double LBdo33;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
+double oouzerosqr;
 double P;
 double Psi2;
 double Psi4;
@@ -391,11 +392,16 @@ vR3
 vRI3 + vRS3[ijk]
 ;
 
-uzerosqr
+oouzerosqr
 =
 alpha2 - Psi4*(2.*(vR1*beta1[ijk] + vR2*beta2[ijk] + vR3*beta3[ijk]) + 
      pow2(vR1) + pow2(vR2) + pow2(vR3) + pow2(beta1[ijk]) + 
      pow2(beta2[ijk]) + pow2(beta3[ijk]))
+;
+
+uzerosqr
+=
+1./oouzerosqr
 ;
 
 rho0
@@ -519,4 +525,4 @@ P*g33[ijk] + (P + rhoE)*uzerosqr*pow2(vRplusbetado3)
 }  /* end of function */
 
 /* setADMvars.c */
-/* nvars = 51, n* = 159,  n/ = 30,  n+ = 173, n = 362, O = 1 */
+/* nvars = 51, n* = 159,  n/ = 31,  n+ = 173, n = 363, O = 1 */
