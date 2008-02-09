@@ -33,7 +33,7 @@ int TOV_init(double Pc, double kappa, double Gam, int pr, double *rf_surf,
              double *m, double *Phi_c, double *Psi_c, double *m0)
 {
   /* Variablen fuer odeint.c */
-  int kmax=23;             /* max # of points outputed by odeint */
+  int kmax=21;             /* max # of points outputed by odeint */
   int kount;               /* # of points outputed by odeint */
   double *rfp,**yp;        /* points outputed by odeint  */
   double drfsav;           /* approx. rf-distance between points */
@@ -200,6 +200,9 @@ int TOV_init(double Pc, double kappa, double Gam, int pr, double *rf_surf,
   *Phi_c = Phic;
   *Psi_c = Psic;
   *m0    = y[5];
+
+  if(pr) printf("  => rf_surf=%g  r_surf=%g  m=%g  m0=%g\n     P_c=%g  Phi_c=%g  Psi_c=%g\n",
+                  rfe,   rfe*y[4]*y[4], *m,   *m0,             Pc,    *Phi_c,   *Psi_c);
 
   free_vector(dy, 1,nvar);
   free_vector(y,  1,nvar);
