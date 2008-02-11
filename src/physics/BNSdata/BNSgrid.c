@@ -317,3 +317,96 @@ void m02_VectorFunc(int n, double *vec, double *fvec)
   TOV_init(Pc, kappa, Gamma, 0, &rf_surf2, &m, &Phic, &Psic, &m0);
   fvec[1] = m0-m02;
 }
+
+
+/*************************************/
+/* functions to adjust star surfaces */
+/*************************************/
+/* reset sigma such that the zeros in BNSdata_q are at A=0 */
+void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, 
+                                         int innerdom,  int outerdom)
+{
+  int iq = Ind("BNSdata_q");
+  int iX = Ind("X");
+  int iY = Ind("Y");
+  int iZ = Ind("Z");
+  int isigma = Ind("Coordinates_AnsorgNS_sigma_pm");
+  double *q_in = grid->box[innerdom]->v[iq];
+  double *q_out= grid->box[outerdom]->v[iq];  
+  int n1 = grid->box[innerdom]->n1;
+  int n2 = grid->box[innerdom]->n2;
+  int n3 = grid->box[innerdom]->n3;
+  int i,j,k;
+  int ineg_in;  /* q_in<0  at i=ineg_in (and q_in>=0 i=ineg_in+1) */
+  int ipos_out; /* q_out>0 at i=ipos_out (and q_out<0 i=ipos_out+1) */
+  int i1, i2, dom; /* zero occurs between index i1 and i2 in domain dom */
+  double A1, A2;   /* zero occurs between A=A1 and A=A2 in domain dom */
+  double A0;      /* q=0 at A=A0 in domain dom */
+  double q1, q2;
+  double X0, R0;  /* value of X,R at A=A0 */
+  double B,phi, x,y,z;
+  double ArgCp_1phi, AbsCp_1phi, ReCp_1phi, ImCp_1phi;
+  double ArgCp_Bphi, ReCp_Bphi, ImCp_Bphi;
+  double sigp_1phi, sigp_Bphi;
+
+  /* loop over j,k i.e. B,phi. 
+     NOTE: we assue that n1,n2,n3 are the same in both domains */
+  for(j=n2-1; j>=0; j--)
+  {
+    for(k=0; k<n3; k++)
+    {
+      B   = grid->box[dom]->v[iY][0];
+      phi = grid->box[dom]->v[iZ][0];
+
+      /* find indices where q_in and q_out switch sign */
+      for(i=n1-1; i>=0; i--) if(q_in[Index(i,j,k)]<0.0) break;
+      ineg_in=i;
+      for(i=n1-1; i>=0; i--) if(q_out[Index(i,j,k)]>0.0) break;
+      ipos_out=i;
+
+      /* if ineg_in=>0, q has zero in inner domain */
+      if(ineg_in>=0) { i1=ineg_in; i2=ineg_in+1; dom=innerdom; }
+      /* if ipos_out=>0, q has zero in outer domain */
+      else if(ipos_out>=0) { i1=ipos_out; i2=ipos_out+1; dom=outerdom; }
+      else errorexit("non-monotonic BNSdata_q!!!");
+      A1=grid->box[dom]->v[iX][i1];
+      A2=grid->box[dom]->v[iX][i2];
+      q1=grid->box[dom]->v[iq][i1];
+      q2=grid->box[dom]->v[iq][i2];
+
+      /* find zero in q between A1 and A2 */
+      A0 = A1 - q1*(A2-A1)/(q2-q1); /* initial guess */
+      // use newton ... => A0;
+      
+      /* compute values of X0,R0 at A=A0 */
+      xyz_of_AnsorgNS(grid->box[dom], -1, dom, A0,B,phi, &x,&y,&z, &X0,&R0);
+      
+      /* get Cp and sigp at B=1  */
+      if(j==n2-1 && k==0) /* B=1 case, but compute it only for phi=0 */
+      {
+        ArgCp_1phi = acos(X0);
+        /* 2 ArgCp = ArcTan[Sin[Pi B/2]/Sinh[sigma/2]] */
+        /* Tan[2 ArgCp] = Sin[Pi B/2]/Sinh[sigma/2] */
+        sigp_1phi = 2.0 * asinh( (1.0/tan(ArgCp_1phi)) );
+        AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+        ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+        ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+        sigp_Bphi = sigp_1phi;
+      }
+      if( (j==0 && k==0) || j>0 && j<n2-1 ) /* B<1 case */
+      {                              /* if B=0 compute only for phi=0 */
+        ReCp_Bphi = X0 + B*ReCp_1phi - B*cos(ArgCp_1phi);
+        ImCp_Bphi = R0 + B*ImCp_1phi - B*sin(ArgCp_1phi);
+        ArgCp_Bphi = Arg(ReCp_Bphi, ImCp_Bphi);
+        sigp_Bphi = 2.0 * asinh( (sin(0.5*PI*B)/tan(ArgCp_Bphi)) );
+      }
+
+      /* set Coordinates_AnsorgNS_sigma_pm = sigp_Bphi in both domains */
+      for(i=0; i<n1; i++)
+      {
+        grid->box[innerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
+        grid->box[outerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
+      }
+    } /* end for k */
+  } /* end for j */
+}
