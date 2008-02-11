@@ -348,6 +348,8 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid,
   double ArgCp_1phi, AbsCp_1phi, ReCp_1phi, ImCp_1phi;
   double ArgCp_Bphi, ReCp_Bphi, ImCp_Bphi;
   double sigp_1phi, sigp_Bphi;
+  int itmax = Geti("Coordinates_newtMAXITS");
+  double tol = Getd("Coordinates_newtTOLF");
 
   /* loop over j,k i.e. B,phi. 
      NOTE: we assue that n1,n2,n3 are the same in both domains */
@@ -375,9 +377,14 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid,
       q2=grid->box[dom]->v[iq][i2];
 
       /* find zero in q between A1 and A2 */
-      A0 = A1 - q1*(A2-A1)/(q2-q1); /* initial guess */
-      // use newton ... => A0;
-      
+      if(fabs(q1) < tol) A0=A1;
+      else if(fabs(q2) < tol) A0=A2;
+      else /* use root finder */
+      {
+        A0 = A1 - q1*(A2-A1)/(q2-q1); /* initial guess */
+        // use newton (itmax tol) ... => A0;
+      }
+
       /* compute values of X0,R0 at A=A0 */
       xyz_of_AnsorgNS(grid->box[dom], -1, dom, A0,B,phi, &x,&y,&z, &X0,&R0);
       
