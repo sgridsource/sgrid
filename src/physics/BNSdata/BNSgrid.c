@@ -24,6 +24,8 @@ double rf_surf1; /* radius of star1 */
 double rf_surf2; /* radius of star2 */
 double P_core1;  /* core pressure of star1 */
 double P_core2;  /* core pressure of star2 */
+tBox *BNdata_q_VectorFunc_box;
+double *BNdata_q_VectorFunc_coeffs;
 
 /* funs in this file */
 void rf_surf1_VectorFunc(int n, double *vec, double *fvec);
@@ -322,17 +324,45 @@ void m02_VectorFunc(int n, double *vec, double *fvec)
 /*************************************/
 /* functions to adjust star surfaces */
 /*************************************/
+
+/* get q at A by interpolation */
+void BNdata_q_VectorFunc(int n, double *vec, double *fvec)
+{
+  tBox *box = BNdata_q_VectorFunc_box;
+  double *c = BNdata_q_VectorFunc_coeffs;
+  int i;
+  double B1;
+  double a1=box->bbox[0];
+  double b1=box->bbox[1];
+  int n1 = box->n1;
+  double q = 0.0;
+  double A = vec[1];  
+
+  /* interpolate q onto point A */
+  for(i=n1-1; i>=0; i--)
+  {
+    B1 = box->basis1((void *) box, a1,b1, i,n1, A);
+    q += c[i] * B1;
+  }   
+  fvec[1] = q;
+}
+
 /* reset sigma such that the zeros in BNSdata_q are at A=0 */
-void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, 
+void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
                                          int innerdom,  int outerdom)
 {
   int iq = Ind("BNSdata_q");
+  int ic = Ind("Temp1"); /* we store coeffs of BNSdata_q in Temp1 */
   int iX = Ind("X");
   int iY = Ind("Y");
   int iZ = Ind("Z");
-  int isigma = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int isigma      = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+  int isigma_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
   double *q_in = grid->box[innerdom]->v[iq];
   double *q_out= grid->box[outerdom]->v[iq];  
+  double *c_in = grid->box[innerdom]->v[ic];
+  double *c_out= grid->box[outerdom]->v[ic];  
   int n1 = grid->box[innerdom]->n1;
   int n2 = grid->box[innerdom]->n2;
   int n3 = grid->box[innerdom]->n3;
@@ -350,6 +380,14 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid,
   double sigp_1phi, sigp_Bphi;
   int itmax = Geti("Coordinates_newtMAXITS");
   double tol = Getd("Coordinates_newtTOLF");
+  double vec[2];
+  int check;
+
+  /* set coeffs of BNSdata_q */
+  spec_analysis1(grid->box[innerdom], 1, grid->box[innerdom]->Mcoeffs1, 
+                 q_in, c_in);
+  spec_analysis1(grid->box[outerdom], 1, grid->box[outerdom]->Mcoeffs1, 
+                 q_out, c_out);
 
   /* loop over j,k i.e. B,phi. 
      NOTE: we assue that n1,n2,n3 are the same in both domains */
@@ -366,23 +404,29 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid,
       for(i=n1-1; i>=0; i--) if(q_out[Index(i,j,k)]>0.0) break;
       ipos_out=i;
 
-      /* if ineg_in=>0, q has zero in inner domain */
-      if(ineg_in>=0) { i1=ineg_in; i2=ineg_in+1; dom=innerdom; }
       /* if ipos_out=>0, q has zero in outer domain */
-      else if(ipos_out>=0) { i1=ipos_out; i2=ipos_out+1; dom=outerdom; }
-      else errorexit("non-monotonic BNSdata_q!!!");
+      if(ipos_out>=0) { i1=ipos_out; i2=ipos_out+1; dom=outerdom; }
+      /* if ineg_in=>0, q has zero in inner domain */
+      else if(ineg_in>=0) { i1=ineg_in; i2=ineg_in+1; dom=innerdom; }
+           else           { i1=0;       i2=1;         dom=innerdom; }
       A1=grid->box[dom]->v[iX][i1];
       A2=grid->box[dom]->v[iX][i2];
       q1=grid->box[dom]->v[iq][i1];
       q2=grid->box[dom]->v[iq][i2];
 
       /* find zero in q between A1 and A2 */
-      if(fabs(q1) < tol) A0=A1;
-      else if(fabs(q2) < tol) A0=A2;
+      if( fabs(q1) < tol || (ineg_in<0 && dom==innerdom) ) A0=A1;
+      else if( fabs(q2) < tol ) A0=A2;
       else /* use root finder */
       {
         A0 = A1 - q1*(A2-A1)/(q2-q1); /* initial guess */
-        // use newton (itmax tol) ... => A0;
+        /* use newton_lnsrch to find A0 */
+        BNdata_q_VectorFunc_box    = grid->box[dom];
+        BNdata_q_VectorFunc_coeffs = grid->box[dom]->v[ic]+Index(0,j,k);
+        vec[1] = A0;
+        newton_lnsrch(vec, 1, &check, BNdata_q_VectorFunc, itmax, tol);
+        if(check) printf(": check=%d\n", check);  
+        A0 = vec[1];
       }
 
       /* compute values of X0,R0 at A=A0 */
@@ -411,9 +455,15 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid,
       /* set Coordinates_AnsorgNS_sigma_pm = sigp_Bphi in both domains */
       for(i=0; i<n1; i++)
       {
-        grid->box[innerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
-        grid->box[outerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
+        gridnew->box[innerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
+        gridnew->box[outerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
       }
     } /* end for k */
   } /* end for j */
+  
+  /* compute derivs of sigma */
+  spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
+              gridnew->box[innerdom]->v[isigma_dB]);
+  spec_Deriv1(gridnew->box[outerdom], 3, gridnew->box[outerdom]->v[isigma],
+              gridnew->box[outerdom]->v[isigma_dphi]);
 }
