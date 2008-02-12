@@ -1,7 +1,7 @@
 (* BNS_CTS.m 
    Wolfgang Tichy  12/2007       *)
 
-(* compute right hand side of BSSN equations *)
+(* compute residuals of BNS ham, mom, alphaP and Sigma eqns *)
 
 
 (* variables *)

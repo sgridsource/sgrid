@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 9.2.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 11.2.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
