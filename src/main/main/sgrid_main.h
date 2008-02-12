@@ -8,9 +8,9 @@
 #ifdef PI
 #undef PI
 #endif
-#define PI  3.1415926535897932
-#define PIh 1.5707963267948966
-#define PIq 0.78539816339744831
+#define PI  3.14159265358979323846264338327950
+#define PIh 1.57079632679489661923132169163975
+#define PIq 0.785398163397448309615660845819876
 #define Index(i,j,k) ((i)+n1*((j)+n2*(k)))
 #define forallijk(i,j,k) \
   for (k = 0; k < n3; k++) \
