@@ -259,7 +259,7 @@ BeginCFunction[] := Module[{},
   pr["#include \"BNSdata.h\"\n"];
   pr["\n"];
   pr["#define Power(x,y) (pow((double) (x), (double) (y)))\n"];
-  pr["#define Log(x)     log((double) (x)))\n"];
+  pr["#define Log(x)     (log((double) (x)))\n"];
   pr["#define pow2(x)    ((x)*(x))\n"];
   pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
   pr["#define Cal(x,y,z) ((x)?(y):(z))\n\n"];

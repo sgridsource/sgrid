@@ -6,7 +6,7 @@
 #include "BNSdata.h"
 
 #define Power(x,y) (pow((double) (x), (double) (y)))
-#define Log(x)     log((double) (x)))
+#define Log(x)     (log((double) (x)))
 #define pow2(x)    ((x)*(x))
 #define pow2inv(x) (1.0/((x)*(x)))
 #define Cal(x,y,z) ((x)?(y):(z))

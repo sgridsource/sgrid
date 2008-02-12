@@ -52,6 +52,10 @@ int sgrid_BNSdata()
   AddPar("BNSdata_n",     "1", "polytropic index n, Gamma = 1 + 1/n");
   AddPar("BNSdata_kappa", "1", "kappa in EOS: P = kappa rho0^Gamma");
   AddPar("BNSdata_Omega", "0", "orbital angular velocity");
+  AddPar("BNSdata_C1",    "1", "C1 in q = (C1/F-1)/(n+1) "
+         "[needs to be adjusted so that m01 stays the constant]");
+  AddPar("BNSdata_C2",    "1", "C2 in q = (C2/F-1)/(n+1) "
+         "[needs to be adjusted so that m02 stays the constant]");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "maximal number of Newton iterations");
