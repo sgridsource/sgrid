@@ -45,7 +45,7 @@ double Abstanh(double x, double y)
 {
   double coshx2 = cosh(2.0*x);
   double cosy2  = cos(2.0*y);
-  /* return sqrt( (cosh(2.0*x)-cos(2.0*y)/(cos(2.0*y) + cosh(2.0*x)) ); */
+  /* return sqrt( (cosh(2.0*x)-cos(2.0*y))/(cos(2.0*y) + cosh(2.0*x)) ); */
   return sqrt( (coshx2-cosy2)/(coshx2+cosy2) );
 }
 
