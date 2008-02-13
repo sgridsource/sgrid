@@ -12,7 +12,10 @@ void newton_lnsrch(double x[], int n, int *check,
                    void (*vecfunc)(int, double [], double []),
                	   int MAXITS, double TOLF);
 void fd_jacobian(int n, double x[], double fvec[], double **df,
-  	void (*vecfunc)(int, double [], double []));
+  	         void (*vecfunc)(int, double [], double []));
+int newton_lnsrch_its(double x[], int n, int *check,
+		      void (*vecfunc)(int, double [], double []), 
+		      int MAXITS, double TOLF);
   	  	               	   
 /* 1D and 3D integrals */
 double integral(double (*func)(double), double a, double b, double s, int max);
