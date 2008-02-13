@@ -256,6 +256,51 @@ int BNSdata_solve(tGrid *grid)
   else
     errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
+{
+  tGrid *grid2;
+
+
+extern double  (*Coordinates_AnsorgNS_sigmap)(tBox *box, int ind, double B, double phi);
+
+{
+double x,y,z, X0,R0 ,A,B,phi;
+A=0.03015368960704579; B=0.75; phi=0;
+xyz_of_AnsorgNS(grid->box[1], -1, 1, A,B,phi, &x,&y,&z, &X0,&R0);
+printf("1******* A=%g B=%g phi=%g  X0=%g R0=%g\n",  A,B,phi, X0,R0);
+printf(" sigmap=%g\n", Coordinates_AnsorgNS_sigmap(grid->box[1], -1, B, phi));
+A=0; B=0.75; phi=0;
+xyz_of_AnsorgNS(grid->box[1], -1, 1, A,B,phi, &x,&y,&z, &X0,&R0);
+printf("2******* A=%g B=%g phi=%g  X0=%g R0=%g\n",  A,B,phi, X0,R0);
+printf(" sigmap=%g\n", Coordinates_AnsorgNS_sigmap(grid->box[1], -1, B, phi));
+}     
+
+  /* make new gird2, which is an exact copy of grid */
+  grid2 = make_empty_grid(grid->nvariables, 1);
+  copy_grid(grid, grid2, 1);
+
+  /* reset sigma such that q=0 is at A=0 for box0/1 and box3/2 */
+  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
+  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
+
+  /* copy grid2 back into grid, and free grid2 */
+  copy_grid(grid2, grid, 0);
+  free_grid(grid2);
+{
+double x,y,z, X0,R0 ,A,B,phi;
+A=0; B=0.75; phi=0;
+xyz_of_AnsorgNS(grid->box[1], -1, 1, A,B,phi, &x,&y,&z, &X0,&R0);
+printf("******** A=%g B=%g phi=%g  X0=%g R0=%g\n",  A,B,phi, X0,R0);
+printf(" sigmap=%g\n", Coordinates_AnsorgNS_sigmap(grid->box[1], -1, B, phi));
+{
+double *c = grid->box[1]->v[Ind("Temp1")];
+spec_Coeffs(grid->box[1], grid->box[1]->v[Ind("Coordinates_AnsorgNS_sigma_pm")], c);
+printf(" interp sigmap=%g\n", spec_interpolate(grid->box[1], c, 0.0,B,phi));
+}
+                
+
+}
+}
+
   /* free varlists */     
   VLDisableFree(vldu);
   VLDisableFree(vlduDerivs);

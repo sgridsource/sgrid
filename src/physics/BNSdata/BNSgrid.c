@@ -24,8 +24,11 @@ double rf_surf1; /* radius of star1 */
 double rf_surf2; /* radius of star2 */
 double P_core1;  /* core pressure of star1 */
 double P_core2;  /* core pressure of star2 */
-tBox *BNdata_q_VectorFunc_box;
-double *BNdata_q_VectorFunc_coeffs;
+tBox *BNdata_q_VectorFunc_box;      /* box for BNdata_q_VectorFunc */
+double *BNdata_q_VectorFunc_coeffs; /* coeffs for BNdata_q_VectorFunc */
+double BNdata_sigp_VectorFunc_sigp_1phi; /* sigp_1phi for BNdata_sigp_VectorFunc */
+double BNdata_sigp_VectorFunc_B;         /* B for BNdata_sigp_VectorFunc */
+double BNdata_sigp_VectorFunc_X0;        /* X0 for BNdata_sigp_VectorFunc */
 
 /* funs in this file */
 void rf_surf1_VectorFunc(int n, double *vec, double *fvec);
@@ -347,6 +350,31 @@ void BNdata_q_VectorFunc(int n, double *vec, double *fvec)
   fvec[1] = q;
 }
 
+/* get q at A by interpolation */
+void BNdata_sigp_VectorFunc(int n, double *vec, double *fvec)
+{
+  double sigp_Bphi = vec[1];
+  double sigp_1phi = BNdata_sigp_VectorFunc_sigp_1phi;
+  double B         = BNdata_sigp_VectorFunc_B;
+  double X0        = BNdata_sigp_VectorFunc_X0;
+  double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+  double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+  double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+  /* double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi); */
+  double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+  double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+  double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+  /* double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi); */
+  double X,R;
+
+  /* use Eq. (22), (23) or (24) at A=0 */
+  X = ReCp_Bphi - B*ReCp_1phi + B*cos(ArgCp_1phi);
+  /* R = ImCp_Bphi - B*ImCp_1phi + B*sin(ArgCp_1phi); */
+
+  fvec[1] = (X-X0);
+}
+
+// THIS DOES NOT WORK IF 0<B<1 :
 /* reset sigma such that the zeros in BNSdata_q are at A=0 */
 void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
                                          int innerdom,  int outerdom)
@@ -395,9 +423,6 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   {
     for(k=0; k<n3; k++)
     {
-      B   = grid->box[dom]->v[iY][0];
-      phi = grid->box[dom]->v[iZ][0];
-
       /* find indices where q_in and q_out switch sign */
       for(i=n1-1; i>=0; i--) if(q_in[Index(i,j,k)]<0.0) break;
       ineg_in=i;
@@ -409,10 +434,12 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       /* if ineg_in=>0, q has zero in inner domain */
       else if(ineg_in>=0) { i1=ineg_in; i2=ineg_in+1; dom=innerdom; }
            else           { i1=0;       i2=1;         dom=innerdom; }
-      A1=grid->box[dom]->v[iX][i1];
-      A2=grid->box[dom]->v[iX][i2];
-      q1=grid->box[dom]->v[iq][i1];
-      q2=grid->box[dom]->v[iq][i2];
+      A1 = grid->box[dom]->v[iX][i1];
+      A2 = grid->box[dom]->v[iX][i2];
+      q1 = grid->box[dom]->v[iq][i1];
+      q2 = grid->box[dom]->v[iq][i2];
+      B   = grid->box[dom]->v[iY][Index(i1,j,k)];
+      phi = grid->box[dom]->v[iZ][Index(i1,j,k)];
 
       /* find zero in q between A1 and A2 */
       if( fabs(q1) < tol || (ineg_in<0 && dom==innerdom) ) A0=A1;
@@ -425,32 +452,77 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         BNdata_q_VectorFunc_coeffs = grid->box[dom]->v[ic]+Index(0,j,k);
         vec[1] = A0;
         newton_lnsrch(vec, 1, &check, BNdata_q_VectorFunc, itmax, tol);
-        if(check) printf(": check=%d\n", check);  
+        if(check)
+          printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
         A0 = vec[1];
+        if(A0<A1 || A0>A2) errorexit("reset_Coordinates_AnsorgNS_sigma_pm: "
+                                     "newton_lnsrch failed!");
       }
+printf("\nA0,B,phi=%g,%g,%g  dom=%d A1=%g A2=%g q1=%g q2=%g\n", A0,B,phi, dom, A1,A2, q1,q2);
 
       /* compute values of X0,R0 at A=A0 */
       xyz_of_AnsorgNS(grid->box[dom], -1, dom, A0,B,phi, &x,&y,&z, &X0,&R0);
-      
+printf("old X0=%g R0=%g\n", X0,R0);      
       /* get Cp and sigp at B=1  */
       if(j==n2-1 && k==0) /* B=1 case, but compute it only for phi=0 */
       {
         ArgCp_1phi = acos(X0);
         /* 2 ArgCp = ArcTan[Sin[Pi B/2]/Sinh[sigma/2]] */
         /* Tan[2 ArgCp] = Sin[Pi B/2]/Sinh[sigma/2] */
-        sigp_1phi = 2.0 * asinh( (1.0/tan(ArgCp_1phi)) );
+        sigp_1phi = 2.0 * asinh( (1.0/tan(2.0*ArgCp_1phi)) );
         AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
         ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
         ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
         sigp_Bphi = sigp_1phi;
+printf("ArgCp_1phi=%g ReCp_1phi=%g ImCp_1phi=%g\n",ArgCp_1phi, ReCp_1phi,ImCp_1phi);
       }
       if( (j==0 && k==0) || j>0 && j<n2-1 ) /* B<1 case */
       {                              /* if B=0 compute only for phi=0 */
-        ReCp_Bphi = X0 + B*ReCp_1phi - B*cos(ArgCp_1phi);
-        ImCp_Bphi = R0 + B*ImCp_1phi - B*sin(ArgCp_1phi);
+        ReCp_Bphi = X0 + B*(ReCp_1phi - cos(ArgCp_1phi));
+        ImCp_Bphi = R0 + B*(ImCp_1phi - sin(ArgCp_1phi));
         ArgCp_Bphi = Arg(ReCp_Bphi, ImCp_Bphi);
-        sigp_Bphi = 2.0 * asinh( (sin(0.5*PI*B)/tan(ArgCp_Bphi)) );
+        if(B==0) /* Cp_Bphi^2 = tanh(0.25*sigp_Bphi) */
+          sigp_Bphi = 4.0 * atanh(ReCp_Bphi*ReCp_Bphi-ImCp_Bphi*ImCp_Bphi);
+        else
+        {
+          sigp_Bphi = 2.0 * asinh( sin(PIh*B)/tan(2.0*ArgCp_Bphi) );
+          //or
+          /* Note: |tanh(x+iy)|^2 = K  =>  2x =acosh( cos(2y)*(1+K)/(1-K) ) */
+          //double AbsCpSqr_Bphi=ReCp_Bphi*ReCp_Bphi+ImCp_Bphi*ImCp_Bphi;
+          //double K=AbsCpSqr_Bphi*AbsCpSqr_Bphi;
+          //sigp_Bphi = 2.0 * acosh( cos(PIh*B)*(1.0+K)/(1.0-K) );
+          //sigp_Bphi = sigp_Bphi*0.5 + acosh( cos(PIh*B)*(1.0+K)/(1.0-K) ) ;
+        }
+        /* use newton_lnsrch to find better sigp_Bphi */
+        BNdata_sigp_VectorFunc_sigp_1phi = sigp_1phi;
+        BNdata_sigp_VectorFunc_B         = B;
+        BNdata_sigp_VectorFunc_X0        = X0;
+        vec[1] = sigp_Bphi;
+        newton_lnsrch(vec, 1, &check, BNdata_sigp_VectorFunc, itmax, tol);
+        if(check)
+          printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
+        sigp_Bphi = vec[1];
+printf("ReCp_Bphi*ReCp_Bphi+ImCp_Bphi*ImCp_Bphi=%g ", 
+sqrt(ReCp_Bphi*ReCp_Bphi+ImCp_Bphi*ImCp_Bphi));
+printf("ArgCp_Bphi=%g ReCp_Bphi=%g ImCp_Bphi=%g\n",ArgCp_Bphi, ReCp_Bphi,ImCp_Bphi);
+{
+double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
+
+double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+//double Ap=0;
+double X = (ReCp_Bphi - B*ReCp_1phi) + B*cos(ArgCp_1phi);
+double R = (ImCp_Bphi - B*ImCp_1phi) + B*sin(ArgCp_1phi);
+printf("new X=%g R=%g  ArgCp_Bphi=%g AbsCp_Bphi=%g ReCp_Bphi=%g ImCp_Bphi=%g\n", 
+X,R, ArgCp_Bphi, AbsCp_Bphi, ReCp_Bphi,ImCp_Bphi); 
+}
       }
+printf("sigp_Bphi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_1phi);
 
       /* set Coordinates_AnsorgNS_sigma_pm = sigp_Bphi in both domains */
       for(i=0; i<n1; i++)
@@ -467,3 +539,11 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   spec_Deriv1(gridnew->box[outerdom], 3, gridnew->box[outerdom]->v[isigma],
               gridnew->box[outerdom]->v[isigma_dphi]);
 }
+
+// WE NEED FO FIND sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0
+/*
+q_of_sigp_Bphi_forgiven_Bphi(int n, double *vec, double *fvec)
+{
+  spec_interpolate(tBox *box, double *c, double X, double Y, double Z);
+}
+*/

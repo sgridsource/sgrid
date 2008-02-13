@@ -38,3 +38,5 @@ int TOV_m_P_Phi_Psi_m0_OF_rf(double rf, double rf_surf,
 /* from grid_setup.c */
 int set_boxsizes(tGrid *grid);
 int set_sigma_pm_vars(tGrid *grid);
+void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
+                                         int innerdom,  int outerdom);
