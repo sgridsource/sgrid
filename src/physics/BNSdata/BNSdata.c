@@ -292,6 +292,14 @@ printf(" sigmap=%g\n", Coordinates_AnsorgNS_sigmap(grid->box[1], -1, B, phi));
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);
   free_grid(grid2);
+
+  /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
+  // ... do it
+  //set_BoxStructs_fromPars(grid,1);
+
+  /* reset x,y,z, dXdx and such */
+  // ... do it
+
 {
 double x,y,z, X0,R0 ,A,B,phi;
 A=0; B=0.75; phi=0;
