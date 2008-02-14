@@ -270,7 +270,6 @@ int newton_linesrch_its(double x[], int n, int *check,
 }
 #undef FREERETURNERROR
 
-#undef FREERETURNERROR
 #undef MAXITS
 #undef TOLF
 #undef TOLMIN
