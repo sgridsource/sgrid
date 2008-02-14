@@ -416,7 +416,7 @@ int copy_grid(tGrid *g_old, tGrid *g_new, int pr)
   }
   
   /* copy all the contents, except the vars, from g_old into g_new */
-  copy_grid_withoutvars(g_old, g_new, pr);
+  copy_grid_withoutvars(g_old, g_new, 0);
 
   /* enable all vars needed io g_old */
   enablesamevars(g_old, g_new);
