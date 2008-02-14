@@ -83,6 +83,7 @@ typedef struct tVARLIST {
 
 /* grid.c */
 tGrid *make_grid(int pr);
+int set_BoxStructures_fromPars(tGrid *g, int pr);
 tGrid *make_empty_grid(int nvariables, int pr);
 int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr);
 int copy_grid(tGrid *g_old, tGrid *g_new, int pr);

@@ -19,14 +19,9 @@ tGrid *make_grid(int pr)
 {
   tGrid *g;
   tBox *box;
-  tNode *node;
-  int var_X = Ind("X");
-  int var_Y = Ind("Y");
-  int var_Z = Ind("Z");
-  int b, i, j, k, ijk;
+  int b;
   int n1, n2, n3;
   int nboxes = Geti("nboxes");
-  int basis;
 
   /* print info */
   if (pr) {
@@ -36,7 +31,6 @@ tGrid *make_grid(int pr)
 
   /* provide a hook for special grid preparation */
   RunFun(PRE_GRID, 0);
-
 
   /* make grid structure with nboxes=1, nvariables */
   g = alloc_grid(nboxes, globalnvariables);
@@ -59,6 +53,38 @@ tGrid *make_grid(int pr)
   
   /* time step */
   g->dt = Getd("dt");
+
+  /* set all pointers in each tBox struct of grid from Pars */
+  set_BoxStructures_fromPars(g, 0);
+  if(pr) printgrid(g);
+
+  /* provide a hook for special treatmet after grid creation */
+  RunFun(POST_GRID, g);
+
+  /* return pointer to newly created grid */
+  return g;
+}
+
+
+/* set all pointers (except var contents) in each tBox struct 
+   of grid from Pars */
+int set_BoxStructures_fromPars(tGrid *g, int pr)
+{
+  tBox *box;
+  tNode *node;
+  int var_X = Ind("X");
+  int var_Y = Ind("Y");
+  int var_Z = Ind("Z");
+  int b, i, j, k, ijk;
+  int n1, n2, n3;
+  int nboxes = Geti("nboxes");
+  int basis;
+
+  /* print info */
+  if (pr) {
+    prdivider(0);
+    printf("Creating grid\n");
+  }
 
   /* enable storage of the coordinate variables */
   enablevar(g, var_X);
@@ -106,49 +132,6 @@ tGrid *make_grid(int pr)
 	node[ijk].type = 1;
 
 	/* compute coordinate values */
-/*
-	snprintf(str, 999, "box%d_basis1", b);
-	if( Getv(str, "ChebExtrema") )
-	  box->v[var_X][ijk] 
-	    = 0.5*( (box->bbox[0] - box->bbox[1])*cos(i*PI/(n1-1)) 
-	           +(box->bbox[0] + box->bbox[1]));
-        else if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
-	  box->v[var_X][ijk] 
-	    = ( (box->bbox[1] - box->bbox[0])* ((double) i)/n1 
-	           +box->bbox[0]);
-        else if( Getv(str, "fd2_onesided") )
-	  box->v[var_X][ijk] 
-	    = ( (box->bbox[1] - box->bbox[0])* ((double) i)/(n1-1)
-	           +box->bbox[0]);
-
-	snprintf(str, 999, "box%d_basis2", b);
-	if( Getv(str, "ChebExtrema") )
-	  box->v[var_Y][ijk] 
-	    = 0.5*( (box->bbox[2] - box->bbox[3])*cos(j*PI/(n2-1)) 
-	           +(box->bbox[2] + box->bbox[3])); 
-        else if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
-	  box->v[var_Y][ijk] 
-	    = ( (box->bbox[3] - box->bbox[2])* ((double) j)/n2 
-	           +box->bbox[2]);
-        else if( Getv(str, "fd2_onesided") )
-	  box->v[var_Y][ijk] 
-	    = ( (box->bbox[3] - box->bbox[2])* ((double) j)/(n2-1) 
-	           +box->bbox[2]);
-
-	snprintf(str, 999, "box%d_basis3", b);
-	if( Getv(str, "ChebExtrema") )
-	  box->v[var_Z][ijk] 
-	    = 0.5*( (box->bbox[4] - box->bbox[5])*cos(k*PI/(n3-1)) 
-	           +(box->bbox[4] + box->bbox[5])); 
-        else if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
-	  box->v[var_Z][ijk] 
-	    = ( (box->bbox[5] - box->bbox[4])* ((double) k)/n3 
-	           +box->bbox[4]);
-        else if( Getv(str, "fd2_onesided") )
-	  box->v[var_Z][ijk] 
-	    = ( (box->bbox[5] - box->bbox[4])* ((double) k)/(n3-1) 
-	           +box->bbox[4]);
-*/        
         for(basis=1; basis<=3 ; basis++)
         {
           int nb, bbi, varb, m;
@@ -251,15 +234,9 @@ tGrid *make_grid(int pr)
        initMatrix_ForCoeffs(box->Mcoeffs3, n3, get_coeffs);
        initMatrix_ToEvaluate(box->Meval3,  n3, eval_onPoints);
     }
-  }
-
-  if(1) printgrid(g);
-
-  /* provide a hook for special treatmet after grid creation */
-  RunFun(POST_GRID, g);
-
-  /* return pointer to newly created grid */
-  return g;
+  } /* end box loop */
+  if(pr) printgrid(g);
+  return 0;
 }
 
 
@@ -303,7 +280,7 @@ tGrid *make_empty_grid(int nvariables, int pr)
   /* time step */
   g->dt = Getd("dt");
 
-  if(1) printgrid(g);
+  if(pr) printgrid(g);
 
   /* return pointer to newly created grid */
   return g;
