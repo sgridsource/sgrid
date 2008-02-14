@@ -787,6 +787,8 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
 //printf("itmax=%d tol=%g vec[1]=%g\n",itmax,tol,vec[1]);
       stat=newton_linesrch_its(vec, 1, &check,
                              q_of_sigp_forgiven_Bphi, itmax, tol);
+      /* If q is nowhere negative newton_linesrch_its may not work. In this
+         case we should probably search for the zero in (q - 1e-8). */
 //printf("stat=%d\n",stat);
       if(check)
         printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
