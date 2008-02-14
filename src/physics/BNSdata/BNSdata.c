@@ -134,7 +134,11 @@ int BNSdata_startup(tGrid *grid)
       r1 = sqrt((x-xc1)*(x-xc1) + y*y + z*z);
 //r1=sqrt(x*x + y*y + z*z);
 //r1=sqrt((x-xc2)*(x-xc2) + y*y + z*z);
-
+BNSdata_Psi[i]=1;
+BNSdata_alphaP[i]=1;
+if(fabs(x)>10 || fabs(y)>10 || fabs(z)>10) r1=10;
+BNSdata_q[i]=0.95-r1;
+/*
       TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
                                P_core1, Phic1, Psic1,
                                &m1, &P1, &Phi1, &Psi1, &m01);
@@ -142,15 +146,17 @@ int BNSdata_startup(tGrid *grid)
       BNSdata_alphaP[i]= exp(Phi1)*Psi1;
       BNSdata_q[i]     = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
                          pow(P1, 1.0/(1.0 + BNSdata_n));
-
+*/
+/*
       r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
-//      TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
-//                               P_core2, Phic2, Psic2,
-//                               &m2, &P2, &Phi2, &Psi2, &m02);
-//      BNSdata_Psi[i]   = Psi2;
-//      BNSdata_alphaP[i]= exp(Phi2)*Psi2;
-//      BNSdata_q[i]     = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-//                         pow(P2, 1.0/(1.0 + BNSdata_n));
+      TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
+                               P_core2, Phic2, Psic2,
+                               &m2, &P2, &Phi2, &Psi2, &m02);
+      BNSdata_Psi[i]   = Psi2;
+      BNSdata_alphaP[i]= exp(Phi2)*Psi2;
+      BNSdata_q[i]     = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+                         pow(P2, 1.0/(1.0 + BNSdata_n));
+*/
     }
   }
 
