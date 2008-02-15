@@ -43,12 +43,24 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 int BNSdata_startup(tGrid *grid)
 {
   int b;
+  double Omega     = Getd("BNSdata_Omega");
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_b = Getd("BNSdata_b");
   double BNSdata_n = Getd("BNSdata_n");
   double Gamma     = 1.0 + 1.0/BNSdata_n;
   double rs1, m1, Phic1, Psic1, m01;
   double rs2, m2, Phic2, Psic2, m02;
+  double Fc, qc, Cc, oouzerosqr;
+  double xmax1 = grid->box[0]->x_of_X[1](
+                     (void *) grid->box[0], 0, 0.0,0.0,0.0);
+  double xmin1 = grid->box[0]->x_of_X[1](
+                     (void *) grid->box[0], 0, 0.0,1.0,0.0);
+  double xmax2 = grid->box[3]->x_of_X[1](
+                     (void *) grid->box[3], 0, 0.0,1.0,0.0);
+  double xmin2 = grid->box[3]->x_of_X[1](
+                     (void *) grid->box[3], 0, 0.0,0.0,0.0);
+  double xc1 = 0.5*(xmax1+xmin1);
+  double xc2 = 0.5*(xmax2+xmin2);
 
   printf("Initializing BNSdata:\n");
 
@@ -91,6 +103,28 @@ int BNSdata_startup(tGrid *grid)
   TOV_init(P_core1, kappa, Gamma, 1, &rs1, &m1, &Phic1, &Psic1, &m01);
   TOV_init(P_core2, kappa, Gamma, 1, &rs2, &m2, &Phic2, &Psic2, &m02);
 
+  /* set BNSdata_C1 */
+  qc = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+       pow(P_core1, 1.0/(1.0 + BNSdata_n));
+  /* oouzerosqr == alpha2 - 
+                   Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]), */
+  oouzerosqr = exp(Phic1*2.0) - pow(Psic1, 4)*Omega*Omega*xc1*xc1;
+  Fc = -sqrt(oouzerosqr);
+  /* q == (C1/F - 1.0)/(n+1.0) */
+  Cc = Fc*((BNSdata_n+1.0)*qc + 1.0);
+  Setd("BNSdata_C1", Cc);
+
+  /* set BNSdata_C2 */
+  qc = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+       pow(P_core2, 1.0/(1.0 + BNSdata_n));
+  /* oouzerosqr == alpha2 - 
+                   Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]), */
+  oouzerosqr = exp(Phic2*2.0) - pow(Psic2, 4)*Omega*Omega*xc2*xc2;
+  Fc = -sqrt(oouzerosqr);
+  /* q == (C2/F - 1.0)/(n+1.0) */
+  Cc = Fc*((BNSdata_n+1.0)*qc + 1.0);
+  Setd("BNSdata_C2", Cc);
+
   /* set initial values in all in boxes */
   forallboxes(grid,b)
   {  
@@ -105,19 +139,9 @@ int BNSdata_startup(tGrid *grid)
     double *BNSdata_Psi    = box->v[Ind("BNSdata_Psi")];
     double *BNSdata_alphaP = box->v[Ind("BNSdata_alphaP")];
     double *BNSdata_q      = box->v[Ind("BNSdata_q")];
-    double r1, m1, P1, Phi1, Psi1, m01;
-    double r2, m2, P2, Phi2, Psi2, m02;
-    double xmax1 = grid->box[0]->x_of_X[1](
-                       (void *) grid->box[0], 0, 0.0,0.0,0.0);
-    double xmin1 = grid->box[0]->x_of_X[1](
-                       (void *) grid->box[0], 0, 0.0,1.0,0.0);
-    double xmax2 = grid->box[3]->x_of_X[1](
-                       (void *) grid->box[3], 0, 0.0,1.0,0.0);
-    double xmin2 = grid->box[3]->x_of_X[1](
-                       (void *) grid->box[3], 0, 0.0,0.0,0.0);
-    double xc1 = 0.5*(xmax1+xmin1);
-    double xc2 = 0.5*(xmax2+xmin2);
-         
+    double r1, m1, P1, Phi1, Psi1, m01, q1;
+    double r2, m2, P2, Phi2, Psi2, m02, q2;
+
     forallpoints(box,i)
     {
       double x = pX[i];
@@ -132,32 +156,31 @@ int BNSdata_startup(tGrid *grid)
       }
       /* set Psi, alphaP, q */
       r1 = sqrt((x-xc1)*(x-xc1) + y*y + z*z);
-////r1=sqrt(x*x + y*y + z*z);
-////r1=sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+      TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
+                               P_core1, Phic1, Psic1,
+                               &m1, &P1, &Phi1, &Psi1, &m01);
+      q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+           pow(P1, 1.0/(1.0 + BNSdata_n));
+//      BNSdata_Psi[i]   = Psi1;
+//      BNSdata_alphaP[i]= exp(Phi1)*Psi1;
+//      BNSdata_q[i]     = q1;
+
+      r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+      TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
+                               P_core2, Phic2, Psic2,
+                               &m2, &P2, &Phi2, &Psi2, &m02);
+      q2 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+           pow(P2, 1.0/(1.0 + BNSdata_n));
+
+      BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
+      BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
+      BNSdata_q[i]     = q1 + q2;
+
 //r1 = sqrt((x-1.15)*(x-1.15) + y*y + z*z);
 //BNSdata_Psi[i]=1;
 //BNSdata_alphaP[i]=1;
 //if(fabs(x)>10 || fabs(y)>10 || fabs(z)>10) r1=10;
 //BNSdata_q[i]=0.89-r1;
-
-      TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
-                               P_core1, Phic1, Psic1,
-                               &m1, &P1, &Phi1, &Psi1, &m01);
-      BNSdata_Psi[i]   = Psi1;
-      BNSdata_alphaP[i]= exp(Phi1)*Psi1;
-      BNSdata_q[i]     = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-                         pow(P1, 1.0/(1.0 + BNSdata_n));
-
-/*
-      r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
-      TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
-                               P_core2, Phic2, Psic2,
-                               &m2, &P2, &Phi2, &Psi2, &m02);
-      BNSdata_Psi[i]   = Psi2;
-      BNSdata_alphaP[i]= exp(Phi2)*Psi2;
-      BNSdata_q[i]     = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-                         pow(P2, 1.0/(1.0 + BNSdata_n));
-*/
     }
   }
 
@@ -266,27 +289,14 @@ int BNSdata_solve(tGrid *grid)
 {
   tGrid *grid2;
 
-
-extern double  (*Coordinates_AnsorgNS_sigmap)(tBox *box, int ind, double B, double phi);
-
-{
-double x,y,z, X0,R0 ,A,B,phi;
-A=0.03015368960704579; B=0.75; phi=0;
-xyz_of_AnsorgNS(grid->box[1], -1, 1, A,B,phi, &x,&y,&z, &X0,&R0);
-printf("1******* A=%g B=%g phi=%g  X0=%g R0=%g\n",  A,B,phi, X0,R0);
-printf(" sigmap=%g\n", Coordinates_AnsorgNS_sigmap(grid->box[1], -1, B, phi));
-A=0; B=0.75; phi=0;
-xyz_of_AnsorgNS(grid->box[1], -1, 1, A,B,phi, &x,&y,&z, &X0,&R0);
-printf("2******* A=%g B=%g phi=%g  X0=%g R0=%g\n",  A,B,phi, X0,R0);
-printf(" sigmap=%g\n", Coordinates_AnsorgNS_sigmap(grid->box[1], -1, B, phi));
-}     
+//BNS_compute_new_q(grid);
 
   /* make new gird2, which is an exact copy of grid */
   grid2 = make_empty_grid(grid->nvariables, 1);
   copy_grid(grid, grid2, 1);
 
   /* reset sigma such that q=0 is at A=0 for box0/1 and box3/2 */
-  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
+  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
   //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
 
   /* copy grid2 back into grid, and free grid2 */
@@ -300,18 +310,6 @@ printf(" sigmap=%g\n", Coordinates_AnsorgNS_sigmap(grid->box[1], -1, B, phi));
   /* reset x,y,z, dXdx and such */
   // ... do it
 
-{
-double x,y,z, X0,R0 ,A,B,phi;
-A=0; B=0.75; phi=0;
-xyz_of_AnsorgNS(grid->box[1], -1, 1, A,B,phi, &x,&y,&z, &X0,&R0);
-printf("******** A=%g B=%g phi=%g  X0=%g R0=%g\n",  A,B,phi, X0,R0);
-printf(" sigmap=%g\n", Coordinates_AnsorgNS_sigmap(grid->box[1], -1, B, phi));
-{
-double *c = grid->box[1]->v[Ind("Temp1")];
-spec_Coeffs(grid->box[1], grid->box[1]->v[Ind("Coordinates_AnsorgNS_sigma_pm")], c);
-printf(" interp sigmap=%g\n", spec_interpolate(grid->box[1], c, 0.0,B,phi));
-}
-}
 
 }
 

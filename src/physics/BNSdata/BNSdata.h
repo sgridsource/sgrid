@@ -13,6 +13,7 @@ void setADMvars(tGrid *grid);
 /* funtions from mathematica */
 void BNS_CTS(tVarList *vlFu, tVarList *vlu, tVarList *vlJdu, 
              tVarList *vldu, tVarList *vlduDerivs, int nonlin);
+void BNS_compute_new_q(tGrid *grid);
 
 /* for solving all ell. eqns together */
 void F_BNSdata(tVarList *vlFu, tVarList *vlu,
