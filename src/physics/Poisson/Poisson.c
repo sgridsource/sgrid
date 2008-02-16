@@ -367,6 +367,7 @@ void filterSing(tBox *box, double *u)
   void (*get_coeffs)(double *,double *, int)=NULL;
   void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
@@ -376,13 +377,13 @@ void filterSing(tBox *box, double *u)
   int m3;
 
   get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
-                            &coeffs_of_2ndderiv, &eval_onPoints, 
+                            &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints, 
                             &filter_coeffs, &basisfunc);
   initfiltermatrix(box->F2, n2+1-filt2, n2, 
                    get_coeffs, filter_coeffs, eval_onPoints);
 
   get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
-                            &coeffs_of_2ndderiv, &eval_onPoints, 
+                            &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints, 
                             &filter_coeffs, &basisfunc);
   initfiltermatrix(box->F3, n3+1-filt3, n3, 
                    get_coeffs, filter_coeffs, eval_onPoints);

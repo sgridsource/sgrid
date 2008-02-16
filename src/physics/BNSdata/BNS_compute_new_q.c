@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 11.2.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 15.2.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
