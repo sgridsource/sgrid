@@ -46,22 +46,27 @@ void four_int(double a, double b, double c[], double cint[], int n)
   int j;
   double PI2_con, L;
   int N=n+1;
+  double *u = (double*) calloc(N+1, sizeof(double));
 
   L = b-a;
   PI2_con = 2.0*PI/L;
 
   /* get terms coming from integrating c[0] */
+/*
   for(j=1; 2*j<N; j++)
   {
     cint[2*j-1] = -0.5*L*c[0]/((double) N);
     cint[2*j]   = -0.5*L*c[0]/((double) N); // WRONG!!!!!
-    // integrate the func 1/N and find its coeffs instead!!!
+    // integrate the func 1 and find its coeffs instead!!!
     // multiply this by c[0]
     if(N!=4) errorexit("four_int is wrong");
   }
   if( N%2 == 0 ) cint[N-1] = -0.5*L*c[0]/((double) N);
-
   cint[0] = 0.5*n*L*c[0]/((double) N);  
+*/
+  for(j=0; j<N; j++) u[j]=j*L/N;
+  four_coeffs(cint, u, n); /* get coeffs of the integral of 1 */
+  for(j=0; j<N; j++) cint[j] *= c[0]/N; 
 
   /* add terms coming from integrating everything but the c[0] term */
   for(j=1; 2*j<N; j++)
@@ -70,6 +75,9 @@ void four_int(double a, double b, double c[], double cint[], int n)
     cint[2*j]   +=  c[2*j-1] / (PI2_con*j);
   }
   if( N%2 == 0 ) cint[N-1] += 0.0;
+
+  /* free temp mem u */  
+  free(u);
 }
 
 
