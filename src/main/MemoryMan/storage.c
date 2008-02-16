@@ -119,6 +119,14 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
   if( !(box->Meval1 && box->Meval2 && box->Meval3) )
     errorexit("alloc_box: out of memory for matrices for evaluation on points");
 
+  /* get mem. for matrices for integration */
+  box->Int1 = box->Int2 = box->Int3 = NULL;
+  box->Int1 = (double *) calloc( n1*n1, sizeof(double) );
+  box->Int2 = (double *) calloc( n2*n2, sizeof(double) );
+  box->Int3 = (double *) calloc( n3*n3, sizeof(double) );
+  if( !(box->Int1 && box->Int2 && box->Int3) )
+    errorexit("alloc_box: out of memory for matrices for integration");
+
   return box;
 } 
 
@@ -170,6 +178,9 @@ void free_box(tBox *box)
   free(box->Meval1);
   free(box->Meval2);
   free(box->Meval3);
+  free(box->Int1);
+  free(box->Int2);
+  free(box->Int3);
   
   free(box);
 }

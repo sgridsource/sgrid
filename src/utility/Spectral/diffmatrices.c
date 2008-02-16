@@ -210,3 +210,43 @@ void convert_grid_to_fd_onesidedBC(tGrid *grid)
     initMatrix_ToEvaluate(box->Meval3,  n3, fd2_eval);
   }      
 }
+
+
+/* init the n1*n1 integration matrix Int */
+void initIntegrationMatrix(double a, double b, double *Int, int n1,
+                    void (*get_coeffs)(double *,double *, int),
+                    void (*coeffs_of_int)(double, double, double *,double *, int),
+                    void (*eval_onPoints)(double *,double *, int) )
+{
+  int i,j;
+  double *u;
+  double *c;
+  double *d;
+
+  u = (double *) calloc(n1, sizeof(double));
+  c = (double *) calloc(n1, sizeof(double));
+  d = (double *) calloc(n1, sizeof(double));
+
+  if( !(u && c && d) )
+    errorexit("initIntegrationMatrix: out of memory for u, c, d");
+
+
+  /* read matrix from functions */
+  for(j=0; j<n1; j++)
+  {
+    u[j]=1.0;
+
+    get_coeffs(c, u, n1-1);
+    coeffs_of_int(a, b,  c, d, n1-1);
+    eval_onPoints(d, c, n1-1);
+    
+    /* set Int */
+    for(i=0; i<n1; i++) Int[n1*i + j] = c[i];
+    
+    u[j]=0.0;
+  }
+
+  free(u);
+  free(c);
+  free(d);
+}

@@ -204,6 +204,8 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
        box->basis1=basisfunc;
        initMatrix_ForCoeffs(box->Mcoeffs1, n1, get_coeffs);
        initMatrix_ToEvaluate(box->Meval1,  n1, eval_onPoints);
+       initIntegrationMatrix(box->bbox[0], box->bbox[1], box->Int1, n1,
+                             get_coeffs, coeffs_of_int, eval_onPoints);
 
        /* direction 2 */
        get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
@@ -219,6 +221,8 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
        box->basis2=basisfunc;
        initMatrix_ForCoeffs(box->Mcoeffs2, n2, get_coeffs);
        initMatrix_ToEvaluate(box->Meval2,  n2, eval_onPoints);
+       initIntegrationMatrix(box->bbox[2], box->bbox[3], box->Int2, n2,
+                             get_coeffs, coeffs_of_int, eval_onPoints);
 
        /* direction 3 */
        get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
@@ -234,6 +238,8 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
        box->basis3=basisfunc;
        initMatrix_ForCoeffs(box->Mcoeffs3, n3, get_coeffs);
        initMatrix_ToEvaluate(box->Meval3,  n3, eval_onPoints);
+       initIntegrationMatrix(box->bbox[4], box->bbox[5], box->Int3, n3,
+                             get_coeffs, coeffs_of_int, eval_onPoints);
     }
   } /* end box loop */
   if(pr) printgrid(g);

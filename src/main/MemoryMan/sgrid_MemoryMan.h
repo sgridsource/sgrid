@@ -43,6 +43,9 @@ typedef struct tBOX {
   double *Meval1;	/* matrix to evaluate in direction 1 */
   double *Meval2;	/* matrix to evaluate in direction 2 */
   double *Meval3;	/* matrix to evaluate in direction 3 */
+  double *Int1;		/* matrix to integrate in direction 1 */
+  double *Int2;		/* matrix to integrate in direction 2 */
+  double *Int3;		/* matrix to integrate in direction 3 */
   double bbox[6];	/* global bounding box */
   int ibbox[6];	/* global bounding box in index range */
 } tBox;
