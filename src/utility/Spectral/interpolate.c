@@ -37,6 +37,7 @@ void spec_Coeffs_old(tBox *box, double *u, double *c)
   void (*get_coeffs)(double *,double *, int)=NULL;
   void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int n1, double X)=NULL;
@@ -50,21 +51,21 @@ void spec_Coeffs_old(tBox *box, double *u, double *c)
   /* get c_ijk by calling spec_analysis1 in all 3 directions */
   /* direction 1 */
   get_spec_functionpointers(box, 1, &get_coeffs, &coeffs_of_deriv,
-                            &coeffs_of_2ndderiv, &eval_onPoints,
+                            &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
                             &filter_coeffs, &basisfunc);
   initMatrix_ForCoeffs(M, n1, get_coeffs);
   spec_analysis1(box, 1, M, u, c);
 
   /* direction 2 */
   get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
-                            &coeffs_of_2ndderiv, &eval_onPoints,
+                            &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
                             &filter_coeffs, &basisfunc);
   initMatrix_ForCoeffs(M, n2, get_coeffs);
   spec_analysis1(box, 2, M, c, d);
 
   /* direction 3 */
   get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
-                            &coeffs_of_2ndderiv, &eval_onPoints,
+                            &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
                             &filter_coeffs, &basisfunc);
   initMatrix_ForCoeffs(M, n3, get_coeffs);
   spec_analysis1(box, 3, M, d, c);

@@ -6,9 +6,9 @@
 #include "Spectral.h"
 
 /* define PI */
-#define PI  3.1415926535897932
-#define PIh 1.5707963267948966
-#define PIq 0.78539816339744831
+#define PI  3.14159265358979323846264338327950
+#define PIh 1.57079632679489661923132169163975
+#define PIq 0.785398163397448309615660845819876
 
 
 /* Note here we have X = [a,b] and x=[1,-1]
@@ -91,6 +91,25 @@ void cheb_deriv(double a, double b, double c[], double cder[], int n)
   con=2.0/(a-b);
   for (j=0;j<n;j++)
     cder[j] *= con;
+}
+
+
+/* compute Cheb coeffs of integral cint[0...n] from Cheb coeffs c[0...n] */
+void cheb_int(double a, double b, double c[], double cint[], int n)
+{
+  int j;
+  double sum=0.0,fac=1.0,con;
+
+  con=0.25*(a-b);
+  for (j=1;j<=n-1;j++)
+  {
+    cint[j]=con*(c[j-1]-c[j+1])/j;
+    sum += fac*cint[j];
+    fac = -fac;
+  }
+  cint[n]=con*c[n-1]/(n);
+  sum += fac*cint[n];
+  cint[0]=2.0*sum;  /* <--arbitrary const picked as in numrec */
 }
 
 

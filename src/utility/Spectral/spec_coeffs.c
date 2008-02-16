@@ -181,6 +181,7 @@ void get_spec_functionpointers(tBox *box, int direc,
      void (**get_coeffs)(double *,double *, int),
      void (**coeffs_of_deriv)(double, double, double *,double *, int),
      void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
+     void (**coeffs_of_int)(double, double, double *,double *, int),
      void (**eval_onPoints)(double *,double *, int),
      void (**filter_coeffs)(double *, int, int),
      double (**basisfunc)(void *aux, double a, double b, int k, int N, double X) )
@@ -190,6 +191,7 @@ void get_spec_functionpointers(tBox *box, int direc,
   *get_coeffs=NULL;
   *coeffs_of_deriv=NULL;
   *coeffs_of_2ndderiv=NULL;
+  *coeffs_of_int=NULL;
   *eval_onPoints=NULL;
   *filter_coeffs=NULL;
   *basisfunc=NULL;
@@ -200,6 +202,7 @@ void get_spec_functionpointers(tBox *box, int direc,
   {
     *get_coeffs = cheb_coeffs_fromExtrema;
     *coeffs_of_deriv = cheb_deriv;
+    *coeffs_of_int = cheb_int;
     *eval_onPoints = cheb_eval_onExtrema;
     *filter_coeffs = cheb_filter;
     *basisfunc = cheb_basisfunc;
@@ -208,6 +211,7 @@ void get_spec_functionpointers(tBox *box, int direc,
   {
     *get_coeffs = four_coeffs;
     *coeffs_of_deriv = four_deriv;
+    *coeffs_of_int = four_int;
     *eval_onPoints = four_eval;
     *filter_coeffs = four_filter;
     *basisfunc = four_basisfunc;
@@ -232,6 +236,7 @@ void get_spec_functionpointers(tBox *box, int direc,
   {
     *get_coeffs = cheb_coeffs_fromZeros;
     *coeffs_of_deriv = cheb_deriv;
+    *coeffs_of_int = cheb_int;
     *eval_onPoints = cheb_eval_onZeros;
     *filter_coeffs = cheb_filter;
     *basisfunc = cheb_basisfunc;
@@ -250,13 +255,14 @@ void get_spec_functionpointerTO_get_coeffs(tBox *box, int direc,
 {
   void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int n1, double X)=NULL;
            
   get_spec_functionpointers(box, direc, get_coeffs, &coeffs_of_deriv,
-                            &coeffs_of_2ndderiv, &eval_onPoints,
-                            &filter_coeffs, &basisfunc);
+                            &coeffs_of_2ndderiv, &coeffs_of_int, 
+                            &eval_onPoints, &filter_coeffs, &basisfunc);
 }
 
 

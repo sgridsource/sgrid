@@ -19,12 +19,13 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   void (*get_coeffs)(double *,double *, int)=NULL;
   void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
 
   get_spec_functionpointers(box, direc, &get_coeffs, &coeffs_of_deriv,
-                            &coeffs_of_2ndderiv, &eval_onPoints,
+                            &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
                             &filter_coeffs, &basisfunc);
   if(direc==1)
   {
@@ -197,6 +198,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   void (*get_coeffs)(double *,double *, int)=NULL;
   void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
   void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
@@ -206,7 +208,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   spec_Integral1(box, 3, u, U);
 
   get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
-                            &coeffs_of_2ndderiv, &eval_onPoints,
+                            &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
                             &filter_coeffs, &basisfunc);
   {
     linelen = n2;

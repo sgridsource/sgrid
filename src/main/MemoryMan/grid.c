@@ -175,6 +175,7 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
        void (*get_coeffs)(double *,double *, int)=NULL;
        void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
        void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+       void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
        void (*eval_onPoints)(double *,double *, int)=NULL;
        void (*filter_coeffs)(double *, int, int)=NULL;
        double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
@@ -191,8 +192,8 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
 
        /* direction 1 */
        get_spec_functionpointers(box, 1, &get_coeffs, &coeffs_of_deriv,
-                                 &coeffs_of_2ndderiv, &eval_onPoints, 
-                                 &filter_coeffs, &basisfunc);
+                                 &coeffs_of_2ndderiv, &coeffs_of_int,
+                                 &eval_onPoints, &filter_coeffs, &basisfunc);
        initdiffmatrix(box->bbox[0], box->bbox[1], box->D1, box->DD1, n1,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F1, n1+1-filt1, n1, 
@@ -206,8 +207,8 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
 
        /* direction 2 */
        get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
-                                 &coeffs_of_2ndderiv, &eval_onPoints, 
-                                 &filter_coeffs, &basisfunc);
+                                 &coeffs_of_2ndderiv, &coeffs_of_int,
+                                 &eval_onPoints, &filter_coeffs, &basisfunc);
        initdiffmatrix(box->bbox[2], box->bbox[3], box->D2, box->DD2, n2,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F2, n2+1-filt2, n2, 
@@ -221,8 +222,8 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
 
        /* direction 3 */
        get_spec_functionpointers(box, 3, &get_coeffs, &coeffs_of_deriv,
-                                 &coeffs_of_2ndderiv, &eval_onPoints, 
-                                 &filter_coeffs, &basisfunc);
+                                 &coeffs_of_2ndderiv, &coeffs_of_int,
+                                 &eval_onPoints, &filter_coeffs, &basisfunc);
        initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
                       get_coeffs, coeffs_of_deriv, eval_onPoints);
        initfiltermatrix(box->F3, n3+1-filt3, n3, 

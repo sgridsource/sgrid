@@ -6,9 +6,9 @@
 #include "Spectral.h"
 
 /* define PI */
-#define PI  3.1415926535897932
-#define PIh 1.5707963267948966
-#define PIq 0.78539816339744831
+#define PI  3.14159265358979323846264338327950
+#define PIh 1.57079632679489661923132169163975
+#define PIq 0.785398163397448309615660845819876
 
 
 /* Note here we have X = [a,b] and x=[0,1]
@@ -37,6 +37,25 @@ void four_deriv(double a, double b, double c[], double cder[], int n)
   
   //else  /* this is what I had in the old explicit_Four_trafos.c version */
   //{ cder[N-2] = 0.0;  cder[N-1] = 0.0; }
+}
+
+
+/* compute Cheb coeffs of integral cint[0...n] from Cheb coeffs c[0...n] */
+void four_int(double a, double b, double c[], double cint[], int n)
+{
+  int j;
+  double PI2_con;
+  int N=n+1;
+
+  PI2_con = 2.0*PI/(b-a);
+
+  for(j=1; 2*j<N; j++)
+  {
+    cint[2*j-1] = -c[2*j] / (PI2_con*j);
+    cint[2*j]   =  c[2*j-1] / (PI2_con*j);
+  }
+  cint[0] = 0.0;  /* arbitrary constant */
+  if( N%2 == 0 ) cint[N-1] = 0.0;
 }
 
 

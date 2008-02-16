@@ -14,6 +14,9 @@ double cheb_eval(double a, double b, double c[], int n, double X);
 /* compute Cheb coeffs of deriv cder[0...n] from Cheb coeffs c[0...n] */
 void cheb_deriv(double a, double b, double c[], double cder[], int n);
 
+/* compute Cheb coeffs of integral cint[0...n] from Cheb coeffs c[0...n] */
+void cheb_int(double a, double b, double c[], double cint[], int n);
+
 /* compute Cheb coeffs c[0...n] from function u at the zeros of T_N(x).
    Note N=n+1                                                           */
 void cheb_coeffs_fromZeros(double c[], double u[], int n);
@@ -41,8 +44,11 @@ double cheb_basisfunc_FromSum(void *aux, double a, double b, int n, int n1, doub
 
 /* compute Four coeffs of deriv cder[0...N-1] from Four coeffs c[0...N-1] */
 void four_deriv(double a, double b, double c[], double cder[], int N);
-/* compute Four coeffs c[0...N-1] from function u 
-   at x_k = k/N, k=0,...,N-1 */
+
+/* compute Cheb coeffs of integral cint[0...n] from Cheb coeffs c[0...n] */
+void four_int(double a, double b, double c[], double cint[], int n);
+
+/* compute Four coeffs c[0...N-1] from function u at x_k = k/N, k=0,...,N-1 */
 void four_coeffs(double c[], double u[], int N);
 
 /* find function u from Four coeffs c[0...N-1] */
