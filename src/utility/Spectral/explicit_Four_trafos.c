@@ -44,18 +44,32 @@ void four_deriv(double a, double b, double c[], double cder[], int n)
 void four_int(double a, double b, double c[], double cint[], int n)
 {
   int j;
-  double PI2_con;
+  double PI2_con, L;
   int N=n+1;
 
-  PI2_con = 2.0*PI/(b-a);
+  L = b-a;
+  PI2_con = 2.0*PI/L;
 
+  /* get terms coming from integrating c[0] */
   for(j=1; 2*j<N; j++)
   {
-    cint[2*j-1] = -c[2*j] / (PI2_con*j);
-    cint[2*j]   =  c[2*j-1] / (PI2_con*j);
+    cint[2*j-1] = -0.5*L*c[0]/((double) N);
+    cint[2*j]   = -0.5*L*c[0]/((double) N); // WRONG!!!!!
+    // integrate the func 1/N and find its coeffs instead!!!
+    // multiply this by c[0]
+    if(N!=4) errorexit("four_int is wrong");
   }
-  cint[0] = 0.0;  /* arbitrary constant */
-  if( N%2 == 0 ) cint[N-1] = 0.0;
+  if( N%2 == 0 ) cint[N-1] = -0.5*L*c[0]/((double) N);
+
+  cint[0] = 0.5*n*L*c[0]/((double) N);  
+
+  /* add terms coming from integrating everything but the c[0] term */
+  for(j=1; 2*j<N; j++)
+  {
+    cint[2*j-1] += -c[2*j] / (PI2_con*j);
+    cint[2*j]   +=  c[2*j-1] / (PI2_con*j);
+  }
+  if( N%2 == 0 ) cint[N-1] += 0.0;
 }
 
 
