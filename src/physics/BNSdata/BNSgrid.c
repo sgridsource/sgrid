@@ -104,7 +104,7 @@ int set_boxsizes(tGrid *grid)
     Sets("box0_basis3", "Fourier");
     Sets("box0_min3", "0");
     Sets("box0_max3", "2*pi");
-        
+
     Sets("box1_Coordinates", "AnsorgNS1");
     Sets("box1_basis1", "ChebExtrema");
     Sets("box1_min1", "0");
