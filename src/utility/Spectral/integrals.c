@@ -271,3 +271,60 @@ double spec_sphericalDF3dIntegral(tBox *box, double *u, double *U)
   
   return U[0];
 }
+
+
+/* compute the indefinite integral U of 3d var u in direction direc on a box */
+void spec_Int1(tBox *box, int direc, double *u, double *U)
+{
+  static int linelen=0;
+  static double *uline=NULL;
+  static double *Uline=NULL;
+  int i,j,k, m3;
+    
+  /* static memory for lines */
+  m3=max3(box->n1, box->n2, box->n3);
+  if(m3>linelen)
+  {
+    linelen = m3;
+    uline = (double*) realloc(uline, linelen * sizeof(double));
+    Uline = (double*) realloc(Uline, linelen * sizeof(double));
+  }
+
+  if(direc==1)
+  {
+    for (k = 0; k < box->n3; k++)
+      for (j = 0; j < box->n2; j++)
+      {
+        /* 
+        get_memline(u, uline, 1, j, k, box->n1, box->n2, box->n3);
+        matrix_times_vector(box->Int1, uline, Uline, box->n1);
+        put_memline(U, Uline, 1, j, k, box->n1, box->n2, box->n3);        
+        */
+        int n1=box->n1;
+        int n2=box->n2;
+        matrix_times_vector(box->Int1, u+Index(0,j,k), U+Index(0,j,k), n1);
+      }
+  }
+  else if(direc==2)
+  {
+    for (k = 0; k < box->n3; k++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
+        matrix_times_vector(box->Int2, uline, Uline, box->n2);
+        put_memline(U, Uline, 2, i, k, box->n1, box->n2, box->n3);        
+      }
+  }
+  else if(direc==3)
+  {
+    for (j = 0; j < box->n2; j++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
+        matrix_times_vector(box->Int3 , uline, Uline, box->n3);
+        put_memline(U, Uline, 3, i, j, box->n1, box->n2, box->n3);
+      }
+  }
+  else
+    errorexit("spec_Int1: possible values for direction direc are 1,2,3.");
+}
