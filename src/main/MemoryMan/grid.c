@@ -363,6 +363,7 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
       g_new->box[b]->F1[i]  = g_old->box[b]->F1[i];
       g_new->box[b]->Mcoeffs1[i] = g_old->box[b]->Mcoeffs1[i];
       g_new->box[b]->Meval1[i]   = g_old->box[b]->Meval1[i];
+      g_new->box[b]->Int1[i]     = g_old->box[b]->Int1[i];
     }
     for (j = 0; j < n2*n2; j++)
     {
@@ -371,6 +372,7 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
       g_new->box[b]->F2[j]  = g_old->box[b]->F2[j];
       g_new->box[b]->Mcoeffs2[j] = g_old->box[b]->Mcoeffs2[j];
       g_new->box[b]->Meval2[j]   = g_old->box[b]->Meval2[j];
+      g_new->box[b]->Int2[j]     = g_old->box[b]->Int2[j];
     }
     for (k = 0; k < n3*n3; k++)
     {
@@ -379,6 +381,7 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
       g_new->box[b]->F3[k]  = g_old->box[b]->F3[k];
       g_new->box[b]->Mcoeffs3[k] = g_old->box[b]->Mcoeffs3[k];
       g_new->box[b]->Meval3[k]   = g_old->box[b]->Meval3[k];
+      g_new->box[b]->Int3[k]     = g_old->box[b]->Int3[k];
     }
   }
   if(pr) printgrid(g_new);
