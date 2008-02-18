@@ -806,3 +806,176 @@ printf("sigp_Bphi=%g sigp_0phi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_0phi, sigp_1p
   spec_Deriv1(gridnew->box[outerdom], 3, gridnew->box[outerdom]->v[isigma],
               gridnew->box[outerdom]->v[isigma_dphi]);
 }
+
+
+/* compute volume integral of var with index vind in domain0+5 (if b=0)
+   or domain3+4 (if b=3) */
+double InnerVolumeIntergral(tGrid *grid, int b, int vind)
+{
+  tGrid *grid2;
+  double *var2;
+  double *Psi2;
+  double *Integ;
+  double *Temp3;
+  double *pX;
+  double *pY;
+  double *pZ;
+  double *dXdx;
+  double *dXdy;
+  double *dXdz;
+  double *dYdx;
+  double *dYdy;
+  double *dYdz;
+  double *dZdx;
+  double *dZdy;
+  double *dZdz;
+  double *var;
+  double *Psi;
+  double *cv;
+  double *cp;
+  double box0_max1, box3_max1;  
+  int box0_n1, box3_n1;
+  int ib;
+  int i,j,k;
+  double Xmax;
+  double VolInt;
+
+  /* compute volume integral by making a new grid, where domain b
+     covers the entire inside of the star */
+
+  /* adjust box0 to cover the entire iside of star1 */
+  box0_max1 = Getd("box0_max1");
+  box0_n1   = Geti("box0_n1");
+  Sets("box0_max1", "1");
+  Seti("box0_n1", box0_n1+Geti("box5_n1")/2);
+
+  /* adjust box3 to cover the entire iside of star2 */
+  box3_max1 = Getd("box3_max1");
+  box3_n1   = Geti("box3_n1");
+  Sets("box3_max1", "1");
+  Seti("box3_n1", box3_n1+Geti("box4_n1")/2);
+
+  /* make grid with new adjusted boxes */
+  grid2 = make_empty_grid(grid->nvariables, 1);
+  set_BoxStructures_fromPars(grid2,1);
+
+  /* enable some vars needed on grid2 */
+  enablevar(grid2, vind);
+  enablevar(grid2, Ind("BNSdata_Psi"));
+  enablevar(grid2, Ind("BNSdata_temp2"));
+  enablevar(grid2, Ind("BNSdata_temp3"));
+  enablevar(grid2, Ind("x"));
+  enablevar(grid2, Ind("y"));
+  enablevar(grid2, Ind("z"));
+  enablevar(grid2, Ind("dXdx"));
+  enablevar(grid2, Ind("dYdx"));
+  enablevar(grid2, Ind("dZdx"));
+  enablevar(grid2, Ind("Temp1"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_sigma_pm"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dB"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dphi"));  
+
+  /* set Coordinates_AnsorgNS_sigma_pm, ... on grid2. Since grid2
+     has different points only in the A-direc. we can copy it.    */  
+  {
+    int n1 = grid2->box[b]->n1;
+    int n2 = grid2->box[b]->n2;
+    int n3 = grid2->box[b]->n3;
+    double *sigp2      = grid2->box[b]->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+    double *dsigp_dB2  = grid2->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dB")];
+    double *dsigp_dphi2= grid2->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dphi")];
+    double *sigp       = grid->box[b]->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+    double *dsigp_dB   = grid->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dB")];
+    double *dsigp_dphi = grid->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dphi")];
+    int i,j,k;
+
+    for(k=0; k<n3; k++)
+    for(j=0; j<n2; j++)
+    for(i=0; i<n1; i++)
+    {
+      sigp2[(i)+n1*((j)+n2*(k))]       = sigp[0+n1*((j)+n2*(k))];
+      dsigp_dB2[(i)+n1*((j)+n2*(k))]   = dsigp_dB[0+n1*((j)+n2*(k))];
+      dsigp_dphi2[(i)+n1*((j)+n2*(k))] = dsigp_dphi[0+n1*((j)+n2*(k))];
+    } 
+  }
+  /* initialize coords on grid2 */
+  init_CoordTransform_And_Derivs(grid2);
+
+  /* set var and Psi on grid2 */
+  if(b==0) { ib=5; Xmax=box0_max1; }
+  else     { ib=4; Xmax=box3_max1; }
+  pX    = grid2->box[b]->v[Ind("X")];
+  pY    = grid2->box[b]->v[Ind("Y")];
+  pZ    = grid2->box[b]->v[Ind("Z")];
+  dXdx  = grid2->box[b]->v[Ind("dXdx")];
+  dXdy  = grid2->box[b]->v[Ind("dXdx")+1];
+  dXdz  = grid2->box[b]->v[Ind("dXdx")+2];
+  dYdx  = grid2->box[b]->v[Ind("dYdx")];
+  dYdy  = grid2->box[b]->v[Ind("dYdx")+1];
+  dYdz  = grid2->box[b]->v[Ind("dYdx")+2];
+  dZdx  = grid2->box[b]->v[Ind("dZdx")];
+  dZdy  = grid2->box[b]->v[Ind("dZdx")+1];
+  dZdz  = grid2->box[b]->v[Ind("dZdx")+2];
+  var2  = grid2->box[b]->v[vind];
+  Integ = grid2->box[b]->v[Ind("BNSdata_temp2")];
+  Temp3 = grid2->box[b]->v[Ind("BNSdata_temp3")];
+  Psi2  = grid2->box[b]->v[Ind("BNSdata_Psi")];
+  var   = grid->box[b]->v[vind];
+  Psi   = grid->box[b]->v[Ind("BNSdata_Psi")];
+  cv    = grid->box[b]->v[Ind("temp1")];
+  cp    = grid->box[b]->v[Ind("temp2")];
+
+  /* coeffs of var */
+  spec_Coeffs(grid->box[b], var, cv);
+  spec_Coeffs(grid->box[ib], var, cv);
+  /* coeffs of Psi */
+  spec_Coeffs(grid->box[b], var, cp);
+  spec_Coeffs(grid->box[ib], var, cp);
+
+  /* set var and Psi on grid2 by interpolation */
+  forallpoints(grid2->box[b], i)
+    if(pX[i]<Xmax)
+    {
+      var2[i] = spec_interpolate(grid->box[b], cv, pX[i], pY[i], pZ[i]);
+      Psi2[i] = spec_interpolate(grid->box[b], cp, pX[i], pY[i], pZ[i]);
+    }
+    else
+    {
+      var2[i] = spec_interpolate(grid->box[ib], cv, pX[i], pY[i], pZ[i]);
+      Psi2[i] = spec_interpolate(grid->box[ib], cp, pX[i], pY[i], pZ[i]);
+    }
+  /* set integrand in Integ */
+  forallpoints(grid2->box[b], i)
+  {
+    double q   = var2[i];
+    double Psi = Psi2[i];
+    double Psi_to6 = Psi*Psi*Psi*Psi*Psi*Psi;
+    double det = dXdx[i]*dYdy[i]*dZdz[i] + dXdy[i]*dYdz[i]*dZdx[i] +
+                 dXdz[i]*dYdx[i]*dZdy[i] - dXdz[i]*dYdy[i]*dZdx[i] -
+                 dXdy[i]*dYdx[i]*dZdz[i] - dXdx[i]*dYdz[i]*dZdy[i];
+    double jac;
+
+    if(det!=0.0) jac = 1.0/fabs(det);   else jac = 0.0;
+    Integ[i] = q * Psi_to6 * jac;
+  }
+
+Yo(1);
+printgrid(grid2);
+printbox(grid2->box[b]);
+printvar(grid2->box[b], "BNSdata_temp2");
+Yo(2);
+exit(433);
+  /* integrate */
+  VolInt = spec_3dIntegral(grid2->box[b], Integ, Temp3);
+
+  /* remove grid2 */
+  free_grid(grid2);
+
+  /* reset box0/3 pars */
+  Setd("box0_max1", box0_max1);
+  Seti("box0_n1", box0_n1);
+  Setd("box3_max1", box3_max1);
+  Seti("box3_n1", box3_n1);
+  
+  return VolInt;
+}

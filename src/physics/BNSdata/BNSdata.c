@@ -288,19 +288,10 @@ int BNSdata_solve(tGrid *grid)
 
 {
   tGrid *grid2;
-  double *BNSdata_q2;
-  double *Temp2;
-  double *pX;
-  double *pY;
-  double *pZ;
   double BNSdata_n = Getd("BNSdata_n");
   double kappa     = Getd("BNSdata_kappa");
   double m01, m02;
-  double *BNSdata_q;
-  double *Temp1;
-  double box0_max1, box3_max1;  
-  int box0_n1, box3_n1;
-  int ijk, b;
+  int b, i;
 
 //BNS_compute_new_q(grid);
 
@@ -326,66 +317,26 @@ int BNSdata_solve(tGrid *grid)
   /***************************************/
   /* compute rest mass error Delta_m01/2 */
   /***************************************/
-  /* adjust box0 to cover the entire iside of star1 */
-  box0_max1 = Getd("box0_max1");
-  box0_n1   = Geti("box0_n1");
-  Sets("box0_max1", "1");
-  Seti("box0_n1", box0_n1+Geti("box5_n1")/2);
-
-  /* adjust box3 to cover the entire iside of star2 */
-  box3_max1 = Getd("box3_max1");
-  box3_n1   = Geti("box3_n1");
-  Sets("box3_max1", "1");
-  Seti("box3_n1", box3_n1+Geti("box4_n1")/2);
-
-  /* make grid with new adjusted boxes */
-  grid2 = make_empty_grid(grid->nvariables, 1);
-  set_BoxStructures_fromPars(grid2,1);
-
-  /* set BNSdata_q on grid2 and compute rest masses */
-  enablevar(grid2, Ind("BNSdata_q"));
-  enablevar(grid2, Ind("Temp1"));
-  for(b=0; b<=3; b+=3)
+  /* set rho in BNSdata_temp1 */
+  forallboxes(grid, b)
   {
-    int ib;
-    double Xmax;
-    if(b==0) { ib=5; Xmax=box0_max1; }
-    else     { ib=4; Xmax=box3_max1; }
-    pX         = grid2->box[b]->v[Ind("X")];
-    pY         = grid2->box[b]->v[Ind("Y")];
-    pZ         = grid2->box[b]->v[Ind("Z")];
-    BNSdata_q2 = grid2->box[b]->v[Ind("BNSdata_q")];
-    Temp2      = grid2->box[b]->v[Ind("Temp1")];
-    BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];
-    Temp1     = grid->box[b]->v[Ind("Temp1")];
-    spec_Coeffs(grid->box[b], BNSdata_q, Temp1);
-    spec_Coeffs(grid->box[ib], BNSdata_q, Temp1);
-
-    /* set BNSdata_q on grid2 by interpolation */
-    forallpoints(grid2->box[b], ijk)
-      if(pX[ijk]<box0_max1)
-        BNSdata_q2[ijk] = spec_interpolate(grid->box[b], Temp1,  
-                                           pX[ijk], pY[ijk], pZ[ijk]);
-      else
-        BNSdata_q2[ijk] = spec_interpolate(grid->box[ib], Temp1,
-                                           pX[ijk], pY[ijk], pZ[ijk]);
-    /* set mass integrand in Temp2 */
-    forallpoints(grid2->box[b], ijk)
-    {
-      double q = BNSdata_q2[ijk];
-      double rho0 = pow(q/kappa, BNSdata_n);
-      Temp2[ijk] = rho0 * 1; // wrong
-    }
-    /* compute rest masses */
-    m02 = spec_3dIntegral(grid2->box[b], Temp2, BNSdata_q2); // note: this overwrites BNSdata_q2
-    if(b==0) m01=m02;
-  }
-  /* reset box0/3 */
-  Setd("box0_max1", box0_max1);
-  Seti("box0_n1", box0_n1);
-  Setd("box3_max1", box3_max1);
-  Seti("box3_n1", box3_n1);
+    double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
+    double *temp1     = grid->box[b]->v[Ind("BNSdata_temp1")];
   
+    forallpoints(grid->box[b], i)
+    {
+      double q, rho0;
+      q = BNSdata_q[i];
+      if(q>=0.0) rho0 = pow(q/kappa, BNSdata_n);
+      else       rho0 = 0.0;
+      temp1[i] = rho0;
+    }
+  }
+  /* get rest masses */
+  m01 = InnerVolumeIntergral(grid, 0, Ind("BNSdata_temp1"));
+  m02 = InnerVolumeIntergral(grid, 3, Ind("BNSdata_temp1"));
+
+printf("InnerVolumeIntergral: m01=%g m02=%g\n", m01, m02);
   //fvec[1] = m01 - Getd("BNSdata_m01");
   //fvec[2] = m02 - Getd("BNSdata_m02");
 }

@@ -41,3 +41,4 @@ int set_boxsizes(tGrid *grid);
 int set_sigma_pm_vars(tGrid *grid);
 void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
                                          int innerdom,  int outerdom);
+double InnerVolumeIntergral(tGrid *grid, int b, int vind);
