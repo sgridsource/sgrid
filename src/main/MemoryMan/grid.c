@@ -415,7 +415,7 @@ int copy_grid(tGrid *g_old, tGrid *g_new, int pr)
     tBox *box_old = g_old->box[b];
 
     for(ind=0; ind<g_new->nvariables; ind++)
-      forallpoints(box_new, ijk)
+      for(ijk=0; ijk < min2(box_new->nnodes, box_old->nnodes); ijk++)
         if(box_new->v[ind])
           box_new->v[ind][ijk] = box_old->v[ind][ijk];
   }
