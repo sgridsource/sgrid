@@ -11,7 +11,7 @@ void printgrid(tGrid *g)
 {
   int i;
 
-  printf("grid %p: nboxes=%d, nvariables=%d\n",
+  printf("grid=%p: nboxes=%d, nvariables=%d\n",
 	 g, g->nboxes, g->nvariables);
   for (i = 0; i < g->nboxes; i++)
   {
@@ -22,7 +22,7 @@ void printgrid(tGrid *g)
 
 void printbox(tBox *box) 
 {
-  printf(" box %p: grid=%p, b=%d, n1=%d n2=%d n3=%d,\n"
+  printf("b=%d: box=%p, grid=%p, n1=%d n2=%d n3=%d,\n"
          " nnodes=%d, node=%p, v=%p,\n"
          " D1 =%p D2 =%p D3 =%p,\n"
          " DD1=%p DD2=%p DD3=%p,\n"
@@ -30,7 +30,7 @@ void printbox(tBox *box)
          " Mcoeffs1=%p Mcoeffs2=%p Mcoeffs3=%p,\n"
          " Meval1  =%p Meval2  =%p Meval3  =%p,\n"
          " Int1    =%p Int2    =%p Int3    =%p\n",
-	 box, box->grid, box->b, box->n1, box->n2, box->n3, box->nnodes, 
+	 box->b, box, box->grid, box->n1, box->n2, box->n3, box->nnodes, 
 	 box->node, box->v, box->D1, box->D2, box->D3,
 	 box->DD1, box->DD2, box->DD3,  box->F1, box->F2, box->F3,
 	 box->Mcoeffs1, box->Mcoeffs2, box->Mcoeffs3,
