@@ -158,33 +158,29 @@ int set_boxsizes(tGrid *grid)
   P_core1 = vec[1];
   printf(" setting: P_core1=%g\n", P_core1);
 
-  /* find P_core2, s.t. rest mass is m02 */
-  vec[1] = 1e-10;   /* initial guess */
-  /* do newton_lnsrch iterations: */
-  newton_lnsrch(vec, 1, &check, m02_VectorFunc, 
- 		Geti("Coordinates_newtMAXITS"),
-    		Getd("Coordinates_newtTOLF") );
-  if(check) printf(": check=%d\n", check);  
-  P_core2 = vec[1];
-  printf(" setting: P_core2=%g\n", P_core2);
-
   /* TOV_init yields m01 for a given P_core1 */
   TOV_init(P_core1, kappa, Gamma, 1, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
   printf(" rf_surf1=%g: m1=%g Phic1=%g Psic1=%g m01=%g\n",
          rf_surf1, m1, Phic1, Psic1, m01);
-{
-double m,P,Phi,Psi,m0;
-double rf=rf_surf1;
-TOV_m_P_Phi_Psi_m0_OF_rf(rf, rf_surf1, kappa, Gamma,
-                      P_core1, Phic1, Psic1,
-                      &m, &P, &Phi, &Psi, &m0);
-printf(" check rf=%g: r=%g m=%g P=%g Phi=%g Psi=%g m0=%g\n", 
-rf,rf*Psi*Psi,m,P,Phi,Psi,m0);
-}
-  /* TOV_init yields m02 for a given P_core2 */
-  TOV_init(P_core2, kappa, Gamma, 1, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
-  printf(" rf_surf2=%g: m2=%g Phic2=%g Psic2=%g m02=%g\n",
-         rf_surf2, m2, Phic2, Psic2, m02);
+
+  if(Getd("BNSdata_m02")>0)
+  {
+    /* find P_core2, s.t. rest mass is m02 */
+    vec[1] = 1e-10;   /* initial guess */
+    /* do newton_lnsrch iterations: */
+    newton_lnsrch(vec, 1, &check, m02_VectorFunc, 
+                Geti("Coordinates_newtMAXITS"),
+                Getd("Coordinates_newtTOLF") );
+    if(check) printf(": check=%d\n", check);  
+    P_core2 = vec[1];
+    printf(" setting: P_core2=%g\n", P_core2);
+
+    /* TOV_init yields m02 for a given P_core2 */
+    TOV_init(P_core2, kappa, Gamma, 1, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
+    printf(" rf_surf2=%g: m2=%g Phic2=%g Psic2=%g m02=%g\n",
+           rf_surf2, m2, Phic2, Psic2, m02);
+  }
+  else { P_core2=0.0; m2=m02=Phic2=0.0; Psic2=1.0; rf_surf2=rf_surf1; }
 
   /* find sigma1, s.t. radius is rf_surf1 */
   vec[1] = 1.0/rf_surf1;   /* initial guess */

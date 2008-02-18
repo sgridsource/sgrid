@@ -71,6 +71,13 @@ int TOV_init(double Pc, double kappa, double Gam, int pr, double *rf_surf,
   if(pr) printf(" A=%g B=%g C=%g D=%g E=%g=F=%g\n K=%g Gamma=%g  R=%g S=%g\n",
                 A,B,C,D,E,F, K,Gamma, R,S);
 
+  if(Pc<=0.0)
+  {
+    *rf_surf=*m=*Phi_c=*m0 = 0.0;
+    *Psi_c = 1.0;
+    return 0;
+  }
+
   /* allocate mem. */
   y =vector(1,nvar);   /* The functions y1, y2, ... */
   dy=vector(1,nvar);   /* The functions' derivs dy1, dy2, ... */
@@ -235,6 +242,13 @@ int TOV_m_P_Phi_Psi_m0_OF_rf(double rf, double rf_surf,
   int i, stat;
   double rfe, ret;
   double mc, m0c;
+
+  if(Pc<=0.0)
+  {
+    *m=*P=*Phi=*m0 = 0.0;
+    *Psi = 1.0;
+    return 0;
+  }
 
   y =vector(1,nvar);          /* The functions y1, y2, ... */
   dy=vector(1,nvar);          /* The functions' derivs dy1, dy2, ... */
