@@ -30,11 +30,11 @@ void xyz_VectorFunc(int n, double *XYZvec, double *fvec)
 }
 
 /* find X,Y,Z from x,y,z (Note: X,Y,Z also contains initial guess) */
-void XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
+int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                 double x, double y, double z)
 {
   double XYZvec[4];
-  int check;
+  int check, stat;
 
   box_for_xyz_VectorFunc = box;
   desired_x = x;
@@ -52,14 +52,15 @@ void XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   XYZvec[3] = *Z;
       
   /* do newton_lnsrch iterations: */
-  newton_lnsrch(XYZvec, 3, &check, xyz_VectorFunc, 
- 		Geti("Coordinates_newtMAXITS"),
-    		Getd("Coordinates_newtTOLF") );
+  stat = newton_linesrch_its(XYZvec, 3, &check, xyz_VectorFunc, 
+                             Geti("Coordinates_newtMAXITS"),
+                             Getd("Coordinates_newtTOLF") );
   *X = XYZvec[1];
   *Y = XYZvec[2];
   *Z = XYZvec[3];
 
-  if(check) printf("XYZ_of_xyz: check=%d\n", check);  
+  if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+  return stat-check;
 }
 
 /* find nearest X,Y,Z on grid from x,y,z */
