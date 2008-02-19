@@ -1587,6 +1587,9 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   init_CoordTransform_And_Derivs(grid2);
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 
+  /* interpolate q (and maybe some other vars) from grid onto new grid2 */
+  // ...
+
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);
   free_grid(grid2);
