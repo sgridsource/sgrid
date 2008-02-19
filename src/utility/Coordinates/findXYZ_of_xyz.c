@@ -12,7 +12,7 @@ double desired_z;
 tBox *box_for_xyz_VectorFunc;
 
 
-/* funtion to be passed into newton_lnsrch by XYZ_of_xyz */
+/* funtion to be passed into newton_linesrch_its by XYZ_of_xyz */
 void xyz_VectorFunc(int n, double *XYZvec, double *fvec)
 {
   double xg,yg,zg;
@@ -51,7 +51,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   XYZvec[2] = *Y;
   XYZvec[3] = *Z;
       
-  /* do newton_lnsrch iterations: */
+  /* do newton_linesrch_its iterations: */
   stat = newton_linesrch_its(XYZvec, 3, &check, xyz_VectorFunc, 
                              Geti("Coordinates_newtMAXITS"),
                              Getd("Coordinates_newtTOLF") );
@@ -175,7 +175,7 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
   return rmin;
 }
 
-/* function to be passed into newton_lnsrch by X_of_x_forgiven_YZ */
+/* function to be passed into newton_linesrch_its by X_of_x_forgiven_YZ */
 void x_VectorFunc_YZ(int n, double *XYZvec, double *fvec)
 {
   double xg;
@@ -202,8 +202,8 @@ void X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z)
   XYZvec[2] = Y;
   XYZvec[3] = Z;
       
-  /* do newton_lnsrch iterations: */
-  newton_lnsrch(XYZvec, 1, &check, x_VectorFunc_YZ, 
+  /* do newton_linesrch_its iterations: */
+  newton_linesrch_its(XYZvec, 1, &check, x_VectorFunc_YZ, 
  		Geti("Coordinates_newtMAXITS"),
     		Getd("Coordinates_newtTOLF") );
   *X = XYZvec[1];
