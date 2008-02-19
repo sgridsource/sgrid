@@ -2532,9 +2532,10 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     {
       /* ad hoc regularization. CHECK THIS!!! */
       dXdx = dXdrho = dRdx = dRdrho = 0.0; // this must be wrong!
-      printf("dABphi_dxyz_AnsorgNS: incorrect regularization at "
-             "(X,R)=(1,0) or (X,R)=(0,1):\n"
-             " dXdx = dXdrho = dRdx = dRdrho = 0.0\n");
+      if(Getv("Coordinates_verbose", "yes"))
+        printf("dABphi_dxyz_AnsorgNS: incorrect regularization at "
+               "(X,R)=(1,0) or (X,R)=(0,1):\n"
+               " dXdx = dXdrho = dRdx = dRdrho = 0.0\n");
     }
     dXRphi_dxyz[1][1]=dXdx;
     dXRphi_dxyz[1][2]=dXdrho*cos(phi);
