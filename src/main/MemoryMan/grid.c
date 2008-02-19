@@ -83,7 +83,8 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
   /* print info */
   if (pr) {
     prdivider(0);
-    printf("Creating grid\n");
+    printf("set_BoxStructures_fromPars: setting box structures on grid=%p\n",
+           g);
   }
 
   /* enable storage of the coordinate variables */
