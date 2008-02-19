@@ -207,6 +207,7 @@ int BNSdata_solve(tGrid *grid)
   tVarList *vldummy;
   double Cvec[3];
   double m0errorvec[3];
+  int check;
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -290,12 +291,19 @@ int BNSdata_solve(tGrid *grid)
   else
     errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
-  /* iterate Cvec until m0errorvec is zero */
+  /* do newton_lnsrch iterations Cvec until m0errorvec is zero */
   m0_errors_VectorFunc__grid = grid;
   Cvec[1] = Getd("BNSdata_C1");
   Cvec[2] = Getd("BNSdata_C2");
-  // do it!!!
-  m0_errors_VectorFunc(2, Cvec, m0errorvec);
+  newton_lnsrch(Cvec, 2, &check, m0_errors_VectorFunc, 
+ 		Geti("Coordinates_newtMAXITS"),
+    		Getd("Coordinates_newtTOLF") );
+  if(check) printf(": check=%d\n", check);  
+  Setd("BNSdata_C1", Cvec[1]);
+  Setd("BNSdata_C2", Cvec[2]);
+printf("new BNSdata_C1=%g BNSdata_C2=%g\n", Cvec[1], Cvec[2]);
+
+m0_errors_VectorFunc(2, Cvec, m0errorvec);
 printf("m0_errors_VectorFunc: dm01=%g dm02=%g\n", m0errorvec[1], m0errorvec[2]);
 
   /* free varlists */     
