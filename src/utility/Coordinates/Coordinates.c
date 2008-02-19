@@ -59,7 +59,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     char str[1000];
 
     snprintf(str, 999, "box%d_Coordinates", b);
-    printf("Coordinates: %s = %s\n", str, Gets(str));
+    if(pr) printf("Coordinates: %s = %s\n", str, Gets(str));
     if( Getv(str, "Cartesian") )
     {
       if(pr) printf("Coordinates: default Cartesian coordinates...\n");
