@@ -261,13 +261,13 @@ tGrid *make_empty_grid(int nvariables, int pr)
   if(pr) 
   {
     prdivider(0);
-    printf("make_empty_grid:\n");
+    printf("make_empty_grid:  ");
   }
 
   /* make grid structure with nboxes, nvariables */
   g = alloc_grid(nboxes, nvariables);
-  printf("g->nboxes=%d  g->box=%p  nvariables=%d\n",
-         g->nboxes, g->box, nvariables);
+  if(pr) printf("g->nboxes=%d  g->box=%p  nvariables=%d\n",
+                g->nboxes, g->box, nvariables);
 
   /* make box structure with so many nodes and add it to g */
   for(b=0; b<nboxes ; b++)
