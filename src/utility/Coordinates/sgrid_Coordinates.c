@@ -43,9 +43,9 @@ int sgrid_Coordinates(void)
            "[no,dXdx,ddXdxdx]");
   }
 
+  AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");
   AddPar("CoordinateTransforms_stored", "yes",
          "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");
-  
   AddPar("Coordinates_newtTOLF", "1e-10", "newton tolerence");
   AddPar("Coordinates_newtMAXITS", "100000", "max. newton iterations");
   AddPar("compactSphericalDF_r0", "-1", "radius r at xi=0");

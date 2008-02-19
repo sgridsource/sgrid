@@ -41,6 +41,7 @@ double Coordinates_AnsorgNS_b; /* value of x if A=1 in AnsorgNS0/3 */
 /* initialize the coord transforms */
 int init_CoordTransform_And_Derivs(tGrid *grid)
 {
+  int pr = Getv("Coordinates_verbose", "yes");
   int var_x = Ind("x");
   int var_y = Ind("y");
   int var_z = Ind("z");
@@ -61,11 +62,11 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     printf("Coordinates: %s = %s\n", str, Gets(str));
     if( Getv(str, "Cartesian") )
     {
-      printf("Coordinates: default Cartesian coordinates...\n");
+      if(pr) printf("Coordinates: default Cartesian coordinates...\n");
     }
     else if( Getv(str, "Polar") )
     {
-      printf("Coordinates: initializing Polar coordinates...\n");
+      if(pr) printf("Coordinates: initializing Polar coordinates...\n");
       box->x_of_X[1] = x_ofPolar;
       box->x_of_X[2] = y_ofPolar;
       box->x_of_X[3] = z_ofPolar;
@@ -107,7 +108,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "PolarCE") )
     {
-      printf("Coordinates: initializing PolarCE coordinates...\n");
+      if(pr) printf("Coordinates: initializing PolarCE coordinates...\n");
       box->x_of_X[1] = x_ofPolarCE;
       box->x_of_X[2] = y_ofPolarCE;
       box->x_of_X[3] = z_equals_Z;
@@ -127,7 +128,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "SphericalDF") )
     {
-      printf("Coordinates: initializing SphericalDF coordinates...\n");
+      if(pr) printf("Coordinates: initializing SphericalDF coordinates...\n");
       box->x_of_X[1] = x_ofSphericalDF;
       box->x_of_X[2] = y_ofSphericalDF;
       box->x_of_X[3] = z_ofSphericalDF;
@@ -165,7 +166,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "compactSphericalDF") )
     {
-      printf("Coordinates: initializing compactSphericalDF coordinates...\n");
+      if(pr) printf("Coordinates: initializing compactSphericalDF coordinates...\n");
       box->x_of_X[1] = x_ofcompactSphericalDF;
       box->x_of_X[2] = y_ofcompactSphericalDF;
       box->x_of_X[3] = z_ofcompactSphericalDF;
@@ -203,7 +204,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "Spherical") )
     {
-      printf("Coordinates: initializing Spherical coordinates...\n");
+      if(pr) printf("Coordinates: initializing Spherical coordinates...\n");
       box->x_of_X[1] = x_ofSpherical;
       box->x_of_X[2] = y_ofSpherical;
       box->x_of_X[3] = z_ofSpherical;
@@ -241,8 +242,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "Spherical2") )
     {
-      printf("Coordinates: initializing Spherical2 coordinates...\n");
-      printf("WARNING!!! Spherical2 yields very inaccurate derivatives!!!\n");
+      if(pr) printf("Coordinates: initializing Spherical2 coordinates...\n");
+      if(pr) printf("WARNING!!! Spherical2 yields very inaccurate derivatives!!!\n");
       box->x_of_X[1] = x_ofSpherical2;
       box->x_of_X[2] = y_ofSpherical2;
       box->x_of_X[3] = z_ofSpherical2;
@@ -280,7 +281,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "Spherical3") )
     {
-      printf("Coordinates: initializing Spherical3 coordinates...\n");
+      if(pr) printf("Coordinates: initializing Spherical3 coordinates...\n");
       box->x_of_X[1] = x_ofSpherical3;
       box->x_of_X[2] = y_ofSpherical3;
       box->x_of_X[3] = z_ofSpherical3;
@@ -318,7 +319,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "tan_stretch") )
     {
-      printf("Coordinates: initializing tan_stretch coordinates...\n");
+      if(pr) printf("Coordinates: initializing tan_stretch coordinates...\n");
       box->x_of_X[1] = x_of_tan_stretch;
       box->x_of_X[2] = y_of_tan_stretch;
       box->x_of_X[3] = z_of_tan_stretch;
@@ -356,7 +357,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "AnsorgNS0") )
     {
-      printf("Coordinates: initializing AnsorgNS0 coordinates...\n");
+      if(pr) printf("Coordinates: initializing AnsorgNS0 coordinates...\n");
       box->x_of_X[1] = x_of_AnsorgNS0;
       box->x_of_X[2] = y_of_AnsorgNS0;
       box->x_of_X[3] = z_of_AnsorgNS0;
@@ -383,7 +384,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "AnsorgNS1") )
     {
-      printf("Coordinates: initializing AnsorgNS1 coordinates...\n");
+      if(pr) printf("Coordinates: initializing AnsorgNS1 coordinates...\n");
       box->x_of_X[1] = x_of_AnsorgNS1;
       box->x_of_X[2] = y_of_AnsorgNS1;
       box->x_of_X[3] = z_of_AnsorgNS1;
@@ -410,7 +411,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "AnsorgNS2") )
     {
-      printf("Coordinates: initializing AnsorgNS2 coordinates...\n");
+      if(pr) printf("Coordinates: initializing AnsorgNS2 coordinates...\n");
       box->x_of_X[1] = x_of_AnsorgNS2;
       box->x_of_X[2] = y_of_AnsorgNS2;
       box->x_of_X[3] = z_of_AnsorgNS2;
@@ -437,7 +438,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "AnsorgNS3") )
     {
-      printf("Coordinates: initializing AnsorgNS3 coordinates...\n");
+      if(pr) printf("Coordinates: initializing AnsorgNS3 coordinates...\n");
       box->x_of_X[1] = x_of_AnsorgNS3;
       box->x_of_X[2] = y_of_AnsorgNS3;
       box->x_of_X[3] = z_of_AnsorgNS3;
@@ -592,27 +593,30 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
 
     /* print distances in cart. coordinates */
-    printf("Cartesian distances in box%d:\n", b);
-    printf("X-direction: x[1]-x[0]=%g, ", x[1]-x[0]);
-    printf("y[1]-y[0]=%g, ",              y[1]-y[0]);
-    printf("z[1]-z[0]=%g\n   ==> ",       z[1]-z[0]);
-    printf("d=%g\n", sqrt((x[1]-x[0])*(x[1]-x[0]) + 
-                          (y[1]-y[0])*(y[1]-y[0]) +
-                          (z[1]-z[0])*(z[1]-z[0])));
+    if(pr)
+    {
+      printf("Cartesian distances in box%d:\n", b);
+      printf("X-direction: x[1]-x[0]=%g, ", x[1]-x[0]);
+      printf("y[1]-y[0]=%g, ",              y[1]-y[0]);
+      printf("z[1]-z[0]=%g\n   ==> ",       z[1]-z[0]);
+      printf("d=%g\n", sqrt((x[1]-x[0])*(x[1]-x[0]) + 
+                            (y[1]-y[0])*(y[1]-y[0]) +
+                            (z[1]-z[0])*(z[1]-z[0])));
 
-    printf("Y-direction: x[n1]-x[0]=%g, ", x[n1]-x[0]);
-    printf("y[n1]-y[0]=%g ",               y[n1]-y[0]);
-    printf("z[n1]-z[0]=%g\n   ==> ",       z[n1]-z[0]);
-    printf("d=%g\n", sqrt((x[n1]-x[0])*(x[n1]-x[0]) + 
-                          (y[n1]-y[0])*(y[n1]-y[0]) +
-                          (z[n1]-z[0])*(z[n1]-z[0])));
+      printf("Y-direction: x[n1]-x[0]=%g, ", x[n1]-x[0]);
+      printf("y[n1]-y[0]=%g ",               y[n1]-y[0]);
+      printf("z[n1]-z[0]=%g\n   ==> ",       z[n1]-z[0]);
+      printf("d=%g\n", sqrt((x[n1]-x[0])*(x[n1]-x[0]) + 
+                            (y[n1]-y[0])*(y[n1]-y[0]) +
+                            (z[n1]-z[0])*(z[n1]-z[0])));
 
-    printf("Z-direction: x[n1*n2]-x[0]=%g, ", x[n1*n2]-x[0]);
-    printf("y[n1*n2]-y[0]=%g, ", 	      y[n1*n2]-y[0]);
-    printf("z[n1*n2]-z[0]=%g\n   ==> ",       z[n1*n2]-z[0]);
-    printf("d=%g\n", sqrt((x[n1*n2]-x[0])*(x[n1*n2]-x[0]) + 
-                          (y[n1*n2]-y[0])*(y[n1*n2]-y[0]) +
-                          (z[n1*n2]-z[0])*(z[n1*n2]-z[0])));
+      printf("Z-direction: x[n1*n2]-x[0]=%g, ", x[n1*n2]-x[0]);
+      printf("y[n1*n2]-y[0]=%g, ", 	      y[n1*n2]-y[0]);
+      printf("z[n1*n2]-z[0]=%g\n   ==> ",       z[n1*n2]-z[0]);
+      printf("d=%g\n", sqrt((x[n1*n2]-x[0])*(x[n1*n2]-x[0]) + 
+                            (y[n1*n2]-y[0])*(y[n1*n2]-y[0]) +
+                            (z[n1*n2]-z[0])*(z[n1*n2]-z[0])));
+    }
   }
   /* compute cartesian coordinates x,y,z and derivs again 
      (in case generic changed some things) */
