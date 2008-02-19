@@ -16,30 +16,30 @@ int storage_verbose = 0;
 /* allocate grid */
 tGrid *alloc_grid(int nboxes, int nvariables)
 {
-  int i;
-  tGrid *new;
+  int b;
+  tGrid *grid;
 
-  new = (tGrid *) calloc( 1, sizeof(tGrid) );
-  if (!new) errorexit("alloc_grid:  out of memory");
+  grid = (tGrid *) calloc( 1, sizeof(tGrid) );
+  if (!grid) errorexit("alloc_grid:  out of memory");
 
-  new->nboxes = nboxes;
-  new->nvariables = nvariables;
-  new->iteration = 0;
-  new->time = 0;
+  grid->nboxes = nboxes;
+  grid->nvariables = nvariables;
+  grid->iteration = 0;
+  grid->time = 0;
   
   /* allocate mem for array of tBox * */
-  new->box = (tBox **) calloc( nboxes, sizeof(tBox *) );
-  if (!new->box) errorexit("alloc_grid:  out of memory 2");
+  grid->box = (tBox **) calloc( nboxes, sizeof(tBox *) );
+  if (!grid->box) errorexit("alloc_grid:  out of memory 2");
   
   /* allocate mem for each box */
-  for(i=0; i<nboxes ; i++)
+  for(b=0; b<nboxes ; b++)
   {
-    new->box[i] = (tBox *) calloc( 1, sizeof(tBox) );
-    printf("i=%d new->box[i]=%p\n", i, new->box[i]);
+    grid->box[b] = (tBox *) calloc( 1, sizeof(tBox) );
+    /* printf("b=%d grid->box[b]=%p\n", b, grid->box[b]); */
   }
   
   storage_verbose = Getv("storage_verbose", "yes");
-  return new;
+  return grid;
 }
 
 
@@ -50,7 +50,7 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
   int nnodes = n1*n2*n3;
   int i,j,k;
 
-  printf("b=%d box=%p g->box=%p\n", b, box, g->box);
+  /* printf("b=%d box=%p g->box=%p\n", b, box, g->box); */
 
   /* allowed? */
   if (b >= g->nboxes || b<0 )
