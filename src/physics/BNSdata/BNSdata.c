@@ -12,6 +12,7 @@ extern double rf_surf1; /* radius of star1 */
 extern double rf_surf2; /* radius of star2 */
 extern double P_core1;  /* core pressure of star1 */
 extern double P_core2;  /* core pressure of star2 */
+tGrid *m0_errors_VectorFunc__grid; /* grid var for m0_errors_VectorFunc */
 
 /* global var lists */
 tVarList *vlu, *vlFu, *vluDerivs;
@@ -36,6 +37,7 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
   int pr);
+void m0_errors_VectorFunc(int n, double *vec, double *fvec);
 
 
 
@@ -203,6 +205,8 @@ int BNSdata_solve(tGrid *grid)
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
   tVarList *vldummy;
+  double Cvec[3];
+  double m0errorvec[3];
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -286,60 +290,13 @@ int BNSdata_solve(tGrid *grid)
   else
     errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
-{
-  tGrid *grid2;
-  double BNSdata_n = Getd("BNSdata_n");
-  double kappa     = Getd("BNSdata_kappa");
-  double m01, m02;
-  int b, i;
-
-//BNS_compute_new_q(grid);
-
-  /* make new grid2, which is an exact copy of grid */
-  grid2 = make_empty_grid(grid->nvariables, 1);
-  copy_grid(grid, grid2, 1);
-
-  /* reset sigma such that q=0 is at A=0 for box0/1 and box3/2 */
-  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
-  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
-
-  /* copy grid2 back into grid, and free grid2 */
-  copy_grid(grid2, grid, 0);
-  free_grid(grid2);
-
-  /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
-  // ... do it
-  //set_BoxStructs_fromPars(grid,1);
-
-  /* reset x,y,z, dXdx and such */
-  // ... do it
-
-  /***************************************/
-  /* compute rest mass error Delta_m01/2 */
-  /***************************************/
-  /* set rho in BNSdata_temp1 */
-  forallboxes(grid, b)
-  {
-    double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
-    double *temp1     = grid->box[b]->v[Ind("BNSdata_temp1")];
-  
-    forallpoints(grid->box[b], i)
-    {
-      double q, rho0;
-      q = BNSdata_q[i];
-      if(q>=0.0) rho0 = pow(q/kappa, BNSdata_n);
-      else       rho0 = 0.0;
-      temp1[i] = rho0;
-    }
-  }
-  /* get rest masses */
-  m01 = InnerVolumeIntergral(grid, 0, Ind("BNSdata_temp1"));
-  m02 = InnerVolumeIntergral(grid, 3, Ind("BNSdata_temp1"));
-
-printf("InnerVolumeIntergral: m01=%g m02=%g\n", m01, m02);
-  //fvec[1] = m01 - Getd("BNSdata_m01");
-  //fvec[2] = m02 - Getd("BNSdata_m02");
-}
+  /* iterate Cvec until m0errorvec is zero */
+  m0_errors_VectorFunc__grid = grid;
+  Cvec[1] = Getd("BNSdata_C1");
+  Cvec[2] = Getd("BNSdata_C2");
+  // do it!!!
+  m0_errors_VectorFunc(2, Cvec, m0errorvec);
+printf("m0_errors_VectorFunc: dm01=%g dm02=%g\n", m0errorvec[1], m0errorvec[2]);
 
   /* free varlists */     
   VLDisableFree(vldu);
@@ -1581,4 +1538,75 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
            "  residual = %e\n", it, *normres);
   }
   return it;
+}
+
+
+/* compute differences m01/2 - BNSdata_m01/2 */
+void m0_errors_VectorFunc(int n, double *vec, double *fvec)
+{
+  tGrid *grid = m0_errors_VectorFunc__grid;
+  tGrid *grid2;
+  double BNSdata_n = Getd("BNSdata_n");
+  double kappa     = Getd("BNSdata_kappa");
+  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
+  double m01, m02;
+  int b, i;
+
+  /* set C1/2 */
+  Setd("BNSdata_C1", vec[1]);
+  Setd("BNSdata_C2", vec[2]);
+
+  /* compute new q */
+  BNS_compute_new_q(grid);
+
+  /* make new grid2, which is an exact copy of grid */
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid2, 0);
+
+  /* reset sigma such that q=0 is at A=0 for box0/1 and box3/2 */
+  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
+  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
+
+  /* initialize coords on grid2 */
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
+  init_CoordTransform_And_Derivs(grid2);
+
+  /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
+  adjust_box4_5_pars(grid2);
+  set_BoxStructures_fromPars(grid2, 0);
+
+  /* reset x,y,z, dXdx and such */
+  init_CoordTransform_And_Derivs(grid2);
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
+
+  /* copy grid2 back into grid, and free grid2 */
+  copy_grid(grid2, grid, 0);
+  free_grid(grid2);
+ 
+  /***************************************/
+  /* compute rest mass error Delta_m01/2 */
+  /***************************************/
+  /* set rho in BNSdata_temp1 */
+  forallboxes(grid, b)
+  {
+    double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
+    double *temp1     = grid->box[b]->v[Ind("BNSdata_temp1")];
+  
+    forallpoints(grid->box[b], i)
+    {
+      double q, rho0;
+      q = BNSdata_q[i];
+      if(q>=0.0) rho0 = pow(q/kappa, BNSdata_n);
+      else       rho0 = 0.0;
+      temp1[i] = rho0;
+    }
+  }
+  /* get rest masses */
+  m01 = InnerVolumeIntergral(grid, 0, Ind("BNSdata_temp1"));
+  m02 = InnerVolumeIntergral(grid, 3, Ind("BNSdata_temp1"));
+
+//printf("m0_errors_VectorFunc: m01=%g m02=%g\n", m01, m02);
+
+  fvec[1] = m01 - Getd("BNSdata_m01");
+  fvec[2] = m02 - Getd("BNSdata_m02");
 }

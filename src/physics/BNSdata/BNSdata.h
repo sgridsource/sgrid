@@ -10,6 +10,7 @@ int BNSdata_solve(tGrid *grid);
 int setBNSdata(tGrid *grid);
 void setADMvars(tGrid *grid);
 
+
 /* funtions from mathematica */
 void BNS_CTS(tVarList *vlFu, tVarList *vlu, tVarList *vlJdu, 
              tVarList *vldu, tVarList *vlduDerivs, int nonlin);
@@ -36,9 +37,10 @@ int TOV_m_P_Phi_Psi_m0_OF_rf(double rf, double rf_surf,
                           double *m, double *P, double *Phi, double *Psi,
                           double *m0);
 
-/* from grid_setup.c */
+/* from BNSgrid.c */
 int set_boxsizes(tGrid *grid);
 int set_sigma_pm_vars(tGrid *grid);
 void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
                                          int innerdom,  int outerdom);
 double InnerVolumeIntergral(tGrid *grid, int b, int vind);
+void adjust_box4_5_pars(tGrid *grid);

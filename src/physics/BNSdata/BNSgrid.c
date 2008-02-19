@@ -808,6 +808,10 @@ printf("sigp_Bphi=%g sigp_0phi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_0phi, sigp_1p
 }
 
 
+/******************************************************************/
+/* useful functions                                               */
+/******************************************************************/
+
 /* compute volume integral of var with index vind in domain0+5 (if b=0)
    or domain3+4 (if b=3) */
 double InnerVolumeIntergral(tGrid *grid, int b, int vind)
@@ -820,6 +824,9 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
   double *pX;
   double *pY;
   double *pZ;
+  double *px;
+  double *py;
+  double *pz;
   double *dXdx;
   double *dXdy;
   double *dXdz;
@@ -829,8 +836,6 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
   double *dZdx;
   double *dZdy;
   double *dZdz;
-  double *var;
-  double *Psi;
   double *cv;
   double *cp;
   double box0_max1, box3_max1;  
@@ -839,6 +844,7 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
   int i,j,k;
   double Xmax;
   double VolInt;
+  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
 
   /* compute volume integral by making a new grid, where domain b
      covers the entire inside of the star */
@@ -855,9 +861,12 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
   Sets("box3_max1", "1");
   Seti("box3_n1", box3_n1+Geti("box4_n1")/2);
 
+  if(b==0) { ib=5; Xmax=box0_max1; }
+  else     { ib=4; Xmax=box3_max1; }
+
   /* make grid with new adjusted boxes */
-  grid2 = make_empty_grid(grid->nvariables, 1);
-  set_BoxStructures_fromPars(grid2,1);
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  set_BoxStructures_fromPars(grid2, 0);
 
   /* enable some vars needed on grid2 */
   enablevar(grid2, vind);
@@ -881,6 +890,8 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
     int n1 = grid2->box[b]->n1;
     int n2 = grid2->box[b]->n2;
     int n3 = grid2->box[b]->n3;
+    int in1 = grid2->box[ib]->n1;
+    int in2 = grid2->box[ib]->n2;
     double *sigp2      = grid2->box[b]->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
     double *dsigp_dB2  = grid2->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dB")];
     double *dsigp_dphi2= grid2->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dphi")];
@@ -893,20 +904,23 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
     for(j=0; j<n2; j++)
     for(i=0; i<n1; i++)
     {
-      sigp2[(i)+n1*((j)+n2*(k))]       = sigp[0+n1*((j)+n2*(k))];
-      dsigp_dB2[(i)+n1*((j)+n2*(k))]   = dsigp_dB[0+n1*((j)+n2*(k))];
-      dsigp_dphi2[(i)+n1*((j)+n2*(k))] = dsigp_dphi[0+n1*((j)+n2*(k))];
+      sigp2[(i)+n1*((j)+n2*(k))]       = sigp[0+in1*((j)+in2*(k))];
+      dsigp_dB2[(i)+n1*((j)+n2*(k))]   = dsigp_dB[0+in1*((j)+in2*(k))];
+      dsigp_dphi2[(i)+n1*((j)+n2*(k))] = dsigp_dphi[0+in1*((j)+in2*(k))];
     } 
   }
   /* initialize coords on grid2 */
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
   init_CoordTransform_And_Derivs(grid2);
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 
   /* set var and Psi on grid2 */
-  if(b==0) { ib=5; Xmax=box0_max1; }
-  else     { ib=4; Xmax=box3_max1; }
   pX    = grid2->box[b]->v[Ind("X")];
   pY    = grid2->box[b]->v[Ind("Y")];
   pZ    = grid2->box[b]->v[Ind("Z")];
+  px    = grid2->box[b]->v[Ind("x")];
+  py    = grid2->box[b]->v[Ind("y")];
+  pz    = grid2->box[b]->v[Ind("z")];
   dXdx  = grid2->box[b]->v[Ind("dXdx")];
   dXdy  = grid2->box[b]->v[Ind("dXdx")+1];
   dXdz  = grid2->box[b]->v[Ind("dXdx")+2];
@@ -920,29 +934,39 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
   Integ = grid2->box[b]->v[Ind("BNSdata_temp2")];
   Temp3 = grid2->box[b]->v[Ind("BNSdata_temp3")];
   Psi2  = grid2->box[b]->v[Ind("BNSdata_Psi")];
-  var   = grid->box[b]->v[vind];
-  Psi   = grid->box[b]->v[Ind("BNSdata_Psi")];
-  cv    = grid->box[b]->v[Ind("temp1")];
-  cp    = grid->box[b]->v[Ind("temp2")];
+  /* var   = grid->box[b]->v[vind]; */
 
   /* coeffs of var */
-  spec_Coeffs(grid->box[b], var, cv);
-  spec_Coeffs(grid->box[ib], var, cv);
+  spec_Coeffs(grid->box[b], grid->box[b]->v[vind], 
+                            grid->box[b]->v[Ind("temp1")]);
+  spec_Coeffs(grid->box[ib], grid->box[ib]->v[vind], 
+                             grid->box[ib]->v[Ind("temp1")]);
   /* coeffs of Psi */
-  spec_Coeffs(grid->box[b], var, cp);
-  spec_Coeffs(grid->box[ib], var, cp);
+  spec_Coeffs(grid->box[b], grid->box[b]->v[Ind("BNSdata_Psi")], 
+                            grid->box[b]->v[Ind("temp2")]);
+  spec_Coeffs(grid->box[ib], grid->box[ib]->v[Ind("BNSdata_Psi")], 
+                             grid->box[ib]->v[Ind("temp2")]);
+
+//printvar(grid, VarName(vind));
+//printvar(grid, "temp1");
+//printvar(grid, "BNSdata_Psi");
+//printvar(grid, "temp2");
 
   /* set var and Psi on grid2 by interpolation */
   forallpoints(grid2->box[b], i)
     if(pX[i]<Xmax)
     {
+      cv = grid->box[b]->v[Ind("temp1")];
+      cp = grid->box[b]->v[Ind("temp2")];
       var2[i] = spec_interpolate(grid->box[b], cv, pX[i], pY[i], pZ[i]);
       Psi2[i] = spec_interpolate(grid->box[b], cp, pX[i], pY[i], pZ[i]);
     }
     else
     {
-      var2[i] = spec_interpolate(grid->box[ib], cv, pX[i], pY[i], pZ[i]);
-      Psi2[i] = spec_interpolate(grid->box[ib], cp, pX[i], pY[i], pZ[i]);
+      cv = grid->box[ib]->v[Ind("temp1")];
+      cp = grid->box[ib]->v[Ind("temp2")];
+      var2[i] = spec_interpolate(grid->box[ib], cv, px[i], py[i], pz[i]);
+      Psi2[i] = spec_interpolate(grid->box[ib], cp, px[i], py[i], pz[i]);
     }
   /* set integrand in Integ */
   forallpoints(grid2->box[b], i)
@@ -959,12 +983,18 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
     Integ[i] = q * Psi_to6 * jac;
   }
 
-Yo(1);
-printgrid(grid2);
-printbox(grid2->box[b]);
-printvar(grid2->box[b], "BNSdata_temp2");
-Yo(2);
-exit(433);
+//printvar(grid2, "Coordinates_AnsorgNS_sigma_pm");
+//printvar(grid2, "Coordinates_AnsorgNS_dsigma_pm_dB");
+//
+//Yo(1);
+//printgrid(grid2);
+//printbox(grid2->box[b]);
+//printf("vind: %s\n", VarName(vind));
+//printvar(grid2, VarName(vind));
+//printvar(grid2, "BNSdata_Psi");
+//printf("Integ: BNSdata_temp2\n");
+//printvar(grid2, "BNSdata_temp2");
+//Yo(2);
   /* integrate */
   VolInt = spec_3dIntegral(grid2->box[b], Integ, Temp3);
 
@@ -978,4 +1008,81 @@ exit(433);
   Seti("box3_n1", box3_n1);
   
   return VolInt;
+}
+
+
+/* figure out max A inside stars and adjust boxes4/5 accordingly */
+void adjust_box4_5_pars(tGrid *grid)
+{
+  double box0_max1 = grid->box[0]->bbox[1];
+  double box3_max1 = grid->box[3]->bbox[1];
+  double scal = 1.05; /* make box4/5 5% larger than needed in x-dir */
+  double scal2= 1.10; /* make box4/5 5% larger than needed in y/z-dir */
+  double xp, xm, xmax, xmin;
+  double ymin,ymax, zmin,zmax, res, B;
+  double b = Coordinates_AnsorgNS_b;
+
+  /* adjust box5 */
+  xmin = x_of_AnsorgNS0(grid->box[0], -1, box0_max1,1.0,0.0);
+  xmax = x_of_AnsorgNS0(grid->box[0], -1, box0_max1,0.0,0.0);
+  xm = scal * (xmin-b);
+  xp = scal * (xmax-b);
+  ymin=ymax=zmin=zmax = 0.0;
+  for(B=0.0; B<1.0; B+=0.01)
+  {
+    res = y_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI);
+    if(res<ymin) ymin=res;
+
+    res = y_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,0.0);
+    if(res>ymax) ymax=res;
+
+    res = z_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI*1.5);
+    if(res<zmin) zmin=res;
+
+    res = z_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI*0.5);
+    if(res>zmax) zmax=res;
+  }
+  ymin = scal2 * ymin;
+  ymax = scal2 * ymax;
+  zmin = scal2 * zmin;
+  zmax = scal2 * zmax;
+
+  Setd("box5_min1", b + xm);
+  Setd("box5_max1", b + xp);
+  Setd("box5_min2", ymin);
+  Setd("box5_max2", ymax);
+  Setd("box5_min3", zmin);
+  Setd("box5_max3", zmax);
+
+  /* adjust box4 */
+  xmin = x_of_AnsorgNS3(grid->box[3], -1, box3_max1,0.0,0.0);
+  xmax = x_of_AnsorgNS3(grid->box[3], -1, box3_max1,1.0,0.0);
+  xm = scal * (xmin+b);
+  xp = scal * (xmax+b);
+  ymin=ymax=zmin=zmax = 0.0;
+  for(B=0.0; B<1.0; B+=0.01)
+  {
+    res = y_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI);
+    if(res<ymin) ymin=res;
+
+    res = y_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,0.0);
+    if(res>ymax) ymax=res;
+
+    res = z_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI*1.5);
+    if(res<zmin) zmin=res;
+
+    res = z_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI*0.5);
+    if(res>zmax) zmax=res;
+  }
+  ymin = scal2 * ymin;
+  ymax = scal2 * ymax;
+  zmin = scal2 * zmin;
+  zmax = scal2 * zmax;
+
+  Setd("box4_min1", -b + xm);
+  Setd("box4_max1", -b + xp);
+  Setd("box4_min2", ymin);
+  Setd("box4_max2", ymax);
+  Setd("box4_min3", zmin);
+  Setd("box4_max3", zmax);
 }
