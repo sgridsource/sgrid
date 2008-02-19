@@ -19,11 +19,11 @@ void xyz_VectorFunc(int n, double *XYZvec, double *fvec)
   int ind=-1; /* works only if the x_of_X[i] don't use ind */
 
   xg = box_for_xyz_VectorFunc->x_of_X[1]((void *) box_for_xyz_VectorFunc,
-                                          ind, XYZvec[1],XYZvec[2],XYZvec[3]);
+                                         ind, XYZvec[1],XYZvec[2],XYZvec[3]);
   yg = box_for_xyz_VectorFunc->x_of_X[2]((void *) box_for_xyz_VectorFunc,
-                                          ind, XYZvec[1],XYZvec[2],XYZvec[3]);
+                                         ind, XYZvec[1],XYZvec[2],XYZvec[3]);
   zg = box_for_xyz_VectorFunc->x_of_X[3]((void *) box_for_xyz_VectorFunc,
-                                          ind, XYZvec[1],XYZvec[2],XYZvec[3]);
+                                         ind, XYZvec[1],XYZvec[2],XYZvec[3]);
   fvec[1] = xg-desired_x;
   fvec[2] = yg-desired_y;
   fvec[3] = zg-desired_z;
@@ -35,6 +35,9 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
 {
   double XYZvec[4];
   int check, stat;
+
+  if(box->x_of_X[1]==NULL)
+    { *X = x;  *Y = y;  *Z = z;  return 0; }
 
   box_for_xyz_VectorFunc = box;
   desired_x = x;
@@ -61,6 +64,31 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
 
   if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
   return stat-check;
+}
+
+/* find X,Y,Z from x,y,z (Note: X,Y,Z also contains initial guess)
+   return index of box in which X,Y,Z are found */
+int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,
+                 double x, double y, double z)
+{
+  double XYZvec[4];
+  double X1,Y1,Z1;
+  int stat, bi;
+
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+
+    X1=*X; Y1=*Y; Z1=*Z;
+    stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
+    if(stat<0) continue;
+    if(X1<box->bbox[0] || X1>box->bbox[1]) continue;
+    if(Y1<box->bbox[2] || Y1>box->bbox[3]) continue;
+    if(Z1<box->bbox[4] || Z1>box->bbox[5]) continue;
+    *X=X1; *Y=Y1; *Z=Z1;
+    return bi; /* return box index if success */
+  }
+  return -bi;
 }
 
 /* find nearest X,Y,Z on grid from x,y,z */
