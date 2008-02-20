@@ -91,7 +91,7 @@ int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,
   return -bi;
 }
 
-/* find nearest X,Y,Z on grid from x,y,z */
+/* find nearest X,Y,Z in box from x,y,z */
 double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
                          double x, double y, double z)
 {
@@ -103,9 +103,6 @@ double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
   double *py = box->v[Ind("y")];
   double *pz = box->v[Ind("z")];
   double dxi, dyi, dzi, r, rmin=-1.0;
-
-  if(box->x_of_X[1]==NULL)
-    errorexit("nearestXYZ_of_xyz: box->x_of_X[1] = NULL");
 
   forallpoints(box, i)
   {
@@ -121,6 +118,28 @@ double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
       *Y = pY[i];
       *Z = pZ[i];
     } 
+  }
+  return rmin;
+}
+
+/* find nearest X,Y,Z on grid from x,y,z */
+double nearest_b_XYZ_of_xyz(tGrid *grid,  int *b, int *ind,
+                            double *X, double *Y, double *Z,
+                            double x, double y, double z)
+{
+  double r, rmin=-1.0;
+  double X1,Y1,Z1;
+  int ind1, bi;
+
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+
+    r = nearestXYZ_of_xyz(box, &ind1, &X1,&Y1,&Z1, x,y,z);
+    if(r<=rmin || rmin<0.0 )
+    {
+      *b=bi;  *ind=ind1;   *X=X1;  *Y=Y1;  *Z=Z1;
+    }
   }
   return rmin;
 }
