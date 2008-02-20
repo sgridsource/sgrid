@@ -291,7 +291,29 @@ int BNSdata_solve(tGrid *grid)
   else
     errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
-  /* do newton_lnsrch iterations Cvec until m0errorvec is zero */
+printf("1: BNSdata_C1=%g BNSdata_C2=%g\n",
+       Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+
+  /* choose C1/2 such that q<0 at origin x=y=z=0 */
+  for(check=1; check;)
+  {
+    int n1 = grid->box[1]->n1;
+    int n2 = grid->box[1]->n2;
+    double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
+    double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+
+    BNS_compute_new_q(grid);
+    check=0;
+    if(q_b1[Index(n1-1,n2-1,0)]>=0.0)
+      { Setd("BNSdata_C1", 0.95*Getd("BNSdata_C1"));  check=1; }
+    if(q_b2[Index(n1-1,n2-1,0)]>=0.0)
+      { Setd("BNSdata_C2", 0.95*Getd("BNSdata_C2"));  check=1; }
+  }
+
+printf("2: BNSdata_C1=%g BNSdata_C2=%g\n",
+       Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+
+  /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
   m0_errors_VectorFunc__grid = grid;
   Cvec[1] = Getd("BNSdata_C1");
   Cvec[2] = Getd("BNSdata_C2");
@@ -301,11 +323,48 @@ int BNSdata_solve(tGrid *grid)
   if(check) printf(": check=%d\n", check);  
   Setd("BNSdata_C1", Cvec[1]);
   Setd("BNSdata_C2", Cvec[2]);
-printf("new BNSdata_C1=%g BNSdata_C2=%g\n", Cvec[1], Cvec[2]);
+
+printf("3: BNSdata_C1=%g BNSdata_C2=%g\n",
+       Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
 m0_errors_VectorFunc(2, Cvec, m0errorvec);
 printf("m0_errors_VectorFunc: dm01=%g dm02=%g\n", m0errorvec[1], m0errorvec[2]);
 
+{
+  tGrid *grid2;
+
+BNS_compute_new_q(grid);
+
+  /* make new grid2, which is an exact copy of grid */
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid2, 0);
+
+  /* reset sigma such that q=0 is at A=0 for box0/1 and box3/2 */
+  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
+  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
+
+  /* initialize coords on grid2 */
+  init_CoordTransform_And_Derivs(grid2);
+
+  /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
+  adjust_box4_5_pars(grid2);
+  set_BoxStructures_fromPars(grid2, 0);
+
+  /* reset x,y,z, dXdx and such */
+  init_CoordTransform_And_Derivs(grid2);
+
+  /* interpolate q (and maybe some other vars) from grid onto new grid2 */
+  // ...
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
+
+  //BNS_compute_new_q(grid2);
+
+  /* copy grid2 back into grid, and free grid2 */
+  copy_grid(grid2, grid, 0);
+  free_grid(grid2);
+
+
+}
   /* free varlists */     
   VLDisableFree(vldu);
   VLDisableFree(vlduDerivs);
@@ -1607,8 +1666,8 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
     {
       double q, rho0;
       q = BNSdata_q[i];
-      if(q>=0.0) rho0 = pow(q/kappa, BNSdata_n);
-      else       rho0 = 0.0;
+      if(q>=0.0) rho0 =  pow(q/kappa, BNSdata_n);
+      else       rho0 = -pow(fabs(q)/kappa, BNSdata_n);
       temp1[i] = rho0;
     }
   }

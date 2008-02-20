@@ -48,13 +48,14 @@ int sgrid_BNSdata()
   /* parameters */
   AddPar("BNSdata_m01",   "0.141202", "rest mass of NS1");
   AddPar("BNSdata_m02",   "0.141202", "rest mass of NS2");
-  AddPar("BNSdata_b",     "1", "separation parameter (distance~2b)");
-  AddPar("BNSdata_n",     "1", "polytropic index n, Gamma = 1 + 1/n");
-  AddPar("BNSdata_kappa", "1", "kappa in EOS: P = kappa rho0^Gamma");
-  AddPar("BNSdata_Omega", "0", "orbital angular velocity");
-  AddPar("BNSdata_C1",    "1", "C1 in q = (C1/F-1)/(n+1) "
+  AddPar("BNSdata_Omega", "0",  "orbital angular velocity");
+  AddPar("BNSdata_b",     "1",  "separation parameter (distance~2b)");
+  AddPar("BNSdata_n",     "1",  "polytropic index n, Gamma = 1 + 1/n");
+  AddPar("BNSdata_kappa", "1",  "kappa in EOS: P = kappa rho0^Gamma");
+  AddPar("BNSdata_x_CM",  "0",  "center of mass in x-direction");
+  AddPar("BNSdata_C1",    "-1", "C1 in q = (C1/F-1)/(n+1) "
          "[needs to be adjusted so that m01 stays the constant]");
-  AddPar("BNSdata_C2",    "1", "C2 in q = (C2/F-1)/(n+1) "
+  AddPar("BNSdata_C2",    "-1", "C2 in q = (C2/F-1)/(n+1) "
          "[needs to be adjusted so that m02 stays the constant]");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");

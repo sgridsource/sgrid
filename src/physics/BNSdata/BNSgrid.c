@@ -150,8 +150,8 @@ int set_boxsizes(tGrid *grid)
 
   /* find P_core1, s.t. rest mass is m01 */
   vec[1] = 1e-10;   /* initial guess */
-  /* do newton_lnsrch iterations: */
-  newton_lnsrch(vec, 1, &check, m01_VectorFunc, 
+  /* do newton_linesrch_its iterations: */
+  newton_linesrch_its(vec, 1, &check, m01_VectorFunc, 
  		Geti("Coordinates_newtMAXITS"),
     		Getd("Coordinates_newtTOLF") );
   if(check) printf(": check=%d\n", check);  
@@ -167,8 +167,8 @@ int set_boxsizes(tGrid *grid)
   {
     /* find P_core2, s.t. rest mass is m02 */
     vec[1] = 1e-10;   /* initial guess */
-    /* do newton_lnsrch iterations: */
-    newton_lnsrch(vec, 1, &check, m02_VectorFunc, 
+    /* do newton_linesrch_its iterations: */
+    newton_linesrch_its(vec, 1, &check, m02_VectorFunc, 
                 Geti("Coordinates_newtMAXITS"),
                 Getd("Coordinates_newtTOLF") );
     if(check) printf(": check=%d\n", check);  
@@ -184,8 +184,8 @@ int set_boxsizes(tGrid *grid)
 
   /* find sigma1, s.t. radius is rf_surf1 */
   vec[1] = 1.0/rf_surf1;   /* initial guess */
-  /* do newton_lnsrch iterations: */
-  newton_lnsrch(vec, 1, &check, rf_surf1_VectorFunc, 
+  /* do newton_linesrch_its iterations: */
+  newton_linesrch_its(vec, 1, &check, rf_surf1_VectorFunc, 
  		Geti("Coordinates_newtMAXITS"),
     		Getd("Coordinates_newtTOLF") );
   if(check) printf(": check=%d\n", check);  
@@ -194,8 +194,8 @@ int set_boxsizes(tGrid *grid)
 
   /* find sigma2, s.t. radius is rf_surf2 */
   vec[1] = -1.0/rf_surf2;   /* initial guess */
-  /* do newton_lnsrch iterations: */
-  newton_lnsrch(vec, 1, &check, rf_surf2_VectorFunc, 
+  /* do newton_linesrch_its iterations: */
+  newton_linesrch_its(vec, 1, &check, rf_surf2_VectorFunc, 
  		Geti("Coordinates_newtMAXITS"),
     		Getd("Coordinates_newtTOLF") );
   if(check) printf(": check=%d\n", check);  
@@ -247,7 +247,7 @@ int set_boxsizes(tGrid *grid)
   return 0;
 }
 
-/* funtion to be passed into newton_lnsrch by ??? */
+/* funtion to be passed into newton_linesrch_its by ??? */
 void rf_surf1_VectorFunc(int n, double *vec, double *fvec)
 {
   double xmax, xmin;
@@ -258,7 +258,7 @@ void rf_surf1_VectorFunc(int n, double *vec, double *fvec)
   fvec[1] = (xmax-xmin)-2.0*rf_surf1;
 }
 
-/* funtion to be passed into newton_lnsrch by ??? */
+/* funtion to be passed into newton_linesrch_its by ??? */
 void rf_surf2_VectorFunc(int n, double *vec, double *fvec)
 {
   double xmax, xmin;
@@ -305,7 +305,7 @@ int set_sigma_pm_vars(tGrid *grid)
   return 0;
 }
 
-/* funtion to be passed into newton_lnsrch to find P_core1 from m01 */
+/* funtion to be passed into newton_linesrch_its to find P_core1 from m01 */
 void m01_VectorFunc(int n, double *vec, double *fvec)
 {
   double kappa     = Getd("BNSdata_kappa");
@@ -318,7 +318,7 @@ void m01_VectorFunc(int n, double *vec, double *fvec)
   TOV_init(Pc, kappa, Gamma, 0, &rf_surf1, &m, &Phic, &Psic, &m0);
   fvec[1] = m0-m01;
 }
-/* funtion to be passed into newton_lnsrch to find P_core2 from m02 */
+/* funtion to be passed into newton_linesrch_its to find P_core2 from m02 */
 void m02_VectorFunc(int n, double *vec, double *fvec)
 {
   double kappa     = Getd("BNSdata_kappa");
@@ -456,16 +456,16 @@ void reset_Coordinates_AnsorgNS_sigma_pm__old(tGrid *grid, tGrid *gridnew,
       else /* use root finder */
       {
         A0 = A1 - q1*(A2-A1)/(q2-q1); /* initial guess */
-        /* use newton_lnsrch to find A0 */
+        /* use newton_linesrch_its to find A0 */
         BNdata_q_VectorFunc_box    = grid->box[dom];
         BNdata_q_VectorFunc_coeffs = grid->box[dom]->v[ic]+Index(0,j,k);
         vec[1] = A0;
-        newton_lnsrch(vec, 1, &check, BNdata_q_VectorFunc, itmax, tol);
+        newton_linesrch_its(vec, 1, &check, BNdata_q_VectorFunc, itmax, tol);
         if(check)
           printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
         A0 = vec[1];
         if(A0<A1 || A0>A2) errorexit("reset_Coordinates_AnsorgNS_sigma_pm: "
-                                     "newton_lnsrch failed!");
+                                     "newton_linesrch_its failed!");
       }
 printf("\nA0,B,phi=%g,%g,%g  dom=%d A1=%g A2=%g q1=%g q2=%g\n", A0,B,phi, dom, A1,A2, q1,q2);
 
@@ -502,12 +502,12 @@ printf("ArgCp_1phi=%g ReCp_1phi=%g ImCp_1phi=%g\n",ArgCp_1phi, ReCp_1phi,ImCp_1p
           //sigp_Bphi = 2.0 * acosh( cos(PIh*B)*(1.0+K)/(1.0-K) );
           //sigp_Bphi = sigp_Bphi*0.5 + acosh( cos(PIh*B)*(1.0+K)/(1.0-K) ) ;
         }
-        /* use newton_lnsrch to find better sigp_Bphi */
+        /* use newton_linesrch_its to find better sigp_Bphi */
         BNdata_sigp_VectorFunc_sigp_1phi = sigp_1phi;
         BNdata_sigp_VectorFunc_B         = B;
         BNdata_sigp_VectorFunc_X0        = X0;
         vec[1] = sigp_Bphi;
-        newton_lnsrch(vec, 1, &check, BNdata_sigp_VectorFunc, itmax, tol);
+        newton_linesrch_its(vec, 1, &check, BNdata_sigp_VectorFunc, itmax, tol);
         if(check)
           printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
         sigp_Bphi = vec[1];
@@ -711,7 +711,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
     else /* use root finder */
     {
       A0 = A1 - q1*(A2-A1)/(q2-q1); /* initial guess */
-      /* use newton_lnsrch to find A0 */
+      /* use newton_linesrch_its to find A0 */
       BNdata_q_VectorFunc_box    = grid->box[dom];
       BNdata_q_VectorFunc_coeffs = grid->box[dom]->v[ic]+Index(0,j,k);
       vec[1] = A0;
@@ -770,7 +770,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       /* find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
       B   = grid->box[dom]->v[iY][Index(0,j,k)];
       phi = grid->box[dom]->v[iZ][Index(0,j,k)];
-      /* use newton_lnsrch to find sigp_Bphi */
+      /* use newton_linesrch_its to find sigp_Bphi */
       q_of_sigp_forgiven_Bphi__sigp_1phi = sigp_1phi;
       q_of_sigp_forgiven_Bphi__B = B;
       q_of_sigp_forgiven_Bphi__phi = phi;
@@ -1085,4 +1085,84 @@ void adjust_box4_5_pars(tGrid *grid)
   Setd("box4_max2", ymax);
   Setd("box4_min3", zmin);
   Setd("box4_max3", zmax);
+}
+
+
+/* Interpolate Var with index vind from grid1 to grid2 */
+void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
+{
+  int cind = Ind("Temp1");
+  int Xind = Ind("X");
+  int Yind = Ind("Y");
+  int Zind = Ind("Z");
+  int xind = Ind("x");
+  int yind = Ind("y");
+  int zind = Ind("z");
+  int b,i, b1;
+
+  /* save coeffs of vind on grid1 in cind = Ind("Temp1") */
+  forallboxes(grid1, b)
+  {
+    tBox *box = grid1->box[b];
+    spec_Coeffs(box, box->v[vind], box->v[cind]);
+  }
+
+  /* loop over grid2 */
+  forallboxes(grid2,b)
+  {
+    tBox *box = grid2->box[b];
+    double *pX = box->v[Xind];
+    double *pY = box->v[Yind];
+    double *pZ = box->v[Zind];
+    double *px = box->v[xind];
+    double *py = box->v[yind];
+    double *pz = box->v[zind];
+    double *pv = box->v[vind];
+
+    forallpoints(box,i)
+    {
+      double X = pX[i];
+      double Y = pY[i];
+      double Z = pZ[i];
+
+      if( (b==1 || b==2) && dless(X, 0.9) )
+      {
+printf("b=%d i=%d  b1=%d X=%g Y=%g Z=%g  x=%g y=%g z=%g ",
+b,i, b1,X,Y,Z, px[i],py[i],pz[i]); Yo(1);
+
+        if( b<4 && (dequal(Y, 0.0) || dequal(Y, 1.0)) )
+        {
+          b1 = b_X_of_x_forgiven_YZ(grid1, &X, px[i], Y,Z);
+          if(b1<0)
+          {
+            int blist[2];
+            blist[0]=4;
+            blist[1]=5;
+            b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z,
+                                        px[i],py[i],pz[i]);
+          }
+        }
+        else
+        {
+          //b1 = b_XYZ_of_xyz(grid1, &X,&Y,&Z, px[i],py[i],pz[i]);
+          int blist[6];
+          blist[0]=4;  blist[1]=5;
+          b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z,
+                                      px[i],py[i],pz[i]);
+          if(b1<0)
+          {
+            blist[0]=0;  blist[1]=1;  blist[2]=2;  blist[3]=3;
+            b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,4, &X,&Y,&Z,
+                                        px[i],py[i],pz[i]);
+          }
+        }
+printf("b1=%d  X=%g Y=%g Z=%g ", b1, X,Y,Z); Yo(2);
+        
+        /* interpolate var to point X,Y,Z */
+        pv[i] = spec_interpolate(grid1->box[b1], grid1->box[b1]->v[cind], X,Y,Z);
+      }
+      else 
+        pv[i] = grid1->box[b]->v[vind][i];
+    }
+  }
 }

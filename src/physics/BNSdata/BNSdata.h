@@ -44,3 +44,4 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
                                          int innerdom,  int outerdom);
 double InnerVolumeIntergral(tGrid *grid, int b, int vind);
 void adjust_box4_5_pars(tGrid *grid);
+void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind);
