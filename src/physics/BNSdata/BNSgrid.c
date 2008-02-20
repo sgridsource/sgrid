@@ -759,8 +759,8 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[outerdom]->v[isigma][Index(i,j,kk)] = sigp_Bphi;
       }
   } /* end for j */
-  printf("reset_Coordinates_AnsorgNS_sigma_pm: new "
-         "sigp_0phi=%g sigp_1phi=%g\n", sigp_0phi, sigp_1phi);
+  //printf("reset_Coordinates_AnsorgNS_sigma_pm: new "
+  //       "sigp_0phi=%g sigp_1phi=%g\n", sigp_0phi, sigp_1phi);
 
   /* loop over the remaining j,k i.e. B,phi. 
      NOTE: we assue that n1,n2,n3 are the same in both domains */
@@ -796,8 +796,8 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[innerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
         gridnew->box[outerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
       }
-printf("B=%g phi=%g  ", B, phi);
-printf("sigp_Bphi=%g sigp_0phi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_0phi, sigp_1phi);
+//printf("B=%g phi=%g  ", B, phi);
+//printf("sigp_Bphi=%g sigp_0phi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_0phi, sigp_1phi);
     } /* end for j,k */
 
   /* compute derivs of sigma */

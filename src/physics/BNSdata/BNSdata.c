@@ -330,9 +330,11 @@ printf("3: BNSdata_C1=%g BNSdata_C2=%g\n",
 m0_errors_VectorFunc(2, Cvec, m0errorvec);
 printf("m0_errors_VectorFunc: dm01=%g dm02=%g\n", m0errorvec[1], m0errorvec[2]);
 
+if(0) 
 {
   tGrid *grid2;
 
+Setd("BNSdata_C2", -0.83);
 BNS_compute_new_q(grid);
 
   /* make new grid2, which is an exact copy of grid */
@@ -340,7 +342,7 @@ BNS_compute_new_q(grid);
   copy_grid(grid, grid2, 0);
 
   /* reset sigma such that q=0 is at A=0 for box0/1 and box3/2 */
-  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
+  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
   reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
 
   /* initialize coords on grid2 */
@@ -1630,8 +1632,8 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   copy_grid(grid, grid2, 0);
 
   /* reset sigma such that q=0 is at A=0 for box0/1 and box3/2 */
-  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
-  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
+  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
+  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
 
   /* initialize coords on grid2 */
   if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
@@ -1646,7 +1648,7 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  // ...
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
 
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);
