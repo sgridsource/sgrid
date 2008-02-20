@@ -1088,6 +1088,89 @@ void adjust_box4_5_pars(tGrid *grid)
 }
 
 
+/* find the box and the coords of the point at the cartesian x,y,z */
+/* initially b, *X,*Y,*Z contain the boxindex and the coords of the
+   point on the other grid */
+int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
+                                    double *X1, double *Y1, double *Z1,
+                                    int b, double x, double y, double z)
+{
+  int b1;
+  double X = *X1;
+  double Y = *Y1;
+  double Z = *Z1;
+  int blist[6];
+
+if(dequal(Z, 0.0))
+printf("b =%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n",b, X,Y,Z, x,y,z); //Yo(1);
+
+  /* depending on b decide how to obtain X,Y,Z */
+  if( (b==0 || b==3 || b==5 || b==4) )
+  {
+    blist[0]=4;  blist[1]=5;
+    b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z, x,y,z);
+    if(b1<0) /* not in box4/5 */
+    {
+      /* set good guesses for Z=phi and X=A, Y=B */
+      if(b>=4)
+      { 
+        Z = Arg(Y,Z); if(Z<0.0) Z+=2.0*PI;
+        X = 0.85; /* bad guess ??? */
+        Y = 0.5;  /* bad guess ??? */
+      }
+      if( b<4 && (dequal(Y, 0.0) || dequal(Y, 1.0)) )
+      {
+        b1 = b_X_of_x_forgiven_YZ(grid1, &X, x, Y,Z);
+      }
+      else if(b==0 || b==5)
+      {
+        blist[0]=0;  blist[1]=1;
+        b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z,
+                                    x,y,z);
+      }
+      else if(b==3 || b==4)
+      {
+        blist[0]=3;  blist[1]=2;
+        b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z,
+                                    x,y,z);
+      }
+    } /* end: not in box4/5 */
+  }
+  else if(b==1)
+  {
+    if( (dequal(Y, 0.0) || dequal(Y, 1.0)) )
+    {
+      b1 = b_X_of_x_forgiven_YZ(grid1, &X, x, Y,Z);
+    }
+    else
+    {
+      blist[0]=1;  blist[1]=0;
+      b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z,
+                                  x,y,z);
+    }
+  }
+  else
+  {
+    if( (dequal(Y, 0.0) || dequal(Y, 1.0)) )
+    {
+      b1 = b_X_of_x_forgiven_YZ(grid1, &X, x, Y,Z);
+    }
+    else
+    {
+      blist[0]=2;  blist[1]=3;
+      b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z,
+                                  x,y,z);
+    }
+  }
+if(dequal(Z, 0.0))
+printf("b1=%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n", b1, X,Y,Z, x,y,z); //Yo(2);
+  *X1 = X;
+  *Y1 = Y;
+  *Z1 = Z;
+  return b1;
+}
+
+
 /* Interpolate Var with index vind from grid1 to grid2 */
 void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
 {
@@ -1106,6 +1189,8 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
     tBox *box = grid1->box[b];
     spec_Coeffs(box, box->v[vind], box->v[cind]);
   }
+  printvar(grid1, "Temp1");
+  printvar(grid1, "BNSdata_q");
 
   /* loop over grid2 */
   forallboxes(grid2,b)
@@ -1124,45 +1209,14 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
       double X = pX[i];
       double Y = pY[i];
       double Z = pZ[i];
+      
+      /* get b1, X,Y,Z on grid1 */
+      b1 = BNSgrid_Get_BoxAndCoords_of_xyz(grid1, &X,&Y,&Z, 
+                                           b,px[i],py[i],pz[i]);
 
-      if( (b==1 || b==2) && dless(X, 0.9) )
-      {
-printf("b=%d i=%d  b1=%d X=%g Y=%g Z=%g  x=%g y=%g z=%g ",
-b,i, b1,X,Y,Z, px[i],py[i],pz[i]); Yo(1);
-
-        if( b<4 && (dequal(Y, 0.0) || dequal(Y, 1.0)) )
-        {
-          b1 = b_X_of_x_forgiven_YZ(grid1, &X, px[i], Y,Z);
-          if(b1<0)
-          {
-            int blist[2];
-            blist[0]=4;
-            blist[1]=5;
-            b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z,
-                                        px[i],py[i],pz[i]);
-          }
-        }
-        else
-        {
-          //b1 = b_XYZ_of_xyz(grid1, &X,&Y,&Z, px[i],py[i],pz[i]);
-          int blist[6];
-          blist[0]=4;  blist[1]=5;
-          b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,2, &X,&Y,&Z,
-                                      px[i],py[i],pz[i]);
-          if(b1<0)
-          {
-            blist[0]=0;  blist[1]=1;  blist[2]=2;  blist[3]=3;
-            b1 = b_XYZ_of_xyz_inboxlist(grid1, blist,4, &X,&Y,&Z,
-                                        px[i],py[i],pz[i]);
-          }
-        }
-printf("b1=%d  X=%g Y=%g Z=%g ", b1, X,Y,Z); Yo(2);
-        
-        /* interpolate var to point X,Y,Z */
-        pv[i] = spec_interpolate(grid1->box[b1], grid1->box[b1]->v[cind], X,Y,Z);
-      }
-      else 
-        pv[i] = grid1->box[b]->v[vind][i];
+      /* get var at point X,Y,Z by interpolation */
+      pv[i] = spec_interpolate(grid1->box[b1], grid1->box[b1]->v[cind], X,Y,Z);
+pv[i]=X;
     }
   }
 }
