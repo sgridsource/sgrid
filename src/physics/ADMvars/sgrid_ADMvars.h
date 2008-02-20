@@ -20,3 +20,4 @@ void FirstAndSecondDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab);
 void allDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab);
 
 int set_K_initial(tGrid *grid);
+int CheckIfFinite(tGrid* grid, char *varname);
