@@ -68,7 +68,7 @@ void printbbox(tBox *box, double *bbox, int *ibbox)
     return;
   }
 
-  printf(" b=%d, [%g,%g]x[%g,%g]x[%g,%g] ", 
+  printf(" b=%d, [%.4g,%.4g]x[%.4g,%.4g]x[%.4g,%.4g] ", 
 	 box->b, 
 	 bbox[0], bbox[1], bbox[2], bbox[3], bbox[4], bbox[5]);
   if (ibbox)
