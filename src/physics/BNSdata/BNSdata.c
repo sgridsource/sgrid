@@ -1662,7 +1662,7 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);
   free_grid(grid2);
- 
+
   /***************************************/
   /* compute rest mass error Delta_m01/2 */
   /***************************************/
