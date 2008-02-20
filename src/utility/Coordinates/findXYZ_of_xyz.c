@@ -138,7 +138,7 @@ double nearest_b_XYZ_of_xyz(tGrid *grid,  int *b, int *ind,
     r = nearestXYZ_of_xyz(box, &ind1, &X1,&Y1,&Z1, x,y,z);
     if(r<=rmin || rmin<0.0 )
     {
-      *b=bi;  *ind=ind1;   *X=X1;  *Y=Y1;  *Z=Z1;
+      rmin=r;  *b=bi;  *ind=ind1;   *X=X1;  *Y=Y1;  *Z=Z1;
     }
   }
   return rmin;
