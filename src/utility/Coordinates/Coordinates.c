@@ -22,7 +22,8 @@
 #define Sech(x)    (1.0/cosh(x))
 #define Coth(x)    (1.0/tanh(x))
 #define Sqrt(x)    (sqrt(x))
-#define B_BB_c1    1.0   /* const1 in func B = func(BB) */
+#define B_BB_c1    1.0     /* const1 in func B = func(BB) in AnsorgNS */
+#define LARGE      1.0e150 /* value used for rho if X=R=0 in AnsorgNS */
 
 /* Global Vars: */
 /* the sigma_+ and sigma_- functions and their derivs for AnsorgNS 
@@ -2003,7 +2004,10 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   }
   else
   {
-    *x = *y = *z = 1.0e300;
+    // *x = *y = *z = 1.0e300;
+    *x = 0.0;
+    *y = LARGE * cos(phi);
+    *z = LARGE * sin(phi);
   }
   
   /* and save x,y,z, X,R */
@@ -2574,7 +2578,10 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     dABphi_dXRphi[2][1] = dABphi_dXRphi[2][2] = dABphi_dXRphi[2][3] = 0.0;
     dABphi_dXRphi[3][1] = dABphi_dXRphi[3][2] = dABphi_dXRphi[3][3] = 0.0;
 
-    *x = *y = *z = 1.0e300;
+    // *x = *y = *z = 1.0e300;
+    *x = 0.0;
+    *y = LARGE * cos(phi);
+    *z = LARGE * sin(phi);
   }
 
   /* compute dA^k/dx^m */
