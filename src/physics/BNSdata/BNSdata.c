@@ -207,7 +207,7 @@ int BNSdata_solve(tGrid *grid)
   tVarList *vldummy;
   double Cvec[3];
   double m0errorvec[3];
-  int check;
+  int check, stat;
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -317,10 +317,10 @@ printf("2: BNSdata_C1=%g BNSdata_C2=%g\n",
   m0_errors_VectorFunc__grid = grid;
   Cvec[1] = Getd("BNSdata_C1");
   Cvec[2] = Getd("BNSdata_C2");
-  newton_linesrch_its(Cvec, 2, &check, m0_errors_VectorFunc, 
- 		      Geti("Coordinates_newtMAXITS"),
-    		      Getd("Coordinates_newtTOLF"));
-  if(check) printf(": check=%d\n", check);  
+  stat = newton_linesrch_its(Cvec, 2, &check, m0_errors_VectorFunc, 
+                             Geti("Coordinates_newtMAXITS"),
+                             Getd("Coordinates_newtTOLF"));
+  if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C1", Cvec[1]);
   Setd("BNSdata_C2", Cvec[2]);
 
@@ -1649,6 +1649,15 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSx"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSy"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSz"));
 
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);
@@ -1676,7 +1685,8 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   m01 = InnerVolumeIntergral(grid, 0, Ind("BNSdata_temp1"));
   m02 = InnerVolumeIntergral(grid, 3, Ind("BNSdata_temp1"));
 
-//printf("m0_errors_VectorFunc: m01=%g m02=%g\n", m01, m02);
+printf("m0_errors_VectorFunc: vec[1]=%g vec[2]=%g   m01=%g m02=%g\n",
+vec[1], vec[2], m01, m02);
 
   fvec[1] = m01 - Getd("BNSdata_m01");
   fvec[2] = m02 - Getd("BNSdata_m02");
