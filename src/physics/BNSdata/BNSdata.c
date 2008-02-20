@@ -340,8 +340,8 @@ BNS_compute_new_q(grid);
   copy_grid(grid, grid2, 0);
 
   /* reset sigma such that q=0 is at A=0 for box0/1 and box3/2 */
-  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
-  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
+  //reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
+  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
 
   /* initialize coords on grid2 */
   init_CoordTransform_And_Derivs(grid2);
@@ -354,7 +354,6 @@ BNS_compute_new_q(grid);
   init_CoordTransform_And_Derivs(grid2);
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  // ...
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
 
   //BNS_compute_new_q(grid2);

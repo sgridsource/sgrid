@@ -1101,8 +1101,8 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
   double Z = *Z1;
   int blist[6];
 
-if(dequal(Z, 0.0))
-printf("b =%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n",b, X,Y,Z, x,y,z); //Yo(1);
+//if(dequal(Z, 0.0))
+//printf("b =%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n",b, X,Y,Z, x,y,z); //Yo(1);
 
   /* depending on b decide how to obtain X,Y,Z */
   if( (b==0 || b==3 || b==5 || b==4) )
@@ -1162,8 +1162,8 @@ printf("b =%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n",b, X,Y,Z, x,y,z); //Yo(1)
                                   x,y,z);
     }
   }
-if(dequal(Z, 0.0))
-printf("b1=%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n", b1, X,Y,Z, x,y,z); //Yo(2);
+//if(dequal(Z, 0.0))
+//printf("b1=%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n", b1, X,Y,Z, x,y,z); //Yo(2);
   *X1 = X;
   *Y1 = Y;
   *Z1 = Z;
@@ -1174,7 +1174,7 @@ printf("b1=%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n", b1, X,Y,Z, x,y,z); //Yo(
 /* Interpolate Var with index vind from grid1 to grid2 */
 void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
 {
-  int cind = Ind("Temp1");
+  int cind = Ind("temp1");
   int Xind = Ind("X");
   int Yind = Ind("Y");
   int Zind = Ind("Z");
@@ -1189,8 +1189,6 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
     tBox *box = grid1->box[b];
     spec_Coeffs(box, box->v[vind], box->v[cind]);
   }
-  printvar(grid1, "Temp1");
-  printvar(grid1, "BNSdata_q");
 
   /* loop over grid2 */
   forallboxes(grid2,b)
@@ -1216,7 +1214,6 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
 
       /* get var at point X,Y,Z by interpolation */
       pv[i] = spec_interpolate(grid1->box[b1], grid1->box[b1]->v[cind], X,Y,Z);
-pv[i]=X;
     }
   }
 }
