@@ -23,6 +23,7 @@ void printgrid(tGrid *g)
 void printbox(tBox *box) 
 {
   printf("b=%d: box=%p, grid=%p, n1=%d n2=%d n3=%d,\n"
+         " [%g,%g]x[%g,%g]x[%g,%g]\n"
          " nnodes=%d, node=%p, v=%p,\n"
          " D1 =%p D2 =%p D3 =%p,\n"
          " DD1=%p DD2=%p DD3=%p,\n"
@@ -30,7 +31,9 @@ void printbox(tBox *box)
          " Mcoeffs1=%p Mcoeffs2=%p Mcoeffs3=%p,\n"
          " Meval1  =%p Meval2  =%p Meval3  =%p,\n"
          " Int1    =%p Int2    =%p Int3    =%p\n",
-	 box->b, box, box->grid, box->n1, box->n2, box->n3, box->nnodes, 
+	 box->b, box, box->grid, box->n1, box->n2, box->n3, 
+	 box->bbox[0], box->bbox[1], box->bbox[2], box->bbox[3],
+	 box->bbox[4], box->bbox[5], box->nnodes, 
 	 box->node, box->v, box->D1, box->D2, box->D3,
 	 box->DD1, box->DD2, box->DD3,  box->F1, box->F2, box->F3,
 	 box->Mcoeffs1, box->Mcoeffs2, box->Mcoeffs3,
@@ -65,7 +68,7 @@ void printbbox(tBox *box, double *bbox, int *ibbox)
     return;
   }
 
-  printf(" b=%d, [%.3f,%.3f]x[%.3f,%.3f]x[%.3f,%.3f] ", 
+  printf(" b=%d, [%g,%g]x[%g,%g]x[%g,%g] ", 
 	 box->b, 
 	 bbox[0], bbox[1], bbox[2], bbox[3], bbox[4], bbox[5]);
   if (ibbox)
