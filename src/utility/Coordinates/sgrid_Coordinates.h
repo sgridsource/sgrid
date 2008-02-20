@@ -33,6 +33,9 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                double x, double y, double z);
 int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,
                  double x, double y, double z);
+int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
+                           double *X, double *Y, double *Z,
+                           double x, double y, double z);
 double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
                          double x, double y, double z);
 double nearest_b_XYZ_of_xyz(tGrid *grid,  int *b, int *ind,

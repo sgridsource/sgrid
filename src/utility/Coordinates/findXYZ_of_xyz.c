@@ -90,6 +90,34 @@ int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,
   return -bi;
 }
 
+/* find X,Y,Z from x,y,z (Note: X,Y,Z also contains initial guess)
+   search in all boxes in the list: bi = blist[0], blist[1], ..., blist[nb-1]
+   return index of box in which X,Y,Z are found or erro code if failure */
+int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
+                           double *X, double *Y, double *Z,
+                           double x, double y, double z)
+{
+  double X1,Y1,Z1;
+  int stat, bi, i;
+  tBox *box;
+
+  for(i=0; i<nb; i++)
+  {
+    bi = blist[i];
+    box = grid->box[bi];
+
+    X1=*X; Y1=*Y; Z1=*Z;
+    stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
+    if(stat<0) continue;
+    if(X1<box->bbox[0] || X1>box->bbox[1]) continue;
+    if(Y1<box->bbox[2] || Y1>box->bbox[3]) continue;
+    if(Z1<box->bbox[4] || Z1>box->bbox[5]) continue;
+    *X=X1; *Y=Y1; *Z=Z1;
+    return bi; /* return box index if success */
+  }
+  return -bi;
+}
+
 /* find nearest X,Y,Z in box from x,y,z */
 double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
                          double x, double y, double z)
@@ -273,6 +301,9 @@ int b_X_of_x_forgiven_YZ(tGrid *grid, double *X, double x, double Y, double Z)
 
     X1=*X;
     stat = X_of_x_forgiven_YZ(box, &X1, x, Y,Z);
+//printf("bi=%d: stat=%d X1=%g Y=%g Z=%g\n", bi, stat, X1, Y,Z);
+//printf("%g %g   %g %g   %g %g\n",
+//box->bbox[0],box->bbox[1], box->bbox[2],box->bbox[3], box->bbox[4],box->bbox[5]);
     if(stat<0) continue;
     if(X1<box->bbox[0] || X1>box->bbox[1]) continue;
     if(Y<box->bbox[2] || Y>box->bbox[3]) continue;
