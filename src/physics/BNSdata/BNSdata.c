@@ -305,9 +305,9 @@ printf("1: BNSdata_C1=%g BNSdata_C2=%g\n",
     BNS_compute_new_q(grid);
     check=0;
     if(q_b1[Index(n1-1,n2-1,0)]>=0.0)
-      { Setd("BNSdata_C1", 0.95*Getd("BNSdata_C1"));  check=1; }
+      { Setd("BNSdata_C1", 0.99*Getd("BNSdata_C1"));  check=1; }
     if(q_b2[Index(n1-1,n2-1,0)]>=0.0)
-      { Setd("BNSdata_C2", 0.95*Getd("BNSdata_C2"));  check=1; }
+      { Setd("BNSdata_C2", 0.99*Getd("BNSdata_C2"));  check=1; }
   }
 
 printf("2: BNSdata_C1=%g BNSdata_C2=%g\n",
