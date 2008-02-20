@@ -42,4 +42,5 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
                                  double *X, double *Y, double *Z,
                                  double x, double y, double z,
                                  int plane, int pind);
-void X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z);
+int X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z);
+int b_X_of_x_forgiven_YZ(tGrid *grid, double *X, double x, double Y, double Z);

@@ -71,7 +71,6 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
 int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,
                  double x, double y, double z)
 {
-  double XYZvec[4];
   double X1,Y1,Z1;
   int stat, bi;
 
@@ -234,10 +233,12 @@ void x_VectorFunc_YZ(int n, double *XYZvec, double *fvec)
 }
 
 /* find X from x for a given Y,Z (Note: X also contains initial guess) */
-void X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z)
+int X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z)
 {
   double XYZvec[4];
-  int check;
+  int check, stat;
+
+  if(box->x_of_X[1]==NULL)  { *X = x;  return 0; }
 
   box_for_xyz_VectorFunc = box;
   desired_x = x;
@@ -250,10 +251,34 @@ void X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z)
   XYZvec[3] = Z;
       
   /* do newton_linesrch_its iterations: */
-  newton_linesrch_its(XYZvec, 1, &check, x_VectorFunc_YZ, 
- 		Geti("Coordinates_newtMAXITS"),
-    		Getd("Coordinates_newtTOLF") );
+  stat = newton_linesrch_its(XYZvec, 1, &check, x_VectorFunc_YZ, 
+                             Geti("Coordinates_newtMAXITS"),
+                             Getd("Coordinates_newtTOLF") );
   *X = XYZvec[1];
 
-  if(check) printf("X_of_x_forgiven_YZ: check=%d\n", check);  
+  if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+  return stat-check;
+}
+
+/* find X from x for a given Y,Z (Note: X also contains initial guess)
+   return index of box in which X,Y,Z are found */
+int b_X_of_x_forgiven_YZ(tGrid *grid, double *X, double x, double Y, double Z)
+{
+  double X1;
+  int stat, bi;
+
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+
+    X1=*X;
+    stat = X_of_x_forgiven_YZ(box, &X1, x, Y,Z);
+    if(stat<0) continue;
+    if(X1<box->bbox[0] || X1>box->bbox[1]) continue;
+    if(Y<box->bbox[2] || Y>box->bbox[3]) continue;
+    if(Z<box->bbox[4] || Z>box->bbox[5]) continue;
+    *X=X1;
+    return bi; /* return box index if success */
+  }
+  return -bi;
 }
