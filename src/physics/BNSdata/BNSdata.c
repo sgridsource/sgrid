@@ -193,8 +193,10 @@ int BNSdata_startup(tGrid *grid)
 /* Solve the Equations */
 int BNSdata_solve(tGrid *grid)
 {
-  int    Newton_itmax = Geti("BNSdata_Newton_itmax");
-  double Newton_tol   = Getd("BNSdata_Newton_tol");
+  int    itmax        = Geti("BNSdata_itmax");
+  double tol          = Getd("BNSdata_tol");
+  int    Newton_itmax = itmax;
+  double Newton_tol   = tol*1.0e-1;
   int    linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
   double linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
   double linSolver_tol    = Getd("BNSdata_linSolver_tol");
@@ -207,7 +209,7 @@ int BNSdata_solve(tGrid *grid)
   tVarList *vldummy;
   double Cvec[3];
   double m0errorvec[3];
-  int check, stat;
+  int it, check, stat;
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -262,69 +264,75 @@ int BNSdata_solve(tGrid *grid)
   vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
 
 // remove this later:
-//Setd("GridIterators_setABStozero_below", 1e-12); // remove later
-//vlFu->n = vlu->n = vlJdu->n = vldu->n = 1;
-//Yo(1);
-//J_BNSdata(vlJdu, vldu, vlduDerivs, vlu);
-
-//Yo(2);
 //F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
 //printf("calling write_grid(grid)\n");
 //write_grid(grid);
 //exit(11);
 
-  /* How we solve the coupled ell. eqns */
-  if(Getv("BNSdata_EllSolver_method", "allatonce"))
-  { /* solve the coupled ell. eqns all together */
-    /* call Newton solver */
-    vldummy = vlJdu;
-    Newton(F_BNSdata, J_BNSdata, vlu, vlFu, vluDerivs, vldummy,
-           Newton_itmax, Newton_tol, &normresnonlin, 1,
-           linear_solver, Preconditioner_I, vldu, vlJdu, vlduDerivs, vlu,
-           linSolver_itmax, linSolver_tolFac, linSolver_tol);
-  }
-  else if(Getv("BNSdata_EllSolver_method", "sequential"))
-  { /* solve the coupled ell. eqns one after an other */
-    BNS_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
-                     linear_solver, 1);
-  }
-  else
-    errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
-
-  /* print C1/2 we used before */
-  printf("old  BNSdata_C1=%g BNSdata_C2=%g\n",
-         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
-
-  /* choose C1/2 such that q<0 at origin x=y=z=0 */
-  for(check=1; check;)
+  /* main iteratio loop, do it until res is small enough */
+  for(it=1; it <= itmax; it++)
   {
-    int n1 = grid->box[1]->n1;
-    int n2 = grid->box[1]->n2;
-    double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
-    double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+    /* How we solve the coupled ell. eqns */
+    if(Getv("BNSdata_EllSolver_method", "allatonce"))
+    { /* solve the coupled ell. eqns all together */
+      /* call Newton solver */
+      vldummy = vlJdu;
+      Newton(F_BNSdata, J_BNSdata, vlu, vlFu, vluDerivs, vldummy,
+             Newton_itmax, Newton_tol, &normresnonlin, 1,
+             linear_solver, Preconditioner_I, vldu, vlJdu, vlduDerivs, vlu,
+             linSolver_itmax, linSolver_tolFac, linSolver_tol);
+    }
+    else if(Getv("BNSdata_EllSolver_method", "sequential"))
+    { /* solve the coupled ell. eqns one after an other */
+      BNS_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
+                       linear_solver, 1);
+    }
+    else
+      errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
-    BNS_compute_new_q(grid);
-    check=0;
-    if(q_b1[Index(n1-1,n2-1,0)]>=0.0)
-      { Setd("BNSdata_C1", 0.99*Getd("BNSdata_C1"));  check=1; }
-    if(q_b2[Index(n1-1,n2-1,0)]>=0.0)
-      { Setd("BNSdata_C2", 0.99*Getd("BNSdata_C2"));  check=1; }
+    /* print C1/2 we used before */
+    printf("old  BNSdata_C1=%g BNSdata_C2=%g\n",
+           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+
+    /* choose C1/2 such that q<0 at origin x=y=z=0 */
+    for(check=1; check;)
+    {
+      int n1 = grid->box[1]->n1;
+      int n2 = grid->box[1]->n2;
+      double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
+      double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+
+      BNS_compute_new_q(grid);
+      check=0;
+      if(q_b1[Index(n1-1,n2-1,0)]>=0.0)
+        { Setd("BNSdata_C1", 0.99*Getd("BNSdata_C1"));  check=1; }
+      if(q_b2[Index(n1-1,n2-1,0)]>=0.0)
+        { Setd("BNSdata_C2", 0.99*Getd("BNSdata_C2"));  check=1; }
+    }
+    printf("guess BNSdata_C1=%g BNSdata_C2=%g\n",
+           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+
+    /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
+    m0_errors_VectorFunc__grid = grid;
+    Cvec[1] = Getd("BNSdata_C1");
+    Cvec[2] = Getd("BNSdata_C2");
+    stat = newton_linesrch_its(Cvec, 2, &check, m0_errors_VectorFunc,
+                               Geti("Coordinates_newtMAXITS"),
+                               Getd("Coordinates_newtTOLF") * 1000.0);
+    if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
+    Setd("BNSdata_C1", Cvec[1]);
+    Setd("BNSdata_C2", Cvec[2]);
+    printf("new  BNSdata_C1=%g BNSdata_C2=%g\n",
+           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+
+    /* evalute residual and break if it is small enough */
+    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+    normresnonlin = GridL2Norm(vlFu);
+    printf("BNSdata_solve step %d: residual = %.4e\n", it, normresnonlin);
+    if(normresnonlin<tol) break;
   }
-  printf("guess BNSdata_C1=%g BNSdata_C2=%g\n",
-         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
-
-  /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
-  m0_errors_VectorFunc__grid = grid;
-  Cvec[1] = Getd("BNSdata_C1");
-  Cvec[2] = Getd("BNSdata_C2");
-  stat = newton_linesrch_its(Cvec, 2, &check, m0_errors_VectorFunc,
-                             Geti("Coordinates_newtMAXITS"),
-                             Getd("Coordinates_newtTOLF") * 1000.0);
-  if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
-  Setd("BNSdata_C1", Cvec[1]);
-  Setd("BNSdata_C2", Cvec[2]);
-  printf("new  BNSdata_C1=%g BNSdata_C2=%g\n",
-         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+  if(it>itmax)
+    printf("BNSdata_solve warning: *** Too many steps! ***\n");
 
   /* free varlists */     
   VLDisableFree(vldu);
