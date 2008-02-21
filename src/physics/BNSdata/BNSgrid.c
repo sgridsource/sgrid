@@ -635,7 +635,8 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
     if(stat>=0 && Ac>=0.0 && Ac<=1.0 && Bc>=0.0 && Bc<=1.0) break;
     dom = outerdom;
   }
-  if(stat<0 || Ac<0.0 || Ac>1.0 || Bc<0.0 || Bc>1.0)
+  if(stat<0 || dless(Ac,0.0) || dless(1.0,Ac) ||
+               dless(Bc,0.0) || dless(1.0,Bc)   )
   {
     printf("q_of_sigp_forgiven_Bphi: stat=%d dom=%d Ac=%g Bc=%g\n",
            stat,dom, Ac,Bc);
