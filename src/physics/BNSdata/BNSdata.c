@@ -196,7 +196,7 @@ int BNSdata_solve(tGrid *grid)
   int    itmax        = Geti("BNSdata_itmax");
   double tol          = Getd("BNSdata_tol");
   int    Newton_itmax = itmax;
-  double Newton_tol   = tol*1.0e-1;
+  double Newton_tol   = tol*0.1;
   int    linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
   double linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
   double linSolver_tol    = Getd("BNSdata_linSolver_tol");
@@ -323,9 +323,11 @@ int BNSdata_solve(tGrid *grid)
     m0_errors_VectorFunc__grid = grid;
     Cvec[1] = Getd("BNSdata_C1");
     Cvec[2] = Getd("BNSdata_C2");
+    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+    normresnonlin = GridL2Norm(vlFu);
     stat = newton_linesrch_its(Cvec, 2, &check, m0_errors_VectorFunc,
-                               Geti("Coordinates_newtMAXITS"),
-                               Getd("Coordinates_newtTOLF") * 1000.0);
+                               30, max2(normresnonlin*0.1, tol*0.1));
+//    Geti("Coordinates_newtMAXITS"), Getd("Coordinates_newtTOLF") * 1000.0);
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C1", Cvec[1]);
     Setd("BNSdata_C2", Cvec[2]);
