@@ -1673,7 +1673,7 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   m02 = InnerVolumeIntergral(grid, 3, Ind("BNSdata_temp1"));
 
   printf("m0_errors_VectorFunc: C1=%g C2=%g  m01=%g m02=%g\n",
-         vec[1], vec[2], m01, m02);
+         vec[1], vec[2], m01, m02);  fflush(stdout);
 
   fvec[1] = m01 - Getd("BNSdata_m01");
   fvec[2] = m02 - Getd("BNSdata_m02");
