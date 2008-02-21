@@ -81,9 +81,16 @@ int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,
     X1=*X; Y1=*Y; Z1=*Z;
     stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
     if(stat<0) continue;
-    if(X1<box->bbox[0] || X1>box->bbox[1]) continue;
-    if(Y1<box->bbox[2] || Y1>box->bbox[3]) continue;
-    if(Z1<box->bbox[4] || Z1>box->bbox[5]) continue;
+    if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
+    if(dless(Y1,box->bbox[2]) || dless(box->bbox[3],Y1)) continue;
+    if(dless(Z1,box->bbox[4]) || dless(box->bbox[5],Z1)) continue;
+    /* round X1,Y1,Z1 inside box */
+    if(X1 < box->bbox[0]) X1 = box->bbox[0];
+    if(X1 > box->bbox[1]) X1 = box->bbox[1];
+    if(Y1 < box->bbox[2]) Y1 = box->bbox[2];
+    if(Y1 > box->bbox[3]) Y1 = box->bbox[3];
+    if(Z1 < box->bbox[4]) Z1 = box->bbox[4];
+    if(Z1 > box->bbox[5]) Z1 = box->bbox[5];
     *X=X1; *Y=Y1; *Z=Z1;
     return bi; /* return box index if success */
   }
@@ -109,9 +116,16 @@ int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
     X1=*X; Y1=*Y; Z1=*Z;
     stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
     if(stat<0) continue;
-    if(X1<box->bbox[0] || X1>box->bbox[1]) continue;
-    if(Y1<box->bbox[2] || Y1>box->bbox[3]) continue;
-    if(Z1<box->bbox[4] || Z1>box->bbox[5]) continue;
+    if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
+    if(dless(Y1,box->bbox[2]) || dless(box->bbox[3],Y1)) continue;
+    if(dless(Z1,box->bbox[4]) || dless(box->bbox[5],Z1)) continue;
+    /* round X1,Y1,Z1 inside box */
+    if(X1 < box->bbox[0]) X1 = box->bbox[0];
+    if(X1 > box->bbox[1]) X1 = box->bbox[1];
+    if(Y1 < box->bbox[2]) Y1 = box->bbox[2];
+    if(Y1 > box->bbox[3]) Y1 = box->bbox[3];
+    if(Z1 < box->bbox[4]) Z1 = box->bbox[4];
+    if(Z1 > box->bbox[5]) Z1 = box->bbox[5];
     *X=X1; *Y=Y1; *Z=Z1;
     return bi; /* return box index if success */
   }
@@ -305,9 +319,12 @@ int b_X_of_x_forgiven_YZ(tGrid *grid, double *X, double x, double Y, double Z)
 //printf("%g %g   %g %g   %g %g\n",
 //box->bbox[0],box->bbox[1], box->bbox[2],box->bbox[3], box->bbox[4],box->bbox[5]);
     if(stat<0) continue;
-    if(X1<box->bbox[0] || X1>box->bbox[1]) continue;
-    if(Y<box->bbox[2] || Y>box->bbox[3]) continue;
-    if(Z<box->bbox[4] || Z>box->bbox[5]) continue;
+    if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
+    if(dless(Y,box->bbox[2]) || dless(box->bbox[3],Y)) continue;
+    if(dless(Z,box->bbox[4]) || dless(box->bbox[5],Z)) continue;
+    /* round X1 inside box */
+    if(X1 < box->bbox[0]) X1 = box->bbox[0];
+    if(X1 > box->bbox[1]) X1 = box->bbox[1];
     *X=X1;
     return bi; /* return box index if success */
   }
