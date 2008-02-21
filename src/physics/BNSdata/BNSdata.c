@@ -337,7 +337,15 @@ int BNSdata_solve(tGrid *grid)
     normresnonlin = GridL2Norm(vlFu);
     printf("BNSdata_solve step %d: residual = %.4e\n", it, normresnonlin);
     fflush(stdout);
+
+// remove this later:
+grid->time += 1;
+
     if(normresnonlin<tol) break;
+
+// remove this later:
+printf("calling write_grid(grid)\n");
+write_grid(grid);
   }
   if(it>itmax)
     printf("BNSdata_solve warning: *** Too many steps! ***\n");
