@@ -77,6 +77,9 @@ int set_boxsizes(tGrid *grid)
   double m01 = Getd("BNSdata_m01");
   double m02 = Getd("BNSdata_m02");
   double Gamma     = 1.0 + 1.0/BNSdata_n;
+  double xmin1,xmax1, xmin2,xmax2, xc1, xc2; /* x-positions of stars */
+  double DoM, nu; /* distance over total rest mass, and rest mass ratio */
+  double DoM3, DoM4, DoM5; /* powers of DoM */
   double vec[2];
   int check;
 
@@ -202,11 +205,27 @@ int set_boxsizes(tGrid *grid)
   sigma2 = vec[1];
   printf(" setting: sigma2=%g\n", sigma2);
 
+  /* find  xmin1,xmax1, xmin2,xmax2, xc1, xc2, and CM for both stars */
+  xmax1 = x_of_AnsorgNS0(NULL, -1, 0.0,0.0,0.0);
+  xmin1 = x_of_AnsorgNS0(NULL, -1, 0.0,1.0,0.0);
+  xmax2 = x_of_AnsorgNS3(NULL, -1, 0.0,1.0,0.0);
+  xmin2 = x_of_AnsorgNS3(NULL, -1, 0.0,0.0,0.0);
   printf(" => radius of domain0 = %g,   radius of domain3 = %g\n", 
-         0.5*(x_of_AnsorgNS0(NULL, -1, 0.0,0.0,0.0)-
-              x_of_AnsorgNS0(NULL, -1, 0.0,1.0,0.0)),
-         0.5*(x_of_AnsorgNS3(NULL, -1, 0.0,1.0,0.0)-
-              x_of_AnsorgNS3(NULL, -1, 0.0,0.0,0.0)) );
+         0.5*(xmax1-xmin1), 0.5*(xmax2-xmin2) );
+  xc1 = 0.5*(xmax1+xmin1);
+  xc2 = 0.5*(xmax2+xmin2);
+  DoM = fabs(xc1-xc2)/(m01+m02);
+  DoM3 = DoM*DoM*DoM;
+  DoM4 = DoM3*DoM;
+  DoM5 = DoM4*DoM;
+  nu = (m01*m02)/pow(m01+m02, 2.0);
+
+  /* set CM and Omega (taken from PN_ADM_2.m) */
+  Setd("BNSdata_x_CM", (m01*xc1 + m02*xc2)/(m01+m02) );
+  Setd("BNSdata_Omega", sqrt( 64*DoM3/pow(1 + 2*DoM, 6) + nu/DoM4 +
+                              (-5*nu + 8*nu*nu)/(8*DoM5)            ));
+  printf(" BNSdata_x_CM = %g,   BNSdata_Omega = %g\n",
+         Getd("BNSdata_x_CM"), Getd("BNSdata_Omega"));
 
   /* set max A inside stars and adjust boxes4/5 accordingly */
   if(Getv("BNSdata_grid", "4ABphi_2xyz"))
