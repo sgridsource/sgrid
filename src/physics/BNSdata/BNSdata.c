@@ -272,6 +272,8 @@ int BNSdata_solve(tGrid *grid)
   /* start main iterations */
   prdivider(1);
   printf("BNSdata_solve: starting main iteration loop ...\n");
+  grid->iteration = -itmax;
+  grid->time = -itmax;
 
   /* main iteration loop, do it until res is small enough */
   for(it=1; it <= itmax; it++)
@@ -339,18 +341,19 @@ int BNSdata_solve(tGrid *grid)
     normresnonlin = GridL2Norm(vlFu);
     printf("BNSdata_solve step %d: residual = %.4e\n", it, normresnonlin);
     fflush(stdout);
-
-// remove this later:
-grid->time += 1;
-
     if(normresnonlin<tol) break;
 
-// remove this later:
-printf("calling write_grid(grid)\n");
-write_grid(grid);
+    /* write current iteration if we are not done yet and increase counters */
+    if(it<=itmax) write_grid(grid);
+    grid->iteration += 1;
+    grid->time += 1.0;
   }
   if(it>itmax)
     printf("BNSdata_solve warning: *** Too many steps! ***\n");
+
+  /* now we have intial data, set time=0 */
+  grid->iteration = 0;
+  grid->time = 0.0;
 
   /* free varlists */     
   VLDisableFree(vldu);
