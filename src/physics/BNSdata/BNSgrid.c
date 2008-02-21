@@ -642,6 +642,10 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
            stat,dom, Ac,Bc);
     errorexit("q_of_sigp_forgiven_Bphi: could not find Ac,Bc");
   }
+  if(Ac<0.0) Ac=0.0; /* make sure we stay in our box */
+  if(Ac>1.0) Ac=1.0;
+  if(Bc<0.0) Bc=0.0;
+  if(Bc>1.0) Bc=1.0;
 
   /* obtain q at Ac,Bc,phi by interpolation */
   /* grid->box[dom]->v[icoeffs]  contains coeffs of q in box */
