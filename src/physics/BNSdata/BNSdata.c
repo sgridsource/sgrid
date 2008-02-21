@@ -272,6 +272,10 @@ int BNSdata_solve(tGrid *grid)
   /* main iteratio loop, do it until res is small enough */
   for(it=1; it <= itmax; it++)
   {
+    prdivider(1);
+    printf("BNSdata_solve: starting main iteration loop ...\n");
+    prdivider(1);
+
     /* How we solve the coupled ell. eqns */
     if(Getv("BNSdata_EllSolver_method", "allatonce"))
     { /* solve the coupled ell. eqns all together */
@@ -329,6 +333,7 @@ int BNSdata_solve(tGrid *grid)
     F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
     normresnonlin = GridL2Norm(vlFu);
     printf("BNSdata_solve step %d: residual = %.4e\n", it, normresnonlin);
+    fflush(stdout);
     if(normresnonlin<tol) break;
   }
   if(it>itmax)
