@@ -222,10 +222,11 @@ int set_boxsizes(tGrid *grid)
 
   /* set CM and Omega (taken from PN_ADM_2.m) */
   Setd("BNSdata_x_CM", (m01*xc1 + m02*xc2)/(m01+m02) );
-  Setd("BNSdata_Omega", sqrt( 64*DoM3/pow(1 + 2*DoM, 6) + nu/DoM4 +
-                              (-5*nu + 8*nu*nu)/(8*DoM5)            ));
-  printf(" BNSdata_x_CM = %g,   BNSdata_Omega = %g\n",
-         Getd("BNSdata_x_CM"), Getd("BNSdata_Omega"));
+  Setd("BNSdata_Omega", sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
+                              (-5*nu + 8*nu*nu)/(8*DoM5)          )/(m01+m02));
+  printf(" BNSdata_x_CM = %g\n", Getd("BNSdata_x_CM"));
+  printf(" BNSdata_Omega = %g,  (m01+m02)*BNSdata_Omega = %g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_Omega")*(m01+m02));
 
   /* set max A inside stars and adjust boxes4/5 accordingly */
   if(Getv("BNSdata_grid", "4ABphi_2xyz"))
