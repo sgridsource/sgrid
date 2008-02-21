@@ -269,11 +269,14 @@ int BNSdata_solve(tGrid *grid)
 //write_grid(grid);
 //exit(11);
 
-  /* main iteratio loop, do it until res is small enough */
+  /* start main iterations */
+  prdivider(1);
+  printf("BNSdata_solve: starting main iteration loop ...\n");
+
+  /* main iteration loop, do it until res is small enough */
   for(it=1; it <= itmax; it++)
   {
-    prdivider(1);
-    printf("BNSdata_solve: starting main iteration loop ...\n");
+    printf("BNSdata_solve step %d:\n", it);
     prdivider(1);
 
     /* How we solve the coupled ell. eqns */
