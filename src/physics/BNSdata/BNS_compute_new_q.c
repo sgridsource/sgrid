@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 15.2.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 21.2.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -22,6 +22,7 @@ double C1 = Getd("BNSdata_C1");
 double C2 = Getd("BNSdata_C2");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
+double xCM = Getd("BNSdata_x_CM");
 
 int bi;
 
@@ -97,7 +98,7 @@ OmegaCrossR1
 
 OmegaCrossR2
 =
-Omega*x[ijk]
+Omega*(-xCM + x[ijk])
 ;
 
 OmegaCrossR3
@@ -234,4 +235,4 @@ q[ijk]
 }  /* end of function */
 
 /* BNS_compute_new_q.c */
-/* nvars = 15, n* = 54,  n/ = 27,  n+ = 66, n = 147, O = 1 */
+/* nvars = 15, n* = 54,  n/ = 27,  n+ = 68, n = 149, O = 1 */

@@ -20,7 +20,7 @@ tocompute = {
 
   (* Omega \times r term *)
   OmegaCrossR1 == - Omega y,
-  OmegaCrossR2 == + Omega x,
+  OmegaCrossR2 == + Omega (x-xCM),
   OmegaCrossR3 == 0,
 
   (* shift in rotating frame (in the inertial frame beta^i = B^i) *)
@@ -98,6 +98,7 @@ BeginCFunction[] := Module[{},
   pr["double C2 = Getd(\"BNSdata_C2\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
+  pr["double xCM = Getd(\"BNSdata_x_CM\");\n"];
   pr["\n"];
 
   pr["int bi;\n"];

@@ -1,5 +1,5 @@
 /* setADMvars.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 9.2.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 21.2.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -19,6 +19,7 @@ void setADMvars(tGrid *grid)
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
+double xCM = Getd("BNSdata_x_CM");
 
 int bi;
 
@@ -179,7 +180,7 @@ OmegaCrossR1
 
 OmegaCrossR2
 =
-Omega*x[ijk]
+Omega*(-xCM + x[ijk])
 ;
 
 OmegaCrossR3
@@ -525,4 +526,4 @@ P*g33[ijk] + (P + rhoE)*uzerosqr*pow2(vRplusbetado3)
 }  /* end of function */
 
 /* setADMvars.c */
-/* nvars = 51, n* = 159,  n/ = 31,  n+ = 173, n = 363, O = 1 */
+/* nvars = 51, n* = 159,  n/ = 31,  n+ = 175, n = 365, O = 1 */

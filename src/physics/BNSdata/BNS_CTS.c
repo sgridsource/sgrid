@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 11.2.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 21.2.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -19,6 +19,7 @@ void BNS_CTS(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, tVarList *vld
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
+double xCM = Getd("BNSdata_x_CM");
 
 tGrid *grid = vlu->grid;
 int bi;
@@ -457,7 +458,7 @@ OmegaCrossR1
 
 OmegaCrossR2
 =
-Omega*x[ijk]
+Omega*(-xCM + x[ijk])
 ;
 
 OmegaCrossR3
@@ -1420,4 +1421,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 166, n* = 700,  n/ = 119,  n+ = 784, n = 1603, O = 1 */
+/* nvars = 166, n* = 700,  n/ = 119,  n+ = 786, n = 1605, O = 1 */
