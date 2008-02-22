@@ -221,9 +221,9 @@ int set_boxsizes(tGrid *grid)
   nu = (m01*m02)/pow(m01+m02, 2.0);
 
   /* set CM and Omega (taken from PN_ADM_2.m) */
-  Setd("BNSdata_x_CM", (m01*xc1 + m02*xc2)/(m01+m02) );
-  Setd("BNSdata_Omega", sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
-                              (-5*nu + 8*nu*nu)/(8*DoM5)          )/(m01+m02));
+//  Setd("BNSdata_x_CM", (m01*xc1 + m02*xc2)/(m01+m02) );
+//  Setd("BNSdata_Omega", sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
+//                              (-5*nu + 8*nu*nu)/(8*DoM5)          )/(m01+m02));
   printf(" BNSdata_x_CM = %g\n", Getd("BNSdata_x_CM"));
   printf(" BNSdata_Omega = %g,  (m01+m02)*BNSdata_Omega = %g\n",
          Getd("BNSdata_Omega"), Getd("BNSdata_Omega")*(m01+m02));
@@ -679,8 +679,8 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   int n2 = grid->box[innerdom]->n2;
   int n3 = grid->box[innerdom]->n3;
   int i,j,k, kk;
-  int ineg_in;  /* q_in<0  at i=ineg_in (and q_in>=0 i=ineg_in+1) */
-  int ipos_out; /* q_out>0 at i=ipos_out (and q_out<0 i=ipos_out+1) */
+  int inz_in;   /* q_in<=0  at i=inz_in (and q_in>0 i=inz_in+1) */
+  int inz_out;  /* q_out<=0 at i=inz_out (and q_out>0 i=inz_out-1) */
   int i1, i2, dom; /* zero occurs between index i1 and i2 in domain dom */
   double A1, A2;   /* zero occurs between A=A1 and A=A2 in domain dom */
   double A0;      /* q=0 at A=A0 in domain dom */
@@ -710,29 +710,30 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   for(k=0, j=n2-1; j>=0; j-=n2-1)
   {
     /* find indices where q_in and q_out switch sign */
-    for(i=n1-1; i>=0; i--) if(q_in[Index(i,j,k)]<0.0) break;
-    ineg_in=i;
-    for(i=n1-1; i>=0; i--) if(q_out[Index(i,j,k)]>0.0) break;
-    ipos_out=i;
+    for(i=n1-1; i>=0; i--) if(q_in[Index(i,j,k)]<=0.0) break;
+    inz_in=i;
+    for(i=0; i<n1; i++)   if(q_out[Index(i,j,k)]<=0.0) break;
+    inz_out=i;
 
-    /* if ipos_out=>0, q has zero in outer domain */
-    if(ipos_out>=0) { i1=ipos_out; i2=ipos_out+1; dom=outerdom; }
-    /* if ineg_in=>0, q has zero in inner domain */
-    else if(ineg_in>=0) { i1=ineg_in; i2=ineg_in+1; dom=innerdom; }
-         else           { i1=0;       i2=1;         dom=innerdom; }
+    /* if inz_in=>0, q has zero in inner domain */
+    /* if inz_out<n1, q is negative in outer domain */
+    if(inz_in>=0)                   { i1=inz_in;   i2=inz_in+1; dom=innerdom;}
+    else if(inz_out==0)             { i1=0;         i2=1;       dom=innerdom;}
+    else if(inz_out<n1 && inz_out>0){ i1=inz_out-1; i2=inz_out; dom=outerdom;}
+    else errorexit("reset_Coordinates_AnsorgNS_sigma_pm: q>0 everywhere???");
     A1 = grid->box[dom]->v[iX][Index(i1,j,k)];
     A2 = grid->box[dom]->v[iX][Index(i2,j,k)];
     q1 = grid->box[dom]->v[iq][Index(i1,j,k)];
     q2 = grid->box[dom]->v[iq][Index(i2,j,k)];
     B   = grid->box[dom]->v[iY][Index(i1,j,k)];
     phi = grid->box[dom]->v[iZ][Index(i1,j,k)];
+//printf("inz_out=%d inz_in=%d\n", inz_out,inz_in);
 //printf("reset_Coordinates_AnsorgNS_sigma_pm: "
 //"find zero in q in dom=%d between A1=%g A2=%g\n", dom, A1,A2);
 
     /* find zero in q between A1 and A2 */
-    if( fabs(q1) < tol || (ineg_in<0 && dom==innerdom) ) A0=A1;
-    else if(q1*q2>=0) A0=0.0;  /* same as A0=A1; */
-//else if( fabs(q2) < tol ) A0=A2;
+    if( fabs(q1) < tol || (inz_in<0 && dom==innerdom) ) A0=A1;
+    else if(q1*q2>=0) A0=0.0;
     else /* use root finder */
     {
       A0 = A1 - q1*(A2-A1)/(q2-q1); /* initial guess */
@@ -748,7 +749,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       if(A0<A1 || A0>A2) errorexit("reset_Coordinates_AnsorgNS_sigma_pm: "
                                    "newton_linesrch_its failed!");
     }
-//printf("stat=%d: zero in q at A=A0=%g\n", stat, A0);
+//printf("zero in q at A=A0=%g\n", A0);
 
     /* compute values of X0,R0 at A=A0 */
     xyz_of_AnsorgNS(grid->box[dom], -1, dom, A0,B,phi, &x,&y,&z, &X0,&R0);
@@ -784,11 +785,11 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[outerdom]->v[isigma][Index(i,j,kk)] = sigp_Bphi;
       }
   } /* end for j */
-  //printf("reset_Coordinates_AnsorgNS_sigma_pm: new "
-  //       "sigp_0phi=%g sigp_1phi=%g\n", sigp_0phi, sigp_1phi);
+//printf("reset_Coordinates_AnsorgNS_sigma_pm: new "
+//       "sigp_0phi=%g sigp_1phi=%g\n", sigp_0phi, sigp_1phi);
 
   /* loop over the remaining j,k i.e. B,phi. 
-     NOTE: we assue that n1,n2,n3 are the same in both domains */
+     NOTE: we assume that n1,n2,n3 are the same in both domains */
   for(j=1; j<n2-1; j++)
     for(k=0; k<n3; k++)
     {

@@ -269,11 +269,14 @@ int BNSdata_solve(tGrid *grid)
 //write_grid(grid);
 //exit(11);
 
+  /* output grid before any iterations are done */
+  grid->time  = -itmax-1;
+  write_grid(grid);
+  grid->time += 1.0;
+
   /* start main iterations */
   prdivider(1);
   printf("BNSdata_solve: starting main iteration loop ...\n");
-  grid->iteration = -itmax;
-  grid->time = -itmax;
 
   /* main iteration loop, do it until res is small enough */
   for(it=1; it <= itmax; it++)
@@ -327,6 +330,7 @@ int BNSdata_solve(tGrid *grid)
     Cvec[2] = Getd("BNSdata_C2");
     F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
     normresnonlin = GridL2Norm(vlFu);
+//break;
     stat = newton_linesrch_its(Cvec, 2, &check, m0_errors_VectorFunc,
                                30, max2(normresnonlin*0.1, tol*0.1));
 //    Geti("Coordinates_newtMAXITS"), Getd("Coordinates_newtTOLF") * 1000.0);
@@ -340,19 +344,17 @@ int BNSdata_solve(tGrid *grid)
     F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
     normresnonlin = GridL2Norm(vlFu);
     printf("BNSdata_solve step %d: residual = %.4e\n", it, normresnonlin);
-    fflush(stdout);
+    prdivider(1);  fflush(stdout);
     if(normresnonlin<tol) break;
 
     /* write current iteration if we are not done yet and increase counters */
     if(it<=itmax) write_grid(grid);
-    grid->iteration += 1;
     grid->time += 1.0;
   }
   if(it>itmax)
     printf("BNSdata_solve warning: *** Too many steps! ***\n");
 
   /* now we have intial data, set time=0 */
-  grid->iteration = 0;
   grid->time = 0.0;
 
   /* free varlists */     
