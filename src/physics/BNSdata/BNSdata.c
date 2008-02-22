@@ -281,7 +281,7 @@ int BNSdata_solve(tGrid *grid)
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
     /* print C1/2 we used before */
-    printf("old BNSdata_C1=%g BNSdata_C2=%g\n",
+    printf("old: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
     /* choose C1/2 such that q<0 at origin x=y=z=0 */
@@ -315,7 +315,7 @@ int BNSdata_solve(tGrid *grid)
       if(GetInnerRestMass(grid, 3) > Getd("BNSdata_m02"))
         { Setd("BNSdata_C2", 0.99*Getd("BNSdata_C2"));  check=1; }
     }
-    printf("guess for BNSdata_C1=%g BNSdata_C2=%g\n",
+    printf("guess: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
     /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
@@ -331,7 +331,7 @@ int BNSdata_solve(tGrid *grid)
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C1", Cvec[1]);
     Setd("BNSdata_C2", Cvec[2]);
-    printf("new BNSdata_C1=%g BNSdata_C2=%g\n",
+    printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
     /* evalute residual and break if it is small enough */
