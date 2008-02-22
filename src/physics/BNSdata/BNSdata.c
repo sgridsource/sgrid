@@ -37,6 +37,7 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
   int pr);
+double GetInnerRestMass(tGrid *grid, int bi);
 void m0_errors_VectorFunc(int n, double *vec, double *fvec);
 
 
@@ -52,7 +53,6 @@ int BNSdata_startup(tGrid *grid)
   double Gamma     = 1.0 + 1.0/BNSdata_n;
   double rs1, m1, Phic1, Psic1, m01;
   double rs2, m2, Phic2, Psic2, m02;
-  double Fc, qc, Cc, oouzerosqr;
   double xmax1 = grid->box[0]->x_of_X[1](
                      (void *) grid->box[0], 0, 0.0,0.0,0.0);
   double xmin1 = grid->box[0]->x_of_X[1](
@@ -104,28 +104,6 @@ int BNSdata_startup(tGrid *grid)
   /* set rs, m, Phic, Psic, m0 for both stars */
   TOV_init(P_core1, kappa, Gamma, 1, &rs1, &m1, &Phic1, &Psic1, &m01);
   TOV_init(P_core2, kappa, Gamma, 1, &rs2, &m2, &Phic2, &Psic2, &m02);
-
-  /* set BNSdata_C1 */
-  qc = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-       pow(P_core1, 1.0/(1.0 + BNSdata_n));
-  /* oouzerosqr == alpha2 - 
-                   Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]), */
-  oouzerosqr = exp(Phic1*2.0) - pow(Psic1, 4)*Omega*Omega*xc1*xc1;
-  Fc = -sqrt(oouzerosqr);
-  /* q == (C1/F - 1.0)/(n+1.0) */
-  Cc = Fc*((BNSdata_n+1.0)*qc + 1.0);
-  Setd("BNSdata_C1", Cc);
-
-  /* set BNSdata_C2 */
-  qc = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-       pow(P_core2, 1.0/(1.0 + BNSdata_n));
-  /* oouzerosqr == alpha2 - 
-                   Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]), */
-  oouzerosqr = exp(Phic2*2.0) - pow(Psic2, 4)*Omega*Omega*xc2*xc2;
-  Fc = -sqrt(oouzerosqr);
-  /* q == (C2/F - 1.0)/(n+1.0) */
-  Cc = Fc*((BNSdata_n+1.0)*qc + 1.0);
-  Setd("BNSdata_C2", Cc);
 
   /* set initial values in all in boxes */
   forallboxes(grid,b)
@@ -319,6 +297,22 @@ int BNSdata_solve(tGrid *grid)
       if(q_b1[Index(n1-1,n2-1,0)]>=0.0)
         { Setd("BNSdata_C1", 0.99*Getd("BNSdata_C1"));  check=1; }
       if(q_b2[Index(n1-1,n2-1,0)]>=0.0)
+        { Setd("BNSdata_C2", 0.99*Getd("BNSdata_C2"));  check=1; }
+    }
+
+    /* choose C1/2 such that rest masses are not too big */
+    for(check=1; check;)
+    {
+      int n1 = grid->box[1]->n1;
+      int n2 = grid->box[1]->n2;
+      double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
+      double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+
+      BNS_compute_new_q(grid);
+      check=0;
+      if(GetInnerRestMass(grid, 0) > Getd("BNSdata_m01"))
+        { Setd("BNSdata_C1", 0.99*Getd("BNSdata_C1"));  check=1; }
+      if(GetInnerRestMass(grid, 3) > Getd("BNSdata_m02"))
         { Setd("BNSdata_C2", 0.99*Getd("BNSdata_C2"));  check=1; }
     }
     printf("guess for BNSdata_C1=%g BNSdata_C2=%g\n",
@@ -1599,6 +1593,31 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
   return it;
 }
 
+/* compute rest mass in box bi = 0 or 3 */
+double GetInnerRestMass(tGrid *grid, int bi)
+{
+  double BNSdata_n = Getd("BNSdata_n");
+  double kappa     = Getd("BNSdata_kappa");
+  int b,i;
+
+  /* set rho in BNSdata_temp1 */
+  forallboxes(grid, b)
+  {
+    double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
+    double *temp1     = grid->box[b]->v[Ind("BNSdata_temp1")];
+  
+    forallpoints(grid->box[b], i)
+    {
+      double q, rho0;
+      q = BNSdata_q[i];
+      if(q>=0.0) rho0 =  pow(q/kappa, BNSdata_n);
+      else       rho0 = -pow(fabs(q)/kappa, BNSdata_n);
+      temp1[i] = rho0;
+    }
+  }
+  /* get rest masses */
+  return InnerVolumeIntergral(grid, bi, Ind("BNSdata_temp1"));
+}
 
 /* compute differences m01/2 - BNSdata_m01/2 */
 void m0_errors_VectorFunc(int n, double *vec, double *fvec)
@@ -1671,24 +1690,9 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   /***************************************/
   /* compute rest mass error Delta_m01/2 */
   /***************************************/
-  /* set rho in BNSdata_temp1 */
-  forallboxes(grid, b)
-  {
-    double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
-    double *temp1     = grid->box[b]->v[Ind("BNSdata_temp1")];
-  
-    forallpoints(grid->box[b], i)
-    {
-      double q, rho0;
-      q = BNSdata_q[i];
-      if(q>=0.0) rho0 =  pow(q/kappa, BNSdata_n);
-      else       rho0 = -pow(fabs(q)/kappa, BNSdata_n);
-      temp1[i] = rho0;
-    }
-  }
   /* get rest masses */
-  m01 = InnerVolumeIntergral(grid, 0, Ind("BNSdata_temp1"));
-  m02 = InnerVolumeIntergral(grid, 3, Ind("BNSdata_temp1"));
+  m01 = GetInnerRestMass(grid, 0);
+  m02 = GetInnerRestMass(grid, 3);
 
   printf("m0_errors_VectorFunc: C1=%g C2=%g  m01=%g m02=%g\n",
          vec[1], vec[2], m01, m02);  fflush(stdout);

@@ -80,6 +80,8 @@ int set_boxsizes(tGrid *grid)
   double xmin1,xmax1, xmin2,xmax2, xc1, xc2; /* x-positions of stars */
   double DoM, nu; /* distance over total rest mass, and rest mass ratio */
   double DoM3, DoM4, DoM5; /* powers of DoM */
+  double xCM, Omega;
+  double Fc, qc, Cc, oouzerosqr;
   double vec[2];
   int check;
 
@@ -221,12 +223,42 @@ int set_boxsizes(tGrid *grid)
   nu = (m01*m02)/pow(m01+m02, 2.0);
 
   /* set CM and Omega (taken from PN_ADM_2.m) */
-//  Setd("BNSdata_x_CM", (m01*xc1 + m02*xc2)/(m01+m02) );
-//  Setd("BNSdata_Omega", sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
-//                              (-5*nu + 8*nu*nu)/(8*DoM5)          )/(m01+m02));
+  xCM = (m01*xc1 + m02*xc2)/(m01+m02);
+  Omega = sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
+               (-5*nu + 8*nu*nu)/(8*DoM5)            )/(m01+m02);
+  Setd("BNSdata_x_CM", xCM);
+  Setd("BNSdata_Omega", Omega);
   printf(" BNSdata_x_CM = %g\n", Getd("BNSdata_x_CM"));
   printf(" BNSdata_Omega = %g,  (m01+m02)*BNSdata_Omega = %g\n",
          Getd("BNSdata_Omega"), Getd("BNSdata_Omega")*(m01+m02));
+
+  /* set BNSdata_C1 */
+  qc = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+       pow(P_core1, 1.0/(1.0 + BNSdata_n));
+  /* oouzerosqr == alpha2 - 
+                   Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]), */
+  oouzerosqr = exp(Phic1*2.0) - 
+               pow(Psic1+m02/(2*fabs(xc1-xc2)), 4) *
+               Omega*Omega*(xc1-xCM)*(xc1-xCM);
+  Fc = -sqrt(oouzerosqr);
+  /* q == (C1/F - 1.0)/(n+1.0) */
+  Cc = Fc*((BNSdata_n+1.0)*qc + 1.0);
+  Setd("BNSdata_C1", Cc);
+  printf(" BNSdata_C1 = %g\n", Getd("BNSdata_C1"));
+
+  /* set BNSdata_C2 */
+  qc = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+       pow(P_core2, 1.0/(1.0 + BNSdata_n));
+  /* oouzerosqr == alpha2 - 
+                   Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]), */
+  oouzerosqr = exp(Phic2*2.0) - 
+               pow(Psic2+m01/(2*fabs(xc1-xc2)), 4) *
+               Omega*Omega*(xc2-xCM)*(xc2-xCM);
+  Fc = -sqrt(oouzerosqr);
+  /* q == (C2/F - 1.0)/(n+1.0) */
+  Cc = Fc*((BNSdata_n+1.0)*qc + 1.0);
+  Setd("BNSdata_C2", Cc);
+  printf(" BNSdata_C2 = %g\n", Getd("BNSdata_C2"));
 
   /* set max A inside stars and adjust boxes4/5 accordingly */
   if(Getv("BNSdata_grid", "4ABphi_2xyz"))
@@ -1188,8 +1220,15 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
                                   x,y,z);
     }
   }
-//if(dequal(Z, 0.0))
-//printf("b1=%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n", b1, X,Y,Z, x,y,z); //Yo(2);
+
+  /* failure? */
+  if(b1<0)
+  {
+    printf("b1=%d  initial guess b=%d *X1=%.4g *Y1=%.4g *Z1=%.4g\n",
+           b1, b,*X1,*Y1,*Z1);
+    printf("b1=%d  X=%.4g Y=%.4g Z=%.4g  x=%g y=%g z=%g\n",
+           b1, X,Y,Z, x,y,z);
+  }
   *X1 = X;
   *Y1 = Y;
   *Z1 = Z;
@@ -1237,8 +1276,22 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
       /* get b1, X,Y,Z on grid1 */
       b1 = BNSgrid_Get_BoxAndCoords_of_xyz(grid1, &X,&Y,&Z, 
                                            b,px[i],py[i],pz[i]);
-      if(b1<0) errorexit("Interpolate_Var_From_Grid1_To_Grid2: "
-                         "could not find X,Y,Z on grid1.");
+      if(b1<0)
+      {
+        double x,y,z;
+        double *sigpm = box->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+        printf("b1=%d grid2: b=%d i=%d X=%g Y=%g Z=%g "
+               "sigpm[i]=%g sigpm[box->n1*(box->n1-1)]=%g\n",
+               b1, b,i,X,Y,Z, sigpm[i], sigpm[box->n1*(box->n1-1)]);
+        printf("b1=%d grid2: b=%d x=%g y=%g z=%g\n", b1, b,px[i],py[i],pz[i]);
+        box->x_of_X[3]((void *) box, -1,X*0.5,Y*0.5,Z);
+        x=box->x_of_X[1]((void *) box, i,X,Y,Z);
+        y=box->x_of_X[2]((void *) box, i,X,Y,Z);
+        z=box->x_of_X[3]((void *) box, i,X,Y,Z);
+        printf("b1=%d grid2: box->x_of_X => x=%g y=%g z=%g\n", b1, x,y,z);
+        errorexit("Interpolate_Var_From_Grid1_To_Grid2: "
+                  "could not find X,Y,Z on grid1.");
+      }
 
       /* get var at point X,Y,Z by interpolation */
       pv[i] = spec_interpolate(grid1->box[b1], grid1->box[b1]->v[cind], X,Y,Z);
