@@ -1719,7 +1719,7 @@ void m01_error_VectorFunc(int n, double *vec, double *fvec)
   int b, i;
   int n1 = grid->box[1]->n1;
   int n2 = grid->box[1]->n2;
-  double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
+  //double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
 
   /* set C1 */
   Setd("BNSdata_C1", vec[1]);
@@ -1732,8 +1732,8 @@ void m01_error_VectorFunc(int n, double *vec, double *fvec)
   copy_grid(grid, grid2, 0);
 
   /* reset sigma such that q=0 is at A=0 for box0/1 */
-  if(q_b1[Index(n1-1,n2-1,0)]<0.0)
-    reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
+  //if(q_b1[Index(n1-1,n2-1,0)]<0.0)
+  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 0, 1);
 
   /* initialize coords on grid2 */
   if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
@@ -1796,7 +1796,7 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
   int b, i;
   int n1 = grid->box[1]->n1;
   int n2 = grid->box[1]->n2;
-  double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+  //double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
 
   /* set C2 */
   Setd("BNSdata_C2", vec[1]);
@@ -1809,8 +1809,8 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
   copy_grid(grid, grid2, 0);
 
   /* reset sigma such that q=0 is at A=0 for box3/2 */
-  if(q_b2[Index(n1-1,n2-1,0)]<0.0)
-    reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
+  //if(q_b2[Index(n1-1,n2-1,0)]<0.0)
+  reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
 
   /* initialize coords on grid2 */
   if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
