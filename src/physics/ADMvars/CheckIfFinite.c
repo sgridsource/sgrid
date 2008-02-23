@@ -68,15 +68,17 @@ num = 0.0;
     {
       if(var==NULL) 
       {
-        printf("pointer to %s is NULL at ijk=%d:  x=%f y=%f z=%f\n",
-	     VarName(ivar),ijk,x[ijk],y[ijk],z[ijk]); 
+        printf("pointer to %s is NULL at ijk=%d: x=%g y=%g z=%g "
+               "box%d grid=%p X=%g Y=%g Z=%g\n",
+               VarName(ivar),ijk,x[ijk],y[ijk],z[ijk],
+  	       b, grid, X[ijk], Y[ijk], Z[ijk]); 
         continue;
       }
         
       if( !finite(var[ijk]) ) 
       {
         if(messageflag==0)
-          printf("NAN/INF: %s=%g at ijk=%d: x=%.6g y=%.6g z=%.6g "
+          printf("NAN/INF: %s=%g at ijk=%d: x=%g y=%g z=%g "
                  "box%d grid=%p X=%g Y=%g Z=%g\n", 
 	         VarName(ivar), var[ijk], ijk, x[ijk], y[ijk], z[ijk],
 	         b, grid, X[ijk], Y[ijk], Z[ijk]);
@@ -89,7 +91,7 @@ num = 0.0;
       else
       {
         if(messageflag>1)
-          printf("NAN/INF: %s=%g til    %d: x=%.6g y=%.6g z=%.6g "
+          printf("NAN/INF: %s=%g til    %d: x=%g y=%g z=%g "
                  "box%d grid=%p X=%g Y=%g Z=%g\n",
                  VarName(ivar), var[ijk_old], ijk_old,
                  x[ijk_old], y[ijk_old], z[ijk_old],
@@ -128,7 +130,7 @@ int ExitIfNAN(tGrid* grid)
   {
     printf("ExitIfNAN: %s is not finite after evolve!\n"  
 	   "  iteration %d\n"
-           "  crashtime %f, outdir %s\n",
+           "  crashtime %g, outdir %s\n",
 	   varname, grid->iteration+1, 
 	   (grid->iteration+1) * grid->dt, Gets("outdir"));
     errorexit("Too bad.");
