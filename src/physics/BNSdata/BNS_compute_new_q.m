@@ -43,7 +43,14 @@ tocompute = {
 
   (* compute u^0 in rotating frame *)
   oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
-  uzero == Sqrt[1/oouzerosqr],
+  Cif == (oouzerosqr==0),
+    oouzerosqr == -1,
+  Cif == end,
+  Cif == (oouzerosqr<0),
+    uzero == -Sqrt[-1/oouzerosqr],
+  Cif == else,
+    uzero == Sqrt[1/oouzerosqr],
+  Cif == end,
 
   (* killing vec xi^i in rotating frame, xi^a = (xi^0, xi^i) *)
   xi[a] == 0,

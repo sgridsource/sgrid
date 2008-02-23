@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 21.2.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 23.2.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -177,10 +177,41 @@ alpha2 - Psi4*(2.*(beta1*vR1 + beta2*vR2 + beta3*vR3) + pow2(beta1) +
      pow2(beta2) + pow2(beta3) + pow2(vR1) + pow2(vR2) + pow2(vR3))
 ;
 
+
+
+/* conditional */
+if (oouzerosqr == 0) {
+
+oouzerosqr
+=
+-1.
+;
+
+}
+/* if (oouzerosqr == 0) */
+
+
+
+
+/* conditional */
+if (oouzerosqr < 0) {
+
+uzero
+=
+-Sqrt(-1./oouzerosqr)
+;
+
+
+} else { /* if (!oouzerosqr < 0) */
+
 uzero
 =
 Sqrt(1/oouzerosqr)
 ;
+
+}
+/* if (oouzerosqr < 0) */
+
 
 xi1
 =
@@ -235,4 +266,4 @@ q[ijk]
 }  /* end of function */
 
 /* BNS_compute_new_q.c */
-/* nvars = 15, n* = 54,  n/ = 27,  n+ = 68, n = 149, O = 1 */
+/* nvars = 15, n* = 64,  n/ = 38,  n+ = 71, n = 173, O = 1 */
