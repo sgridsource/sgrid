@@ -56,7 +56,7 @@ num = 0.0;
     x=box->v[Ind("x")];
     y=box->v[Ind("y")];
     z=box->v[Ind("z")];
-    X=box->v[Ind("Z")];
+    X=box->v[Ind("X")];
     Y=box->v[Ind("Y")];
     Z=box->v[Ind("Z")];
 
