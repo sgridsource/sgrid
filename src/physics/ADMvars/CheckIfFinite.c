@@ -14,10 +14,14 @@ int CheckIfFinite(tGrid* grid, char *varname)
   double *var;
   int ivar;
   double num=0.0;
-  int ccc, ccc_old;
+  int ijk, ijk_old, b_old;
+  tGrid* grid_old;
   double *x; 
   double *y;  
   double *z;
+  double *X;
+  double *Y;
+  double *Z;
   int b;
   int messageflag=0;
 
@@ -49,44 +53,47 @@ num = 0.0;
   for (b = 0; b < grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
+    x=box->v[Ind("x")];
+    y=box->v[Ind("y")];
+    z=box->v[Ind("z")];
+    X=box->v[Ind("Z")];
+    Y=box->v[Ind("Y")];
+    Z=box->v[Ind("Z")];
 
     /* printf("Checking for INF or NAN in %s\n", varname); */
     ivar= Ind(varname);
     var = box->v[ivar]; 
  
-    forallpoints(box,ccc)
+    forallpoints(box,ijk)
     {
       if(var==NULL) 
       {
-        x=box->v[Ind("x")];
-        y=box->v[Ind("y")];
-        z=box->v[Ind("z")];
-        printf("pointer to %s is NULL at ccc=%d:  x=%f y=%f z=%f\n",
-	     VarName(ivar),ccc,x[ccc],y[ccc],z[ccc]); 
+        printf("pointer to %s is NULL at ijk=%d:  x=%f y=%f z=%f\n",
+	     VarName(ivar),ijk,x[ijk],y[ijk],z[ijk]); 
         continue;
       }
         
-      if( !finite(var[ccc]) ) 
+      if( !finite(var[ijk]) ) 
       {
         if(messageflag==0)
-        {
-	x=box->v[Ind("x")];
-	y=box->v[Ind("y")];
-	z=box->v[Ind("z")];
-	printf("NAN/INF: %s=%g at ccc=%d: box%d x=%g y=%g z=%g\n", 
-	       VarName(ivar), var[ccc], ccc, b, x[ccc], y[ccc], z[ccc]);
-        }
-        ccc_old=ccc;
+          printf("NAN/INF: %s=%g at ijk=%d: x=%.6g y=%.6g z=%.6g "
+                 "box%d grid=%p X=%g Y=%g Z=%g\n", 
+	         VarName(ivar), var[ijk], ijk, x[ijk], y[ijk], z[ijk],
+	         b, grid, X[ijk], Y[ijk], Z[ijk]);
+        ijk_old = ijk;
+        b_old   = b;
+        grid_old= grid;
         messageflag++;
         num++;
       }
       else
       {
         if(messageflag>1)
-          printf("NAN/INF: %s=%g til    %d: box%d x=%g y=%g z=%g\n",
-                 VarName(ivar), var[ccc_old], ccc_old, b,
-                 x[ccc_old], y[ccc_old], z[ccc_old]);
-                       
+          printf("NAN/INF: %s=%g til    %d: x=%.6g y=%.6g z=%.6g "
+                 "box%d grid=%p X=%g Y=%g Z=%g\n",
+                 VarName(ivar), var[ijk_old], ijk_old,
+                 x[ijk_old], y[ijk_old], z[ijk_old],
+                 b_old, grid_old, X[ijk_old], Y[ijk_old], Z[ijk_old]);
         messageflag=0;
       }
     }
