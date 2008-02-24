@@ -640,7 +640,7 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
   double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
   double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
   double X,R;
-  double Ac,Bc, q;
+  double Ac,Bc, Acmax, q;
   double vec[3];
   int i,check,stat,dom;
 
@@ -656,6 +656,7 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
     DelXR_of_AB_VectorFunc__box = grid->box[dom];
     DelXR_of_AB_VectorFunc__X = X;
     DelXR_of_AB_VectorFunc__R = R;
+    Acmax  = grid->box[dom]->bbox[1];
     vec[1] = 1e-7; /* initial guess is that Ac,Bc = 0,B*/
     vec[2] = B;
     stat = newton_linesrch_its(vec, 2, &check, 
@@ -663,26 +664,35 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
     if(check) printf("q_of_sigp_forgiven_Bphi: check=%d\n", check);  
     Ac = vec[1];
     Bc = vec[2];
-//printf("  stat=%d  dom=%d Ac=%g Bc=%g\n", stat,dom, Ac,Bc);
-    if(stat>=0 && Ac>=0.0 && Ac<=1.0 && Bc>=0.0 && Bc<=1.0) break;
+//printf("  sigp_Bphi=%g sigp_1phi=%g:\n"
+//"       X=%g R=%g: stat=%d dom=%d Ac=%g Bc=%g\n",
+//sigp_Bphi,sigp_1phi, X,R, stat,dom, Ac,Bc);
+    /* if(stat>=0 && Ac>=0.0 && Ac<=Acmax && Bc>=0.0 && Bc<=1.0) break; */
+    if(stat>=0 && dless(0.0,Ac) && dless(Ac,Acmax) &&
+                  dless(0.0,Bc) && dless(Bc,1.0)   ) break;
     dom = outerdom;
   }
-  if(stat<0 || dless(Ac,0.0) || dless(1.0,Ac) ||
+  if(stat<0 || dless(Ac,0.0) || dless(Acmax,Ac) ||
                dless(Bc,0.0) || dless(1.0,Bc)   )
   {
     printf("q_of_sigp_forgiven_Bphi: stat=%d dom=%d Ac=%g Bc=%g\n",
            stat,dom, Ac,Bc);
+    printf("q_of_sigp_forgiven_Bphi: X=%g R=%g for: A=0 B=%g phi=%g\n"
+           " sigp_Bphi=%g sigp_1phi=%g\n"
+           " ReCp_Bphi=%g ImCp_Bphi=%g ReCp_1phi=%g ImCp_1phi=%g\n",
+           X,R, B,phi, sigp_Bphi,sigp_1phi,
+           ReCp_Bphi,ImCp_Bphi, ReCp_1phi,ImCp_1phi);
     errorexit("q_of_sigp_forgiven_Bphi: could not find Ac,Bc");
   }
-  if(Ac<0.0) Ac=0.0; /* make sure we stay in our box */
-  if(Ac>1.0) Ac=1.0;
-  if(Bc<0.0) Bc=0.0;
-  if(Bc>1.0) Bc=1.0;
+  if(Ac<0.0)   Ac=0.0; /* make sure we stay in our box */
+  if(Ac>Acmax) Ac=Acmax;
+  if(Bc<0.0)   Bc=0.0;
+  if(Bc>1.0)   Bc=1.0;
 
   /* obtain q at Ac,Bc,phi by interpolation */
   /* grid->box[dom]->v[icoeffs]  contains coeffs of q in box */
   q = spec_interpolate(grid->box[dom], grid->box[dom]->v[icoeffs], Ac,Bc,phi);
-//printf("dom=%d Ac=%g Bc=%g  sigp_Bphi=%g q=%g\n",dom,Ac,Bc, sigp_Bphi,q);
+//printf("         dom=%d Ac=%g Bc=%g  sigp_Bphi=%g q=%g\n",dom,Ac,Bc, sigp_Bphi,q);
   qvec[1] = q;
 //qvec[1] = sigp_Bphi-0.9;
 }
@@ -838,9 +848,9 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       q_of_sigp_forgiven_Bphi__outerdom = outerdom;
       vec[1] = sigp_Bphi;
 //vec[1] = grid->box[dom]->v[isigma][Index(0,j,k)];
-//printf("itmax=%d tol=%g vec[1]=%g\n",itmax,tol,vec[1]);
+//printf("itmax=%d tol=%g vec[1]=%g B=%g phi=%g\n",itmax,tol,vec[1], B,phi);
       stat=newton_linesrch_its(vec, 1, &check,
-                             q_of_sigp_forgiven_Bphi, itmax, tol);
+                               q_of_sigp_forgiven_Bphi, itmax, tol);
       /* If q is nowhere negative newton_linesrch_its may not work. In this
          case we should probably search for the zero in (q - 1e-8). */
 //printf("stat=%d\n",stat);
@@ -1295,6 +1305,15 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
 
       /* get var at point X,Y,Z by interpolation */
       pv[i] = spec_interpolate(grid1->box[b1], grid1->box[b1]->v[cind], X,Y,Z);
+//if(!finite(pv[i]))
+//{
+//double x,y,z;
+//double *sigpm = box->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+//printf("b1=%d grid2: b=%d i=%d X=%g Y=%g Z=%g "
+//       "sigpm[i]=%g sigpm[box->n1*(box->n1-1)]=%g\n",
+//       b1, b,i,X,Y,Z, sigpm[i], sigpm[box->n1*(box->n1-1)]);
+//printf("b1=%d grid2: b=%d      x=%g y=%g z=%g\n", b1, b,px[i],py[i],pz[i]);
+//}
     }
   }
 }

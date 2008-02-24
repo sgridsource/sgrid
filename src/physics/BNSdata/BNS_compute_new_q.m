@@ -47,7 +47,7 @@ tocompute = {
     oouzerosqr == -1,
   Cif == end,
   Cif == (oouzerosqr<0),
-    uzero == -Sqrt[-1/oouzerosqr],
+    uzero == -1, (* -Sqrt[-1/oouzerosqr], *)
   Cif == else,
     uzero == Sqrt[1/oouzerosqr],
   Cif == end,

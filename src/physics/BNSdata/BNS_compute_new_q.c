@@ -198,7 +198,7 @@ if (oouzerosqr < 0) {
 
 uzero
 =
--Sqrt(-1./oouzerosqr)
+-1.
 ;
 
 
@@ -266,4 +266,4 @@ q[ijk]
 }  /* end of function */
 
 /* BNS_compute_new_q.c */
-/* nvars = 15, n* = 64,  n/ = 38,  n+ = 71, n = 173, O = 1 */
+/* nvars = 15, n* = 64,  n/ = 37,  n+ = 70, n = 171, O = 1 */
