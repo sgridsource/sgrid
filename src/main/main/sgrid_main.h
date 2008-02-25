@@ -22,6 +22,10 @@
 #define dless(a,b) ((a)<(b)-dequaleps)
 #define dequal(a,b) (!(dless(a,b)||dless(b,a)))
 
+/* approx. <= and >= with dequaleps tolerance */
+#define dlesseq(a,b) ( (a)<(b)+dequaleps )
+#define dgreatereq(a,b) ( (a)>(b)-dequaleps )
+
 
 /* parameters.c */
 void AddPar(char *name, char *value, char *description);
