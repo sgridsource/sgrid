@@ -631,6 +631,7 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
   int icoeffs      = q_of_sigp_forgiven_Bphi__icoeffs;
   int innerdom     = q_of_sigp_forgiven_Bphi__innerdom;
   int outerdom     = q_of_sigp_forgiven_Bphi__outerdom;
+  int iq = Ind("BNSdata_q");
   double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
   double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
   double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
@@ -668,11 +669,11 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
 //"       X=%g R=%g: stat=%d dom=%d Ac=%g Bc=%g\n",
 //sigp_Bphi,sigp_1phi, X,R, stat,dom, Ac,Bc);
     /* if(stat>=0 && Ac>=0.0 && Ac<=Acmax && Bc>=0.0 && Bc<=1.0) break; */
-    if(stat>=0 && dless(0.0,Ac) && dless(Ac,Acmax) &&
+    if(stat>=0 && dless(0.0,Ac) && dless(Ac,1.0) &&
                   dless(0.0,Bc) && dless(Bc,1.0)   ) break;
     dom = outerdom;
   }
-  if(stat<0 || dless(Ac,0.0) || dless(Acmax,Ac) ||
+  if(stat<0 || dless(Ac,0.0) || dless(1.0,Ac) ||
                dless(Bc,0.0) || dless(1.0,Bc)   )
   {
     printf("q_of_sigp_forgiven_Bphi: stat=%d dom=%d Ac=%g Bc=%g\n",
@@ -684,14 +685,19 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
            ReCp_Bphi,ImCp_Bphi, ReCp_1phi,ImCp_1phi);
     errorexit("q_of_sigp_forgiven_Bphi: could not find Ac,Bc");
   }
-  if(Ac<0.0)   Ac=0.0; /* make sure we stay in our box */
-  if(Ac>Acmax) Ac=Acmax;
-  if(Bc<0.0)   Bc=0.0;
-  if(Bc>1.0)   Bc=1.0;
+  if(Ac<0.0) Ac=0.0; /* make sure we stay in our box */
+  if(Ac>1.0) Ac=1.0;
+  if(Bc<0.0) Bc=0.0;
+  if(Bc>1.0) Bc=1.0;
 
-  /* obtain q at Ac,Bc,phi by interpolation */
-  /* grid->box[dom]->v[icoeffs]  contains coeffs of q in box */
-  q = spec_interpolate(grid->box[dom], grid->box[dom]->v[icoeffs], Ac,Bc,phi);
+  /* if we get point in innerdom with Acmax<Ac<1 we retrun a huge value
+     for q, so that newton_linesrch_its thinks it has to backtrack... */
+  if(Ac>Acmax && dom==0)      q = 1000.0*grid->box[5]->v[iq][0];
+  else if(Ac>Acmax && dom==3) q = 1000.0*grid->box[4]->v[iq][0];
+  else
+    /* obtain q at Ac,Bc,phi by interpolation */
+    /* grid->box[dom]->v[icoeffs]  contains coeffs of q in box */
+    q = spec_interpolate(grid->box[dom], grid->box[dom]->v[icoeffs],Ac,Bc,phi);
 //printf("         dom=%d Ac=%g Bc=%g  sigp_Bphi=%g q=%g\n",dom,Ac,Bc, sigp_Bphi,q);
   qvec[1] = q;
 //qvec[1] = sigp_Bphi-0.9;

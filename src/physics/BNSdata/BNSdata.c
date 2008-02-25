@@ -38,6 +38,8 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
   int pr);
 double GetInnerRestMass(tGrid *grid, int bi);
+void m01_guesserror_VectorFunc(int n, double *vec, double *fvec);
+void m02_guesserror_VectorFunc(int n, double *vec, double *fvec);
 void m0_errors_VectorFunc(int n, double *vec, double *fvec);
 void m01_error_VectorFunc(int n, double *vec, double *fvec);
 void m02_error_VectorFunc(int n, double *vec, double *fvec);
@@ -254,11 +256,16 @@ int BNSdata_solve(tGrid *grid)
   write_grid(grid);
   grid->time += 1.0;
 
-Yo(1);CheckIfFinite(grid,  "BNSdata_q");
+//Yo(1);CheckIfFinite(grid,  "BNSdata_q");
 
   /* start main iterations */
   prdivider(1);
   printf("BNSdata_solve: starting main iteration loop ...\n");
+
+  /* choose initial Newton_tol*/
+  F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+  normresnonlin = GridL2Norm(vlFu);
+  Newton_tol = max2(normresnonlin*0.1, tol*0.1);
 
   /* main iteration loop, do it until res is small enough */
   for(it=1; it <= itmax; it++)
@@ -284,35 +291,17 @@ Yo(1);CheckIfFinite(grid,  "BNSdata_q");
     else
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
-Yo(2);
-CheckIfFinite(grid,  "BNSdata_q");
-CheckIfFinite(grid,  "BNSdata_Psi");
+//Yo(2);
+//CheckIfFinite(grid,  "BNSdata_q");
+//CheckIfFinite(grid,  "BNSdata_Psi");
 
     /* print C1/2 we used before */
     printf("old: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
-//    /* choose C1/2 such that q<0 at origin x=y=z=0 */
-//    for(check=1; check;)
-//    {
-//      int n1 = grid->box[1]->n1;
-//      int n2 = grid->box[1]->n2;
-//      double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
-//      double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
-//
-//     BNS_compute_new_q(grid);
-//      check=0;
-//      if(q_b1[Index(n1-1,n2-1,0)]>=0.0)
-//        { Setd("BNSdata_C1", 0.99*Getd("BNSdata_C1"));  check=1; }
-//      if(q_b2[Index(n1-1,n2-1,0)]>=0.0)
-//        { Setd("BNSdata_C2", 0.99*Getd("BNSdata_C2"));  check=1; }
-//    }
-
     /* choose C1/2 such that rest masses are not too big or too small */
-    for(check=1; check;)
+    for(i=0; i<1000; i++)
     {
-      int n1 = grid->box[1]->n1;
-      int n2 = grid->box[1]->n2;
       double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
       double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
       double m01, m02;
@@ -323,40 +312,63 @@ CheckIfFinite(grid,  "BNSdata_Psi");
 
       check = 0;
 
-      if(m01 > 1.2*Getd("BNSdata_m01"))
-        { Setd("BNSdata_C1", 0.9999*Getd("BNSdata_C1"));  check=1; }
-      else if(m01 < 0.8*Getd("BNSdata_m01"))
-        { Setd("BNSdata_C1", 1.001*Getd("BNSdata_C1"));  check=1; }
+      if(m01 > 1.1*Getd("BNSdata_m01"))
+        { Setd("BNSdata_C1", 0.999*Getd("BNSdata_C1"));  check=1; }
+      else if(m01 < 0.9*Getd("BNSdata_m01"))
+        { Setd("BNSdata_C1", 1.002*Getd("BNSdata_C1"));  check=1; }
 
-      if(m02 > 1.2*Getd("BNSdata_m02"))
-        { Setd("BNSdata_C2", 0.9999*Getd("BNSdata_C2"));  check=1; }
-      else if(m02 < 0.8*Getd("BNSdata_m02"))
-        { Setd("BNSdata_C2", 1.001*Getd("BNSdata_C2"));  check=1; }
+      if(m02 > 1.1*Getd("BNSdata_m02"))
+        { Setd("BNSdata_C2", 0.999*Getd("BNSdata_C2"));  check=1; }
+      else if(m02 < 0.9*Getd("BNSdata_m02"))
+        { Setd("BNSdata_C2", 1.002*Getd("BNSdata_C2"));  check=1; }
+
+      if(check==0) break;
     }
-    printf("guess: BNSdata_C1=%g BNSdata_C2=%g\n",
-           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
-Yo(3);
-CheckIfFinite(grid,  "BNSdata_q");
-
-    /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
+    /* refine guess for C1/2 */
     m0_errors_VectorFunc__grid = grid;
     Cvec[1] = Getd("BNSdata_C1");
-    Cvec[2] = Getd("BNSdata_C2");
+    stat = newton_linesrch_its(Cvec, 1, &check, m01_guesserror_VectorFunc,
+                               30, max2(normresnonlin*0.1, tol*0.1));
+    if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);
+
+    m0_errors_VectorFunc__grid = grid;
+    Cvec[1] = Getd("BNSdata_C2");
+    stat = newton_linesrch_its(Cvec, 1, &check, m02_guesserror_VectorFunc,
+                               30, max2(normresnonlin*0.1, tol*0.1));
+    if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);
+
+    /* print guess for C1/2 */                                        
+    printf("guess: BNSdata_C1=%g BNSdata_C2=%g\n",
+           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+//Yo(3);
+//CheckIfFinite(grid,  "BNSdata_q");
+
+    /* compute error so far */
+    forallboxes(grid, bi)
+    {
+      double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+      forallpoints(grid->box[bi], i)
+        if( BNSdata_q[i]<0.0 )  BNSdata_q[i] = 0.0;
+    }
     F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
     normresnonlin = GridL2Norm(vlFu);
     printf("BNSdata_solve step %d: error = %.4e "
            "(before adjusting q)\n", it, normresnonlin);
-//    stat = newton_linesrch_its(Cvec, 2, &check, m0_errors_VectorFunc,
-//                               30, max2(normresnonlin*0.1, tol*0.1));
+
+    /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
+    m0_errors_VectorFunc__grid = grid;
+    Cvec[1] = Getd("BNSdata_C1");
     stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
-                                30, max2(normresnonlin*0.1, tol*0.1));
-    if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
-    stat = newton_linesrch_its(Cvec+1, 1, &check, m02_error_VectorFunc,
-                                30, max2(normresnonlin*0.1, tol*0.1));
+                               100, max2(normresnonlin*0.01, tol*0.1));
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C1", Cvec[1]);
-    Setd("BNSdata_C2", Cvec[2]);
+
+    Cvec[1] = Getd("BNSdata_C2");
+    stat = newton_linesrch_its(Cvec, 1, &check, m02_error_VectorFunc,
+                               100, max2(normresnonlin*0.01, tol*0.1));
+    if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
+    Setd("BNSdata_C2", Cvec[1]);
     printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
@@ -374,6 +386,9 @@ CheckIfFinite(grid,  "BNSdata_q");
     printf("BNSdata_solve step %d: residual = %.4e\n", it, normresnonlin);
     prdivider(1);  fflush(stdout);
     if(normresnonlin<tol) break;
+
+    /* set new tol for Newton */
+    Newton_tol = normresnonlin*0.1;
 
     /* write current iteration if we are not done yet and increase counters */
     if(it<=itmax) write_grid(grid);
@@ -1653,6 +1668,30 @@ double GetInnerRestMass(tGrid *grid, int bi)
   return InnerVolumeIntergral(grid, bi, Ind("BNSdata_temp1"));
 }
 
+/* guess error in m01 from inner Volume int., but without adjusting
+   surfaces */
+void m01_guesserror_VectorFunc(int n, double *vec, double *fvec)
+{
+  double m01;
+
+  Setd("BNSdata_C1", vec[1]);
+  BNS_compute_new_q(m0_errors_VectorFunc__grid);
+  m01 = GetInnerRestMass(m0_errors_VectorFunc__grid, 0);
+  fvec[1] = m01 - Getd("BNSdata_m01");
+}
+
+/* guess error in m02 from inner Volume int., but without adjusting
+   surfaces */
+void m02_guesserror_VectorFunc(int n, double *vec, double *fvec)
+{
+  double m02;
+
+  Setd("BNSdata_C2", vec[1]);
+  BNS_compute_new_q(m0_errors_VectorFunc__grid);
+  m02 = GetInnerRestMass(m0_errors_VectorFunc__grid, 3);
+  fvec[1] = m02 - Getd("BNSdata_m02");
+}
+
 /* compute differences m01/2 - BNSdata_m01/2 */
 void m0_errors_VectorFunc(int n, double *vec, double *fvec)
 {
@@ -1755,8 +1794,8 @@ void m01_error_VectorFunc(int n, double *vec, double *fvec)
 
   /* compute new q */
   BNS_compute_new_q(grid);
-grid->time=-1000;
-write_grid(grid);
+//grid->time=-140;
+//write_grid(grid);
 
   /* make new grid2, which is an exact copy of grid */
   grid2 = make_empty_grid(grid->nvariables, 0);
@@ -1779,7 +1818,7 @@ write_grid(grid);
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
+  //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));
@@ -1789,8 +1828,11 @@ write_grid(grid);
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSx"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSy"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSz"));
-CheckIfFinite(grid,  "BNSdata_q");
-CheckIfFinite(grid2, "BNSdata_q");
+  BNS_compute_new_q(grid2);
+//grid2->time=-120;
+//write_grid(grid2);
+//CheckIfFinite(grid,  "BNSdata_q");
+//CheckIfFinite(grid2, "BNSdata_q");
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
 //  forallboxes(grid2, b)
@@ -1812,8 +1854,8 @@ CheckIfFinite(grid2, "BNSdata_q");
 
   printf("m01_error_VectorFunc: C1=%g  m01=%g\n", vec[1], m01);
   fflush(stdout);
-grid->time=-100;
-write_grid(grid);
+//grid->time=-100;
+//write_grid(grid);
 
   fvec[1] = m01 - Getd("BNSdata_m01");
 }
@@ -1837,6 +1879,8 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
 
   /* compute new q */
   BNS_compute_new_q(grid);
+//grid->time=-240;
+//write_grid(grid);
 
   /* make new grid2, which is an exact copy of grid */
   grid2 = make_empty_grid(grid->nvariables, 0);
@@ -1859,7 +1903,7 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
+  //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));
@@ -1869,6 +1913,9 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSx"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSy"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSz"));
+  BNS_compute_new_q(grid2);
+//grid2->time=-230;
+//write_grid(grid2);
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
 //  forallboxes(grid2, b)
@@ -1890,8 +1937,8 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
 
   printf("m02_error_VectorFunc: C2=%g  m02=%g\n", vec[1], m02);
   fflush(stdout);
-grid->time=-200;
-write_grid(grid);
+//grid->time=-200;
+//write_grid(grid);
   
   fvec[1] = m02 - Getd("BNSdata_m02");
 }
