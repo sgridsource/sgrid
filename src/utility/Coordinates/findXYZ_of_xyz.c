@@ -81,9 +81,9 @@ int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,
     X1=*X; Y1=*Y; Z1=*Z;
     stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
     if(stat<0) continue;
-    if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
-    if(dless(Y1,box->bbox[2]) || dless(box->bbox[3],Y1)) continue;
-    if(dless(Z1,box->bbox[4]) || dless(box->bbox[5],Z1)) continue;
+    if(dlesseq(X1,box->bbox[0]) || dlesseq(box->bbox[1],X1)) continue;
+    if(dlesseq(Y1,box->bbox[2]) || dlesseq(box->bbox[3],Y1)) continue;
+    if(dlesseq(Z1,box->bbox[4]) || dlesseq(box->bbox[5],Z1)) continue;
     /* round X1,Y1,Z1 inside box */
     if(X1 < box->bbox[0]) X1 = box->bbox[0];
     if(X1 > box->bbox[1]) X1 = box->bbox[1];
@@ -116,9 +116,9 @@ int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
     X1=*X; Y1=*Y; Z1=*Z;
     stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
     if(stat<0) continue;
-    if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
-    if(dless(Y1,box->bbox[2]) || dless(box->bbox[3],Y1)) continue;
-    if(dless(Z1,box->bbox[4]) || dless(box->bbox[5],Z1)) continue;
+    if(dlesseq(X1,box->bbox[0]) || dlesseq(box->bbox[1],X1)) continue;
+    if(dlesseq(Y1,box->bbox[2]) || dlesseq(box->bbox[3],Y1)) continue;
+    if(dlesseq(Z1,box->bbox[4]) || dlesseq(box->bbox[5],Z1)) continue;
     /* round X1,Y1,Z1 inside box */
     if(X1 < box->bbox[0]) X1 = box->bbox[0];
     if(X1 > box->bbox[1]) X1 = box->bbox[1];
@@ -319,9 +319,9 @@ int b_X_of_x_forgiven_YZ(tGrid *grid, double *X, double x, double Y, double Z)
 //printf("%g %g   %g %g   %g %g\n",
 //box->bbox[0],box->bbox[1], box->bbox[2],box->bbox[3], box->bbox[4],box->bbox[5]);
     if(stat<0) continue;
-    if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
-    if(dless(Y,box->bbox[2]) || dless(box->bbox[3],Y)) continue;
-    if(dless(Z,box->bbox[4]) || dless(box->bbox[5],Z)) continue;
+    if(dlesseq(X1,box->bbox[0]) || dlesseq(box->bbox[1],X1)) continue;
+    if(dlesseq(Y,box->bbox[2]) || dlesseq(box->bbox[3],Y)) continue;
+    if(dlesseq(Z,box->bbox[4]) || dlesseq(box->bbox[5],Z)) continue;
     /* round X1 inside box */
     if(X1 < box->bbox[0]) X1 = box->bbox[0];
     if(X1 > box->bbox[1]) X1 = box->bbox[1];
