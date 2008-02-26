@@ -15,6 +15,8 @@ void setADMvars(tGrid *grid);
 void BNS_CTS(tVarList *vlFu, tVarList *vlu, tVarList *vlJdu, 
              tVarList *vldu, tVarList *vlduDerivs, int nonlin);
 void BNS_compute_new_q(tGrid *grid);
+double BNS_compute_new_q_atXYZ(tGrid *grid, int bi,
+                               double X, double Y, double Z);
 
 /* for solving all ell. eqns together */
 void F_BNSdata(tVarList *vlFu, tVarList *vlu,
