@@ -848,6 +848,9 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
                check, stat);
       A0 = vec[1];
 //printf("stat=%d: zero in q at A=A0=%g\n", stat, A0); Yo(1);
+      /* go back to initial guess if we leave A1<A0<A2 in outerdom */
+      if( (A0 < A1 || A0 > A2) && dom==outerdom )
+        A0 = A1 - q1*(A2-A1)/(q2-q1);
       if(A0 < A1 - 0.05*(A2-A1) || A0 > A2 + 0.05*(A2-A1))
       {
         printf("reset_Coordinates_AnsorgNS_sigma_pm: B=%g phi=%g  "
