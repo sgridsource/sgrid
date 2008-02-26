@@ -310,6 +310,7 @@ int BNSdata_solve(tGrid *grid)
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
     /* choose C1/2 such that rest masses are not too big or too small */
+/*
     for(i=0; i<1000; i++)
     {
       double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
@@ -333,8 +334,9 @@ int BNSdata_solve(tGrid *grid)
 
       if(check==0) break;
     }
-
+*/
     /* refine guess for C1/2 */
+/*
     m0_errors_VectorFunc__grid = grid;
     Cvec[1] = Getd("BNSdata_C1");
     stat = newton_linesrch_its(Cvec, 1, &check, m01_guesserror_VectorFunc,
@@ -346,7 +348,7 @@ int BNSdata_solve(tGrid *grid)
     stat = newton_linesrch_its(Cvec, 1, &check, m02_guesserror_VectorFunc,
                                30, max2(Delta_m0*0.1, tol*0.1));
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);
-
+*/
     /* print guess for C1/2 */                                        
     printf("guess: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));

@@ -815,7 +815,13 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
     if(inz_in>=0)                   { i1=inz_in;   i2=inz_in+1; dom=innerdom;}
     else if(inz_out==0)             { i1=0;         i2=1;       dom=innerdom;}
     else if(inz_out<n1 && inz_out>0){ i1=inz_out-1; i2=inz_out; dom=outerdom;}
-    else errorexit("reset_Coordinates_AnsorgNS_sigma_pm: q>0 everywhere???");
+    else
+    {
+      printf("reset_Coordinates_AnsorgNS_sigma_pm: innerdom=%d  B=%g phi=%g  "
+             "inz_in=%d inz_out=%d\n", innerdom, B,phi, inz_in,inz_out);
+      printf("q_in[Index(n1-1,j,k)]=%g\n", q_in[Index(n1-1,j,k)]);
+      errorexit("reset_Coordinates_AnsorgNS_sigma_pm: q>0 everywhere???");
+    }
     A1 = grid->box[dom]->v[iX][Index(i1,j,k)];
     A2 = grid->box[dom]->v[iX][Index(i2,j,k)];
     q1 = grid->box[dom]->v[iq][Index(i1,j,k)];
