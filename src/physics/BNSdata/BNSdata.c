@@ -292,15 +292,15 @@ int BNSdata_solve(tGrid *grid)
     else
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
-    /* compute error in masses */
+    /* compute error in masses, and exit if smaller than tol */
     m01 = GetInnerRestMass(grid, 0);
     m02 = GetInnerRestMass(grid, 3);
     Delta_m0 = pow(m01-Getd("BNSdata_m01"), 2) +
                pow(m02-Getd("BNSdata_m02"), 2);
-    Delta_m0 = sqrt(Delta_m0);
+    Delta_m0 = sqrt(Delta_m0)/(Getd("BNSdata_m01")+Getd("BNSdata_m02"));
     printf("BNSdata_solve step %d: rest mass error = %.4e "
            "(before adjusting q)\n", it, Delta_m0);
-
+    if(Delta_m0<tol) break;
 //Yo(2);
 //CheckIfFinite(grid,  "BNSdata_q");
 //CheckIfFinite(grid,  "BNSdata_Psi");
