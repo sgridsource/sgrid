@@ -1616,7 +1616,8 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
   {
     if( (dequal(Y, 0.0) || dequal(Y, 1.0)) )
     {
-      b1 = b_X_of_x_forgiven_YZ(grid1, &X, x, Y,Z);
+      blist[0]=0;  blist[1]=1;
+      b1 = b_X_of_x_forgiven_YZ_inboxlist(grid1, blist,2, &X, x, Y,Z);
     }
     else
     {
@@ -1625,11 +1626,12 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
                                   x,y,z);
     }
   }
-  else
+  else /* b==2 */
   {
     if( (dequal(Y, 0.0) || dequal(Y, 1.0)) )
     {
-      b1 = b_X_of_x_forgiven_YZ(grid1, &X, x, Y,Z);
+      blist[0]=3;  blist[1]=2;
+      b1 = b_X_of_x_forgiven_YZ_inboxlist(grid1, blist,2, &X, x, Y,Z);
     }
     else
     {
