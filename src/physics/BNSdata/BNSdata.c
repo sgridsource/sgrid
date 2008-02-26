@@ -308,6 +308,9 @@ int BNSdata_solve(tGrid *grid)
     /* print C1/2 we used before */
     printf("old: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+    m01 = GetInnerRestMass(grid, 0);
+    m02 = GetInnerRestMass(grid, 3);
+    printf("     => m01=%.19g m02=%.19g\n", m01, m02);
 
     /* choose C1/2 such that rest masses are not too big or too small */
     for(i=0; i<1000; i++)
