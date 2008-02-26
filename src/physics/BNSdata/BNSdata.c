@@ -263,10 +263,10 @@ int BNSdata_solve(tGrid *grid)
   prdivider(1);
   printf("BNSdata_solve: starting main iteration loop ...\n");
 
-  /* choose initial Newton_tol*/
-  F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
-  normresnonlin = GridL2Norm(vlFu);
-  Newton_tol = max2(normresnonlin*0.1, tol*0.1);
+//  /* choose initial Newton_tol */
+//  F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+//  normresnonlin = GridL2Norm(vlFu);
+//  Newton_tol = max2(normresnonlin*0.001, tol*0.1);
 
   /* main iteration loop, do it until res is small enough */
   for(it=1; it <= itmax; it++)
@@ -360,13 +360,13 @@ int BNSdata_solve(tGrid *grid)
     m0_errors_VectorFunc__grid = grid;
     Cvec[1] = Getd("BNSdata_C1");
     stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
-                               100, max2(Delta_m0*0.01, tol*0.1));
+                               1000, tol*0.01);
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C1", Cvec[1]);
 
     Cvec[1] = Getd("BNSdata_C2");
     stat = newton_linesrch_its(Cvec, 1, &check, m02_error_VectorFunc,
-                               100, max2(Delta_m0*0.01, tol*0.1));
+                               1000, tol*0.01);
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C2", Cvec[1]);
     printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
