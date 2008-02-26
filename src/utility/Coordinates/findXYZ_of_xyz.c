@@ -330,3 +330,35 @@ int b_X_of_x_forgiven_YZ(tGrid *grid, double *X, double x, double Y, double Z)
   }
   return -bi;
 }
+
+/* find X from x for a given Y,Z (Note: X also contains initial guess)
+   search in all boxes in the list: bi = blist[0], blist[1], ..., blist[nb-1]
+   return index of box in which X,Y,Z are found or error code if failure */
+int b_X_of_x_forgiven_YZ_inboxlist(tGrid *grid, int *blist, int nb, 
+                                   double *X, double x, double Y, double Z)
+{
+  double X1;
+  int stat, i, bi;
+
+  for(i=0; i<nb; i++)
+  {
+    bi = blist[i];
+    tBox *box = grid->box[bi];
+
+    X1=*X;
+    stat = X_of_x_forgiven_YZ(box, &X1, x, Y,Z);
+//printf("bi=%d: stat=%d X1=%g Y=%g Z=%g\n", bi, stat, X1, Y,Z);
+//printf("%g %g   %g %g   %g %g\n",
+//box->bbox[0],box->bbox[1], box->bbox[2],box->bbox[3], box->bbox[4],box->bbox[5]);
+    if(stat<0) continue;
+    if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
+    if(dless(Y,box->bbox[2]) || dless(box->bbox[3],Y)) continue;
+    if(dless(Z,box->bbox[4]) || dless(box->bbox[5],Z)) continue;
+    /* round X1 inside box */
+    if(X1 < box->bbox[0]) X1 = box->bbox[0];
+    if(X1 > box->bbox[1]) X1 = box->bbox[1];
+    *X=X1;
+    return bi; /* return box index if success */
+  }
+  return -bi;
+}
