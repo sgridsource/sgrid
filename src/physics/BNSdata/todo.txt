@@ -1,1 +1,2 @@
-*replace all dless by dlesseq or dgreatereq (commit main)
+*replace q interpolation by BNS_compute_new_q_atXYZ in
+ reset_Coordinates_AnsorgNS_sigma_pm
