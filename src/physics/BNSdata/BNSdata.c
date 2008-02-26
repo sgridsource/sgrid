@@ -368,6 +368,10 @@ int BNSdata_solve(tGrid *grid)
     Setd("BNSdata_C2", Cvec[1]);
     printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+    BNS_compute_new_q(grid);
+    m01 = GetInnerRestMass(grid, 0);
+    m02 = GetInnerRestMass(grid, 3);
+    printf("     => m01=%.19g m02=%.19g\n", m01, m02);
 
     /* set q to zero if q<0, and also in region 1 & 2 */
     forallboxes(grid, bi)
