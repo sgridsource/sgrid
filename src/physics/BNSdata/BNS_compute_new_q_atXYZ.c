@@ -86,10 +86,25 @@ double xi3;
 FirstDerivsOf_S(box,index_BNSdata_Sigma,                                    Ind("BNSdata_Sigmax")); 
 
 
+if(box->x_of_X[1] != NULL) { 
+
+
 x = box->x_of_X[1]((void *) box, -1, X,Y,Z); 
 
 
 y = box->x_of_X[2]((void *) box, -1, X,Y,Z); 
+
+
+} else { 
+
+
+x = X; 
+
+
+y = Y; 
+
+
+} 
 
 
 spec_Coeffs(box, BNSPsi, temp4); 
@@ -336,4 +351,4 @@ return q;
 }  /* end of function */
 
 /* BNS_compute_new_q_atXYZ.c */
-/* nvars = 13, n* = 63,  n/ = 35,  n+ = 71, n = 169, O = 1 */
+/* nvars = 13, n* = 63,  n/ = 35,  n+ = 72, n = 170, O = 1 */

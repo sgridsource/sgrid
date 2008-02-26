@@ -18,8 +18,13 @@ tocompute = {
   Cinstruction == "FirstDerivsOf_S(box,index_BNSdata_Sigma,
                                    Ind(\"BNSdata_Sigmax\"));",
   (* x,y *)
+  Cinstruction == "if(box->x_of_X[1] != NULL) {",
   Cinstruction == "x = box->x_of_X[1]((void *) box, -1, X,Y,Z);",
   Cinstruction == "y = box->x_of_X[2]((void *) box, -1, X,Y,Z);",
+  Cinstruction == "} else {",
+  Cinstruction == "x = X;",
+  Cinstruction == "y = Y;",
+  Cinstruction == "}",
 
   (* Psi, B[a], alphaP, Sigma, dSigma[a], vRS[a] by interpolation *)
   Cinstruction == "spec_Coeffs(box, BNSPsi, temp4);",
