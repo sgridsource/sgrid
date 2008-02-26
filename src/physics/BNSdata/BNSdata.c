@@ -391,8 +391,8 @@ int BNSdata_solve(tGrid *grid)
     prdivider(1);  fflush(stdout);
     if(normresnonlin<tol) break;
 
-    /* set new tol for Newton */
-    Newton_tol = normresnonlin*0.1;
+//    /* set new tol for Newton */
+//    Newton_tol = normresnonlin*0.1;
 
     /* write current iteration if we are not done yet and increase counters */
     if(it<=itmax) write_grid(grid);
