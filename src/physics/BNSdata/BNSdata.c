@@ -191,6 +191,7 @@ int BNSdata_solve(tGrid *grid)
   tVarList *vldummy;
   double Cvec[3];
   double m0errorvec[3];
+  double m01, m02, Delta_m0;
   int it, check, stat, bi, i;
 
   /* choose linear solver */
@@ -291,6 +292,15 @@ int BNSdata_solve(tGrid *grid)
     else
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
+    /* compute error in masses */
+    m01 = GetInnerRestMass(grid, 0);
+    m02 = GetInnerRestMass(grid, 3);
+    Delta_m0 = pow(m01-Getd("BNSdata_m01"), 2) +
+               pow(m02-Getd("BNSdata_m02"), 2);
+    Delta_m0 = sqrt(Delta_m0);
+    printf("BNSdata_solve step %d: rest mass error = %.4e "
+           "(before adjusting q)\n", it, Delta_m0);
+
 //Yo(2);
 //CheckIfFinite(grid,  "BNSdata_q");
 //CheckIfFinite(grid,  "BNSdata_Psi");
@@ -304,7 +314,6 @@ int BNSdata_solve(tGrid *grid)
     {
       double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
       double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
-      double m01, m02;
 
       BNS_compute_new_q(grid);
       m01 = GetInnerRestMass(grid, 0);
@@ -329,13 +338,13 @@ int BNSdata_solve(tGrid *grid)
     m0_errors_VectorFunc__grid = grid;
     Cvec[1] = Getd("BNSdata_C1");
     stat = newton_linesrch_its(Cvec, 1, &check, m01_guesserror_VectorFunc,
-                               30, max2(normresnonlin*0.1, tol*0.1));
+                               30, max2(Delta_m0*0.1, tol*0.1));
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);
 
     m0_errors_VectorFunc__grid = grid;
     Cvec[1] = Getd("BNSdata_C2");
     stat = newton_linesrch_its(Cvec, 1, &check, m02_guesserror_VectorFunc,
-                               30, max2(normresnonlin*0.1, tol*0.1));
+                               30, max2(Delta_m0*0.1, tol*0.1));
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);
 
     /* print guess for C1/2 */                                        
@@ -344,29 +353,17 @@ int BNSdata_solve(tGrid *grid)
 //Yo(3);
 //CheckIfFinite(grid,  "BNSdata_q");
 
-    /* compute error so far */
-    forallboxes(grid, bi)
-    {
-      double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-      forallpoints(grid->box[bi], i)
-        if( BNSdata_q[i]<0.0 )  BNSdata_q[i] = 0.0;
-    }
-    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
-    normresnonlin = GridL2Norm(vlFu);
-    printf("BNSdata_solve step %d: error = %.4e "
-           "(before adjusting q)\n", it, normresnonlin);
-
     /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
     m0_errors_VectorFunc__grid = grid;
     Cvec[1] = Getd("BNSdata_C1");
     stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
-                               100, max2(normresnonlin*0.01, tol*0.1));
+                               100, max2(Delta_m0*0.01, tol*0.1));
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C1", Cvec[1]);
 
     Cvec[1] = Getd("BNSdata_C2");
     stat = newton_linesrch_its(Cvec, 1, &check, m02_error_VectorFunc,
-                               100, max2(normresnonlin*0.01, tol*0.1));
+                               100, max2(Delta_m0*0.01, tol*0.1));
     if(check || stat<0) printf(": check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C2", Cvec[1]);
     printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",

@@ -619,6 +619,22 @@ void DelXR_of_AB_VectorFunc(int n, double *vec, double *fvec)
   fvec[2] = Rc-R;
 }
 
+/* find diff. Xc(A,B,phi)-X for any A 
+   calls DelXR_of_AB_VectorFunc above and uses the same global vars,
+   but ensures that B=0 */
+void DelXR_of_A_forB0_VectorFunc(int n, double *vec1, double *fvec1)
+{
+  tBox *box = DelXR_of_AB_VectorFunc__box;
+  double vec[3];
+  double fvec[3];
+  
+  vec[1] = vec1[1];
+  vec[2] = 0.0; /* since B=0 */
+  DelXR_of_AB_VectorFunc(2, vec, fvec);
+  if(box->b<2) fvec1[1] = fvec[1]; /* in box0/1 R=0 at B=0 */
+  else         fvec1[1] = fvec[2]; /* in box3/2 R=0 at B=0 */
+}
+
 /* WE NEED to find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
 /* q as a func of sigp for a given A=0, B, phi */
 void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
@@ -641,13 +657,17 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
   double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
   double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
   double X,R;
-  double Ac,Bc, Acmax, q;
+  double Ac,Bc, Acin,Bcin, Acout,Bcout, Acmax, q;
   double vec[3];
-  int i,check,stat,dom;
+  int i, check, stat,statin,statout, dom;
 
   /* use Eq. (22), (23) or (24) at A=0 to compute X,R */
   X = ReCp_Bphi - B*ReCp_1phi + B*cos(ArgCp_1phi);
   R = ImCp_Bphi - B*ImCp_1phi + B*sin(ArgCp_1phi);
+
+  /* set Acin,Bcin, Acout,Bcout, statin,statout to invalid values */
+  statin=statout=-1;
+  Acin=Acout=Bcin=Bcout=-1.0;
 
   /* find domain and Ac,Bc on current grid, corresponding to X,R */
   dom = innerdom;
@@ -660,24 +680,51 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
     Acmax  = grid->box[dom]->bbox[1];
     vec[1] = 1e-7; /* initial guess is that Ac,Bc = 0,B*/
     vec[2] = B;
-    stat = newton_linesrch_its(vec, 2, &check, 
-                               DelXR_of_AB_VectorFunc, 100, 1e-10);
+    if(dequal(B,0.0))
+      stat = newton_linesrch_its(vec, 1, &check,
+                                 DelXR_of_A_forB0_VectorFunc, 1000, 1e-10);
+    else
+      stat = newton_linesrch_its(vec, 2, &check, 
+                                 DelXR_of_AB_VectorFunc, 1000, 1e-10);
     if(check) printf("q_of_sigp_forgiven_Bphi: check=%d\n", check);  
     Ac = vec[1];
     Bc = vec[2];
+
+    /* save vals for later */
+    if(dom == innerdom) {  Acin=Ac;  Bcin=Bc;  statin=stat; }
+    else                { Acout=Ac; Bcout=Bc; statout=stat; }
 //printf("  sigp_Bphi=%g sigp_1phi=%g:\n"
 //"       X=%g R=%g: stat=%d dom=%d Ac=%g Bc=%g\n",
 //sigp_Bphi,sigp_1phi, X,R, stat,dom, Ac,Bc);
     /* if(stat>=0 && Ac>=0.0 && Ac<=Acmax && Bc>=0.0 && Bc<=1.0) break; */
-    if(stat>=0 && dless(0.0,Ac) && dless(Ac,1.0) &&
-                  dless(0.0,Bc) && dless(Bc,1.0)   ) break;
+    if(stat>=0 && dlesseq(0.0,Ac) && dlesseq(Ac,1.0) &&
+                  dlesseq(0.0,Bc) && dlesseq(Bc,1.0)   ) break;
     dom = outerdom;
   }
+  /* decide which results to use */
+  if(dom == outerdom && statin>=0)
+  {
+    double dA=fabs(Acout)-fabs(Acin);
+    double dB=fabs(Bcout)-fabs(Bcin);
+    /* switch back to innerdom in some cases */
+    if(Ac<0.0)
+      if( dA>0.0 && dlesseq(0.0,Bcin) && dlesseq(Bcin,1.0) )
+      {dom=innerdom; Ac=0.0; Bc=Bcin; stat=statin;}
+    if(Bc<0.0)
+      if( dB>0.0 && dlesseq(0.0,Acin) && dlesseq(Acin,1.0) )
+      {dom=innerdom; Ac=Acin; Bc=0.0; stat=statin;}
+    if(Bc>1.0)
+      if(fabs(Bcin)<fabs(Bcout) && dlesseq(0.0,Acin) && dlesseq(Acin,1.0))
+      {dom=innerdom; Ac=Acin; Bc=1.0; stat=statin;}
+  }
+  /* check for failure */
   if(stat<0 || dless(Ac,0.0) || dless(1.0,Ac) ||
                dless(Bc,0.0) || dless(1.0,Bc)   )
   {
     printf("q_of_sigp_forgiven_Bphi: stat=%d dom=%d Ac=%g Bc=%g\n",
            stat,dom, Ac,Bc);
+    printf("statin=%d Acin=%g Bcin=%g  statout=%d Acout=%g Bcout=%g\n",
+           statin, Acin,Bcin, statout, Acout,Bcout);
     printf("q_of_sigp_forgiven_Bphi: X=%g R=%g for: A=0 B=%g phi=%g\n"
            " sigp_Bphi=%g sigp_1phi=%g\n"
            " ReCp_Bphi=%g ImCp_Bphi=%g ReCp_1phi=%g ImCp_1phi=%g\n",
@@ -790,12 +837,24 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       BNdata_q_VectorFunc_coeffs = grid->box[dom]->v[ic]+Index(0,j,k);
       vec[1] = A0;
       stat=newton_linesrch_its(vec, 1, &check, BNdata_q_VectorFunc, itmax, tol);
-      if(check)
-        printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
+      if(check || stat<0)
+        printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d stat=%d\n",
+               check, stat);
       A0 = vec[1];
 //printf("stat=%d: zero in q at A=A0=%g\n", stat, A0); Yo(1);
-      if(A0<A1 || A0>A2) errorexit("reset_Coordinates_AnsorgNS_sigma_pm: "
-                                   "newton_linesrch_its failed!");
+      if(A0 < A1 - 0.05*(A2-A1) || A0 > A2 + 0.05*(A2-A1))
+      {
+        printf("reset_Coordinates_AnsorgNS_sigma_pm: B=%g phi=%g  "
+               "inz_in=%d inz_out=%d\n", B,phi, inz_in,inz_out);
+        printf("looked for zero in q in dom=%d between A1=%g A2=%g\n",
+               dom, A1,A2);
+        printf("q1=q(A1)=%g  q2=q(A2)=%g\n", q1,q2);
+        printf("stat=%d: zero in q at A=A0=%g\n", stat, A0);        
+        errorexit("reset_Coordinates_AnsorgNS_sigma_pm: "
+                  "newton_linesrch_its failed!");
+      }
+      if(A0<0.0) A0=0.0; /* make sure we stay in box */
+      if(A0>1.0) A0=1.0;
     }
 //printf("zero in q at A=A0=%g\n", A0);
 
@@ -836,9 +895,12 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
 //printf("reset_Coordinates_AnsorgNS_sigma_pm: new "
 //       "sigp_0phi=%g sigp_1phi=%g\n", sigp_0phi, sigp_1phi);
 
+  /* guess for sigp_Bphi at j=n2-2 */
+  sigp_Bphi = sigp_1phi;
+  
   /* loop over the remaining j,k i.e. B,phi. 
      NOTE: we assume that n1,n2,n3 are the same in both domains */
-  for(j=1; j<n2-1; j++)
+  for(j=n2-2; j>0; j--) /* we could include j=0 (B=0) here again, so that most sigp_Bphi are found with the same method */
     for(k=0; k<n3; k++)
     {
       /* find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
@@ -873,6 +935,14 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
 //printf("B=%g phi=%g  ", B, phi);
 //printf("sigp_Bphi=%g sigp_0phi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_0phi, sigp_1phi);
     } /* end for j,k */
+
+  /* make sure that sigma has only one value at B=0 and also at B=1 */
+  for(j=0; j<n2; j+=n2-1)
+    for(k=1; k<n3; k++)
+      for(i=0; i<n1; i++)
+        gridnew->box[innerdom]->v[isigma][Index(i,j,k)] =
+        gridnew->box[outerdom]->v[isigma][Index(i,j,k)] =
+                        gridnew->box[innerdom]->v[isigma][Index(0,j,0)];
 
   /* compute derivs of sigma */
   spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
@@ -1193,8 +1263,10 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
         Y = 0.5;  /* bad guess ??? */
       }
       if( b<4 && (dequal(Y, 0.0) || dequal(Y, 1.0)) )
-      {
-        b1 = b_X_of_x_forgiven_YZ(grid1, &X, x, Y,Z);
+      { 
+        if(b<2) { blist[0]=0;  blist[1]=1; }
+        else    { blist[0]=3;  blist[1]=2; }
+        b1 = b_X_of_x_forgiven_YZ_inboxlist(grid1, blist,2, &X, x, Y,Z);
       }
       else if(b==0 || b==5)
       {
