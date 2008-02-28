@@ -1,2 +1,4 @@
-*replace q interpolation by BNS_compute_new_q_atXYZ in
- reset_Coordinates_AnsorgNS_sigma_pm [done]
+*check if regridding works propoerly
+*check if q is calculated correctly
+*maybe do q_{new} = w q_{computed from fields} + (1-w) q_{old}
+ choose w<1, so that q does not change too much (currently we have w=1)
