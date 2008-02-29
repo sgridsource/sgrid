@@ -47,3 +47,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
 double InnerVolumeIntergral(tGrid *grid, int b, int vind);
 void adjust_box4_5_pars(tGrid *grid);
 void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind);
+double BNS_update_q_atXYZ(tGrid *grid2, 
+                          int b2, double X2, double Y2, double Z2,
+                          double w, tGrid *grid1);
+void BNS_update_q(tGrid *grid2, double w, tGrid *grid1);

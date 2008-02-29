@@ -1727,3 +1727,54 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
     }
   }
 }
+
+
+/* compute weighted average of the new q2 on grid2 and the old q1 on grid1 
+   at a point X2,Y2,Z2 in grid2 coords */
+double BNS_update_q_atXYZ(tGrid *grid2, 
+                          int b2, double X2, double Y2, double Z2,
+                          double w, tGrid *grid1)
+{
+  double x,y,z, Xp,Rp;
+  int b1;
+  double X1,Y1,Z1;
+  double q2, q1;
+
+  /* get q on grid 2 at X2,Y2,Z2 */
+  q2 = BNS_compute_new_q_atXYZ(grid2,b2, X2,Y2,Z2);
+
+  /* get q on grid 1 at the same point */
+  if(b2<4)
+    xyz_of_AnsorgNS(grid2->box[b2], -1, b2, X2,Y2,Z2, &x,&y,&z, &Xp,&Rp);
+  else
+    { x=X2;  y=Y2;  z=Z2; }
+  X1 = X2;  Y1 = Y2;  Z1 = Z2;
+  b1 = BNSgrid_Get_BoxAndCoords_of_xyz(grid1, &X1,&Y1,&Z1, b2,x,y,z);
+  q1 = BNS_compute_new_q_atXYZ(grid1,b1, X1,Y1,Z1);
+
+  /* return weighted average */
+  return w*q2 + (1.0-w)*q1;
+}
+
+/* compute weighted average of the new q2 on grid2 and the old q1 on grid1 
+   at a point X2,Y2,Z2 in grid2 coords */
+void BNS_update_q(tGrid *grid2, double w, tGrid *grid1)
+{
+  int iX = Ind("X");
+  int iY = Ind("Y");
+  int iZ = Ind("Z");
+  int iq = Ind("BNSdata_q");
+  int b2, i;
+
+  forallboxes(grid2,b2)
+  {
+    tBox *box = grid2->box[b2];
+    double *X2 = box->v[iX];
+    double *Y2 = box->v[iY];
+    double *Z2 = box->v[iZ];
+    double *q = box->v[iq];
+
+    forallpoints(box, i)
+      q[i] = BNS_update_q_atXYZ(grid2,b2, X2[i],Y2[i],Z2[i], w, grid1);
+  }
+}
