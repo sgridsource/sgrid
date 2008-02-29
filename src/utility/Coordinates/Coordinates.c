@@ -1857,6 +1857,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
                      double A, double BB, double phi, 
                      double *x, double *y, double *z, double *Xp, double *Rp)
 {
+  static tBox *boxsav=NULL;
   static int domainsav=-1;
   static double Asav=-1, BBsav=-1, phisav=-1;
   static double xsav, ysav, zsav, Xsav, Rsav;
@@ -1870,13 +1871,13 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
                 computational Y-coord. I use B = func(BB) */
 
   /* check if we have saved values */  
-  if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav)
+  if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav && box==boxsav)
   {
     *x=xsav;  *y=ysav;  *z=zsav;
     *Xp=Xsav; *Rp=Rsav;
     return;
   }
-  Asav=A;  BBsav=BB;  phisav=phi;  domainsav=domain;
+  Asav=A;  BBsav=BB;  phisav=phi;  domainsav=domain;  boxsav=box;
 
   /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
   if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
@@ -2024,6 +2025,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                           double *dBBdx,  double *dBBdy,  double *dBBdz,
                           double *dphidx, double *dphidy, double *dphidz)
 {
+  static tBox *boxsav=NULL;
   static int domainsav=-1;
   static double Asav=-1, BBsav=-1, phisav=-1;
   static double xsav, ysav, zsav;
@@ -2046,8 +2048,8 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                 computational Y-coord. I use B = func(BB) */
   double dBBdB;
 
-  /* check if we have saved values */  
-  if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav)
+  /* check if we have saved values */
+  if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav && box==boxsav)
   {
     *x=xsav; *y=ysav; *z=zsav;
     *dAdx=dAdxsav;     *dAdy=dAdysav;     *dAdz=dAdzsav;
@@ -2055,7 +2057,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     *dphidx=dphidxsav; *dphidy=dphidysav; *dphidz=dphidzsav;
     return;
   }
-  Asav=A;  BBsav=BB;  phisav=phi;  domainsav=domain;
+  Asav=A;  BBsav=BB;  phisav=phi;  domainsav=domain;  boxsav=box;
 
   /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
   if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
