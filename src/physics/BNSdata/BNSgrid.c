@@ -228,6 +228,7 @@ int set_boxsizes(tGrid *grid)
   xCM = (m01*xc1 + m02*xc2)/(m01+m02);
   Omega = sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
                (-5*nu + 8*nu*nu)/(8*DoM5)            )/(m01+m02);
+  if(nu<=0.0) Omega=0.0;
   Setd("BNSdata_x_CM", xCM);
   Setd("BNSdata_Omega", Omega);
   printf(" BNSdata_x_CM = %g\n", Getd("BNSdata_x_CM"));
@@ -259,6 +260,7 @@ int set_boxsizes(tGrid *grid)
   Fc = -sqrt(oouzerosqr);
   /* q == (C2/F - 1.0)/(n+1.0) */
   Cc = Fc*((BNSdata_n+1.0)*qc + 1.0);
+  if(m02<=0.0) Cc = 0.0;
   Setd("BNSdata_C2", Cc);
   printf(" BNSdata_C2 = %g\n", Getd("BNSdata_C2"));
 
