@@ -2,3 +2,5 @@
 *check if q is calculated correctly
 *maybe do q_{new} = w q_{computed from fields} + (1-w) q_{old}
  choose w<1, so that q does not change too much (currently we have w=1)
+ [this only works if iterations overshoot]
+*maybe adjust Omega as Pedro did, and also maybe xCM
