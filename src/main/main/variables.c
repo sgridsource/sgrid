@@ -602,7 +602,7 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
    one function can catch several special cases like cb == 0 (unfinished)
    important: if coefficient is zero we guarantee that memory is not accessed
 */
-void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList*b) 
+void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b) 
 {
   tGrid *grid = r->grid;
   double *pr, *pa, *pb;
@@ -638,4 +638,19 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList*b)
   else if (ca == 0)	  r->time = cb * b->time;
   else if (cb == 0)	  r->time = ca * a->time;
   else			  r->time = ca * a->time + cb * b->time;
+}
+
+/* wrapper for single variable: r = ca*a + cb*b (ia/b/r is index of a/b/r) */
+void varadd(tGrid *grid, int ir, double ca, int ia, double cb, int ib)
+{
+  tVarList *a = vlalloc(grid);
+  tVarList *b = vlalloc(grid);
+  tVarList *r = vlalloc(grid);
+  vlpush(a, ia);
+  vlpush(b, ib);
+  vlpush(r, ir);
+  vladd(r, ca,a, cb,b);
+  vlfree(a);
+  vlfree(b);
+  vlfree(r);
 }

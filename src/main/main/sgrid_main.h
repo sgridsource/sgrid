@@ -130,6 +130,7 @@ void varcopy(tGrid *grid, int iv, int iu);
 void vlaverage(tVarList *r, tVarList *a, tVarList *b);
 void vlsubtract(tVarList *r, tVarList *a, tVarList *b);
 void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList*b);
+void varadd(tGrid *grid, int ir, double ca, int ia, double cb, int ib);
 
 tVarList *VLPtrEnable1(tGrid *grid, char *varname);
 void VLDisableFree(tVarList *vl);
