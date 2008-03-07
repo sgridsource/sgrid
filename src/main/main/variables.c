@@ -522,7 +522,18 @@ void vlcopygrid(tGrid *grid, tVarList *v, tVarList *u)
   vlcopy(v, u);
 }
 
-
+/* wrapper for single variable: v = u (iv/u is index of v/u) */
+void varcopy(tGrid *grid, int iv, int iu)
+{
+  tVarList *v = vlalloc(grid);
+  tVarList *u = vlalloc(grid);
+  vlpush(v, iv);
+  vlpush(u, iu);
+  vlcopy(v, u);
+  vlfree(u);
+  vlfree(v);
+}
+            
 
 /* average: r=(a+b)/2 */   
 void vlaverage(tVarList *r, tVarList *a, tVarList *b)
