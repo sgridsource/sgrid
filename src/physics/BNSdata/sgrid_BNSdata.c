@@ -35,6 +35,7 @@ int sgrid_BNSdata()
   AddVar("BNSdata_q",   "",  "q := P/rho0");
   AddVar("BNSdata_vRS", "Ij","1st deriv of vRS");
   AddVar("BNSdata_q",   "i", "1st deriv of q");
+  AddVar("BNSdata_qold","",  "old q");
 
   AddVar("BNSdata_A", "", "store value of A in box4/5");
   AddVar("BNSdata_B", "", "store value of B in box4/5");

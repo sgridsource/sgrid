@@ -101,6 +101,7 @@ int BNSdata_startup(tGrid *grid)
   enablevar(grid, Ind("BNSdata_temp2"));
   enablevar(grid, Ind("BNSdata_temp3"));
   enablevar(grid, Ind("BNSdata_temp4"));
+  enablevar(grid, Ind("BNSdata_qold"));
 
   /* enable some lapse and shift of ADMvars */
   enablevar(grid, Ind("alpha"));
@@ -197,6 +198,8 @@ int BNSdata_solve(tGrid *grid)
   double Cvec[3];
   double m0errorvec[3];
   double m01, m02, m0_error, dm01, dm02;
+  double Omega, dOmega=1e-3;; 
+  double L2norm1,L2norm2,L2norm3;
   int it, check, stat, bi, i;
 
   /* choose linear solver */
@@ -327,6 +330,63 @@ int BNSdata_solve(tGrid *grid)
     m0_error = sqrt(m0_error)/(Getd("BNSdata_m01")+Getd("BNSdata_m02"));
     printf("BNSdata_solve step %d: rest mass error = %.4e "
            "(before adjusting C1/2)\n", it, m0_error);
+
+    /* save Omega */
+    Omega = Getd("BNSdata_Omega");
+    //dOmega= Omega * m0_error;
+    printf("BNSdata_solve step %d: old Omega = %.4e  dOmega = %.4e\n",
+           it, Getd("BNSdata_Omega"), dOmega);
+           
+    /* save old q in BNSdata_qold */
+    varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+
+    /* compute L2-diff between new q and qold for Omega - dOmega */
+    Setd("BNSdata_Omega", Omega - dOmega);
+    BNS_compute_new_q(grid);
+    varadd(grid, Ind("BNSdata_temp1"), 
+               1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+    L2norm3 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
+
+    /* compute L2-diff between new q and qold for Omega + dOmega */
+    Setd("BNSdata_Omega", Omega + dOmega);
+    BNS_compute_new_q(grid);
+    varadd(grid, Ind("BNSdata_temp1"), 
+               1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+    L2norm2 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
+
+    /* compute L2-diff between new q and qold for Omega */
+    Setd("BNSdata_Omega", Omega);
+    BNS_compute_new_q(grid);
+    varadd(grid, Ind("BNSdata_temp1"), 
+               1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+    L2norm1 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
+
+    printf("BNSdata_solve step %d: L2norm1=%g\n", it, L2norm1);
+    printf("BNSdata_solve step %d: L2norm2=%g\n", it, L2norm2);
+    printf("BNSdata_solve step %d: L2norm3=%g\n", it, L2norm3);
+    if(L2norm1<=L2norm2 && L2norm1<=L2norm3)
+    { Setd("BNSdata_Omega", Omega);  dOmega=dOmega*0.5; }
+    if(L2norm2<L2norm1  && L2norm2<=L2norm3) 
+      Setd("BNSdata_Omega", Omega+dOmega);
+    if(L2norm3<L2norm1  && L2norm3<L2norm2)
+      Setd("BNSdata_Omega", Omega-dOmega);
+    printf("BNSdata_solve step %d: new Omega = %.4e  dOmega = %.4e\n",
+           it, Getd("BNSdata_Omega"), dOmega);
+    BNS_compute_new_q(grid);
+    
+/*
+{
+int b;
+  forallboxes(grid, b)
+  {
+    double *t = grid->box[b]->v[Ind("BNSdata_temp1")];;
+    double *q = grid->box[b]->v[Ind("BNSdata_q")];;
+    double *qo = grid->box[b]->v[Ind("BNSdata_qold")];;
+    forallpoints(grid->box[b], i)
+    { t[i] = -(b+100);  q[i] = -(b+20);  qo[i] = -(b+30);}
+  }
+}
+*/
 
     /* set desired masses for this iteration */
     m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
