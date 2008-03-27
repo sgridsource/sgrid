@@ -49,7 +49,8 @@ int ScalarOnKerr_startup(tGrid *grid)
 //  evolve_algebraicConditionsregister(set_boundary_ofPi);
 
   /* filter all newly computed vars */
-  evolve_algebraicConditionsregister(filter_unew);
+  if(Getv("ScalarOnKerr_filter_unew", "yes"))
+    evolve_algebraicConditionsregister(filter_unew);
 
   /* set initial data in boxes */
   forallboxes(grid,b)
@@ -247,28 +248,32 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
 //  set_boundary(unew, upre, dt, ucur);
   set_psi_Pi_boundary(unew, upre, dt, ucur);
 
-  /* filter near poles */
-  coordinateDependentFilter(unew);
-
-  /* filter high freq. angular modes */
-  forallboxes(grid,b)
+  /* special nPi filter */
+  if(Getv("ScalarOnKerr_special_nPi_filter", "yes"))
   {
-    tBox *box = grid->box[b];
-    int n1=box->n1;
-    int n2=box->n2;
-    int n3=box->n3;
-    int i,j,k, jf,kf;
-    double *nPi = vlldataptr(unew, box, 1);
-    double *temp1 = box->v[Ind("temp1")];
+    /* filter near poles */
+    coordinateDependentFilter(unew);
 
-    /* filter nPi */
-    spec_Coeffs(box, nPi, temp1);
-    kf=n3/3; kf*=2;
-    jf=n2/3; jf*=2;
-    forallijk(i,j,k)
-      if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
-    spec_Eval(box, nPi, temp1);
-  } /* end forallboxes */
+    /* filter high freq. angular modes */
+    forallboxes(grid,b)
+    {
+      tBox *box = grid->box[b];
+      int n1=box->n1;
+      int n2=box->n2;
+      int n3=box->n3;
+      int i,j,k, jf,kf;
+      double *nPi = vlldataptr(unew, box, 1);
+      double *temp1 = box->v[Ind("temp1")];
+
+      /* filter nPi */
+      spec_Coeffs(box, nPi, temp1);
+      kf=n3/3; kf*=2;
+      jf=n2/3; jf*=2;
+      forallijk(i,j,k)
+        if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
+      spec_Eval(box, nPi, temp1);
+    } /* end forallboxes */
+  }
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);

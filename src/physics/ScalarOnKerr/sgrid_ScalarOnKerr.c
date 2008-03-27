@@ -55,7 +55,11 @@ int sgrid_ScalarOnKerr(void)
   AddPar("BHsy", "0.0", "spin_y of black hole");
   AddPar("BHsz", "0.0", "spin_z of black hole");
   AddPar("ScalarOnKerr_reset_doubleCoveredPoints", "yes",
-         "whether we reset double covered points after each evo step [no,yes]");
+         "whether we reset double covered points in each evo substep [no,yes]");
+  AddPar("ScalarOnKerr_filter_unew", "yes",
+         "whether we filter all unew in each evo substep [yes,no]");
+  AddPar("ScalarOnKerr_special_nPi_filter", "yes",
+         "whether we filter all new Pi in each evo substep [yes,no]");
          
   return 0;
 }
