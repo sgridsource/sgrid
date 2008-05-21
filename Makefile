@@ -6,8 +6,8 @@
 # where am I
 UNAME := $(shell uname)
 TOP   := $(shell pwd)
-# to shorten the output: about to be removed for non-standard directories
-TOP   := ../../..
+## to shorten the output: about to be removed for non-standard directories
+#TOP   := ../../..
 
 # name the fruit of our labor
 EXEC = sgrid
