@@ -433,7 +433,7 @@ void allDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab)
 
 
 
-double detg(double g11, double g12, double g13, 
+double ADMvars_detg(double g11, double g12, double g13, 
 	    double g22, double g23, double g33)
 {
   double gginv11, gginv12, gginv13;
@@ -446,7 +446,7 @@ double detg(double g11, double g12, double g13,
 
 
 
-double invg(double g11, double g12, double g13, 
+double ADMvars_invg(double g11, double g12, double g13, 
 	    double g22, double g23, double g33,
 	    double *i11, double *i12, double *i13, 
 	    double *i22, double *i23, double *i33)
@@ -502,8 +502,8 @@ int set_K_initial(tGrid *grid)
       
     forallpoints(box, i)
     {
-      invg(gxx[i], gxy[i], gxz[i], gyy[i], gyz[i], gzz[i],
-	   &ixx, &ixy, &ixz, &iyy, &iyz, &izz);
+      ADMvars_invg(gxx[i], gxy[i], gxz[i], gyy[i], gyz[i], gzz[i],
+        	   &ixx, &ixy, &ixz, &iyy, &iyz, &izz);
     
       K_initial[i] = pow(psi[i],-4.0) * 
         (ixx*Kxx[i] + iyy*Kyy[i] + izz*Kzz[i] 
