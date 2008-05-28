@@ -3,7 +3,8 @@
 
 #include "sgrid.h"
 #include "ScalarOnKerr.h"
-
+#include "DV_CircSchwSource/Constants.h"
+#include "DV_CircSchwSource/Source.h"
 
 
 /* initialize ScalarOnKerr */
@@ -82,7 +83,10 @@ int ScalarOnKerr_startup(tGrid *grid)
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(ScalarOnKerrvars);
-  
+
+  /* enable rho */
+  enablevar(grid, Ind("ScalarOnKerr_rho"));
+
   /* enable all derivative vars */
   enablevar(grid, Ind("ScalarOnKerr_dpsix"));
   enablevar(grid, Ind("ScalarOnKerr_ddpsixx"));
@@ -148,6 +152,9 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   q22= 4.0*PI*q/(r0*sqrt(1.0-3*M/r0))*sqrt(5.0/(96.0*PI))*3.0;
   Omega = sqrt(M/(r0*r0*r0));
 
+/* call Ian's func to set mass and radius */
+set_mass_radius(M,r0);
+  
   /* loop over all boxes */
   forallboxes(grid,b)
   {
@@ -224,6 +231,9 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
       rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
             cos(2.0*(Omega*t - phi)) * Y22;
 
+/* use Ian's source */
+rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+
       /* set RHS of psi and Pi */
       rPi  = (g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
              //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
@@ -251,28 +261,10 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   /* special nPi filter */
   if(Getv("ScalarOnKerr_special_nPi_filter", "yes"))
   {
-    /* filter near poles */
-    coordinateDependentFilter(unew);
-
-    /* filter high freq. angular modes */
-    forallboxes(grid,b)
-    {
-      tBox *box = grid->box[b];
-      int n1=box->n1;
-      int n2=box->n2;
-      int n3=box->n3;
-      int i,j,k, jf,kf;
-      double *nPi = vlldataptr(unew, box, 1);
-      double *temp1 = box->v[Ind("temp1")];
-
-      /* filter nPi */
-      spec_Coeffs(box, nPi, temp1);
-      kf=n3/3; kf*=2;
-      jf=n2/3; jf*=2;
-      forallijk(i,j,k)
-        if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
-      spec_Eval(box, nPi, temp1);
-    } /* end forallboxes */
+    tVarList *vl_Pi = vlalloc(grid);
+    vlpush(vl_Pi, unew->index[1]);
+    filter_unew(vl_Pi, 0);
+    vlfree(vl_Pi);
   }
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
@@ -376,11 +368,17 @@ void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt,
   }
 }
 
+
 /* filter all newly computed vars */
 void filter_unew(tVarList *unew, tVarList *upre)
 {
   tGrid *grid = unew->grid;
   int b;
+  double n2frac = Getd("ScalarOnKerr_filter_n2frac");
+  double n3frac = Getd("ScalarOnKerr_filter_n3frac");
+  int shift2 = Geti("ScalarOnKerr_filter_shift2");
+  int shift3 = Geti("ScalarOnKerr_filter_shift3");
+  int ellipse= Getv("ScalarOnKerr_filter_YZregion", "ellipse");
 
   coordinateDependentFilter(unew);
 
@@ -392,6 +390,13 @@ void filter_unew(tVarList *unew, tVarList *upre)
     int n2=box->n2;
     int n3=box->n3;
     int i,j,k, jf,kf, vi;
+    double jmax, kmax;
+
+    jf=0.5*n2frac*n2; jf*=2; jf+=shift2;
+    jmax=jf;
+        
+    kf=0.5*n3frac*n3; kf*=2; kf+=shift3;
+    kmax=kf;
 
     /* filter all vars */
     for(vi=0; vi<unew->n; vi++)
@@ -399,11 +404,17 @@ void filter_unew(tVarList *unew, tVarList *upre)
       double *var = vlldataptr(unew, box, vi);
       double *temp1 = box->v[Ind("temp1")];
 
-      kf=n3/3; kf*=2;
-      jf=n2/3; jf*=2;
       spec_Coeffs(box, var, temp1);
       forallijk(i,j,k)
-        if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
+      {
+        int tj = 2*((j+1)/2);
+        int tk = 2*((k+1)/2);
+
+        if(ellipse) { if((tj/jmax)*(tj/jmax) + (tk/kmax)*(tk/kmax) > 1.0)
+                        temp1[Index(i,j,k)]=0.0; }
+        else        if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
+          
+      }
       spec_Eval(box, var, temp1);
     }
   } /* end forallboxes */
@@ -415,10 +426,28 @@ int ScalarOnKerr_analyze(tGrid *grid)
 {
   int b;
 
-// if( ! timeforoutput_index(grid, Ind("ScalarOnKerr_rho")) ) return 0;
+  if( ! timeforoutput_index(grid, Ind("ScalarOnKerr_rho")) ) return 0;
 
-// do something useful here 
+  /* set rho on grid */
+  forallboxes(grid,b)
+  {  
+    tBox *box = grid->box[b];
+    int i;
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    double *rho = box->v[Ind("ScalarOnKerr_rho")];
 
+    forallpoints(box,i)
+    {
+      double x = px[i];
+      double y = py[i];
+      double z = pz[i];
+      double t = grid->time;
+
+      rho[i] = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+    }
+  }
   return 0;
 }
 

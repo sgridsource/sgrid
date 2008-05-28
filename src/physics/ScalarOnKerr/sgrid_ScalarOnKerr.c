@@ -20,6 +20,7 @@ int sgrid_ScalarOnKerr(void)
   /* variables */
   AddVar("ScalarOnKerr_psi", "", "scalar");
   AddVar("ScalarOnKerr_Pi",  "", "time deriv of scalar");
+  AddVar("ScalarOnKerr_rho", "", "Source");
 
   /* derivatives which need to be precomputed before each evo steo */
   AddVar("ScalarOnKerr_dpsi",  "i",    "1st spatial deriv of scalar");
@@ -58,6 +59,16 @@ int sgrid_ScalarOnKerr(void)
          "whether we reset double covered points in each evo substep [no,yes]");
   AddPar("ScalarOnKerr_filter_unew", "yes",
          "whether we filter all unew in each evo substep [yes,no]");
+  AddPar("ScalarOnKerr_filter_n2frac", "0.66666666667",
+         "fraction of the n2 coeffs to keep, when filtering Y-direc.");
+  AddPar("ScalarOnKerr_filter_n3frac", "0.66666666667",
+         "fraction of the n3 coeffs to keep, when filtering Z-direc.");
+  AddPar("ScalarOnKerr_filter_shift2", "0",
+         "shift index of last coeff to keep, when filtering Y-direc.");
+  AddPar("ScalarOnKerr_filter_shift3", "0",
+         "shift index of last coeff to keep, when filtering Z-direc.");
+  AddPar("ScalarOnKerr_filter_YZregion", "square",
+         "region outside which we apply filters [ellipse,square]");
   AddPar("ScalarOnKerr_special_nPi_filter", "yes",
          "whether we filter all new Pi in each evo substep [yes,no]");
          
