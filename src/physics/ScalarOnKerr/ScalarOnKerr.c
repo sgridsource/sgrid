@@ -392,10 +392,10 @@ void filter_unew(tVarList *unew, tVarList *upre)
     int i,j,k, jf,kf, vi;
     double jmax, kmax;
 
-    jf=0.5*n2frac*n2; jf*=2; jf+=shift2;
+    jf=0.5*n2frac*n2; jf*=2; jf+=shift2-2;
     jmax=jf;
         
-    kf=0.5*n3frac*n3; kf*=2; kf+=shift3;
+    kf=0.5*n3frac*n3; kf*=2; kf+=shift3-2;
     kmax=kf;
 
     /* filter all vars */
