@@ -52,6 +52,16 @@ int sgrid_BSSN(void)
          "whether unew is filtered inside the time integrator [no,yes]");
   AddPar("BSSN_filter_unew", "no", "whether unew is filtered inside "
          "the time integrator using BSSN_filter_unew [no,yes]");
+  AddPar("BSSN_filter_n2frac", "0.66666666667",
+         "fraction of the n2 coeffs to keep, when filtering Y-direc.");
+  AddPar("BSSN_filter_n3frac", "0.66666666667",
+         "fraction of the n3 coeffs to keep, when filtering Z-direc.");
+  AddPar("BSSN_filter_shift2", "0",
+         "shift index of last coeff to keep, when filtering Y-direc.");
+  AddPar("BSSN_filter_shift3", "0",
+         "shift index of last coeff to keep, when filtering Z-direc.");
+  AddPar("BSSN_filter_YZregion", "square",
+         "region outside which we apply filters [ellipse,square]");
   AddPar("BSSN_densitizedLapse", "no", 
          "whether we evolve a densitized lapse instead of ADM alpha "
          "[no,yes,1+log_withoutShift]");

@@ -315,6 +315,11 @@ void BSSN_filter_unew(tVarList *unew, tVarList *upre)
 {
   tGrid *grid = unew->grid;
   int b;
+  double n2frac = Getd("BSSN_filter_n2frac");
+  double n3frac = Getd("BSSN_filter_n3frac");
+  int shift2 = Geti("BSSN_filter_shift2");
+  int shift3 = Geti("BSSN_filter_shift3");
+  int ellipse= Getv("BSSN_filter_YZregion", "ellipse");
 
   coordinateDependentFilter(unew);
 
@@ -326,6 +331,13 @@ void BSSN_filter_unew(tVarList *unew, tVarList *upre)
     int n2=box->n2;
     int n3=box->n3;
     int i,j,k, jf,kf, vi;
+    double jmax, kmax;
+
+    jf=0.5*n2frac*n2; jf*=2; jf+=shift2-2;
+    jmax=jf;
+        
+    kf=0.5*n3frac*n3; kf*=2; kf+=shift3-2;
+    kmax=kf;
 
     /* filter all vars */
     for(vi=0; vi<unew->n; vi++)
@@ -333,11 +345,17 @@ void BSSN_filter_unew(tVarList *unew, tVarList *upre)
       double *var = vlldataptr(unew, box, vi);
       double *temp1 = box->v[Ind("temp1")];
 
-      kf=n3/3; kf*=2;
-      jf=n2/3; jf*=2;
       spec_Coeffs(box, var, temp1);
       forallijk(i,j,k)
-        if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
+      {
+        int tj = 2*((j+1)/2);
+        int tk = 2*((k+1)/2);
+
+        if(ellipse) { if((tj/jmax)*(tj/jmax) + (tk/kmax)*(tk/kmax) > 1.0)
+                        temp1[Index(i,j,k)]=0.0; }
+        else        if(k>kf || j>jf) temp1[Index(i,j,k)]=0.0;
+          
+      }
       spec_Eval(box, var, temp1);
     }
   } /* end forallboxes */
