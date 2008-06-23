@@ -328,3 +328,79 @@ void spec_Int1(tBox *box, int direc, double *u, double *U)
   else
     errorexit("spec_Int1: possible values for direction direc are 1,2,3.");
 }
+
+
+// ???: NOT TESTED YET !!!
+/* compute the definite integral from a to b of the 3d var u 
+   in direction direc on a box, save result in U */
+void spec_definiteInt1(tBox *box, int direc, double a, double b, 
+                       double *u, double *U)
+{
+  int linelen=0;
+  int i,j,k;
+  double Ua,Ub;
+  double *Uline;
+  double *BM[2];
+
+  /* memory for lines and BM */
+  linelen=max3(box->n1, box->n2, box->n3);
+  Uline = (double *) calloc(linelen, sizeof(double));
+  BM[0] = (double *) calloc(linelen, sizeof(double));
+  BM[1] = (double *) calloc(linelen, sizeof(double));
+
+  /* obtain BM vectors for interpolation along direc */
+  spec_Basis_times_CoeffMatrix_direc(box, direc, BM[0], a);
+  spec_Basis_times_CoeffMatrix_direc(box, direc, BM[1], b);
+
+  /* get indefinite integral in U */
+  spec_Int1(box, direc, u, U);
+
+  /* now write result for def. int. into the entire Uline */
+  if(direc==1)
+  {
+    for (k = 0; k < box->n3; k++)
+      for (j = 0; j < box->n2; j++)
+      {
+        /* 
+        get_memline(U, Uline, 1, j, k, box->n1, box->n2, box->n3);
+        Ua = scalarproduct_vectors(BM[0], Uline, box->n1);
+        Ub = scalarproduct_vectors(BM[1], Uline, box->n1);
+        for (i = 0; i < n1; i++) Uline[i] = Ub-Ua;
+        put_memline(U, Uline, 1, j, k, box->n1, box->n2, box->n3);        
+        */
+        int n1=box->n1;
+        int n2=box->n2;
+        Ua = scalarproduct_vectors(BM[0], U+Index(0,j,k), n1);
+        Ub = scalarproduct_vectors(BM[1], U+Index(0,j,k), n1);
+        for (i = 0; i < n1; i++) U[Index(i,j,k)] = Ub-Ua;
+      }
+  }
+  else if(direc==2)
+  {
+    for (k = 0; k < box->n3; k++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(U, Uline, 2, i, k, box->n1, box->n2, box->n3);
+        Ua = scalarproduct_vectors(BM[0], Uline, box->n2);
+        Ub = scalarproduct_vectors(BM[1], Uline, box->n2);
+        for (j = 0; j < box->n2; j++) Uline[j] = Ub-Ua;
+        put_memline(U, Uline, 2, i, k, box->n1, box->n2, box->n3);        
+      }
+  }
+  else if(direc==3)
+  {
+    for (j = 0; j < box->n2; j++)
+      for (i = 0; i < box->n1; i++)
+      {
+        get_memline(U, Uline, 3, i, j, box->n1, box->n2, box->n3);
+        Ua = scalarproduct_vectors(BM[0], Uline, box->n3);
+        Ub = scalarproduct_vectors(BM[1], Uline, box->n3);
+        for (k = 0; k < box->n3; k++) Uline[k] = Ub-Ua;
+        put_memline(U, Uline, 3, i, j, box->n1, box->n2, box->n3);
+      }
+  }
+  else
+    errorexit("spec_definiteInt1: possible values for direction direc are 1,2,3.");
+
+  free(Uline);  free(BM[0]);  free(BM[1]);
+}
