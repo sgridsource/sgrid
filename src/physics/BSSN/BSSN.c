@@ -32,8 +32,10 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
   if(Getv("BSSN_unewFilter", "yes"))
     filter_VarList(unew);
 
-  if(Getv("BSSN_filter_unew", "yes"))
+  if(Getv("BSSN_filter_unew", "simple"))
     BSSN_filter_unew(unew, upre);
+  else if(Getv("BSSN_filter_unew", "naive_Ylm"))
+    BSSN_naive_Ylm_filter(unew, upre);
 
   if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
@@ -200,8 +202,10 @@ int BSSN_startup(tGrid *grid)
   evolve_rhsregister(BSSN_evolve);
 
   /* filter all newly computed vars */
-  if(Getv("BSSN_filter_unew", "yes"))
+  if(Getv("BSSN_filter_unew", "simple"))
     evolve_algebraicConditionsregister(BSSN_filter_unew);
+  else if(Getv("BSSN_filter_unew", "naive_Ylm"))
+    evolve_algebraicConditionsregister(BSSN_naive_Ylm_filter);
 
   /* set K identically to zero only if we are doing maximal slicing */
   if (Getv("BSSN_forceKzero", "yes")) {
@@ -359,4 +363,10 @@ void BSSN_filter_unew(tVarList *unew, tVarList *upre)
       spec_Eval(box, var, temp1);
     }
   } /* end forallboxes */
+}
+
+/* filter unew with Ylm */
+void BSSN_naive_Ylm_filter(tVarList *unew, tVarList *upre)
+{
+  Naive_YlmFilter(unew);
 }

@@ -50,8 +50,8 @@ int sgrid_BSSN(void)
          "are used [no,yes]");
   AddPar("BSSN_unewFilter", "no",
          "whether unew is filtered inside the time integrator [no,yes]");
-  AddPar("BSSN_filter_unew", "no", "whether unew is filtered inside "
-         "the time integrator using BSSN_filter_unew [no,yes]");
+  AddPar("BSSN_filter_unew", "no", "how unew is filtered inside "
+         "the time integrator. Use: [no, simple, naive_Ylm]");
   AddPar("BSSN_filter_n2frac", "0.66666666667",
          "fraction of the n2 coeffs to keep, when filtering Y-direc.");
   AddPar("BSSN_filter_n3frac", "0.66666666667",
