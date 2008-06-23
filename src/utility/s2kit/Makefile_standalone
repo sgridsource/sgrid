@@ -1,0 +1,25 @@
+wtest: wtest.o s2kit_makeweights.o s2kit_naive_synthesis.o s2kit_pmls.o s2kit_primitive.o
+	gcc -O3 -lm -o wtest wtest.o s2kit_makeweights.o \
+	s2kit_naive_synthesis.o s2kit_pmls.o s2kit_primitive.o
+
+# benoetigte Objekt Dateien
+wtest.o: wtest.c
+	gcc -c -ansi -pedantic -Wall  wtest.c 
+
+
+s2kit_makeweights.o: 
+	gcc -c  -ansi -pedantic -Wall s2kit_makeweights.c
+
+s2kit_naive_synthesis.o:
+	gcc -c  -ansi -pedantic -Wall s2kit_naive_synthesis.c
+
+s2kit_pmls.o:
+	gcc -c  -ansi -pedantic -Wall s2kit_pmls.c
+
+s2kit_primitive.o:
+	gcc -c  -ansi -pedantic -Wall s2kit_primitive.c
+
+
+
+clean:
+	rm -f *.o wtest

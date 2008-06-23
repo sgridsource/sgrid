@@ -1,0 +1,49 @@
+# s2kit_t_test.par
+# WT 2008
+
+physics = s2kit_test ADMvars
+
+nboxes = 1
+
+box0_n1 = 3
+box0_n2 = 12
+box0_n3 = 12
+iterate_parameters = yes
+iterate_parameter1 = box0_n1  4  6  8 10
+iterate_parameter2 = box0_n2  8 12 16 20
+iterate_parameter3 = box0_n3  4  6  8 10
+
+# SphericalDF
+box0_Coordinates = SphericalDF
+box0_min1	= 1.8
+box0_max1	= 9.8
+box0_basis2	= Fourier
+box0_min2	= 0
+box0_max2	= 2*pi
+box0_basis3	= Fourier
+box0_min3	= 0
+box0_max3 	= 2*pi
+
+iterations = 0
+
+#===========================================================================
+## output
+outputX0_box0 = 2
+outputY0_box0 = 1.57079632679
+outputZ0_box0 = 0
+
+##outputReplaceXby_box0 = x
+##outputReplaceYby_box0 = z
+##outputReplaceZby_box0 = y
+
+0doutiter = 1
+0doutput = s2kit_test_var1 s2kit_test_var2 s2kit_test_fil1 s2kit_test_fil2 s2kit_test_dif1 s2kit_test_dif2
+0doutputall = yes
+
+1doutiter = 1
+1doutput = s2kit_test_var1 s2kit_test_var2 s2kit_test_fil1 s2kit_test_fil2 s2kit_test_dif1 s2kit_test_dif2
+1doutputall = yes
+
+2doutiter = 1
+2doutput = s2kit_test_var1 s2kit_test_var2 s2kit_test_fil1 s2kit_test_fil2 s2kit_test_dif1 s2kit_test_dif2
+2doutputall = yes
