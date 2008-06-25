@@ -29,10 +29,9 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
   if(Getv("BSSN_coordinateDependentFilter", "yes"))
     coordinateDependentFilter(unew);
 
-  if(Getv("BSSN_unewFilter", "yes"))
+  if(Getv("BSSN_filter_unew", "old_spec_filters"))
     filter_VarList(unew);
-
-  if(Getv("BSSN_filter_unew", "simple"))
+  else if(Getv("BSSN_filter_unew", "simple"))
     BSSN_filter_unew(unew, upre);
   else if(Getv("BSSN_filter_unew", "naive_Ylm"))
     BSSN_naive_Ylm_filter(unew, upre);
@@ -308,7 +307,16 @@ int filter_VarList(tVarList *vl)
 int BSSN_filter(tGrid *grid)
 {
   //printf("BSSN_filter\n");
-  filter_VarList(BSSNvars);
+  if(Getv("BSSN_postEVOfilter", "old_spec_filters"))
+    filter_VarList(BSSNvars);
+
+  if(Getv("BSSN_postEVOfilter", "simple"))
+    BSSN_filter_unew(BSSNvars, NULL);
+  else if(Getv("BSSN_postEVOfilter", "naive_Ylm"))
+    BSSN_naive_Ylm_filter(BSSNvars, NULL);
+
+  if(Getv("BSSN_postEVOfilter", "X2/3"))
+    filter_with2o3rule_inX(BSSNvars, NULL);
 
   return 0;
 }
@@ -370,3 +378,39 @@ void BSSN_naive_Ylm_filter(tVarList *unew, tVarList *upre)
 {
   Naive_YlmFilter(unew);
 }
+
+/* filter unew with 2/3 rule in X-direction */
+void filter_with2o3rule_inX(tVarList *unew, tVarList *upre)
+{
+  tGrid *grid = unew->grid;
+  int b;
+
+  /* loop over boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k, vi;
+
+    /* filter all vars */
+    for(vi=0; vi<unew->n; vi++)
+    {
+      double *var = vlldataptr(unew, box, vi);
+      double *vc  = box->v[Ind("temp1")];
+
+      /* compute coeffs of var in X-dir */
+      spec_analysis1(box, 1, box->Mcoeffs1, var, vc);
+
+      /* remove all coeffs with i>=2*(n1/3) */
+      for(k=0; k<n3; k++)
+        for(j=0; j<n2; j++)
+          for(i=(n1/3)*2; i<n1; i++)
+              vc[Index(i,j,k)]=0.0;
+
+      /* use modified coeffs to change var */
+      spec_synthesis1(box, 1, box->Meval1, var, vc);
+    }
+  }
+}    

@@ -48,10 +48,9 @@ int sgrid_BSSN(void)
   AddPar("BSSN_coordinateDependentFilter", "no",
          "whether coordinate dependent filters (e.g. for SphereicalDF) "
          "are used [no,yes]");
-  AddPar("BSSN_unewFilter", "no",
-         "whether unew is filtered inside the time integrator [no,yes]");
-  AddPar("BSSN_filter_unew", "no", "how unew is filtered inside "
-         "the time integrator. Use: [no, simple, naive_Ylm]");
+  AddPar("BSSN_filter_unew", "no", "how/if unew is filtered inside "
+         "the time integrator. Options: "
+         "[no,simple,naive_Ylm,old_spec_filters]");
   AddPar("BSSN_filter_n2frac", "0.66666666667",
          "fraction of the n2 coeffs to keep, when filtering Y-direc.");
   AddPar("BSSN_filter_n3frac", "0.66666666667",
@@ -96,8 +95,9 @@ int sgrid_BSSN(void)
 
   AddPar("BSSN_shift_stop_time", "-1.0", 
          "time when shift stops evolving (-1 for don't stop)");
-  AddPar("BSSN_filter", "no", "whether we use filters");
-  if(Getv("BSSN_filter", "yes"))
+  AddPar("BSSN_postEVOfilter", "no", "how/if we filter after each time step. "
+         "Options: [no,X2/3,naive_Ylm,old_spec_filters]");
+  if(!Getv("BSSN_postEVOfilter", "no"))
   {
     printf("scheduling BSSN_filter in bin POST_EVOLVE.\n");
     AddFun(POST_EVOLVE, BSSN_filter, "filter all BSSN variables");
