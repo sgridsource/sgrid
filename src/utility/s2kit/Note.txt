@@ -8,5 +8,5 @@ theta_j = PI*(2j + 1)/(4bw), where j = 0,1, ... ,2bw-1
 these are the points of SphericalDF if n2%4=0
 I.e. we need to use bw=box->n2/4, then l_max=bw-1 and m_max=lmax in the Plm
 
-Also note that Y_l^{-m}(th,0) = -Y_l^{m}(th,0), the same goes thus
+Also note that Y_l^{-m}(th,0) = (-1)^m Y_l^{m}(th,0), the same goes thus
 for the Plm in s2kit.
