@@ -50,8 +50,10 @@ int ScalarOnKerr_startup(tGrid *grid)
 //  evolve_algebraicConditionsregister(set_boundary_ofPi);
 
   /* filter all newly computed vars */
-  if(Getv("ScalarOnKerr_filter_unew", "yes"))
+  if(Getv("ScalarOnKerr_filter_unew", "simple"))
     evolve_algebraicConditionsregister(filter_unew);
+  else if(Getv("ScalarOnKerr_filter_unew", "naive_Ylm"))
+    evolve_algebraicConditionsregister(naive_Ylm_filter_unew);
 
   /* set initial data in boxes */
   forallboxes(grid,b)
@@ -259,11 +261,14 @@ rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
   set_psi_Pi_boundary(unew, upre, dt, ucur);
 
   /* special nPi filter */
-  if(Getv("ScalarOnKerr_special_nPi_filter", "yes"))
+  if(!Getv("ScalarOnKerr_special_nPi_filter", "no"))
   {
     tVarList *vl_Pi = vlalloc(grid);
     vlpush(vl_Pi, unew->index[1]);
-    filter_unew(vl_Pi, 0);
+    if(Getv("ScalarOnKerr_special_nPi_filter", "simple"))
+      filter_unew(vl_Pi, 0);
+    else if(Getv("ScalarOnKerr_special_nPi_filter", "naive_Ylm"))
+      naive_Ylm_filter_unew(vl_Pi, 0);
     vlfree(vl_Pi);
   }
 
@@ -418,6 +423,12 @@ void filter_unew(tVarList *unew, tVarList *upre)
       spec_Eval(box, var, temp1);
     }
   } /* end forallboxes */
+}
+
+/* filter all newly computed vars */
+void naive_Ylm_filter_unew(tVarList *unew, tVarList *upre)
+{
+  Naive_YlmFilter(unew);
 }
 
 

@@ -57,8 +57,9 @@ int sgrid_ScalarOnKerr(void)
   AddPar("BHsz", "0.0", "spin_z of black hole");
   AddPar("ScalarOnKerr_reset_doubleCoveredPoints", "yes",
          "whether we reset double covered points in each evo substep [no,yes]");
-  AddPar("ScalarOnKerr_filter_unew", "yes",
-         "whether we filter all unew in each evo substep [yes,no]");
+  AddPar("ScalarOnKerr_filter_unew", "simple",
+         "whether we filter all unew in each evo substep "
+         "[no, simple, naive_Ylm]");
   AddPar("ScalarOnKerr_filter_n2frac", "0.66666666667",
          "fraction of the n2 coeffs to keep, when filtering Y-direc.");
   AddPar("ScalarOnKerr_filter_n3frac", "0.66666666667",
@@ -69,8 +70,9 @@ int sgrid_ScalarOnKerr(void)
          "shift index of last coeff to keep, when filtering Z-direc.");
   AddPar("ScalarOnKerr_filter_YZregion", "square",
          "region outside which we apply filters [ellipse,square]");
-  AddPar("ScalarOnKerr_special_nPi_filter", "yes",
-         "whether we filter all new Pi in each evo substep [yes,no]");
-         
+  AddPar("ScalarOnKerr_special_nPi_filter", "simple",
+         "whether we filter all new Pi in each evo substep "
+         "[no, simple, naive_Ylm]");
+
   return 0;
 }
