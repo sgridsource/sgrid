@@ -1,0 +1,24 @@
+About the source and the window func:
+-------------------------------------
+In the phi- and theta-directions, Ian's source behaves 
+qualitatively like this:
+s[ph_] = D[ psi[ph], ph,ph]
+where
+psi[ph_] = 5e-5 * (Cos[ph]+2.5)Sin[ph/2]^3 + Cos[ph]
+(* PlotData["psi.phi", psi[x], {x,0,2Pi}, 400]
+   PlotData["s.phi", s[x], {x,0,2Pi}, 400]          *)
+
+Such a psi can be described up to 1-e3 at phi=0 with a 12 Fourier coeffs.
+(which I concluded using ~/c/FT_1Ddata.c)
+If the source orbits at r=10 this corresponds to a resolution of only
+h=2*pi*10/12 = 5.24.
+
+However, in the radial direction Ian's source has spikes from the 
+window function that are 10^5 times the size of the source.
+To resolve both Ian suggested a res of about h=1/25, which
+is 125 better than what we seem to need without window func.
+
+
+About BCs:
+----------
+[explain about U_{+/-}]
