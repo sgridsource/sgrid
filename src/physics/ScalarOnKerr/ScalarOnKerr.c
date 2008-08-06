@@ -553,7 +553,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       bp = 1.0;
       cp = (gdn-Gn)/gnn;
       lambdam = betan - sqrt( betan*betan + alpha2*gnn ); //???
-      am = lambdap/(alpha2*gnn); //???
+      am = lambdam/(alpha2*gnn); //???
       bm = 1.0;
       cm = (gdn-Gn)/gnn;  //???
 
@@ -675,7 +675,7 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
         bp = 1.0;
         cp = (gdn-Gn)/gnn;
         lambdam = betan - sqrt( betan*betan + alpha2*gnn ); //???
-        am = lambdap/(alpha2*gnn); //???
+        am = lambdam/(alpha2*gnn); //???
         bm = 1.0;
         cm = (gdn-Gn)/gnn;  //???
 
