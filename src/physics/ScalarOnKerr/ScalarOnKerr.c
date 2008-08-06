@@ -225,12 +225,12 @@ set_mass_radius(M,r0);
       double g_ddpsi, gG_dpsi;
       /* g is upper metric */
       /* get all terms with less than 2 time derivs in g^ab d_a d_b psi */
-      g_ddpsi = -2.0*(gtx[i]*Pix[i] +gty[i]*Piy[i] +gtz[i]*Piz[i]) + 
+      g_ddpsi = 2.0*(gtx[i]*Pix[i] +gty[i]*Piy[i] +gtz[i]*Piz[i]) + 
                 gxx[i]*psixx[i] + gyy[i]*psiyy[i] + gzz[i]*psizz[i] +
                 2.0*(gxy[i]*psixy[i] + gxz[i]*psixz[i] + gyz[i]*psiyz[i]);
 
       /* get G^a dpsi_a, where G[a] = g^bc Gamma^a_bc */
-      gG_dpsi = -Gt[i]*cPi[i] + Gx[i]*psix[i] + Gy[i]*psiy[i] + Gz[i]*psiz[i];
+      gG_dpsi = Gt[i]*cPi[i] + Gx[i]*psix[i] + Gy[i]*psiy[i] + Gz[i]*psiz[i];
 
       /* source rho */
       r     = sqrt(x*x + y*y + z*z);
@@ -244,10 +244,10 @@ set_mass_radius(M,r0);
 rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
 
       /* set RHS of psi and Pi */
-      rPi  = (g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
+      rPi  = -(g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
              //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
              //  -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // oldest source
-      rpsi = -cPi[i];
+      rpsi = cPi[i];
 
       /* set new vars or RHS, depending in which integrator is used */
       if(dt!=0.0)
