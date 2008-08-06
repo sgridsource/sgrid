@@ -262,7 +262,11 @@ rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
       }
     }
   } /* end forallboxes */
-      
+
+  /* set char. vars. and use them to compute unew */
+  set_Up_Um_onBoundary(unew, NULL);
+  compute_unew_from_Up_Um_onBoundary(unew, NULL);
+
   /* set BCs */
 //  set_boundary(unew, upre, dt, ucur);
   set_psi_Pi_boundary(unew, upre, dt, ucur);
@@ -478,8 +482,7 @@ void set_psi_Pi_boundary_New(tVarList *unew, tVarList *upre, double dt,
   }
 }
 
-/* set BC for old version: this is the 2007 version which sets only rPi */
-//void set_psi_Pi_boundary_2007_PiVersion(tVarList *unew, tVarList *upre, double dt, 
+/* compute and transfer Up and Um on boundaries */
 void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
 {
   tGrid *grid = unew->grid;
@@ -586,6 +589,118 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       Um[ijk]    = lUm[l_ijk];
     }
   } /* end for b */
+}
+
+/* compute unew from Up and Um on boundaries */
+void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
+{
+  tGrid *grid = unew->grid;
+  int b;
+  
+  /* compute Up and Um in each box */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, i,j,k;
+    double *Up = box->v[Ind("ScalarOnKerr_Up")];
+    double *Um = box->v[Ind("ScalarOnKerr_Um")];
+    double *npsi = vlldataptr(unew, box, 0);
+    double *nPi = vlldataptr(unew, box, 1);
+    double *npsix = box->v[Ind("temp1")];
+    double *npsiy = box->v[Ind("temp2")];
+    double *npsiz = box->v[Ind("temp3")];
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    double *dXdx = box->v[Ind("dXdx")];
+    double *dXdy = box->v[Ind("dXdx")+1];
+    double *dXdz = box->v[Ind("dXdx")+2];
+    int i_gup = Ind("ScalarOnKerr_guptt");
+    double *gtt = box->v[i_gup];
+    double *gtx = box->v[i_gup+1];
+    double *gty = box->v[i_gup+2];
+    double *gtz = box->v[i_gup+3];
+    double *gxx = box->v[i_gup+4];
+    double *gxy = box->v[i_gup+5];
+    double *gxz = box->v[i_gup+6];
+    double *gyy = box->v[i_gup+7];
+    double *gyz = box->v[i_gup+8];
+    double *gzz = box->v[i_gup+9];
+    int i_G = Ind("ScalarOnKerr_Gt");
+    double *Gt = box->v[i_G];
+    double *Gx = box->v[i_G+1];
+    double *Gy = box->v[i_G+2];
+    double *Gz = box->v[i_G+3];
+
+    /* compute spatial derivs of npsi */
+    cart_partials(box, npsi, npsix, npsiy, npsiz);
+
+    /* loop over inner and outer boundary points */
+    for(i=0; i<n1; i+=n1-1)
+    {
+      if(b==0 && i==0) continue; /* do nothing on inner bound of box0 */
+      if(b==grid->nboxes-1 && i==n1-1) break; /*do nothing on outer bound of last box */
+      for(k=0; k<n3; k++)
+      for(j=0; j<n2; j++)
+      {
+        double x,y,z;
+        double r, nx,ny,nz;
+        double rPi;
+        double betan, alpha, alpha2, gnn, Gn, gdn;
+        double ap,bp,cp, lambdap, am,bm,cm, lambdam;
+        double dXdr, D00, npsi_plus_cnpsir, npsir;
+
+        ijk  = Index(i,j,k);
+        x = px[ijk];
+        y = py[ijk];
+        z = pz[ijk];
+        r = sqrt(x*x + y*y + z*z);
+        nx = x/r;
+        ny = y/r;
+        nz = z/r;
+        alpha2 = -1.0/gtt[ijk];
+        alpha  = sqrt(alpha2);
+        betan = alpha2*(gtx[ijk]*nx +gty[ijk]*ny +gtz[ijk]*nz);
+        gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+              2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+        Gn = Gx[ijk]*nx + Gy[ijk]*ny + Gz[ijk]*nz;
+        /* dn = d_i n_j = (delta_ij - n_i n_j)/r */
+        /* gdn = g^ij d_i n_j */
+        gdn = (gxx[ijk]+gyy[ijk]+gzz[ijk]-gnn)/r;
+        lambdap = betan + sqrt( betan*betan + alpha2*gnn );
+        ap = lambdap/(alpha2*gnn);
+        bp = 1.0;
+        cp = (gdn-Gn)/gnn;
+        lambdam = betan - sqrt( betan*betan + alpha2*gnn ); //???
+        am = lambdap/(alpha2*gnn); //???
+        bm = 1.0;
+        cm = (gdn-Gn)/gnn;  //???
+
+        /* compute dXdr = dXdx dxdr +... */
+        dXdr = dXdx[ijk]*nx + dXdy[ijk]*ny + dXdz[ijk]*nz;
+        /* npsi := d/dr psi = dXdr d/dX psi */
+        D00 = dXdr * box->D1[(i+1)*(i+1)-1];
+        npsir = ( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
+
+        /* compute nPi and npsi from Up, Um on boundary */
+        /* Up[ijk] = ap*nPi[ijk] + bp*npsi[ijk] + cp*npsir;
+           Um[ijk] = am*nPi[ijk] + bm*npsi[ijk] + cm*npsir; */
+        nPi[ijk] = (Up[ijk] - Um[ijk])/(ap-am);
+        npsi_plus_cnpsir = Um[ijk] - am*nPi[ijk];
+        /* deriv = D00 u[0] + sum_{j=1...n-1} D0j u[j] */
+        /* npsi_plus_cnpsir = psi[0] + 
+                               c*(D00 psi[0] + sum_{j=1...n-1} D0j psi[j])
+                       = psi[0] + c*D00 psi[0] + c*(D0j psi[j]-D00 psi[0]) 
+          ==> psi[0] = (npsi_plus_cnpsir - c*(D0j psi[j]-D00 psi[0])) / 
+                       (1+c*D00); */
+        npsi[ijk] = (npsi_plus_cnpsir - cm*(npsir-D00*npsi[ijk]))/
+                    (1.0+cm*D00);
+      }
+    }
+  }
 }
 
 

@@ -14,3 +14,5 @@ void Kerr(tGrid *grid, int i_x, int i_g, int i_gup, int i_Gam, int i_G);
 void Kerr3d(tGrid *grid, int i_x, int i_alpha, int i_beta, int i_g, 
             int i_K, int i_TrK, int i_gup, int i_Gam, int i_dalpha);
 void set_boundary_ofPi(tVarList *unew, tVarList *upre);
+void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre);
+void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre);
