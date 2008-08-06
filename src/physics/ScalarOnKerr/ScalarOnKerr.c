@@ -489,22 +489,14 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
   forallboxes(grid,b)
   {
     tBox *box = grid->box[b];
-    int n1=box->n1;
-    int n2=box->n2;
-    int n3=box->n3;
     int ijk, pi;
     double *Up = box->v[Ind("ScalarOnKerr_Up")];
     double *Um = box->v[Ind("ScalarOnKerr_Um")];
     double *npsi = vlldataptr(unew, box, 0);
     double *nPi = vlldataptr(unew, box, 1);
-    int inpsi = (unew)->index[0];
-//    int iPi  = (unew)->index[1];
-    double *npsix = box->v[Ind("ScalarOnKerr_dnpsix")];
-    double *npsiy = box->v[Ind("ScalarOnKerr_dnpsix")+1];
-    double *npsiz = box->v[Ind("ScalarOnKerr_dnpsix")+2];
-//    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
-//    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
-//    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *npsix = box->v[Ind("temp1")];
+    double *npsiy = box->v[Ind("temp2")];
+    double *npsiz = box->v[Ind("temp3")];
     double *px = box->v[Ind("x")];
     double *py = box->v[Ind("y")];
     double *pz = box->v[Ind("z")];
@@ -525,9 +517,8 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
     double *Gy = box->v[i_G+2];
     double *Gz = box->v[i_G+3];
 
-    /* compute the spatial derivs */
-    FirstDerivsOf_S(box, inpsi, Ind("ScalarOnKerr_dnpsix"));
-//    FirstDerivsOf_S(box, iPi , Ind("ScalarOnKerr_dPix"));
+    /* compute spatial derivs of npsi */
+    cart_partials(box, npsi, npsix, npsiy, npsiz);
 
     /* loop over points and set RHS */
     forPointList_inbox(boxBoundaryPointList, box, pi , ijk)
@@ -564,13 +555,37 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       cm = (gdn-Gn)/gnn;  //???
 
       /* set char vars (either time derivs if npsi is RHS 
-                        or U's themselves if npsi is the new */
+                        or U's themselves if npsi is the new psi */
       Up[ijk] = ap*nPi[ijk] + bp*npsi[ijk] +
                 cp*( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
       Um[ijk] = am*nPi[ijk] + bm*npsi[ijk] +
                 cm*( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
     }
   }
+
+  /* copy Up or Um between boxes */
+  for(b=1; b<grid->nboxes; b++)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    tBox *lbox = grid->box[b-1]; /* shell inside shell(=box) */
+    int ijk, l_ijk, i,j,k;
+    double *Up = box->v[Ind("ScalarOnKerr_Up")];
+    double *Um = box->v[Ind("ScalarOnKerr_Um")];
+    double *lUp = lbox->v[Ind("ScalarOnKerr_Up")];
+    double *lUm = lbox->v[Ind("ScalarOnKerr_Um")];
+
+    /* loop over boundary points */
+    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
+    {
+      ijk  = Index(i,j,k);
+      l_ijk= ijk + (lbox->n1 - 1); /* true if n2,n3 are the same in all boxes */
+      lUp[l_ijk] = Up[ijk];
+      Um[ijk]    = lUm[l_ijk];
+    }
+  } /* end for b */
 }
 
 
