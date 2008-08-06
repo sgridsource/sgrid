@@ -33,6 +33,9 @@ int ScalarOnKerr_startup(tGrid *grid)
   VarNameSetBoundaryInfo("ScalarOnKerr_dPiy", 0, 1, 1.0);
   VarNameSetBoundaryInfo("ScalarOnKerr_dPiz", 0, 1, 1.0);
 
+  VarNameSetBoundaryInfo("ScalarOnKerr_Up",   0, 1, 1.0);
+  VarNameSetBoundaryInfo("ScalarOnKerr_Um",   0, 1, 1.0);
+
   /* create a variable list for ScalarOnKerr evolutions  */
   ScalarOnKerrvars = vlalloc(grid);
   vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_psi"));
@@ -85,6 +88,10 @@ int ScalarOnKerr_startup(tGrid *grid)
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(ScalarOnKerrvars);
+
+  /* enable char. vars. */
+  enablevar(grid, Ind("ScalarOnKerr_Up"));
+  enablevar(grid, Ind("ScalarOnKerr_Um"));
 
   /* enable rho */
   enablevar(grid, Ind("ScalarOnKerr_rho"));
@@ -467,6 +474,101 @@ void set_psi_Pi_boundary_New(tVarList *unew, tVarList *upre, double dt,
         npsi[ijk]  = ppsi[ijk]  + dt * rpsi;
       else
         npsi[ijk]  = rpsi;
+    }
+  }
+}
+
+/* set BC for old version: this is the 2007 version which sets only rPi */
+//void set_psi_Pi_boundary_2007_PiVersion(tVarList *unew, tVarList *upre, double dt, 
+void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
+{
+  tGrid *grid = unew->grid;
+  int b;
+  
+  /* compute Up and Um in each box */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, pi;
+    double *Up = box->v[Ind("ScalarOnKerr_Up")];
+    double *Um = box->v[Ind("ScalarOnKerr_Um")];
+    double *npsi = vlldataptr(unew, box, 0);
+    double *nPi = vlldataptr(unew, box, 1);
+    int inpsi = (unew)->index[0];
+//    int iPi  = (unew)->index[1];
+    double *npsix = box->v[Ind("ScalarOnKerr_dnpsix")];
+    double *npsiy = box->v[Ind("ScalarOnKerr_dnpsix")+1];
+    double *npsiz = box->v[Ind("ScalarOnKerr_dnpsix")+2];
+//    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
+//    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
+//    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_gup = Ind("ScalarOnKerr_guptt");
+    double *gtt = box->v[i_gup];
+    double *gtx = box->v[i_gup+1];
+    double *gty = box->v[i_gup+2];
+    double *gtz = box->v[i_gup+3];
+    double *gxx = box->v[i_gup+4];
+    double *gxy = box->v[i_gup+5];
+    double *gxz = box->v[i_gup+6];
+    double *gyy = box->v[i_gup+7];
+    double *gyz = box->v[i_gup+8];
+    double *gzz = box->v[i_gup+9];
+    int i_G = Ind("ScalarOnKerr_Gt");
+    double *Gt = box->v[i_G];
+    double *Gx = box->v[i_G+1];
+    double *Gy = box->v[i_G+2];
+    double *Gz = box->v[i_G+3];
+
+    /* compute the spatial derivs */
+    FirstDerivsOf_S(box, inpsi, Ind("ScalarOnKerr_dnpsix"));
+//    FirstDerivsOf_S(box, iPi , Ind("ScalarOnKerr_dPix"));
+
+    /* loop over points and set RHS */
+    forPointList_inbox(boxBoundaryPointList, box, pi , ijk)
+    {
+      double x,y,z;
+      double r, nx,ny,nz;
+      double rPi;
+      double betan, alpha, alpha2, gnn, Gn, gdn;
+      double ap,bp,cp, lambdap, am,bm,cm, lambdam;
+
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r;
+      ny = y/r;
+      nz = z/r;
+      alpha2 = -1.0/gtt[ijk];
+      alpha  = sqrt(alpha2);
+      betan = alpha2*(gtx[ijk]*nx +gty[ijk]*ny +gtz[ijk]*nz);
+      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+      Gn = Gx[ijk]*nx + Gy[ijk]*ny + Gz[ijk]*nz;
+      /* dn = d_i n_j = (delta_ij - n_i n_j)/r */
+      /* gdn = g^ij d_i n_j */
+      gdn = (gxx[ijk]+gyy[ijk]+gzz[ijk]-gnn)/r;
+      lambdap = betan + sqrt( betan*betan + alpha2*gnn );
+      ap = lambdap/(alpha2*gnn);
+      bp = 1.0;
+      cp = (gdn-Gn)/gnn;
+      lambdam = betan - sqrt( betan*betan + alpha2*gnn ); //???
+      am = lambdap/(alpha2*gnn); //???
+      bm = 1.0;
+      cm = (gdn-Gn)/gnn;  //???
+
+      /* set char vars (either time derivs if npsi is RHS 
+                        or U's themselves if npsi is the new */
+      Up[ijk] = ap*nPi[ijk] + bp*npsi[ijk] +
+                cp*( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
+      Um[ijk] = am*nPi[ijk] + bm*npsi[ijk] +
+                cm*( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
     }
   }
 }
