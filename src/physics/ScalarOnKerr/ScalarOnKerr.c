@@ -530,7 +530,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       double r, nx,ny,nz;
       double rPi;
       double betan, alpha, alpha2, gnn, Gn, gdn;
-      double ap,bp,cp, lambdap, am,bm,cm, lambdam;
+      double ap,bp,cp, lambdap, am,bm,cm, lambdam, npsir;
 
       x = px[ijk];
       y = py[ijk];
@@ -552,17 +552,17 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       ap = lambdap/(alpha2*gnn);
       bp = 1.0;
       cp = (gdn-Gn)/gnn;
-      lambdam = betan - sqrt( betan*betan + alpha2*gnn ); //???
-      am = lambdam/(alpha2*gnn); //???
-      bm = 1.0;
-      cm = (gdn-Gn)/gnn;  //???
+      lambdam = betan - sqrt( betan*betan + alpha2*gnn );
+      am = lambdam/(alpha2*gnn);
+      bm = bp;
+      cm = cp;
+
+      npsir = ( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
 
       /* set char vars (either time derivs if npsi is RHS 
                         or U's themselves if npsi is the new psi */
-      Up[ijk] = ap*nPi[ijk] + bp*npsi[ijk] +
-                cp*( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
-      Um[ijk] = am*nPi[ijk] + bm*npsi[ijk] +
-                cm*( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
+      Up[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
+      Um[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk];
     }
   }
 
@@ -651,7 +651,7 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
         double rPi;
         double betan, alpha, alpha2, gnn, Gn, gdn;
         double ap,bp,cp, lambdap, am,bm,cm, lambdam;
-        double dXdr, D00, npsi_plus_cnpsir, npsir;
+        double dXdr, D00, npsir_plus_cnpsi, npsir;
 
         ijk  = Index(i,j,k);
         x = px[ijk];
@@ -674,10 +674,10 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
         ap = lambdap/(alpha2*gnn);
         bp = 1.0;
         cp = (gdn-Gn)/gnn;
-        lambdam = betan - sqrt( betan*betan + alpha2*gnn ); //???
-        am = lambdam/(alpha2*gnn); //???
-        bm = 1.0;
-        cm = (gdn-Gn)/gnn;  //???
+        lambdam = betan - sqrt( betan*betan + alpha2*gnn );
+        am = lambdam/(alpha2*gnn);
+        bm = bp;
+        cm = cp;
 
         /* compute dXdr = dXdx dxdr +... */
         dXdr = dXdx[ijk]*nx + dXdy[ijk]*ny + dXdz[ijk]*nz;
@@ -686,18 +686,16 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
         npsir = ( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
 
         /* compute nPi and npsi from Up, Um on boundary */
-        /* Up[ijk] = ap*nPi[ijk] + bp*npsi[ijk] + cp*npsir;
-           Um[ijk] = am*nPi[ijk] + bm*npsi[ijk] + cm*npsir; */
+        /* Up[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
+           Um[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk]; */
         nPi[ijk] = (Up[ijk] - Um[ijk])/(ap-am);
-        npsi_plus_cnpsir = Um[ijk] - am*nPi[ijk];
+        npsir_plus_cnpsi = Um[ijk] - am*nPi[ijk];
         /* deriv = D00 u[0] + sum_{j=1...n-1} D0j u[j] */
-        /* npsi_plus_cnpsir = psi[0] + 
-                               c*(D00 psi[0] + sum_{j=1...n-1} D0j psi[j])
-                       = psi[0] + c*D00 psi[0] + c*(D0j psi[j]-D00 psi[0]) 
-          ==> psi[0] = (npsi_plus_cnpsir - c*(D0j psi[j]-D00 psi[0])) / 
-                       (1+c*D00); */
-        npsi[ijk] = (npsi_plus_cnpsir - cm*(npsir-D00*npsi[ijk]))/
-                    (1.0+cm*D00);
+        /* npsir_plus_cnpsi = D00 psi[0] + sum_{j=1...n-1} D0j psi[j] +
+                              c*psi[0]
+                       = c*psi[0] + D00 psi[0] + (D0j psi[j]-D00 psi[0]) 
+         ==> psi[0] = (npsir_plus_cnpsi - (D0j psi[j]-D00 psi[0]))/(c+D00); */
+        npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00);
       }
     }
   }
