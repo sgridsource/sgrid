@@ -241,7 +241,7 @@ set_mass_radius(M,r0);
             cos(2.0*(Omega*t - phi)) * Y22;
 
 /* use Ian's source */
-rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+//rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
 
       /* set RHS of psi and Pi */
       rPi  = -(g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
@@ -348,7 +348,7 @@ void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt,
       double x,y,z;
       double r, nx,ny,nz;
       double rPi;
-      double betan, alpha, alpha2, gnn, Gn, gdn;
+      double betan, alpha2, gnn, Gn, gdn;
       double ap,bp,cp, lambdap, dnPi;
 
       ijk = Index(i,j,k);
@@ -360,7 +360,6 @@ void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt,
       ny = y/r;
       nz = z/r;
       alpha2 = -1.0/gtt[ijk];
-      alpha  = sqrt(alpha2);
       betan = alpha2*(gtx[ijk]*nx +gty[ijk]*ny +gtz[ijk]*nz);
       gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
             2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
@@ -446,7 +445,7 @@ void set_psi_Pi_boundary_New(tVarList *unew, tVarList *upre, double dt,
       double x,y,z;
       double r, nx,ny,nz;
       double rpsi;
-      double betan, alpha, alpha2, gnn, Gn, gdn;
+      double betan, alpha2, gnn, Gn, gdn;
       double ap,bp,cp, lambdap, dnpsi;
 
       ijk = Index(i,j,k);
@@ -458,7 +457,6 @@ void set_psi_Pi_boundary_New(tVarList *unew, tVarList *upre, double dt,
       ny = y/r;
       nz = z/r;
       alpha2 = -1.0/gtt[ijk];
-      alpha  = sqrt(alpha2);
       betan = alpha2*(gtx[ijk]*nx +gty[ijk]*ny +gtz[ijk]*nz);
       gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
             2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
@@ -531,7 +529,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       double x,y,z;
       double r, nx,ny,nz;
       double rPi;
-      double betan, alpha, alpha2, gnn, Gn, gdn;
+      double betan, alpha2, gnn, Gn, gdn;
       double ap,bp,cp, lambdap, am,bm,cm, lambdam, npsir;
 
       x = px[ijk];
@@ -542,7 +540,6 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       ny = y/r;
       nz = z/r;
       alpha2 = -1.0/gtt[ijk];
-      alpha  = sqrt(alpha2);
       betan = alpha2*(gtx[ijk]*nx +gty[ijk]*ny +gtz[ijk]*nz);
       gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
             2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
@@ -565,6 +562,12 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
                         or U's themselves if npsi is the new psi */
       Up[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
       Um[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk];
+if(ijk==20 || ijk==39)
+{
+printf("b=%d ijk=%d (x,y,z)=(%g,%g,%g): Up[ijk]=%g Um[ijk]=%g\n",
+b,ijk,x,y,z, Up[ijk], Um[ijk]);
+}
+
     }
   }
 
@@ -589,6 +592,16 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       l_ijk= ijk + (lbox->n1 - 1); /* true if n2,n3 are the same in all boxes */
       lUp[l_ijk] = Up[ijk];
       Um[ijk]    = lUm[l_ijk];
+//lUp[l_ijk] = Up[ijk];
+//Um[ijk]    = lUm[l_ijk];
+//lUp[l_ijk] = 0;
+//Um[ijk]    = lUm[l_ijk];
+if(ijk==20)
+{
+printf("lb=%d l_ijk=%d: lUp[l_ijk]=%g lUm[l_ijk]=%g\n"
+       " b=%d   ijk=%d:  Up[ijk]  =%g  Um[ijk]=  %g\n",
+b-1,l_ijk, lUp[l_ijk],lUm[l_ijk], b,ijk, Up[ijk],Um[ijk]);
+}
     }
   } /* end for b */
 }
@@ -638,27 +651,27 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
     double *Gy = box->v[i_G+2];
     double *Gz = box->v[i_G+3];
 
-    /* loop over inner and outer boundary points */
+    /* compute spatial derivs of npsi */
+    spec_Deriv1(box, 1, npsi, npsiX);
+    /* move this-^ inside the for(i=0; i<n1; i+=n1-1) loop if npsi is 
+       changed for each i */
+
+    /* loop over lower and upper boundary points */
     for(i=0; i<n1; i+=n1-1)
     {
       if(b==0 && i==0) continue; /* do nothing on inner bound of box0 */
       if(b==grid->nboxes-1 && i==n1-1) break; /*do nothing on outer bound of last box */
-
-      /* compute spatial derivs of npsi */
-      // cart_partials(box, npsi, npsix, npsiy, npsiz);
-      spec_Deriv1(box, 1, npsi, npsiX);
-
       for(k=0; k<n3; k++)
       for(j=0; j<n2; j++)
       {
         double x,y,z;
         double r, nx,ny,nz;
         double rPi;
-        double betan, alpha, alpha2, gnn, Gn, gdn;
+        double betan, alpha2, gnn, Gn, gdn;
         double ap,bp,cp, lambdap, am,bm,cm, lambdam;
-        double dXdr, D00, npsir_plus_cnpsi, npsir, bnpsir;
+        double dXdr, npsir, D00, npsir_plus_cnpsi; //, D00, npsir_plus_cnpsi, bnpsir;
 
-        ijk  = Index(i,j,k);
+        ijk = Index(i,j,k);
         x = px[ijk];
         y = py[ijk];
         z = pz[ijk];
@@ -667,7 +680,6 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
         ny = y/r;
         nz = z/r;
         alpha2 = -1.0/gtt[ijk];
-        alpha  = sqrt(alpha2);
         betan = alpha2*(gtx[ijk]*nx +gty[ijk]*ny +gtz[ijk]*nz);
         gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
               2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
@@ -686,55 +698,34 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
 
         /* compute dXdr = dXdx dxdr +... */
         dXdr = dXdx[ijk]*nx + dXdy[ijk]*ny + dXdz[ijk]*nz;
-        /* npsi := d/dr psi = dXdr d/dX psi */
-        D00 = dXdr * box->D1[(i+1)*(i+1)-1];
+        /* npsir := d/dr psi = dXdr d/dX psi */
         npsir = dXdr * npsiX[ijk];
+        /* D00 = dXdr * box->D1[(i+1)*(i+1)-1]; */
 
-        /* compute nPi and npsi from Up, Um on boundary */
+        /* compute nPi and from Up or Um on boundary */
         /* Up[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
            Um[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk]; */
-        nPi[ijk] = (Up[ijk] - Um[ijk])/(ap-am);
-        npsir_plus_cnpsi = Um[ijk] - am*nPi[ijk];
+        /* Note: only Up/m is correct at upper/lower bounday!!! */
+//        if(i==0)  nPi[ijk] = (Um[ijk] - bm*npsir - cm*npsi[ijk])/am;
+//        else      nPi[ijk] = (Up[ijk] - bp*npsir - cp*npsi[ijk])/ap;
+nPi[ijk] = (Up[ijk] - Um[ijk])/(ap-am);
+
+        /* Note: U0 = psi is a zero speed mode, so we leave psi untouched!!! 
+           I.E.: we do not use the following : */
         /* deriv = D00 u[0] + sum_{j=1...n-1} D0j u[j] */
         /* npsir_plus_cnpsi = D00 psi[0] + sum_{j=1...n-1} D0j psi[j] +
                               c*psi[0]
-                       = c*psi[0] + D00 psi[0] + (D0j psi[j]-D00 psi[0]) 
-         ==> psi[0] = (npsir_plus_cnpsi - (D0j psi[j]-D00 psi[0]))/(c+D00); */
-//        npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00);
-if(j==1 && k==0 && 0)
-{
-double drnpsi, npsir_plus_cnpsi_res;
-double dx[100*6*6], dy[100*6*6], dz[100*6*6];
-cart_partials(box, npsi, dx, dy, dz);
-drnpsi = ( nx*dx[ijk] + ny*dy[ijk] + nz*dz[ijk] );
-npsir_plus_cnpsi_res = drnpsi + cm *npsi[ijk];
-printf("b=%d ijk=%d (x,y,z)=(%g,%g,%g): nPi[ijk]=%g npsir_plus_cnpsi=%g "
-       "npsi[ijk]=%g npsir_plus_cnpsi_res=%g\n",
-b,ijk,x,y,z, nPi[ijk], npsir_plus_cnpsi, npsi[ijk], npsir_plus_cnpsi_res);
-}
-
-        bnpsir = Um[ijk] - am*nPi[ijk] - cm*npsi[ijk];
-        /* deriv = D00 u[0] + sum_{j=1...n-1} D0j u[j] */
-        /* bnpsir = D00 psi[0] + sum_{j=1...n-1} D0j psi[j]
-                  = D00 psi[0] + (D0j psi[j]-D00 psi[0])
-           ==> psi[0] = (bnpsir - (D0j psi[j]-D00 psi[0]))/(D00); */
-//        npsi[ijk] = (bnpsir - (npsir-D00*npsi[ijk]))/(D00);
-if(j==1 && k==0 && 0)
-{
-double drnpsi, bnpsir_res;
-double dx[100*6*6], dy[100*6*6], dz[100*6*6];
-cart_partials(box, npsi, dx, dy, dz);
-drnpsi = ( nx*dx[ijk] + ny*dy[ijk] + nz*dz[ijk] );
-bnpsir_res = drnpsi;
-printf("b=%d ijk=%d (x,y,z)=(%g,%g,%g): nPi[ijk]=%g bnpsir=%g "
-       "npsi[ijk]=%g bnpsir_res=%g\n",
-b,ijk,x,y,z, nPi[ijk], bnpsir, npsi[ijk], bnpsir_res);
-}
+                            = c*psi[0] + D00 psi[0] + (D0j psi[j]-D00 psi[0]) 
+         ==> psi[0] = (npsir_plus_cnpsi - (D0j psi[j]-D00 psi[0]))/(c+D00);
+           npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00); */
+        npsir_plus_cnpsi = Um[ijk] - am*nPi[ijk];
+        D00 = dXdr * box->D1[(i+1)*(i+1)-1];
+        npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00);
       }
     }
   }
 
-  /* copy U0 = npsi between boxes */
+  /* average npsi and nPi between boxes */
   for(b=1; b<grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
@@ -743,24 +734,29 @@ b,ijk,x,y,z, nPi[ijk], bnpsir, npsi[ijk], bnpsir_res);
     int n3=box->n3;
     tBox *lbox = grid->box[b-1]; /* shell inside shell(=box) */
     int ijk, l_ijk, i,j,k;
-    double *U0  = vlldataptr(unew, box, 0);
-    double *lU0 = vlldataptr(unew, lbox, 0);
-    double U0val;
+    double *npsi  = vlldataptr(unew, box, 0);
+    double *lnpsi = vlldataptr(unew, lbox, 0);
     double *nPi  = vlldataptr(unew, box, 1);
     double *lnPi = vlldataptr(unew, lbox, 1);
+    double npsival, nPival;
 
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
     {
       ijk  = Index(i,j,k);
       l_ijk= ijk + (lbox->n1 - 1); /* true if n2,n3 are the same in all boxes */
-      U0val = 0.5*(U0[ijk] + lU0[l_ijk]);
-//      U0[ijk] = lU0[l_ijk] = U0val;
+      npsival = 0.5*(npsi[ijk] + lnpsi[l_ijk]);
+      nPival  = 0.5*(nPi[ijk] + lnPi[l_ijk]);
+//npsival=lnpsi[l_ijk];
+//npsival=npsi[ijk];
+//nPival= lnPi[l_ijk];
+      npsi[ijk] = lnpsi[l_ijk] = npsival;
+//      nPi[ijk]  = lnPi[l_ijk] = nPival;
 if(j==1 && k==0 )
 {
-printf("lb=%d l_ijk=%d: lnPi[l_ijk]=%g lU0[l_ijk]=%g\n"
-       " b=%d   ijk=%d:  nPi[ijk]=%g  U0[ijk]=%g\n",
-       b-1,l_ijk, lnPi[l_ijk], lU0[l_ijk], b,ijk, nPi[ijk], U0[ijk]);
+printf("#lb=%d l_ijk=%d: lnPi[l_ijk]=%g lnpsi[l_ijk]=%g\n"
+       "# b=%d   ijk=%d:  nPi[ijk]  =%g  npsi[ijk]=  %g\n",
+       b-1,l_ijk, lnPi[l_ijk], lnpsi[l_ijk], b,ijk, nPi[ijk], npsi[ijk]);
 }
     }
   } /* end for b */
