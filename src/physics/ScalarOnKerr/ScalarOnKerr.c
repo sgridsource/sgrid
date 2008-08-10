@@ -769,7 +769,7 @@ void interpolate_between_boxes(tVarList *unew, tVarList *upre)
   tGrid *grid = unew->grid;
   int b;
   
-  /* copy Up or Um between boxes */
+  /* loop over boxes */
   for(b=1; b<grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
@@ -777,22 +777,61 @@ void interpolate_between_boxes(tVarList *unew, tVarList *upre)
     int n2=box->n2;
     int n3=box->n3;
     tBox *lbox = grid->box[b-1]; /* shell inside shell(=box) */
+    int ln1=lbox->n1;
+    int ln2=lbox->n2;
     int ijk, l_ijk, i,j,k;
     double *npsi = vlldataptr(unew,  box, 0);
     double *lnpsi= vlldataptr(unew, lbox, 0);
     double *nPi  = vlldataptr(unew,  box, 1);
     double *lnPi = vlldataptr(unew, lbox, 1);
+    double *X  =  box->v[Ind("X")];
+    double *lX = lbox->v[Ind("X")];
+    double *BM;
+    double *lBM;
+
+    /* set BM and lBM if necessary */
+    BM = lBM = NULL;
+    if( !dequal(X[0],lX[ln1 - 2]) )
+    {
+      lBM = (double *) calloc(ln1, sizeof(double));
+      spec_Basis_times_CoeffMatrix_direc(lbox, 1, lBM, X[0]);
+    }
+    if( !dequal(lX[ln1-1],X[1]) )
+    {
+      BM = (double *) calloc(n1, sizeof(double));
+      spec_Basis_times_CoeffMatrix_direc(box, 1, BM, lX[ln1-1]);
+    }
 
     /* loop over boundary points */
-    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n1,n2,n3 */
+    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
     {
       ijk  = Index(i,j,k);
-      l_ijk= ijk + (lbox->n1 - 2); /* true if n1,n2,n3 are the same in all boxes */
-      npsi[ijk]= lnpsi[l_ijk];
-      nPi[ijk] = lnPi[l_ijk];
-      lnpsi[l_ijk+1]= npsi[ijk+1];
-      lnPi[l_ijk+1] = nPi[ijk+1];
+      l_ijk= Ind_n1n2(ln1-2, j, k, ln1,ln2); 
+      /* set values at i=0 in box from values in lbox */
+      if( dequal(X[ijk],lX[l_ijk]) )
+      {
+        npsi[ijk]= lnpsi[l_ijk];
+        nPi[ijk] = lnPi[l_ijk];
+      }
+      else
+      {
+        npsi[ijk]=scalarproduct_vectors(lBM, lnpsi +Ind_n1n2(0,j,k, ln1,ln2), ln1);
+        nPi[ijk]=scalarproduct_vectors(lBM, lnPi +Ind_n1n2(0,j,k, ln1,ln2), ln1);
+      }
+      /* set values at i=ln1-1 in lbox from values in box */
+      if( dequal(lX[l_ijk+1],X[ijk+1]) )
+      {
+        lnpsi[l_ijk+1]= npsi[ijk+1];
+        lnPi[l_ijk+1] = nPi[ijk+1];
+      }
+      else
+      {
+        lnpsi[l_ijk+1]=scalarproduct_vectors(BM, npsi +Index(0,j,k), n1);
+        lnPi[l_ijk+1] =scalarproduct_vectors(BM, nPi + Index(0,j,k), n1);
+      }
     }
+    free(lBM);
+    free(BM);
   } /* end for b */
 }
 
