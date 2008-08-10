@@ -12,6 +12,7 @@
 #define PIh 1.57079632679489661923132169163975
 #define PIq 0.785398163397448309615660845819876
 #define Index(i,j,k) ((i)+n1*((j)+n2*(k)))
+#define Ind_n1n2(i,j,k,n1,n2) ((i)+(n1)*((j)+(n2)*(k)))
 #define forallijk(i,j,k) \
   for (k = 0; k < n3; k++) \
   for (j = 0; j < n2; j++) \
