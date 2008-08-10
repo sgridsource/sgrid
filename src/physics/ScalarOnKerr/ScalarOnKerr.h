@@ -16,3 +16,4 @@ void Kerr3d(tGrid *grid, int i_x, int i_alpha, int i_beta, int i_g,
 void set_boundary_ofPi(tVarList *unew, tVarList *upre);
 void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre);
 void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre);
+void interpolate_between_boxes(tVarList *unew, tVarList *upre);

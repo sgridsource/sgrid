@@ -264,8 +264,9 @@ set_mass_radius(M,r0);
   } /* end forallboxes */
 
   /* set char. vars. and use them to compute unew */
-  set_Up_Um_onBoundary(unew, NULL);
-  compute_unew_from_Up_Um_onBoundary(unew, NULL);
+//  set_Up_Um_onBoundary(unew, NULL);
+//  compute_unew_from_Up_Um_onBoundary(unew, NULL);
+interpolate_between_boxes(unew, NULL);
 
   /* set BCs */
 //  set_boundary(unew, upre, dt, ucur);
@@ -586,10 +587,10 @@ b,ijk,x,y,z, Up[ijk], Um[ijk]);
     double *lUm = lbox->v[Ind("ScalarOnKerr_Um")];
 
     /* loop over boundary points */
-    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
+    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n1,n2,n3 */
     {
       ijk  = Index(i,j,k);
-      l_ijk= ijk + (lbox->n1 - 1); /* true if n2,n3 are the same in all boxes */
+      l_ijk= ijk + (lbox->n1 - 1); /* true if n1,n2,n3 are the same in all boxes */
       lUp[l_ijk] = Up[ijk];
       Um[ijk]    = lUm[l_ijk];
 //lUp[l_ijk] = Up[ijk];
@@ -741,10 +742,10 @@ nPi[ijk] = (Up[ijk] - Um[ijk])/(ap-am);
     double npsival, nPival;
 
     /* loop over boundary points */
-    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
+    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n1,n2,n3 */
     {
       ijk  = Index(i,j,k);
-      l_ijk= ijk + (lbox->n1 - 1); /* true if n2,n3 are the same in all boxes */
+      l_ijk= ijk + (lbox->n1 - 1); /* true if n1,n2,n3 are the same in all boxes */
       npsival = 0.5*(npsi[ijk] + lnpsi[l_ijk]);
       nPival  = 0.5*(nPi[ijk] + lnPi[l_ijk]);
 //npsival=lnpsi[l_ijk];
@@ -758,6 +759,39 @@ printf("#lb=%d l_ijk=%d: lnPi[l_ijk]=%g lnpsi[l_ijk]=%g\n"
        "# b=%d   ijk=%d:  nPi[ijk]  =%g  npsi[ijk]=  %g\n",
        b-1,l_ijk, lnPi[l_ijk], lnpsi[l_ijk], b,ijk, nPi[ijk], npsi[ijk]);
 }
+    }
+  } /* end for b */
+}
+
+/* interpolate between boxes */
+void interpolate_between_boxes(tVarList *unew, tVarList *upre)
+{
+  tGrid *grid = unew->grid;
+  int b;
+  
+  /* copy Up or Um between boxes */
+  for(b=1; b<grid->nboxes; b++)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    tBox *lbox = grid->box[b-1]; /* shell inside shell(=box) */
+    int ijk, l_ijk, i,j,k;
+    double *npsi = vlldataptr(unew,  box, 0);
+    double *lnpsi= vlldataptr(unew, lbox, 0);
+    double *nPi  = vlldataptr(unew,  box, 1);
+    double *lnPi = vlldataptr(unew, lbox, 1);
+
+    /* loop over boundary points */
+    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n1,n2,n3 */
+    {
+      ijk  = Index(i,j,k);
+      l_ijk= ijk + (lbox->n1 - 2); /* true if n1,n2,n3 are the same in all boxes */
+      npsi[ijk]= lnpsi[l_ijk];
+      nPi[ijk] = lnPi[l_ijk];
+      lnpsi[l_ijk+1]= npsi[ijk+1];
+      lnPi[l_ijk+1] = nPi[ijk+1];
     }
   } /* end for b */
 }
