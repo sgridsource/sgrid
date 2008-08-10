@@ -1,7 +1,7 @@
 # ScalarOnKerr/Makefile
 
 NAME := ScalarOnKerr
-OBJS := sgrid_$(NAME).o ScalarOnKerr.o Kerr.o Kerr3d.o
+OBJS := sgrid_$(NAME).o ScalarOnKerr.o Kerr.o Kerr3d.o setupgrid.o
 
 include $(TOP)/Makefile.subdirs
 

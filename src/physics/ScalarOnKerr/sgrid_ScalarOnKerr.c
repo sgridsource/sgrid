@@ -13,6 +13,7 @@ int sgrid_ScalarOnKerr(void)
   printf("Adding ScalarOnKerr\n");
 
   /* functions */
+  AddFun(PRE_GRID, ScalarOnKerr_setup_boxes, "setup initial box sizes");
   AddFun(POST_INITIALDATA, ScalarOnKerr_startup, 
 	 "initialize ScalarOnKerr system from adm initial data");
   AddFun(ANALYZE, ScalarOnKerr_analyze, "compute something useful");
@@ -77,6 +78,8 @@ int sgrid_ScalarOnKerr(void)
   AddPar("ScalarOnKerr_special_nPi_filter", "simple",
          "whether we filter all new Pi in each evo substep "
          "[no, simple, naive_Ylm]");
+  AddPar("ScalarOnKerr_overlap_shells", "no",
+         "whether we use overlapping shells [no,yes]");
 
   return 0;
 }
