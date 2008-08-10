@@ -17,11 +17,11 @@ int ScalarOnKerr_setup_boxes(tGrid *g)
 
   if(Getv("ScalarOnKerr_overlap_shells", "no")) return 0;
 
-  printf("ScalarOnKerr_setup_boxes: setting box sizes used ...\n");
+  printf("ScalarOnKerr_setup_boxes: moving boxes so that they overlap ...\n");
 
   /* make a dummy grid with 3 vars */
-  grid=make_empty_grid(globalnvariables, 1);
-  set_BoxStructures_fromPars(grid, 1);
+  grid=make_empty_grid(globalnvariables, 0);
+  set_BoxStructures_fromPars(grid, 0);
 
   /* shift shell radii */
   for(Xshift=0.0, b=1; b<nboxes; b++)
