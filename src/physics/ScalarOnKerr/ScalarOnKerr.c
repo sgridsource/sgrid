@@ -40,6 +40,8 @@ int ScalarOnKerr_startup(tGrid *grid)
   ScalarOnKerrvars = vlalloc(grid);
   vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_psi"));
   vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_Pi"));
+  vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_Up"));
+  vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_Um"));
   if (0) prvarlist(ScalarOnKerrvars);
   enablevarlist(ScalarOnKerrvars);
 
@@ -90,8 +92,8 @@ int ScalarOnKerr_startup(tGrid *grid)
     reset_doubleCoveredPoints(ScalarOnKerrvars);
 
   /* enable char. vars. */
-  enablevar(grid, Ind("ScalarOnKerr_Up"));
-  enablevar(grid, Ind("ScalarOnKerr_Um"));
+  //enablevar(grid, Ind("ScalarOnKerr_Up"));
+  //enablevar(grid, Ind("ScalarOnKerr_Um"));
 
   /* enable rho */
   enablevar(grid, Ind("ScalarOnKerr_rho"));
@@ -264,9 +266,9 @@ set_mass_radius(M,r0);
   } /* end forallboxes */
 
   /* set char. vars. and use them to compute unew */
-//  set_Up_Um_onBoundary(unew, NULL);
-//  compute_unew_from_Up_Um_onBoundary(unew, NULL);
-interpolate_between_boxes(unew, NULL);
+  set_Up_Um_onBoundary(unew, upre, dt, ucur);
+  compute_unew_from_Up_Um_onBoundary(unew, upre, dt, ucur);
+//interpolate_between_boxes(unew, NULL);
 
   /* set BCs */
 //  set_boundary(unew, upre, dt, ucur);
@@ -484,23 +486,31 @@ void set_psi_Pi_boundary_New(tVarList *unew, tVarList *upre, double dt,
 }
 
 /* compute and transfer Up and Um on boundaries */
-void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
+void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt, 
+                          tVarList *ucur)
 {
   tGrid *grid = unew->grid;
   int b;
   
-  /* compute Up and Um in each box */
+  /* compute nUp and nUm in each box */
   forallboxes(grid,b)
   {
     tBox *box = grid->box[b];
     int ijk, pi;
-    double *Up = box->v[Ind("ScalarOnKerr_Up")];
-    double *Um = box->v[Ind("ScalarOnKerr_Um")];
     double *npsi = vlldataptr(unew, box, 0);
     double *nPi = vlldataptr(unew, box, 1);
+    double *nUp = vlldataptr(unew, box, 2);
+    double *nUm = vlldataptr(unew, box, 3);
     double *npsix = box->v[Ind("temp1")];
     double *npsiy = box->v[Ind("temp2")];
     double *npsiz = box->v[Ind("temp3")];
+    double *cpsi = vlldataptr(ucur, box, 0);
+    double *cPi = vlldataptr(ucur, box, 1);
+    double *cUp = vlldataptr(ucur, box, 2);
+    double *cUm = vlldataptr(ucur, box, 3);
+    double *cpsix = box->v[Ind("ScalarOnKerr_dpsix")];
+    double *cpsiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+    double *cpsiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
     double *px = box->v[Ind("x")];
     double *py = box->v[Ind("y")];
     double *pz = box->v[Ind("z")];
@@ -523,6 +533,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
 
     /* compute spatial derivs of npsi */
     cart_partials(box, npsi, npsix, npsiy, npsiz);
+    cart_partials(box, cpsi, cpsix, cpsiy, cpsiz);
 
     /* loop over points and set RHS */
     forPointList_inbox(boxBoundaryPointList, box, pi , ijk)
@@ -531,7 +542,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       double r, nx,ny,nz;
       double rPi;
       double betan, alpha2, gnn, Gn, gdn;
-      double ap,bp,cp, lambdap, am,bm,cm, lambdam, npsir;
+      double ap,bp,cp, lambdap, am,bm,cm, lambdam, npsir, cpsir;
 
       x = px[ijk];
       y = py[ijk];
@@ -558,21 +569,22 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
       cm = cp;
 
       npsir = ( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
+      cpsir = ( nx*cpsix[ijk] + ny*cpsiy[ijk] + nz*cpsiz[ijk] );
 
-      /* set char vars (either time derivs if npsi is RHS 
-                        or U's themselves if npsi is the new psi */
-      Up[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
-      Um[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk];
-if(ijk==20 || ijk==39)
-{
-printf("b=%d ijk=%d (x,y,z)=(%g,%g,%g): Up[ijk]=%g Um[ijk]=%g\n",
-b,ijk,x,y,z, Up[ijk], Um[ijk]);
-}
-
+      /* set char vars both unew and ucur */
+      nUp[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
+      nUm[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk];
+      cUp[ijk] = ap*cPi[ijk] + bp*cpsir + cp*cpsi[ijk];
+      cUm[ijk] = am*cPi[ijk] + bm*cpsir + cm*cpsi[ijk];
+//if(ijk==20 || ijk==39)
+//{
+//printf("b=%d ijk=%d (x,y,z)=(%g,%g,%g): nUp[ijk]=%g nUm[ijk]=%g\n",
+//b,ijk,x,y,z, nUp[ijk], nUm[ijk]);
+//}
     }
   }
 
-  /* copy Up or Um between boxes */
+  /* add penalty terms to nUp and nUm */
   for(b=1; b<grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
@@ -580,40 +592,52 @@ b,ijk,x,y,z, Up[ijk], Um[ijk]);
     int n2=box->n2;
     int n3=box->n3;
     tBox *lbox = grid->box[b-1]; /* shell inside shell(=box) */
+    int ln1=lbox->n1;
+    int ln2=lbox->n2;
     int ijk, l_ijk, i,j,k;
-    double *Up = box->v[Ind("ScalarOnKerr_Up")];
-    double *Um = box->v[Ind("ScalarOnKerr_Um")];
-    double *lUp = lbox->v[Ind("ScalarOnKerr_Up")];
-    double *lUm = lbox->v[Ind("ScalarOnKerr_Um")];
+    double *nUp =  vlldataptr(unew, box, 2);
+    double *nUm =  vlldataptr(unew, box, 3);
+    double *lnUp = vlldataptr(unew, lbox, 2);
+    double *lnUm = vlldataptr(unew, lbox, 3);
+    double *cUp =  vlldataptr(ucur, box, 2);
+    double *cUm =  vlldataptr(ucur, box, 3);
+    double *lcUp = vlldataptr(ucur, lbox, 2);
+    double *lcUm = vlldataptr(ucur, lbox, 3);
+    double *npsi =  vlldataptr(unew,  box, 0);
+    double *lnpsi = vlldataptr(unew, lbox, 0);
+    double *cpsi =  vlldataptr(ucur,  box, 0);
+    double *lcpsi = vlldataptr(ucur, lbox, 0);
+
+    double tau = 0.2*n1*(n1+1);
 
     /* loop over boundary points */
-    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n1,n2,n3 */
+    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
     {
       ijk  = Index(i,j,k);
-      l_ijk= ijk + (lbox->n1 - 1); /* true if n1,n2,n3 are the same in all boxes */
-      lUp[l_ijk] = Up[ijk];
-      Um[ijk]    = lUm[l_ijk];
-//lUp[l_ijk] = Up[ijk];
-//Um[ijk]    = lUm[l_ijk];
-//lUp[l_ijk] = 0;
-//Um[ijk]    = lUm[l_ijk];
+      l_ijk= Ind_n1n2(ln1-1, j, k, ln1,ln2);
+      lnUp[l_ijk] -= tau*(lcUp[l_ijk] - cUp[ijk]); 
+      nUm[ijk]    -= tau*(cUm[ijk] - lcUm[l_ijk]);
+
+//      lnpsi[l_ijk] -= tau*(lcpsi[l_ijk] - cpsi[ijk]);
+//      npsi[ijk]    -= tau*(cpsi[ijk] - lcpsi[l_ijk]);
 if(ijk==20)
 {
-printf("lb=%d l_ijk=%d: lUp[l_ijk]=%g lUm[l_ijk]=%g\n"
-       " b=%d   ijk=%d:  Up[ijk]  =%g  Um[ijk]=  %g\n",
-b-1,l_ijk, lUp[l_ijk],lUm[l_ijk], b,ijk, Up[ijk],Um[ijk]);
+printf("lb=%d l_ijk=%d: lnUp[l_ijk]=%g lnUm[l_ijk]=%g\n"
+       " b=%d   ijk=%d:  nUp[ijk]  =%g  nUm[ijk]=  %g\n",
+b-1,l_ijk, lnUp[l_ijk],lnUm[l_ijk], b,ijk, nUp[ijk],nUm[ijk]);
 }
     }
   } /* end for b */
 }
 
 /* compute unew from Up and Um on boundaries */
-void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
+void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
+                                        double dt, tVarList *ucur)
 {
   tGrid *grid = unew->grid;
   int b;
   
-  /* compute Up and Um in each box */
+  /* compute nUp and nUm in each box */
   forallboxes(grid,b)
   {
     tBox *box = grid->box[b];
@@ -621,10 +645,10 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
     int n2=box->n2;
     int n3=box->n3;
     int ijk, i,j,k;
-    double *Up = box->v[Ind("ScalarOnKerr_Up")];
-    double *Um = box->v[Ind("ScalarOnKerr_Um")];
     double *npsi = vlldataptr(unew, box, 0);
     double *nPi = vlldataptr(unew, box, 1);
+    double *nUp = vlldataptr(unew, box, 2);
+    double *nUm = vlldataptr(unew, box, 3);
     double *npsiX = box->v[Ind("temp1")];
 //    double *npsix = box->v[Ind("temp1")];
 //    double *npsiy = box->v[Ind("temp2")];
@@ -703,13 +727,13 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre)
         npsir = dXdr * npsiX[ijk];
         /* D00 = dXdr * box->D1[(i+1)*(i+1)-1]; */
 
-        /* compute nPi and from Up or Um on boundary */
-        /* Up[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
-           Um[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk]; */
-        /* Note: only Up/m is correct at upper/lower bounday!!! */
-//        if(i==0)  nPi[ijk] = (Um[ijk] - bm*npsir - cm*npsi[ijk])/am;
-//        else      nPi[ijk] = (Up[ijk] - bp*npsir - cp*npsi[ijk])/ap;
-nPi[ijk] = (Up[ijk] - Um[ijk])/(ap-am);
+        /* compute nPi and from nUp or nUm on boundary */
+        /* nUp[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
+           nUm[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk]; */
+        /* Note: only nUp/m is correct at upper/lower bounday!!! */
+//        if(i==0)  nPi[ijk] = (nUm[ijk] - bm*npsir - cm*npsi[ijk])/am;
+//        else      nPi[ijk] = (nUp[ijk] - bp*npsir - cp*npsi[ijk])/ap;
+nPi[ijk] = (nUp[ijk] - nUm[ijk])/(ap-am);
 
         /* Note: U0 = psi is a zero speed mode, so we leave psi untouched!!! 
            I.E.: we do not use the following : */
@@ -719,9 +743,9 @@ nPi[ijk] = (Up[ijk] - Um[ijk])/(ap-am);
                             = c*psi[0] + D00 psi[0] + (D0j psi[j]-D00 psi[0]) 
          ==> psi[0] = (npsir_plus_cnpsi - (D0j psi[j]-D00 psi[0]))/(c+D00);
            npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00); */
-        npsir_plus_cnpsi = Um[ijk] - am*nPi[ijk];
-        D00 = dXdr * box->D1[(i+1)*(i+1)-1];
-        npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00);
+//        npsir_plus_cnpsi = nUm[ijk] - am*nPi[ijk];
+//        D00 = dXdr * box->D1[(i+1)*(i+1)-1];
+//        npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00);
       }
     }
   }
