@@ -491,7 +491,36 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
 {
   tGrid *grid = unew->grid;
   int b;
-  
+
+  /* add my own "penalty" terms to npsi */
+  for(b=1; b<grid->nboxes; b++)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    tBox *lbox = grid->box[b-1]; /* shell inside shell(=box) */
+    int ln1=lbox->n1;
+    int ln2=lbox->n2;
+    int ijk, l_ijk, i,j,k;
+    double *npsi =  vlldataptr(unew,  box, 0);
+    double *lnpsi = vlldataptr(unew, lbox, 0);
+    double *cpsi =  vlldataptr(ucur,  box, 0);
+    double *lcpsi = vlldataptr(ucur, lbox, 0);
+    double ltau = 0.2*ln1*(ln1+1);
+    double tau  = 0.2*n1*(n1+1);
+    double tau2 = 4.0;
+
+    /* loop over boundary points */
+    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
+    {
+      ijk  = Index(i,j,k);
+      l_ijk= Ind_n1n2(ln1-1, j, k, ln1,ln2);
+      lnpsi[l_ijk] -= tau2*(lcpsi[l_ijk] - cpsi[ijk]);
+      npsi[ijk]    -= tau2*(cpsi[ijk] - lcpsi[l_ijk]);
+    }
+  } /* end for b */
+
   /* compute nUp and nUm in each box */
   forallboxes(grid,b)
   {
@@ -607,19 +636,20 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
     double *lnpsi = vlldataptr(unew, lbox, 0);
     double *cpsi =  vlldataptr(ucur,  box, 0);
     double *lcpsi = vlldataptr(ucur, lbox, 0);
-
-    double tau = 0.2*n1*(n1+1);
+    double ltau = 0.2*ln1*(ln1+1);
+    double tau  = 0.2*n1*(n1+1);
+    double tau2 = 0.2*n1;
 
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
     {
       ijk  = Index(i,j,k);
       l_ijk= Ind_n1n2(ln1-1, j, k, ln1,ln2);
-      lnUp[l_ijk] -= tau*(lcUp[l_ijk] - cUp[ijk]); 
-      nUm[ijk]    -= tau*(cUm[ijk] - lcUm[l_ijk]);
+      lnUp[l_ijk] -= ltau*(lcUp[l_ijk] - cUp[ijk]); 
+      nUm[ijk]    -=  tau*(cUm[ijk] - lcUm[l_ijk]);
 
-//      lnpsi[l_ijk] -= tau*(lcpsi[l_ijk] - cpsi[ijk]);
-//      npsi[ijk]    -= tau*(cpsi[ijk] - lcpsi[l_ijk]);
+//      lnpsi[l_ijk] -= tau2*(lcpsi[l_ijk] - cpsi[ijk]);
+//      npsi[ijk]    -= tau2*(cpsi[ijk] - lcpsi[l_ijk]);
 if(ijk==20)
 {
 printf("lb=%d l_ijk=%d: lnUp[l_ijk]=%g lnUm[l_ijk]=%g\n"
@@ -730,10 +760,10 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
         /* compute nPi and from nUp or nUm on boundary */
         /* nUp[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
            nUm[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk]; */
-        /* Note: only nUp/m is correct at upper/lower bounday!!! */
+//        /* Note: only nUp/m is correct at upper/lower bounday!!! */
 //        if(i==0)  nPi[ijk] = (nUm[ijk] - bm*npsir - cm*npsi[ijk])/am;
 //        else      nPi[ijk] = (nUp[ijk] - bp*npsir - cp*npsi[ijk])/ap;
-nPi[ijk] = (nUp[ijk] - nUm[ijk])/(ap-am);
+        nPi[ijk] = (nUp[ijk] - nUm[ijk])/(ap-am);
 
         /* Note: U0 = psi is a zero speed mode, so we leave psi untouched!!! 
            I.E.: we do not use the following : */
@@ -743,9 +773,9 @@ nPi[ijk] = (nUp[ijk] - nUm[ijk])/(ap-am);
                             = c*psi[0] + D00 psi[0] + (D0j psi[j]-D00 psi[0]) 
          ==> psi[0] = (npsir_plus_cnpsi - (D0j psi[j]-D00 psi[0]))/(c+D00);
            npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00); */
-//        npsir_plus_cnpsi = nUm[ijk] - am*nPi[ijk];
-//        D00 = dXdr * box->D1[(i+1)*(i+1)-1];
-//        npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00);
+        npsir_plus_cnpsi = nUm[ijk] - am*nPi[ijk];
+        D00 = dXdr * box->D1[(i+1)*(i+1)-1];
+        npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00);
       }
     }
   }
@@ -758,6 +788,8 @@ nPi[ijk] = (nUp[ijk] - nUm[ijk])/(ap-am);
     int n2=box->n2;
     int n3=box->n3;
     tBox *lbox = grid->box[b-1]; /* shell inside shell(=box) */
+    int ln1=lbox->n1;
+    int ln2=lbox->n2;
     int ijk, l_ijk, i,j,k;
     double *npsi  = vlldataptr(unew, box, 0);
     double *lnpsi = vlldataptr(unew, lbox, 0);
@@ -769,13 +801,13 @@ nPi[ijk] = (nUp[ijk] - nUm[ijk])/(ap-am);
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n1,n2,n3 */
     {
       ijk  = Index(i,j,k);
-      l_ijk= ijk + (lbox->n1 - 1); /* true if n1,n2,n3 are the same in all boxes */
+      l_ijk= Ind_n1n2(ln1-1, j, k, ln1,ln2);
       npsival = 0.5*(npsi[ijk] + lnpsi[l_ijk]);
       nPival  = 0.5*(nPi[ijk] + lnPi[l_ijk]);
 //npsival=lnpsi[l_ijk];
 //npsival=npsi[ijk];
 //nPival= lnPi[l_ijk];
-      npsi[ijk] = lnpsi[l_ijk] = npsival;
+//      npsi[ijk] = lnpsi[l_ijk] = npsival;
 //      nPi[ijk]  = lnPi[l_ijk] = nPival;
 if(j==1 && k==0 )
 {
