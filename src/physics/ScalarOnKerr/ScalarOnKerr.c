@@ -373,7 +373,7 @@ void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt,
       lambdap = betan + sqrt( betan*betan + alpha2*gnn);
       ap = lambdap/(alpha2*gnn);
       bp = 1.0;
-      cp = (gdn-Gn)/gnn;
+      cp = 0.5*(gdn-Gn)/gnn;
       dnPi = nx*Pix[ijk] + ny*Piy[ijk] + nz*Piz[ijk];
       
       /* set RHS of Pi */
@@ -470,7 +470,7 @@ void set_psi_Pi_boundary_New(tVarList *unew, tVarList *upre, double dt,
       lambdap = betan + sqrt( betan*betan + alpha2*gnn);
       ap = lambdap/(alpha2*gnn);
       bp = 1.0;
-      cp = (gdn-Gn)/gnn;
+      cp = 0.5*(gdn-Gn)/gnn;
       dnpsi = nx*psix[ijk] + ny*psiy[ijk] + nz*psiz[ijk];
       
       /* set RHS of psi */
@@ -589,7 +589,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
       lambdap = betan + sqrt( betan*betan + alpha2*gnn );
       ap = lambdap/(alpha2*gnn);
       bp = 1.0;
-      cp = (gdn-Gn)/gnn;
+      cp = 0.5*(gdn-Gn)/gnn;
       lambdam = betan - sqrt( betan*betan + alpha2*gnn );
       am = lambdam/(alpha2*gnn);
       bm = bp;
@@ -743,7 +743,7 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
         lambdap = betan + sqrt( betan*betan + alpha2*gnn );
         ap = lambdap/(alpha2*gnn);
         bp = 1.0;
-        cp = (gdn-Gn)/gnn;
+        cp = 0.5*(gdn-Gn)/gnn;
         lambdam = betan - sqrt( betan*betan + alpha2*gnn );
         am = lambdam/(alpha2*gnn);
         bm = bp;
