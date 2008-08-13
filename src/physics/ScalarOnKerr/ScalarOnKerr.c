@@ -507,9 +507,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
     double *lnpsi = vlldataptr(unew, lbox, 0);
     double *cpsi =  vlldataptr(ucur,  box, 0);
     double *lcpsi = vlldataptr(ucur, lbox, 0);
-    double ltau = 0.2*ln1*(ln1+1);
-    double tau  = 0.2*n1*(n1+1);
-    double tau2 = 4.0;
+    double tau2 = 0.05/grid->dt; // 4.0;
 
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
@@ -636,26 +634,26 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
     double *lnpsi = vlldataptr(unew, lbox, 0);
     double *cpsi =  vlldataptr(ucur,  box, 0);
     double *lcpsi = vlldataptr(ucur, lbox, 0);
-    double ltau = 0.2*ln1*(ln1+1);
-    double tau  = 0.2*n1*(n1+1);
-    double tau2 = 0.2*n1;
+    // double ltau = 0.2*ln1*(ln1+1);
+    // double tau  = 0.2*n1*(n1+1);
+    double tau = 0.5/grid->dt;
 
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
     {
       ijk  = Index(i,j,k);
       l_ijk= Ind_n1n2(ln1-1, j, k, ln1,ln2);
-      lnUp[l_ijk] -= ltau*(lcUp[l_ijk] - cUp[ijk]); 
-      nUm[ijk]    -=  tau*(cUm[ijk] - lcUm[l_ijk]);
+      lnUp[l_ijk] -= tau*(lcUp[l_ijk] - cUp[ijk]); 
+      nUm[ijk]    -= tau*(cUm[ijk] - lcUm[l_ijk]);
 
 //      lnpsi[l_ijk] -= tau2*(lcpsi[l_ijk] - cpsi[ijk]);
 //      npsi[ijk]    -= tau2*(cpsi[ijk] - lcpsi[l_ijk]);
-if(ijk==20)
-{
-printf("lb=%d l_ijk=%d: lnUp[l_ijk]=%g lnUm[l_ijk]=%g\n"
-       " b=%d   ijk=%d:  nUp[ijk]  =%g  nUm[ijk]=  %g\n",
-b-1,l_ijk, lnUp[l_ijk],lnUm[l_ijk], b,ijk, nUp[ijk],nUm[ijk]);
-}
+//if(ijk==20)
+//{
+//printf("lb=%d l_ijk=%d: lnUp[l_ijk]=%g lnUm[l_ijk]=%g\n"
+//       " b=%d   ijk=%d:  nUp[ijk]  =%g  nUm[ijk]=  %g\n",
+//b-1,l_ijk, lnUp[l_ijk],lnUm[l_ijk], b,ijk, nUp[ijk],nUm[ijk]);
+//}
     }
   } /* end for b */
 }
@@ -760,13 +758,15 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
         /* compute nPi and from nUp or nUm on boundary */
         /* nUp[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
            nUm[ijk] = am*nPi[ijk] + bm*npsir + cm*npsi[ijk]; */
-//        /* Note: only nUp/m is correct at upper/lower bounday!!! */
+        nPi[ijk] = (nUp[ijk] - nUm[ijk])/(ap-am);
+//        /* Note: if only nUp/m was correct at upper/lower bounday: */
 //        if(i==0)  nPi[ijk] = (nUm[ijk] - bm*npsir - cm*npsi[ijk])/am;
 //        else      nPi[ijk] = (nUp[ijk] - bp*npsir - cp*npsi[ijk])/ap;
-        nPi[ijk] = (nUp[ijk] - nUm[ijk])/(ap-am);
 
-        /* Note: U0 = psi is a zero speed mode, so we leave psi untouched!!! 
-           I.E.: we do not use the following : */
+//        /* Note: U0 = psi is a zero speed mode, so we might want to 
+//           leave psi untouched!!! 
+//           I.E.: we do not use the following : */
+        /* U0 = psi is a zero speed mode, but really we need to set npsir */
         /* deriv = D00 u[0] + sum_{j=1...n-1} D0j u[j] */
         /* npsir_plus_cnpsi = D00 psi[0] + sum_{j=1...n-1} D0j psi[j] +
                               c*psi[0]
@@ -809,12 +809,12 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
 //nPival= lnPi[l_ijk];
 //      npsi[ijk] = lnpsi[l_ijk] = npsival;
 //      nPi[ijk]  = lnPi[l_ijk] = nPival;
-if(j==1 && k==0 )
-{
-printf("#lb=%d l_ijk=%d: lnPi[l_ijk]=%g lnpsi[l_ijk]=%g\n"
-       "# b=%d   ijk=%d:  nPi[ijk]  =%g  npsi[ijk]=  %g\n",
-       b-1,l_ijk, lnPi[l_ijk], lnpsi[l_ijk], b,ijk, nPi[ijk], npsi[ijk]);
-}
+//if(j==1 && k==0 )
+//{
+//printf("#lb=%d l_ijk=%d: lnPi[l_ijk]=%g lnpsi[l_ijk]=%g\n"
+//       "# b=%d   ijk=%d:  nPi[ijk]  =%g  npsi[ijk]=  %g\n",
+//       b-1,l_ijk, lnPi[l_ijk], lnpsi[l_ijk], b,ijk, nPi[ijk], npsi[ijk]);
+//}
     }
   } /* end for b */
 }
