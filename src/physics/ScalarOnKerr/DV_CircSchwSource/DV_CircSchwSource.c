@@ -17,13 +17,13 @@ int DV_CircSchwSource_startup(tGrid *grid)
   
   set_mass_radius(M,10.0*M);
 
-  for(i=0;i<40;i++){
-        x=9.9*M+i*0.005*M;
-        for(j=0;j<40;j++){
-            y=-0.1*M+j*0.005*M;
-            printf ("%f %f %3.10e \n", x, y,SourceInKerrSchild(4.0*log(2.0)*M,x,y,0.0));
-        }
-        printf("\n");
-  }
+//  for(i=0;i<40;i++){
+//        x=9.9*M+i*0.005*M;
+//        for(j=0;j<40;j++){
+//            y=-0.1*M+j*0.005*M;
+//            printf ("%f %f %3.10e \n", x, y,SourceInKerrSchild(4.0*log(2.0)*M,x,y,0.0));
+//        }
+//        printf("\n");
+//  }
   return 0;
 }
