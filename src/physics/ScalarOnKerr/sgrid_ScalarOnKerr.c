@@ -27,7 +27,7 @@ int sgrid_ScalarOnKerr(void)
   AddVar("ScalarOnKerr_Up",  "", "characteristic var. U_{+}");
   AddVar("ScalarOnKerr_Um",  "", "characteristic var. U_{-}");
 
-  /* derivatives which need to be precomputed before each evo steo */
+  /* derivatives which need to be precomputed before each evo step */
   AddVar("ScalarOnKerr_dpsi",  "i",    "1st spatial deriv of scalar");
   AddVar("ScalarOnKerr_ddpsi", "(ij)", "2nd spatial deriv of scalar");
   AddVar("ScalarOnKerr_dPi",   "i",    "1st spatial deriv of Pi");
@@ -80,6 +80,18 @@ int sgrid_ScalarOnKerr(void)
          "[no, simple, naive_Ylm]");
   AddPar("ScalarOnKerr_overlap_shells", "no",
          "whether we use overlapping shells [no,yes]");
+  AddPar("ScalarOnKerr_1stOrder_inSpace", "no",
+         "introduce extra vars to make system 1st order in space [no,yes]");
+  if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+  {
+    /* add phix=dpsi/dx, phiy=dpsi/dy, phiz=dpsi/dz, for 1st order reduction */
+    AddVar("ScalarOnKerr_phi",  "i", "1st spatial derivs of scalar");
+    /* add 0 speed char. vars: phim =m^j phix^j, phil =l^j phix^j 
+       [n.m=0, n.l=0, m.l=0, n.n=1, m.m=1, l.l=1] */
+    AddVar("ScalarOnKerr_phim",  "", "zero speed char. var. phi_m");
+    AddVar("ScalarOnKerr_phil",  "", "zero speed char. var. phi_l");
+    AddVar("ScalarOnKerr_dphi", "ij", "spatial derivs of phix,...");
+  }
 
   return 0;
 }

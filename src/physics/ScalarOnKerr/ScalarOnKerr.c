@@ -42,6 +42,19 @@ int ScalarOnKerr_startup(tGrid *grid)
   vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_Pi"));
   vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_Up"));
   vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_Um"));
+  if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+  {
+    VarNameSetBoundaryInfo("ScalarOnKerr_phim", 0, 1, 1.0);
+    VarNameSetBoundaryInfo("ScalarOnKerr_phil", 0, 1, 1.0);
+    VarNameSetBoundaryInfo("ScalarOnKerr_phix", 0, 1, 1.0);
+    VarNameSetBoundaryInfo("ScalarOnKerr_phiy", 0, 1, 1.0);
+    VarNameSetBoundaryInfo("ScalarOnKerr_phiz", 0, 1, 1.0);
+    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phim"));
+    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phil"));
+    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phix"));
+    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phiy"));
+    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phiz"));
+  }
   if (0) prvarlist(ScalarOnKerrvars);
   enablevarlist(ScalarOnKerrvars);
 
@@ -102,7 +115,9 @@ int ScalarOnKerr_startup(tGrid *grid)
   enablevar(grid, Ind("ScalarOnKerr_dpsix"));
   enablevar(grid, Ind("ScalarOnKerr_ddpsixx"));
   enablevar(grid, Ind("ScalarOnKerr_dPix"));
-  
+  if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+    enablevar(grid, Ind("ScalarOnKerr_dphixx"));
+
   /* enable all metric vars */
   enablevar(grid, Ind("ScalarOnKerr_gtt"));
   enablevar(grid, Ind("ScalarOnKerr_guptt"));
@@ -148,6 +163,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   tGrid *grid = ucur->grid;
   int b;
   double t = ucur->time;
+  int firstorder = Getv("ScalarOnKerr_1stOrder_inSpace", "yes");
   // double x0, y0;
   double M = Getd("BHmass");
   double r0, Omega, Dr, q, q22;
@@ -179,18 +195,24 @@ set_mass_radius(M,r0);
     int i;
     int ipsi 	= (ucur)->index[0];
     int iPi = (ucur)->index[1];
-    double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
-    double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
-    double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
-    double *psixx = box->v[Ind("ScalarOnKerr_ddpsixx")];
-    double *psixy = box->v[Ind("ScalarOnKerr_ddpsixx")+1];
-    double *psixz = box->v[Ind("ScalarOnKerr_ddpsixx")+2];
-    double *psiyy = box->v[Ind("ScalarOnKerr_ddpsixx")+3];
-    double *psiyz = box->v[Ind("ScalarOnKerr_ddpsixx")+4];
-    double *psizz = box->v[Ind("ScalarOnKerr_ddpsixx")+5];
+    double *dpsix = box->v[Ind("ScalarOnKerr_dpsix")];
+    double *dpsiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+    double *dpsiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+    double *ddpsixx = box->v[Ind("ScalarOnKerr_ddpsixx")];
+    double *ddpsixy = box->v[Ind("ScalarOnKerr_ddpsixx")+1];
+    double *ddpsixz = box->v[Ind("ScalarOnKerr_ddpsixx")+2];
+    double *ddpsiyy = box->v[Ind("ScalarOnKerr_ddpsixx")+3];
+    double *ddpsiyz = box->v[Ind("ScalarOnKerr_ddpsixx")+4];
+    double *ddpsizz = box->v[Ind("ScalarOnKerr_ddpsixx")+5];
     double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
     double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
     double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *cphix, *cphiy, *cphiz;
+    double *pphix, *pphiy, *pphiz;
+    double *nphix, *nphiy, *nphiz;
+    double *dphixx, *dphixy, *dphixz;
+    double *dphiyx, *dphiyy, *dphiyz;
+    double *dphizx, *dphizy, *dphizz;
     double *px = box->v[Ind("x")];
     double *py = box->v[Ind("y")];
     double *pz = box->v[Ind("z")];
@@ -212,27 +234,83 @@ set_mass_radius(M,r0);
     double *Gz = box->v[i_G+3];
 
     /* compute the spatial derivs */
-    allDerivsOf_S(box, ipsi,
-                  Ind("ScalarOnKerr_dpsix"), Ind("ScalarOnKerr_ddpsixx"));
-    FirstDerivsOf_S(box, iPi , Ind("ScalarOnKerr_dPix"));
+    if(firstorder)
+    {
+      cphix = vlldataptr(ucur, box, 6);
+      cphiy = vlldataptr(ucur, box, 7);
+      cphiz = vlldataptr(ucur, box, 8);
+      pphix = vlldataptr(upre, box, 6);
+      pphiy = vlldataptr(upre, box, 7);
+      pphiz = vlldataptr(upre, box, 8);
+      nphix = vlldataptr(unew, box, 6);
+      nphiy = vlldataptr(unew, box, 7);
+      nphiz = vlldataptr(unew, box, 8);
+      dphixx = box->v[Ind("ScalarOnKerr_dphixx")];
+      dphixy = box->v[Ind("ScalarOnKerr_dphixx")+1];
+      dphixz = box->v[Ind("ScalarOnKerr_dphixx")+2];
+      dphiyx = box->v[Ind("ScalarOnKerr_dphixx")+3];
+      dphiyy = box->v[Ind("ScalarOnKerr_dphixx")+4];
+      dphiyz = box->v[Ind("ScalarOnKerr_dphixx")+5];
+      dphizx = box->v[Ind("ScalarOnKerr_dphixx")+6];
+      dphizy = box->v[Ind("ScalarOnKerr_dphixx")+7];
+      dphizz = box->v[Ind("ScalarOnKerr_dphixx")+8];
+      cart_partials(box, cphix, dphixx,dphixy,dphixz);
+      cart_partials(box, cphiy, dphiyx,dphiyy,dphiyz);
+      cart_partials(box, cphiz, dphizx,dphizy,dphizz);
+    }
+    else
+    {
+      allDerivsOf_S(box, ipsi,
+                    Ind("ScalarOnKerr_dpsix"), Ind("ScalarOnKerr_ddpsixx"));
+      FirstDerivsOf_S(box, iPi , Ind("ScalarOnKerr_dPix"));
+    }
 
     /* loop over points and set RHS */
     forallpoints(box, i)
     {
       double rPi, rpsi;
+      double rphix, rphiy, rphiz;
       double x = px[i];
       double y = py[i];
       double z = pz[i];
       double rho, r, phi, theta, Y22;
-      double g_ddpsi, gG_dpsi;
+      double g_ddpsi, gG_dpsi;  /* g is upper metric */
+      double psix,psiy,psiz, psixx,psixy,psixz,psiyy,psiyz,psizz;
+
+      /* set derivs*/
+      if(firstorder)
+      {
+        psix = cphix[i];
+        psiy = cphiy[i];
+        psiz = cphix[i];
+        psixx = dphixx[i];
+        psixy = 0.5*(dphixy[i]+dphiyx[i]);
+        psixz = 0.5*(dphixz[i]+dphizx[i]);
+        psiyy = dphiyy[i];
+        psiyz = 0.5*(dphiyz[i]+dphizy[i]);
+        psizz = dphizz[i];
+      }
+      else
+      {
+        psix = dpsix[i];
+        psiy = dpsiy[i];
+        psiz = dpsiz[i];
+        psixx = ddpsixx[i];
+        psixy = ddpsixy[i];
+        psixz = ddpsixz[i];
+        psiyy = ddpsiyy[i];
+        psiyz = ddpsiyz[i];
+        psizz = ddpsizz[i];
+      }
+
       /* g is upper metric */
       /* get all terms with less than 2 time derivs in g^ab d_a d_b psi */
       g_ddpsi = 2.0*(gtx[i]*Pix[i] +gty[i]*Piy[i] +gtz[i]*Piz[i]) + 
-                gxx[i]*psixx[i] + gyy[i]*psiyy[i] + gzz[i]*psizz[i] +
-                2.0*(gxy[i]*psixy[i] + gxz[i]*psixz[i] + gyz[i]*psiyz[i]);
+                gxx[i]*psixx + gyy[i]*psiyy + gzz[i]*psizz +
+                2.0*(gxy[i]*psixy + gxz[i]*psixz + gyz[i]*psiyz);
 
       /* get G^a dpsi_a, where G[a] = g^bc Gamma^a_bc */
-      gG_dpsi = Gt[i]*cPi[i] + Gx[i]*psix[i] + Gy[i]*psiy[i] + Gz[i]*psiz[i];
+      gG_dpsi = Gt[i]*cPi[i] + Gx[i]*psix + Gy[i]*psiy + Gz[i]*psiz;
 
       /* source rho */
       r     = sqrt(x*x + y*y + z*z);
@@ -250,18 +328,32 @@ set_mass_radius(M,r0);
              //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
              //  -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // oldest source
       rpsi = cPi[i];
+      /* set RHS of phix, ... if needed */
+      if(firstorder) { rphix = Pix[i];  rphiy = Piy[i];  rphiz = Piz[i]; }
 
       /* set new vars or RHS, depending in which integrator is used */
       if(dt!=0.0)
       {
         nPi[i]  = pPi[i]  + dt * rPi;
         npsi[i] = ppsi[i] + dt * rpsi;
+        if(firstorder)
+        { 
+          nphix[i] = pphix[i] + dt * rphix;
+          nphiy[i] = pphiy[i] + dt * rphiy;
+          nphiz[i] = pphiz[i] + dt * rphiz;
+        }
       }
-      else
+      else /* if(dt==0.0) */
       {
         nPi[i]  = rPi;
         npsi[i] = rpsi;
-      }
+        if(firstorder)
+        { 
+          nphix[i] = rphix;
+          nphiy[i] = rphiy;
+          nphiz[i] = rphiz;
+        }
+      } /* end else */
     }
   } /* end forallboxes */
 
