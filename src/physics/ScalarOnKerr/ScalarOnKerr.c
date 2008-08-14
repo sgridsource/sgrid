@@ -508,12 +508,30 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
     double *cpsi =  vlldataptr(ucur,  box, 0);
     double *lcpsi = vlldataptr(ucur, lbox, 0);
     double tau2 = 0.05/grid->dt; // 4.0;
-
+//double npsival;
+////double tau2 = 0.0025*ln1*(ln1+1)+ 0.0025*n1*(n1+1);
+//double tau1=0.0;
+//double tau2=0.1;
+//double *cpsiX = box->v[Ind("temp1")];
+//double *lcpsiX=lbox->v[Ind("temp1")];
+//double cpsir, lcpsir;
+//
+//spec_Deriv1(box, 1, cpsi, cpsiX);
+//if(b==1) spec_Deriv1(lbox, 1, lcpsi, lcpsiX);
+    
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
     {
       ijk  = Index(i,j,k);
       l_ijk= Ind_n1n2(ln1-1, j, k, ln1,ln2);
+//npsival = 0.5*(npsi[ijk] + lnpsi[l_ijk]);
+//lnpsi[l_ijk] = npsi[ijk] = npsival;
+//cpsir = cpsiX[ijk];
+//lcpsir=lcpsiX[l_ijk];
+//lnpsi[l_ijk] -= tau1*(lcpsi[l_ijk] - cpsi[ijk]) + 
+//                tau2*(lcpsir - cpsir);
+//npsi[ijk]    -= tau1*(cpsi[ijk] - lcpsi[l_ijk]) +
+//                tau2*(cpsir - lcpsir);
       lnpsi[l_ijk] -= tau2*(lcpsi[l_ijk] - cpsi[ijk]);
       npsi[ijk]    -= tau2*(cpsi[ijk] - lcpsi[l_ijk]);
     }
@@ -589,7 +607,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
       lambdap = betan + sqrt( betan*betan + alpha2*gnn );
       ap = lambdap/(alpha2*gnn);
       bp = 1.0;
-      cp = 0.5*(gdn-Gn)/gnn;
+      cp = 0.0*0.5*(gdn-Gn)/gnn;
       lambdam = betan - sqrt( betan*betan + alpha2*gnn );
       am = lambdam/(alpha2*gnn);
       bm = bp;
@@ -637,6 +655,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
     // double ltau = 0.2*ln1*(ln1+1);
     // double tau  = 0.2*n1*(n1+1);
     double tau = 0.5/grid->dt;
+//double tau = 800;
 
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
@@ -743,7 +762,7 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
         lambdap = betan + sqrt( betan*betan + alpha2*gnn );
         ap = lambdap/(alpha2*gnn);
         bp = 1.0;
-        cp = 0.5*(gdn-Gn)/gnn;
+        cp = 0.0*0.5*(gdn-Gn)/gnn;
         lambdam = betan - sqrt( betan*betan + alpha2*gnn );
         am = lambdam/(alpha2*gnn);
         bm = bp;
@@ -776,6 +795,14 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
         npsir_plus_cnpsi = nUm[ijk] - am*nPi[ijk];
         D00 = dXdr * box->D1[(i+1)*(i+1)-1];
         npsi[ijk] = (npsir_plus_cnpsi - (npsir-D00*npsi[ijk]))/(cm+D00);
+// change npsi[ijk +/- 1] instead of npsi[ijk]
+//double D01;
+//int ijk_in, i_in;
+//npsir_plus_cnpsi = nUm[ijk] - am*nPi[ijk];
+//if(i==0) { i_in = 1;         ijk_in = ijk+1; }
+//else     { i_in = n1*i+n1-2; ijk_in = ijk-1; }
+//D01 = box->D1[i_in];// <-test: correct this with the dXdr at the right place
+//npsi[ijk_in] = (npsir_plus_cnpsi - (npsir-D01*npsi[ijk_in]))/(cm+D01);
       }
     }
   }
