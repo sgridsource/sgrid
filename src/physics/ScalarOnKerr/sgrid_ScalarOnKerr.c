@@ -88,8 +88,8 @@ int sgrid_ScalarOnKerr(void)
     AddVar("ScalarOnKerr_phi",  "i", "1st spatial derivs of scalar");
     /* add 0 speed char. vars: phim =m^j phix^j, phil =l^j phix^j 
        [n.m=0, n.l=0, m.l=0, n.n=1, m.m=1, l.l=1] */
-    AddVar("ScalarOnKerr_phim",  "", "zero speed char. var. phi_m");
     AddVar("ScalarOnKerr_phil",  "", "zero speed char. var. phi_l");
+    AddVar("ScalarOnKerr_phim",  "", "zero speed char. var. phi_m");
     AddVar("ScalarOnKerr_dphi", "ij", "spatial derivs of phix,...");
   }
 
