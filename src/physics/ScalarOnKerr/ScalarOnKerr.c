@@ -276,7 +276,7 @@ set_mass_radius(M,r0);
       double rho, r, phi, theta, Y22;
       double g_ddpsi, gG_dpsi;  /* g is upper metric */
       double psix,psiy,psiz, psixx,psixy,psixz,psiyy,psiyz,psizz;
-      double psidot, psidotx,psidoty,psidotz;
+      double psidot, psidotx,psidoty,psidotz, psidotdot;
 
       /* set derivs*/
       if(firstorder)
@@ -329,10 +329,13 @@ set_mass_radius(M,r0);
 /* use Ian's source */
 //rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
 
+      /* compute psidotdot */
+      psidotdot = -(g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
+                   //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
+                   //  -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // oldest source
+                
       /* set RHS of psi and Pi */
-      rPi  = -(g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
-             //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
-             //  -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // oldest source
+      rPi  = psidotdot;
       rpsi = psidot;
       /* set RHS of phix, ... if needed */
       if(firstorder) { rphix = psidotx;  rphiy = psidoty;  rphiz = psidotz; }
