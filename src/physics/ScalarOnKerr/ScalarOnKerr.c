@@ -276,6 +276,7 @@ set_mass_radius(M,r0);
       double rho, r, phi, theta, Y22;
       double g_ddpsi, gG_dpsi;  /* g is upper metric */
       double psix,psiy,psiz, psixx,psixy,psixz,psiyy,psiyz,psizz;
+      double psidot, psidotx,psidoty,psidotz;
 
       /* set derivs*/
       if(firstorder)
@@ -302,15 +303,20 @@ set_mass_radius(M,r0);
         psiyz = ddpsiyz[i];
         psizz = ddpsizz[i];
       }
+      /* set psidot and derivs from Pi */
+      psidot  = cPi[i];
+      psidotx = Pix[i];
+      psidoty = Piy[i];
+      psidotz = Piz[i];
 
       /* g is upper metric */
       /* get all terms with less than 2 time derivs in g^ab d_a d_b psi */
-      g_ddpsi = 2.0*(gtx[i]*Pix[i] +gty[i]*Piy[i] +gtz[i]*Piz[i]) + 
+      g_ddpsi = 2.0*(gtx[i]*psidotx +gty[i]*psidoty +gtz[i]*psidotz) + 
                 gxx[i]*psixx + gyy[i]*psiyy + gzz[i]*psizz +
                 2.0*(gxy[i]*psixy + gxz[i]*psixz + gyz[i]*psiyz);
 
       /* get G^a dpsi_a, where G[a] = g^bc Gamma^a_bc */
-      gG_dpsi = Gt[i]*cPi[i] + Gx[i]*psix + Gy[i]*psiy + Gz[i]*psiz;
+      gG_dpsi = Gt[i]*psidot + Gx[i]*psix + Gy[i]*psiy + Gz[i]*psiz;
 
       /* source rho */
       r     = sqrt(x*x + y*y + z*z);
@@ -327,9 +333,9 @@ set_mass_radius(M,r0);
       rPi  = -(g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
              //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
              //  -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // oldest source
-      rpsi = cPi[i];
+      rpsi = psidot;
       /* set RHS of phix, ... if needed */
-      if(firstorder) { rphix = Pix[i];  rphiy = Piy[i];  rphiz = Piz[i]; }
+      if(firstorder) { rphix = psidotx;  rphiy = psidoty;  rphiz = psidotz; }
 
       /* set new vars or RHS, depending in which integrator is used */
       if(dt!=0.0)
@@ -369,8 +375,7 @@ set_mass_radius(M,r0);
       naive_Ylm_filter_unew(vl_Pi, 0);
     vlfree(vl_Pi);
   }
-
-filter_unew_radially(unew, NULL);
+//filter_unew_radially(unew, NULL);
 
   /* set char. vars. and use them to compute unew */
   set_Up_Um_onBoundary(unew, upre, dt, ucur);
@@ -381,7 +386,6 @@ filter_unew_radially(unew, NULL);
 ////  set_boundary(unew, upre, dt, ucur);
 //  set_psi_Pi_phi_boundary(unew, upre, dt, ucur);
   set_psi_Pi_boundary(unew, upre, dt, ucur);
-
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
