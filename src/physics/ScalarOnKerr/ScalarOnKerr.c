@@ -357,15 +357,6 @@ set_mass_radius(M,r0);
     }
   } /* end forallboxes */
 
-  /* set char. vars. and use them to compute unew */
-  set_Up_Um_onBoundary(unew, upre, dt, ucur);
-  compute_unew_from_Up_Um_onBoundary(unew, upre, dt, ucur);
-//interpolate_between_boxes(unew, NULL);
-
-  /* set BCs */
-////  set_boundary(unew, upre, dt, ucur);
-//  set_psi_Pi_phi_boundary(unew, upre, dt, ucur);
-  set_psi_Pi_boundary(unew, upre, dt, ucur);
 
   /* special nPi filter */
   if(!Getv("ScalarOnKerr_special_nPi_filter", "no"))
@@ -378,6 +369,19 @@ set_mass_radius(M,r0);
       naive_Ylm_filter_unew(vl_Pi, 0);
     vlfree(vl_Pi);
   }
+
+filter_unew_radially(unew, NULL);
+
+  /* set char. vars. and use them to compute unew */
+  set_Up_Um_onBoundary(unew, upre, dt, ucur);
+  compute_unew_from_Up_Um_onBoundary(unew, upre, dt, ucur);
+//interpolate_between_boxes(unew, NULL);
+
+  /* set BCs */
+////  set_boundary(unew, upre, dt, ucur);
+//  set_psi_Pi_phi_boundary(unew, upre, dt, ucur);
+  set_psi_Pi_boundary(unew, upre, dt, ucur);
+
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
@@ -778,6 +782,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
 //                tau2*(lcpsir - cpsir);
 //npsi[ijk]    -= tau1*(cpsi[ijk] - lcpsi[l_ijk]) +
 //                tau2*(cpsir - lcpsir);
+//      /* ??? assume ??? that psi on left should be equal to psi on right */
       lnpsi[l_ijk] -= tau2*(lcpsi[l_ijk] - cpsi[ijk]);
       npsi[ijk]    -= tau2*(cpsi[ijk] - lcpsi[l_ijk]);
     }
@@ -1239,6 +1244,36 @@ void filter_unew(tVarList *unew, tVarList *upre)
 void naive_Ylm_filter_unew(tVarList *unew, tVarList *upre)
 {
   Naive_YlmFilter(unew);
+}
+
+/* filter all newly computed vars */
+void filter_unew_radially(tVarList *unew, tVarList *upre)
+{
+  tGrid *grid = unew->grid;
+  int b;
+
+  /* filter high freq. angular modes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k, f, vi;
+
+    f=3*n1/2;
+
+    /* filter all vars */
+    for(vi=0; vi<unew->n; vi++)
+    {
+      double *var = vlldataptr(unew, box, vi);
+      double *temp1 = box->v[Ind("temp1")];
+
+      spec_analysis1(box, 1, box->Mcoeffs1, var, temp1);
+      forallijk(i,j,k) if(i>f) temp1[Index(i,j,k)]=0.0;
+      spec_synthesis1(box, 1, box->Meval1, var, temp1);
+    }
+  } /* end forallboxes */
 }
 
 
