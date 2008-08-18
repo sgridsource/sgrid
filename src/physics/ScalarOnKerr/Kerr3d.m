@@ -6,7 +6,7 @@
 
 (* variables *)
 variables = { x[a], alpha, beta[a], g[a,b], gup[a,b], K[a,b], TrK,
-	      Gam[a,b,c], dalpha[a] }
+	      Gam[a,b,c], dalpha[a], dbeta[a,b] }
 
 (* compute in this order *)
 tocompute = {
@@ -48,6 +48,10 @@ tocompute = {
 
  (* deriv of lapse *)
  dalpha[a] == -dH[a] / ((1 + 2 H)*sqrt[1 + 2 H]),
+
+ (* deriv of shift *)
+ dbeta[a,b] == ( 2/(1 + 2 H) - 4 H/(1 + 2 H)^2 ) dH[b] l[a] +
+               2 H/(1 + 2 H) dl[a,b],
 
  (* extrinsic curv *) 
  K[a,b] == alpha ( l[a] dH[b] + l[b] dH[a] + H dl[a,b] + H dl[b,a] + 2 H^2 (l[a] l[c] dl[b,c] + l[b] l[c] dl[a,c]) + 2 H l[a] l[b] l[c] dH[c]),
@@ -111,7 +115,8 @@ BeginCFunction[] := Module[{},
   pr["\n\n\n"];
 
   pr["void Kerr3d(tGrid *grid, int i_x, int i_alpha, int i_beta, int i_g,
-		  int i_K, int i_TrK, int i_gup, int i_Gam, int i_dalpha)\n"];
+		  int i_K, int i_TrK, int i_gup,
+                  int i_Gam, int i_dalpha, int i_dbeta)\n"];
   pr["{\n"];
   pr["int bi;\n"];
   pr["\n"];
@@ -146,6 +151,7 @@ variabledeclarations[] := Module[{},
   prdecvar[{gup[a,b]},		"i_gup"];
   prdecvar[{Gam[a,b,c]},	"i_Gam"];
   prdecvar[{dalpha[a]},         "i_dalpha"];
+  prdecvar[{dbeta[a,b]},        "i_dbeta"];
   pr["\n"];
 ];    
 (* auxillary variables are automatically inserted here *)

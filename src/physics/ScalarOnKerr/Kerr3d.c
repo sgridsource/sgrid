@@ -1,5 +1,5 @@
 /* Kerr3d.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 14.9.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 18.8.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -14,7 +14,7 @@
 
 
 
-void Kerr3d(tGrid *grid, int i_x, int i_alpha, int i_beta, int i_g,    int i_K, int i_TrK, int i_gup, int i_Gam, int i_dalpha)
+void Kerr3d(tGrid *grid, int i_x, int i_alpha, int i_beta, int i_g,    int i_K, int i_TrK, int i_gup,                   int i_Gam, int i_dalpha, int i_dbeta)
 {
 int bi;
 
@@ -80,6 +80,15 @@ double *Gam333 = box->v[i_Gam+17];
 double *dalpha1 = box->v[i_dalpha+0];
 double *dalpha2 = box->v[i_dalpha+1];
 double *dalpha3 = box->v[i_dalpha+2];
+double *dbeta11 = box->v[i_dbeta+0];
+double *dbeta12 = box->v[i_dbeta+1];
+double *dbeta13 = box->v[i_dbeta+2];
+double *dbeta21 = box->v[i_dbeta+3];
+double *dbeta22 = box->v[i_dbeta+4];
+double *dbeta23 = box->v[i_dbeta+5];
+double *dbeta31 = box->v[i_dbeta+6];
+double *dbeta32 = box->v[i_dbeta+7];
+double *dbeta33 = box->v[i_dbeta+8];
 
 
 double a2;
@@ -480,6 +489,51 @@ dalpha3[ijk]
 -(dH3/(sqrt(1. + 2.*H) + 2.*H*sqrt(1. + 2.*H)))
 ;
 
+dbeta11[ijk]
+=
+(2.*(dl11*H + dH1*l1))/(1. + 2.*H) - (4.*dH1*H*l1)/(1. + 4.*(H + pow2(H)))
+;
+
+dbeta12[ijk]
+=
+(2.*(dl12*H + dH2*l1))/(1. + 2.*H) - (4.*dH2*H*l1)/(1. + 4.*(H + pow2(H)))
+;
+
+dbeta13[ijk]
+=
+(2.*(dl13*H + dH3*l1))/(1. + 2.*H) - (4.*dH3*H*l1)/(1. + 4.*(H + pow2(H)))
+;
+
+dbeta21[ijk]
+=
+(2.*(dl21*H + dH1*l2))/(1. + 2.*H) - (4.*dH1*H*l2)/(1. + 4.*(H + pow2(H)))
+;
+
+dbeta22[ijk]
+=
+(2.*(dl22*H + dH2*l2))/(1. + 2.*H) - (4.*dH2*H*l2)/(1. + 4.*(H + pow2(H)))
+;
+
+dbeta23[ijk]
+=
+(2.*(dl23*H + dH3*l2))/(1. + 2.*H) - (4.*dH3*H*l2)/(1. + 4.*(H + pow2(H)))
+;
+
+dbeta31[ijk]
+=
+(2.*(dl31*H + dH1*l3))/(1. + 2.*H) - (4.*dH1*H*l3)/(1. + 4.*(H + pow2(H)))
+;
+
+dbeta32[ijk]
+=
+(2.*(dl32*H + dH2*l3))/(1. + 2.*H) - (4.*dH2*H*l3)/(1. + 4.*(H + pow2(H)))
+;
+
+dbeta33[ijk]
+=
+(2.*(dl33*H + dH3*l3))/(1. + 2.*H) - (4.*dH3*H*l3)/(1. + 4.*(H + pow2(H)))
+;
+
 K11[ijk]
 =
 alpha[ijk]*(4.*pow2(H)*(l1*(dl12*l2 + dl13*l3) + dl11*pow2(l1)) + 
@@ -832,4 +886,4 @@ Gamdo133*gup13[ijk] + Gamdo233*gup23[ijk] + Gamdo333*gup33[ijk]
 }  /* end of function */
 
 /* Kerr3d.c */
-/* nvars = 50, n* = 678,  n/ = 64,  n+ = 454, n = 1196, O = 1 */
+/* nvars = 59, n* = 759,  n/ = 82,  n+ = 517, n = 1358, O = 1 */
