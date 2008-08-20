@@ -46,12 +46,9 @@ double *g33 = box->v[i_g+5];
 double *K11 = box->v[i_K+0];
 double *K12 = box->v[i_K+1];
 double *K13 = box->v[i_K+2];
-double *K21 = box->v[i_K+3];
-double *K22 = box->v[i_K+4];
-double *K23 = box->v[i_K+5];
-double *K31 = box->v[i_K+6];
-double *K32 = box->v[i_K+7];
-double *K33 = box->v[i_K+8];
+double *K22 = box->v[i_K+3];
+double *K23 = box->v[i_K+4];
+double *K33 = box->v[i_K+5];
 double *TrK = box->v[i_TrK+0];
 double *gup11 = box->v[i_gup+0];
 double *gup12 = box->v[i_gup+1];
@@ -559,14 +556,6 @@ alpha[ijk]*(dH1*l3 + l1*(dH3 + 2.*dl32*l2*pow2(H)) +
        pow2(H)*((dl11 + dl33)*l1*l3 + dl31*pow2(l1) + dl13*pow2(l3))))
 ;
 
-K21[ijk]
-=
-alpha[ijk]*((dl12 + dl21)*H + dH1*l2 + dH2*(l1 + 2.*H*l1*pow2(l2)) + 
-    2.*(l2*(dl13*l3*pow2(H) + H*(dH3*l1*l3 + dH1*pow2(l1))) + 
-       pow2(H)*(l1*((dl11 + dl22)*l2 + dl23*l3) + dl21*pow2(l1) + 
-          dl12*pow2(l2))))
-;
-
 K22[ijk]
 =
 alpha[ijk]*(4.*pow2(H)*(dl21*l1*l2 + dl22*pow2(l2)) + 
@@ -575,22 +564,6 @@ alpha[ijk]*(4.*pow2(H)*(dl21*l1*l2 + dl22*pow2(l2)) +
 ;
 
 K23[ijk]
-=
-alpha[ijk]*((dl23 + dl32)*H + dH2*l3 + l2*(dH3 + 2.*dl31*l1*pow2(H)) + 
-    2.*(l3*((dl21*l1 + dl22*l2)*pow2(H) + l2*(dH1*H*l1 + dl33*pow2(H))) + 
-       (dH2*H*l3 + dl32*pow2(H))*pow2(l2) + 
-       (dH3*H*l2 + dl23*pow2(H))*pow2(l3)))
-;
-
-K31[ijk]
-=
-alpha[ijk]*(dH1*l3 + l1*(dH3 + 2.*dl32*l2*pow2(H)) + 
-    H*(dl13 + dl31 + 2.*dH3*l1*pow2(l3)) + 
-    2.*(l3*(dl12*l2*pow2(H) + H*(dH2*l1*l2 + dH1*pow2(l1))) + 
-       pow2(H)*((dl11 + dl33)*l1*l3 + dl31*pow2(l1) + dl13*pow2(l3))))
-;
-
-K32[ijk]
 =
 alpha[ijk]*((dl23 + dl32)*H + dH2*l3 + l2*(dH3 + 2.*dl31*l1*pow2(H)) + 
     2.*(l3*((dl21*l1 + dl22*l2)*pow2(H) + l2*(dH1*H*l1 + dl33*pow2(H))) + 
@@ -607,9 +580,9 @@ alpha[ijk]*(4.*(dl31*l1 + dl32*l2)*l3*pow2(H) +
 
 TrK[ijk]
 =
-gup11[ijk]*K11[ijk] + gup12[ijk]*(K12[ijk] + K21[ijk]) + 
-  gup22[ijk]*K22[ijk] + gup13[ijk]*(K13[ijk] + K31[ijk]) + 
-  gup23[ijk]*(K23[ijk] + K32[ijk]) + gup33[ijk]*K33[ijk]
+gup11[ijk]*K11[ijk] + gup22[ijk]*K22[ijk] + 
+  2.*(gup12[ijk]*K12[ijk] + gup13[ijk]*K13[ijk] + gup23[ijk]*K23[ijk]) + 
+  gup33[ijk]*K33[ijk]
 ;
 
 dg111
@@ -910,4 +883,4 @@ Gam311[ijk]*gup11[ijk] + Gam322[ijk]*gup22[ijk] +
 }  /* end of function */
 
 /* Kerr3d.c */
-/* nvars = 62, n* = 783,  n/ = 82,  n+ = 538, n = 1403, O = 1 */
+/* nvars = 59, n* = 713,  n/ = 82,  n+ = 493, n = 1288, O = 1 */

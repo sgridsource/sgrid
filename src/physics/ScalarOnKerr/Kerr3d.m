@@ -83,6 +83,7 @@ epsilon[a_,a_,c_] := 0
 
 g[a_,b_]     := g[b,a]   /; !OrderedQ[{a,b}]
 gup[a_,b_]   := gup[b,a] /; !OrderedQ[{a,b}]
+K[a_,b_]     := K[b,a]   /; !OrderedQ[{a,b}]
 dg[a_,b_,c_] := dg[b,a,c]  /; !OrderedQ[{a,b}]
 ahat[a_,b_]  := -ahat[b,a] /; !OrderedQ[{a,b}]
 ahat[a_,a_]  := 0
