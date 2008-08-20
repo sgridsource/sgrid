@@ -46,6 +46,7 @@ int sgrid_ScalarOnKerr(void)
   AddConstantVar("ScalarOnKerr3d_TrK",   "",      "trace of K");
   AddConstantVar("ScalarOnKerr3d_gup",   "(IJ)",  "inverse Kerr 3-metric");
   AddConstantVar("ScalarOnKerr3d_Gamma", "I(jk)", "Christoffel symbol of 3-metric");
+  AddConstantVar("ScalarOnKerr3d_G",     "I",     "G^I = Gamma^I_jk g^jk");
   AddConstantVar("ScalarOnKerr3d_dalpha","i",     "1st spatial deriv of lapse");
   AddConstantVar("ScalarOnKerr3d_dbeta","Ij",     "1st spatial deriv of shift");
 

@@ -6,7 +6,7 @@
 
 (* variables *)
 variables = { x[a], alpha, beta[a], g[a,b], gup[a,b], K[a,b], TrK,
-	      Gam[a,b,c], dalpha[a], dbeta[a,b] }
+	      Gam[a,b,c], G[a], dalpha[a], dbeta[a,b] }
 
 (* compute in this order *)
 tocompute = {
@@ -65,9 +65,9 @@ tocompute = {
  (* lower Christoffel *)
  Gamdo[a,b,c] == ( dg[a,b,c] + dg[a,c,b] - dg[b,c,a] )/2,
 
- (* standard upper Christoffel *)
- Gam[a,b,c] == gup[a,d] Gamdo[d,b,c]
- 
+ (* standard upper Christoffel and its contraction  *)
+ Gam[a,b,c] == gup[a,d] Gamdo[d,b,c],
+ G[a] == gup[b,c] Gam[a,b,c]
 }
 
 
@@ -116,7 +116,7 @@ BeginCFunction[] := Module[{},
 
   pr["void Kerr3d(tGrid *grid, int i_x, int i_alpha, int i_beta, int i_g,
 		  int i_K, int i_TrK, int i_gup,
-                  int i_Gam, int i_dalpha, int i_dbeta)\n"];
+                  int i_Gam, int i_G, int i_dalpha, int i_dbeta)\n"];
   pr["{\n"];
   pr["int bi;\n"];
   pr["\n"];
@@ -150,6 +150,7 @@ variabledeclarations[] := Module[{},
   prdecvar[{TrK},               "i_TrK"];
   prdecvar[{gup[a,b]},		"i_gup"];
   prdecvar[{Gam[a,b,c]},	"i_Gam"];
+  prdecvar[{G[a]},		"i_G"];
   prdecvar[{dalpha[a]},         "i_dalpha"];
   prdecvar[{dbeta[a,b]},        "i_dbeta"];
   pr["\n"];

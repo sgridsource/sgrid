@@ -1,5 +1,5 @@
 /* Kerr3d.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 18.8.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 20.8.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -14,7 +14,7 @@
 
 
 
-void Kerr3d(tGrid *grid, int i_x, int i_alpha, int i_beta, int i_g,    int i_K, int i_TrK, int i_gup,                   int i_Gam, int i_dalpha, int i_dbeta)
+void Kerr3d(tGrid *grid, int i_x, int i_alpha, int i_beta, int i_g,    int i_K, int i_TrK, int i_gup,                   int i_Gam, int i_G, int i_dalpha, int i_dbeta)
 {
 int bi;
 
@@ -77,6 +77,9 @@ double *Gam313 = box->v[i_Gam+14];
 double *Gam322 = box->v[i_Gam+15];
 double *Gam323 = box->v[i_Gam+16];
 double *Gam333 = box->v[i_Gam+17];
+double *G1 = box->v[i_G+0];
+double *G2 = box->v[i_G+1];
+double *G3 = box->v[i_G+2];
 double *dalpha1 = box->v[i_dalpha+0];
 double *dalpha2 = box->v[i_dalpha+1];
 double *dalpha3 = box->v[i_dalpha+2];
@@ -879,6 +882,27 @@ Gam333[ijk]
 Gamdo133*gup13[ijk] + Gamdo233*gup23[ijk] + Gamdo333*gup33[ijk]
 ;
 
+G1[ijk]
+=
+Gam111[ijk]*gup11[ijk] + Gam122[ijk]*gup22[ijk] + 
+  2.*(Gam112[ijk]*gup12[ijk] + Gam113[ijk]*gup13[ijk] + 
+     Gam123[ijk]*gup23[ijk]) + Gam133[ijk]*gup33[ijk]
+;
+
+G2[ijk]
+=
+Gam211[ijk]*gup11[ijk] + Gam222[ijk]*gup22[ijk] + 
+  2.*(Gam212[ijk]*gup12[ijk] + Gam213[ijk]*gup13[ijk] + 
+     Gam223[ijk]*gup23[ijk]) + Gam233[ijk]*gup33[ijk]
+;
+
+G3[ijk]
+=
+Gam311[ijk]*gup11[ijk] + Gam322[ijk]*gup22[ijk] + 
+  2.*(Gam312[ijk]*gup12[ijk] + Gam313[ijk]*gup13[ijk] + 
+     Gam323[ijk]*gup23[ijk]) + Gam333[ijk]*gup33[ijk]
+;
+
 } /* end of points */
 } /* end of boxes */
 
@@ -886,4 +910,4 @@ Gamdo133*gup13[ijk] + Gamdo233*gup23[ijk] + Gamdo333*gup33[ijk]
 }  /* end of function */
 
 /* Kerr3d.c */
-/* nvars = 59, n* = 759,  n/ = 82,  n+ = 517, n = 1358, O = 1 */
+/* nvars = 62, n* = 783,  n/ = 82,  n+ = 538, n = 1403, O = 1 */

@@ -131,6 +131,7 @@ int ScalarOnKerr_startup(tGrid *grid)
   enablevar(grid, Ind("ScalarOnKerr3d_TrK"));
   enablevar(grid, Ind("ScalarOnKerr3d_gupxx"));
   enablevar(grid, Ind("ScalarOnKerr3d_Gammaxxx"));
+  enablevar(grid, Ind("ScalarOnKerr3d_Gx"));
   enablevar(grid, Ind("ScalarOnKerr3d_dalphax"));
   enablevar(grid, Ind("ScalarOnKerr3d_dbetaxx"));
 
@@ -151,8 +152,8 @@ int ScalarOnKerr_startup(tGrid *grid)
   Kerr3d(grid, Ind("x"), Ind("ScalarOnKerr3d_alpha"), Ind("ScalarOnKerr3d_betax"),
          Ind("ScalarOnKerr3d_gxx"), Ind("ScalarOnKerr3d_Kxx"),
          Ind("ScalarOnKerr3d_TrK"), Ind("ScalarOnKerr3d_gupxx"),
-         Ind("ScalarOnKerr3d_Gammaxxx"), Ind("ScalarOnKerr3d_dalphax"),
-         Ind("ScalarOnKerr3d_dbetaxx"));
+         Ind("ScalarOnKerr3d_Gammaxxx"), Ind("ScalarOnKerr3d_Gx"), 
+         Ind("ScalarOnKerr3d_dalphax"), Ind("ScalarOnKerr3d_dbetaxx"));
 
   return 0;
 }
