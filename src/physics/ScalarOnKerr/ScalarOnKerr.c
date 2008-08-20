@@ -132,6 +132,7 @@ int ScalarOnKerr_startup(tGrid *grid)
   enablevar(grid, Ind("ScalarOnKerr3d_gupxx"));
   enablevar(grid, Ind("ScalarOnKerr3d_Gammaxxx"));
   enablevar(grid, Ind("ScalarOnKerr3d_dalphax"));
+  enablevar(grid, Ind("ScalarOnKerr3d_dbetaxx"));
 
   /* enable temp vars */
   if(!Getv("physics", "ADMvars"))
@@ -150,7 +151,8 @@ int ScalarOnKerr_startup(tGrid *grid)
   Kerr3d(grid, Ind("x"), Ind("ScalarOnKerr3d_alpha"), Ind("ScalarOnKerr3d_betax"),
          Ind("ScalarOnKerr3d_gxx"), Ind("ScalarOnKerr3d_Kxx"),
          Ind("ScalarOnKerr3d_TrK"), Ind("ScalarOnKerr3d_gupxx"),
-         Ind("ScalarOnKerr3d_Gammaxxx"), Ind("ScalarOnKerr3d_dalphax"));
+         Ind("ScalarOnKerr3d_Gammaxxx"), Ind("ScalarOnKerr3d_dalphax"),
+         Ind("ScalarOnKerr3d_dbetaxx"));
 
   return 0;
 }
@@ -164,6 +166,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   int b;
   double t = ucur->time;
   int firstorder = Getv("ScalarOnKerr_1stOrder_inSpace", "yes");
+  int ScheelsPi = Getv("ScalarOnKerr_1stOrder_inSpace", "ScheelsPi");
   // double x0, y0;
   double M = Getd("BHmass");
   double r0, Omega, Dr, q, q22;
@@ -193,8 +196,8 @@ set_mass_radius(M,r0);
     double *pPi = vlldataptr(upre, box, 1);
     double *nPi = vlldataptr(unew, box, 1);
     int i;
-    int ipsi 	= (ucur)->index[0];
-    int iPi = (ucur)->index[1];
+    int ipsi = (ucur)->index[0];
+    int iPi  = (ucur)->index[1];
     double *dpsix = box->v[Ind("ScalarOnKerr_dpsix")];
     double *dpsiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
     double *dpsiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
@@ -232,6 +235,29 @@ set_mass_radius(M,r0);
     double *Gx = box->v[i_G+1];
     double *Gy = box->v[i_G+2];
     double *Gz = box->v[i_G+3];
+    /* lapse, shift and their derivs */
+    double *alpha = box->v[Ind("ScalarOnKerr3d_alpha")];
+    int i_dalpha = Ind("ScalarOnKerr3d_dalphax");
+    double *dalphax = box->v[i_dalpha];
+    double *dalphay = box->v[i_dalpha+1];
+    double *dalphaz = box->v[i_dalpha+2];
+    int i_beta = Ind("ScalarOnKerr3d_betax");
+    double *betax = box->v[i_beta];
+    double *betay = box->v[i_beta+1];
+    double *betaz = box->v[i_beta+2];
+    int i_dbeta = Ind("ScalarOnKerr3d_dbetaxx");
+    double *dbetaxx = box->v[i_dbeta];
+    double *dbetaxy = box->v[i_dbeta+1];
+    double *dbetaxz = box->v[i_dbeta+2];
+    double *dbetayx = box->v[i_dbeta+3];
+    double *dbetayy = box->v[i_dbeta+4];
+    double *dbetayz = box->v[i_dbeta+5];
+    double *dbetazx = box->v[i_dbeta+6];
+    double *dbetazy = box->v[i_dbeta+7];
+    double *dbetazz = box->v[i_dbeta+8];
+    double A; 
+    double dAx,dAy,dAz , Bx,By,Bz;
+    double dBxx,dBxy,dBxz , dByx,dByy,dByz , dBzx,dBzy,dBzz;
 
     /* compute the spatial derivs */
     if(firstorder)
@@ -257,6 +283,7 @@ set_mass_radius(M,r0);
       cart_partials(box, cphix, dphixx,dphixy,dphixz);
       cart_partials(box, cphiy, dphiyx,dphiyy,dphiyz);
       cart_partials(box, cphiz, dphizx,dphizy,dphizz);
+      FirstDerivsOf_S(box, ipsi , Ind("ScalarOnKerr_dpsix"));
     }
     else
     {
@@ -275,7 +302,9 @@ set_mass_radius(M,r0);
       double z = pz[i];
       double rho, r, phi, theta, Y22;
       double g_ddpsi, gG_dpsi;  /* g is upper metric */
-      double psix,psiy,psiz, psixx,psixy,psixz,psiyy,psiyz,psizz;
+      double psix,psiy,psiz;
+      double psixy_s,psixz_s,psiyz_s; /* symm. mixed 2nd derivs */
+      double psixx,psixy,psixz, psiyx,psiyy,psiyz, psizx,psizy,psizz;
       double psidot, psidotx,psidoty,psidotz, psidotdot;
 
       /* set derivs*/
@@ -285,11 +314,17 @@ set_mass_radius(M,r0);
         psiy = cphiy[i];
         psiz = cphix[i];
         psixx = dphixx[i];
-        psixy = 0.5*(dphixy[i]+dphiyx[i]);
-        psixz = 0.5*(dphixz[i]+dphizx[i]);
+        psixy = dphixy[i];
+        psixz = dphixz[i];
+        psiyx = dphiyx[i];
         psiyy = dphiyy[i];
-        psiyz = 0.5*(dphiyz[i]+dphizy[i]);
+        psiyz = dphiyz[i];
+        psizx = dphizx[i];
+        psizy = dphizy[i];
         psizz = dphizz[i];
+        psixy_s = 0.5*(dphixy[i]+dphiyx[i]);
+        psixz_s = 0.5*(dphixz[i]+dphizx[i]);
+        psiyz_s = 0.5*(dphiyz[i]+dphizy[i]);
       }
       else
       {
@@ -297,23 +332,52 @@ set_mass_radius(M,r0);
         psiy = dpsiy[i];
         psiz = dpsiz[i];
         psixx = ddpsixx[i];
-        psixy = ddpsixy[i];
-        psixz = ddpsixz[i];
+        psixy_s = ddpsixy[i];
+        psixz_s = ddpsixz[i];
         psiyy = ddpsiyy[i];
-        psiyz = ddpsiyz[i];
+        psiyz_s = ddpsiyz[i];
         psizz = ddpsizz[i];
       }
+      if(ScheelsPi)
+      {
+        A = alpha[i];
+        dAx = dalphax[i];
+        dAy = dalphay[i];
+        dAz = dalphaz[i];
+        Bx = betax[i];
+        By = betay[i];
+        Bz = betaz[i];
+        dBxx = dbetaxx[i];
+        dBxy = dbetaxy[i];
+        dBxz = dbetaxz[i];
+        dByx = dbetayx[i];
+        dByy = dbetayy[i];
+        dByz = dbetayz[i];
+        dBzx = dbetazx[i];
+        dBzy = dbetazy[i];
+        dBzz = dbetazz[i];
+      }
+      else
+      { 
+        A=-1.0; 
+        dAx=dAy=dAz = Bx=By=Bz = 0.0;
+        dBxx=dBxy=dBxz = dByx=dByy=dByz = dBzx=dBzy=dBzz = 0.0;
+      }
+
       /* set psidot and derivs from Pi */
-      psidot  = cPi[i];
-      psidotx = Pix[i];
-      psidoty = Piy[i];
-      psidotz = Piz[i];
+      psidot  = Bx*psix +By*psiy +Bz*psiz - A*cPi[i];
+      psidotx = Bx*psixx + By*psiyx + Bz*psizx - A*Pix[i] - cPi[i]*dAx
+                +dBxx*psix +dByx*psiy +dBzx*psiz;
+      psidoty = Bx*psixy + By*psiyy + Bz*psizy - A*Piy[i] - cPi[i]*dAy
+                +dBxy*psix +dByy*psiy +dBzy*psiz;
+      psidotz = Bx*psixz + By*psiyz + Bz*psizz - A*Piz[i] - cPi[i]*dAz
+                +dBxz*psix +dByz*psiy +dBzz*psiz;
 
       /* g is upper metric */
       /* get all terms with less than 2 time derivs in g^ab d_a d_b psi */
       g_ddpsi = 2.0*(gtx[i]*psidotx +gty[i]*psidoty +gtz[i]*psidotz) + 
                 gxx[i]*psixx + gyy[i]*psiyy + gzz[i]*psizz +
-                2.0*(gxy[i]*psixy + gxz[i]*psixz + gyz[i]*psiyz);
+                2.0*(gxy[i]*psixy_s + gxz[i]*psixz_s + gyz[i]*psiyz_s);
 
       /* get G^a dpsi_a, where G[a] = g^bc Gamma^a_bc */
       gG_dpsi = Gt[i]*psidot + Gx[i]*psix + Gy[i]*psiy + Gz[i]*psiz;
@@ -335,8 +399,8 @@ set_mass_radius(M,r0);
                    //  -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // oldest source
                 
       /* set RHS of psi and Pi */
-      rPi  = psidotdot;
-      rpsi = psidot;
+      rPi  = -psidotdot/A +(Bx*psidotx+By*psidoty+Bz*psidotz)/A;
+      rpsi = Bx*dpsix[i] + By*dpsiy[i] + Bz*dpsiz[i] - A*cPi[i];
       /* set RHS of phix, ... if needed */
       if(firstorder) { rphix = psidotx;  rphiy = psidoty;  rphiz = psidotz; }
 
@@ -606,7 +670,7 @@ void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt,
     int n3=box->n3;
     int ijk, i,j,k;
     double *cpsi = vlldataptr(ucur, box, 0);
-//    double *ppsi = vlldataptr(upre, box, 0);
+    double *ppsi = vlldataptr(upre, box, 0);
     double *npsi = vlldataptr(unew, box, 0);
     double *cPi = vlldataptr(ucur, box, 1);
     double *pPi = vlldataptr(upre, box, 1);
@@ -647,6 +711,29 @@ void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt,
     double *Gx = box->v[i_G+1];
     double *Gy = box->v[i_G+2];
     double *Gz = box->v[i_G+3];
+    /* lapse, shift and their derivs */
+    double *alpha = box->v[Ind("ScalarOnKerr3d_alpha")];
+    int i_dalpha = Ind("ScalarOnKerr3d_dalphax");
+    double *dalphax = box->v[i_dalpha];
+    double *dalphay = box->v[i_dalpha+1];
+    double *dalphaz = box->v[i_dalpha+2];
+    int i_beta = Ind("ScalarOnKerr3d_betax");
+    double *betax = box->v[i_beta];
+    double *betay = box->v[i_beta+1];
+    double *betaz = box->v[i_beta+2];
+    int i_dbeta = Ind("ScalarOnKerr3d_dbetaxx");
+    double *dbetaxx = box->v[i_dbeta];
+    double *dbetaxy = box->v[i_dbeta+1];
+    double *dbetaxz = box->v[i_dbeta+2];
+    double *dbetayx = box->v[i_dbeta+3];
+    double *dbetayy = box->v[i_dbeta+4];
+    double *dbetayz = box->v[i_dbeta+5];
+    double *dbetazx = box->v[i_dbeta+6];
+    double *dbetazy = box->v[i_dbeta+7];
+    double *dbetazz = box->v[i_dbeta+8];
+
+// d_c g^ab = -(Gamma^{(a}_{cd} g^{b)d})
+
 
     /* compute the spatial derivs */
 //    FirstDerivsOf_S(box, ipsi, Ind("ScalarOnKerr_dpsix"));
@@ -657,11 +744,11 @@ void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt,
     {
       double x,y,z;
       double r, nx,ny,nz, cos_th,sin_th, sin_ph,cos_ph, mx,my,mz, lx,ly,lz;
-      double rPi, rphix,rphiy,rphiz;
+      double rPi, rpsi, rphix,rphiy,rphiz;
       double betan, alpha2, gnn, Gn, gdn;
       double ap,bp,cp, lambdap, am,bm,cm, lambdam, nphin, cphin;
       double nphil,nphim, nUp,nUm, cUp,cUm;
-     
+
       ijk = Index(i,j,k);
       x = px[ijk];
       y = py[ijk];
@@ -703,21 +790,42 @@ void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt,
 
       /* nUp = ap*nPi[ijk] + bp*nphin + cp*npsi[ijk];
          nUm = am*nPi[ijk] + bm*nphin + cm*npsi[ijk]; */
+      /* but now we don't use Pi = psidot, so now: 
+         Up = ap*psidot + bp*phin;
+         Up = ap*(betax[ijk]*psix+betay[ijk]*psiy+betaz[ijk]*psiz
+                  -alpha[ijk]*cPi[ijk]) + bp*phin;
+         Um = am*(betax[ijk]*psix+betay[ijk]*psiy+betaz[ijk]*psiz
+                  -alpha[ijk]*cPi[ijk]) + bm*phin;
+        beta^i = beta^n n^i
+         Up = ap*(betan*phin - alpha[ijk]*cPi[ijk]) + bp*phin;
+         Um = am*(betan*phin - alpha[ijk]*cPi[ijk]) + bm*phin;
+         nUp = -ap*alpha[ijk]*nPi[ijk] + (ap*betan + bp)*nphin;
+         nUm = -am*alpha[ijk]*nPi[ijk] + (am*betan + bm)*nphin;
+         nUp/(ap*betan + bp) + ap*alpha[ijk]*nPi[ijk]/(ap*betan + bp) = nphin
+         nUm/(am*betan + bm) + am*alpha[ijk]*nPi[ijk]/(am*betan + bm) = nphin
+         nUp/(ap*betan + bp)-nUm/(am*betan + bm) = 
+         am*alpha[ijk]*nPi[ijk]/(am*betan + bm)-ap*alpha[ijk]*nPi[ijk]/(ap*betan + bp)  */
+
       nUp = 0.0;  /* <-set d/dt Up = 0 */
-      nUm = am*nPi[ijk] + bm*nphin + cm*npsi[ijk];
+      nUm = am*nPi[ijk] + bm*nphin;
 
-nUp = ap*nPi[ijk] + bp*nphin + cp*npsi[ijk];
-
+// compute nUm
+nUm = am*(betan*nphin - alpha[ijk]*nPi[ijk]) + bm*nphin;
+//set rest
+nUp = cp*cPi[ijk];
+nphil = nphim = 0.0;
 cphin = nx*cphix[ijk] + ny*cphiy[ijk] + nz*cphiz[ijk];
-cUp = ap*cPi[ijk] + bp*cphin + cp*cpsi[ijk];
-cUm = am*cPi[ijk] + bm*cphin + cm*cpsi[ijk];
-nUp += -160*(cUp-0);
+rpsi = betan*cphin - alpha[ijk]*cPi[ijk];
+//cUp = ap*cPi[ijk] + bp*cphin + cp*cpsi[ijk];
+//cUm = am*cPi[ijk] + bm*cphin + cm*cpsi[ijk];
+//nUp += -160*(cUp-0);
 
       /* set RHS of Pi and phi */
-      rPi = (nUp - nUm)/(ap-am);
-//rPi = nUp - bp*nphin - cp*npsi[ijk];
-//rPi=0.1;
-      nphin = nUm - am*rPi -cm*npsi[ijk];
+//      rPi = (nUp - nUm)/(ap-am);
+rPi = (nUp/(ap*betan + bp)-nUm/(am*betan + bm))/
+      (alpha[ijk]*(am/(am*betan + bm) - ap/(ap*betan + bp)));
+//      nphin = nUm - am*rPi -cm*npsi[ijk];
+nphin = nUm/(am*betan + bm) + am*alpha[ijk]*rPi/(am*betan + bm);      
       rphix = nphin*nx + nphil*lx + nphim*mx;
       rphiy = nphin*ny + nphil*ly + nphim*my;
       rphiz = nphin*nz + nphil*lz + nphim*mz;
@@ -726,6 +834,7 @@ nUp += -160*(cUp-0);
       if(dt!=0.0)
       {
         nPi[ijk]   = pPi[ijk]   + dt * rPi;
+        npsi[ijk]  = ppsi[ijk]  + dt * rpsi;
         nphix[ijk] = pphix[ijk] + dt * rphix;
         nphiy[ijk] = pphiy[ijk] + dt * rphiy;
         nphiz[ijk] = pphiz[ijk] + dt * rphiz;
@@ -733,6 +842,7 @@ nUp += -160*(cUp-0);
       else
       {
         nPi[ijk]   = rPi;
+        npsi[ijk]  = rpsi;
         nphix[ijk] = rphix;
         nphiy[ijk] = rphiy;
         nphiz[ijk] = rphiz;
