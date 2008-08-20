@@ -166,7 +166,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   int b;
   double t = ucur->time;
   int firstorder = Getv("ScalarOnKerr_1stOrder_inSpace", "yes");
-  int ScheelsPi = Getv("ScalarOnKerr_1stOrder_inSpace", "ScheelsPi");
+  int ScheelsPi = Getv("ScalarOnKerr_Pi_def", "ScheelsPi");
   // double x0, y0;
   double M = Getd("BHmass");
   double r0, Omega, Dr, q, q22;
@@ -338,6 +338,7 @@ set_mass_radius(M,r0);
         psiyz_s = ddpsiyz[i];
         psizz = ddpsizz[i];
       }
+      /* use Scheel's def of Pi instead of Pi = psidot */
       if(ScheelsPi)
       {
         A = alpha[i];

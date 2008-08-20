@@ -81,6 +81,8 @@ int sgrid_ScalarOnKerr(void)
          "[no, simple, naive_Ylm]");
   AddPar("ScalarOnKerr_overlap_shells", "no",
          "whether we use overlapping shells [no,yes]");
+  AddPar("ScalarOnKerr_Pi_def", "psidot",
+         "def. of Pi [psidot,ScheelsPi]");
   AddPar("ScalarOnKerr_1stOrder_inSpace", "no",
          "introduce extra vars to make system 1st order in space [no,yes]");
   if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
