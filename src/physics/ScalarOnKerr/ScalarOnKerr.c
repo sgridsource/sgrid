@@ -916,19 +916,24 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
     double *nPi = vlldataptr(unew, box, 1);
     double *nUp = vlldataptr(unew, box, 2);
     double *nUm = vlldataptr(unew, box, 3);
-    double *npsix = box->v[Ind("temp1")];
-    double *npsiy = box->v[Ind("temp2")];
-    double *npsiz = box->v[Ind("temp3")];
+    double *npsiX = box->v[Ind("temp1")];
+//    double *npsix = box->v[Ind("temp1")];
+//    double *npsiy = box->v[Ind("temp2")];
+//    double *npsiz = box->v[Ind("temp3")];
     double *cpsi = vlldataptr(ucur, box, 0);
     double *cPi = vlldataptr(ucur, box, 1);
     double *cUp = vlldataptr(ucur, box, 2);
     double *cUm = vlldataptr(ucur, box, 3);
-    double *cpsix = box->v[Ind("ScalarOnKerr_dpsix")];
-    double *cpsiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
-    double *cpsiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+    double *cpsiX = box->v[Ind("temp2")];
+//    double *cpsix = box->v[Ind("ScalarOnKerr_dpsix")];
+//    double *cpsiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+//    double *cpsiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
     double *px = box->v[Ind("x")];
     double *py = box->v[Ind("y")];
     double *pz = box->v[Ind("z")];
+    double *dXdx = box->v[Ind("dXdx")];
+    double *dXdy = box->v[Ind("dXdx")+1];
+    double *dXdz = box->v[Ind("dXdx")+2];
     int i_gup = Ind("ScalarOnKerr_guptt");
     double *gtt = box->v[i_gup];
     double *gtx = box->v[i_gup+1];
@@ -947,8 +952,10 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
     double *Gz = box->v[i_G+3];
 
     /* compute spatial derivs of npsi */
-    cart_partials(box, npsi, npsix, npsiy, npsiz);
-    cart_partials(box, cpsi, cpsix, cpsiy, cpsiz);
+    spec_Deriv1(box, 1, npsi, npsiX);
+    spec_Deriv1(box, 1, cpsi, cpsiX);
+    /* cart_partials(box, npsi, npsix, npsiy, npsiz);
+       cart_partials(box, cpsi, cpsix, cpsiy, cpsiz); */
 
     /* loop over points and set RHS */
     forPointList_inbox(boxBoundaryPointList, box, pi , ijk)
@@ -957,7 +964,8 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
       double r, nx,ny,nz;
       double rPi;
       double betan, alpha2, gnn, Gn, gdn;
-      double ap,bp,cp, lambdap, am,bm,cm, lambdam, npsir, cpsir;
+      double ap,bp,cp, lambdap, am,bm,cm, lambdam;
+      double dXdr, npsir, cpsir;
 
       x = px[ijk];
       y = py[ijk];
@@ -983,8 +991,13 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
       bm = bp;
       cm = cp;
 
-      npsir = ( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
-      cpsir = ( nx*cpsix[ijk] + ny*cpsiy[ijk] + nz*cpsiz[ijk] );
+      /* compute dXdr = dXdx dxdr +... */
+      dXdr = dXdx[ijk]*nx + dXdy[ijk]*ny + dXdz[ijk]*nz;
+      /* npsir := d/dr psi = dXdr d/dX psi */
+      npsir = dXdr * npsiX[ijk];
+      cpsir = dXdr * cpsiX[ijk];
+      /* npsir = ( nx*npsix[ijk] + ny*npsiy[ijk] + nz*npsiz[ijk] );
+         cpsir = ( nx*cpsix[ijk] + ny*cpsiy[ijk] + nz*cpsiz[ijk] ); */
 
       /* set char vars both unew and ucur */
       nUp[ijk] = ap*nPi[ijk] + bp*npsir + cp*npsi[ijk];
