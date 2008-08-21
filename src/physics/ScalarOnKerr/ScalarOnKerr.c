@@ -657,7 +657,7 @@ void set_psi_Pi_boundary_New(tVarList *unew, tVarList *upre, double dt,
 
 
 /* set outer BC of psi, Pi, phi for first order version */
-void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt, 
+void set_psi_Pi_phi_boundary_old(tVarList *unew, tVarList *upre, double dt, 
                              tVarList *ucur)
 {
   tGrid *grid = ucur->grid;
@@ -1617,6 +1617,375 @@ void set_boundary_ofPi(tVarList *unew, tVarList *upre)
 
       Pinew[ijk] = (nx*dpsi_dx[ijk] + ny*dpsi_dy[ijk] + nz*dpsi_dz[ijk])
                     - psinew[ijk]/r;
+    }
+  }
+}
+
+
+/***********************************************************************/
+/* 1st order version of scalar evo as in Scheel et al: */
+/* evolve and set boundary points */
+//void ScalarOnKerr_evolve_Scheel(tVarList *unew, tVarList *upre, double dt, 
+//                             tVarList *ucur)
+void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt, 
+                             tVarList *ucur)
+{
+  tGrid *grid = ucur->grid;
+  int b;
+  double t = ucur->time;
+  // double x0, y0;
+  double M = Getd("BHmass");
+  double r0, Omega, Dr, q, q22;
+
+  ///* old source position */
+  //x0 = 10*cos(0.02*t);
+  //y0 = 10*sin(0.02*t);
+
+  /* source parameters */
+  q  = 1.0;
+  r0 = 10.0*M;
+  Dr = 1.0*M;
+  q22= 4.0*PI*q/(r0*sqrt(1.0-3*M/r0))*sqrt(5.0/(96.0*PI))*3.0;
+  Omega = sqrt(M/(r0*r0*r0));
+
+/* call Ian's func to set mass and radius */
+set_mass_radius(M,r0);
+  
+  /* loop over all boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    double *cpsi = vlldataptr(ucur, box, 0);
+    double *ppsi = vlldataptr(upre, box, 0);
+    double *npsi = vlldataptr(unew, box, 0);
+    double *cPi = vlldataptr(ucur, box, 1);
+    double *pPi = vlldataptr(upre, box, 1);
+    double *nPi = vlldataptr(unew, box, 1);
+    int i;
+    int icpsi = (ucur)->index[0];
+    int icPi  = (ucur)->index[1];
+    double *dpsix = box->v[Ind("ScalarOnKerr_dpsix")];
+    double *dpsiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+    double *dpsiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
+    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
+    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *cphix, *cphiy, *cphiz;
+    double *pphix, *pphiy, *pphiz;
+    double *nphix, *nphiy, *nphiz;
+    double *dphixx, *dphixy, *dphixz;
+    double *dphiyx, *dphiyy, *dphiyz;
+    double *dphizx, *dphizy, *dphizz;
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_alpha = Ind("ScalarOnKerr3d_alpha");
+    double *alpha = box->v[i_alpha];
+    int i_beta = Ind("ScalarOnKerr3d_betax");
+    double *betax = box->v[i_beta];
+    double *betay = box->v[i_beta+1];
+    double *betaz = box->v[i_beta+2];
+    int i_gup = Ind("ScalarOnKerr3d_gupxx");
+    double *gxx = box->v[i_gup];
+    double *gxy = box->v[i_gup+1];
+    double *gxz = box->v[i_gup+2];
+    double *gyy = box->v[i_gup+3];
+    double *gyz = box->v[i_gup+4];
+    double *gzz = box->v[i_gup+5];
+    int i_TrK = Ind("ScalarOnKerr3d_TrK");
+    double *TrK = box->v[i_TrK];
+    int i_G = Ind("ScalarOnKerr3d_Gx");
+    double *Gx = box->v[i_G];
+    double *Gy = box->v[i_G+1];
+    double *Gz = box->v[i_G+2];
+    int i_dalpha = Ind("ScalarOnKerr3d_dalphax");
+    double *dalphax = box->v[i_dalpha];
+    double *dalphay = box->v[i_dalpha+1];
+    double *dalphaz = box->v[i_dalpha+2];
+    int i_dbeta = Ind("ScalarOnKerr3d_dbetaxx");
+    double *dbetaxx = box->v[i_dbeta];
+    double *dbetaxy = box->v[i_dbeta+1];
+    double *dbetaxz = box->v[i_dbeta+2];
+    double *dbetayx = box->v[i_dbeta+3];
+    double *dbetayy = box->v[i_dbeta+4];
+    double *dbetayz = box->v[i_dbeta+5];
+    double *dbetazx = box->v[i_dbeta+6];
+    double *dbetazy = box->v[i_dbeta+7];
+    double *dbetazz = box->v[i_dbeta+8];
+    double A; 
+    double dAx,dAy,dAz , Bx,By,Bz;
+    double dBxx,dBxy,dBxz , dByx,dByy,dByz , dBzx,dBzy,dBzz;
+
+    /* compute the spatial derivs */
+    cphix = vlldataptr(ucur, box, 6);
+    cphiy = vlldataptr(ucur, box, 7);
+    cphiz = vlldataptr(ucur, box, 8);
+    pphix = vlldataptr(upre, box, 6);
+    pphiy = vlldataptr(upre, box, 7);
+    pphiz = vlldataptr(upre, box, 8);
+    nphix = vlldataptr(unew, box, 6);
+    nphiy = vlldataptr(unew, box, 7);
+    nphiz = vlldataptr(unew, box, 8);
+    dphixx = box->v[Ind("ScalarOnKerr_dphixx")];
+    dphixy = box->v[Ind("ScalarOnKerr_dphixx")+1];
+    dphixz = box->v[Ind("ScalarOnKerr_dphixx")+2];
+    dphiyx = box->v[Ind("ScalarOnKerr_dphixx")+3];
+    dphiyy = box->v[Ind("ScalarOnKerr_dphixx")+4];
+    dphiyz = box->v[Ind("ScalarOnKerr_dphixx")+5];
+    dphizx = box->v[Ind("ScalarOnKerr_dphixx")+6];
+    dphizy = box->v[Ind("ScalarOnKerr_dphixx")+7];
+    dphizz = box->v[Ind("ScalarOnKerr_dphixx")+8];
+    cart_partials(box, cphix, dphixx,dphixy,dphixz);
+    cart_partials(box, cphiy, dphiyx,dphiyy,dphiyz);
+    cart_partials(box, cphiz, dphizx,dphizy,dphizz);
+    FirstDerivsOf_S(box, icpsi , Ind("ScalarOnKerr_dpsix"));
+    FirstDerivsOf_S(box, icPi , Ind("ScalarOnKerr_dPix"));
+
+    /* loop over points and set RHS */
+    forallpoints(box, i)
+    {
+      double rPi, rpsi;
+      double rphix, rphiy, rphiz;
+      double x = px[i];
+      double y = py[i];
+      double z = pz[i];
+      double rho, r, ph, theta, Y22;
+      double beta_dPi,ag_dphi, gGx,gGy,gGz,aG_phi, g_phi_da, aKPi, beta_dpsi;
+      double b_dphix,b_dphiy,b_dphiz,phi_dbx,phi_dby,phi_dbz;
+      /* g is upper metric */
+      /* terms on RHS of Pi eqn */ 
+      beta_dPi = betax[i]*Pix[i] + betay[i]*Piy[i] + betaz[i]*Piz[i];
+      ag_dphi = alpha[i]*
+                  (gxx[i]*dphixx[i] + gyy[i]*dphiyy[i] + gzz[i]*dphizz[i] +
+                   gxy[i]*(dphixy[i]+dphiyx[i]) +
+                   gxz[i]*(dphixz[i]+dphizx[i]) + 
+                   gyz[i]*(dphiyz[i]+dphizy[i]));
+      /* get alpha gG[i] = alpha g^ik Gamma^i_jk */
+      aG_phi = alpha[i]*(Gx[i]*cphix[i] + Gy[i]*cphiy[i] + Gz[i]*cphiz[i]);
+
+      /* get g_phi_da = g^ik dpsi_i dalpha_k */
+      g_phi_da = gxx[i]*cphix[i]*dalphax[i] + gyy[i]*cphiy[i]*dalphay[i] +
+                  gzz[i]*cphiz[i]*dalphaz[i] +
+                  gxy[i]*(cphix[i]*dalphay[i] + cphiy[i]*dalphax[i]) + 
+                  gxz[i]*(cphix[i]*dalphaz[i] + cphiz[i]*dalphax[i]) +
+                  gyz[i]*(cphiy[i]*dalphaz[i] + cphiz[i]*dalphay[i]);
+
+      aKPi = alpha[i]*TrK[i]*cPi[i];
+
+      /* term on RHS of psi eqn */
+      beta_dpsi = betax[i]*dpsix[i] + betay[i]*dpsiy[i] + betaz[i]*dpsiz[i];
+
+      /* terms on RHS of phi_i eqn */
+      b_dphix = betax[i]*dphixx[i] + betay[i]*dphixy[i] + betaz[i]*dphixz[i];
+      b_dphiy = betax[i]*dphiyx[i] + betay[i]*dphiyy[i] + betaz[i]*dphiyz[i];
+      b_dphiz = betax[i]*dphizx[i] + betay[i]*dphizy[i] + betaz[i]*dphizz[i];
+      phi_dbx = cphix[i]*dbetaxx[i]+cphiy[i]*dbetayx[i]+cphiz[i]*dbetazx[i];
+      phi_dby = cphix[i]*dbetaxy[i]+cphiy[i]*dbetayy[i]+cphiz[i]*dbetazy[i];
+      phi_dbz = cphix[i]*dbetaxz[i]+cphiy[i]*dbetayz[i]+cphiz[i]*dbetazz[i];
+
+      /* source rho */
+      r     = sqrt(x*x + y*y + z*z);
+      theta = 0.5*PI - asin(z/r);
+      ph   = Arg(x,y); // returns value in (-PI,PI]
+      Y22 = sqrt(5.0/(96.0*PI))*1.5*(1.0 - cos(2.0*theta));
+      rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
+            cos(2.0*(Omega*t - ph)) * Y22;
+
+/* use Ian's source */
+//rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+
+      /* set RHS of psi and Pi */
+      rPi  = beta_dPi - ag_dphi + aG_phi - g_phi_da + aKPi  -
+              (alpha[i])*4.0*PI*rho;
+      rpsi = beta_dpsi - alpha[i]*cPi[i];
+      rphix = b_dphix + phi_dbx - alpha[i]*Pix[i] - cPi[i]*dalphax[i];
+      rphiy = b_dphiy + phi_dby - alpha[i]*Piy[i] - cPi[i]*dalphay[i];
+      rphiz = b_dphiz + phi_dbz - alpha[i]*Piz[i] - cPi[i]*dalphaz[i];
+
+      /* set new vars or RHS, depending in which integrator is used */
+      if(dt!=0.0)
+      {
+        nPi[i]  = pPi[i]  + dt * rPi;
+        npsi[i] = ppsi[i] + dt * rpsi;
+        nphix[i] = pphix[i] + dt * rphix;
+        nphiy[i] = pphiy[i] + dt * rphiy;
+        nphiz[i] = pphiz[i] + dt * rphiz;
+      }
+      else /* if(dt==0.0) */
+      {
+        nPi[i]  = rPi;
+        npsi[i] = rpsi;
+        nphix[i] = rphix;
+        nphiy[i] = rphiy;
+        nphiz[i] = rphiz;
+      } /* end else */
+    }
+  } /* end forallboxes */
+
+
+  /* special nPi filter */
+  if(!Getv("ScalarOnKerr_special_nPi_filter", "no"))
+  {
+    tVarList *vl_Pi = vlalloc(grid);
+    vlpush(vl_Pi, unew->index[1]);
+    if(Getv("ScalarOnKerr_special_nPi_filter", "simple"))
+      filter_unew(vl_Pi, 0);
+    else if(Getv("ScalarOnKerr_special_nPi_filter", "naive_Ylm"))
+      naive_Ylm_filter_unew(vl_Pi, 0);
+    vlfree(vl_Pi);
+  }
+//filter_unew_radially(unew, NULL);
+
+  /* set char. vars. and use them to compute unew */
+//  set_Up_Um_onBoundary(unew, upre, dt, ucur);
+//  compute_unew_from_Up_Um_onBoundary(unew, upre, dt, ucur);
+
+  /* set BCs */
+  set_psi_Pi_phi_boundary(unew, upre, dt, ucur);
+
+  if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
+    reset_doubleCoveredPoints(unew);
+}
+
+/* set outer BC of psi, Pi, phi for first order Schheel version */
+void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt, 
+                             tVarList *ucur)
+{
+  tGrid *grid = ucur->grid;
+  int b;
+
+  /* not: forallboxes(grid,b) , use only outermost box */
+  b = grid->nboxes - 1;
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, i,j,k;
+    double *cpsi = vlldataptr(ucur, box, 0);
+    double *ppsi = vlldataptr(upre, box, 0);
+    double *npsi = vlldataptr(unew, box, 0);
+    double *cPi = vlldataptr(ucur, box, 1);
+    double *pPi = vlldataptr(upre, box, 1);
+    double *nPi = vlldataptr(unew, box, 1);
+//    int ipsi = (ucur)->index[0];
+//    int iPi  = (ucur)->index[1];
+//    double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
+//    double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+//    double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+//    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
+//    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
+//    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *cphix = vlldataptr(ucur, box, 6);
+    double *cphiy = vlldataptr(ucur, box, 7);
+    double *cphiz = vlldataptr(ucur, box, 8);
+    double *pphix = vlldataptr(upre, box, 6);
+    double *pphiy = vlldataptr(upre, box, 7);
+    double *pphiz = vlldataptr(upre, box, 8);
+    double *nphix = vlldataptr(unew, box, 6);
+    double *nphiy = vlldataptr(unew, box, 7);
+    double *nphiz = vlldataptr(unew, box, 8);
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_alpha = Ind("ScalarOnKerr3d_alpha");
+    double *alpha = box->v[i_alpha];
+    int i_beta = Ind("ScalarOnKerr3d_betax");
+    double *betax = box->v[i_beta];
+    double *betay = box->v[i_beta+1];
+    double *betaz = box->v[i_beta+2];
+    int i_gup = Ind("ScalarOnKerr3d_gupxx");
+    double *gxx = box->v[i_gup];
+    double *gxy = box->v[i_gup+1];
+    double *gxz = box->v[i_gup+2];
+    double *gyy = box->v[i_gup+3];
+    double *gyz = box->v[i_gup+4];
+    double *gzz = box->v[i_gup+5];
+
+
+    /* compute the spatial derivs */
+//    FirstDerivsOf_S(box, ipsi, Ind("ScalarOnKerr_dpsix"));
+//    FirstDerivsOf_S(box, iPi , Ind("ScalarOnKerr_dPix"));
+
+    /* loop over points and set RHS */
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+    {
+      double x,y,z;
+      double r, nx,ny,nz;
+      double rPi, rpsi, rphix,rphiy,rphiz;
+      double cx,cy,cz, cupx,cupy,cupz, gnn; 
+      double nphic;
+      double nUp,nUm, nU0x,nU0y,nU0z, nUpsi;
+
+      ijk = Index(i,j,k);
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r; /* nx=sin_th cos_ph, ny=sin_th sin_ph, nz=cos_th */
+      ny = y/r;
+      nz = z/r;
+      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+
+      cx = nx/sqrt(gnn);
+      cy = ny/sqrt(gnn);
+      cz = nz/sqrt(gnn);
+      cupx = gxx[ijk]*cx + gxy[ijk]*cy + gxz[ijk]*cz;
+      cupy = gxy[ijk]*cx + gyy[ijk]*cy + gyz[ijk]*cz;
+      cupz = gxz[ijk]*cx + gyz[ijk]*cy + gzz[ijk]*cz;
+      nphic = cx*nphix[ijk] + cy*nphiy[ijk] + cz*nphiz[ijk];
+
+      /* use Up/m for Scheel's u^{+/-}
+         Up/m = Pi +/- c^i phi_i        */
+      
+      /* compute outgoing mode */
+      nUp = nPi[ijk] + nphic; 
+
+      /* set BC on Um and U0x,U0y,U0z, Upsi */
+      nUm = -cPi[ijk]/r;
+      nU0x = nU0y = nU0z = 0.0;
+      nUpsi = -alpha[ijk]*cPi[ijk] +
+              betax[i]*cphix[i] + betay[i]*cphiy[i] + betaz[i]*cphiz[i];
+
+      /* set RHS of psi, Pi and phi */
+      rpsi = nUpsi;
+      rPi   = 0.5*(nUp + nUm);
+      nphic = 0.5*(nUp - nUm);
+      rphix = nphic*cx + nU0x;
+      rphiy = nphic*cy + nU0y;
+      rphiz = nphic*cz + nU0z;
+
+//if(!finite(rPi))
+if(dequal(gxx[ijk],0.0))
+{
+printf("ijk=%d (t,x,y,z)=(%f,%f,%f,%f) rPi=%f rpsi=%f rphix=%f rphiy=%f rphiz=%f\n",
+ijk, ucur->time,x,y,z, rPi, rpsi, rphix, rphiy, rphiz);
+//return;
+printf("gij=%f %f %f %f %f %f\n",
+gxx[ijk],gxy[ijk],gxz[ijk],gyy[ijk],gyz[ijk],gzz[ijk]);
+printf("gnn=%f\n",gnn);
+printf("nphix[ijk]=%f nphic=%f nUp=%f nPi[ijk]=%f",
+nphix[ijk],nphic,nUp,nPi[ijk]);
+Yo(1);exit(11);
+}
+      /* set new vars or RHS, depending in which integrator is used */
+      if(dt!=0.0)
+      {
+        nPi[ijk]   = pPi[ijk]   + dt * rPi;
+        npsi[ijk]  = ppsi[ijk]  + dt * rpsi;
+        nphix[ijk] = pphix[ijk] + dt * rphix;
+        nphiy[ijk] = pphiy[ijk] + dt * rphiy;
+        nphiz[ijk] = pphiz[ijk] + dt * rphiz;
+      }
+      else
+      {
+        nPi[ijk]   = rPi;
+        npsi[ijk]  = rpsi;
+        nphix[ijk] = rphix;
+        nphiy[ijk] = rphiy;
+        nphiz[ijk] = rphiz;
+      }  /* end if(dt==0.0) */
     }
   }
 }
