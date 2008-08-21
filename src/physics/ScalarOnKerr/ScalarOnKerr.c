@@ -220,6 +220,7 @@ int KerrChecker(tGrid *grid)
     {
       double M = 1.0;
       double tiny=1e-13;
+      int err=0;
       double x = px[i];
       double y = py[i];
       double z = pz[i];
@@ -227,18 +228,49 @@ int KerrChecker(tGrid *grid)
       double nx = x/r;
       double ny = y/r;
       double nz = z/r;
+      double dnxdx = (1.0 - nx*nx)/r;
+      double dnxdy = ( - ny*nx)/r;
+      double dnxdz = ( - nz*nx)/r;
+      double dnydx = ( - ny*nx)/r;
+      double dnydy = (1.0 - ny*ny)/r;
+      double dnydz = ( - nz*ny)/r;
+      double dnzdx = ( - nz*nx)/r;
+      double dnzdy = ( - ny*nz)/r;
+      double dnzdz = (1.0 - nz*nz)/r;
+      double gda_upx,gda_upy,gda_upz, G3_minus_gdaoa_x,G3_minus_gdaoa_y,G3_minus_gdaoa_z;
       double N = sqrt(r/(r+2.0*M));
+      double dNdr = M/(N*(r+2.0*M)*(r+2.0*M));
+      double dNdx = dNdr*nx;
+      double dNdy = dNdr*ny;
+      double dNdz = dNdr*nz;
       double L = 1.0/N;
       double Vr = 2.0*M/(r+2.0*M);
+      double Vx = Vr*nx;
+      double Vy = Vr*ny;
+      double Vz = Vr*nz;
+      double dVrdr = -2.0*M/((r+2.0*M)*(r+2.0*M));
+      double dVrdx = dVrdr * nx;
+      double dVrdy = dVrdr * ny;
+      double dVrdz = dVrdr * nz;
+      double dVxdx = dVrdx*nx + Vr*dnxdx;
+      double dVxdy = dVrdy*nx + Vr*dnxdy;
+      double dVxdz = dVrdz*nx + Vr*dnxdz;
+      double dVydx = dVrdx*ny + Vr*dnydx;
+      double dVydy = dVrdy*ny + Vr*dnydy;
+      double dVydz = dVrdz*ny + Vr*dnydz;
+      double dVzdx = dVrdx*nz + Vr*dnzdx;
+      double dVzdy = dVrdy*nz + Vr*dnzdy;
+      double dVzdz = dVrdz*nz + Vr*dnzdz;
       double gupxx = (1.0/(L*L) - 1.0)*nx*nx + 1.0;
       double gupxy = (1.0/(L*L) - 1.0)*nx*ny;
       double gupxz = (1.0/(L*L) - 1.0)*nx*nz;
       double gupyy = (1.0/(L*L) - 1.0)*ny*ny + 1.0;
       double gupyz = (1.0/(L*L) - 1.0)*ny*nz;
       double gupzz = (1.0/(L*L) - 1.0)*nz*nz + 1.0;
-      double Jx = nx*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M));
-      double Jy = ny*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M));
-      double Jz = nz*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M));
+      /* J^i = g^{jk} Gamma^i_{jk} - g^{ij} N_{,j}/N */
+      double Jx = ( nx*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M)) );
+      double Jy = ( ny*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M)) );
+      double Jz = ( nz*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M)) );
       double K = ( 2.0*M*(r + 3.0*M)/(r*(r+2.0*M)*(r+2.0*M)) )/N;
       /* check upper 3-metric */
       if(fabs(gxx[i]-gupxx)>tiny || fabs(gxy[i]-gupxy)>tiny ||
@@ -250,17 +282,43 @@ int KerrChecker(tGrid *grid)
                gxx[i],gxy[i],gxz[i],gyy[i],gyz[i],gzz[i]);
         printf("gupij=%g %g %g %g %g %g\n",
                gupxx,gupxy,gupxz,gupyy,gupyz,gupzz);
-        errorexit("error in Kerr metric");
+        err=1;
       }
-      /* check upper contracted 3-Gamma */
-      if(fabs(G3x[i]-Jx)>tiny || fabs(G3y[i]-Jy)>tiny ||
-         fabs(G3z[i]-Jz)>tiny)
+      /* check alpha */
+      if(fabs(alpha[i]-N)>tiny)
       {
         printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
-        printf("Gi =%g %g %g\n", Gx[i],Gy[i],Gz[i]);
-        printf("G3i=%g %g %g\n", G3x[i],G3y[i],G3z[i]);
-        printf("Ji =%g %g %g\n", Jx,Jy,Jz);
-        errorexit("error in Kerr metric");
+        printf("alpha=%g\n", alpha[i]);
+        printf("N    =%g\n", N);
+        err=1;
+      }
+      /* check upper shift */
+      if(fabs(betax[i]-Vx)>tiny || fabs(betay[i]-Vy)>tiny ||
+         fabs(betaz[i]-Vz)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("betai=%g %g %g\n", betax[i],betay[i],betaz[i]);
+        printf("Vi   =%g %g %g\n", Vx,Vy,Vz);
+        err=1;
+      }
+      gda_upx = gxx[i]*dalphax[i] + gxy[i]*dalphay[i] + gxz[i]*dalphaz[i];
+      gda_upy = gxy[i]*dalphax[i] + gyy[i]*dalphay[i] + gyz[i]*dalphaz[i];
+      gda_upz = gxz[i]*dalphax[i] + gyz[i]*dalphay[i] + gzz[i]*dalphaz[i];
+      G3_minus_gdaoa_x = G3x[i] - gda_upx/alpha[i];
+      G3_minus_gdaoa_y = G3y[i] - gda_upy/alpha[i];
+      G3_minus_gdaoa_z = G3z[i] - gda_upz/alpha[i];
+      /* check upper contracted 3-Gamma */
+      if(fabs(G3_minus_gdaoa_x-Jx)>tiny ||
+         fabs(G3_minus_gdaoa_y-Jy)>tiny ||
+         fabs(G3_minus_gdaoa_z-Jz)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("Gi              =%g %g %g\n", Gx[i],Gy[i],Gz[i]);
+        printf("G3i             =%g %g %g\n", G3x[i],G3y[i],G3z[i]);
+        printf("G3_minus_gdaoa_i=%g %g %g\n",
+                G3_minus_gdaoa_x,G3_minus_gdaoa_y,G3_minus_gdaoa_z);
+        printf("Ji              =%g %g %g\n", Jx,Jy,Jz);
+        err=1;
       }
       /* check TrK */
       if(fabs(TrK[i]-K)>tiny)
@@ -268,11 +326,45 @@ int KerrChecker(tGrid *grid)
         printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
         printf("TrK=%g\n", TrK[i]);
         printf("K  =%g\n", K);
-        errorexit("error in Kerr metric");
+        err=1;
+      }
+      /* check lapse derivs */
+      if(fabs(dalphax[i]-dNdx)>tiny || fabs(dalphay[i]-dNdy)>tiny ||
+         fabs(dalphaz[i]-dNdz)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("dalphai=%g %g %g\n", dalphax[i],dalphay[i],dalphaz[i]);
+        printf("dNdi   =%g %g %g\n", dNdx,dNdy,dNdz);
+        err=1;
+      }
+      /* check shift derivs */
+      if(fabs(dbetaxx[i]-dVxdx)>tiny || fabs(dbetaxy[i]-dVxdy)>tiny ||
+         fabs(dbetaxz[i]-dVxdz)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("dbetaxi=%g %g %g\n", dbetaxx[i],dbetaxy[i],dbetaxz[i]);
+        printf("Vxdi   =%g %g %g\n", dVxdx,dVxdy,dVxdz);
+        err=1;
+      }
+      if(fabs(dbetayx[i]-dVydx)>tiny || fabs(dbetayy[i]-dVydy)>tiny ||
+         fabs(dbetayz[i]-dVydz)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("dbetayi=%g %g %g\n", dbetayx[i],dbetayy[i],dbetayz[i]);
+        printf("Vydi   =%g %g %g\n", dVydx,dVydy,dVydz);
+        err=1;
+      }
+      if(fabs(dbetazx[i]-dVzdx)>tiny || fabs(dbetazy[i]-dVzdy)>tiny ||
+         fabs(dbetazz[i]-dVzdz)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("dbetazi=%g %g %g\n", dbetazx[i],dbetazy[i],dbetazz[i]);
+        printf("Vzdi   =%g %g %g\n", dVzdx,dVzdy,dVzdz);
+        err=1;
       }
 
 
-      
+      if(err) errorexit("error in Kerr metric");
     } /* end forallpoints */
   }
   return 0;
