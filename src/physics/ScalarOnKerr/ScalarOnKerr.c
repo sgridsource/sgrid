@@ -155,6 +155,126 @@ int ScalarOnKerr_startup(tGrid *grid)
          Ind("ScalarOnKerr3d_Gammaxxx"), Ind("ScalarOnKerr3d_Gx"), 
          Ind("ScalarOnKerr3d_dalphax"), Ind("ScalarOnKerr3d_dbetaxx"));
 
+  /* check if Kerr vars are correct */
+  KerrChecker(grid);
+
+  return 0;
+}
+
+/* check if Kerr vars are correct */
+int KerrChecker(tGrid *grid)
+{
+  int b;
+
+  printf("KerrChecker:\n");
+
+  /* loop over all boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int i;
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_alpha = Ind("ScalarOnKerr3d_alpha");
+    double *alpha = box->v[i_alpha];
+    int i_beta = Ind("ScalarOnKerr3d_betax");
+    double *betax = box->v[i_beta];
+    double *betay = box->v[i_beta+1];
+    double *betaz = box->v[i_beta+2];
+    int i_gup = Ind("ScalarOnKerr3d_gupxx");
+    double *gxx = box->v[i_gup];
+    double *gxy = box->v[i_gup+1];
+    double *gxz = box->v[i_gup+2];
+    double *gyy = box->v[i_gup+3];
+    double *gyz = box->v[i_gup+4];
+    double *gzz = box->v[i_gup+5];
+    int i_TrK = Ind("ScalarOnKerr3d_TrK");
+    double *TrK = box->v[i_TrK];
+    int i_G3 = Ind("ScalarOnKerr3d_Gx");
+    double *G3x = box->v[i_G3];
+    double *G3y = box->v[i_G3+1];
+    double *G3z = box->v[i_G3+2];
+    int i_G = Ind("ScalarOnKerr_Gt");
+    double *Gt = box->v[i_G];
+    double *Gx = box->v[i_G+1];
+    double *Gy = box->v[i_G+2];
+    double *Gz = box->v[i_G+3];
+    int i_dalpha = Ind("ScalarOnKerr3d_dalphax");
+    double *dalphax = box->v[i_dalpha];
+    double *dalphay = box->v[i_dalpha+1];
+    double *dalphaz = box->v[i_dalpha+2];
+    int i_dbeta = Ind("ScalarOnKerr3d_dbetaxx");
+    double *dbetaxx = box->v[i_dbeta];
+    double *dbetaxy = box->v[i_dbeta+1];
+    double *dbetaxz = box->v[i_dbeta+2];
+    double *dbetayx = box->v[i_dbeta+3];
+    double *dbetayy = box->v[i_dbeta+4];
+    double *dbetayz = box->v[i_dbeta+5];
+    double *dbetazx = box->v[i_dbeta+6];
+    double *dbetazy = box->v[i_dbeta+7];
+    double *dbetazz = box->v[i_dbeta+8];
+
+    /* loop over points check */
+    forallpoints(box, i)
+    {
+      double M = 1.0;
+      double tiny=1e-13;
+      double x = px[i];
+      double y = py[i];
+      double z = pz[i];
+      double r = sqrt(x*x + y*y + z*z);
+      double nx = x/r;
+      double ny = y/r;
+      double nz = z/r;
+      double N = sqrt(r/(r+2.0*M));
+      double L = 1.0/N;
+      double Vr = 2.0*M/(r+2.0*M);
+      double gupxx = (1.0/(L*L) - 1.0)*nx*nx + 1.0;
+      double gupxy = (1.0/(L*L) - 1.0)*nx*ny;
+      double gupxz = (1.0/(L*L) - 1.0)*nx*nz;
+      double gupyy = (1.0/(L*L) - 1.0)*ny*ny + 1.0;
+      double gupyz = (1.0/(L*L) - 1.0)*ny*nz;
+      double gupzz = (1.0/(L*L) - 1.0)*nz*nz + 1.0;
+      double Jx = nx*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M));
+      double Jy = ny*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M));
+      double Jz = nz*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M));
+      double K = ( 2.0*M*(r + 3.0*M)/(r*(r+2.0*M)*(r+2.0*M)) )/N;
+      /* check upper 3-metric */
+      if(fabs(gxx[i]-gupxx)>tiny || fabs(gxy[i]-gupxy)>tiny ||
+         fabs(gxz[i]-gupxz)>tiny || fabs(gyy[i]-gupyy)>tiny ||
+         fabs(gyz[i]-gupyz)>tiny || fabs(gzz[i]-gupzz)>tiny )
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("gij  =%g %g %g %g %g %g\n",
+               gxx[i],gxy[i],gxz[i],gyy[i],gyz[i],gzz[i]);
+        printf("gupij=%g %g %g %g %g %g\n",
+               gupxx,gupxy,gupxz,gupyy,gupyz,gupzz);
+        errorexit("error in Kerr metric");
+      }
+      /* check upper contracted 3-Gamma */
+      if(fabs(G3x[i]-Jx)>tiny || fabs(G3y[i]-Jy)>tiny ||
+         fabs(G3z[i]-Jz)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("Gi =%g %g %g\n", Gx[i],Gy[i],Gz[i]);
+        printf("G3i=%g %g %g\n", G3x[i],G3y[i],G3z[i]);
+        printf("Ji =%g %g %g\n", Jx,Jy,Jz);
+        errorexit("error in Kerr metric");
+      }
+      /* check TrK */
+      if(fabs(TrK[i]-K)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("TrK=%g\n", TrK[i]);
+        printf("K  =%g\n", K);
+        errorexit("error in Kerr metric");
+      }
+
+
+      
+    } /* end forallpoints */
+  }
   return 0;
 }
 
@@ -1848,6 +1968,7 @@ set_mass_radius(M,r0);
     vlfree(vl_Pi);
   }
 //filter_unew_radially(unew, NULL);
+//filter_unew(unew, NULL);
 
   /* set char. vars. and use them to compute unew */
 //  set_Up_Um_onBoundary(unew, upre, dt, ucur);
