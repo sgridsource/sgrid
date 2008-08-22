@@ -80,6 +80,9 @@ int sgrid_ScalarOnKerr(void)
   AddPar("ScalarOnKerr_special_nPi_filter", "simple",
          "whether we filter all new Pi in each evo substep "
          "[no, simple, naive_Ylm]");
+  AddPar("ScalarOnKerr_special_nPi_nphi_filter", "naive_Ylm",
+         "whether we filter all new Pi and phi_i in each evo substep "
+         "[no, simple, naive_Ylm]");
   AddPar("ScalarOnKerr_overlap_shells", "no",
          "whether we use overlapping shells [no,yes]");
   AddPar("ScalarOnKerr_Pi_def", "psidot",
