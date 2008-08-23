@@ -25,3 +25,9 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
                                         double dt, tVarList *ucur);
 void interpolate_between_boxes(tVarList *unew, tVarList *upre);
 int ScalarOnKerr_setup_boxes(tGrid *g);
+void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
+                              tVarList *ucur);
+void set_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre, double dt, 
+                             tVarList *ucur);
+void compute_unew_from_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre,
+                                           double dt, tVarList *ucur);

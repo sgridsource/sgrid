@@ -47,13 +47,11 @@ int ScalarOnKerr_startup(tGrid *grid)
     VarNameSetBoundaryInfo("ScalarOnKerr_phix", 0, 1, 1.0);
     VarNameSetBoundaryInfo("ScalarOnKerr_phiy", 0, 1, 1.0);
     VarNameSetBoundaryInfo("ScalarOnKerr_phiz", 0, 1, 1.0);
-    VarNameSetBoundaryInfo("ScalarOnKerr_phil", 0, 1, 1.0);
-    VarNameSetBoundaryInfo("ScalarOnKerr_phim", 0, 1, 1.0);
+    VarNameSetBoundaryInfo("ScalarOnKerr_U0x", 0, 1, 1.0);
+    VarNameSetBoundaryInfo("ScalarOnKerr_U0y", 0, 1, 1.0);
+    VarNameSetBoundaryInfo("ScalarOnKerr_U0z", 0, 1, 1.0);
     vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phix"));
-    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phiy"));
-    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phiz"));
-    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phil"));
-    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_phim"));
+    vlpush(ScalarOnKerrvars, Ind("ScalarOnKerr_U0x"));
   }
   if (0) prvarlist(ScalarOnKerrvars);
   enablevarlist(ScalarOnKerrvars);
@@ -62,7 +60,8 @@ int ScalarOnKerr_startup(tGrid *grid)
   evolve_vlregister(ScalarOnKerrvars);
   
   /* register evolution routine */
-  evolve_rhsregister(ScalarOnKerr_evolve);
+  //evolve_rhsregister(ScalarOnKerr_evolve);
+  evolve_rhsregister(ScalarOnKerr_evolve_1stO);
 
 //  /* register alternative BC routine */
 //  evolve_algebraicConditionsregister(set_boundary_ofPi);
@@ -2077,9 +2076,9 @@ set_mass_radius(M,r0);
 
 
   /* set char. vars. and use them to compute unew */
-//  set_Up_Um_onBoundary(unew, upre, dt, ucur);
-//  compute_unew_from_Up_Um_onBoundary(unew, upre, dt, ucur);
-
+  set_Up_Um_U0_onBoundary(unew, upre, dt, ucur);
+  compute_unew_from_Up_Um_U0_onBoundary(unew, upre, dt, ucur);
+                             
   /* set BCs */
   set_psi_Pi_phi_boundary(unew, upre, dt, ucur);
 
@@ -2201,7 +2200,7 @@ void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt,
       /* compute outgoing mode */
       nUp = nPi[ijk] + nphic; 
 
-      /* set BC on Um and U0x,U0y,U0z */
+      /* set BC on ingoing modes Um and U0x,U0y,U0z */
       nUm = -cPi[ijk]/r;
 //nU0x = nU0y = nU0z = 0.0; // <-- allows constraint violations in
       /* d_t U0_i = P^k_i d_k d_t psi  is constraint preserving
@@ -2249,6 +2248,269 @@ Yo(1);exit(11);
         nphiy[ijk] = rphiy;
         nphiz[ijk] = rphiz;
       }  /* end if(dt==0.0) */
+    }
+  }
+}
+
+
+/* compute and transfer Up and Um on boundaries */
+void set_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre, double dt, 
+                             tVarList *ucur)
+{
+  tGrid *grid = unew->grid;
+  int b;
+
+  /* compute nUp, nUm nU0_i in each box */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int ijk, pi;
+    double *npsi = vlldataptr(unew, box, 0);
+    double *nPi = vlldataptr(unew, box, 1);
+    double *nUp = vlldataptr(unew, box, 2);
+    double *nUm = vlldataptr(unew, box, 3);
+    double *nphix = vlldataptr(unew, box, 4);
+    double *nphiy = vlldataptr(unew, box, 5);
+    double *nphiz = vlldataptr(unew, box, 6);
+    double *cpsi = vlldataptr(ucur, box, 0);
+    double *cPi = vlldataptr(ucur, box, 1);
+    double *cUp = vlldataptr(ucur, box, 2);
+    double *cUm = vlldataptr(ucur, box, 3);
+    double *cphix = vlldataptr(ucur, box, 4);
+    double *cphiy = vlldataptr(ucur, box, 5);
+    double *cphiz = vlldataptr(ucur, box, 6);
+    double *nU0x  = vlldataptr(unew,  box, 7);
+    double *nU0y  = vlldataptr(unew,  box, 8);
+    double *nU0z  = vlldataptr(unew,  box, 9);
+    double *cU0x  = vlldataptr(ucur,  box, 7);
+    double *cU0y  = vlldataptr(ucur,  box, 8);
+    double *cU0z  = vlldataptr(ucur,  box, 9);
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_gup = Ind("ScalarOnKerr3d_gupxx");
+    double *gxx = box->v[i_gup];
+    double *gxy = box->v[i_gup+1];
+    double *gxz = box->v[i_gup+2];
+    double *gyy = box->v[i_gup+3];
+    double *gyz = box->v[i_gup+4];
+    double *gzz = box->v[i_gup+5];
+
+    /* loop over points and set RHS */
+    forPointList_inbox(boxBoundaryPointList, box, pi , ijk)
+    {
+      double x,y,z;
+      double r, nx,ny,nz, gnn, cx,cy,cz, cupx,cupy,cupz;
+      double nphic, cphic;
+
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r; /* nx=sin_th cos_ph, ny=sin_th sin_ph, nz=cos_th */
+      ny = y/r;
+      nz = z/r;
+      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+
+      cx = nx/sqrt(gnn);
+      cy = ny/sqrt(gnn);
+      cz = nz/sqrt(gnn);
+      cupx = gxx[ijk]*cx + gxy[ijk]*cy + gxz[ijk]*cz;
+      cupy = gxy[ijk]*cx + gyy[ijk]*cy + gyz[ijk]*cz;
+      cupz = gxz[ijk]*cx + gyz[ijk]*cy + gzz[ijk]*cz;
+      nphic = cupx*nphix[ijk] + cupy*nphiy[ijk] + cupz*nphiz[ijk];
+      cphic = cupx*cphix[ijk] + cupy*cphiy[ijk] + cupz*cphiz[ijk];
+
+      /* use Up/m for Scheel's u^{+/-}
+         Up/m = Pi +/- c^i phi_i        */
+      /* set char vars Up/m in both unew and ucur */
+      nUp[ijk] = nPi[ijk] + nphic;
+      nUm[ijk] = nPi[ijk] - nphic;
+      cUp[ijk] = cPi[ijk] + cphic;
+      cUm[ijk] = cPi[ijk] - cphic;
+      /* phi_i = phic*c_i + U0_i; */
+      /* set char vars U0i in both unew and ucur */
+      nU0x[ijk] = nphix[ijk] - nphic*cx;
+      nU0y[ijk] = nphiy[ijk] - nphic*cy;
+      nU0z[ijk] = nphiz[ijk] - nphic*cz;
+      cU0x[ijk] = cphix[ijk] - cphic*cx;
+      cU0y[ijk] = cphiy[ijk] - cphic*cy;
+      cU0z[ijk] = cphiz[ijk] - cphic*cz;
+    }
+  }
+
+  /* add penalty terms to psi, nUp, nUm, nU0_i on inner boundaries */
+if(1)
+  for(b=0; b<grid->nboxes-1; b++)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    tBox *rbox = grid->box[b+1]; /* shell outside shell(=box) */
+    int rn1=rbox->n1;
+    int rn2=rbox->n2;
+    int ijk, r_ijk, i,j,k;
+    double *npsi =  vlldataptr(unew,  box, 0);
+    double *rnpsi = vlldataptr(unew, rbox, 0);
+    double *cpsi =  vlldataptr(ucur,  box, 0);
+    double *rcpsi = vlldataptr(ucur, rbox, 0);
+    double *nUp =  vlldataptr(unew, box, 2);
+    double *nUm =  vlldataptr(unew, box, 3);
+    double *rnUp = vlldataptr(unew, rbox, 2);
+    double *rnUm = vlldataptr(unew, rbox, 3);
+    double *cUp =  vlldataptr(ucur, box, 2);
+    double *cUm =  vlldataptr(ucur, box, 3);
+    double *rcUp = vlldataptr(ucur, rbox, 2);
+    double *rcUm = vlldataptr(ucur, rbox, 3);
+    double *nU0x  = vlldataptr(unew,  box, 7);
+    double *nU0y  = vlldataptr(unew,  box, 8);
+    double *nU0z  = vlldataptr(unew,  box, 9);
+    double *rnU0x = vlldataptr(unew, rbox, 7);
+    double *rnU0y = vlldataptr(unew, rbox, 8);
+    double *rnU0z = vlldataptr(unew, rbox, 9);
+    double *cU0x  = vlldataptr(ucur,  box, 7);
+    double *cU0y  = vlldataptr(ucur,  box, 8);
+    double *cU0z  = vlldataptr(ucur,  box, 9);
+    double *rcU0x = vlldataptr(ucur, rbox, 7);
+    double *rcU0y = vlldataptr(ucur, rbox, 8);
+    double *rcU0z = vlldataptr(ucur, rbox, 9);
+    double tau = 0.5/grid->dt;
+    double tau2 = 0.05/grid->dt; // 4.0;
+
+    /* loop over boundary points */
+    forplane1(i,j,k, n1,n2,n3, n1-1) /* assume that all boxes have same n2,n3 */
+    {
+      ijk  = Index(i,j,k);
+      r_ijk= Ind_n1n2(0, j, k, rn1,rn2);
+      /* outgoing mode: */
+      rnUp[r_ijk] -= tau*(rcUp[r_ijk] - cUp[ijk]);
+      /* ingoing modes: */
+      nUm[ijk]  -= tau*(cUm[ijk] - rcUm[r_ijk]); 
+      npsi[ijk] -= tau2*(cpsi[ijk] - rcpsi[r_ijk]);
+      nU0x[ijk] -= tau*(cU0x[ijk] - rcU0x[r_ijk]);
+      nU0y[ijk] -= tau*(cU0y[ijk] - rcU0y[r_ijk]);
+      nU0z[ijk] -= tau*(cU0z[ijk] - rcU0z[r_ijk]);
+    }
+  } /* end for b */
+
+  /* transfer psi, nUp, nUm, nU0_i between inner boundaries */
+if(0)
+  for(b=0; b<grid->nboxes-1; b++)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    tBox *rbox = grid->box[b+1]; /* shell outside shell(=box) */
+    int rn1=rbox->n1;
+    int rn2=rbox->n2;
+    int ijk, r_ijk, i,j,k;
+    double *npsi =  vlldataptr(unew,  box, 0);
+    double *rnpsi = vlldataptr(unew, rbox, 0);
+    double *nUp =  vlldataptr(unew, box, 2);
+    double *nUm =  vlldataptr(unew, box, 3);
+    double *rnUp = vlldataptr(unew, rbox, 2);
+    double *rnUm = vlldataptr(unew, rbox, 3);
+    double *nU0x  = vlldataptr(unew,  box, 7);
+    double *nU0y  = vlldataptr(unew,  box, 8);
+    double *nU0z  = vlldataptr(unew,  box, 9);
+    double *rnU0x = vlldataptr(unew, rbox, 7);
+    double *rnU0y = vlldataptr(unew, rbox, 8);
+    double *rnU0z = vlldataptr(unew, rbox, 9);
+
+    /* loop over boundary points */
+    forplane1(i,j,k, n1,n2,n3, n1-1) /* assume that all boxes have same n2,n3 */
+    {
+      ijk  = Index(i,j,k);
+      r_ijk= Ind_n1n2(0, j, k, rn1,rn2);
+      /* outgoing mode: */
+      rnUp[r_ijk] = nUp[ijk];
+      /* ingoing modes: */
+      nUm[ijk]  = rnUm[r_ijk]; 
+      npsi[ijk] = rnpsi[r_ijk];
+      nU0x[ijk] = rnU0x[r_ijk];
+      nU0y[ijk] = rnU0y[r_ijk];
+      nU0z[ijk] = rnU0z[r_ijk];
+    }
+  } /* end for b */
+}
+
+/* compute unew from Up and Um on boundaries */
+void compute_unew_from_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre,
+                                        double dt, tVarList *ucur)
+{
+  tGrid *grid = unew->grid;
+  int b;
+  
+  /* compute nUp and nUm in each box */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, i,j,k;
+    double *npsi = vlldataptr(unew, box, 0);
+    double *nPi = vlldataptr(unew, box, 1);
+    double *nUp = vlldataptr(unew, box, 2);
+    double *nUm = vlldataptr(unew, box, 3);
+    double *nphix = vlldataptr(unew, box, 4);
+    double *nphiy = vlldataptr(unew, box, 5);
+    double *nphiz = vlldataptr(unew, box, 6);
+    double *nU0x  = vlldataptr(unew,  box, 7);
+    double *nU0y  = vlldataptr(unew,  box, 8);
+    double *nU0z  = vlldataptr(unew,  box, 9);
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_gup = Ind("ScalarOnKerr3d_gupxx");
+    double *gxx = box->v[i_gup];
+    double *gxy = box->v[i_gup+1];
+    double *gxz = box->v[i_gup+2];
+    double *gyy = box->v[i_gup+3];
+    double *gyz = box->v[i_gup+4];
+    double *gzz = box->v[i_gup+5];
+
+    /* loop over lower and upper boundary points */
+    for(i=0; i<n1; i+=n1-1)
+    {
+      if(b==0 && i==0) continue; /* do nothing on inner bound of box0 */
+      if(b==grid->nboxes-1 && i==n1-1) break; /*do nothing on outer bound of last box */
+      for(k=0; k<n3; k++)
+      for(j=0; j<n2; j++)
+      {
+        double x,y,z;
+        double r, nx,ny,nz, gnn, cx,cy,cz, cupx,cupy,cupz;
+        double nphic;
+  
+        x = px[ijk];
+        y = py[ijk];
+        z = pz[ijk];
+        r = sqrt(x*x + y*y + z*z);
+        nx = x/r; /* nx=sin_th cos_ph, ny=sin_th sin_ph, nz=cos_th */
+        ny = y/r;
+        nz = z/r;
+        gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+              2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+  
+        cx = nx/sqrt(gnn);
+        cy = ny/sqrt(gnn);
+        cz = nz/sqrt(gnn);
+        cupx = gxx[ijk]*cx + gxy[ijk]*cy + gxz[ijk]*cz;
+        cupy = gxy[ijk]*cx + gyy[ijk]*cy + gyz[ijk]*cz;
+        cupz = gxz[ijk]*cx + gyz[ijk]*cy + gzz[ijk]*cz;
+  
+        /* Up/m = Pi +/- c^i phi_i  */
+        /* phi_i = phic*c_i + U0_i; */
+        /* compute nPi and nphi_i from nUp, nUm, nU0_i on boundaries */
+        nPi[ijk] = (nUp[ijk] + nUm[ijk])*0.5;
+        nphic = (nUp[ijk] - nUm[ijk])*0.5;
+        nphix[ijk] = nU0x[ijk] + nphic*cx;
+        nphiy[ijk] = nU0y[ijk] + nphic*cy;
+        nphiz[ijk] = nU0z[ijk] + nphic*cz;
+      }
     }
   }
 }
