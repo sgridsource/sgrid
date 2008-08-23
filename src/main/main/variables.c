@@ -291,6 +291,9 @@ void vlpush(tVarList *v, int vi)
 {
   int i, n = VarNComponents(vi);
 
+  if(IndComponent0(vi)!=vi) 
+    errorexit("vlpush (23.8.2008): vi needs to be index of component 0. "
+              "Consider using vlpushone.");
   v->n += n;
   v->index = realloc(v->index, sizeof(int) * v->n); 
   for (i = 0; i < n; i++)
