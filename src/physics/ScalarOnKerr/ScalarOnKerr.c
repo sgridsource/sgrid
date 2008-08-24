@@ -60,8 +60,10 @@ int ScalarOnKerr_startup(tGrid *grid)
   evolve_vlregister(ScalarOnKerrvars);
   
   /* register evolution routine */
-  evolve_rhsregister(ScalarOnKerr_evolve);
-  //evolve_rhsregister(ScalarOnKerr_evolve_1stO);
+  if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+    evolve_rhsregister(ScalarOnKerr_evolve_1stO);
+  else
+    evolve_rhsregister(ScalarOnKerr_evolve);
 
 //  /* register alternative BC routine */
 //  evolve_algebraicConditionsregister(set_boundary_ofPi);
@@ -165,7 +167,7 @@ int KerrChecker(tGrid *grid)
 {
   int b;
 
-  printf("KerrChecker:\n");
+  printf("KerrChecker: ");
 
   /* loop over all boxes */
   forallboxes(grid,b)
@@ -362,10 +364,10 @@ int KerrChecker(tGrid *grid)
         err=1;
       }
 
-
       if(err) errorexit("error in Kerr metric");
     } /* end forallpoints */
   }
+  printf("ok.\n");
   return 0;
 }
 
@@ -1247,13 +1249,10 @@ if(0)
     double *lnpsi = vlldataptr(unew, lbox, 0);
     double *cpsi =  vlldataptr(ucur,  box, 0);
     double *lcpsi = vlldataptr(ucur, lbox, 0);
-    // double ltau = 0.2*ln1*(ln1+1);
-    // double tau  = 0.2*n1*(n1+1);
-//    double tau = 0.5/grid->dt;
-double tau  = 10*3*n1*(n1+1)/(box->bbox[1]-box->bbox[0]);
-double ltau = 10*3*ln1*(ln1+1)/(lbox->bbox[1]-lbox->bbox[0]);
-tau = 0.5/grid->dt;
-ltau= tau;
+    //double tau  = 10*3*n1*(n1+1)/(box->bbox[1]-box->bbox[0]);
+    //double ltau = 10*3*ln1*(ln1+1)/(lbox->bbox[1]-lbox->bbox[0]);
+    double tau = 0.5/grid->dt;
+    double ltau= tau;
 
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
@@ -1439,11 +1438,11 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
     double *lnpsi = vlldataptr(unew, lbox, 0);
     double *cpsi =  vlldataptr(ucur,  box, 0);
     double *lcpsi = vlldataptr(ucur, lbox, 0);
-//    double tau2 = 0.05/grid->dt; // 4.0;
-double tau  = n1*(n1+1)/(box->bbox[1]-box->bbox[0]);
-double ltau = ln1*(ln1+1)/(lbox->bbox[1]-lbox->bbox[0]);
-tau = 0.5/grid->dt;
-ltau= tau;
+    //    double tau2 = 0.05/grid->dt; // 4.0;
+    //double tau  = n1*(n1+1)/(box->bbox[1]-box->bbox[0]);
+    //double ltau = ln1*(ln1+1)/(lbox->bbox[1]-lbox->bbox[0]);
+    double tau = 0.1/grid->dt;
+    double ltau= tau;
     
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
@@ -2378,7 +2377,7 @@ void set_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre, double dt,
   }
 
   /* add penalty terms to psi, nUp, nUm, nU0_i on inner boundaries */
-if(1)
+if(0)
   for(b=0; b<grid->nboxes-1; b++)
   {
     tBox *box = grid->box[b];
@@ -2413,7 +2412,7 @@ if(1)
     double *rcU0x = vlldataptr(ucur, rbox, 7);
     double *rcU0y = vlldataptr(ucur, rbox, 8);
     double *rcU0z = vlldataptr(ucur, rbox, 9);
-    double tau = 0.5/grid->dt;
+    double tau = 0.25/grid->dt;
     double tau2 = 0.05/grid->dt; // 4.0;
 
     /* loop over boundary points */
@@ -2425,7 +2424,7 @@ if(1)
       rnUp[r_ijk] -= tau*(rcUp[r_ijk] - cUp[ijk]);
       /* ingoing modes: */
       nUm[ijk]  -= tau*(cUm[ijk] - rcUm[r_ijk]); 
-      npsi[ijk] -= tau2*(cpsi[ijk] - rcpsi[r_ijk]);
+      npsi[ijk] -= tau*(cpsi[ijk] - rcpsi[r_ijk]);
       nU0x[ijk] -= tau*(cU0x[ijk] - rcU0x[r_ijk]);
       nU0y[ijk] -= tau*(cU0y[ijk] - rcU0y[r_ijk]);
       nU0z[ijk] -= tau*(cU0z[ijk] - rcU0z[r_ijk]);
@@ -2433,7 +2432,7 @@ if(1)
   } /* end for b */
 
   /* transfer psi, nUp, nUm, nU0_i between inner boundaries */
-if(0)
+if(1)
   for(b=0; b<grid->nboxes-1; b++)
   {
     tBox *box = grid->box[b];
@@ -2521,7 +2520,8 @@ void compute_unew_from_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre,
         double x,y,z;
         double r, nx,ny,nz, gnn, cx,cy,cz, cupx,cupy,cupz;
         double nphic;
-  
+
+        ijk  = Index(i,j,k);
         x = px[ijk];
         y = py[ijk];
         z = pz[ijk];
@@ -2547,6 +2547,12 @@ void compute_unew_from_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre,
         nphix[ijk] = nU0x[ijk] + nphic*cx;
         nphiy[ijk] = nU0y[ijk] + nphic*cy;
         nphiz[ijk] = nU0z[ijk] + nphic*cz;
+//if(j==8 && k==0 )
+//{
+//printf("# b=%d ijk=%d (x,y,z)=(%g,%g,%g): nPi[ijk]=%g npsi[ijk]=%g "
+//       "(nphix,nphiy,nphiz)[ijk]=(%g,%g,%g)\n",
+//       b,ijk, x,y,z, nPi[ijk], npsi[ijk], nphix[ijk],nphiy[ijk],nphiz[ijk]);
+//}
       }
     }
   }
