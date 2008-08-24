@@ -60,8 +60,8 @@ int ScalarOnKerr_startup(tGrid *grid)
   evolve_vlregister(ScalarOnKerrvars);
   
   /* register evolution routine */
-  //evolve_rhsregister(ScalarOnKerr_evolve);
-  evolve_rhsregister(ScalarOnKerr_evolve_1stO);
+  evolve_rhsregister(ScalarOnKerr_evolve);
+  //evolve_rhsregister(ScalarOnKerr_evolve_1stO);
 
 //  /* register alternative BC routine */
 //  evolve_algebraicConditionsregister(set_boundary_ofPi);
@@ -1073,6 +1073,7 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
   int b;
 
   /* add my own "penalty" terms to npsi */
+if(0)
   for(b=1; b<grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
@@ -1248,15 +1249,18 @@ void set_Up_Um_onBoundary(tVarList *unew, tVarList *upre, double dt,
     double *lcpsi = vlldataptr(ucur, lbox, 0);
     // double ltau = 0.2*ln1*(ln1+1);
     // double tau  = 0.2*n1*(n1+1);
-    double tau = 0.5/grid->dt;
-//double tau = 800;
+//    double tau = 0.5/grid->dt;
+double tau  = 10*3*n1*(n1+1)/(box->bbox[1]-box->bbox[0]);
+double ltau = 10*3*ln1*(ln1+1)/(lbox->bbox[1]-lbox->bbox[0]);
+tau = 0.5/grid->dt;
+ltau= tau;
 
     /* loop over boundary points */
     forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
     {
       ijk  = Index(i,j,k);
       l_ijk= Ind_n1n2(ln1-1, j, k, ln1,ln2);
-      lnUp[l_ijk] -= tau*(lcUp[l_ijk] - cUp[ijk]); 
+      lnUp[l_ijk] -= ltau*(lcUp[l_ijk] - cUp[ijk]); 
       nUm[ijk]    -= tau*(cUm[ijk] - lcUm[l_ijk]);
 //      lnpsi[l_ijk] -= tau2*(lcpsi[l_ijk] - cpsi[ijk]);
 //      npsi[ijk]    -= tau2*(cpsi[ijk] - lcpsi[l_ijk]);
@@ -1420,7 +1424,40 @@ void compute_unew_from_Up_Um_onBoundary(tVarList *unew, tVarList *upre,
     }
   }
 
+  /* add my own "penalty" terms to npsi */
+  for(b=1; b<grid->nboxes; b++)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    tBox *lbox = grid->box[b-1]; /* shell inside shell(=box) */
+    int ln1=lbox->n1;
+    int ln2=lbox->n2;
+    int ijk, l_ijk, i,j,k;
+    double *npsi =  vlldataptr(unew,  box, 0);
+    double *lnpsi = vlldataptr(unew, lbox, 0);
+    double *cpsi =  vlldataptr(ucur,  box, 0);
+    double *lcpsi = vlldataptr(ucur, lbox, 0);
+//    double tau2 = 0.05/grid->dt; // 4.0;
+double tau  = n1*(n1+1)/(box->bbox[1]-box->bbox[0]);
+double ltau = ln1*(ln1+1)/(lbox->bbox[1]-lbox->bbox[0]);
+tau = 0.5/grid->dt;
+ltau= tau;
+    
+    /* loop over boundary points */
+    forplane1(i,j,k, n1,n2,n3, 0) /* assume that all boxes have same n2,n3 */
+    {
+      ijk  = Index(i,j,k);
+      l_ijk= Ind_n1n2(ln1-1, j, k, ln1,ln2);
+//      /* ??? assume ??? that psi on left should be equal to psi on right */
+      lnpsi[l_ijk] -= ltau*(lcpsi[l_ijk] - cpsi[ijk]);
+      npsi[ijk]    -= tau*(cpsi[ijk] - lcpsi[l_ijk]);
+    }
+  } /* end for b */
+
   /* average npsi and nPi between boxes */
+if(0)
   for(b=1; b<grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
