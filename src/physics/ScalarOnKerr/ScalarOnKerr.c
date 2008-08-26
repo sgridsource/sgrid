@@ -68,11 +68,11 @@ int ScalarOnKerr_startup(tGrid *grid)
 //  /* register alternative BC routine */
 //  evolve_algebraicConditionsregister(set_boundary_ofPi);
 
-  /* filter all newly computed vars */
-  if(Getv("ScalarOnKerr_filter_unew", "simple"))
-    evolve_algebraicConditionsregister(filter_unew);
-  else if(Getv("ScalarOnKerr_filter_unew", "naive_Ylm"))
-    evolve_algebraicConditionsregister(naive_Ylm_filter_unew);
+//  /* filter all newly computed vars */
+//  if(Getv("ScalarOnKerr_filter_unew", "simple"))
+//    evolve_algebraicConditionsregister(filter_unew);
+//  else if(Getv("ScalarOnKerr_filter_unew", "naive_Ylm"))
+//    evolve_algebraicConditionsregister(naive_Ylm_filter_unew);
 
   /* set initial data in boxes */
   forallboxes(grid,b)
@@ -645,17 +645,21 @@ set_mass_radius(M,r0);
     }
   } /* end forallboxes */
 
-
-  /* special nPi filter */
-  if(!Getv("ScalarOnKerr_special_nPi_filter", "no"))
+  /* filter */
+  if(!Getv("ScalarOnKerr_filter_vars", "no"))
   {
-    tVarList *vl_Pi = vlalloc(grid);
-    vlpush(vl_Pi, unew->index[1]);
-    if(Getv("ScalarOnKerr_special_nPi_filter", "simple"))
-      filter_unew(vl_Pi, 0);
-    else if(Getv("ScalarOnKerr_special_nPi_filter", "naive_Ylm"))
-      naive_Ylm_filter_unew(vl_Pi, 0);
-    vlfree(vl_Pi);
+    tVarList *vl_flt = vlalloc(grid);
+    if(Getv("ScalarOnKerr_filter_vars", "npsi"))
+      vlpush(vl_flt, unew->index[0]);
+    if(Getv("ScalarOnKerr_filter_vars", "nPi"))
+      vlpush(vl_flt, unew->index[1]);
+    if(Getv("ScalarOnKerr_filter_vars", "nphi"))
+      vlpush(vl_flt, unew->index[4]);
+    if(Getv("ScalarOnKerr_filter_type", "simple"))
+      filter_unew(vl_flt, 0);
+    if(Getv("ScalarOnKerr_filter_type", "naive_Ylm"))
+      naive_Ylm_filter_unew(vl_flt, 0);
+    vlfree(vl_flt);
   }
 //filter_unew_radially(unew, NULL);
 
@@ -2082,34 +2086,23 @@ set_mass_radius(M,r0);
     }
   } /* end forallboxes */
 
-
-  /* special nPi filter */
-  if(!Getv("ScalarOnKerr_special_nPi_filter", "no"))
+  /* filter */
+  if(!Getv("ScalarOnKerr_filter_vars", "no"))
   {
-    tVarList *vl_Pi = vlalloc(grid);
-    vlpush(vl_Pi, unew->index[1]);
-    if(Getv("ScalarOnKerr_special_nPi_filter", "simple"))
-      filter_unew(vl_Pi, 0);
-    else if(Getv("ScalarOnKerr_special_nPi_filter", "naive_Ylm"))
-      naive_Ylm_filter_unew(vl_Pi, 0);
-    vlfree(vl_Pi);
+    tVarList *vl_flt = vlalloc(grid);
+    if(Getv("ScalarOnKerr_filter_vars", "npsi"))
+      vlpush(vl_flt, unew->index[0]);
+    if(Getv("ScalarOnKerr_filter_vars", "nPi"))
+      vlpush(vl_flt, unew->index[1]);
+    if(Getv("ScalarOnKerr_filter_vars", "nphi"))
+      vlpush(vl_flt, unew->index[4]);
+    if(Getv("ScalarOnKerr_filter_type", "simple"))
+      filter_unew(vl_flt, 0);
+    if(Getv("ScalarOnKerr_filter_type", "naive_Ylm"))
+      naive_Ylm_filter_unew(vl_flt, 0);
+    vlfree(vl_flt);
   }
 //filter_unew_radially(unew, NULL);
-//filter_unew(unew, NULL);
-//naive_Ylm_filter_unew(unew, 0);
-  /* special unew filter */
-  if(!Getv("ScalarOnKerr_special_nPi_nphi_filter", "no"))
-  {
-    tVarList *vl_Piphi = vlalloc(grid);
-    vlpush(vl_Piphi, unew->index[1]);
-    vlpush(vl_Piphi, unew->index[4]);
-    if(Getv("ScalarOnKerr_special_nPi_nphi_filter", "simple"))
-      filter_unew(vl_Piphi, NULL);
-    else if(Getv("ScalarOnKerr_special_nPi_nphi_filter", "naive_Ylm"))
-      naive_Ylm_filter_unew(vl_Piphi, NULL);
-    vlfree(vl_Piphi);
-  }
-
 
   /* set char. vars. and use them to compute unew */
   set_Up_Um_U0_onBoundary(unew, upre, dt, ucur);
