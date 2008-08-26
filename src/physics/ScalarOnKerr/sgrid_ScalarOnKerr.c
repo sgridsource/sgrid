@@ -70,7 +70,7 @@ int sgrid_ScalarOnKerr(void)
   AddPar("ScalarOnKerr_filter_vars", "no",
          "which vars we filter in each evo substep [no,nPsi,nPi,nphi]");
   AddPar("ScalarOnKerr_filter_type", "simple",
-         "how we filter in each evo substep [simple, naive_Ylm]");
+         "how we filter in each evo substep [simple,naive_Ylm,Ylm_lmshift]");
   AddPar("ScalarOnKerr_filter_n2frac", "0.66666666667",
          "fraction of the n2 coeffs to keep, when filtering Y-direc.");
   AddPar("ScalarOnKerr_filter_n3frac", "0.66666666667",

@@ -656,9 +656,9 @@ set_mass_radius(M,r0);
     if(Getv("ScalarOnKerr_filter_vars", "nphi"))
       vlpush(vl_flt, unew->index[4]);
     if(Getv("ScalarOnKerr_filter_type", "simple"))
-      filter_unew(vl_flt, 0);
+      filter_unew(vl_flt, NULL);
     if(Getv("ScalarOnKerr_filter_type", "naive_Ylm"))
-      naive_Ylm_filter_unew(vl_flt, 0);
+      naive_Ylm_filter_unew(vl_flt, NULL);
     vlfree(vl_flt);
   }
 //filter_unew_radially(unew, NULL);
@@ -1606,6 +1606,7 @@ void filter_unew(tVarList *unew, tVarList *upre)
     {
       double *var = vlldataptr(unew, box, vi);
       double *temp1 = box->v[Ind("temp1")];
+//printf("filter_unew: %s\n", VarName(unew->index[vi]));
 
       spec_Coeffs(box, var, temp1);
       forallijk(i,j,k)
@@ -2094,13 +2095,25 @@ set_mass_radius(M,r0);
       vlpush(vl_flt, unew->index[0]);
     if(Getv("ScalarOnKerr_filter_vars", "nPi"))
       vlpush(vl_flt, unew->index[1]);
-    if(Getv("ScalarOnKerr_filter_vars", "nphi"))
-      vlpush(vl_flt, unew->index[4]);
     if(Getv("ScalarOnKerr_filter_type", "simple"))
-      filter_unew(vl_flt, 0);
+      filter_unew(vl_flt, NULL);
     if(Getv("ScalarOnKerr_filter_type", "naive_Ylm"))
-      naive_Ylm_filter_unew(vl_flt, 0);
+      Naive_YlmFilter_lmshift(vl_flt, 0);
+    if(Getv("ScalarOnKerr_filter_type", "Ylm_lmshift"))
+      Naive_YlmFilter_lmshift(vl_flt, -1);
     vlfree(vl_flt);
+    if(Getv("ScalarOnKerr_filter_vars", "nphi"))
+    {
+      vl_flt = vlalloc(grid);
+      if(Getv("ScalarOnKerr_filter_vars", "nphi"))
+        vlpush(vl_flt, unew->index[4]);
+      if(Getv("ScalarOnKerr_filter_type", "simple"))
+        filter_unew(vl_flt, NULL);
+      if(Getv("ScalarOnKerr_filter_type", "naive_Ylm") ||
+         Getv("ScalarOnKerr_filter_type", "Ylm_lmshift"))
+        Naive_YlmFilter_lmshift(vl_flt, 0);
+      vlfree(vl_flt);
+    }
   }
 //filter_unew_radially(unew, NULL);
 
