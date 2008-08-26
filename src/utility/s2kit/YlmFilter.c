@@ -11,10 +11,14 @@
 
 
 /* use s2kit's Plm to project onto Ylm */
-void Naive_YlmFilter(tVarList *unew)
+/* here lmax = bw-1 + lmshift, where bw = n2/4 */
+/* currently we need: lmshift<=0 */
+void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
 {
   tGrid *grid = unew->grid;
   int b;
+
+  if(lmshift>0) errorexit("YlmFilter: we need lmshift<=0.");
 
   /* loop over boxes */
   forallboxes(grid,b)
@@ -24,7 +28,7 @@ void Naive_YlmFilter(tVarList *unew)
     int n2=box->n2;
     int n3=box->n3;
     int i,j,k, m, vi;
-    int bw;
+    int l, bw;
     double *samples, *coeffs;
     double **plm, *weights, *workspace;
 
@@ -65,6 +69,7 @@ void Naive_YlmFilter(tVarList *unew)
     {
       double *var = vlldataptr(unew, box, vi);
       double *vc  = box->v[Ind("temp1")];
+//printf("Naive_YlmFilter: %s\n", VarName(unew->index[vi]));
 
       /* compute coeffs of var after Fourier trafo in phi*/
       spec_analysis1(box, 3, box->Mcoeffs3, var, vc);
@@ -73,7 +78,7 @@ void Naive_YlmFilter(tVarList *unew)
       for(k=0; k<n3; k++)
       {
         m = (k+1)/2; /* set m */
-        if(m<bw)
+        if(m<bw + lmshift)
         {
           /* loop over all radii */
           for(i=0; i<n1; i++)
@@ -88,6 +93,9 @@ void Naive_YlmFilter(tVarList *unew)
             Naive_AnalysisX(samples, bw, m, weights, coeffs, plm[m], workspace);
             /* Note l_max=bw-1=n2/4-1, so we filter out half of all l modes!!! */
 
+            /* set coeffs with l = l_max + lmshift, ..., lmax to zero */
+            for(l=bw + lmshift; l<bw; l++) coeffs[l]=0.0;
+
             /* do inverse naive transform */
             Naive_SynthesizeX(coeffs, bw, m, samples, plm[m]);
             /* Note: this writes in samples only for theta<PI !!!*/
@@ -96,7 +104,7 @@ void Naive_YlmFilter(tVarList *unew)
             put_memline(vc, samples, 2, i, k, n1, n2, n3);
           }
         }
-        else /* if(m>=bw) */
+        else /* if(m>=bw + lmshift) */
         {
           /* filter all k modes with m>=bw=l+1 */
           for(j=0; j<n2; j++)
@@ -128,3 +136,9 @@ void Naive_YlmFilter(tVarList *unew)
     free(samples);
   }
 }    
+
+/* wrapper that sets lmshift=0, i.e. lmax = bw-1 = n2/4 - 1 */
+void Naive_YlmFilter(tVarList *unew)
+{
+  Naive_YlmFilter_lmshift(unew, 0);
+}

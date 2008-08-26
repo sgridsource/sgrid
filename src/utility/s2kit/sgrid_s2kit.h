@@ -3,4 +3,5 @@
 
 
 /* FUNCTIONS */
+void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift);
 void Naive_YlmFilter(tVarList *unew);
