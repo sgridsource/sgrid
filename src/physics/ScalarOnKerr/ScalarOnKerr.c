@@ -2087,35 +2087,9 @@ set_mass_radius(M,r0);
     }
   } /* end forallboxes */
 
-  /* filter */
-  if(!Getv("ScalarOnKerr_filter_vars", "no"))
-  {
-    tVarList *vl_flt = vlalloc(grid);
-    if(Getv("ScalarOnKerr_filter_vars", "npsi"))
-      vlpush(vl_flt, unew->index[0]);
-    if(Getv("ScalarOnKerr_filter_vars", "nPi"))
-      vlpush(vl_flt, unew->index[1]);
-    if(Getv("ScalarOnKerr_filter_type", "simple"))
-      filter_unew(vl_flt, NULL);
-    if(Getv("ScalarOnKerr_filter_type", "naive_Ylm"))
-      Naive_YlmFilter_lmshift(vl_flt, 0);
-    if(Getv("ScalarOnKerr_filter_type", "Ylm_lmshift"))
-      Naive_YlmFilter_lmshift(vl_flt, -1);
-    vlfree(vl_flt);
-    if(Getv("ScalarOnKerr_filter_vars", "nphi"))
-    {
-      vl_flt = vlalloc(grid);
-      if(Getv("ScalarOnKerr_filter_vars", "nphi"))
-        vlpush(vl_flt, unew->index[4]);
-      if(Getv("ScalarOnKerr_filter_type", "simple"))
-        filter_unew(vl_flt, NULL);
-      if(Getv("ScalarOnKerr_filter_type", "naive_Ylm") ||
-         Getv("ScalarOnKerr_filter_type", "Ylm_lmshift"))
-        Naive_YlmFilter_lmshift(vl_flt, 0);
-      vlfree(vl_flt);
-    }
-  }
-//filter_unew_radially(unew, NULL);
+  /* filter after RHS and before BCs */
+  if(Getv("ScalarOnKerr_filter_time", "afterRHS"))  
+    ChooseAndApplyFilter(unew);
 
   /* set char. vars. and use them to compute unew */
   set_Up_Um_U0_onBoundary(unew, upre, dt, ucur);
@@ -2126,6 +2100,10 @@ set_mass_radius(M,r0);
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
+
+  /* filter after BCs */
+  if(Getv("ScalarOnKerr_filter_time", "afterBC"))
+    ChooseAndApplyFilter(unew);
 }
 
 /* set outer BC of psi, Pi, phi for first order Schheel version */
@@ -2562,4 +2540,39 @@ void compute_unew_from_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre,
       }
     }
   }
+}
+
+/* filter according to pars */
+void ChooseAndApplyFilter(tVarList *unew)
+{
+  tGrid *grid = unew->grid;
+
+  if(!Getv("ScalarOnKerr_filter_vars", "no"))
+  {
+    tVarList *vl_flt = vlalloc(grid);
+    if(Getv("ScalarOnKerr_filter_vars", "npsi"))
+      vlpush(vl_flt, unew->index[0]);
+    if(Getv("ScalarOnKerr_filter_vars", "nPi"))
+      vlpush(vl_flt, unew->index[1]);
+    if(Getv("ScalarOnKerr_filter_type", "simple"))
+      filter_unew(vl_flt, NULL);
+    if(Getv("ScalarOnKerr_filter_type", "naive_Ylm"))
+      Naive_YlmFilter_lmshift(vl_flt, 0);
+    if(Getv("ScalarOnKerr_filter_type", "Ylm_lmshift"))
+      Naive_YlmFilter_lmshift(vl_flt, -1);
+    vlfree(vl_flt);
+    if(Getv("ScalarOnKerr_filter_vars", "nphi"))
+    {
+      vl_flt = vlalloc(grid);
+      if(Getv("ScalarOnKerr_filter_vars", "nphi"))
+        vlpush(vl_flt, unew->index[4]);
+      if(Getv("ScalarOnKerr_filter_type", "simple"))
+        filter_unew(vl_flt, NULL);
+      if(Getv("ScalarOnKerr_filter_type", "naive_Ylm") ||
+         Getv("ScalarOnKerr_filter_type", "Ylm_lmshift"))
+        Naive_YlmFilter_lmshift(vl_flt, 0);
+      vlfree(vl_flt);
+    }
+  }
+//filter_unew_radially(unew, NULL);
 }

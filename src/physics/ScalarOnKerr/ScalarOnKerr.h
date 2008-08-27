@@ -31,3 +31,4 @@ void set_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre, double dt,
                              tVarList *ucur);
 void compute_unew_from_Up_Um_U0_onBoundary(tVarList *unew, tVarList *upre,
                                            double dt, tVarList *ucur);
+void ChooseAndApplyFilter(tVarList *unew);
