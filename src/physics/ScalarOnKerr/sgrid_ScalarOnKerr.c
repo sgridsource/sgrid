@@ -68,11 +68,13 @@ int sgrid_ScalarOnKerr(void)
 //         "whether we filter all unew in each evo substep "
 //         "[no, simple, naive_Ylm]");
   AddPar("ScalarOnKerr_filter_vars", "no",
-         "which vars we filter in each evo substep [no,nPsi,nPi,nphi]");
+         "which vars we filter in each evo substep [no,psi,Pi,phi]");
   AddPar("ScalarOnKerr_filter_type", "simple",
          "how we filter in each evo substep [simple,naive_Ylm,Ylm_lmshift]");
   AddPar("ScalarOnKerr_filter_time", "afterRHS afterBC",
-         "when we filter in each evo substep [afterRHS,afterBC]");
+         "when we filter in evo substep [afterRHS,afterBC] or [POST_EVOLVE]");
+  if(Getv("ScalarOnKerr_filter_time", "POST_EVOLVE"))
+    AddFun(POST_EVOLVE, ScalarOnKerr_filter, "filter in POST_EVOLVE");
   AddPar("ScalarOnKerr_filter_n2frac", "0.66666666667",
          "fraction of the n2 coeffs to keep, when filtering Y-direc.");
   AddPar("ScalarOnKerr_filter_n3frac", "0.66666666667",

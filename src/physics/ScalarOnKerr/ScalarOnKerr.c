@@ -6,11 +6,12 @@
 #include "DV_CircSchwSource/Constants.h"
 #include "DV_CircSchwSource/Source.h"
 
+tVarList *ScalarOnKerrvars;
+
 
 /* initialize ScalarOnKerr */
 int ScalarOnKerr_startup(tGrid *grid)
 {
-  tVarList *ScalarOnKerrvars;
   int b;
   
   printf("Initializing ScalarOnKerr:\n");
@@ -649,11 +650,11 @@ set_mass_radius(M,r0);
   if(!Getv("ScalarOnKerr_filter_vars", "no"))
   {
     tVarList *vl_flt = vlalloc(grid);
-    if(Getv("ScalarOnKerr_filter_vars", "npsi"))
+    if(Getv("ScalarOnKerr_filter_vars", "psi"))
       vlpush(vl_flt, unew->index[0]);
-    if(Getv("ScalarOnKerr_filter_vars", "nPi"))
+    if(Getv("ScalarOnKerr_filter_vars", "Pi"))
       vlpush(vl_flt, unew->index[1]);
-    if(Getv("ScalarOnKerr_filter_vars", "nphi"))
+    if(Getv("ScalarOnKerr_filter_vars", "phi"))
       vlpush(vl_flt, unew->index[4]);
     if(Getv("ScalarOnKerr_filter_type", "simple"))
       filter_unew(vl_flt, NULL);
@@ -2550,9 +2551,9 @@ void ChooseAndApplyFilter(tVarList *unew)
   if(!Getv("ScalarOnKerr_filter_vars", "no"))
   {
     tVarList *vl_flt = vlalloc(grid);
-    if(Getv("ScalarOnKerr_filter_vars", "npsi"))
+    if(Getv("ScalarOnKerr_filter_vars", "psi"))
       vlpush(vl_flt, unew->index[0]);
-    if(Getv("ScalarOnKerr_filter_vars", "nPi"))
+    if(Getv("ScalarOnKerr_filter_vars", "Pi"))
       vlpush(vl_flt, unew->index[1]);
     if(Getv("ScalarOnKerr_filter_type", "simple"))
       filter_unew(vl_flt, NULL);
@@ -2561,11 +2562,10 @@ void ChooseAndApplyFilter(tVarList *unew)
     if(Getv("ScalarOnKerr_filter_type", "Ylm_lmshift"))
       Naive_YlmFilter_lmshift(vl_flt, -1);
     vlfree(vl_flt);
-    if(Getv("ScalarOnKerr_filter_vars", "nphi"))
+    if(Getv("ScalarOnKerr_filter_vars", "phi"))
     {
       vl_flt = vlalloc(grid);
-      if(Getv("ScalarOnKerr_filter_vars", "nphi"))
-        vlpush(vl_flt, unew->index[4]);
+      vlpush(vl_flt, unew->index[4]);
       if(Getv("ScalarOnKerr_filter_type", "simple"))
         filter_unew(vl_flt, NULL);
       if(Getv("ScalarOnKerr_filter_type", "naive_Ylm") ||
@@ -2575,4 +2575,11 @@ void ChooseAndApplyFilter(tVarList *unew)
     }
   }
 //filter_unew_radially(unew, NULL);
+}
+
+/* filter ScalarOnKerrvars */
+int ScalarOnKerr_filter(tGrid *grid)
+{
+  ChooseAndApplyFilter(ScalarOnKerrvars);
+  return 0;
 }
