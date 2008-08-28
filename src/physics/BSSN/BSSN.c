@@ -412,7 +412,31 @@ void BSSN_ChooseAndApplyFilters(tVarList *vl)
     if(Getv("BSSN_filter_type", "naive_Ylm"))
       Naive_YlmFilter_lmshift(vl, 0);
     if(Getv("BSSN_filter_type", "Ylm_lmshift"))
+    {
+      tGrid *grid = vl->grid;
+      tVarList *vl_flt;
+
+      vl_flt = vlalloc(grid);
+      vlpush(vl_flt, vl->index[6]);   // BSSN_phi
+      vlpush(vl_flt, vl->index[13]);  // BSSN_K
+      vlpush(vl_flt, vl->index[17]);  // alpha
+      vlpush(vl_flt, vl->index[24]);  // BSSN_alphaDensity
+      Naive_YlmFilter_lmshift(vl, 0);
+      vlfree(vl_flt);
+
+      vl_flt = vlalloc(grid);
+      vlpush(vl_flt, vl->index[14]);  // BSSN_Gx
+      vlpush(vl_flt, vl->index[18]);  // betax
+      vlpush(vl_flt, vl->index[21]);  // betadotx
       Naive_YlmFilter_lmshift(vl, -1);
+      vlfree(vl_flt);
+
+      vl_flt = vlalloc(grid);
+      vlpush(vl_flt, vl->index[0]);  // BSSN_gxx
+      vlpush(vl_flt, vl->index[7]);  // BSSN_Axx
+      Naive_YlmFilter_lmshift(vl, -2);
+      vlfree(vl_flt);
+    }
     if(Getv("BSSN_filter_type", "X2/3"))
       filter_with2o3rule_inX(vl, NULL);
   }
