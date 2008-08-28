@@ -14,27 +14,19 @@ tVarList *BSSNvars;
 */ 
 void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 {
-
-  //filter_VarList(upre);
-  //filter_VarList(ucur);
- 
   BSSN_rhs(unew, upre, dt, ucur);
 
   /* wether addDissipation is called after each ICN (or RK) step: */
   if(Getv("evolve_Dissipation", "yes")) 
      addDissipation(unew, upre, dt, ucur);
 
+  if(Getv("BSSN_filter_time", "afterRHS"))
+    BSSN_ChooseAndApplyFilters(unew);
+
   set_boundary(unew, upre, dt, ucur);
 
-  if(Getv("BSSN_coordinateDependentFilter", "yes"))
-    coordinateDependentFilter(unew);
-
-  if(Getv("BSSN_filter_unew", "old_spec_filters"))
-    filter_VarList(unew);
-  else if(Getv("BSSN_filter_unew", "simple"))
-    BSSN_filter_unew(unew, upre);
-  else if(Getv("BSSN_filter_unew", "naive_Ylm"))
-    BSSN_naive_Ylm_filter(unew, upre);
+  if(Getv("BSSN_filter_time", "afterBC"))
+    BSSN_ChooseAndApplyFilters(unew);
 
   if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
@@ -200,11 +192,11 @@ int BSSN_startup(tGrid *grid)
   /* register evolution routine */
   evolve_rhsregister(BSSN_evolve);
 
-  /* filter all newly computed vars */
-  if(Getv("BSSN_filter_unew", "simple"))
-    evolve_algebraicConditionsregister(BSSN_filter_unew);
-  else if(Getv("BSSN_filter_unew", "naive_Ylm"))
-    evolve_algebraicConditionsregister(BSSN_naive_Ylm_filter);
+//  /* filter all newly computed vars */
+//  if(Getv("BSSN_filter_unew", "simple"))
+//    evolve_algebraicConditionsregister(BSSN_filter_unew);
+//  else if(Getv("BSSN_filter_unew", "naive_Ylm"))
+//    evolve_algebraicConditionsregister(BSSN_naive_Ylm_filter);
 
   /* set K identically to zero only if we are doing maximal slicing */
   if (Getv("BSSN_forceKzero", "yes")) {
@@ -217,8 +209,9 @@ int BSSN_startup(tGrid *grid)
   ADMtoBSSN(grid);
   //set_boundary_symmetry(level, BSSNvars);
 
-  if(Getv("BSSN_coordinateDependentFilter", "yes"))
-    coordinateDependentFilter(BSSNvars);
+
+  if(Getv("BSSN_filter_type", "coordinateDependentFilter"))
+    BSSN_ChooseAndApplyFilters(BSSNvars);
 
   if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(BSSNvars);
@@ -307,16 +300,7 @@ int filter_VarList(tVarList *vl)
 int BSSN_filter(tGrid *grid)
 {
   //printf("BSSN_filter\n");
-  if(Getv("BSSN_postEVOfilter", "old_spec_filters"))
-    filter_VarList(BSSNvars);
-
-  if(Getv("BSSN_postEVOfilter", "simple"))
-    BSSN_filter_unew(BSSNvars, NULL);
-  else if(Getv("BSSN_postEVOfilter", "naive_Ylm"))
-    BSSN_naive_Ylm_filter(BSSNvars, NULL);
-
-  if(Getv("BSSN_postEVOfilter", "X2/3"))
-    filter_with2o3rule_inX(BSSNvars, NULL);
+  BSSN_ChooseAndApplyFilters(BSSNvars);
 
   return 0;
 }
@@ -414,3 +398,22 @@ void filter_with2o3rule_inX(tVarList *unew, tVarList *upre)
     }
   }
 }    
+
+void BSSN_ChooseAndApplyFilters(tVarList *vl)
+{
+  if(!Getv("BSSN_filter_vars", "no"))
+  {
+    if(Getv("BSSN_filter_type", "old_spec_filters"))
+      filter_VarList(vl);
+    if(Getv("BSSN_filter_type", "coordinateDependentFilter"))
+      coordinateDependentFilter(vl);
+    if(Getv("BSSN_filter_type", "simple"))
+      BSSN_filter_unew(BSSNvars, NULL);
+    if(Getv("BSSN_filter_type", "naive_Ylm"))
+      Naive_YlmFilter_lmshift(vl, 0);
+    if(Getv("BSSN_filter_type", "Ylm_lmshift"))
+      Naive_YlmFilter_lmshift(vl, -1);
+    if(Getv("BSSN_filter_type", "X2/3"))
+      filter_with2o3rule_inX(vl, NULL);
+  }
+}

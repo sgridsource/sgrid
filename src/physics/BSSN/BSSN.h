@@ -17,3 +17,4 @@ int BSSN_filter(tGrid *grid);
 void BSSN_filter_unew(tVarList *unew, tVarList *upre);
 void BSSN_naive_Ylm_filter(tVarList *unew, tVarList *upre);
 void filter_with2o3rule_inX(tVarList *unew, tVarList *upre);
+void BSSN_ChooseAndApplyFilters(tVarList *vl);

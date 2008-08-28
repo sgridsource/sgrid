@@ -45,12 +45,18 @@ int sgrid_BSSN(void)
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BSSN_reset_doubleCoveredPoints", "no",
          "whether we reset double covered points after each evo step [no,yes]");
-  AddPar("BSSN_coordinateDependentFilter", "no",
-         "whether coordinate dependent filters (e.g. for SphereicalDF) "
-         "are used [no,yes]");
-  AddPar("BSSN_filter_unew", "no", "how/if unew is filtered inside "
-         "the time integrator. Options: "
-         "[no,simple,naive_Ylm,old_spec_filters]");
+  AddPar("BSSN_filter_vars", "no",
+         "which vars we filter in each evo substep [no,all]");
+  AddPar("BSSN_filter_type", "none",
+         "how we filter [old_spec_filters,coordinateDependentFilter,"
+         "simple,naive_Ylm,Ylm_lmshift,X2/3]");
+  AddPar("BSSN_filter_time", "afterBC", 
+         "when we filter in evo substep [afterRHS,afterBC] or [POST_EVOLVE]");
+  if(Getv("BSSN_filter_time", "POST_EVOLVE"))
+  {
+    printf("scheduling BSSN_filter in bin POST_EVOLVE.\n");
+    AddFun(POST_EVOLVE, BSSN_filter, "filter all BSSN variables");
+  }
   AddPar("BSSN_filter_n2frac", "0.66666666667",
          "fraction of the n2 coeffs to keep, when filtering Y-direc.");
   AddPar("BSSN_filter_n3frac", "0.66666666667",
@@ -95,13 +101,6 @@ int sgrid_BSSN(void)
 
   AddPar("BSSN_shift_stop_time", "-1.0", 
          "time when shift stops evolving (-1 for don't stop)");
-  AddPar("BSSN_postEVOfilter", "no", "how/if we filter after each time step. "
-         "Options: [no,X2/3,naive_Ylm,old_spec_filters]");
-  if(!Getv("BSSN_postEVOfilter", "no"))
-  {
-    printf("scheduling BSSN_filter in bin POST_EVOLVE.\n");
-    AddFun(POST_EVOLVE, BSSN_filter, "filter all BSSN variables");
-  }
          
   return 0;
 }
