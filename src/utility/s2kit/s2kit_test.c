@@ -15,6 +15,7 @@ int s2kit_test_Naive_YlmFilter(tGrid *grid)
   tVarList *vlvar;
   tVarList *vldif;
   int b;
+  int lmshift = Geti("s2kit_test_lmshift");
 
   /* I need to enable my vars */
   //enablevar(grid, Ind("temp1"));
@@ -44,6 +45,8 @@ int s2kit_test_Naive_YlmFilter(tGrid *grid)
     if(!Getv(str, "SphericalDF")) errorexit("use SphericalDF");
     if(n2%4) errorexit("use n2 divisible by 4.");
 
+    printf("s2kit_test_Naive_YlmFilter: Set up var1 to contain l=2 only.\n");
+    printf("s2kit_test_Naive_YlmFilter: Set up var2 to contain l=2 and l=3.\n");
     forallpoints(box,i)
     {
       double r     = X[i];
@@ -71,7 +74,9 @@ int s2kit_test_Naive_YlmFilter(tGrid *grid)
   vlpush(vlfil, Ind("s2kit_test_fil2"));
 
   /* now filter vlfil */
-  Naive_YlmFilter(vlfil);
+  printf("Naive_YlmFilter_lmshift: filtering var1 and var2 with lmshift=%d, "
+         "and writing results in fil1 and fil2\n", lmshift);
+  Naive_YlmFilter_lmshift(vlfil, lmshift);
   
   /* compute difference */
   vlvar = vlalloc(grid);
@@ -81,6 +86,7 @@ int s2kit_test_Naive_YlmFilter(tGrid *grid)
   vlpush(vldif, Ind("s2kit_test_dif1"));
   vlpush(vldif, Ind("s2kit_test_dif2"));
   /* subtract: vldif = vlvar-vlfil */
+  printf("computing dif1/2 = var1/2 - fil1/2.\n");
   vladd(vldif, 1.0,vlvar, -1.0,vlfil);
 
   vlfree(vlfil);

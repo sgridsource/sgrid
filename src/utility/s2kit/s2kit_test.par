@@ -3,6 +3,8 @@
 
 physics = s2kit_test ADMvars
 
+s2kit_test_lmshift = 0 # -2
+
 nboxes = 1
 
 box0_n1 = 3
