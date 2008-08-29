@@ -646,23 +646,9 @@ set_mass_radius(M,r0);
     }
   } /* end forallboxes */
 
-  /* filter */
-  if(!Getv("ScalarOnKerr_filter_vars", "no"))
-  {
-    tVarList *vl_flt = vlalloc(grid);
-    if(Getv("ScalarOnKerr_filter_vars", "psi"))
-      vlpush(vl_flt, unew->index[0]);
-    if(Getv("ScalarOnKerr_filter_vars", "Pi"))
-      vlpush(vl_flt, unew->index[1]);
-    if(Getv("ScalarOnKerr_filter_vars", "phi"))
-      vlpush(vl_flt, unew->index[4]);
-    if(Getv("ScalarOnKerr_filter_type", "simple"))
-      filter_unew(vl_flt, NULL);
-    if(Getv("ScalarOnKerr_filter_type", "naive_Ylm"))
-      naive_Ylm_filter_unew(vl_flt, NULL);
-    vlfree(vl_flt);
-  }
-//filter_unew_radially(unew, NULL);
+  /* filter after RHS and before BCs */
+  if(Getv("ScalarOnKerr_filter_time", "afterRHS"))  
+    ChooseAndApplyFilter(unew);
 
   /* set char. vars. and use them to compute unew */
   set_Up_Um_onBoundary(unew, upre, dt, ucur);
@@ -676,6 +662,10 @@ set_mass_radius(M,r0);
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
+
+  /* filter after BCs */
+  if(Getv("ScalarOnKerr_filter_time", "afterBC"))
+    ChooseAndApplyFilter(unew);
 }
 
 
