@@ -171,7 +171,7 @@ double SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS)
     double Pi = 3.14159265358979323846264338;
     double r = sqrt(xKS*xKS+yKS*yKS+zKS*zKS);
     
-    if(r<=2.5*M){
+    if(r<=2.5*M  && ian_W<1.0){
         return 0.0;
     }
     else{
