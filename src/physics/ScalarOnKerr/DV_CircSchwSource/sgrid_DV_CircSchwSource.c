@@ -20,7 +20,7 @@ int sgrid_DV_CircSchwSource(void)
   //AddVar("DV_CircSchwSource_psi", "", "scalar");
 
   /* parameters */
-  //AddPar("BHmass", "1.0", "mass of black hole");
+  AddPar("DV_CircSchwSource_useWindow", "no", "if we use Windowfunc. [no,yes]");
          
   return 0;
 }

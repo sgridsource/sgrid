@@ -31,31 +31,44 @@ double powr(double r, int n){
 
 void eval_window(double ts, double r, double theta, double phi)
 {
+  static int useWindow=-1;
+  double M=ian_M;
+  double R=ian_R;
+
+  double W;
+  double width=2.0*M; // width used in paper
+  double rl = (r-R)/width;
+  int n = 8;                  
+  int i,j;
+
+  if(useWindow<0) useWindow=Getv("DV_CircSchwSource_useWindow","yes");
+
+  if(useWindow)
+  {
     eval_Kdelta();
     eval_singular(ts,r,theta,phi);
     eval_THZ(ts,r,theta,phi);
     
-    double M=ian_M;
-    double R=ian_R;
-    
-    double W;
-
-    double width=2.0*M; // width used in paper
-
-    double rl = (r-R)/width;
-    int n = 8;                  
     W=exp(-powr(rl,n));
     ian_W=W;
     
-    int i;
     for(i=0;i<4;i++){
         DW[i]=-W*(n*powr(rl,n-1)*(Kdelta[1][i])/width) ;
     }
     for(i=0;i<4;i++){
-        int j;
         for(j=0;j<4;j++){
             DDW[i][j]=-DW[j]*(n*powr(rl,n-1)*(Kdelta[1][i])/width)
             -W*(n*(n-1)*powr(rl,n-2)*Kdelta[1][i]*Kdelta[1][j]/(width*width));
             }
     }
   }
+  else /* W=1 */
+  {
+    ian_W=W=0.0;
+    for(i=0;i<4;i++)
+    {
+      DW[i]=0.0;
+      for(j=0;j<4;j++) DDW[i][j]=0.0;
+    }
+  }
+}
