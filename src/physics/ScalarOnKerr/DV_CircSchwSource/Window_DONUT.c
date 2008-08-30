@@ -64,7 +64,7 @@ void eval_window(double ts, double r, double theta, double phi)
   }
   else /* W=1 */
   {
-    ian_W=W=0.0;
+    ian_W=W=1.0;
     for(i=0;i<4;i++)
     {
       DW[i]=0.0;
