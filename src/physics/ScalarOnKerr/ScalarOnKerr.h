@@ -4,6 +4,7 @@
 
 int ScalarOnKerr_startup(tGrid *grid);
 int KerrChecker(tGrid *grid);
+double ScalarOnKerr_Source(double t, double x,double y,double z);
 void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt, 
                          tVarList *ucur);
 void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt, 

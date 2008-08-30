@@ -372,6 +372,48 @@ int KerrChecker(tGrid *grid)
   return 0;
 }
 
+/* return value of source rho */
+double ScalarOnKerr_Source(double t, double x,double y,double z)
+{
+  static double M=-1.0; /* if M=-1 we need to initialize */
+  static double r0, Omega, Dr, q, q22;
+  static int sourcetype;
+  double rho;
+
+  /* initialize some par once */
+  if(M<0.0)
+  {
+    if(Getv("ScalarOnKerr_sourcetype","Y22test")) sourcetype=1;
+    /* set mass and orbital radius of source */
+    M = Getd("BHmass");
+    r0 = 10.0*M;
+    /* source parameters (needed only for old test source) */
+    q  = 1.0;
+    Dr = 1.0*M;
+    q22= 4.0*PI*q/(r0*sqrt(1.0-3*M/r0))*sqrt(5.0/(96.0*PI))*3.0;
+    Omega = sqrt(M/(r0*r0*r0));
+    /* call Ian's func to set mass and radius */
+    set_mass_radius(M, r0);
+  }
+
+  /* select source */
+  if(sourcetype==1) /* old l=m=2 test source */
+  {
+    double r, theta, phi, Y22;
+    r     = sqrt(x*x + y*y + z*z);
+    theta = 0.5*PI - asin(z/r);
+    phi   = Arg(x,y); // returns value in (-PI,PI]
+    Y22 = sqrt(5.0/(96.0*PI))*1.5*(1.0 - cos(2.0*theta));
+    rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
+          cos(2.0*(Omega*t - phi)) * Y22;
+  }
+  else /* use Ian's source */
+  {
+    rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+  }
+  return rho;
+}
+
 
 /* evolve and set boundary points */
 void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt, 
@@ -382,23 +424,6 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
   double t = ucur->time;
   int firstorder = Getv("ScalarOnKerr_1stOrder_inSpace", "yes");
   int ScheelsPi = Getv("ScalarOnKerr_Pi_def", "ScheelsPi");
-  // double x0, y0;
-  double M = Getd("BHmass");
-  double r0, Omega, Dr, q, q22;
-
-  ///* old source position */
-  //x0 = 10*cos(0.02*t);
-  //y0 = 10*sin(0.02*t);
-
-  /* source parameters */
-  q  = 1.0;
-  r0 = 10.0*M;
-  Dr = 1.0*M;
-  q22= 4.0*PI*q/(r0*sqrt(1.0-3*M/r0))*sqrt(5.0/(96.0*PI))*3.0;
-  Omega = sqrt(M/(r0*r0*r0));
-
-/* call Ian's func to set mass and radius */
-set_mass_radius(M,r0);
   
   /* loop over all boxes */
   forallboxes(grid,b)
@@ -515,7 +540,7 @@ set_mass_radius(M,r0);
       double x = px[i];
       double y = py[i];
       double z = pz[i];
-      double rho, r, phi, theta, Y22;
+      double rho;
       double g_ddpsi, gG_dpsi;  /* g is upper metric */
       double psix,psiy,psiz;
       double psixy_s,psixz_s,psiyz_s; /* symm. mixed 2nd derivs */
@@ -598,17 +623,9 @@ set_mass_radius(M,r0);
       /* get G^a dpsi_a, where G[a] = g^bc Gamma^a_bc */
       gG_dpsi = Gt[i]*psidot + Gx[i]*psix + Gy[i]*psiy + Gz[i]*psiz;
 
-      /* source rho */
-      r     = sqrt(x*x + y*y + z*z);
-      theta = 0.5*PI - asin(z/r);
-      phi   = Arg(x,y); // returns value in (-PI,PI]
-      Y22 = sqrt(5.0/(96.0*PI))*1.5*(1.0 - cos(2.0*theta));
-      rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
-            cos(2.0*(Omega*t - phi)) * Y22;
-
-/* use Ian's source */
-//rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
-
+      /* select source */
+      rho = ScalarOnKerr_Source(t, x, y, z);
+      
       /* compute psidotdot */
       psidotdot = -(g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
                    //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
@@ -1676,7 +1693,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
       double z = pz[i];
       double t = grid->time;
 
-      rho[i] = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+      rho[i] = ScalarOnKerr_Source(t, x, y, z);
     }
   }
   return 0;
@@ -1889,23 +1906,6 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
   tGrid *grid = ucur->grid;
   int b;
   double t = ucur->time;
-  // double x0, y0;
-  double M = Getd("BHmass");
-  double r0, Omega, Dr, q, q22;
-
-  ///* old source position */
-  //x0 = 10*cos(0.02*t);
-  //y0 = 10*sin(0.02*t);
-
-  /* source parameters */
-  q  = 1.0;
-  r0 = 10.0*M;
-  Dr = 1.0*M;
-  q22= 4.0*PI*q/(r0*sqrt(1.0-3*M/r0))*sqrt(5.0/(96.0*PI))*3.0;
-  Omega = sqrt(M/(r0*r0*r0));
-
-/* call Ian's func to set mass and radius */
-set_mass_radius(M,r0);
   
   /* loop over all boxes */
   forallboxes(grid,b)
@@ -2005,7 +2005,7 @@ set_mass_radius(M,r0);
       double x = px[i];
       double y = py[i];
       double z = pz[i];
-      double rho, r, ph, theta, Y22;
+      double rho;
       double beta_dPi,ag_dphi, gGx,gGy,gGz,aG_phi, g_phi_da, aKPi, beta_dpsi;
       double b_dphix,b_dphiy,b_dphiz,phi_dbx,phi_dby,phi_dbz;
       /* g is upper metric */
@@ -2039,16 +2039,8 @@ set_mass_radius(M,r0);
       phi_dby = cphix[i]*dbetaxy[i]+cphiy[i]*dbetayy[i]+cphiz[i]*dbetazy[i];
       phi_dbz = cphix[i]*dbetaxz[i]+cphiy[i]*dbetayz[i]+cphiz[i]*dbetazz[i];
 
-      /* source rho */
-      r     = sqrt(x*x + y*y + z*z);
-      theta = 0.5*PI - asin(z/r);
-      ph   = Arg(x,y); // returns value in (-PI,PI]
-      Y22 = sqrt(5.0/(96.0*PI))*1.5*(1.0 - cos(2.0*theta));
-      rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
-            cos(2.0*(Omega*t - ph)) * Y22;
-
-/* use Ian's source */
-//rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+      /* select source */
+      rho = ScalarOnKerr_Source(t, x, y, z);
 
       /* set RHS of psi and Pi */
       rPi  = beta_dPi - ag_dphi + aG_phi - g_phi_da + aKPi  -
