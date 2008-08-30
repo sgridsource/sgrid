@@ -373,7 +373,7 @@ int KerrChecker(tGrid *grid)
 }
 
 /* return value of source rho */
-double ScalarOnKerr_Source(double t, double x,double y,double z)
+double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
 {
   static double M=-1.0; /* if M=-1 we need to initialize */
   static double r0, Omega, Dr, q, q22;
@@ -409,7 +409,9 @@ double ScalarOnKerr_Source(double t, double x,double y,double z)
   }
   else /* use Ian's source */
   {
-    rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+    if( (r0-box->bbox[0])*(r0-box->bbox[1])<=0.0 )
+      rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+    else rho=0.0;
   }
   return rho;
 }
@@ -624,7 +626,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
       gG_dpsi = Gt[i]*psidot + Gx[i]*psix + Gy[i]*psiy + Gz[i]*psiz;
 
       /* select source */
-      rho = ScalarOnKerr_Source(t, x, y, z);
+      rho = ScalarOnKerr_Source(box, t, x, y, z);
       
       /* compute psidotdot */
       psidotdot = -(g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
@@ -1693,7 +1695,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
       double z = pz[i];
       double t = grid->time;
 
-      rho[i] = ScalarOnKerr_Source(t, x, y, z);
+      rho[i] = ScalarOnKerr_Source(box, t, x, y, z);
     }
   }
   return 0;
@@ -2040,7 +2042,7 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
       phi_dbz = cphix[i]*dbetaxz[i]+cphiy[i]*dbetayz[i]+cphiz[i]*dbetazz[i];
 
       /* select source */
-      rho = ScalarOnKerr_Source(t, x, y, z);
+      rho = ScalarOnKerr_Source(box, t, x, y, z);
 
       /* set RHS of psi and Pi */
       rPi  = beta_dPi - ag_dphi + aG_phi - g_phi_da + aKPi  -
