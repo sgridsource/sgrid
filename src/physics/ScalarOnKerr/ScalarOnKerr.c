@@ -2539,6 +2539,8 @@ void ChooseAndApplyFilter(tVarList *unew)
       vlpush(vl_flt, unew->index[0]);
     if(Getv("ScalarOnKerr_filter_vars", "Pi"))
       vlpush(vl_flt, unew->index[1]);
+    if(Getv("ScalarOnKerr_filter_type", "X2/3"))
+      filter_unew_radially(vl_flt, NULL);
     if(Getv("ScalarOnKerr_filter_type", "simple"))
       filter_unew(vl_flt, NULL);
     if(Getv("ScalarOnKerr_filter_type", "naive_Ylm"))
@@ -2550,6 +2552,8 @@ void ChooseAndApplyFilter(tVarList *unew)
     {
       vl_flt = vlalloc(grid);
       vlpush(vl_flt, unew->index[4]);
+      if(Getv("ScalarOnKerr_filter_type", "X2/3"))
+        filter_unew_radially(vl_flt, NULL);
       if(Getv("ScalarOnKerr_filter_type", "simple"))
         filter_unew(vl_flt, NULL);
       if(Getv("ScalarOnKerr_filter_type", "naive_Ylm") ||

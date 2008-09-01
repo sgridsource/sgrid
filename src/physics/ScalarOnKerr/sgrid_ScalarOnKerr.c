@@ -72,7 +72,7 @@ int sgrid_ScalarOnKerr(void)
   AddPar("ScalarOnKerr_filter_vars", "no",
          "which vars we filter in each evo substep [no,psi,Pi,phi]");
   AddPar("ScalarOnKerr_filter_type", "simple",
-         "how we filter in each evo substep [simple,naive_Ylm,Ylm_lmshift]");
+         "how we filter in each evo substep [simple,naive_Ylm,Ylm_lmshift,X2/2]");
   AddPar("ScalarOnKerr_filter_time", "afterRHS afterBC",
          "when we filter in evo substep [afterRHS,afterBC] or [POST_EVOLVE]");
   if(Getv("ScalarOnKerr_filter_time", "POST_EVOLVE"))
