@@ -381,7 +381,40 @@ int write_grid(tGrid *grid)
   d = 3;
   if(timeforoutput_di_dt(grid, di[d], dt[d]))
   {
-    printf("3d output not implemented");
+    for (b = 0; b < grid->nboxes; b++)
+    {
+      tBox *box = grid->box[b];
+      char str[1000];
+      int start=0;
+      int vi;
+
+      //printf("3dout ... |%s|\n", ou[3]);
+      while(sscanf(ou[3]+start, "%s", str)==1)
+      {
+        start += strlen(str);
+        if(ou[3][start]==' ') start++;
+        //printf("3dout |%s|\n", str);
+        
+        /* check if str has an index that exists */
+        vi = IndLax(str);
+        if(vi<0) continue;
+
+        /* ignore variable if it is constant in time and iteration > 0 */
+        if (VarConstantFlag(vi) && grid->iteration) continue;
+
+        /* check whether we do 3doutputall */
+        if( all[3] )
+        {
+          int i;
+          int vi0 = IndComponent0(vi);
+
+          for(i=0; i<VarNComponents(vi0); i++)
+            dump3d_boxvar(box, VarName(vi0+i));
+        }
+        else
+          dump3d_boxvar(box, str);
+      }
+    }
   }
   return 0;
 }
