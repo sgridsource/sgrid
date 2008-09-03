@@ -108,6 +108,21 @@ int sgrid_ScalarOnKerr(void)
     AddVar("ScalarOnKerr_U0",  "i", "transverse char. var. U0");
     AddVar("ScalarOnKerr_dphi", "ij", "spatial derivs of phix,...");
   }
+  AddPar("ScalarOnKerr_constraints", "no", "compute constraints [no,yes]");
+  if(Getv("ScalarOnKerr_constraints", "yes") && 
+     Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+  {
+    AddVar("ScalarOnKerr_C",  "i", "Cx=phix - d/dx psi");
+  }
+  AddPar("ScalarOnKerr_modes", "no", "compute modes [no,yes]");
+  if(Getv("ScalarOnKerr_modes", "yes"))
+  {
+    AddVar("ScalarOnKerr_rhomodes",  "",  "coeffs of rho");
+    AddVar("ScalarOnKerr_psimodes",  "",  "coeffs of psi");
+    AddVar("ScalarOnKerr_Pimodes",   "",  "coeffs of Pi");
+    if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+      AddVar("ScalarOnKerr_phimodes",  "i", "coeffs of phi_i");
+  }
 
   return 0;
 }

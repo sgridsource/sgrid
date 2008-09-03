@@ -145,6 +145,18 @@ int ScalarOnKerr_startup(tGrid *grid)
     enablevar(grid, Ind("temp3"));
   }
 
+  /* enable mode and constraint vars */
+  if(Getv("ScalarOnKerr_modes", "yes"))
+  {
+    enablevar(grid, Ind("ScalarOnKerr_rhomodes"));
+    enablevar(grid, Ind("ScalarOnKerr_psimodes"));
+    enablevar(grid, Ind("ScalarOnKerr_Pimodes"));
+    if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+      enablevar(grid, Ind("ScalarOnKerr_phimodesx"));
+  }
+  if(Getv("ScalarOnKerr_constraints", "yes") &&
+     Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+     enablevar(grid, Ind("ScalarOnKerr_Cx"));
 
   /* set Kerr metric and Christoffels */
   Kerr(grid, Ind("x"), Ind("ScalarOnKerr_gtt"), Ind("ScalarOnKerr_guptt"),
@@ -1699,6 +1711,61 @@ int ScalarOnKerr_analyze(tGrid *grid)
       rho[i] = ScalarOnKerr_Source(box, t, x, y, z);
     }
   }
+  
+  /* compute modes */
+  if(Getv("ScalarOnKerr_modes", "yes")) 
+    forallboxes(grid,b)
+    {
+      tBox *box = grid->box[b];
+      double *rho = box->v[Ind("ScalarOnKerr_rho")];
+      double *psi = box->v[Ind("ScalarOnKerr_psi")];
+      double *Pi  = box->v[Ind("ScalarOnKerr_Pi")];
+      double *rhom = box->v[Ind("ScalarOnKerr_rhomodes")];
+      double *psim = box->v[Ind("ScalarOnKerr_psimodes")];
+      double *Pim  = box->v[Ind("ScalarOnKerr_Pimodes")];
+               
+      spec_Coeffs(box, rho, rhom);
+      spec_Coeffs(box, psi, psim);
+      spec_Coeffs(box, Pi,  Pim);
+      if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+      {
+        double *phix = box->v[Ind("ScalarOnKerr_phix")];
+        double *phiy = box->v[Ind("ScalarOnKerr_phix")+1];
+        double *phiz = box->v[Ind("ScalarOnKerr_phix")+2];
+        double *phimx = box->v[Ind("ScalarOnKerr_phimodesx")];
+        double *phimy = box->v[Ind("ScalarOnKerr_phimodesx")+1];
+        double *phimz = box->v[Ind("ScalarOnKerr_phimodesx")+2];
+        spec_Coeffs(box, phix, phimx);
+        spec_Coeffs(box, phiy, phimy);
+        spec_Coeffs(box, phiz, phimz);
+      }
+    }
+
+  /* compute constraints */
+  if(Getv("ScalarOnKerr_constraints", "yes") && 
+     Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+    forallboxes(grid,b)
+    {
+      tBox *box = grid->box[b];
+      int i;
+      double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
+      double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+      double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+      double *phix = box->v[Ind("ScalarOnKerr_phix")];
+      double *phiy = box->v[Ind("ScalarOnKerr_phix")+1];
+      double *phiz = box->v[Ind("ScalarOnKerr_phix")+2];
+      double *Cx = box->v[Ind("ScalarOnKerr_Cx")];
+      double *Cy = box->v[Ind("ScalarOnKerr_Cx")+1];
+      double *Cz = box->v[Ind("ScalarOnKerr_Cx")+2];
+
+      forallpoints(box,i)
+      {
+        Cx[i] = phix[i] - psix[i];
+        Cy[i] = phiy[i] - psiy[i];
+        Cz[i] = phiz[i] - psiz[i];
+      }
+    }
+  
   return 0;
 }
 
