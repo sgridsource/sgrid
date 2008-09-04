@@ -2293,19 +2293,6 @@ void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt,
       rphiy = nphic*cy + nU0y;
       rphiz = nphic*cz + nU0z;
 
-//if(!finite(rPi))
-if(dequal(gxx[ijk],0.0))
-{
-//printf("ijk=%d (t,x,y,z)=(%f,%f,%f,%f) rPi=%f rpsi=%f rphix=%f rphiy=%f rphiz=%f\n",
-//ijk, ucur->time,x,y,z, rPi, rpsi, rphix, rphiy, rphiz);
-//return;
-printf("gij=%f %f %f %f %f %f\n",
-gxx[ijk],gxy[ijk],gxz[ijk],gyy[ijk],gyz[ijk],gzz[ijk]);
-printf("gnn=%f\n",gnn);
-printf("nphix[ijk]=%f nphic=%f nUp=%f nPi[ijk]=%f",
-nphix[ijk],nphic,nUp,nPi[ijk]);
-Yo(1);exit(11);
-}
       /* set new vars or RHS, depending in which integrator is used */
       if(dt!=0.0)
       {
