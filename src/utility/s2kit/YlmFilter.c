@@ -69,7 +69,7 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
     {
       double *var = vlldataptr(unew, box, vi);
       double *vc  = box->v[Ind("temp1")];
-//printf("Naive_YlmFilter: %s\n", VarName(unew->index[vi]));
+//printf("Naive_YlmFilter: %s lmshift=%d\n", VarName(unew->index[vi]), lmshift);
 
       /* compute coeffs of var after Fourier trafo in phi*/
       spec_analysis1(box, 3, box->Mcoeffs3, var, vc);
