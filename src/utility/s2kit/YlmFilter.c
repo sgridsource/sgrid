@@ -93,8 +93,10 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
             Naive_AnalysisX(samples, bw, m, weights, coeffs, plm[m], workspace);
             /* Note l_max=bw-1=n2/4-1, so we filter out half of all l modes!!! */
 
-            /* set coeffs with l = l_max + lmshift, ..., lmax to zero */
-            for(l=bw + lmshift; l<bw; l++) coeffs[l]=0.0;
+            /* set coeffs with l = l_max + 1 + lmshift, ..., lmax to zero */
+            for(l=bw-m + lmshift; l<bw-m; l++) coeffs[l]=0.0;
+            /* coeffs is an array of size (bw-m). First coefficient 
+               is coefficient for Pmm */
 
             /* do inverse naive transform */
             Naive_SynthesizeX(coeffs, bw, m, samples, plm[m]);
