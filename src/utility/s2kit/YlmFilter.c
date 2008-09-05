@@ -91,7 +91,8 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
 
             /* now do forward naive transform */
             Naive_AnalysisX(samples, bw, m, weights, coeffs, plm[m], workspace);
-            /* Note l_max=bw-1=n2/4-1, so we filter out half of all l modes!!! */
+            /* Note l_max=bw-1=n2/4-1, so we filter out half of all
+               Fourier modes (in the Y-direction)!!! */
 
             /* set coeffs with l = l_max + 1 + lmshift, ..., lmax to zero */
             for(l=bw-m + lmshift; l<bw-m; l++) coeffs[l]=0.0;

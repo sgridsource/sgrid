@@ -8,5 +8,21 @@ theta_j = PI*(2j + 1)/(4bw), where j = 0,1, ... ,2bw-1
 these are the points of SphericalDF if n2%4=0
 I.e. we need to use bw=box->n2/4, then l_max=bw-1 and m_max=lmax in the Plm
 
+Note that l_max requires 2l_max + 1 Fourier modes for the Y-direction
+and 2l_max + 1 Fourier modes for the Z-direction.
+=>If originally we have n2 Fourier modes for the Y-direction,
+  only 2l_max + 1 = 2bw-1 = n2/2-1 remain after we apply
+  Naive_YlmFilter_lmshift with lmshift=0.
+  Of the n3 Fourier modes for the Z-direction only
+  2l_max + 1 = 2bw-1 = n2/2-1 remain after we apply
+  Naive_YlmFilter_lmshift with lmshift=0.
+So if we choose n3=(3/4)n2, we filter about half the Fourier modes for the
+Y-direction, and approximately the upper 1/3 for the Z-direction.
+If we choose n3=n2/2, we filter about half the Fourier modes for the
+Y-direction, and just the k=n2/2-1 mode for the Z-direction.
+Filtering half the modes for the Y-direction may be justifiable
+by the fact that really we should need only n2/2 modes,
+because of double covering in SphericalDF.
+
 Also note that Y_l^{-m}(th,0) = (-1)^m Y_l^{m}(th,0), the same goes thus
 for the Plm in s2kit.
