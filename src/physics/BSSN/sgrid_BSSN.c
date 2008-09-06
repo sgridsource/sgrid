@@ -77,6 +77,10 @@ int sgrid_BSSN(void)
   AddPar("BSSN_recomputegzz",  "no",  "recompute gzz from the other gs");
   AddPar("BSSN_subtractA",     "yes", "set trace of A identically zero");
   AddPar("BSSN_normalizedetg", "no",  "normalize determinant of gamma to one");
+  AddPar("BSSN_enforce_AlgConstr", "no", "whether we enforce algebraic "
+	 "constraints after evolution step [no,yes]");
+  if(Getv("BSSN_enforce_AlgConstr", "yes"))
+    AddFun(PRE_POST_EVOLVE, BSSN_enforce_AlgConstr, "enforce algebraic constraints");
   AddPar("BSSN_YoTermFactor",  "0",
          "YoTermFactor = (xi + 2/3) in Yo's paper (gr-qc/0209066)");
   AddPar("BSSN_GReplacedBydg", "yes", "replace G by dg in RHS of evo eqns");

@@ -34,6 +34,31 @@ void BSSN_evolve(tVarList *unew, tVarList *upre, double dt, tVarList *ucur)
 
 
 
+/* compute trA and detg for BSSN variables
+   enforce trA = 0 and detg = 1 if requested:
+     gtilde_ij = detgtilde^(-1/3) gtilde_ij
+     Atilde_ij = Atilde_ij - 1/3 gtilde_ij gtilde^kl Atilde_kl */
+int BSSN_enforce_AlgConstr(tGrid *grid)
+{
+  tVarList *vl = vlalloc(grid);
+
+  vlpush(vl, Ind("BSSN_gxx"));
+  vlpush(vl, Ind("BSSN_Axx"));
+  /* vlpush(vl, Ind("BSSN_trA"));
+     vlpush(vl, Ind("BSSN_detg")); */
+  /* enable BSSN_trA and BSSN_detg if we want to store the result */
+  /* if (Getv("BSSN_register_algcon", "store"))
+      enablevarlist(vl); */
+
+  /* compute and enforce */
+  BSSN_AlgConstr(vl);
+
+  /* done */
+  if (0) printf("BSSN: enforced algebraic constraints.\n");
+  vlfree(vl);
+  return 0;
+}
+
 
 
 /* derive ADM variables from BSSN variables
