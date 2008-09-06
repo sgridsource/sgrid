@@ -65,14 +65,14 @@ void set_boundary_radiative_analytic(tVarList *unew, tVarList *upre,
   int bi, pi, ijk;
   int i,j;
   double v;
-  static int firstcall=1;
-  static tVarList *uinitial;
+  static tVarList *uinitial=NULL;
 
-  if(firstcall)
+  if(ucur->time == 0.0)
   {
     printf("set_boundary_radiative_analytic: "
            "saving upre at t=%g\n", grid->time);
     /* duplicate upre into uinitial and turn on memory */
+    vlfree(uinitial);
     uinitial = AddDuplicateEnable(upre, "_initial");
     for (j = 0; j < upre->n; j++)
     {
@@ -86,7 +86,6 @@ void set_boundary_radiative_analytic(tVarList *unew, tVarList *upre,
         forallpoints(box, ijk)  ui[ijk] = up[ijk];
       }
     }
-    firstcall=0;
   }
 
   /* for all variables */
