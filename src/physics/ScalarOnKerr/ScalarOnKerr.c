@@ -1748,16 +1748,20 @@ int ScalarOnKerr_analyze(tGrid *grid)
     {
       tBox *box = grid->box[b];
       int i;
-      double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
-      double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
-      double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
-      double *phix = box->v[Ind("ScalarOnKerr_phix")];
-      double *phiy = box->v[Ind("ScalarOnKerr_phix")+1];
-      double *phiz = box->v[Ind("ScalarOnKerr_phix")+2];
-      double *Cx = box->v[Ind("ScalarOnKerr_Cx")];
-      double *Cy = box->v[Ind("ScalarOnKerr_Cx")+1];
-      double *Cz = box->v[Ind("ScalarOnKerr_Cx")+2];
+      int ipsix = Ind("ScalarOnKerr_dpsix");
+      int iphix = Ind("ScalarOnKerr_phix");
+      int iCx   = Ind("ScalarOnKerr_Cx");
+      double *psix = box->v[ipsix];
+      double *psiy = box->v[ipsix+1];
+      double *psiz = box->v[ipsix+2];
+      double *phix = box->v[iphix];
+      double *phiy = box->v[iphix+1];
+      double *phiz = box->v[iphix+2];
+      double *Cx = box->v[iCx];
+      double *Cy = box->v[iCx+1];
+      double *Cz = box->v[iCx+2];
 
+      FirstDerivsOf_S(box, Ind("ScalarOnKerr_psi"), ipsix);
       forallpoints(box,i)
       {
         Cx[i] = phix[i] - psix[i];
