@@ -115,6 +115,7 @@ int initialize_grid(tGrid *g)
   RunFun(POST_INITIALDATA, g); 
 
   /* initial data is just another new time slice */
+  RunFun(PRE_POST_EVOLVE, g);
   RunFun(POST_EVOLVE, g); 
 
   /* initial data complete */
@@ -165,6 +166,7 @@ int evolve_grid(tGrid *grid)
     RunFun(EVOLVE, grid); 
 
     /* post evolve */
+    RunFun(PRE_POST_EVOLVE, grid);
     RunFun(POST_EVOLVE, grid); 
 
     /* evolution step complete */
