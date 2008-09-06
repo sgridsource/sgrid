@@ -128,12 +128,19 @@ int ExitIfNAN(tGrid* grid)
 
   if( CheckIfFinite(grid, varname) !=0 )
   {
+    int iterationmax = Geti("iterations");
+    double timemax   = Getd("finaltime");
+    if(timemax > 0) iterationmax = timemax/grid->dt + 0.5;
+
     printf("ExitIfNAN: %s is not finite after evolve!\n"  
 	   "  iteration %d\n"
            "  crashtime %g, outdir %s\n",
 	   varname, grid->iteration+1, 
 	   (grid->iteration+1) * grid->dt, Gets("outdir"));
-    errorexit("Too bad.");
+    /* errorexit("Too bad."); */
+    printf("Too bad.\n");
+    printf("ExitIfNAN: setting grid->iteration = iterationmax\n");
+    grid->iteration = iterationmax;
   }
   
   return 0;
