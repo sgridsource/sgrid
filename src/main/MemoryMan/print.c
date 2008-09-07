@@ -11,8 +11,8 @@ void printgrid(tGrid *g)
 {
   int i;
 
-  printf("grid=%p: nboxes=%d, nvariables=%d\n",
-	 g, g->nboxes, g->nvariables);
+  printf("grid=%p: nboxes=%d, nvariables=%d, dt=%g\n",
+	 g, g->nboxes, g->nvariables, g->dt);
   for (i = 0; i < g->nboxes; i++)
   {
     printbox(g->box[i]);
