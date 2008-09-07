@@ -16,15 +16,18 @@
 int timeforoutput_di_dt(tGrid *grid, int di, double dt) 
 {
   double Time = fabs(grid->time);
+  double dT = fabs(grid->dt);
 
   /* time for output based on number of iterations */
-  if (di > 0 && grid->iteration % di == 0) 
+  if(di > 0 && grid->iteration % di == 0) 
     return grid->iteration/di + 1;
 
   /* time for output based on time interval, assumes Time >= 0 */
-  if (dt > 0) {
-    int i = (Time + dequaleps)/dt;
-    if (dequal(Time-i*dt, 0))
+  if(dt > 0)
+  {
+    int i = (0.5 + Time/dt); /* (Time + dequaleps)/dt; */
+    /* if(dequal(Time-i*dt, 0)) */
+    if( Time-i*dt > -0.5*dT && Time-i*dt <= 0.5*dT )
       return i + 1;
   }
     
