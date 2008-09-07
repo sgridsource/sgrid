@@ -29,5 +29,11 @@ int sgrid_ParManipulator()
   AddPar("basis2", "ChebExtrema", "basis functions in Y-direction");
   AddPar("basis3", "ChebExtrema", "basis functions in Z-direction");
 
+  /* par to set dt */
+  AddPar("ParManipulator_dt_scaling", "no", "[no,1/n1^2]");
+  AddPar("ParManipulator_ds_min", "1", "smallest grid spacing");
+  AddPar("ParManipulator_ds_min_coeff", "10", "e.g. ds_min * n1^2");
+  AddPar("ParManipulator_dtfac", "0.25", "dt = dtfac * ds_min");
+
   return 0;
 }

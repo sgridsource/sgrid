@@ -46,6 +46,15 @@ int ParManipulator_setPars(tGrid *grid)
     if(Getv(str, "basis2")) Sets(str, Gets("basis2"));
     snprintf(str, 999, "box%d_basis3", b);
     if(Getv(str, "basis3")) Sets(str, Gets("basis3"));
+
+    /* set dt */
+    if(Getv("ParManipulator_dt_scaling", "1/n1^2"))
+    {
+      int n1 = Geti("n1");
+      double coeff = Getd("ParManipulator_ds_min_coeff");
+      Setd("ParManipulator_ds_min", coeff/(n1*n1));
+      Setd("dt", Getd("ParManipulator_dtfac")*Getd("ParManipulator_ds_min"));
+    }
   }
 
   return 0;
