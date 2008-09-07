@@ -16,7 +16,6 @@ int sgrid_main()
 
   /* parameters */
   AddPar("physics", "", "what problem to solve");
-  AddPar("nboxes"  , "1", "number of boxes");
   AddPar("dt"  , "0.125", "time step dt");
   
   AddPar("iterations", "0", "number of grid iterations");
