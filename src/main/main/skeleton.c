@@ -27,9 +27,9 @@ void AddFun(int step, int (*f)(tGrid *), char *name)
   if (!fps[step]) fps[step] = (tTodo *) calloc(sizeof(tTodo), 1);
 
   for (t = fps[step]; t->next; t = t->next);
-  t->next = (tTodo *) calloc(sizeof(tTodo), 1);
+  t->next = (tTodo *) calloc(1, sizeof(tTodo));
   t->f = f;
-  t->name = (char *) calloc(sizeof(char), strlen(name)+1);
+  t->name = (char *) calloc(strlen(name)+1, sizeof(char));
   strcpy(t->name, name);
 }
 
