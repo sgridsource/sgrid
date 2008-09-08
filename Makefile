@@ -38,11 +38,10 @@ OFLAGS = -O2
 
 # --------------------------------------------------------------------------
 # some libraries are currently required
-libpaths = src/main/MemoryMan 
+libpaths = src/main/MemoryMan src/utility/ParManipulator
 libpaths += src/utility/output src/utility/evolve
 libpaths += src/utility/Coordinates src/utility/Spectral
 libpaths += src/utility/NumericUtils
-libpaths += src/utility/ParManipulator
 
 # --------------------------------------------------------------------------
 # the user choses the libraries and some options in the file MyConfig
