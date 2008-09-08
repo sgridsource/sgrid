@@ -101,8 +101,13 @@ int ParManipulator_setPars(tGrid *grid)
     {
       int n1 = Geti("n1");
       double coeff = Getd("ParManipulator_ds_min_coeff");
+      double time = Getd("ParManipulator_requiredtime");
+      double dt;
+      int i;
       Setd("ParManipulator_ds_min", coeff/(n1*n1));
-      Setd("dt", Getd("ParManipulator_dtfac")*Getd("ParManipulator_ds_min"));
+      dt = Getd("ParManipulator_dtfac")*Getd("ParManipulator_ds_min");
+      if(time>0) { i= 0.5 + time/dt;  dt = time/i; }
+      Setd("dt", dt);
     }
   }
 
