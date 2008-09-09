@@ -22,3 +22,54 @@ is 125 better than what we seem to need without window func.
 About BCs:
 ----------
 [explain about U_{+/-}]
+...
+
+
+Filtering:
+----------
+from
+ygraph oldSource_6boxes_O1_32_24_fall/ScalarOnKerr_Pi_rms.2 \
+ oldSource_6boxes_O1_Ylm_lmshift32_24_fall/ScalarOnKerr_Pi_rms.2
+we see that we need the Ylm_lmshift filter, and that we need to filter
+psi, Pi, phi_i to obtain stability till 1000M.
+
+Note: lmax = n2/4 - 1 for phi_i 
+      lmax = n2/4 - 2 for Pi and psi
+
+So far n3 = 0.75 n2 is working, but n3 = 0.5 n2 might work also???
+(but then we would not filter at all in the Z-direction)?
+
+
+About convergence:
+------------------
+oS_1box_lmsh.par is convergent
+ConvRatio_withDiffs oS_1box_lmsh_22_20_16/ScalarOnKerr_psi_rms.0 \
+ oS_1box_lmsh_26_20_16/ScalarOnKerr_psi_rms.0 \
+ oS_1box_lmsh_30_20_16/ScalarOnKerr_psi_rms.0 | ygraph -
+gives a ConvRatio ~ 4.5
+
+oS_2boxes_lmsh.par are both oS_2boxes_lrgdt_lmsh.par convergent,
+even though the latter has a 7 times bigger time step dt
+ConvRatio_withDiffs oS_2boxes_lrgdt_lmsh_22_20_16/ScalarOnKerr_psi_rms.0 \
+ oS_2boxes_lrgdt_lmsh_26_20_16/ScalarOnKerr_psi_rms.0 \
+ oS_2boxes_lrgdt_lmsh_30_20_16/ScalarOnKerr_psi_rms.0 | ygraph -
+gives a ConvRatio ~ 7 (actually both have 7)
+
+oS_3boxes_lmsh.par is convergent
+ConvRatio_withDiffs oS_3boxes_lmsh_22_20_16/ScalarOnKerr_psi_rms.0 \
+ oS_3boxes_lmsh_26_20_16/ScalarOnKerr_psi_rms.0 \
+ oS_3boxes_lmsh_30_20_16/ScalarOnKerr_psi_rms.0 | ygraph -
+gives a ConvRatio ~ 6.8
+
+I have trouble with getting my 6 boxes thing to converge!
+E.g. oS_lmsh.par or nW_lmsh.par
+
+Also, Ian's source does not converge so well:
+ygraph nW_lmsh_18_20_16/ScalarOnKerr_rho_rms.2 \
+ nW_lmsh_22_24_18/ScalarOnKerr_rho_rms.2 \
+ nW_lmsh_26_28_22/ScalarOnKerr_rho_rms.2
+Reason: If a source with more angular (e.g. Fourier) coeffs as 
+exactly resolved orbits, all its coeffs retained by the code oscillate.
+The more angular points the faster this oscillation. Thus it's
+convergence is masked.
+
