@@ -171,10 +171,6 @@ double SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS)
     double Pi = 3.14159265358979323846264338;
     double r = sqrt(xKS*xKS+yKS*yKS+zKS*zKS);
     
-    if(r<=2.5*M  && ian_W<1.0){
-        return 0.0;
-    }
-    else{
     double theta; 
     if(zKS != 0.0){ 
         if(zKS>0.0) theta = atan(sqrt(xKS*xKS+yKS*yKS)/zKS);
@@ -204,5 +200,44 @@ double SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS)
    
     eval_source(ts,r,theta,phi);
     return Del2Psi;
+}
+
+double SingularInKerrSchild(double tKS, double xKS, double yKS, double zKS)
+{
+    double M=ian_M;  
+    
+    double Pi = 3.14159265358979323846264338;
+    double r = sqrt(xKS*xKS+yKS*yKS+zKS*zKS);
+    
+    double theta; 
+    if(zKS != 0.0){ 
+        if(zKS>0.0) theta = atan(sqrt(xKS*xKS+yKS*yKS)/zKS);
+        else theta = Pi-atan(sqrt(xKS*xKS+yKS*yKS)/fabs(zKS));
     }
+    else theta = Pi/2.0;
+    
+    double phi;
+    if(xKS == 0.0){
+        if(yKS>= 0.0) phi = Pi/2.0;
+        else phi = -Pi/2.0;
+    } 
+    else if(xKS > 0.0){ 
+        if(yKS>=0.0) phi = atan(yKS/xKS);
+        else phi = 2.0*Pi-atan(fabs(yKS)/xKS);
+    }
+    else{ 
+        if(yKS>=0.0) phi = Pi-atan(yKS/fabs(xKS));
+        else phi = Pi+atan(fabs(yKS/xKS));
+    }
+    
+    double ts = tKS-2.0*M*log(r/(2.0*M)-1.0); 
+        
+    assert(fabs(xKS-r*sin(theta)*cos(phi))<1.e-12); 
+    assert(fabs(yKS-r*sin(theta)*sin(phi))<1.e-12);
+    assert(fabs(zKS-r*cos(theta))<1.e-12);
+   
+    eval_THZ(ts,r,theta,phi);
+    eval_g(ts,r,theta,phi);
+    eval_singular(ts,r,theta,phi);
+    return ian_Psi;
 }
