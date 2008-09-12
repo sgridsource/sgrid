@@ -395,7 +395,10 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
   /* initialize some par once */
   if(M<0.0)
   {
-    if(Getv("ScalarOnKerr_sourcetype","Y22test")) sourcetype=1;
+    if(Getv("ScalarOnKerr_sourcetype","Y22test"))       sourcetype=1;
+    else if(Getv("DV_CircSchwSource_useWindow", "yes")) sourcetype=2;
+    else sourcetype=3;
+
     /* set mass and orbital radius of source */
     M = Getd("BHmass");
     r0 = 10.0*M;
@@ -419,7 +422,11 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
     rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
           cos(2.0*(Omega*t - phi)) * Y22;
   }
-  else /* use Ian's source */
+  else if(sourcetype==2) /* use Ian's source with Window */
+  {
+    rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+  }
+  else /* use Ian's source without Window */
   {
     if( (r0-box->bbox[0])*(r0-box->bbox[1])<=0.0 )
       rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
