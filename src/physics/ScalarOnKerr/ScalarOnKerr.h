@@ -11,6 +11,8 @@ void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt,
                          tVarList *ucur);
 void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt,
                              tVarList *ucur);
+void set_psi_Pi_phi_boundary_CP(tVarList *unew, tVarList *upre, double dt,
+                                tVarList *ucur);
 void filter_unew(tVarList *unew, tVarList *upre);
 void naive_Ylm_filter_unew(tVarList *unew, tVarList *upre);
 void filter_unew_radially(tVarList *unew, tVarList *upre);

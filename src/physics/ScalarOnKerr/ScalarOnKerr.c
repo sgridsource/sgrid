@@ -2160,7 +2160,10 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
   compute_unew_from_Up_Um_U0_onBoundary(unew, upre, dt, ucur);
                              
   /* set BCs */
-  set_psi_Pi_phi_boundary(unew, upre, dt, ucur);
+  if(Getv("ScalarOnKerr_outerBC", "constraintPreserving"))
+    set_psi_Pi_phi_boundary_CP(unew, upre, dt, ucur);
+  else
+    set_psi_Pi_phi_boundary(unew, upre, dt, ucur);
 
   if(Getv("ScalarOnKerr_reset_doubleCoveredPoints", "yes"))
     reset_doubleCoveredPoints(unew);
@@ -2171,6 +2174,8 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
 }
 
 /* set outer BC of psi, Pi, phi for first order Schheel version */
+//void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt, 
+//                             tVarList *ucur)
 void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt, 
                              tVarList *ucur)
 {
@@ -2293,6 +2298,356 @@ void set_psi_Pi_phi_boundary(tVarList *unew, tVarList *upre, double dt,
          ==> nUpsic = cupx*nUpsix + cupy*nUpsiy + cupz*nUpsiz;  */
       nUpsix = npsix[ijk];   nUpsiy = npsiy[ijk];   nUpsiz = npsiz[ijk];
       nUpsic = cupx*nUpsix + cupy*nUpsiy + cupz*nUpsiz;
+      nU0x = nUpsix - nUpsic*cx;
+      nU0y = nUpsiy - nUpsic*cy;
+      nU0z = nUpsiz - nUpsic*cz;
+
+      /* set RHS of Pi and phi */
+      rPi   = 0.5*(nUp + nUm);
+      nphic = 0.5*(nUp - nUm);
+      rphix = nphic*cx + nU0x;
+      rphiy = nphic*cy + nU0y;
+      rphiz = nphic*cz + nU0z;
+
+      /* set new vars or RHS, depending in which integrator is used */
+      if(dt!=0.0)
+      {
+        nPi[ijk]   = pPi[ijk]   + dt * rPi;
+        nphix[ijk] = pphix[ijk] + dt * rphix;
+        nphiy[ijk] = pphiy[ijk] + dt * rphiy;
+        nphiz[ijk] = pphiz[ijk] + dt * rphiz;
+      }
+      else
+      {
+        nPi[ijk]   = rPi;
+        nphix[ijk] = rphix;
+        nphiy[ijk] = rphiy;
+        nphiz[ijk] = rphiz;
+      }  /* end if(dt==0.0) */
+    }
+  }
+}
+
+/* set outer BC of psi, Pi, phi for first order Schheel version,
+   but with radiative BC for psi, and constraint preserving BC for
+   rest  */
+void set_psi_Pi_phi_boundary_CP(tVarList *unew, tVarList *upre, double dt, 
+                                tVarList *ucur)
+{
+  tGrid *grid = ucur->grid;
+  int b;
+
+  /* not: forallboxes(grid,b) , use only outermost box */
+  b = grid->nboxes - 1;
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, i,j,k;
+    double *cpsi = vlldataptr(ucur, box, 0);
+    double *ppsi = vlldataptr(upre, box, 0);
+    double *npsi = vlldataptr(unew, box, 0);
+    double *cPi = vlldataptr(ucur, box, 1);
+    double *pPi = vlldataptr(upre, box, 1);
+    double *nPi = vlldataptr(unew, box, 1);
+//    int ipsi = (ucur)->index[0];
+//    int iPi  = (ucur)->index[1];
+//    double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
+//    double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+//    double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+//    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
+//    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
+//    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *npsix = box->v[Ind("temp1")];
+    double *npsiy = box->v[Ind("temp2")];
+    double *npsiz = box->v[Ind("temp3")];
+    double *cphix = vlldataptr(ucur, box, 4);
+    double *cphiy = vlldataptr(ucur, box, 5);
+    double *cphiz = vlldataptr(ucur, box, 6);
+    double *pphix = vlldataptr(upre, box, 4);
+    double *pphiy = vlldataptr(upre, box, 5);
+    double *pphiz = vlldataptr(upre, box, 6);
+    double *nphix = vlldataptr(unew, box, 4);
+    double *nphiy = vlldataptr(unew, box, 5);
+    double *nphiz = vlldataptr(unew, box, 6);
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_alpha = Ind("ScalarOnKerr3d_alpha");
+    double *alpha = box->v[i_alpha];
+    int i_beta = Ind("ScalarOnKerr3d_betax");
+    double *betax = box->v[i_beta];
+    double *betay = box->v[i_beta+1];
+    double *betaz = box->v[i_beta+2];
+    int i_gup = Ind("ScalarOnKerr3d_gupxx");
+    double *gxx = box->v[i_gup];
+    double *gxy = box->v[i_gup+1];
+    double *gxz = box->v[i_gup+2];
+    double *gyy = box->v[i_gup+3];
+    double *gyz = box->v[i_gup+4];
+    double *gzz = box->v[i_gup+5];
+
+    /* loop over points and to set BC on psi only */
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+    {
+      double x,y,z;
+      double r, nx,ny,nz;
+      double cx,cy,cz, cupx,cupy,cupz, gnn; 
+      double cphic;
+      double nUpsi, rpsi;
+
+      ijk = Index(i,j,k);
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r; /* nx=sin_th cos_ph, ny=sin_th sin_ph, nz=cos_th */
+      ny = y/r;
+      nz = z/r;
+      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+
+      cx = nx/sqrt(gnn);
+      cy = ny/sqrt(gnn);
+      cz = nz/sqrt(gnn);
+      cupx = gxx[ijk]*cx + gxy[ijk]*cy + gxz[ijk]*cz;
+      cupy = gxy[ijk]*cx + gyy[ijk]*cy + gyz[ijk]*cz;
+      cupz = gxz[ijk]*cx + gyz[ijk]*cy + gzz[ijk]*cz;
+      cphic = cupx*cphix[ijk] + cupy*cphiy[ijk] + cupz*cphiz[ijk];
+
+      /* set radiative BC on Upsi */
+      nUpsi = -cphic - cpsi[ijk]/r;
+      /* set RHS of psi */
+      rpsi = nUpsi;
+
+      /* set new vars or RHS, depending in which integrator is used */
+      if(dt!=0.0)  npsi[ijk]  = ppsi[ijk]  + dt * rpsi;
+      else         npsi[ijk]  = rpsi;
+    }
+
+    /* compute the spatial derivs */
+    cart_partials(box, npsi, npsix, npsiy, npsiz);
+
+    /* loop over points and set BCs on rest */
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+    {
+      double x,y,z;
+      double r, nx,ny,nz;
+      double rPi, rphix,rphiy,rphiz;
+      double cx,cy,cz, cupx,cupy,cupz, gnn; 
+      double nphic;
+      double nUp,nUm, nU0x,nU0y,nU0z, nUpsix,nUpsiy,nUpsiz, nUpsic;
+
+      ijk = Index(i,j,k);
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r; /* nx=sin_th cos_ph, ny=sin_th sin_ph, nz=cos_th */
+      ny = y/r;
+      nz = z/r;
+      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+
+      cx = nx/sqrt(gnn);
+      cy = ny/sqrt(gnn);
+      cz = nz/sqrt(gnn);
+      cupx = gxx[ijk]*cx + gxy[ijk]*cy + gxz[ijk]*cz;
+      cupy = gxy[ijk]*cx + gyy[ijk]*cy + gyz[ijk]*cz;
+      cupz = gxz[ijk]*cx + gyz[ijk]*cy + gzz[ijk]*cz;
+      nphic = cupx*nphix[ijk] + cupy*nphiy[ijk] + cupz*nphiz[ijk];
+      nUpsix = npsix[ijk];   nUpsiy = npsiy[ijk];   nUpsiz = npsiz[ijk];
+      nUpsic = cupx*nUpsix + cupy*nUpsiy + cupz*nUpsiz;
+
+      /* use Up/m for Scheel's u^{+/-}
+         Up/m = Pi +/- c^i phi_i        */
+      
+      /* compute outgoing mode */
+      nUp = nPi[ijk] + nphic; 
+
+      /* set BC on ingoing modes Um and U0x,U0y,U0z */
+      nUm = nUp - 2.0*nUpsic;
+      /* d_t U0_i = P^k_i d_k d_t psi  is constraint preserving
+         where d_t psi = d_t Upsi = nUpsi ,  P^k_i = delta^k_i - c^k c_i
+         ==> d_t U0_i = P^k_i d_k nUpsi
+         ==> nUpsic = cupx*nUpsix + cupy*nUpsiy + cupz*nUpsiz;  */
+      nU0x = nUpsix - nUpsic*cx;
+      nU0y = nUpsiy - nUpsic*cy;
+      nU0z = nUpsiz - nUpsic*cz;
+
+      /* set RHS of Pi and phi */
+      rPi   = 0.5*(nUp + nUm);
+      nphic = 0.5*(nUp - nUm);
+      rphix = nphic*cx + nU0x;
+      rphiy = nphic*cy + nU0y;
+      rphiz = nphic*cz + nU0z;
+
+      /* set new vars or RHS, depending in which integrator is used */
+      if(dt!=0.0)
+      {
+        nPi[ijk]   = pPi[ijk]   + dt * rPi;
+        nphix[ijk] = pphix[ijk] + dt * rphix;
+        nphiy[ijk] = pphiy[ijk] + dt * rphiy;
+        nphiz[ijk] = pphiz[ijk] + dt * rphiz;
+      }
+      else
+      {
+        nPi[ijk]   = rPi;
+        nphix[ijk] = rphix;
+        nphiy[ijk] = rphiy;
+        nphiz[ijk] = rphiz;
+      }  /* end if(dt==0.0) */
+    }
+  }
+}
+/* set outer BC of psi, Pi, phi for first order Schheel version,
+   but with radiative BC for psi, and constraint preserving BC for
+   rest  */
+void set_psi_Pi_phi_boundary_t2(tVarList *unew, tVarList *upre, double dt, 
+                             tVarList *ucur)
+{
+  tGrid *grid = ucur->grid;
+  int b;
+
+  /* not: forallboxes(grid,b) , use only outermost box */
+  b = grid->nboxes - 1;
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int ijk, i,j,k;
+    double *cpsi = vlldataptr(ucur, box, 0);
+    double *ppsi = vlldataptr(upre, box, 0);
+    double *npsi = vlldataptr(unew, box, 0);
+    double *cPi = vlldataptr(ucur, box, 1);
+    double *pPi = vlldataptr(upre, box, 1);
+    double *nPi = vlldataptr(unew, box, 1);
+//    int ipsi = (ucur)->index[0];
+//    int iPi  = (ucur)->index[1];
+    double *psix = box->v[Ind("ScalarOnKerr_dpsix")];
+    double *psiy = box->v[Ind("ScalarOnKerr_dpsix")+1];
+    double *psiz = box->v[Ind("ScalarOnKerr_dpsix")+2];
+//    double *Pix = box->v[Ind("ScalarOnKerr_dPix")];
+//    double *Piy = box->v[Ind("ScalarOnKerr_dPix")+1];
+//    double *Piz = box->v[Ind("ScalarOnKerr_dPix")+2];
+    double *npsix = box->v[Ind("temp1")];
+    double *npsiy = box->v[Ind("temp2")];
+    double *npsiz = box->v[Ind("temp3")];
+    double *cphix = vlldataptr(ucur, box, 4);
+    double *cphiy = vlldataptr(ucur, box, 5);
+    double *cphiz = vlldataptr(ucur, box, 6);
+    double *pphix = vlldataptr(upre, box, 4);
+    double *pphiy = vlldataptr(upre, box, 5);
+    double *pphiz = vlldataptr(upre, box, 6);
+    double *nphix = vlldataptr(unew, box, 4);
+    double *nphiy = vlldataptr(unew, box, 5);
+    double *nphiz = vlldataptr(unew, box, 6);
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    int i_alpha = Ind("ScalarOnKerr3d_alpha");
+    double *alpha = box->v[i_alpha];
+    int i_beta = Ind("ScalarOnKerr3d_betax");
+    double *betax = box->v[i_beta];
+    double *betay = box->v[i_beta+1];
+    double *betaz = box->v[i_beta+2];
+    int i_gup = Ind("ScalarOnKerr3d_gupxx");
+    double *gxx = box->v[i_gup];
+    double *gxy = box->v[i_gup+1];
+    double *gxz = box->v[i_gup+2];
+    double *gyy = box->v[i_gup+3];
+    double *gyz = box->v[i_gup+4];
+    double *gzz = box->v[i_gup+5];
+
+    /* compute the spatial derivs */
+    cart_partials(box, cpsi, psix, psiy, psiz);
+
+    /* loop over points and to set BC on psi only */
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+    {
+      double x,y,z;
+      double r, nx,ny,nz;
+      double cx,cy,cz, cupx,cupy,cupz, gnn; 
+      double psic;
+      double nUpsi, rpsi;
+
+      ijk = Index(i,j,k);
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r; /* nx=sin_th cos_ph, ny=sin_th sin_ph, nz=cos_th */
+      ny = y/r;
+      nz = z/r;
+      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+
+      cx = nx/sqrt(gnn);
+      cy = ny/sqrt(gnn);
+      cz = nz/sqrt(gnn);
+      cupx = gxx[ijk]*cx + gxy[ijk]*cy + gxz[ijk]*cz;
+      cupy = gxy[ijk]*cx + gyy[ijk]*cy + gyz[ijk]*cz;
+      cupz = gxz[ijk]*cx + gyz[ijk]*cy + gzz[ijk]*cz;
+      psic = cupx*psix[ijk] + cupy*psiy[ijk] + cupz*psiz[ijk];
+
+      /* set radiative BC on Upsi */
+      nUpsi = -psic - cpsi[ijk]/r;
+      /* set RHS of psi */
+      rpsi = nUpsi;
+
+      /* set new vars or RHS, depending in which integrator is used */
+      if(dt!=0.0)  npsi[ijk]  = ppsi[ijk]  + dt * rpsi;
+      else         npsi[ijk]  = rpsi;
+    }
+
+    /* compute the spatial derivs */
+    cart_partials(box, npsi, npsix, npsiy, npsiz);
+
+    /* loop over points and set BCs on rest */
+    forplane1(i,j,k, n1,n2,n3, n1-1)
+    {
+      double x,y,z;
+      double r, nx,ny,nz;
+      double rPi, rphix,rphiy,rphiz;
+      double cx,cy,cz, cupx,cupy,cupz, gnn; 
+      double nphic;
+      double nUp,nUm, nU0x,nU0y,nU0z, nUpsix,nUpsiy,nUpsiz, nUpsic;
+
+      ijk = Index(i,j,k);
+      x = px[ijk];
+      y = py[ijk];
+      z = pz[ijk];
+      r = sqrt(x*x + y*y + z*z);
+      nx = x/r; /* nx=sin_th cos_ph, ny=sin_th sin_ph, nz=cos_th */
+      ny = y/r;
+      nz = z/r;
+      gnn = gxx[ijk]*nx*nx +gyy[ijk]*ny*ny +gzz[ijk]*nz*nz + 
+            2.0*(gxy[ijk]*nx*ny +gxz[ijk]*nx*nz +gyz[ijk]*ny*nz);
+
+      cx = nx/sqrt(gnn);
+      cy = ny/sqrt(gnn);
+      cz = nz/sqrt(gnn);
+      cupx = gxx[ijk]*cx + gxy[ijk]*cy + gxz[ijk]*cz;
+      cupy = gxy[ijk]*cx + gyy[ijk]*cy + gyz[ijk]*cz;
+      cupz = gxz[ijk]*cx + gyz[ijk]*cy + gzz[ijk]*cz;
+      nphic = cupx*nphix[ijk] + cupy*nphiy[ijk] + cupz*nphiz[ijk];
+      nUpsix = npsix[ijk];   nUpsiy = npsiy[ijk];   nUpsiz = npsiz[ijk];
+      nUpsic = cupx*nUpsix + cupy*nUpsiy + cupz*nUpsiz;
+
+      /* use Up/m for Scheel's u^{+/-}
+         Up/m = Pi +/- c^i phi_i        */
+      
+      /* compute outgoing mode */
+      nUp = nPi[ijk] + nphic; 
+
+      /* set BC on ingoing modes Um and U0x,U0y,U0z */
+      nUm = nUp - 2.0*nUpsic;
+      /* d_t U0_i = P^k_i d_k d_t psi  is constraint preserving
+         where d_t psi = d_t Upsi = nUpsi ,  P^k_i = delta^k_i - c^k c_i
+         ==> d_t U0_i = P^k_i d_k nUpsi
+         ==> nUpsic = cupx*nUpsix + cupy*nUpsiy + cupz*nUpsiz;  */
       nU0x = nUpsix - nUpsic*cx;
       nU0y = nUpsiy - nUpsic*cy;
       nU0z = nUpsiz - nUpsic*cz;

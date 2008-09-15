@@ -64,6 +64,8 @@ int sgrid_ScalarOnKerr(void)
   AddPar("BHsz", "0.0", "spin_z of black hole");
   AddPar("ScalarOnKerr_sourcetype","Y22test",
          "source we use [Y22test,DV_source]");
+  AddPar("ScalarOnKerr_outerBC", "standard",
+         "outer BC type [standard,constraintPreserving]");
   AddPar("ScalarOnKerr_reset_doubleCoveredPoints", "yes",
          "whether we reset double covered points in each evo substep [no,yes]");
 //  AddPar("ScalarOnKerr_filter_unew", "simple",
