@@ -6,6 +6,9 @@
 #include "DV_CircSchwSource/Constants.h"
 #include "DV_CircSchwSource/Source.h"
 
+//#define KSTIMESHIFT 2.772588722239781
+#define KSTIMESHIFT 1.204119982655925
+
 tVarList *ScalarOnKerrvars;
 
 
@@ -424,12 +427,12 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
   }
   else if(sourcetype==2) /* use Ian's source with Window */
   {
-    rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+    rho = SourceInKerrSchild(KSTIMESHIFT + t, x, y, z);
   }
   else /* use Ian's source without Window */
   {
     if( (r0-box->bbox[0])*(r0-box->bbox[1])<=0.0 )
-      rho = SourceInKerrSchild(1.204119982655925 + t, x, y, z);
+      rho = SourceInKerrSchild(KSTIMESHIFT + t, x, y, z);
     else rho=0.0;
   }
   return rho;
@@ -1776,6 +1779,82 @@ int ScalarOnKerr_analyze(tGrid *grid)
         Cz[i] = phiz[i] - psiz[i];
       }
     }
+
+  /* compute and output self-force */
+  if(Getv("ScalarOnKerr_OutputForce", "yes") &&
+     timeforoutput_di_dt(grid, Geti("0doutiter"), Getd("0douttime")))
+  {
+    double M = Getd("BHmass");
+    double r0 = 10.0*M;
+    double Omega = sqrt(M/(r0*r0*r0));
+    double t = ScalarOnKerrvars->time;
+    double tKS = t + KSTIMESHIFT;
+    double tSchw = tKS - 2.0*M*log(r0/(2.0*M)-1.0);
+    double x0 = r0*cos(Omega*tSchw); /* particle postion??? */
+    double y0 = r0*sin(Omega*tSchw);
+    double z0 = 0.0;
+    double Ft,Fx,Fy,Fz, psiR; /* self force and psi */
+    FILE *fp;
+    char *outdir = Gets("outdir");
+    char *name = "ScalarOnKerr_Force";
+    char *filename;
+    int filenamelen;
+
+printf("t=%g tKS=%g tSchw=%g\n", t,tKS,tSchw);
+    forallboxes(grid,b)
+    {
+      tBox *box = grid->box[b];
+      int i;
+      int ipsi  = Ind("ScalarOnKerr_psi");
+      int iPi   = Ind("ScalarOnKerr_Pi");
+      int iphix = Ind("ScalarOnKerr_phix");
+      double *psi = box->v[ipsi];
+      double *Pi  = box->v[iPi];
+      double *phix = box->v[iphix];
+      double *phiy = box->v[iphix+1];
+      double *phiz = box->v[iphix+2];
+      double *psidot = box->v[Ind("temp1")];
+      double *coeffs = box->v[Ind("temp2")];
+      int i_alpha = Ind("ScalarOnKerr3d_alpha");
+      double *alpha = box->v[i_alpha];
+      int i_beta = Ind("ScalarOnKerr3d_betax");
+      double *betax = box->v[i_beta];
+      double *betay = box->v[i_beta+1];
+      double *betaz = box->v[i_beta+2];
+      
+      if( (r0-box->bbox[0])*(r0-box->bbox[1])<=0.0 )
+      {
+        /* compute psidot */
+        forallpoints(box,i)
+        {
+          double beta_phi = betax[i]*phix[i] + betay[i]*phiy[i] + 
+                             betaz[i]*phiz[i];
+          psidot[i] = beta_phi - alpha[i]*Pi[i];
+        }
+        /* interpolate force */
+        spec_Coeffs(box, psidot, coeffs);
+        Ft = spec_interpolate(box, coeffs, x0,y0,z0);
+        spec_Coeffs(box, phix, coeffs);
+        Fx = spec_interpolate(box, coeffs, x0,y0,z0);
+        spec_Coeffs(box, phiy, coeffs);
+        Fy = spec_interpolate(box, coeffs, x0,y0,z0);
+        spec_Coeffs(box, phiz, coeffs);
+        Fz = spec_interpolate(box, coeffs, x0,y0,z0);
+        spec_Coeffs(box, psi, coeffs);
+        psiR = spec_interpolate(box, coeffs, x0,y0,z0);
+      }
+    } /* end:     forallboxes(grid,b) */
+    /* write force */
+    filenamelen = strlen(outdir) + strlen(name) + 200;
+    filename = cmalloc(filenamelen+1);
+    snprintf(filename, filenamelen, "%s/%s.txyz", outdir, name);
+    fp = fopen(filename, "a");
+    if(!fp) errorexits("failed opening %s", filename);
+    fprintf(fp, "%.16g %.16g %.16g %.16g  ", t,x0,y0,z0);
+    fprintf(fp, "%.16g %.16g %.16g %.16g  %.16g\n", Ft,Fx,Fy,Fz, psiR);
+    fclose(fp);
+    free(filename);              
+  }
   
   return 0;
 }

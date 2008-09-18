@@ -66,6 +66,7 @@ int sgrid_ScalarOnKerr(void)
          "source we use [Y22test,DV_source]");
   AddPar("ScalarOnKerr_outerBC", "standard",
          "outer BC type [standard,constraintPreserving]");
+  AddPar("ScalarOnKerr_OutputForce", "yes", "compute + output force [yes,no]");
   AddPar("ScalarOnKerr_reset_doubleCoveredPoints", "yes",
          "whether we reset double covered points in each evo substep [no,yes]");
 //  AddPar("ScalarOnKerr_filter_unew", "simple",
