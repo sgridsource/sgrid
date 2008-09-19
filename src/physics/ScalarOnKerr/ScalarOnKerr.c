@@ -1790,15 +1790,22 @@ int ScalarOnKerr_analyze(tGrid *grid)
     double t = ScalarOnKerrvars->time;
     double tKS = t + KSTIMESHIFT;
     double tSchw = tKS - 2.0*M*log(r0/(2.0*M)-1.0);
-    double x0 = r0*cos(Omega*tSchw); /* particle postion??? */
-    double y0 = r0*sin(Omega*tSchw);
-    double z0 = 0.0;
+    double phi0 = Omega*tSchw;
+    double theta0,x0,y0,z0;
     double Ft,Fx,Fy,Fz, psiR; /* self force and psi */
     FILE *fp;
     char *outdir = Gets("outdir");
     char *name = "ScalarOnKerr_Force";
     char *filename;
-    int filenamelen;
+    int n;
+    
+    /* particle position??? */
+    theta0 = PIh;
+    n = phi0/(2.0*PI);
+    phi0 -= n*2*PI; /* stay in [0,2PI] */
+    x0 = r0*cos(phi0);
+    y0 = r0*sin(phi0);
+    z0 = 0.0;
 
 //printf("t=%g tKS=%g tSchw=%g\n", t,tKS,tSchw);
     forallboxes(grid,b)
@@ -1833,21 +1840,21 @@ int ScalarOnKerr_analyze(tGrid *grid)
         }
         /* interpolate force */
         spec_Coeffs(box, psidot, coeffs);
-        Ft = spec_interpolate(box, coeffs, x0,y0,z0);
+        Ft = spec_interpolate(box, coeffs, r0,theta0,phi0);
         spec_Coeffs(box, phix, coeffs);
-        Fx = spec_interpolate(box, coeffs, x0,y0,z0);
+        Fx = spec_interpolate(box, coeffs, r0,theta0,phi0);
         spec_Coeffs(box, phiy, coeffs);
-        Fy = spec_interpolate(box, coeffs, x0,y0,z0);
+        Fy = spec_interpolate(box, coeffs, r0,theta0,phi0);
         spec_Coeffs(box, phiz, coeffs);
-        Fz = spec_interpolate(box, coeffs, x0,y0,z0);
+        Fz = spec_interpolate(box, coeffs, r0,theta0,phi0);
         spec_Coeffs(box, psi, coeffs);
-        psiR = spec_interpolate(box, coeffs, x0,y0,z0);
+        psiR = spec_interpolate(box, coeffs, r0,theta0,phi0);
       }
     } /* end:     forallboxes(grid,b) */
     /* write force */
-    filenamelen = strlen(outdir) + strlen(name) + 200;
-    filename = cmalloc(filenamelen+1);
-    snprintf(filename, filenamelen, "%s/%s.txyz", outdir, name);
+    n = strlen(outdir) + strlen(name) + 200;
+    filename = cmalloc(n+1);
+    snprintf(filename, n, "%s/%s.txyz", outdir, name);
     fp = fopen(filename, "a");
     if(!fp) errorexits("failed opening %s", filename);
     fprintf(fp, "%.16g %.16g %.16g %.16g  ", t,x0,y0,z0);
