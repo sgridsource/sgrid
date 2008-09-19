@@ -6,8 +6,8 @@
 #include "DV_CircSchwSource/Constants.h"
 #include "DV_CircSchwSource/Source.h"
 
-//#define KSTIMESHIFT 2.772588722239781
-#define KSTIMESHIFT 1.204119982655925
+#define KSTIMESHIFT 2.772588722239781
+//#define KSTIMESHIFT 1.204119982655925
 
 tVarList *ScalarOnKerrvars;
 
@@ -1800,7 +1800,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
     char *filename;
     int filenamelen;
 
-printf("t=%g tKS=%g tSchw=%g\n", t,tKS,tSchw);
+//printf("t=%g tKS=%g tSchw=%g\n", t,tKS,tSchw);
     forallboxes(grid,b)
     {
       tBox *box = grid->box[b];
