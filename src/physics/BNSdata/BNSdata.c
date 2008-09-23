@@ -1743,29 +1743,19 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
 }
 
 /* compute rest mass in box bi = 0 or 3 */
+/* rest mass m_0 = \int d^3x \sqrt{g^{(3)}} rho_0 u^0 (-n_0),
+   where n_0 = -\alpha, and d^3x \sqrt{g^{(3)}} = d^3x Psi^6  */
 double GetInnerRestMass(tGrid *grid, int bi)
 {
-  double BNSdata_n = Getd("BNSdata_n");
-  double kappa     = Getd("BNSdata_kappa");
-  int b,i;
+  int iInteg = Ind("BNSdata_temp1");
 
-  /* set rho in BNSdata_temp1 */
-  forallboxes(grid, b)
-  {
-    double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
-    double *temp1     = grid->box[b]->v[Ind("BNSdata_temp1")];
-  
-    forallpoints(grid->box[b], i)
-    {
-      double q, rho0;
-      q = BNSdata_q[i];
-      if(q>=0.0) rho0 =  pow(q/kappa, BNSdata_n);
-      else       rho0 = -pow(fabs(q)/kappa, BNSdata_n);
-      temp1[i] = rho0;
-    }
-  }
+  /* set BNSdata_temp1 = Integ = rho_0 u^0 alpha */
+  BNS_set_restmassintegrand(grid, iInteg);
+  /* Integ is integrand for rest mass.
+     Note: all 3-volume element factors e.g. Psi^6 r^2 sin(theta)
+           are taken care of in InnerVolumeIntergral.
   /* get rest masses */
-  return InnerVolumeIntergral(grid, bi, Ind("BNSdata_temp1"));
+  return InnerVolumeIntergral(grid, bi, iInteg);
 }
 
 /* guess error in m01 from inner Volume int., but without adjusting

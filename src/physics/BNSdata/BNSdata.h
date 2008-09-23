@@ -17,6 +17,7 @@ void BNS_CTS(tVarList *vlFu, tVarList *vlu, tVarList *vlJdu,
 void BNS_compute_new_q(tGrid *grid);
 double BNS_compute_new_q_atXYZ(tGrid *grid, int bi,
                                double X, double Y, double Z);
+void BNS_set_restmassintegrand(tGrid *grid, int iInteg);
 
 /* for solving all ell. eqns together */
 void F_BNSdata(tVarList *vlFu, tVarList *vlu,
