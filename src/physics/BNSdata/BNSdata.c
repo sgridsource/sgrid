@@ -260,11 +260,6 @@ int BNSdata_solve(tGrid *grid)
 //write_grid(grid);
 //exit(11);
 
-  /* output grid before any iterations are done */
-  grid->time  = -itmax-1;
-  write_grid(grid);
-  grid->time += 1.0;
-
 //Yo(1);CheckIfFinite(grid,  "BNSdata_q");
 
   /* start main iterations */
@@ -275,6 +270,11 @@ int BNSdata_solve(tGrid *grid)
   F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
   normresnonlin = GridL2Norm(vlFu);
   Newton_tol = max2(normresnonlin*0.1, tol*0.1);
+
+  /* output grid before any iterations are done */
+  grid->time  = -itmax-1;
+  write_grid(grid);
+  grid->time += 1.0;
 
   /* main iteration loop, do it until res is small enough */
   for(it=1; it <= itmax; it++)
@@ -299,6 +299,11 @@ int BNSdata_solve(tGrid *grid)
     }
     else
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
+
+    /* write after elliptic solve, but before adjusting q */
+    grid->time -= 0.5;
+    write_grid(grid);
+    grid->time += 0.5;
 
     /* rest masses before adjusting q */
     m01 = GetInnerRestMass(grid, 0);
