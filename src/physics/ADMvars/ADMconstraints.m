@@ -5,7 +5,8 @@
 
 
 (* variables *)
-variables = {g[a,b], K[a,b], rho, j[a], S[a,b], psi, dpop[a], ddpop[a,b], 
+variables = {g[a,b], K[a,b], alpha, beta[a],
+             rho, j[a], S[a,b], psi, dpop[a], ddpop[a,b], 
              ham, mom[a], trK, dtrKdt, normham, normmom[a], 
              dg[a,b,c], ddg[a,b,c,d], dK[a,b,c]}
 
@@ -225,7 +226,7 @@ BeginCFunction[] := Module[{},
 variabledeclarations[] := Module[{},
 
   prdecvl[{psi, dpop[a], ddpop[a,b]}, "psiandderivs"];
-  prdecvl[{g[a,b], K[a,b], rho, j[a], S[a,b], ham, mom[a], trK, dtrKdt, normham, normmom[a]}, "u"];
+  prdecvl[{g[a,b], K[a,b], alpha, beta[a], rho, j[a], S[a,b], ham, mom[a], trK, dtrKdt, normham, normmom[a]}, "u"];
   prdecvarname[{dg[a,b,c]},    "ADMvars_dgxxx"];
   prdecvarname[{ddg[a,b,c,d]}, "ADMvars_ddgxxxx"];
   prdecvarname[{dK[a,b,c]},    "ADMvars_dKxxx"];

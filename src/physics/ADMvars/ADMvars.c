@@ -40,6 +40,8 @@ int computeADMconstraints(tGrid *grid)
     wl = vlalloc(grid);
     vlpush(wl, Ind("gxx"));
     vlpush(wl, Ind("Kxx"));
+    vlpush(wl, Ind("alpha"));
+    vlpush(wl, Ind("betax"));
     vlpush(wl, Ind("rho"));
     vlpush(wl, Ind("jx"));
     vlpush(wl, Ind("Sxx"));
