@@ -1,5 +1,5 @@
 /* ADMconstraints.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 21.1.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 25.9.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -65,10 +65,11 @@ double *mom1 = vlldataptr(u, box, 17);
 double *mom2 = vlldataptr(u, box, 18);
 double *mom3 = vlldataptr(u, box, 19);
 double *trK = vlldataptr(u, box, 20);
-double *normham = vlldataptr(u, box, 21);
-double *normmom1 = vlldataptr(u, box, 22);
-double *normmom2 = vlldataptr(u, box, 23);
-double *normmom3 = vlldataptr(u, box, 24);
+double *dtrKdt = vlldataptr(u, box, 21);
+double *normham = vlldataptr(u, box, 22);
+double *normmom1 = vlldataptr(u, box, 23);
+double *normmom2 = vlldataptr(u, box, 24);
+double *normmom3 = vlldataptr(u, box, 25);
 int index_ADMvars_dgxxx = Ind("ADMvars_dgxxx");
 double *dg111 = box->v[index_ADMvars_dgxxx + 0];
 double *dg112 = box->v[index_ADMvars_dgxxx + 1];
@@ -2980,4 +2981,4 @@ Cal(denom <= 0.,0.,mom3[ijk]/denom)
 }  /* end of function */
 
 /* ADMconstraints.c */
-/* nvars = 107, n* = 2000,  n/ = 36,  n+ = 1951, n = 3987, O = 1 */
+/* nvars = 108, n* = 2001,  n/ = 36,  n+ = 1951, n = 3988, O = 1 */

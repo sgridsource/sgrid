@@ -30,11 +30,11 @@ int sgrid_ADMvars()
   AddVar("S",   "(ij)", "S_{ij} = g_{ik} g_{jl} S^{kl}, S^{ab} = g^{ac} g^{bd} T_{cd}");
   
   /* vars to be computed */
-  AddVar("ham",   "",      "Hamiltonian constraint");
-  AddVar("mom",   "i",     "momentum constraint");
-  AddVar("trK",   "",
-	 "trace of extrinsic curvature tensor (for output)");
-  AddVar("E_ADM", "",      "ADM energy");
+  AddVar("ham",     "",      "Hamiltonian constraint");
+  AddVar("mom",     "i",     "momentum constraint");
+  AddVar("trK",     "", "trace of extrinsic curvature tensor (for output)");
+  AddVar("dtrK_dt", "", "time derivative of trK");
+  AddVar("E_ADM",   "",      "ADM energy");
 
   AddPar("ADMvars_normalizedConstraints", "no",
          "whether we compute normalized constraints [no,yes]");

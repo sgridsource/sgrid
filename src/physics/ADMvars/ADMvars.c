@@ -18,6 +18,8 @@ int computeADMconstraints(tGrid *grid)
   vlpush(vl, Ind("ham"));
   vlpush(vl, Ind("momx"));
   vlpush(vl, Ind("trK"));
+  vlpush(vl, Ind("dtrK_dt"));
+
   /* add normalzed constraints to list if ADMvars_normalizedConstraints=yes */
   if(Getv("ADMvars_normalizedConstraints", "yes"))
   {
