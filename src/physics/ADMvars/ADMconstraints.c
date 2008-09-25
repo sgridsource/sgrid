@@ -60,16 +60,22 @@ double *rho = vlldataptr(u, box, 12);
 double *j1 = vlldataptr(u, box, 13);
 double *j2 = vlldataptr(u, box, 14);
 double *j3 = vlldataptr(u, box, 15);
-double *ham = vlldataptr(u, box, 16);
-double *mom1 = vlldataptr(u, box, 17);
-double *mom2 = vlldataptr(u, box, 18);
-double *mom3 = vlldataptr(u, box, 19);
-double *trK = vlldataptr(u, box, 20);
-double *dtrKdt = vlldataptr(u, box, 21);
-double *normham = vlldataptr(u, box, 22);
-double *normmom1 = vlldataptr(u, box, 23);
-double *normmom2 = vlldataptr(u, box, 24);
-double *normmom3 = vlldataptr(u, box, 25);
+double *S11 = vlldataptr(u, box, 16);
+double *S12 = vlldataptr(u, box, 17);
+double *S13 = vlldataptr(u, box, 18);
+double *S22 = vlldataptr(u, box, 19);
+double *S23 = vlldataptr(u, box, 20);
+double *S33 = vlldataptr(u, box, 21);
+double *ham = vlldataptr(u, box, 22);
+double *mom1 = vlldataptr(u, box, 23);
+double *mom2 = vlldataptr(u, box, 24);
+double *mom3 = vlldataptr(u, box, 25);
+double *trK = vlldataptr(u, box, 26);
+double *dtrKdt = vlldataptr(u, box, 27);
+double *normham = vlldataptr(u, box, 28);
+double *normmom1 = vlldataptr(u, box, 29);
+double *normmom2 = vlldataptr(u, box, 30);
+double *normmom3 = vlldataptr(u, box, 31);
 int index_ADMvars_dgxxx = Ind("ADMvars_dgxxx");
 double *dg111 = box->v[index_ADMvars_dgxxx + 0];
 double *dg112 = box->v[index_ADMvars_dgxxx + 1];
@@ -1987,6 +1993,11 @@ trK[ijk]
 K
 ;
 
+dtrKdt[ijk]
+=
+42.
+;
+
 
 
 /* conditional */
@@ -2981,4 +2992,4 @@ Cal(denom <= 0.,0.,mom3[ijk]/denom)
 }  /* end of function */
 
 /* ADMconstraints.c */
-/* nvars = 108, n* = 2001,  n/ = 36,  n+ = 1951, n = 3988, O = 1 */
+/* nvars = 114, n* = 2007,  n/ = 36,  n+ = 1951, n = 3994, O = 1 */

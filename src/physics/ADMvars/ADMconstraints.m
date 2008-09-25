@@ -5,7 +5,7 @@
 
 
 (* variables *)
-variables = {g[a,b], K[a,b], rho, j[a], psi, dpop[a], ddpop[a,b], 
+variables = {g[a,b], K[a,b], rho, j[a], S[a,b], psi, dpop[a], ddpop[a,b], 
              ham, mom[a], trK, dtrKdt, normham, normmom[a], 
              dg[a,b,c], ddg[a,b,c,d], dK[a,b,c]}
 
@@ -70,8 +70,13 @@ tocompute = {
   momu[a] == ginv[a,b] cdKudd[c,b,d] delta[c,d] - ginv[b,c] cdKudd[a,b,c],
   mom[a] == f g[a,b] momu[b] - momrhs[a],
 
+  (* trace of extrinsic curvature *)
   trK == K,
 
+  (* time derivative of trace of extrinsic curvature *)
+  dtrKdt == 42,
+
+  (* compute normalized constraints *)
   Cif == normConstr,
 
     (* normalized Hamiltonian constraint *)
@@ -135,6 +140,7 @@ R[a_,b_]       := R[b,a] /; !OrderedQ[{a,b}]
 ginv[a_,b_]    := ginv[b,a] /; !OrderedQ[{a,b}]
 ddpop[a_,b_]   := ddpop[b,a] /; !OrderedQ[{a,b}]
 deldelf[a_,b_] := deldelf[b,a] /; !OrderedQ[{a,b}]
+S[a_,b_]       := S[b,a] /; !OrderedQ[{a,b}]
 
 delg[c_,a_,b_] := delg[c,b,a] /; !OrderedQ[{a,b}]
 delK[c_,a_,b_] := delK[c,b,a] /; !OrderedQ[{a,b}]
@@ -219,7 +225,7 @@ BeginCFunction[] := Module[{},
 variabledeclarations[] := Module[{},
 
   prdecvl[{psi, dpop[a], ddpop[a,b]}, "psiandderivs"];
-  prdecvl[{g[a,b], K[a,b], rho, j[a], ham, mom[a], trK, dtrKdt, normham, normmom[a]}, "u"];
+  prdecvl[{g[a,b], K[a,b], rho, j[a], S[a,b], ham, mom[a], trK, dtrKdt, normham, normmom[a]}, "u"];
   prdecvarname[{dg[a,b,c]},    "ADMvars_dgxxx"];
   prdecvarname[{ddg[a,b,c,d]}, "ADMvars_ddgxxxx"];
   prdecvarname[{dK[a,b,c]},    "ADMvars_dKxxx"];
