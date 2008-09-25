@@ -271,6 +271,9 @@ int BNSdata_solve(tGrid *grid)
   normresnonlin = GridL2Norm(vlFu);
   Newton_tol = max2(normresnonlin*0.1, tol*0.1);
 
+  /* compute diagnostics like ham and mom */
+  BNSdata_verify_solution(grid);
+  
   /* output grid before any iterations are done */
   grid->time  = -itmax-1;
   write_grid(grid);
@@ -299,6 +302,9 @@ int BNSdata_solve(tGrid *grid)
     }
     else
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
+
+    /* compute diagnostics like ham and mom */
+    BNSdata_verify_solution(grid);
 
     /* write after elliptic solve, but before adjusting q */
     grid->time -= 0.5;
@@ -485,6 +491,9 @@ int b;
     m02 = GetInnerRestMass(grid, 3);
     printf("     => m01=%.19g m02=%.19g\n", m01, m02);
 
+    /* compute diagnostics like ham and mom */
+    BNSdata_verify_solution(grid);
+
     /* evalute residual and break if it is small enough */
     F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
     normresnonlin = GridL2Norm(vlFu);
@@ -532,6 +541,27 @@ int setBNSdata(tGrid *grid)
 
   /* set all ADM vars */
   setADMvars(grid);
+
+  return 0;
+}
+
+/* compute absolute error in ANALYSIS */
+int BNSdata_verify_solution(tGrid *grid)
+{
+  /* enable all ADM vars */
+  enablevar(grid, Ind("gxx"));
+  enablevar(grid, Ind("alpha"));
+  enablevar(grid, Ind("betax"));
+  enablevar(grid, Ind("Kxx"));
+  enablevar(grid, Ind("rho"));
+  enablevar(grid, Ind("jx"));
+  enablevar(grid, Ind("Sxx"));
+
+  /* set all ADM vars */
+  setADMvars(grid);
+
+  /* compute constraint and other things that should be zero */
+  computeADMconstraints(grid);
 
   return 0;
 }

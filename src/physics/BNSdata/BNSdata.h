@@ -5,6 +5,7 @@
 /* main functions */
 int BNSdata_setup_boxsizes(tGrid *grid);
 int BNSdata_startup(tGrid *grid);
+int BNSdata_verify_solution(tGrid *grid);
 int BNSdata_analyze(tGrid *grid);
 int BNSdata_solve(tGrid *grid);
 int setBNSdata(tGrid *grid);
