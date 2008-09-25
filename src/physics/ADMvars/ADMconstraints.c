@@ -28,8 +28,14 @@ for(bi = 0; bi < grid->nboxes; bi++)
 tBox *box = grid->box[bi];
 int ijk;
 
-if(useDD) allDerivsOf_Sab(box, Ind("gxx"), Ind("ADMvars_dgxxx"),                                      Ind("ADMvars_ddgxxxx"));
-else FirstAndSecondDerivsOf_Sab(box, Ind("gxx"),Ind("ADMvars_dgxxx"),                                       Ind("ADMvars_ddgxxxx"));
+if(useDD) {
+  allDerivsOf_Sab(box, Ind("gxx"), Ind("ADMvars_dgxxx"),                         Ind("ADMvars_ddgxxxx"));
+  allDerivsOf_S(box, Ind("alpha"), Ind("ADMvars_dalpx"),                       Ind("ADMvars_ddalpxx"));
+}
+else {
+  FirstAndSecondDerivsOf_Sab(box, Ind("gxx"),Ind("ADMvars_dgxxx"),                                    Ind("ADMvars_ddgxxxx"));
+  FirstAndSecondDerivsOf_S(box, Ind("alpha"),Ind("ADMvars_dalpx"),                                  Ind("ADMvars_ddalpxx"));
+}
 FirstDerivsOf_Sab(box, Ind("Kxx"), Ind("ADMvars_dKxxx"));
 
 forallpoints(box, ijk)
@@ -155,7 +161,19 @@ double *dK233 = box->v[index_ADMvars_dKxxx + 14];
 double *dK331 = box->v[index_ADMvars_dKxxx + 15];
 double *dK332 = box->v[index_ADMvars_dKxxx + 16];
 double *dK333 = box->v[index_ADMvars_dKxxx + 17];
+int index_ADMvars_dalpx = Ind("ADMvars_dalpx");
+double *dalp1 = box->v[index_ADMvars_dalpx + 0];
+double *dalp2 = box->v[index_ADMvars_dalpx + 1];
+double *dalp3 = box->v[index_ADMvars_dalpx + 2];
+int index_ADMvars_ddalpxx = Ind("ADMvars_ddalpxx");
+double *ddalp11 = box->v[index_ADMvars_ddalpxx + 0];
+double *ddalp12 = box->v[index_ADMvars_ddalpxx + 1];
+double *ddalp13 = box->v[index_ADMvars_ddalpxx + 2];
+double *ddalp22 = box->v[index_ADMvars_ddalpxx + 3];
+double *ddalp23 = box->v[index_ADMvars_ddalpxx + 4];
+double *ddalp33 = box->v[index_ADMvars_ddalpxx + 5];
 
+double betadtrK;
 double denom;
 double detginvf;
 double f;
@@ -167,6 +185,17 @@ double RA;
 double RB;
 double RC;
 double RD;
+double Sminus3rho;
+double trcdda;
+double cdda11;
+double cdda12;
+double cdda13;
+double cdda21;
+double cdda22;
+double cdda23;
+double cdda31;
+double cdda32;
+double cdda33;
 double cdKdA1;
 double cdKdA2;
 double cdKdA3;
@@ -359,6 +388,9 @@ double delK333;
 double denom1;
 double denom2;
 double denom3;
+double dtrK1;
+double dtrK2;
+double dtrK3;
 double gamma111;
 double gamma112;
 double gamma113;
@@ -1997,9 +2029,115 @@ trK[ijk]
 K
 ;
 
+cdda11
+=
+-(gamma111*dalp1[ijk]) - gamma211*dalp2[ijk] - gamma311*dalp3[ijk] + 
+  ddalp11[ijk]
+;
+
+cdda12
+=
+-(gamma112*dalp1[ijk]) - gamma212*dalp2[ijk] - gamma312*dalp3[ijk] + 
+  ddalp12[ijk]
+;
+
+cdda13
+=
+-(gamma113*dalp1[ijk]) - gamma213*dalp2[ijk] - gamma313*dalp3[ijk] + 
+  ddalp13[ijk]
+;
+
+cdda21
+=
+-(gamma121*dalp1[ijk]) - gamma221*dalp2[ijk] - gamma321*dalp3[ijk] + 
+  ddalp12[ijk]
+;
+
+cdda22
+=
+-(gamma122*dalp1[ijk]) - gamma222*dalp2[ijk] - gamma322*dalp3[ijk] + 
+  ddalp22[ijk]
+;
+
+cdda23
+=
+-(gamma123*dalp1[ijk]) - gamma223*dalp2[ijk] - gamma323*dalp3[ijk] + 
+  ddalp23[ijk]
+;
+
+cdda31
+=
+-(gamma131*dalp1[ijk]) - gamma231*dalp2[ijk] - gamma331*dalp3[ijk] + 
+  ddalp13[ijk]
+;
+
+cdda32
+=
+-(gamma132*dalp1[ijk]) - gamma232*dalp2[ijk] - gamma332*dalp3[ijk] + 
+  ddalp23[ijk]
+;
+
+cdda33
+=
+-(gamma133*dalp1[ijk]) - gamma233*dalp2[ijk] - gamma333*dalp3[ijk] + 
+  ddalp33[ijk]
+;
+
+trcdda
+=
+cdda11*ginv11 + (cdda12 + cdda21)*ginv12 + (cdda13 + cdda31)*ginv13 + 
+  cdda22*ginv22 + (cdda23 + cdda32)*ginv23 + cdda33*ginv33
+;
+
+dtrK1
+=
+codelK111*ginv11 + codelK122*ginv22 + 
+  2.*(codelK112*ginv12 + codelK113*ginv13 + codelK123*ginv23) + 
+  codelK133*ginv33
+;
+
+dtrK2
+=
+codelK211*ginv11 + codelK222*ginv22 + 
+  2.*(codelK212*ginv12 + codelK213*ginv13 + codelK223*ginv23) + 
+  codelK233*ginv33
+;
+
+dtrK3
+=
+codelK311*ginv11 + codelK322*ginv22 + 
+  2.*(codelK312*ginv12 + codelK313*ginv13 + codelK323*ginv23) + 
+  codelK333*ginv33
+;
+
+betadtrK
+=
+dtrK1*beta1[ijk] + dtrK2*beta2[ijk] + dtrK3*beta3[ijk]
+;
+
+
+if(S11==NULL) { 
+
+Sminus3rho
+=
+0
+;
+
+
+} else { 
+
+Sminus3rho
+=
+-3.*rho[ijk] + ginv11*S11[ijk] + ginv22*S22[ijk] + 
+  2.*(ginv12*S12[ijk] + ginv13*S13[ijk] + ginv23*S23[ijk]) + ginv33*S33[ijk]
+;
+
+
+} 
+
 dtrKdt[ijk]
 =
-42.
+betadtrK - trcdda + alpha[ijk]*(R + 4.*PI*Sminus3rho + pow2(K))
 ;
 
 
@@ -2996,4 +3134,4 @@ Cal(denom <= 0.,0.,mom3[ijk]/denom)
 }  /* end of function */
 
 /* ADMconstraints.c */
-/* nvars = 118, n* = 2011,  n/ = 36,  n+ = 1951, n = 3998, O = 1 */
+/* nvars = 127, n* = 2088,  n/ = 36,  n+ = 2041, n = 4165, O = 1 */

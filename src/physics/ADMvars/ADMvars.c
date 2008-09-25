@@ -145,6 +145,8 @@ int allocateADMvars(tGrid *grid)
     enablevar(grid, Ind("ADMvars_dgxxx"));
     enablevar(grid, Ind("ADMvars_ddgxxxx"));
     enablevar(grid, Ind("ADMvars_dKxxx"));
+    enablevar(grid, Ind("ADMvars_dalpx"));
+    enablevar(grid, Ind("ADMvars_ddalpxx"));
   }
 
   /* enable temp1, temp2, temp3 */

@@ -8,7 +8,7 @@
 variables = {g[a,b], K[a,b], alpha, beta[a],
              rho, j[a], S[a,b], psi, dpop[a], ddpop[a,b], 
              ham, mom[a], trK, dtrKdt, normham, normmom[a], 
-             dg[a,b,c], ddg[a,b,c,d], dK[a,b,c]}
+             dg[a,b,c], ddg[a,b,c,d], dK[a,b,c], dalp[a], ddalp[a,b]}
 
 
 
@@ -75,7 +75,17 @@ tocompute = {
   trK == K,
 
   (* time derivative of trace of extrinsic curvature *)
-  dtrKdt == 42,
+  (* derivatives of the lapse *)
+  cdda[a,b] == ddalp[a,b] - gamma[c,a,b] dalp[c],
+  trcdda == ginv[a,b] cdda[a,b],
+  dtrK[a] == ginv[b,c] codelK[a,b,c],
+  betadtrK == beta[a] dtrK[a],
+  Cinstruction == "if(S11==NULL) {",
+    Sminus3rho == 0,
+  Cinstruction == "} else {",
+    Sminus3rho == ginv[a,b] S[a,b] - 3 rho,
+  Cinstruction == "}",
+  dtrKdt == -trcdda + alpha (R + K*K) + betadtrK + alpha * 4 PI Sminus3rho,
 
   (* compute normalized constraints *)
   Cif == normConstr,
@@ -147,6 +157,7 @@ delg[c_,a_,b_] := delg[c,b,a] /; !OrderedQ[{a,b}]
 delK[c_,a_,b_] := delK[c,b,a] /; !OrderedQ[{a,b}]
 deldelg[a_,b_,c_,d_] := deldelg[b,a,c,d] /; !OrderedQ[{a,b}]
 deldelg[a_,b_,c_,d_] := deldelg[a,b,d,c] /; !OrderedQ[{c,d}]
+ddalp[a_,b_]      := ddalp[b,a]    /; !OrderedQ[{a,b}]
 
 codelK[c_,a_,b_] := codelK[c,b,a] /; !OrderedQ[{a,b}]
 cdKudd[c_,a_,b_] := cdKudd[c,b,a] /; !OrderedQ[{a,b}]
@@ -208,10 +219,18 @@ BeginCFunction[] := Module[{},
   pr["tBox *box = grid->box[bi];\n"];
   pr["int ijk;\n\n"];
 
-  pr["if(useDD) allDerivsOf_Sab(box, Ind(\"gxx\"), Ind(\"ADMvars_dgxxx\"),
-                                     Ind(\"ADMvars_ddgxxxx\"));\n"];
-  pr["else FirstAndSecondDerivsOf_Sab(box, Ind(\"gxx\"),Ind(\"ADMvars_dgxxx\"),
-                                      Ind(\"ADMvars_ddgxxxx\"));\n"];
+  pr["if(useDD) {\n"];
+  pr["  allDerivsOf_Sab(box, Ind(\"gxx\"), Ind(\"ADMvars_dgxxx\"),
+                        Ind(\"ADMvars_ddgxxxx\"));\n"];
+  pr["  allDerivsOf_S(box, Ind(\"alpha\"), Ind(\"ADMvars_dalpx\"),
+                      Ind(\"ADMvars_ddalpxx\"));\n"];
+  pr["}\n"];
+  pr["else {\n"];
+  pr["  FirstAndSecondDerivsOf_Sab(box, Ind(\"gxx\"),Ind(\"ADMvars_dgxxx\"),
+                                   Ind(\"ADMvars_ddgxxxx\"));\n"];
+  pr["  FirstAndSecondDerivsOf_S(box, Ind(\"alpha\"),Ind(\"ADMvars_dalpx\"),
+                                 Ind(\"ADMvars_ddalpxx\"));\n"];
+  pr["}\n"];
   pr["FirstDerivsOf_Sab(box, Ind(\"Kxx\"), Ind(\"ADMvars_dKxxx\"));\n"];
   pr["\n"];
 
@@ -230,6 +249,8 @@ variabledeclarations[] := Module[{},
   prdecvarname[{dg[a,b,c]},    "ADMvars_dgxxx"];
   prdecvarname[{ddg[a,b,c,d]}, "ADMvars_ddgxxxx"];
   prdecvarname[{dK[a,b,c]},    "ADMvars_dKxxx"];
+  prdecvarname[{dalp[a]},      "ADMvars_dalpx"];
+  prdecvarname[{ddalp[a,b]},   "ADMvars_ddalpxx"];
 
 ];    
 (* auxillary variables are automatically inserted here *)

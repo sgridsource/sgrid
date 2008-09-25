@@ -75,6 +75,8 @@ int sgrid_ADMvars()
   AddVar("ADMvars_dg",  "(ij)k", "first partial derivs of a symmetric tensor");
   AddVar("ADMvars_ddg", "(ij)(kl)", "second part. derivs of a symm. tensor");
   AddVar("ADMvars_dK",  "(ij)k", "first partial derivs of a symmetric tensor");
+  AddVar("ADMvars_dalp",  "i",   "first partial derivs of a scalar");
+  AddVar("ADMvars_ddalp","(ij)", "second partial derivs of a scalar");
   AddVar("temp1", "", "temporary variable(e.g. to store derivs)");
   AddVar("temp2", "", "temporary variable(e.g. to store derivs)");
   AddVar("temp3", "", "temporary variable(e.g. to store derivs)");
