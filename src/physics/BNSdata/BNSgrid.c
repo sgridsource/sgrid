@@ -267,8 +267,8 @@ int set_boxsizes(tGrid *grid)
   /* set max A inside stars and adjust boxes4/5 accordingly */
   if(Getv("BNSdata_grid", "4ABphi_2xyz"))
   {
-    double box0_max1 = 0.85;
-    double box3_max1 = 0.85;
+    double box0_max1 = Getd("BNSdata_box0_Amax");
+    double box3_max1 = Getd("BNSdata_box3_Amax");
     double scal = 1.05; //1.551108723489246  /* make box4/5 5% larger than needed */
     double xr, xp, xm, xmax, xmin;
     double b = Coordinates_AnsorgNS_b;
