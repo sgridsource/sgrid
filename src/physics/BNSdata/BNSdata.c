@@ -178,6 +178,205 @@ int BNSdata_startup(tGrid *grid)
 }
 
 
+/* adjust C1/2 and Omega as in Pedro's NS ini dat paper */
+int adjust_C1_C2_Omega_Pedro(tGrid *grid, int it, double tol)
+{
+  double Cvec[3];
+  double m0errorvec[3];
+  double m01, m02, m0_error, dm01, dm02;
+  double Omega, dOmega=1e-3;; 
+  double L2norm1,L2norm2,L2norm3;
+  int check, stat, bi, i;
+
+  /* write after elliptic solve, but before adjusting q */
+  grid->time -= 0.5;
+  write_grid(grid);
+  grid->time += 0.5;
+
+  /* rest masses before adjusting q */
+  m01 = GetInnerRestMass(grid, 0);
+  m02 = GetInnerRestMass(grid, 3);
+  printf("BNSdata_solve: rest mass in inner domains before computing new q:\n"
+         "   m01=%g  m02=%g\n", m01, m02);
+
+//    /* set new q on grid */
+//    BNS_compute_new_q(grid);
+//
+//    /* compute masses after computing new q */
+//    m01 = GetInnerRestMass(grid, 0);
+//    m02 = GetInnerRestMass(grid, 3);
+//    printf("rest mass in inner domains after computing new q: "
+//           "m01=%g m02=%g\n", m01, m02);
+//
+//    /* compute masses after adjusting grid */
+//    compute_new_q_and_adjust_domainshapes(grid, 0);
+//    compute_new_q_and_adjust_domainshapes(grid, 3);
+//    m01 = GetInnerRestMass(grid, 0);
+//    m02 = GetInnerRestMass(grid, 3);
+//    printf("rest mass after adjusting grid to new q: "
+//           "m01=%g m02=%g\n", m01, m02);
+//
+  /* compute error in masses */
+  dm01 = m01 - Getd("BNSdata_m01");
+  dm02 = m02 - Getd("BNSdata_m02");
+  m0_error = dm01*dm01 + dm02*dm02;
+  m0_error = sqrt(m0_error)/(Getd("BNSdata_m01")+Getd("BNSdata_m02"));
+  printf("BNSdata_solve step %d: rest mass error = %.4e "
+         "(before adjusting C1/2)\n", it, m0_error);
+
+  /* save Omega */
+  Omega = Getd("BNSdata_Omega");
+  //dOmega= Omega * m0_error;
+  printf("BNSdata_solve step %d: old Omega = %.4e  dOmega = %.4e\n",
+         it, Getd("BNSdata_Omega"), dOmega);
+         
+  /* save old q in BNSdata_qold */
+  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+
+  /* compute L2-diff between new q and qold for Omega - dOmega */
+  Setd("BNSdata_Omega", Omega - dOmega);
+  BNS_compute_new_q(grid);
+  varadd(grid, Ind("BNSdata_temp1"), 
+             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+  L2norm3 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
+
+  /* compute L2-diff between new q and qold for Omega + dOmega */
+  Setd("BNSdata_Omega", Omega + dOmega);
+  BNS_compute_new_q(grid);
+  varadd(grid, Ind("BNSdata_temp1"), 
+             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+  L2norm2 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
+
+  /* compute L2-diff between new q and qold for Omega */
+  Setd("BNSdata_Omega", Omega);
+  BNS_compute_new_q(grid);
+  varadd(grid, Ind("BNSdata_temp1"), 
+             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+  L2norm1 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
+
+  printf("BNSdata_solve step %d: L2norm1=%g\n", it, L2norm1);
+  printf("BNSdata_solve step %d: L2norm2=%g\n", it, L2norm2);
+  printf("BNSdata_solve step %d: L2norm3=%g\n", it, L2norm3);
+  if(L2norm1<=L2norm2 && L2norm1<=L2norm3)
+  { Setd("BNSdata_Omega", Omega);  dOmega=dOmega*0.5; }
+  if(L2norm2<L2norm1  && L2norm2<=L2norm3) 
+    Setd("BNSdata_Omega", Omega+dOmega);
+  if(L2norm3<L2norm1  && L2norm3<L2norm2)
+    Setd("BNSdata_Omega", Omega-dOmega);
+  printf("BNSdata_solve step %d: new Omega = %.4e  dOmega = %.4e\n",
+         it, Getd("BNSdata_Omega"), dOmega);
+  BNS_compute_new_q(grid);
+  
+/*
+{
+int b;
+  forallboxes(grid, b)
+  {
+    double *t = grid->box[b]->v[Ind("BNSdata_temp1")];;
+    double *q = grid->box[b]->v[Ind("BNSdata_q")];;
+    double *qo = grid->box[b]->v[Ind("BNSdata_qold")];;
+    forallpoints(grid->box[b], i)
+    { t[i] = -(b+100);  q[i] = -(b+20);  qo[i] = -(b+30);}
+  }
+}
+*/
+
+  /* set desired masses for this iteration */
+  m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
+  m0_errors_VectorFunc__m02 = Getd("BNSdata_m02"); // + dm02*0.9;
+  printf("BNSdata_solve step %d: "
+         "adjusting q,C1,C2 to achieve: m01=%g  m02=%g\n",
+         it, m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02);
+
+  /* print C1/2 we used before */
+  printf("old: BNSdata_C1=%g BNSdata_C2=%g\n",
+         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+  printf("     => m01=%.19g m02=%.19g\n", m01, m02);
+
+  /* choose C1/2 such that rest masses are not too big or too small */
+  for(i=0; i<1000; i++)
+  {
+    double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
+    double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+
+    BNS_compute_new_q(grid);
+    m01 = GetInnerRestMass(grid, 0);
+    m02 = GetInnerRestMass(grid, 3);
+
+    check = 0;
+
+    if(m01 > 1.1*Getd("BNSdata_m01"))
+      { Setd("BNSdata_C1", 0.999*Getd("BNSdata_C1"));  check=1; }
+    else if(m01 < 0.9*Getd("BNSdata_m01"))
+      { Setd("BNSdata_C1", 1.002*Getd("BNSdata_C1"));  check=1; }
+
+    if(m02 > 1.1*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
+      { Setd("BNSdata_C2", 0.999*Getd("BNSdata_C2"));  check=1; }
+    else if(m02 < 0.9*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
+      { Setd("BNSdata_C2", 1.002*Getd("BNSdata_C2"));  check=1; }
+
+    if(check==0) break;
+  }
+
+  /* refine guess for C1/2 */
+  m0_errors_VectorFunc__grid = grid;
+  Cvec[1] = Getd("BNSdata_C1");
+  stat = newton_linesrch_its(Cvec, 1, &check, m01_guesserror_VectorFunc,
+                             30, max2(m0_error*0.1, tol*0.1));
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  Setd("BNSdata_C1", Cvec[1]);
+
+  Cvec[1] = Getd("BNSdata_C2");
+  if(Getd("BNSdata_m02")>0)
+    stat = newton_linesrch_its(Cvec, 1, &check, m02_guesserror_VectorFunc,
+                               30, max2(m0_error*0.1, tol*0.1));
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  Setd("BNSdata_C2", Cvec[1]);
+
+  /* print guess for C1/2 */                                        
+  printf("guess: BNSdata_C1=%g BNSdata_C2=%g\n",
+         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+//Yo(3);
+//CheckIfFinite(grid,  "BNSdata_q");
+
+  /**********************************************************************/
+  /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
+  /**********************************************************************/
+  m0_errors_VectorFunc__grid = grid;
+  /* adjust C1 and thus m01 */
+  Cvec[1] = Getd("BNSdata_C1");
+  stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
+                             1000, tol*0.01);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
+  Setd("BNSdata_C1", Cvec[1]);
+
+  /* adjust C2 and thus m02 */
+  Cvec[1] = Getd("BNSdata_C2");
+  if(Getd("BNSdata_m02")>0)
+    stat = newton_linesrch_its(Cvec, 1, &check, m02_error_VectorFunc,
+                               1000, tol*0.01);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
+  Setd("BNSdata_C2", Cvec[1]);
+  printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
+         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+
+  /* set q to zero if q<0, and also in region 1 & 2 */
+  forallboxes(grid, bi)
+  {
+    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+    forallpoints(grid->box[bi], i)
+      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+  }
+
+  /* print new masses */
+  m01 = GetInnerRestMass(grid, 0);
+  m02 = GetInnerRestMass(grid, 3);
+  printf("     => m01=%.19g m02=%.19g\n", m01, m02);
+
+  return 0;
+}
+
+
 /* Solve the Equations */
 int BNSdata_solve(tGrid *grid)
 {
@@ -195,12 +394,7 @@ int BNSdata_solve(tGrid *grid)
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
   tVarList *vldummy;
-  double Cvec[3];
-  double m0errorvec[3];
-  double m01, m02, m0_error, dm01, dm02;
-  double Omega, dOmega=1e-3;; 
-  double L2norm1,L2norm2,L2norm3;
-  int it, check, stat, bi, i;
+  int it;
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -306,190 +500,9 @@ int BNSdata_solve(tGrid *grid)
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
 
-    /* write after elliptic solve, but before adjusting q */
-    grid->time -= 0.5;
-    write_grid(grid);
-    grid->time += 0.5;
-
-    /* rest masses before adjusting q */
-    m01 = GetInnerRestMass(grid, 0);
-    m02 = GetInnerRestMass(grid, 3);
-    printf("BNSdata_solve: rest mass in inner domains before computing new q:\n"
-           "   m01=%g  m02=%g\n", m01, m02);
-
-//    /* set new q on grid */
-//    BNS_compute_new_q(grid);
-//
-//    /* compute masses after computing new q */
-//    m01 = GetInnerRestMass(grid, 0);
-//    m02 = GetInnerRestMass(grid, 3);
-//    printf("rest mass in inner domains after computing new q: "
-//           "m01=%g m02=%g\n", m01, m02);
-//
-//    /* compute masses after adjusting grid */
-//    compute_new_q_and_adjust_domainshapes(grid, 0);
-//    compute_new_q_and_adjust_domainshapes(grid, 3);
-//    m01 = GetInnerRestMass(grid, 0);
-//    m02 = GetInnerRestMass(grid, 3);
-//    printf("rest mass after adjusting grid to new q: "
-//           "m01=%g m02=%g\n", m01, m02);
-//
-    /* compute error in masses */
-    dm01 = m01 - Getd("BNSdata_m01");
-    dm02 = m02 - Getd("BNSdata_m02");
-    m0_error = dm01*dm01 + dm02*dm02;
-    m0_error = sqrt(m0_error)/(Getd("BNSdata_m01")+Getd("BNSdata_m02"));
-    printf("BNSdata_solve step %d: rest mass error = %.4e "
-           "(before adjusting C1/2)\n", it, m0_error);
-
-    /* save Omega */
-    Omega = Getd("BNSdata_Omega");
-    //dOmega= Omega * m0_error;
-    printf("BNSdata_solve step %d: old Omega = %.4e  dOmega = %.4e\n",
-           it, Getd("BNSdata_Omega"), dOmega);
-           
-    /* save old q in BNSdata_qold */
-    varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
-
-    /* compute L2-diff between new q and qold for Omega - dOmega */
-    Setd("BNSdata_Omega", Omega - dOmega);
-    BNS_compute_new_q(grid);
-    varadd(grid, Ind("BNSdata_temp1"), 
-               1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
-    L2norm3 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
-
-    /* compute L2-diff between new q and qold for Omega + dOmega */
-    Setd("BNSdata_Omega", Omega + dOmega);
-    BNS_compute_new_q(grid);
-    varadd(grid, Ind("BNSdata_temp1"), 
-               1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
-    L2norm2 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
-
-    /* compute L2-diff between new q and qold for Omega */
-    Setd("BNSdata_Omega", Omega);
-    BNS_compute_new_q(grid);
-    varadd(grid, Ind("BNSdata_temp1"), 
-               1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
-    L2norm1 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
-
-    printf("BNSdata_solve step %d: L2norm1=%g\n", it, L2norm1);
-    printf("BNSdata_solve step %d: L2norm2=%g\n", it, L2norm2);
-    printf("BNSdata_solve step %d: L2norm3=%g\n", it, L2norm3);
-    if(L2norm1<=L2norm2 && L2norm1<=L2norm3)
-    { Setd("BNSdata_Omega", Omega);  dOmega=dOmega*0.5; }
-    if(L2norm2<L2norm1  && L2norm2<=L2norm3) 
-      Setd("BNSdata_Omega", Omega+dOmega);
-    if(L2norm3<L2norm1  && L2norm3<L2norm2)
-      Setd("BNSdata_Omega", Omega-dOmega);
-    printf("BNSdata_solve step %d: new Omega = %.4e  dOmega = %.4e\n",
-           it, Getd("BNSdata_Omega"), dOmega);
-    BNS_compute_new_q(grid);
-    
-/*
-{
-int b;
-  forallboxes(grid, b)
-  {
-    double *t = grid->box[b]->v[Ind("BNSdata_temp1")];;
-    double *q = grid->box[b]->v[Ind("BNSdata_q")];;
-    double *qo = grid->box[b]->v[Ind("BNSdata_qold")];;
-    forallpoints(grid->box[b], i)
-    { t[i] = -(b+100);  q[i] = -(b+20);  qo[i] = -(b+30);}
-  }
-}
-*/
-
-    /* set desired masses for this iteration */
-    m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
-    m0_errors_VectorFunc__m02 = Getd("BNSdata_m02"); // + dm02*0.9;
-    printf("BNSdata_solve step %d: "
-           "adjusting q,C1,C2 to achieve: m01=%g  m02=%g\n",
-           it, m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02);
-
-    /* print C1/2 we used before */
-    printf("old: BNSdata_C1=%g BNSdata_C2=%g\n",
-           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
-    printf("     => m01=%.19g m02=%.19g\n", m01, m02);
-
-    /* choose C1/2 such that rest masses are not too big or too small */
-    for(i=0; i<1000; i++)
-    {
-      double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
-      double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
-
-      BNS_compute_new_q(grid);
-      m01 = GetInnerRestMass(grid, 0);
-      m02 = GetInnerRestMass(grid, 3);
-
-      check = 0;
-
-      if(m01 > 1.1*Getd("BNSdata_m01"))
-        { Setd("BNSdata_C1", 0.999*Getd("BNSdata_C1"));  check=1; }
-      else if(m01 < 0.9*Getd("BNSdata_m01"))
-        { Setd("BNSdata_C1", 1.002*Getd("BNSdata_C1"));  check=1; }
-
-      if(m02 > 1.1*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
-        { Setd("BNSdata_C2", 0.999*Getd("BNSdata_C2"));  check=1; }
-      else if(m02 < 0.9*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
-        { Setd("BNSdata_C2", 1.002*Getd("BNSdata_C2"));  check=1; }
-
-      if(check==0) break;
-    }
-
-    /* refine guess for C1/2 */
-    m0_errors_VectorFunc__grid = grid;
-    Cvec[1] = Getd("BNSdata_C1");
-    stat = newton_linesrch_its(Cvec, 1, &check, m01_guesserror_VectorFunc,
-                               30, max2(m0_error*0.1, tol*0.1));
-    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-    Setd("BNSdata_C1", Cvec[1]);
-
-    Cvec[1] = Getd("BNSdata_C2");
-    if(Getd("BNSdata_m02")>0)
-      stat = newton_linesrch_its(Cvec, 1, &check, m02_guesserror_VectorFunc,
-                                 30, max2(m0_error*0.1, tol*0.1));
-    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-    Setd("BNSdata_C2", Cvec[1]);
-
-    /* print guess for C1/2 */                                        
-    printf("guess: BNSdata_C1=%g BNSdata_C2=%g\n",
-           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
-//Yo(3);
-//CheckIfFinite(grid,  "BNSdata_q");
-
-    /**********************************************************************/
-    /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
-    /**********************************************************************/
-    m0_errors_VectorFunc__grid = grid;
-    /* adjust C1 and thus m01 */
-    Cvec[1] = Getd("BNSdata_C1");
-    stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
-                               1000, tol*0.01);
-    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
-    Setd("BNSdata_C1", Cvec[1]);
-
-    /* adjust C2 and thus m02 */
-    Cvec[1] = Getd("BNSdata_C2");
-    if(Getd("BNSdata_m02")>0)
-      stat = newton_linesrch_its(Cvec, 1, &check, m02_error_VectorFunc,
-                                 1000, tol*0.01);
-    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
-    Setd("BNSdata_C2", Cvec[1]);
-    printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
-           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
-
-    /* set q to zero if q<0, and also in region 1 & 2 */
-    forallboxes(grid, bi)
-    {
-      double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-      forallpoints(grid->box[bi], i)
-        if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-    }
-
-    /* print new masses */
-    m01 = GetInnerRestMass(grid, 0);
-    m02 = GetInnerRestMass(grid, 3);
-    printf("     => m01=%.19g m02=%.19g\n", m01, m02);
+    /* adjust C1/2 according to Pedro's algorithm. This yields
+       a new q as well.  Note: THIS FAILS!!! */
+    adjust_C1_C2_Omega_Pedro(grid, it, tol);
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
