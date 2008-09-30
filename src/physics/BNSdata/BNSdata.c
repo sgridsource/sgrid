@@ -179,7 +179,7 @@ int BNSdata_startup(tGrid *grid)
 
 
 /* adjust C1/2 and Omega as in Pedro's NS ini dat paper */
-int adjust_C1_C2_Omega_Pedro(tGrid *grid, int it, double tol)
+int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
 {
   double Cvec[3];
   double m0errorvec[3];
@@ -502,7 +502,7 @@ int BNSdata_solve(tGrid *grid)
 
     /* adjust C1/2 according to Pedro's algorithm. This yields
        a new q as well.  Note: THIS FAILS!!! */
-    adjust_C1_C2_Omega_Pedro(grid, it, tol);
+    adjust_C1_C2_Omega_q_Pedro(grid, it, tol);
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
