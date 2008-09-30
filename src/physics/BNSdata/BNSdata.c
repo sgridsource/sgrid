@@ -188,11 +188,6 @@ int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
   double L2norm1,L2norm2,L2norm3;
   int check, stat, bi, i;
 
-  /* write after elliptic solve, but before adjusting q */
-  grid->time -= 0.5;
-  write_grid(grid);
-  grid->time += 0.5;
-
   /* rest masses before adjusting q */
   m01 = GetInnerRestMass(grid, 0);
   m02 = GetInnerRestMass(grid, 3);
@@ -499,6 +494,11 @@ int BNSdata_solve(tGrid *grid)
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
+
+    /* write after elliptic solve, but before adjusting q */
+    grid->time -= 0.5;
+    write_grid(grid);
+    grid->time += 0.5;
 
     /* adjust C1/2 according to Pedro's algorithm. This yields
        a new q as well.  Note: THIS FAILS!!! */
