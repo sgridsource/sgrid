@@ -49,6 +49,8 @@ int sgrid_BNSdata()
   /* parameters */
   AddPar("BNSdata_m01",   "0.141202", "rest mass of NS1");
   AddPar("BNSdata_m02",   "0.141202", "rest mass of NS2");
+  AddPar("BNSdata_qmax1", "0", "max q of NS1 along x-axis");
+  AddPar("BNSdata_qmax2", "0", "max q of NS2 along x-axis");
   AddPar("BNSdata_Omega", "0",  "orbital angular velocity");
   AddPar("BNSdata_b",     "1",  "separation parameter (distance~2b)");
   AddPar("BNSdata_n",     "1",  "polytropic index n, Gamma = 1 + 1/n");
