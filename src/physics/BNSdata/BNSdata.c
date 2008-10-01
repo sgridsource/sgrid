@@ -180,8 +180,13 @@ int BNSdata_startup(tGrid *grid)
                         pow(P_core1, 1.0/(1.0 + BNSdata_n)));
   Setd("BNSdata_qmax2", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
                         pow(P_core2, 1.0/(1.0 + BNSdata_n)));
-  printf("BNSdata_startup: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n",
-         Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"));
+  /* set cart positions of qmax1/2 */
+  Setd("BNSdata_xmax1", xc1);
+  Setd("BNSdata_xmax2", xc2);
+  printf("BNSdata_startup: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
+         "                 BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
+         Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
+         Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
 
   return 0;
 }
@@ -389,6 +394,8 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
   double m01, m02;
   int check, stat, bi, i;
 
+//Setd("BNSdata_Omega", 0.01);
+
   /* save old q in BNSdata_qold */
   varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
 
@@ -415,7 +422,7 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
   C1OC2xCMvec[3] = Getd("BNSdata_C2");
   C1OC2xCMvec[4] = Getd("BNSdata_x_CM");
 printf("HACK: for now we adjust only C1 and Omega, and set C2=C1, xCM=0\n");
-  stat = newton_linesrch_its(C1OC2xCMvec, 1, &check,
+  stat = newton_linesrch_its(C1OC2xCMvec, 2, &check,
                              central_q_errors_VectorFunc, 1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C1", C1OC2xCMvec[1]);
@@ -2112,12 +2119,148 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
 }
 
 
+/* find value fvec[1] of dq on x-axis at X=vec[1] by interpolation */
+/* Note: before we can use this, we have to set
+   grid->box[0]->v[Ind("BNSdata_temp3")][0] = bi;
+   grid->box[0]->v[Ind("BNSdata_temp3")][2] = Y; */
+void dq_dx_along_x_axis_VectorFunc(int n, double *vec, double *fvec)
+{
+  tGrid *grid = central_q_errors_VectorFunc__grid;
+  int bi = grid->box[0]->v[Ind("BNSdata_temp3")][0]; /* I abused BNSdata_temp3 to store bi,Y */
+  tBox *box = grid->box[bi];
+  double *c = box->v[Ind("BNSdata_temp2")]; /* coeffs of dq_dx */
+  double X = vec[1];
+  double Y = grid->box[0]->v[Ind("BNSdata_temp3")][2];
+  fvec[1] = spec_interpolate(box, c, X,Y,0);
+//  printf("     at (bi=%d X=%g Y=%g) dq_dx=%g\n", bi, X,Y, fvec[1]);
+}
+
+/* find max q along x-axis */
+void find_qmax1_along_x_axis(int *bi, double *X, double *Y)
+{
+  tGrid *grid = central_q_errors_VectorFunc__grid;
+  int b;
+  int bi_guess = *bi;
+  double *dqin, *dqout;
+  double dq1,dq2;
+  double Xvec[2];
+  int stat, check;
+
+  /* get deriv dq of q in all boxes in BNSdata_temp1
+     and dq's coeffs c in BNSdata_temp2 */
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    double *q = box->v[Ind("BNSdata_q")];
+    double *dq= box->v[Ind("BNSdata_temp1")];
+    double *c = box->v[Ind("BNSdata_temp2")];
+    spec_Deriv1(box, 1, q, dq);
+    spec_Coeffs(box, dq, c);
+  }
+
+  /* look at NS1 */
+  if(bi_guess==0)
+  {
+    tBox *box;
+    double *dq, *c;
+
+    *bi = -1; /* boxindex with dq=0 not yet found */
+
+    /* look in box0 at B=0 */
+    box = grid->box[0];
+    dq = box->v[Ind("BNSdata_temp1")];
+    dq1 = dq[Ind_n1n2(2, 0, 0,         box->n1,box->n2)];
+    dq2 = dq[Ind_n1n2(box->n1-1, 0, 0, box->n1,box->n2)];
+//double *q = box->v[Ind("X")];
+//for(b=0;b<box->n1;b++)
+//printf("q=%g dq=%g\n",
+//q[Ind_n1n2(b, 0, 0, box->n1,box->n2)],
+//dq[Ind_n1n2(b, 0, 0, box->n1,box->n2)]);
+    if(dq1*dq2<=0)  { *bi = 0;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; /* <--B=0 */ }
+    
+    if(*bi<0) /* boxindex *bi with dq=0 not yet found */
+    {
+      /* look in box0 at B=1 */
+      box = grid->box[0];
+      dq = box->v[Ind("BNSdata_temp1")];
+      dq1 = dq[Ind_n1n2(2, box->n2-1, 0,         box->n1,box->n2)];
+      dq2 = dq[Ind_n1n2(box->n1-1, box->n2-1, 0, box->n1,box->n2)];
+      if(dq1*dq2<=0)  { *bi = 0;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=1.0; /* <--B=1 */ }
+    }
+    if(*bi<0) /* boxindex *bi with dq=0 not yet found */
+    {
+      /* look in box5 */
+      box = grid->box[5];
+      c = box->v[Ind("BNSdata_temp2")];
+      dq1 = spec_interpolate(box, c, box->bbox[0],0,0);
+      dq2 = spec_interpolate(box, c, box->bbox[1],0,0);
+      if(dq1*dq2<=0)  { *bi = 5;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; }
+    }
+    if(*bi<0) errorexit("could not find max of q in NS1");
+  }
+  /* look at NS2 */
+  else if(bi_guess==3)
+  {
+    tBox *box;
+    double *dq, *c;
+
+    *bi = -1; /* boxindex with dq=0 not yet found */
+
+    /* look in box3 at B=0 */
+    box = grid->box[3];
+    dq = box->v[Ind("BNSdata_temp1")];
+    dq1 = dq[Ind_n1n2(2, 0, 0,         box->n1,box->n2)];
+    dq2 = dq[Ind_n1n2(box->n1-1, 0, 0, box->n1,box->n2)];
+    if(dq1*dq2<=0)  { *bi = 3;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; /* <--B=0 */ }
+    
+    if(*bi<0) /* boxindex *bi with dq=0 not yet found */
+    {
+      /* look in box3 at B=1 */
+      box = grid->box[3];
+      dq = box->v[Ind("BNSdata_temp1")];
+      dq1 = dq[Ind_n1n2(2, box->n2-1, 0,         box->n1,box->n2)];
+      dq2 = dq[Ind_n1n2(box->n1-1, box->n2-1, 0, box->n1,box->n2)];
+      if(dq1*dq2<=0)  { *bi = 3;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=1.0; /* <--B=1 */ }
+    }
+    if(*bi<0) /* boxindex *bi with dq=0 not yet found */
+    {
+      /* look in box4 */
+      box = grid->box[4];
+      c = box->v[Ind("BNSdata_temp2")];
+      dq1 = spec_interpolate(box, c, box->bbox[0],0,0);
+      dq2 = spec_interpolate(box, c, box->bbox[1],0,0);
+      if(dq1*dq2<=0)  { *bi = 4;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; }
+    }
+    if(*bi<0) errorexit("could not find max of q in NS2");
+  }
+  else errorexit("bi_guess has to be 0 or 3");
+
+//  /* print guesses */
+//  printf("  bi_guess=%d -> guesses: *bi=%d *X=%g *Y=%g\n",
+//         bi_guess, *bi, *X, *Y);
+
+  /* save *bi, *X, *Y in BNSdata_temp3 */
+  grid->box[0]->v[Ind("BNSdata_temp3")][0] = *bi;
+  grid->box[0]->v[Ind("BNSdata_temp3")][1] = *X;
+  grid->box[0]->v[Ind("BNSdata_temp3")][2] = *Y;
+  
+  /* use newton_linesrch_its to find xmax1 */
+  Xvec[1] = *X;
+  stat = newton_linesrch_its(Xvec, 1, &check,
+                             dq_dx_along_x_axis_VectorFunc, 1000, dequaleps);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  *X = Xvec[1];
+  printf("  bi_guess=%d -> qmax is at: *bi=%d *X=%g *Y=%g\n",
+         bi_guess, *bi, *X, *Y);
+}
+
 /* compute deviation in desired central q value and location */
 void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
 {
   tGrid *grid = central_q_errors_VectorFunc__grid;
-  double qmax1, xmax1;
-  double qmax2, xmax2;
+  int bi1, bi2;
+  double qmax1, Xmax1, Ymax1, xmax1;
+  double qmax2, Xmax2, Ymax2, xmax2;
 
   /* set constants */
   Setd("BNSdata_C1", vec[1]);
@@ -2129,24 +2272,43 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
   BNS_compute_new_q(grid);
 
   /* find max q locations xmax1/2 in NS1/2 */
-  // need to find max q along x-axis
-xmax1=Getd("BNSdata_b"); // <--for now
-xmax2=-xmax1;
+  bi1=0;  bi2=3;
+  find_qmax1_along_x_axis(&bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(&bi2, &Xmax2, &Ymax2);
 
   /* compute qmax1 and qmax2 */
-  qmax1 = BNS_compute_new_q_atXYZ(grid, 5, xmax1,0,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, 4, xmax2,0,0);
+  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
 
-  printf("central_q_errors_VectorFunc: C1=%g Omega=%g  qmax1=%g xmax1=%g\n",
-         vec[1], vec[2], qmax1, xmax1);
-  printf("central_q_errors_VectorFunc: C2=%g xCM=%g    qmax2=%g xmax2=%g\n",
-         vec[3], vec[4], qmax2, xmax2);
+  printf("central_q_errors_VectorFunc: C1=%.6g Omega=%.6g  "
+         "qmax1=%.6g Xmax1=%.6g Ymax1=%.6g\n",
+         vec[1], vec[2], qmax1, Xmax1, Ymax1);
+  printf("central_q_errors_VectorFunc: C2=%.6g xCM=%.6g    "
+         "qmax2=%.6g Xmax2=%.6g Ymax2=%.6g\n",
+         vec[3], vec[4], qmax2, Xmax2, Ymax2);
   fflush(stdout);
 //grid->time=-100;
 //write_grid(grid);
 
+  /* compute Cartesian xmax1 */
+  if(bi1==0)
+  {
+    tBox *box = grid->box[bi1];
+    xmax1 = box->x_of_X[1]((void *) box, -1, Xmax1,Ymax1,0);
+  }
+  else xmax1 = Xmax1;
+
+  /* compute Cartesian xmax2 */
+  if(bi2==0)
+  {
+    tBox *box = grid->box[bi2];
+    xmax2 = box->x_of_X[1]((void *) box, -1, Xmax2,Ymax2,0);
+  }
+  else xmax2 = Xmax2;
+
+  /* set fvec */
   fvec[1] = qmax1 - Getd("BNSdata_qmax1");
-//  fvec[2] = xmax1 - Getd("BNSdata_b");
+  fvec[2] = xmax1 - Getd("BNSdata_xmax1");
 //  fvec[3] = qmax2 - Getd("BNSdata_qmax2");
-//  fvec[4] = xmax2 + Getd("BNSdata_b");
+//  fvec[4] = xmax2 - Getd("BNSdata_xmax2");
 }
