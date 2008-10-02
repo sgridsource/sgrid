@@ -421,17 +421,17 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
   C1OC2xCMvec[2] = Getd("BNSdata_Omega");
   C1OC2xCMvec[3] = Getd("BNSdata_C2");
   C1OC2xCMvec[4] = Getd("BNSdata_x_CM");
-printf("HACK: for now we adjust only C1 and Omega, and set C2=C1, xCM=0\n");
-  stat = newton_linesrch_its(C1OC2xCMvec, 2, &check,
+//printf("HACK: for now we adjust only C1 and Omega, and set C2=C1, xCM=0\n");
+  stat = newton_linesrch_its(C1OC2xCMvec, 4, &check,
                              central_q_errors_VectorFunc, 1000, tol*0.01);
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   Setd("BNSdata_C1", C1OC2xCMvec[1]);
   Setd("BNSdata_Omega", C1OC2xCMvec[2]);
   Setd("BNSdata_C2", C1OC2xCMvec[3]);
   Setd("BNSdata_x_CM", C1OC2xCMvec[4]);
 
-printf("HACK: skip adjust C2, and set C2=C1\n");
-Setd("BNSdata_C2", C1OC2xCMvec[1]);
+//printf("HACK: skip adjust C2, and set C2=C1\n");
+//Setd("BNSdata_C2", C1OC2xCMvec[1]);
 
   printf("new: BNSdata_C1=%g BNSdata_Omega=%g BNSdata_C2=%g BNSdata_x_CM=%g\n",
          Getd("BNSdata_C1"), Getd("BNSdata_Omega"), 
@@ -2171,9 +2171,11 @@ void find_qmax1_along_x_axis(int *bi, double *X, double *Y)
     dq = box->v[Ind("BNSdata_temp1")];
     dq1 = dq[Ind_n1n2(2, 0, 0,         box->n1,box->n2)];
     dq2 = dq[Ind_n1n2(box->n1-1, 0, 0, box->n1,box->n2)];
-//double *q = box->v[Ind("X")];
+//double *q = box->v[Ind("BNSdata_q")];
+//double *Xp = box->v[Ind("X")];
 //for(b=0;b<box->n1;b++)
-//printf("q=%g dq=%g\n",
+//printf("X=%g q=%g dq=%g\n",
+//Xp[Ind_n1n2(b, 0, 0, box->n1,box->n2)],
 //q[Ind_n1n2(b, 0, 0, box->n1,box->n2)],
 //dq[Ind_n1n2(b, 0, 0, box->n1,box->n2)]);
     if(dq1*dq2<=0)  { *bi = 0;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; /* <--B=0 */ }
@@ -2267,6 +2269,8 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
   Setd("BNSdata_Omega", vec[2]);
   Setd("BNSdata_C2", vec[3]);
   Setd("BNSdata_x_CM", vec[4]);
+  printf("central_q_errors_VectorFunc: C1=%.6g Omega=%.6g C2=%.6g xCM=%.6g\n",
+         vec[1], vec[2], vec[3], vec[4]);
 
   /* compute new q */
   BNS_compute_new_q(grid);
@@ -2280,16 +2284,6 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
   qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
   qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
 
-  printf("central_q_errors_VectorFunc: C1=%.6g Omega=%.6g  "
-         "qmax1=%.6g Xmax1=%.6g Ymax1=%.6g\n",
-         vec[1], vec[2], qmax1, Xmax1, Ymax1);
-  printf("central_q_errors_VectorFunc: C2=%.6g xCM=%.6g    "
-         "qmax2=%.6g Xmax2=%.6g Ymax2=%.6g\n",
-         vec[3], vec[4], qmax2, Xmax2, Ymax2);
-  fflush(stdout);
-//grid->time=-100;
-//write_grid(grid);
-
   /* compute Cartesian xmax1 */
   if(bi1==0)
   {
@@ -2299,7 +2293,7 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
   else xmax1 = Xmax1;
 
   /* compute Cartesian xmax2 */
-  if(bi2==0)
+  if(bi2==3)
   {
     tBox *box = grid->box[bi2];
     xmax2 = box->x_of_X[1]((void *) box, -1, Xmax2,Ymax2,0);
@@ -2309,6 +2303,15 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
   /* set fvec */
   fvec[1] = qmax1 - Getd("BNSdata_qmax1");
   fvec[2] = xmax1 - Getd("BNSdata_xmax1");
-//  fvec[3] = qmax2 - Getd("BNSdata_qmax2");
-//  fvec[4] = xmax2 - Getd("BNSdata_xmax2");
+  fvec[3] = qmax2 - Getd("BNSdata_qmax2");
+  fvec[4] = xmax2 - Getd("BNSdata_xmax2");
+
+  /* print results */
+  printf(" qmax1=%.6g xmax1=%g (X=%.6g Y=%.6g) fvec[1]=%g fvec[2]=%g\n",
+         qmax1, xmax1, Xmax1, Ymax1, fvec[1], fvec[2]);
+  printf(" qmax2=%.6g xmax2=%g (X=%.6g Y=%.6g) fvec[3]=%g fvec[4]=%g\n",
+         qmax2, xmax2, Xmax2, Ymax2, fvec[3], fvec[4]);
+  fflush(stdout);
+//grid->time=-100;
+//write_grid(grid);
 }
