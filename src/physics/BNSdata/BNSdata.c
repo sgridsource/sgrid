@@ -195,12 +195,12 @@ int BNSdata_startup(tGrid *grid)
 
 /* adjust C1/2 and Omega as in Pedro's NS ini dat paper.
    BUT with this algorithm the iterations fail... */
-int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
+int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol, double dOmega)
 {
   double Cvec[3];
   double m0errorvec[3];
   double m01, m02, m0_error, dm01, dm02;
-  double Omega, dOmega=1e-3;; 
+  double Omega; 
   double L2norm1,L2norm2,L2norm3;
   int check, stat, bi, i;
 
@@ -433,6 +433,9 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
 //  C1OC2xCMvec[4] = Getd("BNSdata_x_CM");
 //  stat = newton_linesrch_its(C1OC2xCMvec, 3, &check,
 //                             central_q_errors_VectorFunc, 1000, tol*0.01);
+//  // or maybe:
+//  //stat = newton_linesrch_its(C1OC2xCMvec, 4, &check,
+//  //                           central_q_errors_VectorFunc, 1000, tol*0.01);
 //  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
 //  Setd("BNSdata_C1", C1OC2xCMvec[1]);
 //  Setd("BNSdata_Omega", C1OC2xCMvec[2]);
@@ -609,7 +612,7 @@ if(0)
 {
     /* adjust C1/2 according to Pedro's algorithm. This yields
        a new q as well.  Note: THIS FAILS!!! */
-    adjust_C1_C2_Omega_q_Pedro(grid, it, tol);
+    adjust_C1_C2_Omega_q_Pedro(grid, it, tol, 1e-3);
 }
     /* adjust C1/2, Omega, xCM according to BGM */
     adjust_C1_C2_Omega_q_BGM(grid, it, tol);
