@@ -53,3 +53,7 @@ double BNS_update_q_atXYZ(tGrid *grid2,
                           int b2, double X2, double Y2, double Z2,
                           double w, tGrid *grid1);
 void BNS_update_q(tGrid *grid2, double w, tGrid *grid1);
+void BNSgrid_init_Coords(tGrid *grid);
+void BNSgrid_copy_DomainShape(tGrid *grid, int ibd);
+void BNSgrid_set_Var_equalmasses_sym(tGrid *grid, int ibd, int iv, int sym);
+void BNSgrid_set_allVars_onLeft_equalmasses(tGrid *grid);

@@ -48,6 +48,7 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec);
 void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom);
 void m01_error_VectorFunc(int n, double *vec, double *fvec);
 void m02_error_VectorFunc(int n, double *vec, double *fvec);
+void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y);
 void central_q_errors_VectorFunc(int n, double *vec, double *fvec);
 void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec);
 
@@ -195,12 +196,12 @@ int BNSdata_startup(tGrid *grid)
 
 /* adjust C1/2 and Omega as in Pedro's NS ini dat paper.
    BUT with this algorithm the iterations fail... */
-int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol, double dOmega)
+int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
 {
   double Cvec[3];
   double m0errorvec[3];
   double m01, m02, m0_error, dm01, dm02;
-  double Omega; 
+  double Omega, dOmega=1e-3; 
   double L2norm1,L2norm2,L2norm3;
   int check, stat, bi, i;
 
@@ -469,6 +470,212 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
   return 0;
 }
 
+/* Adjust C1/2 and thus by demanding that m01 and m02 stay the same. */
+int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
+{
+  double Cvec[3];
+  double m0errorvec[3];
+  double m01, m02, m0_error, dm01, dm02;
+  int check, stat, bi, i;
+
+  /* rest masses before adjusting q */
+  m01 = GetInnerRestMass(grid, 0);
+  m02 = GetInnerRestMass(grid, 3);
+  printf(" BNSdata_solve: rest mass in inner domains before computing new q:\n"
+         "    m01=%g  m02=%g\n", m01, m02);
+
+  /* compute error in masses */
+  dm01 = m01 - Getd("BNSdata_m01");
+  dm02 = m02 - Getd("BNSdata_m02");
+  m0_error = dm01*dm01 + dm02*dm02;
+  m0_error = sqrt(m0_error)/(Getd("BNSdata_m01")+Getd("BNSdata_m02"));
+  printf(" BNSdata_solve step %d: rest mass error = %.4e "
+         "(before adjusting C1/2)\n", it, m0_error);
+
+  /* set desired masses for this iteration */
+  m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
+  m0_errors_VectorFunc__m02 = Getd("BNSdata_m02"); // + dm02*0.9;
+  printf(" BNSdata_solve step %d: "
+         "adjusting q,C1,C2 to achieve: m01=%g  m02=%g\n",
+         it, m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02);
+
+  /* print C1/2 we used before */
+  printf("old: BNSdata_C1=%g BNSdata_C2=%g\n",
+         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+  printf("     => m01=%.19g m02=%.19g\n", m01, m02);
+
+  /* choose C1/2 such that rest masses are not too big or too small */
+  for(i=0; i<1000; i++)
+  {
+    double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
+    double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+
+    BNS_compute_new_q(grid);
+    m01 = GetInnerRestMass(grid, 0);
+    m02 = GetInnerRestMass(grid, 3);
+
+    check = 0;
+
+    if(m01 > 1.1*Getd("BNSdata_m01"))
+      { Setd("BNSdata_C1", 0.999*Getd("BNSdata_C1"));  check=1; }
+    else if(m01 < 0.9*Getd("BNSdata_m01"))
+      { Setd("BNSdata_C1", 1.002*Getd("BNSdata_C1"));  check=1; }
+
+    if(m02 > 1.1*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
+      { Setd("BNSdata_C2", 0.999*Getd("BNSdata_C2"));  check=1; }
+    else if(m02 < 0.9*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
+      { Setd("BNSdata_C2", 1.002*Getd("BNSdata_C2"));  check=1; }
+
+    if(check==0) break;
+  }
+
+  /* refine guess for C1/2 */
+  m0_errors_VectorFunc__grid = grid;
+  Cvec[1] = Getd("BNSdata_C1");
+  stat = newton_linesrch_its(Cvec, 1, &check, m01_guesserror_VectorFunc,
+                             30, max2(m0_error*0.1, tol*0.1));
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  Setd("BNSdata_C1", Cvec[1]);
+
+  Cvec[1] = Getd("BNSdata_C2");
+  if(Getd("BNSdata_m02")>0)
+    stat = newton_linesrch_its(Cvec, 1, &check, m02_guesserror_VectorFunc,
+                               30, max2(m0_error*0.1, tol*0.1));
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  Setd("BNSdata_C2", Cvec[1]);
+
+  /* print guess for C1/2 */                                        
+  printf("guess: BNSdata_C1=%g BNSdata_C2=%g\n",
+         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+
+  /**********************************************************************/
+  /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
+  /**********************************************************************/
+  m0_errors_VectorFunc__grid = grid;
+  /* adjust C1 and thus m01 */
+  Cvec[1] = Getd("BNSdata_C1");
+  stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
+                             1000, tol*0.01);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
+  Setd("BNSdata_C1", Cvec[1]);
+
+  /* adjust C2 and thus m02 */
+  Cvec[1] = Getd("BNSdata_C2");
+  if(Getd("BNSdata_m02")>0)
+    stat = newton_linesrch_its(Cvec, 1, &check, m02_error_VectorFunc,
+                               1000, tol*0.01);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
+  Setd("BNSdata_C2", Cvec[1]);
+  printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
+         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+
+  /* set q to zero if q<0, and also in region 1 & 2 */
+  forallboxes(grid, bi)
+  {
+    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+    forallpoints(grid->box[bi], i)
+      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+  }
+
+  /* print new masses */
+  m01 = GetInnerRestMass(grid, 0);
+  m02 = GetInnerRestMass(grid, 3);
+  printf("     => m01=%.19g m02=%.19g\n", m01, m02);
+
+  return 0;
+}
+
+/* Adjust C1/2: Try adjustment for several Omega and possibly x_CM
+   and choose the one with the smallest qmax difference...  */
+int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol)
+{
+  double Omega, dOmega=1e-3;
+  int bi1, bi2;
+  double qmax1, Xmax1, Ymax1, qmax1sav, diff1_m, diff1_0, diff1_p;
+  double qmax2, Xmax2, Ymax2, qmax2sav, diff2_m, diff2_0, diff2_p;
+  double dif_m, dif_0, dif_p;
+
+  /* save Omega */
+  Omega = Getd("BNSdata_Omega");
+  printf("BNSdata_solve step %d: old Omega = %.4e  dOmega = %.4e\n",
+         it, Omega, dOmega);
+         
+  /* save old q in BNSdata_qold */
+  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+
+  /* find max q locations xmax1/2 in NS1/2 */
+  bi1=0;  bi2=3;
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
+  /* compute qmax1 and qmax2 */
+  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+
+  /* save both qmax */
+  qmax1sav = qmax1;
+  qmax2sav = qmax2;
+
+  /* compute diff between new qmax1 and qmax1sav for Omega - dOmega */
+  Setd("BNSdata_Omega", Omega - dOmega);
+  printf("BNSdata_solve step %d: get qmax diff. for Omega = %g\n",
+         it, Getd("BNSdata_Omega"));
+  adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+  bi1=0;  bi2=3;
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
+  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  diff1_m = qmax1 - qmax1sav;
+  diff2_m = qmax2 - qmax2sav;
+  dif_m = sqrt(diff1_m*diff1_m + diff2_m*diff2_m);
+
+  /* compute diff between new qmax1 and qmax1sav for Omega + dOmega */
+  Setd("BNSdata_Omega", Omega + dOmega);
+  printf("BNSdata_solve step %d: get qmax diff. for Omega = %g\n",
+         it, Getd("BNSdata_Omega"));
+  adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+  bi1=0;  bi2=3;
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
+  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  diff1_p = qmax1 - qmax1sav;
+  diff2_p = qmax2 - qmax2sav;
+  dif_p = sqrt(diff1_p*diff1_p + diff2_p*diff2_p);
+
+  /* compute diff between new qmax1 and qmax1sav for Omega */
+  Setd("BNSdata_Omega", Omega);
+  printf("BNSdata_solve step %d: get qmax diff. for Omega = %g\n",
+         it, Getd("BNSdata_Omega"));
+  adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+  bi1=0;  bi2=3;
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
+  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  diff1_0 = qmax1 - qmax1sav;
+  diff2_0 = qmax2 - qmax2sav;
+  dif_0 = sqrt(diff1_0*diff1_0 + diff2_0*diff2_0);
+
+  printf("BNSdata_solve step %d: dif_m=%g\n", it, dif_m);
+  printf("BNSdata_solve step %d: dif_0=%g\n", it, dif_0);
+  printf("BNSdata_solve step %d: dif_p=%g\n", it, dif_p);
+  if(dif_0<=dif_p && dif_0<=dif_m)
+  { Setd("BNSdata_Omega", Omega);  dOmega=dOmega*0.5; }
+  if(dif_p<dif_0  && dif_p<=dif_m) 
+    Setd("BNSdata_Omega", Omega+dOmega);
+  if(dif_m<dif_0  && dif_m<dif_p)
+    Setd("BNSdata_Omega", Omega-dOmega);
+  printf("BNSdata_solve step %d: new Omega = %.4e  dOmega = %.4e\n",
+         it, Getd("BNSdata_Omega"), dOmega);
+
+  /* set new Omega, and compute new q */
+  if( !dequal(Getd("BNSdata_Omega"), Omega) )
+    adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+
+  return 0;
+}
+
 
 /* Solve the Equations */
 int BNSdata_solve(tGrid *grid)
@@ -594,7 +801,9 @@ int BNSdata_solve(tGrid *grid)
     }
     else if(Getv("BNSdata_EllSolver_method", "sequential"))
     { /* solve the coupled ell. eqns one after an other */
-      BNS_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
+//      BNS_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
+//                       linear_solver, 1);
+      BNS_Eqn_Iterator(grid, Newton_itmax, tol*0.0001, &normresnonlin,
                        linear_solver, 1);
     }
     else
@@ -608,14 +817,47 @@ int BNSdata_solve(tGrid *grid)
     write_grid(grid);
     grid->time += 0.5;
 
+    /* use equal mass symmetry and write grid */
+    BNSgrid_set_allVars_onLeft_equalmasses(grid);
+    grid->time -= 0.4;
+    write_grid(grid);
+    grid->time += 0.4;
+
 if(0)
 {
     /* adjust C1/2 according to Pedro's algorithm. This yields
        a new q as well.  Note: THIS FAILS!!! */
-    adjust_C1_C2_Omega_q_Pedro(grid, it, tol, 1e-3);
+    adjust_C1_C2_Omega_q_Pedro(grid, it, tol);
 }
+if(0)
+{
     /* adjust C1/2, Omega, xCM according to BGM */
     adjust_C1_C2_Omega_q_BGM(grid, it, tol);
+}
+if(0) /* HYBRID <-- not working... */
+{
+  int bi1, bi2;
+  double Xmax1,Ymax1, Xmax2,Ymax2;
+  double qmax1, qmax2;
+
+  /* adjust such that masses are initial masses */
+  adjust_C1_C2_Omega_q_Pedro(grid, it, tol);
+
+  /* find max q locations xmax1/2 in NS1/2 */
+  bi1=0;  bi2=3;
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+//  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
+  /* compute qmax1 and qmax2 */
+  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+//  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+
+  /* make both max densities the same */
+  Setd("BNSdata_qmax1", qmax1);
+  Setd("BNSdata_qmax2", qmax1);          
+  adjust_C1_C2_Omega_q_BGM(grid, it, tol);
+}
+    /* adjust C1/2, Omega, xCM according to WT */
+    adjust_C1_C2_Omega_xCM_q_WT(grid, it, tol);
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
@@ -2158,9 +2400,8 @@ void dq_dx_along_x_axis_VectorFunc(int n, double *vec, double *fvec)
 }
 
 /* find max q along x-axis */
-void find_qmax1_along_x_axis(int *bi, double *X, double *Y)
+void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
 {
-  tGrid *grid = central_q_errors_VectorFunc__grid;
   int b;
   int bi_guess = *bi;
   double *dqin, *dqout;
@@ -2269,6 +2510,7 @@ void find_qmax1_along_x_axis(int *bi, double *X, double *Y)
   grid->box[0]->v[Ind("BNSdata_temp3")][2] = *Y;
   
   /* use newton_linesrch_its to find xmax1 */
+  central_q_errors_VectorFunc__grid = grid;
   Xvec[1] = *X;
   stat = newton_linesrch_its(Xvec, 1, &check,
                              dq_dx_along_x_axis_VectorFunc, 1000, dequaleps);
@@ -2299,8 +2541,8 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
 
   /* find max q locations xmax1/2 in NS1/2 */
   bi1=0;  bi2=3;
-  find_qmax1_along_x_axis(&bi1, &Xmax1, &Ymax1);
-  find_qmax1_along_x_axis(&bi2, &Xmax2, &Ymax2);
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
 
   /* compute qmax1 and qmax2 */
   qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
@@ -2356,8 +2598,8 @@ void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec)
 
   /* find max q locations xmax1/2 in NS1/2 */
   bi1=0;  bi2=3;
-  find_qmax1_along_x_axis(&bi1, &Xmax1, &Ymax1);
-  find_qmax1_along_x_axis(&bi2, &Xmax2, &Ymax2);
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
 
   /* compute qmax1 and qmax2 */
   qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);

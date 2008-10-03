@@ -1780,3 +1780,146 @@ void BNS_update_q(tGrid *grid2, double w, tGrid *grid1)
       q[i] = BNS_update_q_atXYZ(grid2,b2, X2[i],Y2[i],Z2[i], w, grid1);
   }
 }
+
+/*****************************************************************/
+/* useful funcs for equal mass symmetry                           */
+/*****************************************************************/
+
+/* given a new 
+   (Coordinates_AnsorgNS_sigma_pm, 
+    Coordinates_AnsorgNS_dsigma_pm_dB, Coordinates_AnsorgNS_dsigma_pm_dphi)
+   initialize Coordinates */
+void BNSgrid_init_Coords(tGrid *grid)
+{
+  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
+
+  /* initialize coords on grid */
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
+  init_CoordTransform_And_Derivs(grid);
+
+  /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
+  adjust_box4_5_pars(grid);
+  set_BoxStructures_fromPars(grid, 0);
+
+  /* reset x,y,z, dXdx and such */
+  init_CoordTransform_And_Derivs(grid);
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
+}
+
+/* make DomainShape on left equal to the one on the right:
+   if we copy from right into left, set inner box destination ibd=3 
+   if we copy from left into right, set inner box destination ibd=0 */
+void BNSgrid_copy_DomainShape(tGrid *grid, int ibd)
+{
+  int isigma      = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+  int isigma_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+  int i,j,k, kd, ijks, ijkd;
+  int n1 = grid->box[ibd]->n1;
+  int n2 = grid->box[ibd]->n2;
+  int n3 = grid->box[ibd]->n3;
+  double sigp_Bphi;
+  int obd; /* outer box on destination */
+  int ibs; /* inner box on source */
+  int obs; /* outer box on source */
+
+  if(ibd==3)      { obd = 2;  ibs = 0;  obs = 1; }
+  else if(ibd==0) { obd = 1;  ibs = 3;  obs = 2; }
+  else errorexit("BNSgrid_copy_DomainShape: set ibd=3 or ibd=0.");
+  printf("BNSgrid_copy_DomainShape:  from: box%d/%d  to: box%d/%d\n",
+         ibs,obs, ibd,obd);
+  if(n3 % 2)
+    errorexit("BNSgrid_copy_DomainShape: box[0]->n3 has to be divisible by 2.");
+
+  /* use the fact that (A,B,phi)    on right 
+     corresponds to    (A,B,Pi-phi) on the left */
+  /* set Coordinates_AnsorgNS_sigma_pm on dest. side from 
+         Coordinates_AnsorgNS_sigma_pm on source side     */ 
+  for(k=1; k<n3; k++) /* assume n1,n2,n3 are equal on left and right */
+  {
+    if(k<=n3/2) kd=n3/2 - k;
+    else        kd=3*n3/2 - k;
+    for(j=0; j<n2; j++)
+    for(i=0; i<n1; i++)
+    {
+      ijks = Index(i,j,k);
+      ijkd = Index(i,j,kd);
+      sigp_Bphi = grid->box[ibs]->v[isigma][ijks];
+      grid->box[ibd]->v[isigma][ijkd] = -sigp_Bphi;
+      grid->box[obd]->v[isigma][ijkd] = -sigp_Bphi;
+    }
+  }
+
+  /* compute derivs of sigma */
+  spec_Deriv1(grid->box[ibd], 2, grid->box[ibd]->v[isigma],
+              grid->box[ibd]->v[isigma_dB]);
+  spec_Deriv1(grid->box[obd], 3, grid->box[obd]->v[isigma],
+              grid->box[obd]->v[isigma_dphi]);
+
+  /* initialize coords */
+  BNSgrid_init_Coords(grid);
+}
+
+/* copy a var between right and left in case of equal masses:
+   if we copy from right into left, set inner box destination ibd=3
+   if we copy from left into right, set inner box destination ibd=0
+   we should call BNSgrid_copy_DomainShape before */
+void BNSgrid_set_Var_equalmasses_sym(tGrid *grid, int ibd, int iv, int sym)
+{
+  int i,j,k, kd, ijks, ijkd;
+  int n1 = grid->box[ibd]->n1;
+  int n2 = grid->box[ibd]->n2;
+  int n3 = grid->box[ibd]->n3;
+  double var_in, var_out;
+  int obd; /* outer box on destination */
+  int ibs; /* inner box on source */
+  int obs; /* outer box on source */
+
+  if(ibd==3)      { obd = 2;  ibs = 0;  obs = 1; }
+  else if(ibd==0) { obd = 1;  ibs = 3;  obs = 2; }
+  else errorexit("BNSgrid_set_Var_equalmasses_sym: set ibd=3 or ibd=0.");
+  if(n3 % 2)
+    errorexit("BNSgrid_copy_DomainShape: box[0/1/2/3]->n3 has to be divisible by 2.");
+  //  BNSgrid_copy_DomainShape(grid, 3);
+
+  printf("BNSgrid_set_Var_equalmasses_sym: %s from: box%d/%d to: box%d/%d  "
+         "sym=%d\n", VarName(iv), ibs,obs, ibd,obd, sym);
+        
+  /* use the fact that (A,B,phi)    on right 
+     corresponds to    (A,B,Pi-phi) on the left */
+  /* set var on left from var on right */
+  for(k=1; k<n3; k++) /* assume n1,n2,n3 are equal on left and right */
+  {
+    if(k<=n3/2) kd=n3/2 - k;
+    else        kd=3*n3/2 - k;
+    for(j=0; j<n2; j++)
+    for(i=0; i<n1; i++)
+    {
+      ijks = Index(i,j,k);
+      ijkd = Index(i,j,kd);
+      var_in = grid->box[ibs]->v[iv][ijks];
+      var_out= grid->box[obs]->v[iv][ijks];
+      grid->box[ibd]->v[iv][ijkd] = var_in*sym;
+      grid->box[obd]->v[iv][ijkd] = var_out*sym;
+    }
+  }
+}
+
+/* copy all vars from right to left for equal masses */
+void BNSgrid_set_allVars_onLeft_equalmasses(tGrid *grid)
+{
+  printf("BNSgrid_set_allVars_onLeft_equalmasses...\n");
+
+  /* adjust Domain Shape on left */
+  BNSgrid_copy_DomainShape(grid, 3);
+
+  /* set scalars on left */
+  BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_Psi"), 1);
+  BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_alphaP"), 1);
+  BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_Sigma"), 1);
+  BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_q"), 1);
+  /* set vectors on left */
+  BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_Bx"), -1);
+  BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_By"), -1);
+  BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_Bz"), 1);
+}
