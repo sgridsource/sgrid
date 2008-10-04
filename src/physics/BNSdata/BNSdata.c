@@ -587,9 +587,10 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
 
 /* Adjust C1/2: Try adjustment for several Omega and possibly x_CM
    and choose the one with the smallest qmax difference...  */
-int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol)
+int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol, 
+                                double *dOmega)
 {
-  double Omega, dOmega=1e-3;
+  double Omega;
   int bi1, bi2;
   double qmax1, Xmax1, Ymax1, qmax1sav, diff1_m, diff1_0, diff1_p;
   double qmax2, Xmax2, Ymax2, qmax2sav, diff2_m, diff2_0, diff2_p;
@@ -597,8 +598,8 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol)
 
   /* save Omega */
   Omega = Getd("BNSdata_Omega");
-  printf("BNSdata_solve step %d: old Omega = %.4e  dOmega = %.4e\n",
-         it, Omega, dOmega);
+  printf("BNSdata_solve step %d: old Omega = %.4e  *dOmega = %.4e\n",
+         it, Omega, *dOmega);
          
   /* save old q in BNSdata_qold */
   varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
@@ -615,8 +616,8 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol)
   qmax1sav = qmax1;
   qmax2sav = qmax2;
 
-  /* compute diff between new qmax1 and qmax1sav for Omega - dOmega */
-  Setd("BNSdata_Omega", Omega - dOmega);
+  /* compute diff between new qmax1 and qmax1sav for Omega - *dOmega */
+  Setd("BNSdata_Omega", Omega - *dOmega);
   printf("BNSdata_solve step %d: get qmax diff. for Omega = %g\n",
          it, Getd("BNSdata_Omega"));
   adjust_C1_C2_q_keep_restmasses(grid, it, tol);
@@ -629,8 +630,8 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol)
   diff2_m = qmax2 - qmax2sav;
   dif_m = sqrt(diff1_m*diff1_m + diff2_m*diff2_m);
 
-  /* compute diff between new qmax1 and qmax1sav for Omega + dOmega */
-  Setd("BNSdata_Omega", Omega + dOmega);
+  /* compute diff between new qmax1 and qmax1sav for Omega + *dOmega */
+  Setd("BNSdata_Omega", Omega + *dOmega);
   printf("BNSdata_solve step %d: get qmax diff. for Omega = %g\n",
          it, Getd("BNSdata_Omega"));
   adjust_C1_C2_q_keep_restmasses(grid, it, tol);
@@ -661,13 +662,13 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol)
   printf("BNSdata_solve step %d: dif_0=%g\n", it, dif_0);
   printf("BNSdata_solve step %d: dif_p=%g\n", it, dif_p);
   if(dif_0<=dif_p && dif_0<=dif_m)
-  { Setd("BNSdata_Omega", Omega);  dOmega=dOmega*0.5; }
+  { Setd("BNSdata_Omega", Omega);  *dOmega=*dOmega*0.5; }
   if(dif_p<dif_0  && dif_p<=dif_m) 
-    Setd("BNSdata_Omega", Omega+dOmega);
+    Setd("BNSdata_Omega", Omega+*dOmega);
   if(dif_m<dif_0  && dif_m<dif_p)
-    Setd("BNSdata_Omega", Omega-dOmega);
-  printf("BNSdata_solve step %d: new Omega = %.4e  dOmega = %.4e\n",
-         it, Getd("BNSdata_Omega"), dOmega);
+    Setd("BNSdata_Omega", Omega-*dOmega);
+  printf("BNSdata_solve step %d: new Omega = %.4e  *dOmega = %.4e\n",
+         it, Getd("BNSdata_Omega"), *dOmega);
 
   /* set new Omega, and compute new q */
   if( !dequal(Getd("BNSdata_Omega"), Omega) )
@@ -695,6 +696,7 @@ int BNSdata_solve(tGrid *grid)
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
   tVarList *vldummy;
   int it;
+  double dOmega = Getd("BNSdata_Omega")*0.1;
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -816,13 +818,21 @@ int BNSdata_solve(tGrid *grid)
     grid->time -= 0.5;
     write_grid(grid);
     grid->time += 0.5;
+printf(" after ell solve: => m01=%.19g m02=%.19g\n",
+       GetInnerRestMass(grid, 0), GetInnerRestMass(grid, 3));
 
+if(0)
+{
     /* use equal mass symmetry and write grid */
     BNSgrid_set_allVars_onLeft_equalmasses(grid);
+    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+    BNSdata_verify_solution(grid);
     grid->time -= 0.4;
     write_grid(grid);
     grid->time += 0.4;
-
+printf(" after symmetry:  => m01=%.19g m02=%.19g\n",
+       GetInnerRestMass(grid, 0), GetInnerRestMass(grid, 3));
+}
 if(0)
 {
     /* adjust C1/2 according to Pedro's algorithm. This yields
@@ -857,7 +867,7 @@ if(0) /* HYBRID <-- not working... */
   adjust_C1_C2_Omega_q_BGM(grid, it, tol);
 }
     /* adjust C1/2, Omega, xCM according to WT */
-    adjust_C1_C2_Omega_xCM_q_WT(grid, it, tol);
+    adjust_C1_C2_Omega_xCM_q_WT(grid, it, tol, &dOmega);
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
