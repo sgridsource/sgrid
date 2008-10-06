@@ -2324,7 +2324,7 @@ int BNS_Eqn_sequence2(tGrid *grid,
   *normres = GridL2Norm(vlFu);
   if(pr)
   {
-    printf("BNS_Eqn_sequence1: before sequence: "
+    printf("BNS_Eqn_sequence2: before sequence: "
            "residual = %.4e\n", *normres);
     fflush(stdout);
   }
@@ -2412,7 +2412,7 @@ int BNS_Eqn_sequence2(tGrid *grid,
   *normres = GridL2Norm(vlFu);
   if(pr)
   {
-    printf("BNS_Eqn_sequence1:  after sequence: "
+    printf("BNS_Eqn_sequence2:  after sequence: "
            "residual = %.4e\n", *normres);
     fflush(stdout);
   }
