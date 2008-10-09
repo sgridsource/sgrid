@@ -422,7 +422,7 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
     theta = 0.5*PI - asin(z/r);
     phi   = Arg(x,y); // returns value in (-PI,PI]
     Y22 = sqrt(5.0/(96.0*PI))*1.5*(1.0 - cos(2.0*theta));
-    rho = (q22/(4.0*PI*r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
+    rho = -(q22/(r0))*(exp( -(r-r0)*(r-r0)/(Dr*Dr) )/(sqrt(PI)*Dr))*
           cos(2.0*(Omega*t - phi)) * Y22;
   }
   else if(sourcetype==2) /* use Ian's source with Window */
@@ -651,7 +651,7 @@ void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt,
       rho = ScalarOnKerr_Source(box, t, x, y, z);
       
       /* compute psidotdot */
-      psidotdot = -(g_ddpsi - gG_dpsi + 4.0*PI*rho)/gtt[i];
+      psidotdot = -(g_ddpsi - gG_dpsi - rho)/gtt[i];
                    //-(1-Attenuation01( ((x-x0)*(x-x0)+(y-y0)*(y-y0)+z*z)/36,2,0.5)); // old source
                    //  -exp(-(x-x0)*(x-x0))*exp(-(y-y0)*(y-y0))*exp(-z*z); // oldest source
                 
@@ -2210,8 +2210,8 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
       rho = ScalarOnKerr_Source(box, t, x, y, z);
 
       /* set RHS of psi and Pi */
-      rPi  = beta_dPi - ag_dphi + aG_phi - g_phi_da + aKPi  -
-              (alpha[i])*4.0*PI*rho;
+      rPi  = beta_dPi - ag_dphi + aG_phi - g_phi_da + aKPi  +
+              (alpha[i])*rho;
       rpsi = beta_dpsi - alpha[i]*cPi[i];
       rphix = b_dphix + phi_dbx - alpha[i]*Pix[i] - cPi[i]*dalphax[i];
       rphiy = b_dphiy + phi_dby - alpha[i]*Piy[i] - cPi[i]*dalphay[i];
