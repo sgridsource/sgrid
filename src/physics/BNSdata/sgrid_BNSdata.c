@@ -35,7 +35,13 @@ int sgrid_BNSdata()
   AddVar("BNSdata_q",   "",  "q := P/rho0");
   AddVar("BNSdata_vRS", "Ij","1st deriv of vRS");
   AddVar("BNSdata_q",   "i", "1st deriv of q");
-  AddVar("BNSdata_qold","",  "old q");
+
+  /* sometimes we save the old vars before the ell. solve */
+  AddVar("BNSdata_Psiold",    "",  "old Psi");
+  AddVar("BNSdata_Bold",      "I", "old B");
+  AddVar("BNSdata_alphaPold", "",  "old alphaP");
+  AddVar("BNSdata_Sigmaold",  "",  "old Sigma");
+  AddVar("BNSdata_qold",      "",  "old q");
 
   AddVar("BNSdata_A", "", "store value of A in box4/5");
   AddVar("BNSdata_B", "", "store value of B in box4/5");
@@ -62,10 +68,14 @@ int sgrid_BNSdata()
          "[needs to be adjusted so that m01 stays the constant]");
   AddPar("BNSdata_C2",    "-1", "C2 in q = (C2/F-1)/(n+1) "
          "[needs to be adjusted so that m02 stays the constant]");
+  AddPar("BNSdata_guess", "TOV", "init. guess [TOV,TOVaverage]");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "maximal number of Newton iterations");
   AddPar("BNSdata_tol",   "1e-6","tolerance for Newton step");
+  AddPar("BNSdata_esw",   "1",   "ell. solve weight: after ell. solve new "
+         "and old values are averaged according to: "
+         "new = esw*new + (1-esw)*old");
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",
          "how we solve for Psi,B^i,alphaP,Sigma "
          "[allatonce, BNS_Eqn_Iterator, sequence1, sequence2]");

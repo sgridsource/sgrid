@@ -82,6 +82,7 @@ void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec);
 int BNSdata_startup(tGrid *grid)
 {
   int b;
+  int TOVav        = Getv("BNSdata_guess", "TOVaverage");
   double Omega     = Getd("BNSdata_Omega");
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_b = Getd("BNSdata_b");
@@ -129,6 +130,10 @@ int BNSdata_startup(tGrid *grid)
   enablevar(grid, Ind("BNSdata_temp2"));
   enablevar(grid, Ind("BNSdata_temp3"));
   enablevar(grid, Ind("BNSdata_temp4"));
+  enablevar(grid, Ind("BNSdata_Psiold"));
+  enablevar(grid, Ind("BNSdata_Boldx"));
+  enablevar(grid, Ind("BNSdata_alphaPold"));
+  enablevar(grid, Ind("BNSdata_Sigmaold"));
   enablevar(grid, Ind("BNSdata_qold"));
 
   /* enable some lapse and shift of ADMvars */
@@ -172,32 +177,31 @@ int BNSdata_startup(tGrid *grid)
         z = pz[i];
       }
       /* set Psi, alphaP, q */
-      r1 = sqrt((x-xc1)*(x-xc1) + y*y + z*z);
-      TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
-                               P_core1, Phic1, Psic1,
-                               &m1, &P1, &Phi1, &Psi1, &m01);
-      q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-           pow(P1, 1.0/(1.0 + BNSdata_n));
-//      BNSdata_Psi[i]   = Psi1;
-//      BNSdata_alphaP[i]= exp(Phi1)*Psi1;
-//      BNSdata_q[i]     = q1;
-
-      r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
-      TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
-                               P_core2, Phic2, Psic2,
-                               &m2, &P2, &Phi2, &Psi2, &m02);
-      q2 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-           pow(P2, 1.0/(1.0 + BNSdata_n));
-
+      if(TOVav || (b==0 || b==1 || b==5) )
+      {
+        r1 = sqrt((x-xc1)*(x-xc1) + y*y + z*z);
+        TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
+                                 P_core1, Phic1, Psic1,
+                                 &m1, &P1, &Phi1, &Psi1, &m01);
+        q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+             pow(P1, 1.0/(1.0 + BNSdata_n));
+      }
+      else { m1 = P1 = Phi1 = m01 = 0.0;  Psi1 = 1.0; }
+      if(TOVav || (b==2 || b==3 || b==4) )
+      {
+        r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+        TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
+                                 P_core2, Phic2, Psic2,
+                                 &m2, &P2, &Phi2, &Psi2, &m02);
+        q2 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+             pow(P2, 1.0/(1.0 + BNSdata_n));
+      }
+      else { m2 = P2 = Phi2 = m02 = 0.0;  Psi2 = 1.0; }
+      
+      /* set the data */
       BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
       BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
       BNSdata_q[i]     = q1 + q2;
-
-//r1 = sqrt((x-1.15)*(x-1.15) + y*y + z*z);
-//BNSdata_Psi[i]=1;
-//BNSdata_alphaP[i]=1;
-//if(fabs(x)>10 || fabs(y)>10 || fabs(z)>10) r1=10;
-//BNSdata_q[i]=0.89-r1;
     }
   }
 
@@ -701,12 +705,78 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol,
   return 0;
 }
 
+/* Adjust C1/2: Try adjustment for several Omega and possibly x_CM
+   and choose the one with the smallest L2 q difference...  */
+int adjust_C1_C2_Omega_xCM_q_WT_L2(tGrid *grid, int it, double tol, 
+                                   double *dOmega)
+{
+  double Omega;
+  double dif_m, dif_0, dif_p;
+
+  /* save Omega */
+  Omega = Getd("BNSdata_Omega");
+  printf("BNSdata_solve step %d: old Omega = %.4e  *dOmega = %.4e\n",
+         it, Omega, *dOmega);
+         
+  /* save old q in BNSdata_qold */
+  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+
+  /* compute L2-diff between new q and qold for Omega - *dOmega */
+  Setd("BNSdata_Omega", Omega - *dOmega);
+  printf("BNSdata_solve step %d: get q L2-diff. for Omega = %g\n",
+         it, Getd("BNSdata_Omega"));
+  BNS_compute_new_q(grid);
+  varadd(grid, Ind("BNSdata_temp1"), 
+             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+  dif_m = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
+          varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
+
+  /* compute L2-diff between new q and qold for Omega + *dOmega */
+  Setd("BNSdata_Omega", Omega + *dOmega);
+  printf("BNSdata_solve step %d: get q L2-diff. for Omega = %g\n",
+         it, Getd("BNSdata_Omega"));
+  BNS_compute_new_q(grid);
+  varadd(grid, Ind("BNSdata_temp1"), 
+             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+  dif_p = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
+          varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
+
+  /* compute L2-diff between new q and qold for Omega */
+  Setd("BNSdata_Omega", Omega);
+  printf("BNSdata_solve step %d: get q L2-diff. for Omega = %g\n",
+         it, Getd("BNSdata_Omega"));
+  BNS_compute_new_q(grid);
+  varadd(grid, Ind("BNSdata_temp1"), 
+             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+  dif_0 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
+          varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
+
+  /* set new Omega */
+  printf("BNSdata_solve step %d: dif_m=%g\n", it, dif_m);
+  printf("BNSdata_solve step %d: dif_0=%g\n", it, dif_0);
+  printf("BNSdata_solve step %d: dif_p=%g\n", it, dif_p);
+  if(dif_0<=dif_p && dif_0<=dif_m)
+  { Setd("BNSdata_Omega", Omega);  *dOmega=*dOmega*0.5; }
+  if(dif_p<dif_0  && dif_p<=dif_m) 
+    Setd("BNSdata_Omega", Omega+*dOmega);
+  if(dif_m<dif_0  && dif_m<dif_p)
+    Setd("BNSdata_Omega", Omega-*dOmega);
+  printf("BNSdata_solve step %d: new Omega = %.4e  *dOmega = %.4e\n",
+         it, Getd("BNSdata_Omega"), *dOmega);
+
+  /* compute new q */
+  adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+
+  return 0;
+}
+
 
 /* Solve the Equations */
 int BNSdata_solve(tGrid *grid)
 {
   int    itmax        = Geti("BNSdata_itmax");
   double tol          = Getd("BNSdata_tol");
+  double esw          = Getd("BNSdata_esw");
   int    Newton_itmax = itmax;
   double Newton_tol   = tol*0.1;
   int    linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
@@ -815,6 +885,15 @@ int BNSdata_solve(tGrid *grid)
     printf("BNSdata_solve step %d:\n", it);
     prdivider(1);
 
+    /* save old values before ell. solve */
+    varcopy(grid, Ind("BNSdata_Psiold"),    Ind("BNSdata_Psi"));
+    varcopy(grid, Ind("BNSdata_alphaPold"), Ind("BNSdata_alphaP"));
+    varcopy(grid, Ind("BNSdata_Boldx"),     Ind("BNSdata_Bx"));
+    varcopy(grid, Ind("BNSdata_Boldy"),     Ind("BNSdata_By"));
+    varcopy(grid, Ind("BNSdata_Boldz"),     Ind("BNSdata_Bz"));
+    varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+    varcopy(grid, Ind("BNSdata_qold"),      Ind("BNSdata_q"));
+
     /* How we solve the coupled ell. eqns */
     if(Getv("BNSdata_EllSolver_method", "allatonce"))
     { /* solve the coupled ell. eqns all together */
@@ -850,6 +929,15 @@ int BNSdata_solve(tGrid *grid)
     else
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
 
+    /* reset new values from ell. solve as average between old and new.
+       I.e. do: new = esw*new + (1-esw)*old  */
+    varadd(grid, Ind("BNSdata_Psi"),   esw,Ind("BNSdata_Psi"),   (1.0-esw),Ind("BNSdata_Psiold"));
+    varadd(grid, Ind("BNSdata_alphaP"),esw,Ind("BNSdata_alphaP"),(1.0-esw),Ind("BNSdata_alphaPold"));
+    varadd(grid, Ind("BNSdata_Bx"),    esw,Ind("BNSdata_Bx"),    (1.0-esw),Ind("BNSdata_Boldx"));
+    varadd(grid, Ind("BNSdata_By"),    esw,Ind("BNSdata_By"),    (1.0-esw),Ind("BNSdata_Boldy"));
+    varadd(grid, Ind("BNSdata_Bz"),    esw,Ind("BNSdata_Bz"),    (1.0-esw),Ind("BNSdata_Boldz"));
+    varadd(grid, Ind("BNSdata_Sigma"), esw,Ind("BNSdata_Sigma"), (1.0-esw),Ind("BNSdata_Sigmaold"));
+                 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
 
@@ -905,8 +993,13 @@ if(0) /* HYBRID <-- not working... */
   Setd("BNSdata_qmax2", qmax1);          
   adjust_C1_C2_Omega_q_BGM(grid, it, tol);
 }
+if(0) /* not working */
+{
     /* adjust C1/2, Omega, xCM according to WT */
     adjust_C1_C2_Omega_xCM_q_WT(grid, it, tol, &dOmega);
+}
+    /* adjust C1/2, Omega, xCM according to WT with L2 */
+    adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
