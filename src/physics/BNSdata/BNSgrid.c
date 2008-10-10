@@ -1823,6 +1823,9 @@ void BNSgrid_copy_DomainShape(tGrid *grid, int ibd)
   int ibs; /* inner box on source */
   int obs; /* outer box on source */
 
+errorexit("BNSgrid_copy_DomainShape is untested. But you can take out "
+          "this line to try it!");
+
   if(ibd==3)      { obd = 2;  ibs = 0;  obs = 1; }
   else if(ibd==0) { obd = 1;  ibs = 3;  obs = 2; }
   else errorexit("BNSgrid_copy_DomainShape: set ibd=3 or ibd=0.");
@@ -1875,6 +1878,9 @@ void BNSgrid_set_Var_equalmasses_sym(tGrid *grid, int ibd, int iv, int sym)
   int ibs; /* inner box on source */
   int obs; /* outer box on source */
 
+errorexit("BNSgrid_set_Var_equalmasses_sym is untested. But you can take out "
+          "this line to try it!");
+
   if(ibd==3)      { obd = 2;  ibs = 0;  obs = 1; }
   else if(ibd==0) { obd = 1;  ibs = 3;  obs = 2; }
   else errorexit("BNSgrid_set_Var_equalmasses_sym: set ibd=3 or ibd=0.");
@@ -1909,6 +1915,10 @@ void BNSgrid_set_Var_equalmasses_sym(tGrid *grid, int ibd, int iv, int sym)
 void BNSgrid_set_allVars_onLeft_equalmasses(tGrid *grid)
 {
   printf("BNSgrid_set_allVars_onLeft_equalmasses...\n");
+
+errorexit("BNSgrid_set_allVars_onLeft_equalmasses is untested. "
+          "I'm not sure about the syms. But you can take out "
+          "this line to try it!");
 
   /* adjust Domain Shape on left */
   BNSgrid_copy_DomainShape(grid, 3);
