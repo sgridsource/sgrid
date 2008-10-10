@@ -1857,9 +1857,13 @@ errorexit("BNSgrid_copy_DomainShape is untested. But you can take out "
     }
   }
 
-  /* compute derivs of sigma */
+  /* compute derivs of sigma in both domains */
   spec_Deriv1(grid->box[ibd], 2, grid->box[ibd]->v[isigma],
               grid->box[ibd]->v[isigma_dB]);
+  spec_Deriv1(grid->box[ibd], 3, grid->box[ibd]->v[isigma],
+              grid->box[ibd]->v[isigma_dphi]);
+  spec_Deriv1(grid->box[obd], 2, grid->box[obd]->v[isigma],
+              grid->box[obd]->v[isigma_dB]);
   spec_Deriv1(grid->box[obd], 3, grid->box[obd]->v[isigma],
               grid->box[obd]->v[isigma_dphi]);
 
