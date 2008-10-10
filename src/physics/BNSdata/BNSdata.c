@@ -186,7 +186,7 @@ int BNSdata_startup(tGrid *grid)
         q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
              pow(P1, 1.0/(1.0 + BNSdata_n));
       }
-      else { m1 = P1 = Phi1 = m01 = 0.0;  Psi1 = 1.0; }
+      else { m1 = P1 = Phi1 = m01 = q1 = 0.0;  Psi1 = 1.0; }
       if(TOVav || (b==2 || b==3 || b==4) )
       {
         r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
@@ -196,7 +196,7 @@ int BNSdata_startup(tGrid *grid)
         q2 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
              pow(P2, 1.0/(1.0 + BNSdata_n));
       }
-      else { m2 = P2 = Phi2 = m02 = 0.0;  Psi2 = 1.0; }
+      else { m2 = P2 = Phi2 = m02 = q2 = 0.0;  Psi2 = 1.0; }
       
       /* set the data */
       BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
