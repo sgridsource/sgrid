@@ -1276,9 +1276,13 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[outerdom]->v[isigma][Index(i,j,k)] =
                         gridnew->box[innerdom]->v[isigma][Index(0,j,0)];
 
-  /* compute derivs of sigma */
+  /* compute derivs of sigma in both domains */
   spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
               gridnew->box[innerdom]->v[isigma_dB]);
+  spec_Deriv1(gridnew->box[innerdom], 3, gridnew->box[innerdom]->v[isigma],
+              gridnew->box[innerdom]->v[isigma_dphi]);
+  spec_Deriv1(gridnew->box[outerdom], 2, gridnew->box[outerdom]->v[isigma],
+              gridnew->box[outerdom]->v[isigma_dB]);
   spec_Deriv1(gridnew->box[outerdom], 3, gridnew->box[outerdom]->v[isigma],
               gridnew->box[outerdom]->v[isigma_dphi]);
 }
