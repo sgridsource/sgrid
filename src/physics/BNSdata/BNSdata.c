@@ -998,9 +998,14 @@ if(0) /* not working */
     /* adjust C1/2, Omega, xCM according to WT */
     adjust_C1_C2_Omega_xCM_q_WT(grid, it, tol, &dOmega);
 }
+if(0) /* not working */
+{
     /* adjust C1/2, Omega, xCM according to WT with L2 */
     adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
-
+}
+    /* adjust C1/2, q while keeping restmasses, Omega and xCM */
+    adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+  
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
 
