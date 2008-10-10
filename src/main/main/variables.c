@@ -530,8 +530,8 @@ void varcopy(tGrid *grid, int iv, int iu)
 {
   tVarList *v = vlalloc(grid);
   tVarList *u = vlalloc(grid);
-  vlpush(v, iv);
-  vlpush(u, iu);
+  vlpushone(v, iv);
+  vlpushone(u, iu);
   vlcopy(v, u);
   vlfree(u);
   vlfree(v);
@@ -649,9 +649,9 @@ void varadd(tGrid *grid, int ir, double ca, int ia, double cb, int ib)
   tVarList *a = vlalloc(grid);
   tVarList *b = vlalloc(grid);
   tVarList *r = vlalloc(grid);
-  vlpush(a, ia);
-  vlpush(b, ib);
-  vlpush(r, ir);
+  vlpushone(a, ia);
+  vlpushone(b, ib);
+  vlpushone(r, ir);
   vladd(r, ca,a, cb,b);
   vlfree(a);
   vlfree(b);
