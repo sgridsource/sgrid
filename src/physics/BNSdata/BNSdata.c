@@ -906,10 +906,10 @@ int BNSdata_solve(tGrid *grid)
     }
     else if(Getv("BNSdata_EllSolver_method", "BNS_Eqn_Iterator"))
     { /* solve the coupled ell. eqns one after an other */
-//      BNS_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
-//                       linear_solver, 1);
-      BNS_Eqn_Iterator(grid, Newton_itmax, tol*0.0001, &normresnonlin,
+      BNS_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
                        linear_solver, 1);
+//      BNS_Eqn_Iterator(grid, Newton_itmax, tol*0.0001, &normresnonlin,
+//                       linear_solver, 1);
     }
     else if(Getv("BNSdata_EllSolver_method", "sequence1"))
     { 
@@ -918,6 +918,8 @@ int BNSdata_solve(tGrid *grid)
     }
     else if(Getv("BNSdata_EllSolver_method", "sequence2"))
     {
+//      BNS_Eqn_sequence2(grid, Newton_itmax, Newton_tol, &normresnonlin,
+//                       linear_solver, 1);
       BNS_Eqn_sequence2(grid, Newton_itmax, tol*0.0001, &normresnonlin,
                        linear_solver, 1);
     }
