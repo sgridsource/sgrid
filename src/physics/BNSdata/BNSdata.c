@@ -1005,9 +1005,16 @@ if(0) /* not working */
     /* adjust C1/2, Omega, xCM according to WT with L2 */
     adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
 }
-    /* adjust C1/2, q while keeping restmasses, Omega and xCM */
-    adjust_C1_C2_q_keep_restmasses(grid, it, tol);
-  
+    /* choose how we adjust C1/2, Omega, xCM: */
+    if(Getv("BNSdata_adjust", "Omega"))
+    { /* adjust according to WT with L2 */
+      adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
+    }
+    else
+    { /* adjust C1/2, q while keeping restmasses, Omega and xCM */
+      adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+    }
+
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
 
