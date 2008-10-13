@@ -1785,10 +1785,9 @@ void BNS_update_q(tGrid *grid2, double w, tGrid *grid1)
   }
 }
 
-/*****************************************************************/
-/* useful funcs for equal mass symmetry                           */
-/*****************************************************************/
-
+/************************************************************************/
+/* utilities to manipulate the grid */
+/************************************************************************/
 /* given a new 
    (Coordinates_AnsorgNS_sigma_pm, 
     Coordinates_AnsorgNS_dsigma_pm_dB, Coordinates_AnsorgNS_dsigma_pm_dphi)
@@ -1797,8 +1796,10 @@ void BNSgrid_init_Coords(tGrid *grid)
 {
   int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
 
-  /* initialize coords on grid */
+  /* avoid too much printf */
   if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
+
+  /* initialize coords on grid */
   init_CoordTransform_And_Derivs(grid);
 
   /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
@@ -1807,8 +1808,18 @@ void BNSgrid_init_Coords(tGrid *grid)
 
   /* reset x,y,z, dXdx and such */
   init_CoordTransform_And_Derivs(grid);
+
+  /* set values of A,B,phi in box4/5 */
+  set_BNSdata_ABphi(grid);
+
+  /* put back original Coordinates_verbose */
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 }
+
+
+/*****************************************************************/
+/* useful funcs for equal mass symmetry                           */
+/*****************************************************************/
 
 /* make DomainShape on left equal to the one on the right:
    if we copy from right into left, set inner box destination ibd=3 
