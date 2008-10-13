@@ -27,7 +27,6 @@ tVarList *vldu, *vlJdu, *vlduDerivs;
 void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);
 void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
                             double x, double y, double z);
-void set_BNSdata_ABphi(tGrid *grid);
 void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
      tVarList **vlw,  tVarList **vlwDerivs,  tVarList **vlFw, 
      tVarList **vldw, tVarList **vldwDerivs, tVarList **vlJdw, char *Name);

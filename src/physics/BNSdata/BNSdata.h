@@ -10,6 +10,7 @@ int BNSdata_analyze(tGrid *grid);
 int BNSdata_solve(tGrid *grid);
 int setBNSdata(tGrid *grid);
 void setADMvars(tGrid *grid);
+void set_BNSdata_ABphi(tGrid *grid);
 
 
 /* funtions from mathematica */
