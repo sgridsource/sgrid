@@ -1787,27 +1787,38 @@ int ScalarOnKerr_analyze(tGrid *grid)
      timeforoutput_di_dt(grid, Geti("0doutiter"), Getd("0douttime")))
   {
     double M = Getd("BHmass");
-    double r0 = 10.0*M;
-    double Omega = sqrt(M/(r0*r0*r0));
+    //double r0 = 10.0*M;
+    double r0;
+    //double Omega = sqrt(M/(r0*r0*r0));
     double t = ScalarOnKerrvars->time;
     double tKS = t + KSTIMESHIFT;
-    double tSchw = tKS - 2.0*M*log(r0/(2.0*M)-1.0);
-    double phi0 = Omega*tSchw;
-    double theta0,x0,y0,z0;
+    //double tSchw = tKS - 2.0*M*log(r0/(2.0*M)-1.0);
+    //double phi0 = Omega*tSchw;
+    double phi0, theta0;
+    double x0,y0,z0;
     double Ft,Fx,Fy,Fz, psiR; /* self force and psi */
     FILE *fp;
     char *outdir = Gets("outdir");
     char *name = "ScalarOnKerr_Force";
     char *filename;
     int n;
-    
+
     /* particle position??? */
-    theta0 = PIh;
-    n = phi0/(2.0*PI);
-    phi0 -= n*2*PI; /* stay in [0,2PI] */
-    x0 = r0*cos(phi0);
-    y0 = r0*sin(phi0);
-    z0 = 0.0;
+    //theta0 = PIh;
+    //n = phi0/(2.0*PI);
+    //phi0 -= n*2*PI; /* stay in [0,2PI] */
+    //x0 = r0*cos(phi0);
+    //y0 = r0*sin(phi0);
+    //z0 = 0.0;
+    
+    /* use Ian's funcs to get particle position x0,y0,z0 */
+    x0 = current_x(tKS);
+    y0 = current_y(tKS);
+    z0 = current_z(tKS);
+    r0 = sqrt(x0*x0 + y0*y0 + z0*z0);
+    theta0 = acos(z0/r0);
+    phi0 = Arg(x0, y0);
+    if(phi0<0.0) phi0 += PI;
 
 //printf("t=%g tKS=%g tSchw=%g\n", t,tKS,tSchw);
     forallboxes(grid,b)
