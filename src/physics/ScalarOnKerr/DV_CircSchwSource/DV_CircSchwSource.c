@@ -15,7 +15,9 @@ int DV_CircSchwSource_startup(tGrid *grid)
   int i,j;
   printf("Initializing DV_CircSchwSource:\n");
   
-  set_mass_radius(M,10.0*M);
+  //set_mass_radius(M,10.0*M);
+  set_parameters(M, 1.0, 10.0*M, Getd("DV_CircSchwSource_DVWindow_n"), 
+                 Getd("DV_CircSchwSource_DVWindow_width"));
 
 //  for(i=0;i<40;i++){
 //        x=9.9*M+i*0.005*M;

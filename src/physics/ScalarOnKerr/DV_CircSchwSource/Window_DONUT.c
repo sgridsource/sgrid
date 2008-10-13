@@ -12,7 +12,9 @@
 
 
     extern double ian_M;
-    extern double ian_R; 
+    extern double ian_R;
+    extern double ian_n;
+    extern double ian_width; 
 
     extern double Kdelta[4][4];
 
@@ -34,15 +36,17 @@ void eval_window(double ts, double r, double theta, double phi)
   static int useWindow=-1;
   double M=ian_M;
   double R=ian_R;
+  double width=ian_width;
+  double n=ian_n;
 
   double W;
-  double width=2.0*M; // width used in paper
+  //double width=2.0*M; // width used in paper
   double rl = (r-R)/width;
-  int n = 8;                  
+  //int n = 8;                  
   int i,j;
 
   if(useWindow<0) useWindow=Getv("DV_CircSchwSource_useWindow","yes");
-
+  
   if(useWindow)
   {
     eval_Kdelta();

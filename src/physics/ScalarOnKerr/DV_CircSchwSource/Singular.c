@@ -4,11 +4,11 @@
 
 #include<stdio.h>
 #include<math.h>
+#include<assert.h>
 #include "Constants.h"
 #include "Schwarzschild.h"
 #include "THZ.h"
 #include "Singular.h"
-
 
     extern double ian_Q;
 
@@ -73,4 +73,6 @@
         }
    
    } // end of void eval_singular()
+
+
 

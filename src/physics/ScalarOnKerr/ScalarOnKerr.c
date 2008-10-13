@@ -395,7 +395,7 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
   static int sourcetype;
   double rho;
 
-  /* initialize some par once */
+  /* initialize some pars once */
   if(M<0.0)
   {
     if(Getv("ScalarOnKerr_sourcetype","Y22test"))       sourcetype=1;
@@ -410,8 +410,10 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
     Dr = 1.0*M;
     q22= 4.0*PI*q/(r0*sqrt(1.0-3*M/r0))*sqrt(5.0/(96.0*PI))*3.0;
     Omega = sqrt(M/(r0*r0*r0));
-    /* call Ian's func to set mass and radius */
-    set_mass_radius(M, r0);
+    /* call Ian's func to set mass, q, radius, and window func pars... */
+    //set_mass_radius(M, r0);
+    set_parameters(M, q, r0, Getd("DV_CircSchwSource_DVWindow_n"), 
+                   Getd("DV_CircSchwSource_DVWindow_width"));
   }
 
   /* select source */

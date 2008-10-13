@@ -22,6 +22,7 @@
 extern double ian_M;
 extern double ian_R;
 extern double ian_Q;
+extern double ian_Omega;
 
 extern double g[4][4];
 extern double detg;
@@ -241,3 +242,33 @@ double SingularInKerrSchild(double tKS, double xKS, double yKS, double zKS)
     eval_singular(ts,r,theta,phi);
     return ian_Psi;
 }
+
+double current_x(double t_KS)
+{
+    double R=ian_R;
+    double M=ian_M;
+    double Omega=ian_Omega;
+    double Pi=3.14159265358979323846264338;
+    
+    double ts = t_KS-2.0*M*log(R/(2.0*M)-1.0);
+    
+    return R*sin(Pi/2.0)*cos(Omega*ts);  
+}
+
+double current_y(double t_KS)
+{
+    double R=ian_R;
+    double M=ian_M;
+    double Omega=ian_Omega;
+    double Pi=3.14159265358979323846264338;
+ 
+    double ts = t_KS-2.0*M*log(R/(2.0*M)-1.0); 
+    
+    return R*sin(Pi/2.0)*sin(Omega*ts);  
+}
+
+double current_z(double t_KS)
+{   
+    return 0.0;  
+}
+

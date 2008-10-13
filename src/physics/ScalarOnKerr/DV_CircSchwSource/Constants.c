@@ -11,9 +11,12 @@ double ian_R;
 double ian_Omega;
 double ian_Omegad;
 
+double ian_n;
+double ian_width;
+
 double Kdelta[4][4];
 
-void set_mass_radius(double m, double r)
+void set_parameters(double m, double q, double r, int N, double width)
 {
     if(r<6.0*m){                                                     //effectice source only works for R>6M.
         perror("Orbit too close to the black hole. Pick R>6M. \n");
@@ -28,6 +31,9 @@ void set_mass_radius(double m, double r)
     
     ian_Omega = sqrt(M/(R*R*R));                  //frequency for circular orbit
     ian_Omegad = ian_Omega*sqrt(1.0-3.0*M/R);
+
+    ian_n = N;
+    ian_width = width;
 }
 
 void eval_Kdelta()                       //Kronecker delta
