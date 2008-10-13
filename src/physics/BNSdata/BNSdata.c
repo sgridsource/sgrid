@@ -2705,7 +2705,6 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   tGrid *grid2;
   double BNSdata_n = Getd("BNSdata_n");
   double kappa     = Getd("BNSdata_kappa");
-  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
   double m01, m02;
   int b, i;
   int n1 = grid->box[1]->n1;
@@ -2731,16 +2730,7 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
     reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, 3, 2);
 
   /* initialize coords on grid2 */
-  if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
-  init_CoordTransform_And_Derivs(grid2);
-
-  /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
-  adjust_box4_5_pars(grid2);
-  set_BoxStructures_fromPars(grid2, 0);
-
-  /* reset x,y,z, dXdx and such */
-  init_CoordTransform_And_Derivs(grid2);
-  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
+  BNSgrid_init_Coords(grid2);
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
@@ -2785,7 +2775,6 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
    or domain3/2 accordingly */
 void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
 {
-  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
   tGrid *grid2;
   int outerdom;
 
@@ -2805,16 +2794,7 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, innerdom, outerdom);
 
   /* initialize coords on grid2 */
-  if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
-  init_CoordTransform_And_Derivs(grid2);
-
-  /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
-  adjust_box4_5_pars(grid2);
-  set_BoxStructures_fromPars(grid2, 0);
-
-  /* reset x,y,z, dXdx and such */
-  init_CoordTransform_And_Derivs(grid2);
-  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
+  BNSgrid_init_Coords(grid2);
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
