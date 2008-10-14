@@ -1074,7 +1074,10 @@ if(0) /* not working */
     /* choose how we adjust C1/2, Omega, xCM: */
     if(Getv("BNSdata_adjust", "Omega"))
     { /* adjust according to WT with L2 */
-      adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
+      if(Getv("BNSdata_adjust", "WT_L2_method"))
+        adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
+      else  /* adjust Omega but only after re-adjusting C1/2 */
+        adjust_C1_C2_Omega_xCM_q_min_qchange(grid, it, tol, &dOmega);
     }
     else
     { /* adjust C1/2, q while keeping restmasses, Omega and xCM */
