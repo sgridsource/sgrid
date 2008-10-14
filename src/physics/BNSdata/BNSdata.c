@@ -881,6 +881,9 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   xouts_error_VectorFunc__xout1 = grid->box[0]->v[xind][0];
   xouts_error_VectorFunc__xout2 = grid->box[3]->v[xind][0];
 
+  printf("BNSdata_solve step %d: old xout1 = %g  xout2 = %g\n",
+         it, xouts_error_VectorFunc__xout1, xouts_error_VectorFunc__xout2);
+
   /* adjust C1 and thus m01 */
   OmxCMvec[1] = Getd("BNSdata_Omega");
   OmxCMvec[2] = Getd("BNSdata_x_CM");
