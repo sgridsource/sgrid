@@ -59,7 +59,7 @@ int sgrid_BNSdata()
   AddPar("BNSdata_qmax2", "0", "max q of NS2 along x-axis");
   AddPar("BNSdata_xmax1", "0", "pos. of max q of NS1 along x-axis");
   AddPar("BNSdata_xmax2", "0", "pos. of max q of NS2 along x-axis");
-  AddPar("BNSdata_Omega", "0",  "orbital angular velocity");
+  AddPar("BNSdata_Omega", "-1",  "orbital angular velocity");
   AddPar("BNSdata_b",     "1",  "separation parameter (distance~2b)");
   AddPar("BNSdata_n",     "1",  "polytropic index n, Gamma = 1 + 1/n");
   AddPar("BNSdata_kappa", "1",  "kappa in EOS: P = kappa rho0^Gamma");

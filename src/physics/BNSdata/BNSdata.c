@@ -2798,6 +2798,7 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));

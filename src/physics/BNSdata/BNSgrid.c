@@ -226,8 +226,11 @@ int set_boxsizes(tGrid *grid)
 
   /* set CM and Omega (taken from PN_ADM_2.m) */
   xCM = (m01*xc1 + m02*xc2)/(m01+m02);
-  Omega = sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
-               (-5*nu + 8*nu*nu)/(8*DoM5)            )/(m01+m02);
+  if(Getd("BNSdata_Omega")<0.0)
+    Omega = sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
+                 (-5*nu + 8*nu*nu)/(8*DoM5)            )/(m01+m02);
+  else
+    Omega = Getd("BNSdata_Omega");
   if(nu<=0.0) Omega=0.0;
   Setd("BNSdata_x_CM", xCM);
   Setd("BNSdata_Omega", Omega);
