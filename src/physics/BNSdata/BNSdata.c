@@ -16,7 +16,11 @@ tGrid *m0_errors_VectorFunc__grid; /* grid var for m0_errors_VectorFunc */
 double m0_errors_VectorFunc__m01;  /* m01 we currently try to achieve */
 double m0_errors_VectorFunc__m02;  /* m02 we currently try to achieve */
 tGrid *central_q_errors_VectorFunc__grid; /* grid var for central_q_errors_VectorFunc */
-
+tGrid *xouts_error_VectorFunc__grid; /* grid var for xouts_error_VectorFunc */
+int    xouts_error_VectorFunc__it;   /* it for xouts_error_VectorFunc */
+double xouts_error_VectorFunc__tol;  /* tol for xouts_error_VectorFunc */
+double xouts_error_VectorFunc__xout1;  /* xout1 we currently try to achieve */
+double xouts_error_VectorFunc__xout2;  /* xout2 we currently try to achieve */
 
 /* global var lists */
 tVarList *vlu, *vlFu, *vluDerivs;
@@ -836,6 +840,68 @@ int adjust_C1_C2_Omega_xCM_q_min_qchange(tGrid *grid, int it, double tol,
   return 0;
 }
 
+/* for newton_linesrch_its: compute error in xouts */
+void xouts_error_VectorFunc(int n, double *vec, double *fvec)
+{
+  double xout1, xout2;
+  int xind = Ind("x");
+  tBox *box1 = xouts_error_VectorFunc__grid->box[0];
+  tBox *box3 = xouts_error_VectorFunc__grid->box[3];
+
+  Setd("BNSdata_Omega", vec[1]);
+  Setd("BNSdata_x_CM",  vec[2]);
+  adjust_C1_C2_q_keep_restmasses(xouts_error_VectorFunc__grid,
+                                 xouts_error_VectorFunc__it,
+                                 xouts_error_VectorFunc__tol);
+  xout1 = box1->v[xind][0];
+  xout2 = box3->v[xind][0];
+  printf("xouts_error_VectorFunc: Omega=%g x_CM=%g  xout1=%g xout2=%g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"),
+         xout1, xout2);
+  
+  fvec[1] = xout1 - xouts_error_VectorFunc__xout1;
+  fvec[2] = xout2 - xouts_error_VectorFunc__xout2;
+}
+
+/* Adjust Omega and x_CM so that outer edges xout1/2 stay put */
+int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
+{
+  int check, stat, bi, i;
+  int xind = Ind("x");
+  double OmxCMvec[3];
+
+  printf("BNSdata_solve step %d: old Omega = %g  x_CM = %g\n",
+         it, Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+  /**********************************************************************/
+  /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
+  /**********************************************************************/
+  xouts_error_VectorFunc__grid  = grid;
+  xouts_error_VectorFunc__it    = it;
+  xouts_error_VectorFunc__tol   = tol;
+  xouts_error_VectorFunc__xout1 = grid->box[0]->v[xind][0];
+  xouts_error_VectorFunc__xout2 = grid->box[3]->v[xind][0];
+
+  /* adjust C1 and thus m01 */
+  OmxCMvec[1] = Getd("BNSdata_Omega");
+  OmxCMvec[2] = Getd("BNSdata_x_CM");
+  stat = newton_linesrch_its(OmxCMvec, 2, &check, xouts_error_VectorFunc,
+                             1000, tol*0.01);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
+
+  printf("BNSdata_solve step %d: new Omega = %g  x_CM = %g\n",
+         it, Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+
+  /* set q to zero if q<0, and also in region 1 & 2 */
+  forallboxes(grid, bi)
+  {
+    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+    forallpoints(grid->box[bi], i)
+      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+  }
+
+  return 0;
+}
+
 
 /* Solve the Equations */
 int BNSdata_solve(tGrid *grid)
@@ -1076,6 +1142,8 @@ if(0) /* not working */
     { /* adjust according to WT with L2 */
       if(Getv("BNSdata_adjust", "WT_L2_method"))
         adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
+      if(Getv("BNSdata_adjust", "keep_xout"))
+        adjust_C1_C2_Omega_xCM_q_keep_xout(grid, it, tol);
       else  /* adjust Omega but only after re-adjusting C1/2 */
         adjust_C1_C2_Omega_xCM_q_min_qchange(grid, it, tol, &dOmega);
     }
