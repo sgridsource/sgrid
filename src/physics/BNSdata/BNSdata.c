@@ -969,6 +969,7 @@ int BNSdata_solve(tGrid *grid)
   tVarList *vldummy;
   int it;
   double dOmega = Getd("BNSdata_Omega")*0.1;
+  double L2qdiff;
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -1121,12 +1122,31 @@ int BNSdata_solve(tGrid *grid)
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
 
+    /* evalute residual */
+    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+    normresnonlin = GridL2Norm(vlFu);
+    printf("BNSdata_solve step %d (just after ell. solve):\n", it);
+    printf("  => m01=%.16g m02=%.16g residual=%.4e\n",
+           GetInnerRestMass(grid, 0), GetInnerRestMass(grid, 3),
+           normresnonlin);
+    /* compute error in q and add it to normresnonlin */
+    varcopy(grid, Ind("BNSdata_temp2"), Ind("BNSdata_q")); /* set temp2 = qold */
+    BNS_compute_new_q(grid);
+    /* set temp1 = q - temp2 = qnew - qold */
+    varadd(grid, Ind("BNSdata_temp1"),
+                 1,Ind("BNSdata_q"), -1,Ind("BNSdata_temp2"));
+    varcopy(grid, Ind("BNSdata_q"), Ind("BNSdata_temp2")); /* set q = temp2 */
+    L2qdiff = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
+              varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
+    printf("  => L2qdiff=%.4e\n", L2qdiff);
+    normresnonlin += L2qdiff;
+    /* break if normresnonlin is small enough */
+    if(normresnonlin<tol) break;
+
     /* write after elliptic solve, but before adjusting q */
     grid->time -= 0.5;
     write_grid(grid);
     grid->time += 0.5;
-printf(" after ell solve: => m01=%.19g m02=%.19g\n",
-       GetInnerRestMass(grid, 0), GetInnerRestMass(grid, 3));
 
 if(0)
 {
