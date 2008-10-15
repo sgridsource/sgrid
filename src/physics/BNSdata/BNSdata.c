@@ -841,6 +841,8 @@ int adjust_C1_C2_Omega_xCM_q_min_qchange(tGrid *grid, int it, double tol,
 }
 
 /* for newton_linesrch_its: compute error in xouts */
+/* if n=1 only BNSdata_Omega is adjusted
+   if n=2 both BNSdata_Omega & BNSdata_x_CM are adjusted */
 void xouts_error_VectorFunc(int n, double *vec, double *fvec)
 {
   double xout1, xout2;
@@ -848,8 +850,11 @@ void xouts_error_VectorFunc(int n, double *vec, double *fvec)
   tBox *box1 = xouts_error_VectorFunc__grid->box[0];
   tBox *box3 = xouts_error_VectorFunc__grid->box[3];
 
+  /* set BNSdata_Omega & BNSdata_x_CM */
   Setd("BNSdata_Omega", vec[1]);
-  Setd("BNSdata_x_CM",  vec[2]);
+  if(n>=2) Setd("BNSdata_x_CM",  vec[2]);
+  printf("xouts_error_VectorFunc: Omega=%g x_CM=%g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
   adjust_C1_C2_q_keep_restmasses(xouts_error_VectorFunc__grid,
                                  xouts_error_VectorFunc__it,
                                  xouts_error_VectorFunc__tol);
@@ -857,10 +862,11 @@ void xouts_error_VectorFunc(int n, double *vec, double *fvec)
   xout2 = box3->v[xind][0];
   printf("xouts_error_VectorFunc: Omega=%g x_CM=%g  xout1=%g xout2=%g\n",
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"),
-         xout1, xout2);
-  
+         xout1, xout2);  fflush(stdout);
+
+  /* return errors */
   fvec[1] = xout1 - xouts_error_VectorFunc__xout1;
-  fvec[2] = xout2 - xouts_error_VectorFunc__xout2;
+  if(n>=2) fvec[2] = xout2 - xouts_error_VectorFunc__xout2;
 }
 
 /* Adjust Omega and x_CM so that outer edges xout1/2 stay put */
@@ -869,28 +875,61 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   int check, stat, bi, i;
   int xind = Ind("x");
   double OmxCMvec[3];
+  double dxout_m[3];
+  double dxout_0[3];
+  double dxout_p[3];
+  double Omega, x_CM;
+  double dOmega;
 
+  /* save old Omega, x_CM */
+  Omega = Getd("BNSdata_Omega");
+  x_CM  = Getd("BNSdata_x_CM");
   printf("BNSdata_solve step %d: old Omega = %g  x_CM = %g\n",
-         it, Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
-  /**********************************************************************/
-  /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
-  /**********************************************************************/
+         it, Omega, x_CM);
+
+  /* set global vars */
   xouts_error_VectorFunc__grid  = grid;
   xouts_error_VectorFunc__it    = it;
   xouts_error_VectorFunc__tol   = tol;
   xouts_error_VectorFunc__xout1 = grid->box[0]->v[xind][0];
   xouts_error_VectorFunc__xout2 = grid->box[3]->v[xind][0];
-
   printf("BNSdata_solve step %d: old xout1 = %g  xout2 = %g\n",
          it, xouts_error_VectorFunc__xout1, xouts_error_VectorFunc__xout2);
 
-  /* adjust C1 and thus m01 */
-  OmxCMvec[1] = Getd("BNSdata_Omega");
-  OmxCMvec[2] = Getd("BNSdata_x_CM");
-  stat = newton_linesrch_its(OmxCMvec, 2, &check, xouts_error_VectorFunc,
-                             1000, tol*0.01);
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
-
+  /* find current deviations */
+  dOmega = Omega*0.1;
+  OmxCMvec[2] = x_CM;
+  OmxCMvec[1] = Omega - dOmega;
+  xouts_error_VectorFunc(2, OmxCMvec, dxout_m);
+  OmxCMvec[1] = Omega + dOmega;
+  xouts_error_VectorFunc(2, OmxCMvec, dxout_p);
+  OmxCMvec[1] = Omega;
+  /* xouts_error_VectorFunc(2, OmxCMvec, dxout_0); */
+  printf("BNSdata_solve step %d: dxout_m[1] = %g  dxout_m[2] = %g\n",
+         it, dxout_m[1], dxout_m[2]);
+  /* printf("BNSdata_solve step %d: dxout_0[1] = %g  dxout_0[2] = %g\n",
+         it, dxout_0[1], dxout_0[2]); */
+  printf("BNSdata_solve step %d: dxout_p[1] = %g  dxout_p[2] = %g\n",
+         it, dxout_p[1], dxout_p[2]);
+  /* check if there is a zero */
+  if( (dxout_m[1]*dxout_p[1]<0.0) && (dxout_m[2]*dxout_p[2]<0.0) )
+  {
+    /**************************************************************************/
+    /* do newton_linesrch_its iterations until xout1/2 are where we want them */
+    /**************************************************************************/
+    OmxCMvec[1] = Omega;
+    OmxCMvec[2] = x_CM;
+    stat = newton_linesrch_its(OmxCMvec, 2, &check, xouts_error_VectorFunc,
+                               1000, tol*0.01);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
+  }
+  else
+  {
+    OmxCMvec[1] = Omega;
+    xouts_error_VectorFunc(2, OmxCMvec, dxout_0);
+    printf("BNSdata_solve step %d: dxout_0[1] = %g  dxout_0[2] = %g\n",
+           it, dxout_0[1], dxout_0[2]);
+  }
   printf("BNSdata_solve step %d: new Omega = %g  x_CM = %g\n",
          it, Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
 
