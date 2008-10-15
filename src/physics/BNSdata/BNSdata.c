@@ -861,7 +861,7 @@ void xouts_error_VectorFunc(int n, double *vec, double *fvec)
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
   adjust_C1_C2_q_keep_restmasses(xouts_error_VectorFunc__grid,
                                  xouts_error_VectorFunc__it,
-                                 xouts_error_VectorFunc__tol*0.01);
+                                 xouts_error_VectorFunc__tol);
   xout1 = box1->v[xind][0];
   xout2 = box3->v[xind][0];
   printf("xouts_error_VectorFunc: Omega=%g x_CM=%g  xout1=%g xout2=%g\n",
