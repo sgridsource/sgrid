@@ -1137,7 +1137,9 @@ int BNSdata_solve(tGrid *grid)
                  1,Ind("BNSdata_q"), -1,Ind("BNSdata_temp2"));
     varcopy(grid, Ind("BNSdata_q"), Ind("BNSdata_temp2")); /* set q = temp2 */
     L2qdiff = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
-              varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
+              varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1")) +
+              varBoxL2Norm(grid->box[4], Ind("BNSdata_temp1")) +
+              varBoxL2Norm(grid->box[5], Ind("BNSdata_temp1"));
     printf("  => L2qdiff=%.4e\n", L2qdiff);
     normresnonlin += L2qdiff;
     /* break if normresnonlin is small enough */
