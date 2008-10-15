@@ -782,6 +782,10 @@ int adjust_C1_C2_Omega_xCM_q_min_qchange(tGrid *grid, int it, double tol,
   double Omega;
   double dif_m, dif_0, dif_p;
 
+errorexit("in order to use adjust_C1_C2_Omega_xCM_q_min_qchange you must uncomment\n"
+          "//Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind(\"BNSdata_qold\"));\n"
+          "in the function compute_new_q_and_adjust_domainshapes");
+
   /* save Omega */
   Omega = Getd("BNSdata_Omega");
   printf("BNSdata_solve step %d: old Omega = %.4e  *dOmega = %.4e\n",
@@ -2978,7 +2982,7 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"));
+  //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));
