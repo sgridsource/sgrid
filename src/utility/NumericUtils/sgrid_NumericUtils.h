@@ -49,3 +49,8 @@ double odeintegrate(double ystart[], int nvar, double x1, double x2,
 void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
 	double yscal[], double *hdid, double *hnext,
 	void (*derivs)(double, double [], double []));
+
+/* Minimization */
+double brent_with_pointer_to_pars(double ax, double bx, double cx,
+                                  double (*f)(double, void *ppointer),
+                                  double tol, double *xmin, void *parpointer);
