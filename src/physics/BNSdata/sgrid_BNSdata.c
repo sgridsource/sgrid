@@ -77,7 +77,9 @@ int sgrid_BNSdata()
          "and old values are averaged according to: "
          "new = esw*new + (1-esw)*old");
   AddPar("BNSdata_adjust", "nothing", "what we adjust (apart from C1/2) "
-         "after ell. solve [nothing,Omega]");
+         "after ell. solve [nothing,keep_xout,WT_L2_method]");
+  AddPar("BNSdata_adjust_first_at", "10", 
+         "first iteration when we use BNSdata_adjust");
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",
          "how we solve for Psi,B^i,alphaP,Sigma "
          "[allatonce, BNS_Eqn_Iterator, sequence1, sequence2]");
