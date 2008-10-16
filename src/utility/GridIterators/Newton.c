@@ -5,6 +5,34 @@
 #include "GridIterators.h"
 
 
+/* structure we can use to store varlists and funcs */
+typedef struct tNEWTONSTEPVARS {
+  void  (*Fu)(tVarList *vl_Fu,  tVarList *vl_u,  tVarList *vl_c1, tVarList *vl_c2);
+  void (*Jdu)(tVarList *vl_Jdu, tVarList *vl_du, tVarList *vl_d1, tVarList *vl_d2);
+  tVarList *vlFu;
+  tVarList *vlu;
+  tVarList *vlc1;
+  tVarList *vlc2;
+  tVarList *vlres;
+  tVarList *vldu;
+  tVarList *vld1;
+  tVarList *vld2;
+  tVarList *vltemp;
+} tNewtonStepVars;
+
+
+/* funcs */
+void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu);
+void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
+  void  (*Fu)(tVarList *vl_Fu,  tVarList *vl_u,  tVarList *vl_c1, tVarList *vl_c2),
+  void (*Jdu)(tVarList *vl_Jdu, tVarList *vl_du, tVarList *vl_d1, tVarList *vl_d2),
+  tVarList *vlFu,  tVarList *vlc1, tVarList *vlc2,
+  tVarList *vlres, tVarList *vld1, tVarList *vld2,
+  int pr);
+
+
+
+
 /* Newton Raphson solver, which solves F(u)=0 on a grid.
    It takes the function F(u), its linearization J(du), some var lists and
    pars as well as a linear Solver and a Preconditioner as arguments.      */
@@ -55,19 +83,9 @@ int Newton(
     /* if(pr) printf("Newton: after linSolver: %e\n",lin_normres); */
 
     /* do Newton step: u^{n+1} = u^{n} - du */
-    for(j = 0; j < vlu->n; j++)
-      forallboxes(grid,b)
-      {
-        tBox *box = grid->box[b];
-	double *u  = box->v[vlu ->index[j]]; 
-	double *du = box->v[vldu->index[j]]; 
-
-        forallpoints(box,i)
-        {
-          u[i] -= du[i];  /* do Newton step: u^{n+1} = u^{n} - du */
-          du[i] = 0;      /* reset du to zero */
-        }
-      }
+    /* do_partial_Newton_step(vlu, 1.0, vldu); */
+    do_Newton_step(vlu, vldu, res, Fu, Jdu,
+                   vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
 
     /* sync vlu. sync is not needed if du is synced */
     /* bampi_vlsynchronize(vlu); */
@@ -90,4 +108,115 @@ int Newton(
   }
 
   return inewton;
+}
+
+
+/* partial Newton step */
+/* do Newton step: u^{n+1} = u^{n} - lambda*du */
+/* Note: if lambda=1 this is a full Newton step. */
+void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu)
+{
+  tGrid *grid = vlu->grid;
+  int i, j, b;
+  
+  for(j = 0; j < vlu->n; j++)
+    forallboxes(grid,b)
+    {
+      tBox *box = grid->box[b];
+      double *u  = box->v[vlu ->index[j]]; 
+      double *du = box->v[vldu->index[j]]; 
+
+      forallpoints(box,i)
+        u[i] -= lambda*du[i]; /* do Newton step: u^{n+1} = u^{n} - lambda*du */
+    }
+}
+
+/* function for brent, which gives Newton residual as a function of 
+   lambda only */
+double Newton_residual_of_lambda(double lambda, void *p)
+{
+  tNewtonStepVars *pars;
+  pars = (tNewtonStepVars *) p;
+
+  /* set vlu = vltemp */  
+  vlcopy(pars->vlu, pars->vltemp);
+  do_partial_Newton_step(pars->vlu, lambda, pars->vldu);
+  pars->Fu(pars->vlFu, pars->vlu, pars->vlc1, pars->vlc2);
+  return norm2(pars->vlFu);
+}
+
+/* do one Newton step and with backtracking if needed */
+void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
+  void  (*Fu)(tVarList *vl_Fu,  tVarList *vl_u,  tVarList *vl_c1, tVarList *vl_c2),
+  void (*Jdu)(tVarList *vl_Jdu, tVarList *vl_du, tVarList *vl_d1, tVarList *vl_d2),
+  tVarList *vlFu,  tVarList *vlc1, tVarList *vlc2,
+  tVarList *vlres, tVarList *vld1, tVarList *vld2,
+  int pr)
+{
+  double cl = 1.0;
+
+  /* do full Newton step */
+  do_partial_Newton_step(vlu, cl, vldu);
+
+  /* do we use backtracking? */
+  if(Getv("GridIterators_Newtonstep", "backtrack"))
+  {
+    void *p;
+    tNewtonStepVars pars[1]; /* create tNewtonStepVars *pars but with memory */
+    double al = 0.0;
+    double bl = 1e-4;
+    double tol = 0.01;
+    double lmin, lambda;
+    double fx;  
+    tVarList *vltemp;
+    double resb, resc;
+
+    /* res of full Newton step */
+    Fu(vlFu, vlu, vlc1, vlc2);
+    resc = norm2(vlFu);
+    if(resc<oldres)
+    {
+      vlsetconstant(vldu, 0.0); 
+      return; /* stick with full Newton step if it decreases res */
+    }
+
+    /* do Newton step only to lambda = bl */
+    do_partial_Newton_step(vlu, bl-cl, vldu);
+    Fu(vlFu, vlu, vlc1, vlc2);
+    resb = norm2(vlFu);
+    if(resb>=oldres)  errorexit("do_Newton_step: (res at bl) > (res at 0)");
+
+    /* save old vlu in vltemp */
+    vltemp = AddDuplicateEnable(vlu, "_GridIterators_Newtonstep_temp");
+    do_partial_Newton_step(vlu, -bl, vldu); /* go back to lambda=0 */
+    vlcopy(vltemp, vlu);
+            
+    /* set pars for Newton_residual_of_lambda */
+    pars->Fu   = Fu;
+    pars->Jdu  = Jdu;
+    pars->vlFu = vlFu;
+    pars->vlu  = vlu;
+    pars->vlc1 = vlc1;
+    pars->vlc2 = vlc2;
+    pars->vlres= vlres;
+    pars->vldu = vldu;
+    pars->vld1 = vld1;
+    pars->vld2 = vld2;
+    pars->vltemp = vltemp;
+    p = (void *) pars;
+
+    /* call brent with Newton_residual_of_lambda to find the lambda=lmin 
+       where the res in min */
+    fx = brent_with_pointer_to_pars(al, bl, cl, Newton_residual_of_lambda,
+                                    tol, &lmin, p);
+    if(lmin < bl) lambda = bl;
+    else          lambda = lmin;
+    if(pr) printf("do_Newton_step:  backtracking to lambda=%g\n", lambda);
+    
+    /* do reduced Newton step */
+    vlcopy(vlu, vltemp);
+    do_partial_Newton_step(vlu, lambda, vldu);
+  }
+  /* reset du to zero */
+  vlsetconstant(vldu, 0.0);
 }

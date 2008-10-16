@@ -17,6 +17,8 @@ int sgrid_GridIterators()
   AddPar("GridIterators_setABStozero_below", "0", 
          "some numbers will be set equal to 0 if their magnitude "
          "is below this value [any positive number]");
+  AddPar("GridIterators_Newtonstep", "full",
+         "how we take Newton steps [full,backtrack]");
 
   /* check whether there is more to do */
   if (!Getv("physics", "GridIterators")) return 0;
