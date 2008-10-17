@@ -949,6 +949,62 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
 }
 
 
+/* compute weighted average of current and old values,
+   and return total error */
+double average_current_and_old(double weight, tGrid *grid,
+                               tVarList *vlFu, tVarList *vlu,
+                               tVarList *vluDerivs, tVarList *vlJdu)
+{
+  double tm01 = Getd("BNSdata_m01");
+  double tm02 = Getd("BNSdata_m02");
+  double m01, m02;
+  double normresnonlin, L2qdiff, dm01, dm02, m0err, error;
+
+  /* reset new values from ell. solve as average between old and new.
+     I.e. do: new = weight*new + (1-weight)*old  */
+  varadd(grid, Ind("BNSdata_Psi"),   weight,Ind("BNSdata_Psi"),   (1.0-weight),Ind("BNSdata_Psiold"));
+  varadd(grid, Ind("BNSdata_alphaP"),weight,Ind("BNSdata_alphaP"),(1.0-weight),Ind("BNSdata_alphaPold"));
+  varadd(grid, Ind("BNSdata_Bx"),    weight,Ind("BNSdata_Bx"),    (1.0-weight),Ind("BNSdata_Boldx"));
+  varadd(grid, Ind("BNSdata_By"),    weight,Ind("BNSdata_By"),    (1.0-weight),Ind("BNSdata_Boldy"));
+  varadd(grid, Ind("BNSdata_Bz"),    weight,Ind("BNSdata_Bz"),    (1.0-weight),Ind("BNSdata_Boldz"));
+  varadd(grid, Ind("BNSdata_Sigma"), weight,Ind("BNSdata_Sigma"), (1.0-weight),Ind("BNSdata_Sigmaold"));
+
+  /* compute masses */
+  m01 = GetInnerRestMass(grid, 0);
+  m02 = GetInnerRestMass(grid, 3);
+  
+  /* compute error in masses */
+  dm01 = (m01 - tm01)/(tm01+tm02);
+  dm02 = (m02 - tm02)/(tm01+tm02);
+  m0err = fabs(dm01) + fabs(dm02);
+  
+  /* evalute residual */
+  F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+  normresnonlin = GridL2Norm(vlFu);
+  printf("average_current_and_old:  weight=%g\n", weight);
+  printf(" => m01=%.19g m02=%.19g\n", m01, m02);
+
+  /* compute error in q */
+  varcopy(grid, Ind("BNSdata_temp2"), Ind("BNSdata_q")); /* set temp2 = qold */
+  BNS_compute_new_q(grid);
+  /* set temp1 = q - temp2 = qnew - qold */
+  varadd(grid, Ind("BNSdata_temp1"),
+               1,Ind("BNSdata_q"), -1,Ind("BNSdata_temp2"));
+  varcopy(grid, Ind("BNSdata_q"), Ind("BNSdata_temp2")); /* set q = temp2 */
+  L2qdiff = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
+            varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1")) +
+            varBoxL2Norm(grid->box[4], Ind("BNSdata_temp1")) +
+            varBoxL2Norm(grid->box[5], Ind("BNSdata_temp1"));
+  
+  /* compute total error */
+  error = normresnonlin + L2qdiff + m0err;
+  printf(" => residual=%.4e L2qdiff=%.4e m0err=%.3e => error=%.4e\n",
+         normresnonlin, L2qdiff, m0err, error);
+
+  return error;
+}
+
+
 /* Solve the Equations */
 int BNSdata_solve(tGrid *grid)
 {
@@ -969,7 +1025,7 @@ int BNSdata_solve(tGrid *grid)
   tVarList *vldummy;
   int it;
   double dOmega = Getd("BNSdata_Omega")*0.1;
-  double L2qdiff;
+  double totalerr1, totalerr2;
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -1112,38 +1168,18 @@ int BNSdata_solve(tGrid *grid)
 
     /* reset new values from ell. solve as average between old and new.
        I.e. do: new = esw*new + (1-esw)*old  */
-    varadd(grid, Ind("BNSdata_Psi"),   esw,Ind("BNSdata_Psi"),   (1.0-esw),Ind("BNSdata_Psiold"));
-    varadd(grid, Ind("BNSdata_alphaP"),esw,Ind("BNSdata_alphaP"),(1.0-esw),Ind("BNSdata_alphaPold"));
-    varadd(grid, Ind("BNSdata_Bx"),    esw,Ind("BNSdata_Bx"),    (1.0-esw),Ind("BNSdata_Boldx"));
-    varadd(grid, Ind("BNSdata_By"),    esw,Ind("BNSdata_By"),    (1.0-esw),Ind("BNSdata_Boldy"));
-    varadd(grid, Ind("BNSdata_Bz"),    esw,Ind("BNSdata_Bz"),    (1.0-esw),Ind("BNSdata_Boldz"));
-    varadd(grid, Ind("BNSdata_Sigma"), esw,Ind("BNSdata_Sigma"), (1.0-esw),Ind("BNSdata_Sigmaold"));
-                 
+    totalerr1 = average_current_and_old(esw, grid,vlFu,vlu,vluDerivs, vlJdu);
+    /* complete step */
+    totalerr2 = average_current_and_old(1.0/esw, grid,vlFu,vlu,vluDerivs,vlJdu);
+    /* but go back to esw if totalerr2 is larger */
+    if(totalerr2>=totalerr1)
+      totalerr2 = average_current_and_old(esw, grid,vlFu,vlu,vluDerivs,vlJdu);
+
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
 
-    /* evalute residual */
-    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
-    normresnonlin = GridL2Norm(vlFu);
-    printf("BNSdata_solve step %d (just after ell. solve):\n", it);
-    printf("  => m01=%.16g m02=%.16g residual=%.4e\n",
-           GetInnerRestMass(grid, 0), GetInnerRestMass(grid, 3),
-           normresnonlin);
-    /* compute error in q and add it to normresnonlin */
-    varcopy(grid, Ind("BNSdata_temp2"), Ind("BNSdata_q")); /* set temp2 = qold */
-    BNS_compute_new_q(grid);
-    /* set temp1 = q - temp2 = qnew - qold */
-    varadd(grid, Ind("BNSdata_temp1"),
-                 1,Ind("BNSdata_q"), -1,Ind("BNSdata_temp2"));
-    varcopy(grid, Ind("BNSdata_q"), Ind("BNSdata_temp2")); /* set q = temp2 */
-    L2qdiff = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
-              varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1")) +
-              varBoxL2Norm(grid->box[4], Ind("BNSdata_temp1")) +
-              varBoxL2Norm(grid->box[5], Ind("BNSdata_temp1"));
-    printf("  => L2qdiff=%.4e\n", L2qdiff);
-    normresnonlin += L2qdiff;
-    /* break if normresnonlin is small enough */
-    if(normresnonlin<tol) break;
+    /* break if total error is small enough */
+    if(totalerr2<tol) break;
 
     /* write after elliptic solve, but before adjusting q */
     grid->time -= 0.5;
