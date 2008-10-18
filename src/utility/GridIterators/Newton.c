@@ -164,7 +164,7 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
     void *p;
     tNewtonStepVars pars[1]; /* create tNewtonStepVars *pars but with memory */
     double al = 0.0;
-    double bl = 1e-4;
+    double bl = 1e-6;
     double tol = 0.01;
     double lmin, lambda;
     double fx;  
@@ -184,8 +184,20 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
     do_partial_Newton_step(vlu, bl-cl, vldu);
     Fu(vlFu, vlu, vlc1, vlc2);
     resb = norm2(vlFu);
-    if(resb>=oldres)  errorexit("do_Newton_step: (res at bl) > (res at 0)");
-
+    if(resb>=oldres)
+    { /* errorexit("do_Newton_step: (res at bl) > (res at 0)"); */
+      lambda = 1e-4;
+      if(pr)
+      {
+        printf("do_Newton_step: Warning: "
+               "(res at lambda=bl=%g) > (res at lambda=0)\n", bl);
+        printf("do_Newton_step: trying to escape local min. with "
+               "lambda=%g\n", lambda);
+      }
+      do_partial_Newton_step(vlu, lambda-bl, vldu);
+      vlsetconstant(vldu, 0.0);
+      return; /* do Newton step by amount lambda, even though res is worse */
+    }
     /* save old vlu in vltemp */
     vltemp = AddDuplicateEnable(vlu, "_GridIterators_Newtonstep_temp");
     do_partial_Newton_step(vlu, -bl, vldu); /* go back to lambda=0 */
