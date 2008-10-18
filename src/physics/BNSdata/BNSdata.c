@@ -1011,6 +1011,7 @@ int BNSdata_solve(tGrid *grid)
   int    itmax        = Geti("BNSdata_itmax");
   double tol          = Getd("BNSdata_tol");
   double esw          = Getd("BNSdata_esw");
+  int    allow_esw1_it= Geti("BNSdata_allow_esw1_first_at");
   int    Newton_itmax = itmax;
   double Newton_tol   = tol*0.1;
   int    linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
@@ -1025,7 +1026,7 @@ int BNSdata_solve(tGrid *grid)
   tVarList *vldummy;
   int it;
   double dOmega = Getd("BNSdata_Omega")*0.1;
-  double totalerr1, totalerr2;
+  double totalerr1, totalerr;
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -1169,17 +1170,22 @@ int BNSdata_solve(tGrid *grid)
     /* reset new values from ell. solve as average between old and new.
        I.e. do: new = esw*new + (1-esw)*old  */
     totalerr1 = average_current_and_old(esw, grid,vlFu,vlu,vluDerivs, vlJdu);
-    /* complete step */
-    totalerr2 = average_current_and_old(1.0/esw, grid,vlFu,vlu,vluDerivs,vlJdu);
-    /* but go back to esw if totalerr2 is larger */
-    if(totalerr2>=totalerr1)
-      totalerr2 = average_current_and_old(esw, grid,vlFu,vlu,vluDerivs,vlJdu);
+    if(esw<1.0 && it>=allow_esw1_it)
+    {
+      /* complete step */
+      totalerr = average_current_and_old(1.0/esw, grid,vlFu,vlu,vluDerivs,vlJdu);
+      /* but go back to esw if totalerr is larger */
+      if(totalerr>=totalerr1)
+        totalerr = average_current_and_old(esw, grid,vlFu,vlu,vluDerivs,vlJdu);
+    }
+    else
+      totalerr = totalerr1;
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
 
     /* break if total error is small enough */
-    if(totalerr2<tol) break;
+    if(totalerr<tol) break;
 
     /* write after elliptic solve, but before adjusting q */
     grid->time -= 0.5;

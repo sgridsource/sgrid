@@ -76,6 +76,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_esw",   "1",   "ell. solve weight: after ell. solve new "
          "and old values are averaged according to: "
          "new = esw*new + (1-esw)*old");
+  AddPar("BNSdata_allow_esw1_first_at", "0",
+         "first iteration when esw=1 will be tried and allowed if better");
   AddPar("BNSdata_adjust", "nothing", "what we adjust (apart from C1/2) "
          "after ell. solve [nothing,keep_xout,WT_L2_method]");
   AddPar("BNSdata_adjust_first_at", "10", 
