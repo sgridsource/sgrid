@@ -512,28 +512,28 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   /* rest masses before adjusting q */
   m01 = GetInnerRestMass(grid, 0);
   m02 = GetInnerRestMass(grid, 3);
-  printf(" BNSdata_solve: rest mass in inner domains before computing new q:\n"
-         "    m01=%g  m02=%g\n", m01, m02);
+  printf("adjust_C1_C2_q_keep_restmasses: in BNSdata_solve step %d:\n", it);
+  printf(" rest mass in inner domains before computing new q:"
+         " m01=%g m02=%g\n", m01, m02);
 
   /* compute error in masses */
   dm01 = m01 - Getd("BNSdata_m01");
   dm02 = m02 - Getd("BNSdata_m02");
   m0_error = dm01*dm01 + dm02*dm02;
   m0_error = sqrt(m0_error)/(Getd("BNSdata_m01")+Getd("BNSdata_m02"));
-  printf(" BNSdata_solve step %d: rest mass error = %.4e "
-         "(before adjusting C1/2)\n", it, m0_error);
+  printf(" rest mass error = %.4e "
+         "(before adjusting C1/2)\n", m0_error);
 
   /* set desired masses for this iteration */
   m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
   m0_errors_VectorFunc__m02 = Getd("BNSdata_m02"); // + dm02*0.9;
-  printf(" BNSdata_solve step %d: "
-         "adjusting q,C1,C2 to achieve: m01=%g  m02=%g\n",
-         it, m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02);
+  printf(" adjusting q,C1,C2 to achieve: m01=%g  m02=%g\n",
+         m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02);
 
   /* print C1/2 we used before */
-  printf("old: BNSdata_C1=%g BNSdata_C2=%g\n",
+  printf(" old: BNSdata_C1=%g BNSdata_C2=%g\n",
          Getd("BNSdata_C1"), Getd("BNSdata_C2"));
-  printf("     => m01=%.19g m02=%.19g\n", m01, m02);
+  /* printf("     => m01=%g m02=%g\n", m01, m02); */
 
   /* choose C1/2 such that rest masses are not too big or too small */
   for(i=0; i<1000; i++)
@@ -576,7 +576,7 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   Setd("BNSdata_C2", Cvec[1]);
 
   /* print guess for C1/2 */                                        
-  printf("guess: BNSdata_C1=%g BNSdata_C2=%g\n",
+  printf(" guess: BNSdata_C1=%g BNSdata_C2=%g\n",
          Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
   /**********************************************************************/
@@ -597,7 +597,8 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
                                1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C2", Cvec[1]);
-  printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
+  printf("adjust_C1_C2_q_keep_restmasses:\n");
+  printf(" new: BNSdata_C1=%g BNSdata_C2=%g\n",
          Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
   /* set q to zero if q<0, and also in region 1 & 2 */
@@ -864,9 +865,10 @@ void xouts_error_VectorFunc(int n, double *vec, double *fvec)
                                  xouts_error_VectorFunc__tol);
   xout1 = box1->v[xind][0];
   xout2 = box3->v[xind][0];
-  printf("xouts_error_VectorFunc: Omega=%g x_CM=%g  xout1=%g xout2=%g\n",
+  printf("xouts_error_VectorFunc: Omega=%g x_CM=%g xout1=%g xout2=%g\n",
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"),
          xout1, xout2);  fflush(stdout);
+  prdivider(0);
 
   /* return errors */
   fvec[1] = xout1 - xouts_error_VectorFunc__xout1;
@@ -879,16 +881,23 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   int check, stat, bi, i;
   int xind = Ind("x");
   double OmxCMvec[3];
-  double dxout_m[3];
-  double dxout_0[3];
-  double dxout_p[3];
+  double dxout_m0[3];
+  double dxout_00[3];
+  double dxout_p0[3];
+  double dxout_0m[3];
+  double dxout_0p[3];
   double Omega, x_CM;
-  double dOmega;
+  double dOmega, dx_CM;
+  int do_lnsrch;
 
   /* save old Omega, x_CM */
   Omega = Getd("BNSdata_Omega");
   x_CM  = Getd("BNSdata_x_CM");
-  printf("BNSdata_solve step %d: old Omega = %g  x_CM = %g\n",
+  dOmega= Omega * Getd("BNSdata_dOmega_fac");
+  dx_CM = Getd("BNSdata_b") * Getd("BNSdata_dx_CM_fac");
+  prdivider(0);
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xout: in BNSdata_solve step %d\n"
+         "adjust_C1_C2_Omega_xCM_q_keep_xout: old Omega = %g  x_CM = %g\n",
          it, Omega, x_CM);
 
   /* set global vars */
@@ -897,26 +906,55 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   xouts_error_VectorFunc__tol   = tol;
   xouts_error_VectorFunc__xout1 = grid->box[0]->v[xind][0];
   xouts_error_VectorFunc__xout2 = grid->box[3]->v[xind][0];
-  printf("BNSdata_solve step %d: old xout1 = %g  xout2 = %g\n",
-         it, xouts_error_VectorFunc__xout1, xouts_error_VectorFunc__xout2);
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xout: old xout1 = %g  xout2 = %g\n",
+         xouts_error_VectorFunc__xout1, xouts_error_VectorFunc__xout2);
+  prdivider(0);
 
-  /* find current deviations */
-  dOmega = Omega*0.1;
+  /* find deviations for Omega +/- dOmega, x_CM */
   OmxCMvec[2] = x_CM;
   OmxCMvec[1] = Omega - dOmega;
-  xouts_error_VectorFunc(2, OmxCMvec, dxout_m);
+  xouts_error_VectorFunc(2, OmxCMvec, dxout_m0);
   OmxCMvec[1] = Omega + dOmega;
-  xouts_error_VectorFunc(2, OmxCMvec, dxout_p);
+  xouts_error_VectorFunc(2, OmxCMvec, dxout_p0);
   OmxCMvec[1] = Omega;
-  /* xouts_error_VectorFunc(2, OmxCMvec, dxout_0); */
-  printf("BNSdata_solve step %d: dxout_m[1] = %g  dxout_m[2] = %g\n",
-         it, dxout_m[1], dxout_m[2]);
-  /* printf("BNSdata_solve step %d: dxout_0[1] = %g  dxout_0[2] = %g\n",
-         it, dxout_0[1], dxout_0[2]); */
-  printf("BNSdata_solve step %d: dxout_p[1] = %g  dxout_p[2] = %g\n",
-         it, dxout_p[1], dxout_p[2]);
-  /* check if there is a zero */
-  if( (dxout_m[1]*dxout_p[1]<0.0) && (dxout_m[2]*dxout_p[2]<0.0) )
+  /* xouts_error_VectorFunc(2, OmxCMvec, dxout_00); */
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_m0[1]=%g dxout_m0[2]=%g\n",
+         dxout_m0[1], dxout_m0[2]);
+  /* printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_00[1]=%g dxout_00[2]=%g\n",
+         dxout_00[1], dxout_00[2]); */
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_p0[1]=%g dxout_p0[2]=%g\n",
+         dxout_p0[1], dxout_p0[2]);
+  prdivider(0);
+  /* check if there is a zero, if so set do_lnsrch=1 */
+  do_lnsrch = 0;
+  if( (dxout_m0[1]*dxout_p0[1]<0.0) && (dxout_m0[2]*dxout_p0[2]<0.0) )
+    do_lnsrch = 1;
+  if( (do_lnsrch==0) &&
+      ((dxout_m0[1]*dxout_p0[1]<0.0) || (dxout_m0[2]*dxout_p0[2]<0.0)) )
+  {
+    /* find deviations for Omega, x_CM +/- dx_CM */
+    OmxCMvec[1] = Omega;
+    OmxCMvec[2] = x_CM - dx_CM;
+    xouts_error_VectorFunc(2, OmxCMvec, dxout_0m);
+    OmxCMvec[2] = x_CM + dx_CM;
+    xouts_error_VectorFunc(2, OmxCMvec, dxout_0p);
+    OmxCMvec[2] = x_CM;
+    /* xouts_error_VectorFunc(2, OmxCMvec, dxout_00); */
+    printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_0m[1]=%g dxout_0m[2]=%g\n",
+           dxout_m0[1], dxout_m0[2]);
+    /* printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_00[1]=%g dxout_00[2]=%g\n",
+           dxout_00[1], dxout_00[2]); */
+    printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_0p[1]=%g dxout_0p[2]=%g\n",
+           dxout_p0[1], dxout_p0[2]);
+
+    if( (dxout_m0[1]*dxout_p0[1]<0.0) && (dxout_0m[2]*dxout_0p[2]<0.0) )
+      do_lnsrch = 1;
+    if( (dxout_m0[2]*dxout_p0[2]<0.0) && (dxout_0m[1]*dxout_0p[1]<0.0) )
+      do_lnsrch = 1;
+  }
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xout: do_lnsrch = %d\n", do_lnsrch);
+  prdivider(0);
+  if(do_lnsrch)
   {
     /**************************************************************************/
     /* do newton_linesrch_its iterations until xout1/2 are where we want them */
@@ -925,17 +963,19 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
     OmxCMvec[2] = x_CM;
     stat = newton_linesrch_its(OmxCMvec, 2, &check, xouts_error_VectorFunc,
                                1000, tol*0.5);
-    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    prdivider(0);
   }
   else
   {
     OmxCMvec[1] = Omega;
-    xouts_error_VectorFunc(2, OmxCMvec, dxout_0);
-    printf("BNSdata_solve step %d: dxout_0[1] = %g  dxout_0[2] = %g\n",
-           it, dxout_0[1], dxout_0[2]);
+    xouts_error_VectorFunc(2, OmxCMvec, dxout_00);
+    printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_00[1] = %g  dxout_00[2] = %g\n",
+           dxout_00[1], dxout_00[2]);
   }
-  printf("BNSdata_solve step %d: new Omega = %g  x_CM = %g\n",
-         it, Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xout: new Omega = %g  x_CM = %g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+  prdivider(0);
 
   /* set q to zero if q<0, and also in region 1 & 2 */
   forallboxes(grid, bi)

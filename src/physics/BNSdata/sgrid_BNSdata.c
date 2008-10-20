@@ -82,6 +82,8 @@ int sgrid_BNSdata()
          "after ell. solve [nothing,keep_xout,WT_L2_method]");
   AddPar("BNSdata_adjust_first_at", "10", 
          "first iteration when we use BNSdata_adjust");
+  AddPar("BNSdata_dOmega_fac", "0.1", "dOmega = Omega*dOmega_Fac");
+  AddPar("BNSdata_dx_CM_fac",  "0.1", "dx_CM = b*dx_CM_fac");
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",
          "how we solve for Psi,B^i,alphaP,Sigma "
          "[allatonce, BNS_Eqn_Iterator, sequence1, sequence2]");
