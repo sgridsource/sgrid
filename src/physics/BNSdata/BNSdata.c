@@ -988,7 +988,6 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
     stat = newton_linesrch_its(OmxCMvec, 2, &check, xouts_error_VectorFunc,
                                1000, tol*0.5);
     if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-    prdivider(0);
   }
   else
   {
