@@ -888,7 +888,7 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   double dxout_0p[3];
   double Omega, x_CM;
   double dOmega, dx_CM;
-  int do_lnsrch;
+  int do_lnsrch = Getv("BNSdata_adjust", "always");
 
   /* save old Omega, x_CM */
   Omega = Getd("BNSdata_Omega");
@@ -910,23 +910,25 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
          xouts_error_VectorFunc__xout1, xouts_error_VectorFunc__xout2);
   prdivider(0);
 
-  /* find deviations for Omega +/- dOmega, x_CM */
-  OmxCMvec[2] = x_CM;
-  OmxCMvec[1] = Omega - dOmega;
-  xouts_error_VectorFunc(2, OmxCMvec, dxout_m0);
-  OmxCMvec[1] = Omega + dOmega;
-  xouts_error_VectorFunc(2, OmxCMvec, dxout_p0);
-  OmxCMvec[1] = Omega;
-  /* xouts_error_VectorFunc(2, OmxCMvec, dxout_00); */
-  printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_m0[1]=%g dxout_m0[2]=%g\n",
-         dxout_m0[1], dxout_m0[2]);
-  /* printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_00[1]=%g dxout_00[2]=%g\n",
-         dxout_00[1], dxout_00[2]); */
-  printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_p0[1]=%g dxout_p0[2]=%g\n",
-         dxout_p0[1], dxout_p0[2]);
-  prdivider(0);
+  if(do_lnsrch==0)
+  {
+    /* find deviations for Omega +/- dOmega, x_CM */
+    OmxCMvec[2] = x_CM;
+    OmxCMvec[1] = Omega - dOmega;
+    xouts_error_VectorFunc(2, OmxCMvec, dxout_m0);
+    OmxCMvec[1] = Omega + dOmega;
+    xouts_error_VectorFunc(2, OmxCMvec, dxout_p0);
+    OmxCMvec[1] = Omega;
+    /* xouts_error_VectorFunc(2, OmxCMvec, dxout_00); */
+    printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_m0[1]=%g dxout_m0[2]=%g\n",
+           dxout_m0[1], dxout_m0[2]);
+    /* printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_00[1]=%g dxout_00[2]=%g\n",
+           dxout_00[1], dxout_00[2]); */
+    printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_p0[1]=%g dxout_p0[2]=%g\n",
+           dxout_p0[1], dxout_p0[2]);
+    prdivider(0);
+  }
   /* check if there is a zero, if so set do_lnsrch=1 */
-  do_lnsrch = 0;
   if( (dxout_m0[1]*dxout_p0[1]<0.0) && (dxout_m0[2]*dxout_p0[2]<0.0) )
     do_lnsrch = 1;
   if( (do_lnsrch==0) &&
