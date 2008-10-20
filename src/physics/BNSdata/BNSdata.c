@@ -889,6 +889,7 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   double Omega, x_CM;
   double dOmega, dx_CM;
   int do_lnsrch = Getv("BNSdata_adjust", "always");
+  int keepone   = Getv("BNSdata_adjust", "keep_one_xout");
 
   /* save old Omega, x_CM */
   Omega = Getd("BNSdata_Omega");
@@ -934,25 +935,46 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   if( (do_lnsrch==0) &&
       ((dxout_m0[1]*dxout_p0[1]<0.0) || (dxout_m0[2]*dxout_p0[2]<0.0)) )
   {
-    /* find deviations for Omega, x_CM +/- dx_CM */
-    OmxCMvec[1] = Omega;
-    OmxCMvec[2] = x_CM - dx_CM;
-    xouts_error_VectorFunc(2, OmxCMvec, dxout_0m);
-    OmxCMvec[2] = x_CM + dx_CM;
-    xouts_error_VectorFunc(2, OmxCMvec, dxout_0p);
-    OmxCMvec[2] = x_CM;
-    /* xouts_error_VectorFunc(2, OmxCMvec, dxout_00); */
-    printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_0m[1]=%g dxout_0m[2]=%g\n",
-           dxout_m0[1], dxout_m0[2]);
-    /* printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_00[1]=%g dxout_00[2]=%g\n",
-           dxout_00[1], dxout_00[2]); */
-    printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_0p[1]=%g dxout_0p[2]=%g\n",
-           dxout_p0[1], dxout_p0[2]);
-
-    if( (dxout_m0[1]*dxout_p0[1]<0.0) && (dxout_0m[2]*dxout_0p[2]<0.0) )
+    if(keepone) /* fix one xout to current value and then set do_lnsrch=1 */
+    {
+      OmxCMvec[1] = Omega;
+      OmxCMvec[2] = x_CM;
+      if(dxout_m0[1]*dxout_p0[1]>=0.0)
+      {
+        xouts_error_VectorFunc(2, OmxCMvec, dxout_00);
+        xouts_error_VectorFunc__xout1 = grid->box[0]->v[xind][0];
+      }
+      if(dxout_m0[2]*dxout_p0[2]>=0.0)
+      {
+        xouts_error_VectorFunc(2, OmxCMvec, dxout_00);
+        xouts_error_VectorFunc__xout2 = grid->box[3]->v[xind][0];
+      }
       do_lnsrch = 1;
-    if( (dxout_m0[2]*dxout_p0[2]<0.0) && (dxout_0m[1]*dxout_0p[1]<0.0) )
-      do_lnsrch = 1;
+      printf("adjust_C1_C2_Omega_xCM_q_keep_xout: "
+             "changed: old xout1 = %g  xout2 = %g\n",
+             xouts_error_VectorFunc__xout1, xouts_error_VectorFunc__xout2);
+    }
+    else /* find deviations for Omega, x_CM +/- dx_CM */
+    {
+      OmxCMvec[1] = Omega;
+      OmxCMvec[2] = x_CM - dx_CM;
+      xouts_error_VectorFunc(2, OmxCMvec, dxout_0m);
+      OmxCMvec[2] = x_CM + dx_CM;
+      xouts_error_VectorFunc(2, OmxCMvec, dxout_0p);
+      OmxCMvec[2] = x_CM;
+      /* xouts_error_VectorFunc(2, OmxCMvec, dxout_00); */
+      printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_0m[1]=%g dxout_0m[2]=%g\n",
+             dxout_m0[1], dxout_m0[2]);
+      /* printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_00[1]=%g dxout_00[2]=%g\n",
+             dxout_00[1], dxout_00[2]); */
+      printf("adjust_C1_C2_Omega_xCM_q_keep_xout: dxout_0p[1]=%g dxout_0p[2]=%g\n",
+             dxout_p0[1], dxout_p0[2]);
+  
+      if( (dxout_m0[1]*dxout_p0[1]<0.0) && (dxout_0m[2]*dxout_0p[2]<0.0) )
+        do_lnsrch = 1;
+      if( (dxout_m0[2]*dxout_p0[2]<0.0) && (dxout_0m[1]*dxout_0p[1]<0.0) )
+        do_lnsrch = 1;
+    }
   }
   printf("adjust_C1_C2_Omega_xCM_q_keep_xout: do_lnsrch = %d\n", do_lnsrch);
   prdivider(0);
