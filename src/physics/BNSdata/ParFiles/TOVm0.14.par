@@ -1,0 +1,58 @@
+# a single TOV star, without any solving
+
+physics = ADMvars BNSdata
+
+GridIterators_verbose			= yes
+GridIterators_Newtonstep		= backtrack
+Coordinates_AnsorgNS_sigma_pm_vars 	= yes
+
+BNSdata_n	= 1
+BNSdata_b	= 2
+BNSdata_m01	= 0.14 # 0.0595
+BNSdata_m02	= 0
+
+BNSdata_guess 	= TOVaverage # TOV
+BNSdata_esw	= 0.4 # 1
+BNSdata_adjust	= keep_xout always
+BNSdata_itmax	= 200 # 30
+BNSdata_tol	= 10
+
+nboxes		= 6
+n1		= 6
+n2		= 6
+n3		= 8
+BNSdata_2xyz_n	= 6
+
+iterate_parameters = yes
+iterate_parameter1 = n1  10  14 18 22 26 30
+iterate_parameter2 = n2  10  14 18 22 26 30
+
+
+0doutiter	= 1
+0doutput	= BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err ham momx trK dtrK_dt normham normmomx
+0doutputall	= yes
+0doutput_VolumeIntegralJacobian = one
+ADMvars_normalizedConstraints = yes
+
+1doutiter	= 1
+1doutput	= BNSdata_q BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Sigma BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi alpha betax psi gxx Kxx rho jx Sxx ham momx trK dtrK_dt x y z  X Y Z
+1doutputall	= yes
+
+2doutiter	= 1
+2doutput	= BNSdata_q BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Sigma BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm ham momx trK dtrK_dt x y z  X Y Z
+2doutputall	= yes
+
+#outputY0_box0 = 0.75
+
+outputReplaceXby_box0 = x
+outputReplaceYby_box0 = y
+outputReplaceZby_box0 = z
+outputReplaceXby_box1 = x
+outputReplaceYby_box1 = y
+outputReplaceZby_box1 = z
+outputReplaceXby_box2 = x
+outputReplaceYby_box2 = y
+outputReplaceZby_box2 = z
+outputReplaceXby_box3 = x
+outputReplaceYby_box3 = y
+outputReplaceZby_box3 = z
