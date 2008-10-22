@@ -102,6 +102,17 @@ int set_boxsizes(tGrid *grid)
   /* set some box pars */
   if(Getv("BNSdata_grid", "4ABphi_2xyz"))
   {
+    int innercube_n = Geti("BNSdata_2xyz_n");
+    /* Sets("nboxes", "6");  // <--cannot be set here, needs to be set earlier */
+    Seti("box4_n1", innercube_n);
+    Seti("box4_n2", innercube_n);
+    Seti("box4_n3", innercube_n);
+    Seti("box5_n1", innercube_n);
+    Seti("box5_n2", innercube_n);
+    Seti("box5_n3", innercube_n);
+
+    Sets("Coordinates_AnsorgNS_set_sigma_pm_pointers", "yes");
+
     Sets("box0_Coordinates", "AnsorgNS0");
     Sets("box0_basis1", "ChebExtrema");
     Sets("box0_min1", "0");

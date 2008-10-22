@@ -102,6 +102,7 @@ int sgrid_BNSdata()
          "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");
   AddPar("BNSdata_box0_Amax", "0.85", "max A we use in box0 [0...1]");
   AddPar("BNSdata_box3_Amax", "0.85", "max A we use in box3 [0...1]");
+  AddPar("BNSdata_2xyz_n", "6", "if 4ABphi_2xyz: use n*n*n points in box4/5");
   AddPar("BNSdata_regularization", "none",
          "options for 4ABphi_2xyz and AnsorgNS " 
          "[regularity_on_axis,regularity_on_axis_at_center]");
