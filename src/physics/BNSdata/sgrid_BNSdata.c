@@ -76,12 +76,14 @@ int sgrid_BNSdata()
   AddPar("BNSdata_esw",   "1",   "ell. solve weight: after ell. solve new "
          "and old values are averaged according to: "
          "new = esw*new + (1-esw)*old");
-  AddPar("BNSdata_allow_esw1_first_at", "0",
-         "first iteration when esw=1 will be tried and allowed if better");
+  AddPar("BNSdata_allow_esw1_first_at", "-1", "first iteration when esw=1 "
+         "will be tried and allowed if better [#,-1]. -1 means never");
   AddPar("BNSdata_adjust", "nothing", "what we adjust (apart from C1/2) "
-         "after ell. solve [nothing,keep_xout,WT_L2_method]");
-  AddPar("BNSdata_adjust_first_at", "10", 
-         "first iteration when we use BNSdata_adjust");
+         "after ell. solve. E.g. \"keep_xout keep_one_xout\" adjusts Omega "
+         "and x_CM to keep either xout1 or xout2 in place. "
+         "[nothing,WT_L2_method,keep_xout [keep_one_xout,always]]");
+  AddPar("BNSdata_adjust_first_at", "0", 
+         "first iteration when we use BNSdata_adjust. -1 means never");
   AddPar("BNSdata_dOmega_fac", "0.1", "dOmega = Omega*dOmega_Fac");
   AddPar("BNSdata_dx_CM_fac",  "0.1", "dx_CM = b*dx_CM_fac");
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",

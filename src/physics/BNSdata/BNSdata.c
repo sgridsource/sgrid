@@ -1233,7 +1233,7 @@ int BNSdata_solve(tGrid *grid)
     /* reset new values from ell. solve as average between old and new.
        I.e. do: new = esw*new + (1-esw)*old  */
     totalerr1 = average_current_and_old(esw, grid,vlFu,vlu,vluDerivs, vlJdu);
-    if(esw<1.0 && it>=allow_esw1_it)
+    if(esw<1.0 && it>=allow_esw1_it && allow_esw1_it>=0)
     {
       /* complete step */
       totalerr = average_current_and_old(1.0/esw, grid,vlFu,vlu,vluDerivs,vlJdu);
@@ -1311,7 +1311,8 @@ if(0) /* not working */
     adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
 }
     /* choose how we adjust C1/2, Omega, xCM: */
-    if( it >= Geti("BNSdata_adjust_first_at") )
+    if( it>=Geti("BNSdata_adjust_first_at") &&
+        Geti("BNSdata_adjust_first_at")>=0 )
     { 
       if(Getv("BNSdata_adjust", "WT_L2_method"))
         adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
