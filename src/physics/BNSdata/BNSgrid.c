@@ -1337,6 +1337,8 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
   double *cp;
   double box0_max1, box3_max1;  
   int box0_n1, box3_n1;
+  char *box0_n1_sav = cmalloc( strlen(Gets("box0_n1"))+10 );
+  char *box3_n1_sav = cmalloc( strlen(Gets("box3_n1"))+10 );
   int ib;
   int i,j,k;
   double Xmax;
@@ -1349,12 +1351,14 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
   /* adjust box0 to cover the entire iside of star1 */
   box0_max1 = Getd("box0_max1");
   box0_n1   = Geti("box0_n1");
+  strcpy(box0_n1_sav, Gets("box0_n1")); /* save box0_n1 */
   Sets("box0_max1", "1");
   Seti("box0_n1", box0_n1+Geti("box5_n1")/2);
 
   /* adjust box3 to cover the entire iside of star2 */
   box3_max1 = Getd("box3_max1");
   box3_n1   = Geti("box3_n1");
+  strcpy(box3_n1_sav, Gets("box3_n1")); /* save box3_n1 */
   Sets("box3_max1", "1");
   Seti("box3_n1", box3_n1+Geti("box4_n1")/2);
 
@@ -1485,9 +1489,12 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
 
   /* reset box0/3 pars */
   Setd("box0_max1", box0_max1);
-  Seti("box0_n1", box0_n1);
+  Sets("box0_n1", box0_n1_sav);
   Setd("box3_max1", box3_max1);
-  Seti("box3_n1", box3_n1);
+  Sets("box3_n1", box0_n1_sav);
+
+  free(box0_n1_sav);
+  free(box3_n1_sav);
 
   return VolInt;
 }
