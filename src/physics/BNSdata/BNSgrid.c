@@ -1491,7 +1491,7 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
   Setd("box0_max1", box0_max1);
   Sets("box0_n1", box0_n1_sav);
   Setd("box3_max1", box3_max1);
-  Sets("box3_n1", box0_n1_sav);
+  Sets("box3_n1", box3_n1_sav);
 
   free(box0_n1_sav);
   free(box3_n1_sav);
