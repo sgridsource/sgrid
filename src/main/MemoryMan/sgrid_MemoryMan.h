@@ -46,6 +46,24 @@ typedef struct tBOX {
   double *Int1;		/* matrix to integrate in direction 1 */
   double *Int2;		/* matrix to integrate in direction 2 */
   double *Int3;		/* matrix to integrate in direction 3 */
+  void (*get_coeffs1)(double *,double *, int); /* get coeffs in dir. 1 */
+  void (*get_coeffs2)(double *,double *, int); /* get coeffs in dir. 2 */
+  void (*get_coeffs3)(double *,double *, int); /* get coeffs in dir. 3 */
+  void (*coeffs_of_deriv1)(double, double, double *,double *, int);
+  void (*coeffs_of_deriv2)(double, double, double *,double *, int);
+  void (*coeffs_of_deriv3)(double, double, double *,double *, int);
+  void (*coeffs_of_2ndderiv1)(double, double, double *,double *, int);
+  void (*coeffs_of_2ndderiv2)(double, double, double *,double *, int);
+  void (*coeffs_of_2ndderiv3)(double, double, double *,double *, int);
+  void (*coeffs_of_int1)(double, double, double *,double *, int);
+  void (*coeffs_of_int2)(double, double, double *,double *, int);
+  void (*coeffs_of_int3)(double, double, double *,double *, int);
+  void (*eval_onPoints1)(double *,double *, int);
+  void (*eval_onPoints2)(double *,double *, int);
+  void (*eval_onPoints3)(double *,double *, int);
+  void (*filter_coeffs1)(double *, int, int);
+  void (*filter_coeffs2)(double *, int, int);
+  void (*filter_coeffs3)(double *, int, int);
   double bbox[6];	/* global bounding box */
   int ibbox[6];	/* global bounding box in index range */
 } tBox;
