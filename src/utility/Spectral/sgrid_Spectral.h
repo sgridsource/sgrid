@@ -58,6 +58,7 @@ void initMatrix_ToEvaluate(double *M, int n1,
                            void (*eval_onPoints)(double *,double *, int));
 void spec_analysis1(tBox *box, int direc, double *M, double *u, double *c);
 void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c);
+void init_spec_functionpointers(tBox *box);
 void get_spec_functionpointers(tBox *box, int direc,
      void (**get_coeffs)(double *,double *, int),
      void (**coeffs_of_deriv)(double, double, double *,double *, int),

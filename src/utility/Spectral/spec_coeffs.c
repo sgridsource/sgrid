@@ -175,9 +175,9 @@ void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c)
 }
 
 
-
 /* get all relevant function points in one box in direction direc */
-void get_spec_functionpointers(tBox *box, int direc,
+/* this is the old void get_spec_functionpointers */
+void get_spec_functionpointers_from_pars(tBox *box, int direc,
      void (**get_coeffs)(double *,double *, int),
      void (**coeffs_of_deriv)(double, double, double *,double *, int),
      void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
@@ -263,6 +263,111 @@ void get_spec_functionpointerTO_get_coeffs(tBox *box, int direc,
   get_spec_functionpointers(box, direc, get_coeffs, &coeffs_of_deriv,
                             &coeffs_of_2ndderiv, &coeffs_of_int, 
                             &eval_onPoints, &filter_coeffs, &basisfunc);
+}
+
+/* get all relevant function pointers and write them into box struct */
+void init_spec_functionpointers(tBox *box)
+{       
+  char str[1000];
+  int dir;
+  void (*get_coeffs)(double *,double *, int);
+  void (*coeffs_of_deriv)(double, double, double *,double *, int);
+  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int);
+  void (*coeffs_of_int)(double, double, double *,double *, int);
+  void (*eval_onPoints)(double *,double *, int);
+  void (*filter_coeffs)(double *, int, int);
+  double (*basisfunc)(void *aux, double a, double b, int k, int N, double X);
+                                  
+  /* loop over directions */
+  for(dir=1; dir<=3; dir++)
+  {
+    get_coeffs=NULL;
+    coeffs_of_deriv=NULL;
+    coeffs_of_2ndderiv=NULL;
+    coeffs_of_int=NULL;
+    eval_onPoints=NULL;
+    filter_coeffs=NULL;
+    basisfunc=NULL;
+
+    /* get the func pointers in direction dir */
+    get_spec_functionpointers_from_pars(box, dir, 
+                              &get_coeffs, &coeffs_of_deriv,
+                              &coeffs_of_2ndderiv, &coeffs_of_int,
+                              &eval_onPoints, &filter_coeffs, &basisfunc);
+
+    /* write into box struct */
+    if(dir==1)
+    {
+      box->get_coeffs1      = get_coeffs;
+      box->coeffs_of_deriv1 = coeffs_of_deriv;
+      box->coeffs_of_int1   = coeffs_of_int;
+      box->eval_onPoints1   = eval_onPoints;
+      box->filter_coeffs1   = filter_coeffs;
+      box->basis1           = basisfunc;
+    }
+    else if(dir==2)
+    {
+      box->get_coeffs2      = get_coeffs;
+      box->coeffs_of_deriv2 = coeffs_of_deriv;
+      box->coeffs_of_int2   = coeffs_of_int;
+      box->eval_onPoints2   = eval_onPoints;
+      box->filter_coeffs2   = filter_coeffs;
+      box->basis2           = basisfunc;
+    }
+    else if(dir==3)
+    {
+      box->get_coeffs3      = get_coeffs;
+      box->coeffs_of_deriv3 = coeffs_of_deriv;
+      box->coeffs_of_int3   = coeffs_of_int;
+      box->eval_onPoints3   = eval_onPoints;
+      box->filter_coeffs3   = filter_coeffs;
+      box->basis3           = basisfunc;
+    }
+    else
+      errorexit("init_spec_functionpointers: dir must be 1,2 or 3");
+  }
+}
+
+/* read all relevant function points in one box in direction dir from box struct */
+void get_spec_functionpointers(tBox *box, int dir,
+     void (**get_coeffs)(double *,double *, int),
+     void (**coeffs_of_deriv)(double, double, double *,double *, int),
+     void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
+     void (**coeffs_of_int)(double, double, double *,double *, int),
+     void (**eval_onPoints)(double *,double *, int),
+     void (**filter_coeffs)(double *, int, int),
+     double (**basisfunc)(void *aux, double a, double b, int k, int N, double X) )
+{       
+  /* read from  box struct */
+  if(dir==1)
+  {
+    *get_coeffs      = box->get_coeffs1;
+    *coeffs_of_deriv = box->coeffs_of_deriv1;
+    *coeffs_of_int   = box->coeffs_of_int1;
+    *eval_onPoints   = box->eval_onPoints1;
+    *filter_coeffs   = box->filter_coeffs1;
+    *basisfunc       = box->basis1;
+  }
+  else if(dir==2)
+  {
+    *get_coeffs      = box->get_coeffs2;
+    *coeffs_of_deriv = box->coeffs_of_deriv2;
+    *coeffs_of_int   = box->coeffs_of_int2;
+    *eval_onPoints   = box->eval_onPoints2;
+    *filter_coeffs   = box->filter_coeffs2;
+    *basisfunc       = box->basis2;
+  }
+  else if(dir==3)
+  {
+    *get_coeffs      = box->get_coeffs3;
+    *coeffs_of_deriv = box->coeffs_of_deriv3;
+    *coeffs_of_int   = box->coeffs_of_int3;
+    *eval_onPoints   = box->eval_onPoints3;
+    *filter_coeffs   = box->filter_coeffs3;
+    *basisfunc       = box->basis3;
+  }
+  else
+    errorexit("get_spec_functionpointers: dir must be 1,2 or 3");
 }
 
 
