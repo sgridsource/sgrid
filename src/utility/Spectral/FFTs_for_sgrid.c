@@ -186,7 +186,7 @@ void numrec_realft(double data[], unsigned long n, int isign)
 	}
 }
 
-/* cos FT of numrec*/
+/* cos FT1 of numrec */
 void numrec_cosft1(double y[], int n)
 {
 	void numrec_realft(double data[], unsigned long n, int isign);
@@ -219,6 +219,7 @@ void numrec_cosft1(double y[], int n)
 	}
 }
 
+/* cos FT2 of numrec */
 void numrec_cosft2(double y[], int n, int isign)
 {
 	void numrec_realft(double data[], unsigned long n, int isign);
