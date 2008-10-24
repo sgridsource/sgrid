@@ -243,8 +243,8 @@ void get_spec_functionpointers_from_pars(tBox *box, int direc,
   }
   else
   {
-    printf("get_spec_functionpointers: %s=%s is unknown!\n", str, Gets(str));
-    errorexits("get_spec_functionpointers: don't know what to do "
+    printf("get_spec_functionpointers_from_pars: %s=%s is unknown!\n", str, Gets(str));
+    errorexits("get_spec_functionpointers_from_pars: don't know what to do "
                "with %s" , Gets(str));
   }
 }
