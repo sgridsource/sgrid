@@ -1315,7 +1315,7 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
         box->coeffs_of_deriv2(a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
         box->coeffs_of_deriv2(a,b, uline, duline, n2-1); /* coeffs of ddu are now in duline */
         box->eval_onPoints2(duline, uline, n2-1); /* ddu is now in uline */
-        put_memline(du, duline, 2, i, k, n1, n2, n3);        
+        put_memline(du, uline, 2, i, k, n1, n2, n3);        
       }
     else
       for (k = 0; k < n3; k++)
@@ -1339,7 +1339,7 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
         box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
         box->coeffs_of_deriv3(a,b, uline, duline, n3-1); /* coeffs of ddu are now in duline */
         box->eval_onPoints3(duline, uline, n3-1); /* ddu is now in uline */
-        put_memline(du, duline, 3, i, j, n1, n2, n3);
+        put_memline(du, uline, 3, i, j, n1, n2, n3);
       }
     else
       for (j = 0; j < n2; j++)
