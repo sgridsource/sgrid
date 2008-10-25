@@ -3,6 +3,16 @@
 
 #include "Spectral.h"
 
+
+/* the kind of FFTs we have */
+enum
+{
+  MATRIX_MULTIPLICATION,
+  NUMREC_FFT,
+  NTRANSFORMTYPES
+};
+
+
 /* Functions from derivs.c*/
 void cheb_d1(double a, double b, double *u, double *d1u, int n1);
 void cheb_d2(double a, double b, double *u, double *d1u, double *d2u, int n1);
@@ -58,6 +68,7 @@ void initMatrix_ToEvaluate(double *M, int n1,
                            void (*eval_onPoints)(double *,double *, int));
 void spec_analysis1(tBox *box, int direc, double *M, double *u, double *c);
 void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c);
+void set_TransformType_flags_inbox(tBox *box);
 void init_spec_functionpointers(tBox *box);
 void get_spec_functionpointers(tBox *box, int direc,
      void (**get_coeffs)(double *,double *, int),

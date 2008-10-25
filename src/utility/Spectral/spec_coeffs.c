@@ -175,6 +175,47 @@ void spec_synthesis1(tBox *box, int direc, double *M, double *u, double *c)
 }
 
 
+/* check if N is a power of 2 */
+int is_power_of_two(int N)
+{
+  unsigned int nn, ng;
+  
+  ng=0;
+  nn=N;
+  while(nn >>= 1) ng++;
+  if(N == (1L << ng)) return 1; /* N is power of 2 */
+  return 0;
+}
+
+/* set flags which determine if we use FFTs */
+void set_TransformType_flags_inbox(tBox *box)
+{
+  char str[1000];
+  char bas[1000];
+  int dir;
+  
+  for(dir=1; dir<=3 ; dir++)
+  {
+    int nb;
+    int *Ttype;
+
+    nb=box->n1;  Ttype=&(box->TransformType1); /* <--for dir=1 */
+    if(dir==2) { nb=box->n2; Ttype=&(box->TransformType2); }
+    else if(dir==3) { nb=box->n3; Ttype=&(box->TransformType3); }
+
+    snprintf(str, 999, "box%d_TransformType%d", box->b, dir);
+    snprintf(bas, 999, "box%d_basis%d", box->b, dir);
+    /* printf("str=%s=%s\nbas=%s=%s\n", str, Gets(str), bas, Gets(bas)); */
+    if( Getv(str, "NUMREC_FFT") && nb>=Geti(str) && Geti(str)>=0 &&
+        ( (Getv(bas, "ChebExtrema") && is_power_of_two(nb-1)) ||
+          (Getv(bas, "ChebZeros") && is_power_of_two(nb)) ||
+          (Getv(bas, "Fourier") && is_power_of_two(nb))          )  )
+      *Ttype=NUMREC_FFT;
+    else
+      *Ttype=MATRIX_MULTIPLICATION;
+  }
+}
+
 /* get all relevant function points in one box in direction direc */
 /* this is the old void get_spec_functionpointers */
 void get_spec_functionpointers_from_pars(tBox *box, int direc,
@@ -187,6 +228,7 @@ void get_spec_functionpointers_from_pars(tBox *box, int direc,
      double (**basisfunc)(void *aux, double a, double b, int k, int N, double X) )
 {       
   char str[1000];
+  int *Ttype;
 
   *get_coeffs=NULL;
   *coeffs_of_deriv=NULL;
@@ -198,6 +240,10 @@ void get_spec_functionpointers_from_pars(tBox *box, int direc,
 
   snprintf(str, 999, "box%d_basis%d", box->b, direc);
   //printf("%s=%s\n", str, Gets(str));
+  Ttype=&(box->TransformType1); /* <--for direc=1 */
+  if(direc==2)      { Ttype=&(box->TransformType2); }
+  else if(direc==3) { Ttype=&(box->TransformType3); }
+
   if( Getv(str, "ChebExtrema") )
   {
     *get_coeffs = cheb_coeffs_fromExtrema;
@@ -206,6 +252,11 @@ void get_spec_functionpointers_from_pars(tBox *box, int direc,
     *eval_onPoints = cheb_eval_onExtrema;
     *filter_coeffs = cheb_filter;
     *basisfunc = cheb_basisfunc;
+    if(*Ttype==NUMREC_FFT)
+    {
+      *get_coeffs = cheb_coeffs_fromExtrema_numrecFFT;
+      *eval_onPoints = cheb_eval_onExtrema_numrecFFT;
+    }
   }
   else if( Getv(str, "Fourier") )
   {
@@ -215,6 +266,12 @@ void get_spec_functionpointers_from_pars(tBox *box, int direc,
     *eval_onPoints = four_eval;
     *filter_coeffs = four_filter;
     *basisfunc = four_basisfunc;
+    if(*Ttype==NUMREC_FFT)
+    {
+      *get_coeffs = four_coeffs_numrecFFT;
+      *coeffs_of_int = four_int_numrecFFT;
+      *eval_onPoints = four_eval_numrecFFT;
+    }
   }
   else if( Getv(str, "fd2_onesided") )
   {
@@ -240,6 +297,11 @@ void get_spec_functionpointers_from_pars(tBox *box, int direc,
     *eval_onPoints = cheb_eval_onZeros;
     *filter_coeffs = cheb_filter;
     *basisfunc = cheb_basisfunc;
+    if(*Ttype==NUMREC_FFT)
+    {
+      *get_coeffs = cheb_coeffs_fromZeros_numrecFFT;
+      *eval_onPoints = cheb_eval_onZeros_numrecFFT;
+    }
   }
   else
   {
