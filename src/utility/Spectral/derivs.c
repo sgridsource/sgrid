@@ -735,7 +735,7 @@ void spec_Deriv2_diffmatrix(tBox *box, int direc, double *u, double *du)
 /*****************************************************************/
 
 /* compute first deriv of 3d var u in dirction direc on a box*/
-void spec_Deriv1_FFT(tBox *box, int direc, double *u, double *du)
+void spec_Deriv1(tBox *box, int direc, double *u, double *du)
 {
   double *uline;
   double *duline;
@@ -755,7 +755,8 @@ void spec_Deriv1_FFT(tBox *box, int direc, double *u, double *du)
   {
     double a = box->bbox[0];
     double b = box->bbox[1];
-    for (k = 0; k < n3; k++)
+    if(box->TransformType1)
+      for (k = 0; k < n3; k++)
       for (j = 0; j < n2; j++)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -764,12 +765,24 @@ void spec_Deriv1_FFT(tBox *box, int direc, double *u, double *du)
         box->eval_onPoints1(uline, duline, n1-1);
         put_memline(du, duline, 1, j, k, n1, n2, n3);        
       }
+    else
+      for (k = 0; k < n3; k++)
+      for (j = 0; j < n2; j++)
+      {
+        /* 
+        get_memline(u, uline, 1, j, k, n1, n2, n3);
+        matrix_times_vector(box->D1, uline, duline, n1);
+        put_memline(du, duline, 1, j, k, n1, n2, n3);        
+        */
+        matrix_times_vector(box->D1, u+Index(0,j,k), du+Index(0,j,k), n1);
+      }
   }
   else if(direc==2)
   {
     double a = box->bbox[2];
     double b = box->bbox[3];
-    for (k = 0; k < n3; k++)
+    if(box->TransformType2)
+      for (k = 0; k < n3; k++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -778,12 +791,22 @@ void spec_Deriv1_FFT(tBox *box, int direc, double *u, double *du)
         box->eval_onPoints2(uline, duline, n2-1);
         put_memline(du, duline, 2, i, k, n1, n2, n3);        
       }
+    else
+      for (k = 0; k < n3; k++)
+      for (i = 0; i < n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, n1, n2, n3);
+        matrix_times_vector(box->D2, uline, duline, n2);
+        put_memline(du, duline, 2, i, k, n1, n2, n3);        
+      }
+
   }
   else if(direc==3)
   {
     double a = box->bbox[4];
     double b = box->bbox[5];
-    for (j = 0; j < n2; j++)
+    if(box->TransformType3)
+      for (j = 0; j < n2; j++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -792,17 +815,24 @@ void spec_Deriv1_FFT(tBox *box, int direc, double *u, double *du)
         box->eval_onPoints3(uline, duline, n3-1);
         put_memline(du, duline, 3, i, j, n1, n2, n3);
       }
+    else
+      for (j = 0; j < n2; j++)
+      for (i = 0; i < n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, n1, n2, n3);
+        matrix_times_vector(box->D3 , uline, duline, n3);
+        put_memline(du, duline, 3, i, j, n1, n2, n3);
+      }
   }
   else
-    errorexit("spec_Deriv1_FFT: possible values for direction direc are 1,2,3.");
+    errorexit("spec_Deriv1: possible values for direction direc are 1,2,3.");
   /* free memory for lines */
   free(uline);
   free(duline);
 }
 
-
 /* compute first deriv of 3d var u in dirction direc on a box*/
-void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3,
+void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
                     double *u11,double *u12,double *u13,
                     double *u22,double *u23,double *u33 )
 {
@@ -817,7 +847,7 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
   double a,b;
 
   /* memory for lines */
-  m3=max3(box->n1, box->n2, box->n3);
+  m3=max3(n1, n2, n3);
   uline = (double*)  calloc(m3, sizeof(double));
   duline = (double*) calloc(m3, sizeof(double));
   dduline = (double*) calloc(m3, sizeof(double));
@@ -828,7 +858,8 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
     /* x-direction */
     a = box->bbox[0];
     b = box->bbox[1];
-    for (k = 0; k < n3; k++)
+    if(box->TransformType1)
+      for (k = 0; k < n3; k++)
       for (j = 0; j < n2; j++)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -841,11 +872,46 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
         box->eval_onPoints1(duline, dduline, n1-1);
         put_memline(u11, dduline, 1, j, k, n1, n2, n3); 
       }
+    else
+      for (k = 0; k < n3; k++)
+      for (j = 0; j < n2; j++)
+      {
+        /* 
+        get_memline(u, uline, 1, j, k, n1, n2, n3);
+        matrix_times_vector(box->D1, uline, duline, n1);
+        matrix_times_vector(box->DD1, uline, dduline, n1);
+        put_memline(u1, duline, 1, j, k, n1, n2, n3);
+        put_memline(u11, dduline, 1, j, k, n1, n2, n3); 
+        */
+        matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
+        matrix_times_vector(box->DD1, u+Index(0,j,k), u11+Index(0,j,k), n1);
+      }
 
     /* y-direction */
     a = box->bbox[2];
     b = box->bbox[3];
-    for (k = 0; k < n3; k++)
+    if(box->TransformType2)
+      for (k = 0; k < n3; k++)
+      for (i = 0; i < n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, n1, n2, n3);
+        box->get_coeffs2(duline, uline, n2-1);
+        box->coeffs_of_deriv2(a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
+        box->eval_onPoints2(uline, duline, n2-1);
+        put_memline(u2, duline, 2, i, k, n1, n2, n3);
+
+        box->coeffs_of_deriv2(a,b, uline, duline, n2-1); /* coeffs of ddu are now in duline */
+        box->eval_onPoints2(duline, dduline, n2-1);
+        put_memline(u22, dduline, 2, i, k, n1, n2, n3);
+
+        get_memline(u1, uline, 2, i, k, n1, n2, n3);
+        box->get_coeffs2(duline, uline, n2-1);
+        box->coeffs_of_deriv2(a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
+        box->eval_onPoints2(uline, duline, n2-1);
+        put_memline(u12, duline, 2, i, k, n1, n2, n3);
+      }
+    else
+      for (k = 0; k < n3; k++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -862,7 +928,34 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
     /* z-direction */
     a = box->bbox[4];
     b = box->bbox[5];
-    for (j = 0; j < n2; j++)
+    if(box->TransformType3)
+      for (j = 0; j < n2; j++)
+      for (i = 0; i < n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, n1, n2, n3);
+        box->get_coeffs3(duline, uline, n3-1);
+        box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
+        box->eval_onPoints3(uline, duline, n3-1);
+        put_memline(u3, duline, 3, i, j, n1, n2, n3);
+
+        box->coeffs_of_deriv3(a,b, uline, duline, n3-1); /* coeffs of ddu are now in duline */
+        box->eval_onPoints3(duline, dduline, n3-1);
+        put_memline(u33, dduline, 3, i, j, n1, n2, n3);
+
+        get_memline(u1, uline, 3, i, j, n1, n2, n3);
+        box->get_coeffs3(duline, uline, n3-1);
+        box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
+        box->eval_onPoints3(uline, duline, n3-1);
+        put_memline(u13, duline, 3, i, j, n1, n2, n3);
+        
+        get_memline(u2, uline, 3, i, j, n1, n2, n3);
+        box->get_coeffs3(duline, uline, n3-1);
+        box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
+        box->eval_onPoints3(uline, duline, n3-1);
+        put_memline(u23, duline, 3, i, j, n1, n2, n3);
+      }
+    else
+      for (j = 0; j < n2; j++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -883,7 +976,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
   else if(second_deriv_order == 132)
   {
     /* x-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[0];
+    b = box->bbox[1];
+    if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (j = 0; j < n2; j++)
       {
         /* 
@@ -898,7 +995,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* z-direction */
-    for (j = 0; j < n2; j++)
+    a = box->bbox[4];
+    b = box->bbox[5];
+    if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (j = 0; j < n2; j++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -913,7 +1014,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* y-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[2];
+    b = box->bbox[3];
+    if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -935,7 +1040,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
   else if(second_deriv_order == 213)
   {
     /* y-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[2];
+    b = box->bbox[3];
+    if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -946,7 +1055,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* x-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[0];
+    b = box->bbox[1];
+    if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (j = 0; j < n2; j++)
       {
         matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
@@ -956,7 +1069,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* z-direction */
-    for (j = 0; j < n2; j++)
+    a = box->bbox[4];
+    b = box->bbox[5];
+    if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (j = 0; j < n2; j++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -977,7 +1094,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
   else if(second_deriv_order == 231)
   {
     /* y-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[2];
+    b = box->bbox[3];
+    if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -988,7 +1109,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* z-direction */
-    for (j = 0; j < n2; j++)
+    a = box->bbox[4];
+    b = box->bbox[5];
+    if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (j = 0; j < n2; j++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1003,7 +1128,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* x-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[0];
+    b = box->bbox[1];
+    if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (j = 0; j < n2; j++)
       {
         matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
@@ -1012,13 +1141,15 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
         matrix_times_vector(box->D1, u2+Index(0,j,k), u12+Index(0,j,k), n1);
         matrix_times_vector(box->D1, u3+Index(0,j,k), u13+Index(0,j,k), n1);
       }
-
-
   }
   else if(second_deriv_order == 312)
   {
     /* z-direction */
-    for (j = 0; j < n2; j++)
+    a = box->bbox[4];
+    b = box->bbox[5];
+    if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (j = 0; j < n2; j++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1029,7 +1160,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* x-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[0];
+    b = box->bbox[1];
+    if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (j = 0; j < n2; j++)
       {
         matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
@@ -1039,7 +1174,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* y-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[2];
+    b = box->bbox[3];
+    if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1060,7 +1199,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
   else if(second_deriv_order == 321)
   {
     /* z-direction */
-    for (j = 0; j < n2; j++)
+    a = box->bbox[4];
+    b = box->bbox[5];
+    if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (j = 0; j < n2; j++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1071,7 +1214,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* y-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[2];
+    b = box->bbox[3];
+    if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1086,7 +1233,11 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
 
     /* x-direction */
-    for (k = 0; k < n3; k++)
+    a = box->bbox[0];
+    b = box->bbox[1];
+    if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
+    else
+      for (k = 0; k < n3; k++)
       for (j = 0; j < n2; j++)
       {
         matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
@@ -1097,7 +1248,7 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
       }
   }
   else
-    errorexit("spec_allDerivs_FFT: Spectral_second_deriv_order must be "
+    errorexit("spec_allDerivs: Spectral_second_deriv_order must be "
               "123, 132, 213, 231, 312 or 321");
   
   /* free memory for lines */
@@ -1108,7 +1259,7 @@ void spec_allDerivs_FFT(tBox *box, double *u, double *u1, double *u2, double *u3
 
 
 /* compute 2nd deriv of 3d var u in dirction direc on a box */
-void spec_Deriv2_FFT(tBox *box, int direc, double *u, double *du)
+void spec_Deriv2(tBox *box, int direc, double *u, double *du)
 {
   double *uline;
   double *duline;
@@ -1128,7 +1279,8 @@ void spec_Deriv2_FFT(tBox *box, int direc, double *u, double *du)
   {
     double a = box->bbox[0];
     double b = box->bbox[1];
-    for (k = 0; k < n3; k++)
+    if(box->TransformType1)
+      for (k = 0; k < n3; k++)
       for (j = 0; j < n2; j++)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -1138,12 +1290,24 @@ void spec_Deriv2_FFT(tBox *box, int direc, double *u, double *du)
         box->eval_onPoints1(duline, uline, n1-1); /* ddu is in now in uline */
         put_memline(du, uline, 1, j, k, n1, n2, n3);
       }
+    else
+      for (k = 0; k < n3; k++)
+      for (j = 0; j < n2; j++)
+      {
+        /* 
+        get_memline(u, uline, 1, j, k, n1, n2, n3);
+        matrix_times_vector(box->DD1, uline, duline, n1);
+        put_memline(du, duline, 1, j, k, n1, n2, n3);        
+        */
+        matrix_times_vector(box->DD1, u+Index(0,j,k), du+Index(0,j,k), n1);
+      }
   }
   else if(direc==2)
   {
     double a = box->bbox[2];
     double b = box->bbox[3];
-    for (k = 0; k < n3; k++)
+    if(box->TransformType2)
+      for (k = 0; k < n3; k++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1153,50 +1317,42 @@ void spec_Deriv2_FFT(tBox *box, int direc, double *u, double *du)
         box->eval_onPoints2(duline, uline, n2-1); /* ddu is now in uline */
         put_memline(du, duline, 2, i, k, n1, n2, n3);        
       }
+    else
+      for (k = 0; k < n3; k++)
+      for (i = 0; i < n1; i++)
+      {
+        get_memline(u, uline, 2, i, k, n1, n2, n3);
+        matrix_times_vector(box->DD2, uline, duline, n2);
+        put_memline(du, duline, 2, i, k, n1, n2, n3);        
+      }
   }
   else if(direc==3)
   {
     double a = box->bbox[4];
     double b = box->bbox[5];
-    for (j = 0; j < n2; j++)
+    if(box->TransformType3)
+      for (j = 0; j < n2; j++)
       for (i = 0; i < n1; i++)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
-        box->get_coeffs2(duline, uline, n2-1);
-        box->coeffs_of_deriv2(a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
-        box->coeffs_of_deriv2(a,b, uline, duline, n2-1); /* coeffs of ddu are now in duline */
-        box->eval_onPoints2(duline, uline, n2-1); /* ddu is now in uline */
+        box->get_coeffs3(duline, uline, n3-1);
+        box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv3(a,b, uline, duline, n3-1); /* coeffs of ddu are now in duline */
+        box->eval_onPoints3(duline, uline, n3-1); /* ddu is now in uline */
+        put_memline(du, duline, 3, i, j, n1, n2, n3);
+      }
+    else
+      for (j = 0; j < n2; j++)
+      for (i = 0; i < n1; i++)
+      {
+        get_memline(u, uline, 3, i, j, n1, n2, n3);
+        matrix_times_vector(box->DD3 , uline, duline, n3);
         put_memline(du, duline, 3, i, j, n1, n2, n3);
       }
   }
   else
-    errorexit("spec_Deriv2_FFT: possible values for direction direc are 1,2,3.");
+    errorexit("spec_Deriv2: possible values for direction direc are 1,2,3.");
   /* free memory for lines */
   free(uline);
   free(duline);
-}
-
-
-/*****************************************************************/
-/* pick if we use Derivs with or without FFT                     */
-/*****************************************************************/
-
-/* compute first deriv of 3d var u in dirction direc on a box*/
-void spec_Deriv1(tBox *box, int direc, double *u, double *du)
-{
-  spec_Deriv1_diffmatrix(box, direc, u, du);
-}
-
-/* compute first deriv of 3d var u in dirction direc on a box*/
-void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
-                    double *u11,double *u12,double *u13,
-                    double *u22,double *u23,double *u33 )
-{
-  spec_allDerivs_diffmatrix(box, u, u1,u2,u3, u11,u12,u13,u22,u23,u33);
-}
-
-/* compute 2nd deriv of 3d var u in dirction direc on a box */
-void spec_Deriv2(tBox *box, int direc, double *u, double *du)
-{
-  spec_Deriv2_diffmatrix(box, direc, u, du);
 }
