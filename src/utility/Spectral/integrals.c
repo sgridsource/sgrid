@@ -23,10 +23,19 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
+  int imethod, chebmeth=1, fourmeth=2;
 
   get_spec_functionpointers(box, direc, &get_coeffs, &coeffs_of_deriv,
                             &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
                             &filter_coeffs, &basisfunc);
+
+  if( get_coeffs==cheb_coeffs_fromExtrema ||
+      get_coeffs==cheb_coeffs_fromZeros ||
+      get_coeffs==cheb_coeffs_fromExtrema_numrecFFT ||
+      get_coeffs==cheb_coeffs_fromZeros_numrecFFT      ) imethod = chebmeth;
+  if( get_coeffs==four_coeffs || 
+      get_coeffs==four_coeffs_numrecFFT ) imethod = fourmeth;
+
   if(direc==1)
   {
     linelen = n1;
@@ -39,8 +48,7 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
     spec_analysis1(box, direc, M, u, U);
 
     /* write cheb-integral from a to b into U */
-    if(get_coeffs==cheb_coeffs_fromExtrema ||
-       get_coeffs==cheb_coeffs_fromZeros)
+    if(imethod==chebmeth)
       for(k = 0; k < n3; k++)
         for(j = 0; j < n2; j++)
         {
@@ -55,7 +63,7 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
             U[Index(i,j,k)] = sum;
         }
     /* write four-integral from a to b into U */
-    else if(get_coeffs==four_coeffs)
+    else if(imethod==fourmeth)
       for(k = 0; k < n3; k++)
         for(j = 0; j < n2; j++)
         {
@@ -78,8 +86,7 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
     spec_analysis1(box, direc, M, u, U);
 
     /* write cheb-integral from a to b into U */
-    if(get_coeffs==cheb_coeffs_fromExtrema ||
-       get_coeffs==cheb_coeffs_fromZeros)
+    if(imethod==chebmeth)
       for (k = 0; k < n3; k++)
         for (i = 0; i < n1; i++)
         {
@@ -94,7 +101,7 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
             U[Index(i,j,k)] = sum;
         }
     /* write four-integral from a to b into U */
-    else if(get_coeffs==four_coeffs)
+    else if(imethod==fourmeth)
       for (k = 0; k < n3; k++)
         for (i = 0; i < n1; i++)
         {
@@ -117,8 +124,7 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
     spec_analysis1(box, direc, M, u, U);
 
     /* write cheb-integral from a to b into U */
-    if(get_coeffs==cheb_coeffs_fromExtrema ||
-       get_coeffs==cheb_coeffs_fromZeros)
+    if(imethod==chebmeth)
       for (j = 0; j < n2; j++)
         for (i = 0; i < n1; i++)
         {
@@ -133,7 +139,7 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
             U[Index(i,j,k)] = sum;
         }
     /* write four-integral from a to b into U */
-    else if(get_coeffs==four_coeffs)
+    else if(imethod==fourmeth)
       for (j = 0; j < n2; j++)
         for (i = 0; i < n1; i++)
         {
@@ -203,6 +209,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
   double *pX = box->v[Ind("X")];
+  int imethod, chebmeth=1, fourmeth=2;
 
   /* do phi integral */
   spec_Integral1(box, 3, u, U);
@@ -210,6 +217,13 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
                             &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
                             &filter_coeffs, &basisfunc);
+  if( get_coeffs==cheb_coeffs_fromExtrema ||
+      get_coeffs==cheb_coeffs_fromZeros ||
+      get_coeffs==cheb_coeffs_fromExtrema_numrecFFT ||
+      get_coeffs==cheb_coeffs_fromZeros_numrecFFT      ) imethod = chebmeth;
+  if( get_coeffs==four_coeffs || 
+      get_coeffs==four_coeffs_numrecFFT ) imethod = fourmeth;
+
   {
     linelen = n2;
 
@@ -221,7 +235,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
     spec_analysis1(box, 2, M, U, U);
 
     /* write four-integral from a to b into U */
-    if(get_coeffs==four_coeffs)
+    if(imethod==fourmeth)
       for (k = 0; k < n3; k++)
         for (i = 0; i < n1; i++)
         {
