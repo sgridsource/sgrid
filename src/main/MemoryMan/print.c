@@ -39,6 +39,8 @@ void printbox(tBox *box)
 	 box->Mcoeffs1, box->Mcoeffs2, box->Mcoeffs3,
 	 box->Meval1, box->Meval2, box->Meval3,
 	 box->Int1, box->Int2, box->Int3);
+  printf(" TransformType1=%d TransformType2=%d TransformType3=%d\n",
+         box->TransformType1, box->TransformType2, box->TransformType3);
 }
 
 void printnode(tNode *n) 

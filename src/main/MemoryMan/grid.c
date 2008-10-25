@@ -171,6 +171,9 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
       }
     }  /* end for (k = 0; k < n3; k++) */
 
+    /* set flags which determine if we use FFTs */
+    set_TransformType_flags_inbox(box);
+
     /* initialize funcs in box struct */
     init_spec_functionpointers(box);
 
