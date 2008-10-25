@@ -105,3 +105,13 @@ void fdDm_deriv_onesidedBC(double x[], double c[], double cder[], int n);
 double fd_basis1(void *aux, double a, double b, int k, int N, double X);
 double fd_basis2(void *aux, double a, double b, int k, int N, double Y);
 double fd_basis3(void *aux, double a, double b, int k, int N, double Z);
+
+
+/* Functions from FFTs_for_sgrid.c */
+void four_coeffs_numrecFFT(double c[], double u[], int n);
+void four_eval_numrecFFT(double c[], double u[], int n);
+void four_int_numrecFFT(double a, double b, double c[], double cint[], int n);
+void cheb_coeffs_fromZeros_numrecFFT(double c[], double u[], int n);
+void cheb_coeffs_fromExtrema_numrecFFT(double c[], double u[], int n);
+void cheb_eval_onZeros_numrecFFT(double c[], double u[], int n);
+void cheb_eval_onExtrema_numrecFFT(double c[], double u[], int N);

@@ -14,6 +14,8 @@
 /* numrec funcs */
 void numrec_four1(double data[], unsigned long nn, int isign);
 void numrec_realft(double data[], unsigned long n, int isign);
+void numrec_cosft1(double y[], int n);
+void numrec_cosft2(double y[], int n, int isign);
 
 
 
@@ -86,6 +88,50 @@ void four_int_numrecFFT(double a, double b, double c[], double cint[], int n)
 
   /* free temp mem u */  
   free(u);
+}
+
+
+/* compute Cheb coeffs c[0...n] from function u at the zeros of T_N(x).
+   Note N=n+1                                                           */
+void cheb_coeffs_fromZeros_numrecFFT(double c[], double u[], int n)
+{
+  int j;
+  int N=n+1;
+  double toN=2.0/N;
+
+  for(j=0; j<N; j++)  c[j] = toN*u[j];
+  numrec_cosft2(c-1, N, 1);
+}
+
+/* compute Cheb coeffs c[0...N] from function u at the extrema of T_N(x). */
+void cheb_coeffs_fromExtrema_numrecFFT(double c[], double u[], int N)
+{
+  int j;
+  double toN=2.0/N;
+
+  for(j=0; j<=N; j++)  c[j] = toN*u[j];
+  numrec_cosft1(c-1, N);
+  c[N] *= 0.5;
+}
+
+/* find function u on the zeros of T_N(x).   Note N=n+1 */
+void cheb_eval_onZeros_numrecFFT(double c[], double u[], int n)
+{
+  int j;
+  int N=n+1;
+
+  for(j=0; j<N; j++)  u[j] = c[j];
+  numrec_cosft2(u-1, N, -1);
+}
+
+/* find function u on the extrema of T_N(X) */
+void cheb_eval_onExtrema_numrecFFT(double c[], double u[], int N)
+{
+  int j;
+
+  for(j=0; j<N; j++)  u[j] = c[j];
+  u[N] = c[N]*2.0;
+  numrec_cosft1(u-1, N);
 }
 
 
