@@ -213,7 +213,6 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
         for(m=1; m<=3; m++)
         {
           dv[m] = 0.0;
-          m_1 = m-1;
             
           for(i=1; i<=3; i++)
             /* dv[m] += dX_dx(i,m, dXd, box, ind, X,Y,Z) * du[i][ind]; */
