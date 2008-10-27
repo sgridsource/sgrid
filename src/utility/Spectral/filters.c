@@ -75,58 +75,54 @@ void filtermatrix(double *F, double *u, double *uf, int n)
 /* filter 3d var u in dirction direc on a box */
 void spec_filter1(tBox *box, int direc, double *u)
 {
-  static int linelen=0;
-  static double *uline=NULL;
-  static double *ufline=NULL;
+  double *uline;
+  double *ufline;
   int i,j,k, m3;
-    
-  /* static memory for lines */
-  m3=max3(box->n1, box->n2, box->n3);
-  if(m3>linelen)
-  {
-    linelen = m3;
-    uline = (double*) realloc(uline, linelen * sizeof(double));
-    ufline = (double*) realloc(ufline, linelen * sizeof(double));
-  }
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
 
+  /* memory for lines */
+  if(direc==1)      m3=n1;
+  else if(direc==2) m3=n2;
+  else              m3=n3;
+  uline = (double*)  calloc(m3, sizeof(double));
+  ufline = (double*) calloc(m3, sizeof(double));
+    
   if(direc==1)
   {
-    for (k = 0; k < box->n3; k++)
-      for (j = 0; j < box->n2; j++)
+    for (k = 0; k < n3; k++)
+      for (j = 0; j < n2; j++)
       {
-        get_memline(u, uline,  1, j, k, box->n1, box->n2, box->n3);
-        matrix_times_vector(box->F1, uline, ufline, box->n1);
-        put_memline(u, ufline, 1, j, k, box->n1, box->n2, box->n3);        
+        get_memline(u, uline,  1, j, k, n1, n2, n3);
+        matrix_times_vector(box->F1, uline, ufline, n1);
+        put_memline(u, ufline, 1, j, k, n1, n2, n3);        
       }
   }
   else if(direc==2)
   {
-    for (k = 0; k < box->n3; k++)
-      for (i = 0; i < box->n1; i++)
+    for (k = 0; k < n3; k++)
+      for (i = 0; i < n1; i++)
       {
-        get_memline(u, uline,  2, i, k, box->n1, box->n2, box->n3);
-        matrix_times_vector(box->F2, uline, ufline, box->n2);
-        put_memline(u, ufline, 2, i, k, box->n1, box->n2, box->n3);        
+        get_memline(u, uline,  2, i, k, n1, n2, n3);
+        matrix_times_vector(box->F2, uline, ufline, n2);
+        put_memline(u, ufline, 2, i, k, n1, n2, n3);        
       }
   }
   else if(direc==3)
   {
-    for (j = 0; j < box->n2; j++)
-      for (i = 0; i < box->n1; i++)
+    for (j = 0; j < n2; j++)
+      for (i = 0; i < n1; i++)
       {
-        get_memline(u, uline,  3, i, j, box->n1, box->n2, box->n3);
-        matrix_times_vector(box->F3 , uline, ufline, box->n3);
-        put_memline(u, ufline, 3, i, j, box->n1, box->n2, box->n3);
+        get_memline(u, uline,  3, i, j, n1, n2, n3);
+        matrix_times_vector(box->F3 , uline, ufline, n3);
+        put_memline(u, ufline, 3, i, j, n1, n2, n3);
       }
   }
   else
     errorexit("cheb_filter1: possible values for direction direc are 1,2,3.");
+
   /* free memory for lines */
-  /*
-    linelen=0;
     free(uline);
     free(ufline);
-    uline = ufline = NULL;
-  */
 }
-

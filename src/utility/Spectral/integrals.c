@@ -256,57 +256,59 @@ double spec_sphericalDF3dIntegral(tBox *box, double *u, double *U)
 /* compute the indefinite integral U of 3d var u in direction direc on a box */
 void spec_Int1(tBox *box, int direc, double *u, double *U)
 {
-  static int linelen=0;
-  static double *uline=NULL;
-  static double *Uline=NULL;
+  double *uline;
+  double *Uline;
   int i,j,k, m3;
-    
-  /* static memory for lines */
-  m3=max3(box->n1, box->n2, box->n3);
-  if(m3>linelen)
-  {
-    linelen = m3;
-    uline = (double*) realloc(uline, linelen * sizeof(double));
-    Uline = (double*) realloc(Uline, linelen * sizeof(double));
-  }
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+
+  /* memory for lines */
+  if(direc==1)      m3=n1;
+  else if(direc==2) m3=n2;
+  else              m3=n3;
+  uline = (double*) calloc(m3, sizeof(double));
+  Uline = (double*) calloc(m3, sizeof(double));
 
   if(direc==1)
   {
-    for (k = 0; k < box->n3; k++)
-      for (j = 0; j < box->n2; j++)
+    for (k = 0; k < n3; k++)
+      for (j = 0; j < n2; j++)
       {
         /* 
-        get_memline(u, uline, 1, j, k, box->n1, box->n2, box->n3);
-        matrix_times_vector(box->Int1, uline, Uline, box->n1);
-        put_memline(U, Uline, 1, j, k, box->n1, box->n2, box->n3);        
+        get_memline(u, uline, 1, j, k, n1, n2, n3);
+        matrix_times_vector(box->Int1, uline, Uline, n1);
+        put_memline(U, Uline, 1, j, k, n1, n2, n3);        
         */
-        int n1=box->n1;
-        int n2=box->n2;
         matrix_times_vector(box->Int1, u+Index(0,j,k), U+Index(0,j,k), n1);
       }
   }
   else if(direc==2)
   {
-    for (k = 0; k < box->n3; k++)
-      for (i = 0; i < box->n1; i++)
+    for (k = 0; k < n3; k++)
+      for (i = 0; i < n1; i++)
       {
-        get_memline(u, uline, 2, i, k, box->n1, box->n2, box->n3);
-        matrix_times_vector(box->Int2, uline, Uline, box->n2);
-        put_memline(U, Uline, 2, i, k, box->n1, box->n2, box->n3);        
+        get_memline(u, uline, 2, i, k, n1, n2, n3);
+        matrix_times_vector(box->Int2, uline, Uline, n2);
+        put_memline(U, Uline, 2, i, k, n1, n2, n3);        
       }
   }
   else if(direc==3)
   {
-    for (j = 0; j < box->n2; j++)
-      for (i = 0; i < box->n1; i++)
+    for (j = 0; j < n2; j++)
+      for (i = 0; i < n1; i++)
       {
-        get_memline(u, uline, 3, i, j, box->n1, box->n2, box->n3);
-        matrix_times_vector(box->Int3 , uline, Uline, box->n3);
-        put_memline(U, Uline, 3, i, j, box->n1, box->n2, box->n3);
+        get_memline(u, uline, 3, i, j, n1, n2, n3);
+        matrix_times_vector(box->Int3 , uline, Uline, n3);
+        put_memline(U, Uline, 3, i, j, n1, n2, n3);
       }
   }
   else
     errorexit("spec_Int1: possible values for direction direc are 1,2,3.");
+
+  /* free lines */
+  free(Uline);
+  free(uline);
 }
 
 

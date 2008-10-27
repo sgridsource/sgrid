@@ -80,10 +80,9 @@ void spec_Coeffs_old(tBox *box, double *u, double *c)
    (set coeffs c of u by calling spec_Coeffs(box, u, c); */
 double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
 {
-  static int linelen=0;
-  static double *B1=NULL;
-  static double *B2=NULL;
-  static double *B3=NULL;
+  double *B1;
+  double *B2;
+  double *B3;
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
@@ -99,14 +98,11 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
   if(box->basis1==NULL || box->basis2==NULL || box->basis3==NULL)
     errorexiti("spec_interpolate: box%d: one box->basis1/2/3 is NULL",box->b);
 
-  /* allocate memory if needed */
-  if(n1>linelen || n2>linelen || n3>linelen )
-  {
-    linelen = max3(n1,n2,n3);
-    B1 = (double*) realloc(B1, linelen * sizeof(double));
-    B2 = (double*) realloc(B2, linelen * sizeof(double));
-    B3 = (double*) realloc(B3, linelen * sizeof(double));
-  }
+  /* allocate memory for B1/2/3 */
+  B1 = (double*) calloc(n1, sizeof(double));
+  B2 = (double*) calloc(n2, sizeof(double));
+  B3 = (double*) calloc(n3, sizeof(double));
+
   /* set basis func values at X,Y,Z */
   for(i = n1-1; i >=0; i--)  B1[i]=box->basis1((void *) box, a1,b1, i,n1, X);
   for(j = n2-1; j >=0; j--)  B2[j]=box->basis2((void *) box, a2,b2, j,n2, Y);
@@ -117,6 +113,11 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
   for(j = n2-1; j >=0; j--)
   for(i = n1-1; i >=0; i--)
     sum += c[Index(i,j,k)] * B1[i] * B2[j] * B3[k];
+
+  /* free memory for B1/2/3 */
+  free(B1);
+  free(B2);
+  free(B3);
 
   return sum;
 }
