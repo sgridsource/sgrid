@@ -10,8 +10,6 @@
    in direction direc on a box                         */
 void spec_Integral1(tBox *box, int direc, double *u, double *U)
 {
-  int linelen;
-  double *M=NULL;
   int i,j,k;
   int n1=box->n1;
   int n2=box->n2;
@@ -38,14 +36,8 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
 
   if(direc==1)
   {
-    linelen = n1;
-
-    /* initialize the matrix M used to compute coeffs */
-    M = (double *) calloc( linelen*linelen, sizeof(double));
-    initMatrix_ForCoeffs(M, linelen, get_coeffs);
-
     /* write spec coeffs into U */
-    spec_analysis1(box, direc, M, u, U);
+    spec_analysis1(box, direc, u, U);
 
     /* write cheb-integral from a to b into U */
     if(imethod==chebmeth)
@@ -76,14 +68,8 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   }
   else if(direc==2)
   {
-    linelen = n2;
-
-    /* initialize the matrix M used to compute coeffs */
-    M = (double *) calloc( linelen*linelen, sizeof(double));
-    initMatrix_ForCoeffs(M, linelen, get_coeffs);
-
     /* write spec coeffs into U */
-    spec_analysis1(box, direc, M, u, U);
+    spec_analysis1(box, direc, u, U);
 
     /* write cheb-integral from a to b into U */
     if(imethod==chebmeth)
@@ -114,14 +100,8 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   }
   else if(direc==3)
   {
-    linelen = n3;
-
-    /* initialize the matrix M used to compute coeffs */
-    M = (double *) calloc( linelen*linelen, sizeof(double));
-    initMatrix_ForCoeffs(M, linelen, get_coeffs);
-
     /* write spec coeffs into U */
-    spec_analysis1(box, direc, M, u, U);
+    spec_analysis1(box, direc, u, U);
 
     /* write cheb-integral from a to b into U */
     if(imethod==chebmeth)
@@ -152,9 +132,6 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   }
   else
     errorexit("spec_Integral1: possible values for direction direc are 1,2,3.");
-
-  /* free memory for  matrix M */
-  free(M);
 }
 
 
@@ -195,8 +172,6 @@ double spec_3dIntegral(tBox *box, double *u, double *U)
 /* compute U = 2d integral of var u over theta and phi */
 void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
 {
-  int linelen;
-  double *M=NULL;
   int i,j,k;
   int n1=box->n1;
   int n2=box->n2;
@@ -225,14 +200,8 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
       get_coeffs==four_coeffs_numrecFFT ) imethod = fourmeth;
 
   {
-    linelen = n2;
-
-    /* initialize the matrix M used to compute coeffs */
-    M = (double *) calloc( linelen*linelen, sizeof(double));
-    initMatrix_ForCoeffs(M, linelen, get_coeffs);
-
     /* write spec coeffs into U */
-    spec_analysis1(box, 2, M, U, U);
+    spec_analysis1(box, 2, U, U);
 
     /* write four-integral from a to b into U */
     if(imethod==fourmeth)
@@ -271,9 +240,6 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
         }
     else errorexit("spec_sphericalDF2dIntegral: you need Fourier in direction 2");
   }
-
-  /* free memory for  matrix M */
-  free(M);
 }
 
 

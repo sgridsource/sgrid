@@ -172,6 +172,11 @@ int TestDerivs_analyze(tGrid *grid)
       uyz[i]-= ((y - y0)*(z - z0))/(Power(sigmay,2)*Power(sigmaz,2)) * u[i];
       uzz[i]-= (-Power(sigmaz,2) + Power(z - z0,2))/Power(sigmaz,4) * u[i];
     }
+/*
+spec_Deriv2(box, 1, u, ux);
+spec_Deriv2(box, 2, u, uy);
+spec_Deriv2(box, 3, u, uz);
+*/
   }
   return 0;
 }

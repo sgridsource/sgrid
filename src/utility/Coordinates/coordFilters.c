@@ -49,7 +49,7 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
     u = box->v[unew->index[vi]];
     
     /* get spectral coeffs in c */
-    spec_analysis1(box, 3, box->Mcoeffs3, u, c);
+    spec_analysis1(box, 3, u, c);
       
     /* set the upper 1-sin(theta) portion of the coeffs c to zero */
     for(j = 0; j < n2; j++)
@@ -70,7 +70,7 @@ void coordinateDependentFilter_SphericalDF(tBox *box, tVarList *unew)
     }
 
     /* get new u from new c */
-    spec_synthesis1(box, 3, box->Meval3, u, c);
+    spec_synthesis1(box, 3, u, c);
   }
 }
 
@@ -97,7 +97,7 @@ void coordinateDependentFilter_Spherical(tBox *box, tVarList *unew)
     u = box->v[unew->index[vi]];
     
     /* get spectral coeffs in c */
-    spec_analysis1(box, 3, box->Mcoeffs3, u, c);
+    spec_analysis1(box, 3, u, c);
       
     /* set the upper 1-sin(theta) portion of the coeffs c to zero */
     for(j = 0; j < n2; j++)
@@ -123,6 +123,6 @@ void coordinateDependentFilter_Spherical(tBox *box, tVarList *unew)
     }
 
     /* get new u from new c */
-    spec_synthesis1(box, 3, box->Meval3, u, c);
+    spec_synthesis1(box, 3, u, c);
   }
 }

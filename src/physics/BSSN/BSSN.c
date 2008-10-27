@@ -410,7 +410,7 @@ void filter_with2o3rule_inX(tVarList *unew, tVarList *upre)
       double *vc  = box->v[Ind("temp1")];
 
       /* compute coeffs of var in X-dir */
-      spec_analysis1(box, 1, box->Mcoeffs1, var, vc);
+      spec_analysis1(box, 1, var, vc);
 
       /* remove all coeffs with i>=2*(n1/3) */
       for(k=0; k<n3; k++)
@@ -419,7 +419,7 @@ void filter_with2o3rule_inX(tVarList *unew, tVarList *upre)
               vc[Index(i,j,k)]=0.0;
 
       /* use modified coeffs to change var */
-      spec_synthesis1(box, 1, box->Meval1, var, vc);
+      spec_synthesis1(box, 1, var, vc);
     }
   }
 }    

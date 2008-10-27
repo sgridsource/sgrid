@@ -72,7 +72,7 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
 //printf("Naive_YlmFilter: %s lmshift=%d\n", VarName(unew->index[vi]), lmshift);
 
       /* compute coeffs of var after Fourier trafo in phi*/
-      spec_analysis1(box, 3, box->Mcoeffs3, var, vc);
+      spec_analysis1(box, 3, var, vc);
 
       /* loop over all phi-coeffs, i.e. all k or m */
       for(k=0; k<n3; k++)
@@ -116,7 +116,7 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
         }
       }
       /* use modified coeffs to change var */
-      spec_synthesis1(box, 3, box->Meval3, var, vc);
+      spec_synthesis1(box, 3, var, vc);
       /* Note: vc was wrong for all theta>PI !!! */
 
       /* copy var into double covered regions */

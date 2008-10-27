@@ -494,10 +494,8 @@ void reset_Coordinates_AnsorgNS_sigma_pm__old1(tGrid *grid, tGrid *gridnew,
   int check;
 
   /* set coeffs of BNSdata_q */
-  spec_analysis1(grid->box[innerdom], 1, grid->box[innerdom]->Mcoeffs1, 
-                 q_in, c_in);
-  spec_analysis1(grid->box[outerdom], 1, grid->box[outerdom]->Mcoeffs1, 
-                 q_out, c_out);
+  spec_analysis1(grid->box[innerdom], 1, q_in, c_in);
+  spec_analysis1(grid->box[outerdom], 1, q_out, c_out);
 
   /* loop over j,k i.e. B,phi. 
      NOTE: we assue that n1,n2,n3 are the same in both domains */
@@ -812,10 +810,8 @@ void reset_Coordinates_AnsorgNS_sigma_pm__old2(tGrid *grid, tGrid *gridnew,
   int check, stat;
 
   /* set 1D-coeffs of BNSdata_q for interpolation in A-direc. */
-  spec_analysis1(grid->box[innerdom], 1, grid->box[innerdom]->Mcoeffs1, 
-                 q_in, c_in);
-  spec_analysis1(grid->box[outerdom], 1, grid->box[outerdom]->Mcoeffs1, 
-                 q_out, c_out);
+  spec_analysis1(grid->box[innerdom], 1, q_in, c_in);
+  spec_analysis1(grid->box[outerdom], 1, q_out, c_out);
 
   /* set 3D-coeffs of BNSdata_q for 3D interpolation */
   spec_Coeffs(grid->box[innerdom], q_in, c3_in);

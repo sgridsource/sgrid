@@ -1688,9 +1688,9 @@ void filter_unew_radially(tVarList *unew, tVarList *upre)
       double *temp1 = box->v[Ind("temp1")];
 //printf("filter_unew_radially: %s\n", VarName(unew->index[vi]));
 
-      spec_analysis1(box, 1, box->Mcoeffs1, var, temp1);
+      spec_analysis1(box, 1, var, temp1);
       forallijk(i,j,k) if(i>f) temp1[Index(i,j,k)]=0.0;
-      spec_synthesis1(box, 1, box->Meval1, var, temp1);
+      spec_synthesis1(box, 1, var, temp1);
     }
   } /* end forallboxes */
 }
@@ -1875,7 +1875,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
     fclose(fp);
     free(filename);              
   }
-  
+
   return 0;
 }
 
