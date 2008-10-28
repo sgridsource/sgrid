@@ -175,12 +175,8 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
 
   if( box->x_of_X[1] != NULL )
   {
-    int i,m,m_1, ind;
-    double *Xp = box->v[Ind("X")];
-    double *Yp = box->v[Ind("Y")];
-    double *Zp = box->v[Ind("Z")];
+    int ind, k;
     double *du[4];
-    double dv[4];
 
     du[1] = u1;        du[2] = u2;        du[3] = u3;
 
@@ -188,6 +184,9 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
     if(box->v[dXd]) /* use stored coord trafos */
       forallpoints(box,ind)
       {
+        int i,m,m_1;
+        double dv[4];
+
         /* Transform derivs to cartesian coords */
         for(m=1; m<=3; m++)
         {
@@ -205,6 +204,11 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
     else  /* compute  coord trafos */
       forallpoints(box,ind)
       {
+        int i,m,m_1;
+        double dv[4];
+        double *Xp = box->v[Ind("X")];
+        double *Yp = box->v[Ind("Y")];
+        double *Zp = box->v[Ind("Z")];
         double X = Xp[ind];
         double Y = Yp[ind];
         double Z = Zp[ind];
@@ -224,10 +228,10 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
       } /* end cartesian derivs at all points */
 
     /* set derivs at singular points */
-    for(m=1; m<=3; m++)
+    for(k=1; k<=3; k++)
     {
-      if( box->Sing_d_dx[m] != NULL )
-        box->Sing_d_dx[m]((void *) box,   (void *) u,
+      if( box->Sing_d_dx[k] != NULL )
+        box->Sing_d_dx[k]((void *) box,   (void *) u,
                           (void *) du[1], (void *) du[2], (void *) du[3]);
     }
   }
@@ -251,14 +255,9 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
   /* Note: the pointers x_of_X[i] are NULL if X_l = x_l */
   if( box->x_of_X[1] != NULL )
   {
-    int i,j,m,n,m_1,n_1, vi, ind;
-    double *Xp = box->v[Ind("X")];
-    double *Yp = box->v[Ind("Y")];
-    double *Zp = box->v[Ind("Z")];
+    int ind;
     double *du[4];
     double *ddu[4][4];
-    double dv[4];
-    double ddv[4][4];
 
     du[1] = u1;        du[2] = u2;        du[3] = u3;
     ddu[1][1] = u11;   ddu[1][2] = u12;   ddu[1][3] = u13;  
@@ -272,6 +271,9 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->v[ddXdd] && box->v[dXd]) /* use stored coord trafos */
       forallpoints(box,ind) /* loop over all points */
       {
+        int i,j, m,n, m_1,n_1, vi;
+        double dv[4];
+        double ddv[4][4];
         /* Transform derivs to cartesian coords */
         /* Note:
         d u / dx^m = (dX^i / dx^m)  (d u / dX^i)
@@ -321,6 +323,12 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
     else /* compute coord trafos */
       forallpoints(box,ind) /* loop over all points */
       {
+        int i,j, m,n, m_1,n_1, vi;
+        double dv[4];
+        double ddv[4][4];
+        double *Xp = box->v[Ind("X")];
+        double *Yp = box->v[Ind("Y")];
+        double *Zp = box->v[Ind("Z")];
         double X = Xp[ind];
         double Y = Yp[ind];
         double Z = Zp[ind];
