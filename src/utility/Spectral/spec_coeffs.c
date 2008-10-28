@@ -180,83 +180,75 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
 {
   double *M;
   void (*get_coeffs)(double *,double *, int);
-  double *uline;
-  double *cline;
-  int i,j,k, m3;
+  int j,k;
   int n1=box->n1;
   int n2=box->n2;
   int n3=box->n3;
 
-  /* memory for lines */
-  if(direc==1)      { m3=n1; M=box->Mcoeffs1; get_coeffs=box->get_coeffs1; }
-  else if(direc==2) { m3=n2; M=box->Mcoeffs2; get_coeffs=box->get_coeffs2; }
-  else              { m3=n3; M=box->Mcoeffs3; get_coeffs=box->get_coeffs3; }
-  uline = (double*) calloc(m3, sizeof(double));
-  cline = (double*) calloc(m3, sizeof(double));
+  /* M and get_coeffs */
+  if(direc==1)      { M=box->Mcoeffs1; get_coeffs=box->get_coeffs1; }
+  else if(direc==2) { M=box->Mcoeffs2; get_coeffs=box->get_coeffs2; }
+  else              { M=box->Mcoeffs3; get_coeffs=box->get_coeffs3; }
 
   if(direc==1)
   {
     if(box->TransformType1)
-      for (k = 0; k < n3; k++)
-      for (j = 0; j < n2; j++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
         get_coeffs(cline, uline, n1-1);
         put_memline(c, cline, 1, j, k, n1, n2, n3);        
-      }
+      } end_forLines_free2Lines(uline,cline)
     else
-      for (k = 0; k < n3; k++)
-      for (j = 0; j < n2; j++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
         matrix_times_vector(M, uline, cline, n1);
         put_memline(c, cline, 1, j, k, n1, n2, n3);        
-      }
+      } end_forLines_free2Lines(uline,cline)
   }
   else if(direc==2)
   {
     if(box->TransformType2)
-      for (k = 0; k < n3; k++)
-      for (i = 0; i < n1; i++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
         get_coeffs(cline, uline, n2-1);
         put_memline(c, cline, 2, i, k, n1, n2, n3);        
-      }
+      } end_forLines_free2Lines(uline,cline)
     else
-      for (k = 0; k < n3; k++)
-      for (i = 0; i < n1; i++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
         matrix_times_vector(M, uline, cline, n2);
         put_memline(c, cline, 2, i, k, n1, n2, n3);        
-      }
+      } end_forLines_free2Lines(uline,cline)
   }
   else if(direc==3)
   {
     if(box->TransformType3)
-      for (j = 0; j < n2; j++)
-      for (i = 0; i < n1; i++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
         get_coeffs(cline, uline, n3-1);
         put_memline(c, cline, 3, i, j, n1, n2, n3);
-      }
+      } end_forLines_free2Lines(uline,cline)
     else
-      for (j = 0; j < n2; j++)
-      for (i = 0; i < n1; i++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
         matrix_times_vector(M, uline, cline, n3);
         put_memline(c, cline, 3, i, j, n1, n2, n3);
-      }
+      } end_forLines_free2Lines(uline,cline)
   }
   else
     errorexit("spec_analysis1: possible values for direction direc are 1,2,3.");
-
-  /* free lines */
-  free(cline);
-  free(uline);
 }
 
 /* compute the 3d var u from the coeffs c in direction direc  
@@ -265,83 +257,75 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
 {
   double *M;
   void (*eval_onPoints)(double *,double *, int);
-  double *uline;
-  double *cline;
-  int i,j,k, m3;
+  int j,k;
   int n1=box->n1;
   int n2=box->n2;
   int n3=box->n3;
 
-  /* memory for lines */
-  if(direc==1)      { m3=n1; M=box->Meval1; eval_onPoints=box->eval_onPoints1; }
-  else if(direc==2) { m3=n2; M=box->Meval2; eval_onPoints=box->eval_onPoints2; }
-  else              { m3=n3; M=box->Meval3; eval_onPoints=box->eval_onPoints3; }
-  uline = (double*) calloc(m3, sizeof(double));
-  cline = (double*) calloc(m3, sizeof(double));
+  /* M and eval_onPoints */
+  if(direc==1)      { M=box->Meval1; eval_onPoints=box->eval_onPoints1; }
+  else if(direc==2) { M=box->Meval2; eval_onPoints=box->eval_onPoints2; }
+  else              { M=box->Meval3; eval_onPoints=box->eval_onPoints3; }
 
   if(direc==1)
   {
     if(box->TransformType1)
-      for (k = 0; k < n3; k++)
-      for (j = 0; j < n2; j++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
         get_memline(c, cline, 1, j, k, n1, n2, n3);
         eval_onPoints(cline, uline, n1-1);
         put_memline(u, uline, 1, j, k, n1, n2, n3);        
-      }
+      } end_forLines_free2Lines(uline,cline)
     else
-      for (k = 0; k < n3; k++)
-      for (j = 0; j < n2; j++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
         get_memline(c, cline, 1, j, k, n1, n2, n3);
         matrix_times_vector(M, cline, uline, n1);
         put_memline(u, uline, 1, j, k, n1, n2, n3);        
-      }
+      } end_forLines_free2Lines(uline,cline)
   }
   else if(direc==2)
   {
     if(box->TransformType2)
-      for (k = 0; k < n3; k++)
-      for (i = 0; i < n1; i++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
         get_memline(c, cline, 2, i, k, n1, n2, n3);
         eval_onPoints(cline, uline, n2-1);
         put_memline(u, uline, 2, i, k, n1, n2, n3);        
-      }
+      } end_forLines_free2Lines(uline,cline)
     else
-      for (k = 0; k < n3; k++)
-      for (i = 0; i < n1; i++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
         get_memline(c, cline, 2, i, k, n1, n2, n3);
         matrix_times_vector(M, cline, uline, n2);
         put_memline(u, uline, 2, i, k, n1, n2, n3);        
-      }
+      } end_forLines_free2Lines(uline,cline)
   }
   else if(direc==3)
   {
     if(box->TransformType3)
-      for (j = 0; j < n2; j++)
-      for (i = 0; i < n1; i++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
         get_memline(c, cline, 3, i, j, n1, n2, n3);
         eval_onPoints(cline, uline, n3-1);
         put_memline(u, uline, 3, i, j, n1, n2, n3);
-      }
+      } end_forLines_free2Lines(uline,cline)
     else
-      for (j = 0; j < n2; j++)
-      for (i = 0; i < n1; i++)
+      #pragma omp parallel for
+      forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
         get_memline(c, cline, 3, i, j, n1, n2, n3);
         matrix_times_vector(M, cline, uline, n3);
         put_memline(u, uline, 3, i, j, n1, n2, n3);
-      }
+      } end_forLines_free2Lines(uline,cline)
   }
   else
     errorexit("spec_synthesis1: possible values for direction direc are 1,2,3.");
-
-  /* free lines */
-  free(cline);
-  free(uline);
 }
 
 

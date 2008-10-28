@@ -109,10 +109,17 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
   for(k = n3-1; k >=0; k--)  B3[k]=box->basis3((void *) box, a3,b3, k,n3, Z);
 
   /* interpolate to X,Y,Z */
+  /*  for(k = n3-1; k >=0; k--)
+      for(j = n2-1; j >=0; j--)
+      for(i = n1-1; i >=0; i--)
+        sum += c[Index(i,j,k)] * B1[i] * B2[j] * B3[k]; */
+  #pragma omp parallel for reduction(+:sum) 
   for(k = n3-1; k >=0; k--)
-  for(j = n2-1; j >=0; j--)
-  for(i = n1-1; i >=0; i--)
-    sum += c[Index(i,j,k)] * B1[i] * B2[j] * B3[k];
+  { int j,i;
+    for(j = n2-1; j >=0; j--)
+    for(i = n1-1; i >=0; i--)
+      sum += c[Index(i,j,k)] * B1[i] * B2[j] * B3[k];
+  }
 
   /* free memory for B1/2/3 */
   free(B1);
