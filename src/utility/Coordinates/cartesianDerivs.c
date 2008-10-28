@@ -182,6 +182,7 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
 
     /* compute cartesian derivs at all points */
     if(box->v[dXd]) /* use stored coord trafos */
+      #pragma omp parallel for
       forallpoints(box,ind)
       {
         int i,m,m_1;
@@ -202,6 +203,7 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
           du[m][ind] = dv[m];
       }
     else  /* compute  coord trafos */
+      #pragma omp parallel for
       forallpoints(box,ind)
       {
         int i,m,m_1;
@@ -269,6 +271,7 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
 
     /* compute cartesian derivs at all points */
     if(box->v[ddXdd] && box->v[dXd]) /* use stored coord trafos */
+      #pragma omp parallel for
       forallpoints(box,ind) /* loop over all points */
       {
         int i,j, m,n, m_1,n_1, vi;
@@ -321,6 +324,7 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
         }
       } /* end loop over all points */
     else /* compute coord trafos */
+      #pragma omp parallel for
       forallpoints(box,ind) /* loop over all points */
       {
         int i,j, m,n, m_1,n_1, vi;
