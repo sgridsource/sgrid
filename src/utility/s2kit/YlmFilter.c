@@ -27,10 +27,9 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
     int n1=box->n1;
     int n2=box->n2;
     int n3=box->n3;
-    int i,j,k, m, vi;
-    int l, bw;
-    double *samples, *coeffs;
-    double **plm, *weights, *workspace;
+    int k, m, vi;
+    int bw;
+    double **plm, *weights, *workspace0;
 
     /* we need an even n3 and an n2 divisible by 4 */
     if(n2 % 4)
@@ -41,10 +40,6 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
     /* set sampling rate B=bw */
     bw = n2/4;
 
-    /* space for samples and coefficients */
-    samples   = (double *) malloc(sizeof(double) * n2);
-    coeffs    = (double *) malloc(sizeof(double) * bw);
-
     /* space for precomputed Plms */
     plm = (double **) malloc(sizeof(double *) * bw );
     for(m=0; m<bw; m++)
@@ -53,16 +48,15 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
     /* for weights */
     weights = (double *) malloc(sizeof(double) * 4 * bw);
 
-    /* workspace space */
-    workspace = (double *) malloc(sizeof(double) * 18 * bw);
+    /* workspace0 space */
+    workspace0 = (double *) malloc(sizeof(double) * 18 * bw);
 
     /* precompute the Plms */
     for(m=0; m<bw; m++)
-      PmlTableGen(bw, m, plm[m], workspace);
+      PmlTableGen(bw, m, plm[m], workspace0);
 
     /* make the weights */
     makeweights( bw, weights );
-
 
     /* filter all vars */
     for(vi=0; vi<unew->n; vi++)
@@ -75,8 +69,14 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
       spec_analysis1(box, 3, var, vc);
 
       /* loop over all phi-coeffs, i.e. all k or m */
+      #pragma omp parallel for
       for(k=0; k<n3; k++)
       {
+        int i,m,l;
+        double *samples = (double *) malloc(sizeof(double) * n2); /* space for samples and coefficients */
+        double *coeffs  = (double *) malloc(sizeof(double) * bw);
+        double *workspace = (double *) malloc(sizeof(double) * 18 * bw); /* workspace space */
+
         m = (k+1)/2; /* set m */
         if(m<bw + lmshift)
         {
@@ -108,35 +108,43 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
           }
         }
         else /* if(m>=bw + lmshift) */
-        {
+        { int j;
           /* filter all k modes with m>=bw=l+1 */
           for(j=0; j<n2; j++)
             for(i=0; i<n1; i++)
               vc[Index(i,j,k)]=0.0;
         }
+        /* now free up memory for naive trafo */
+        free(workspace);
+        free(coeffs);
+        free(samples);
       }
       /* use modified coeffs to change var */
       spec_synthesis1(box, 3, var, vc);
       /* Note: vc was wrong for all theta>PI !!! */
 
       /* copy var into double covered regions */
+      #pragma omp parallel for
       for(k = 0;    k < n3/2; k++)
-      for(j = n2/2; j < n2; j++)
-      for(i = 0;    i < n1; i++)
-        var[Index(i,j,k)] = var[Index(i,n2-j-1,k+n3/2)];
+      { int i,j;
+        for(j = n2/2; j < n2; j++)
+        for(i = 0;    i < n1; i++)
+          var[Index(i,j,k)] = var[Index(i,n2-j-1,k+n3/2)];
+      }
+      #pragma omp parallel for
       for(k = n3/2; k < n3; k++)
-      for(j = n2/2; j < n2; j++)
-      for(i = 0;    i < n1; i++)
-        var[Index(i,j,k)] = var[Index(i,n2-j-1,k-n3/2)];
+      { int i,j;
+        for(j = n2/2; j < n2; j++)
+        for(i = 0;    i < n1; i++)
+          var[Index(i,j,k)] = var[Index(i,n2-j-1,k-n3/2)];
+      }
     }
 
     /* now free up memory for naive trafo */
     for(m=0; m<bw; m++) free(plm[m]);
     free(plm);
-    free(workspace);
+    free(workspace0);
     free(weights);
-    free(coeffs);
-    free(samples);
   }
 }    
 
