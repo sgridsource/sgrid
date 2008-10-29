@@ -2148,9 +2148,6 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
     double *dbetazx = box->v[i_dbeta+6];
     double *dbetazy = box->v[i_dbeta+7];
     double *dbetazz = box->v[i_dbeta+8];
-    double A; 
-    double dAx,dAy,dAz , Bx,By,Bz;
-    double dBxx,dBxy,dBxz , dByx,dByy,dByz , dBzx,dBzy,dBzz;
 
     /* compute the spatial derivs */
     cphix = vlldataptr(ucur, box, 4);
@@ -2178,6 +2175,9 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
     FirstDerivsOf_S(box, icPi , Ind("ScalarOnKerr_dPix"));
 
     /* loop over points and set RHS */
+    // omp does not work yet, since Ian's source in ScalarOnKerr_Source
+    // is not thread safe
+    //#pragma omp parallel for
     forallpoints(box, i)
     {
       double rPi, rpsi;
