@@ -21,11 +21,11 @@ int checkpoint(tGrid *grid)
 {
   int di;
   double dt, dT;
-  int pr = 1;
+  int pr = 0;
 
   /* check whether we are on */
-  if (Getv("checkpoint", "no")) return 0;
-  if (pr) printf("checkpoint called at top grid iteration %d\n",
+  if(Getv("checkpoint", "no")) return 0;
+  if(pr) printf("checkpoint called at top grid iteration %d\n",
 		 grid->iteration);
 
   /* if we are in the restart phase */
@@ -68,11 +68,11 @@ int checkpoint(tGrid *grid)
     di = dt/grid->dt + dequaleps;
   else
     di = Geti("checkpoint_di");
-  if (pr) printf("di = %d\n", di);
+  if(pr) printf("di = %d\n", di);
   
   /* check whether it is time to write a checkpoint */
   if (grid->iteration % di) {
-    printf("not time to write checkpoint, return\n");
+    if(pr) printf("not time to write checkpoint, return\n");
     return 0;
   }
 

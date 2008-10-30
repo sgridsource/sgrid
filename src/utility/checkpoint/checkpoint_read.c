@@ -84,7 +84,7 @@ void checkpoint_read_ParsAndIterations_local(tGrid *grid, FILE *fp)
   fgetparameter(fp, "$bmax", value);  bmax = atoi(value);
   fgetparameter(fp, "$time", value);      grid->time = atof(value);
   fgetparameter(fp, "$iteration", value); grid->iteration = atoi(value);
-  printf("found $bmin = %d , $bmax = %d , $time = %g, iteration = %d\n",
+  printf("found $bmin = %d , $bmax = %d , $time = %g, $iteration = %d\n",
          bmin, bmax, grid->time, grid->iteration);
 
   /* read parameter database
