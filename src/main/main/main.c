@@ -132,6 +132,9 @@ int initialize_grid(tGrid *g)
   /* post output */
   RunFun(POST_OUTPUT, g);
 
+  /* checkpoint, just in case we need it here already */
+  checkpoint(g);
+
   return 0;
 }
 
@@ -158,7 +161,6 @@ int evolve_grid(tGrid *grid)
   /* outer most evolution loop */
   while (grid->iteration < iterationmax)
   { 
-
     /* pre evolve */
     RunFun(PRE_EVOLVE, grid); 
 
@@ -185,6 +187,13 @@ int evolve_grid(tGrid *grid)
 
     /* post output */
     RunFun(POST_OUTPUT, grid);
+
+    /* checkpoint */
+    checkpoint(grid);
+  
+    /* update since this may change during evolution, say when checkpointing */
+    timemax= Getd("finaltime");
+    iterationmax= (timemax > 0) ? timemax/grid->dt + 0.5 : Geti("iterations");
   }
   return 0;
 }
