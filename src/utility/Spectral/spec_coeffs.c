@@ -193,6 +193,7 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
   if(direc==1)
   {
     if(box->TransformType1)
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
@@ -200,7 +201,9 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
         get_coeffs(cline, uline, n1-1);
         put_memline(c, cline, 1, j, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,cline)
+    }
     else
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
@@ -208,10 +211,12 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
         matrix_times_vector(M, uline, cline, n1);
         put_memline(c, cline, 1, j, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,cline)
+    }
   }
   else if(direc==2)
   {
     if(box->TransformType2)
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
@@ -219,7 +224,9 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
         get_coeffs(cline, uline, n2-1);
         put_memline(c, cline, 2, i, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,cline)
+    }
     else
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
@@ -227,10 +234,12 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
         matrix_times_vector(M, uline, cline, n2);
         put_memline(c, cline, 2, i, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,cline)
+    }
   }
   else if(direc==3)
   {
     if(box->TransformType3)
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
@@ -238,7 +247,9 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
         get_coeffs(cline, uline, n3-1);
         put_memline(c, cline, 3, i, j, n1, n2, n3);
       } end_forLines_free2Lines(uline,cline)
+    }
     else
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
@@ -246,6 +257,7 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
         matrix_times_vector(M, uline, cline, n3);
         put_memline(c, cline, 3, i, j, n1, n2, n3);
       } end_forLines_free2Lines(uline,cline)
+    }
   }
   else
     errorexit("spec_analysis1: possible values for direction direc are 1,2,3.");
@@ -270,6 +282,7 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
   if(direc==1)
   {
     if(box->TransformType1)
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
@@ -277,7 +290,9 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
         eval_onPoints(cline, uline, n1-1);
         put_memline(u, uline, 1, j, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,cline)
+    }
     else
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
@@ -285,10 +300,12 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
         matrix_times_vector(M, cline, uline, n1);
         put_memline(u, uline, 1, j, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,cline)
+    }
   }
   else if(direc==2)
   {
     if(box->TransformType2)
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
@@ -296,7 +313,9 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
         eval_onPoints(cline, uline, n2-1);
         put_memline(u, uline, 2, i, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,cline)
+    }
     else
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
@@ -304,10 +323,12 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
         matrix_times_vector(M, cline, uline, n2);
         put_memline(u, uline, 2, i, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,cline)
+    }
   }
   else if(direc==3)
   {
     if(box->TransformType3)
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
@@ -315,7 +336,9 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
         eval_onPoints(cline, uline, n3-1);
         put_memline(u, uline, 3, i, j, n1, n2, n3);
       } end_forLines_free2Lines(uline,cline)
+    }
     else
+    {
       #pragma omp parallel for
       forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
@@ -323,6 +346,7 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
         matrix_times_vector(M, cline, uline, n3);
         put_memline(u, uline, 3, i, j, n1, n2, n3);
       } end_forLines_free2Lines(uline,cline)
+    }
   }
   else
     errorexit("spec_synthesis1: possible values for direction direc are 1,2,3.");
