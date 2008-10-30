@@ -413,6 +413,30 @@ char *NextEntry(char *list)
 
 
 
+/* direct index access to parameter data base 
+   should not be needed except for, say, dumping the database 
+   for checkpointing */
+char *GetsInd(int i)
+{
+  if (0 <= i && i < npdb)
+    return pdb[i].value;
+  return 0;
+}
+
+char *GetnameInd(int i)
+{
+  if (0 <= i && i < npdb)
+    return pdb[i].name;
+  return 0;
+}
+
+int GetnParameters()
+{
+  return npdb;
+}
+
+
+
 /**************************************************************************/
 int iterate_parameters(void)
 {

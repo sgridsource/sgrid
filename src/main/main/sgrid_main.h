@@ -41,6 +41,9 @@ int Getv(char *name, char *value);
 int GetvLax(char *name, char *value);
 char *NextEntry(char *list);
 void Appends(char *name, char *value);
+char *GetsInd(int i);
+char *GetnameInd(int i);
+int GetnParameters();
 
 /* skeleton.c */
 enum
