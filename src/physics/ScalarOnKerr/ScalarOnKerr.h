@@ -5,6 +5,8 @@
 int ScalarOnKerr_startup(tGrid *grid);
 int KerrChecker(tGrid *grid);
 double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z);
+int ScalarOnKerr_init_rho0_four3modes(tGrid *grid);
+void ScalarOnKerr_rho_from_rho0_four3modes(tBox *box, double *rho, double t);
 void ScalarOnKerr_evolve(tVarList *unew, tVarList *upre, double dt, 
                          tVarList *ucur);
 void set_psi_Pi_boundary(tVarList *unew, tVarList *upre, double dt, 

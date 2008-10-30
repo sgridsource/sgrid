@@ -22,6 +22,10 @@ int sgrid_ScalarOnKerr(void)
   AddVar("ScalarOnKerr_psi", "", "scalar");
   AddVar("ScalarOnKerr_Pi",  "", "time deriv of scalar");
   AddVar("ScalarOnKerr_rho", "", "Source");
+  AddConstantVar("ScalarOnKerr_rho0_four3modes", "",
+                 "Fourier trafo of rho at t=0 in the phi-direction");
+  AddVar("ScalarOnKerr_rho_four3modes", "",
+         "Fourier trafo of rho at some later time in the phi-direction");
 
   /* char. variables */
   AddVar("ScalarOnKerr_Up",  "", "characteristic var. U_{+}");

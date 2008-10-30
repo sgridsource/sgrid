@@ -172,8 +172,11 @@ int ScalarOnKerr_startup(tGrid *grid)
          Ind("ScalarOnKerr3d_Gammaxxx"), Ind("ScalarOnKerr3d_Gx"), 
          Ind("ScalarOnKerr3d_dalphax"), Ind("ScalarOnKerr3d_dbetaxx"));
 
-  /* check if Kerr vars are correct */
+  /* check if Kerr vars are correct (works only for Schwarzschild) */
   KerrChecker(grid);
+
+  /* initialize four3modes of rho at t=0 */
+  ScalarOnKerr_init_rho0_four3modes(grid);
 
   return 0;
 }
@@ -438,6 +441,108 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
     else rho=0.0;
   }
   return rho;
+}
+
+/* some funcs to speed up source evaluation */
+/* initialize four3modes of rho at t=0 */
+int ScalarOnKerr_init_rho0_four3modes(tGrid *grid)
+{
+  int b;
+
+  enablevar(grid, Ind("ScalarOnKerr_rho0_four3modes"));
+  enablevar(grid, Ind("ScalarOnKerr_rho_four3modes"));
+
+  /* put rho0 temporarily into ScalarOnKerr_rho_four3modes */
+  forallboxes(grid, b)
+  {
+    int i;
+    tBox *box=grid->box[b];
+    double *crho0= box->v[Ind("ScalarOnKerr_rho0_four3modes")];
+    double *rho0 = box->v[Ind("ScalarOnKerr_rho_four3modes")];
+    forallpoints(box,i)
+    {
+      double x = box->v[Ind("x")][i];
+      double y = box->v[Ind("y")][i];
+      double z = box->v[Ind("z")][i];
+      rho0[i] = ScalarOnKerr_Source(box, 0,x,y,z);
+    }
+  }
+  /* compute Four trafo of rho */
+  forallboxes(grid, b)
+  {
+    tBox *box=grid->box[b];
+    double *crho0= box->v[Ind("ScalarOnKerr_rho0_four3modes")];
+    double *rho0 = box->v[Ind("ScalarOnKerr_rho_four3modes")];
+
+    spec_analysis1(box, 3, rho0, crho0);
+  }
+  return 0;
+}
+
+/* compute var rho by noting that its coeffs h_m(t) = a_m(t) + i b_m(t)
+   are related to its coeffs at t=0 by h_m(t) = h_m(0) e^{i m Omega t}. 
+   Note: Omega t = sqrt(M/(r0*r0*r0))*t; */
+void ScalarOnKerr_rho_from_rho0_four3modes(tBox *box, double *rho, double t)
+{
+  double Mass = Getd("BHmass");
+  double r0 = 10.0*Mass;
+  double Omega_t = sqrt(Mass/(r0*r0*r0))*t;
+  int k;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  double *crho0= box->v[Ind("ScalarOnKerr_rho0_four3modes")];
+  double *crho = box->v[Ind("ScalarOnKerr_rho_four3modes")];
+  int N3 = (n3-1)/2;
+  int km = 2*N3;
+
+  /* set ScalarOnKerr_rho_four3modes */
+  #pragma omp parallel for
+  for(k=0; k<n3; k++)
+  {
+    int i,j;
+    int m=(k+1)/2;
+    double c = cos(m*Omega_t);
+    double s = sin(m*Omega_t);
+    
+    if(k==0) /* copy h_0 */
+    {
+      for(j=0; j<n2; j++)
+      for(i=0; i<n1; i++)
+      {
+        int ijk = Index(i,j,k);
+        crho[ijk] = crho0[ijk]; /* copy h_0 */
+      }
+    }
+    else if(k<=km)
+    {
+      if(k % 2) /* coeffs of cos */
+        for(j=0; j<n2; j++)
+        for(i=0; i<n1; i++)
+        {
+          int ijk  = Index(i,j,k);
+          int ijkP1= Index(i,j,k+1);
+          crho[ijk] = crho0[ijk]*c - crho0[ijkP1]*s;
+        }
+      else  /* coeffs of sin */
+        for(j=0; j<n2; j++)
+        for(i=0; i<n1; i++)
+        {
+          int ijk  = Index(i,j,k);
+          int ijkM1= Index(i,j,k-1);
+          crho[ijk] = crho0[ijkM1]*s + crho0[ijk]*c;
+        }
+    }
+    else  /* highest cos coeff does not to have a sin companion */
+      for(j=0; j<n2; j++)
+      for(i=0; i<n1; i++)
+      {
+        int ijk = Index(i,j,k);
+        crho[ijk] = crho0[ijk]*c;
+      }
+  }
+  /* compute rho from crho */
+  spec_synthesis1(box, 3, rho, crho);
 }
 
 
@@ -1704,6 +1809,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
   if( ! timeforoutput_index(grid, Ind("ScalarOnKerr_rho")) ) return 0;
 
   /* set rho on grid */
+  /*
   forallboxes(grid,b)
   {  
     tBox *box = grid->box[b];
@@ -1722,6 +1828,13 @@ int ScalarOnKerr_analyze(tGrid *grid)
 
       rho[i] = ScalarOnKerr_Source(box, t, x, y, z);
     }
+  }*/
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    double *rho = box->v[Ind("ScalarOnKerr_rho")];
+    double t = grid->time;
+    ScalarOnKerr_rho_from_rho0_four3modes(box, rho, t);
   }
   
   /* compute modes */
@@ -2086,7 +2199,7 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
   tGrid *grid = ucur->grid;
   int b;
   double t = ucur->time;
-  
+
   /* loop over all boxes */
   forallboxes(grid,b)
   {
@@ -2112,9 +2225,6 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
     double *dphixx, *dphixy, *dphixz;
     double *dphiyx, *dphiyy, *dphiyz;
     double *dphizx, *dphizy, *dphizz;
-    double *px = box->v[Ind("x")];
-    double *py = box->v[Ind("y")];
-    double *pz = box->v[Ind("z")];
     int i_alpha = Ind("ScalarOnKerr3d_alpha");
     double *alpha = box->v[i_alpha];
     int i_beta = Ind("ScalarOnKerr3d_betax");
@@ -2148,6 +2258,10 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
     double *dbetazx = box->v[i_dbeta+6];
     double *dbetazy = box->v[i_dbeta+7];
     double *dbetazz = box->v[i_dbeta+8];
+    double *rho = box->v[Ind("ScalarOnKerr_rho")];
+
+    /* set rho(t) in box */
+    ScalarOnKerr_rho_from_rho0_four3modes(box, rho, t);
 
     /* compute the spatial derivs */
     cphix = vlldataptr(ucur, box, 4);
@@ -2175,17 +2289,11 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
     FirstDerivsOf_S(box, icPi , Ind("ScalarOnKerr_dPix"));
 
     /* loop over points and set RHS */
-    // omp does not work yet, since Ian's source in ScalarOnKerr_Source
-    // is not thread safe
-    //#pragma omp parallel for
+    #pragma omp parallel for
     forallpoints(box, i)
     {
       double rPi, rpsi;
       double rphix, rphiy, rphiz;
-      double x = px[i];
-      double y = py[i];
-      double z = pz[i];
-      double rho;
       double beta_dPi,ag_dphi, gGx,gGy,gGz,aG_phi, g_phi_da, aKPi, beta_dpsi;
       double b_dphix,b_dphiy,b_dphiz,phi_dbx,phi_dby,phi_dbz;
       /* g is upper metric */
@@ -2219,12 +2327,9 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
       phi_dby = cphix[i]*dbetaxy[i]+cphiy[i]*dbetayy[i]+cphiz[i]*dbetazy[i];
       phi_dbz = cphix[i]*dbetaxz[i]+cphiy[i]*dbetayz[i]+cphiz[i]*dbetazz[i];
 
-      /* select source */
-      rho = ScalarOnKerr_Source(box, t, x, y, z);
-
       /* set RHS of psi and Pi */
       rPi  = beta_dPi - ag_dphi + aG_phi - g_phi_da + aKPi  +
-              (alpha[i])*rho;
+              (alpha[i])*rho[i];
       rpsi = beta_dpsi - alpha[i]*cPi[i];
       rphix = b_dphix + phi_dbx - alpha[i]*Pix[i] - cPi[i]*dalphax[i];
       rphiy = b_dphiy + phi_dby - alpha[i]*Piy[i] - cPi[i]*dalphay[i];
