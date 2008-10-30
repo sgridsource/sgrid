@@ -14,35 +14,35 @@
 
 /* loop over two directions */
 #define forLines(j,k, n2,n3)\
-  for((k)=0; (k)<(n3); (k)++ )\
+  for(k=0; k<(n3); k++ )\
   {\
-    int (j);\
-    for((j)=0; (j)<(n2); (j)++)
+    int j;\
+    for(j=0; j<(n2); j++)
 
 /* end the loop forLines */
 #define end_forLines }
 
 /* loop over two directions and allocate 2 lines in the third direction */
 #define forLines_alloc2Lines(j,k, n2,n3, uline,duline,n1)\
-  for((k)=0; (k)<(n3); (k)++ )\
+  for(k=0; k<(n3); k++ )\
   {\
-    int (j);\
+    int j;\
     double *(uline)  = (double*)  calloc((n1), sizeof(double));\
     double *(duline) = (double*)  calloc((n1), sizeof(double));\
-    for((j)=0; (j)<(n2); (j)++)
+    for(j=0; j<(n2); j++)
 
 /* end the loop forLines_alloc2Lines */
 #define end_forLines_free2Lines(uline,duline) free((uline)); free((duline));}
 
 /* loop over two directions and allocate 3 lines in the third direction */
 #define forLines_alloc3Lines(j,k, n2,n3, uline,duline,dduline,n1)\
-  for((k)=0; (k)<(n3); (k)++ )\
+  for(k=0; k<(n3); k++ )\
   {\
-    int (j);\
+    int j;\
     double *(uline)  = (double*)  calloc((n1), sizeof(double));\
     double *(duline) = (double*)  calloc((n1), sizeof(double));\
     double *(dduline)= (double*)  calloc((n1), sizeof(double));\
-    for((j)=0; (j)<(n2); (j)++)
+    for(j=0; j<(n2); j++)
 
 /* end the loop forLines_alloc3Lines */
 #define end_forLines_free3Lines(uline,duline,dduline)\
