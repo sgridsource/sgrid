@@ -318,6 +318,43 @@ void vlpushvl(tVarList *v, tVarList *u)
 
 
 
+/* drop a variable (one component) from a variable list */
+void vldropone(tVarList *v, int vi)
+{
+  int i;
+  
+  for (i = 0; i < v->n; i++)
+    if (v->index[i] == vi) {
+      v->n -= 1;
+      for (; i < v->n; i++)
+	v->index[i] = v->index[i+1];
+      break;
+    }
+}
+
+/* drop a variable with all its components from a variable list */
+void vldrop(tVarList *v, int vi)
+{
+  int i, n = VarNComponents(vi);
+
+  for (i = 0; i < n; i++)
+    vldropone(v, vi+i);
+}
+
+/* drop last n variables from a variable list */
+void vldropn(tVarList *v, int n)
+{
+  if (n <= 0) 
+    return;
+  if (n >= v->n) 
+    v->n = 0;
+  else
+    v->n -= n;
+}
+
+
+
+
 /* duplicate variable list */
 tVarList *vlduplicate(tVarList *v)
 {
