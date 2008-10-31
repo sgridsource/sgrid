@@ -182,6 +182,43 @@ void evolve_rk_generic(tGrid *grid, tButcher *rk)
   if(evolve_algebraicConditions) evolve_algebraicConditions(u_c, u_p);
 }
 
+/* rk4 written out for optimization as in bam
+   (uses only 2 instead of 4 additional variables)  */
+void evolve_rk_rk4(tGrid *grid)
+{
+  double dt = grid->dt;
+  tVarList *r = u_k[0], *v = u_k[1];
+
+  vlcopy(u_p, u_c);                 /* u_p = u_c */
+
+  if(evolve_algebraicConditions) evolve_algebraicConditions(u_c, u_p);
+  evolve_rhs(r, u_p, 0.0, u_c);     /* r    = f(u_p) */
+  //sgridpi_vlsynchronize(r);
+  vladdto(u_c, dt/6.0, r);          /* u_c += dt/6 r */
+  
+  vladd(v, 1.0, u_p, dt/2.0, r);    /* v    = u_p + dt/2 r */
+  if(evolve_algebraicConditions) evolve_algebraicConditions(v, u_p);
+  evolve_rhs(r, u_p, 0.0, v);       /* r    = f(v)         */
+  //sgridpi_vlsynchronize(r);
+  vladdto(u_c, dt/3.0, r);          /* u_c += dt/3 r */
+ 
+  vladd(v, 1.0, u_p, dt/2.0, r);    /* v    = u_p + dt/2 r */
+  if(evolve_algebraicConditions) evolve_algebraicConditions(v, u_p);
+  evolve_rhs(r, u_p, 0.0, v);       /* r    = f(v)         */
+  //sgridpi_vlsynchronize(r);
+  vladdto(u_c, dt/3.0, r);          /* u_c += dt/3 r */
+ 
+  vladd(v, 1.0, u_p, dt  , r);      /* v    = u_p + dt r */
+  if(evolve_algebraicConditions) evolve_algebraicConditions(v, u_p);
+  evolve_rhs(r, u_p, 0.0, v);       /* r    = f(v)       */
+  //sgridpi_vlsynchronize(r);
+  vladdto(u_c, dt/6.0, r);          /* u_c += dt/6 r */
+
+  /* set algebraic BCs for u_c, and any other stuff needed */
+  if(evolve_algebraicConditions) evolve_algebraicConditions(u_c, u_p);
+}
+
+
 
 
 
@@ -208,9 +245,12 @@ void evolve_rk(tGrid *grid)
   else
     errorexits("unknown evolution_method_rk %s", s);
 
+  /* catch special cases
+     some methods are implemented without tables for efficiency */
+  if(rk == &rk4) rk->nstages = 2;
+
   /* add auxiliary fields to data base, no storage yet 
-     incrementing second letter in s gives _r, _s, _t, ...
-  */
+     incrementing second letter in s gives _r, _s, _t, ... */
   if (firstcall) {
     firstcall = 0;
     for (i = 0; i < rk->nstages; i++, s[1]++) 
@@ -231,7 +271,10 @@ void evolve_rk(tGrid *grid)
     enablevarlist(u_k[i]);
 
   /* evolve */
-  evolve_rk_generic(grid, rk);
+  if(rk == &rk4)
+    evolve_rk_rk4(grid);
+  else  
+    evolve_rk_generic(grid, rk);
 
   /* turn off memory */
   for (i = 0; i < rk->nstages; i++)
