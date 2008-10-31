@@ -188,6 +188,8 @@ int ScalarOnKerr_startup(tGrid *grid)
       disablevar(grid, Ind("ScalarOnKerr_Gammattt"));
       disablevar(grid, Ind("ScalarOnKerr_Gt"));
       disablevar(grid, Ind("ScalarOnKerr_ddpsixx"));
+      disablevar(grid, Ind("ScalarOnKerr3d_gxx"));
+      disablevar(grid, Ind("ScalarOnKerr3d_Gammaxxx"));
     }
   }
 
@@ -2307,8 +2309,8 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
     {
       double rPi, rpsi;
       double rphix, rphiy, rphiz;
-      double beta_dPi,ag_dphi, gGx,gGy,gGz,aG_phi, g_phi_da, aKPi, beta_dpsi;
-      double b_dphix,b_dphiy,b_dphiz,phi_dbx,phi_dby,phi_dbz;
+      double beta_dPi,ag_dphi, aG_phi, g_phi_da, aKPi, beta_dpsi;
+      double b_dphix,b_dphiy,b_dphiz, phi_dbx,phi_dby,phi_dbz;
       /* g is upper metric */
       /* terms on RHS of Pi eqn */ 
       beta_dPi = betax[i]*Pix[i] + betay[i]*Piy[i] + betaz[i]*Piz[i];
