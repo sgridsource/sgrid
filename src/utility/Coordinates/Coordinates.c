@@ -3389,8 +3389,8 @@ void copy_var_along_x_AnsorgNS(tBox *box, int vi, int K0)
   double *uline, *cline;
 
   /* take deriv d/dy at phi=pi/2 (k=K0) <=> y=0 and use it everywhere */
-  uline = (double *) calloc(n1, sizeof(double));
-  cline = (double *) calloc(n1, sizeof(double));
+  uline = (double *) malloc(n1 * sizeof(double));
+  cline = (double *) malloc(n1 * sizeof(double));
 
   /* loop over all points with B=0 and B=1 */  
   for(j=0; j<n2; j=j+n2-1)
@@ -3503,9 +3503,9 @@ void set_d_dz_at_rhoEQzero_AnsorgNS_new(void *bo, void *va,
                "box[%d]->n3 has to be divisible by 4.", box->b);
 
   /* take deriv d/dy at phi=pi/2 (k=n3/4) <=> y=0 and use it everywhere */
-  uline = (double *) calloc(n1, sizeof(double));
-  cline = (double *) calloc(n1, sizeof(double));
-  M = (double*) calloc(n1*n1, sizeof(double));
+  uline = (double *) malloc(n1 * sizeof(double));
+  cline = (double *) malloc(n1 * sizeof(double));
+  M = (double*) malloc(n1*n1 * sizeof(double));
 
   get_spec_functionpointerTO_get_coeffs(box, 1, &get_coeffs);
   initMatrix_ForCoeffs(M, n1, get_coeffs);

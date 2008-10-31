@@ -99,9 +99,9 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
     errorexiti("spec_interpolate: box%d: one box->basis1/2/3 is NULL",box->b);
 
   /* allocate memory for B1/2/3 */
-  B1 = (double*) calloc(n1, sizeof(double));
-  B2 = (double*) calloc(n2, sizeof(double));
-  B3 = (double*) calloc(n3, sizeof(double));
+  B1 = (double*) malloc(n1 * sizeof(double));
+  B2 = (double*) malloc(n2 * sizeof(double));
+  B3 = (double*) malloc(n3 * sizeof(double));
 
   /* set basis func values at X,Y,Z */
   for(i = n1-1; i >=0; i--)  B1[i]=box->basis1((void *) box, a1,b1, i,n1, X);

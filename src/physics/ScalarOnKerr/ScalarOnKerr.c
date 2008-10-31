@@ -1681,12 +1681,12 @@ void interpolate_between_boxes(tVarList *unew, tVarList *upre)
     BM = lBM = NULL;
     if( !dequal(X[0],lX[ln1 - 2]) )
     {
-      lBM = (double *) calloc(ln1, sizeof(double));
+      lBM = (double *) malloc(ln1 * sizeof(double));
       spec_Basis_times_CoeffMatrix_direc(lbox, 1, lBM, X[0]);
     }
     if( !dequal(lX[ln1-1],X[1]) )
     {
-      BM = (double *) calloc(n1, sizeof(double));
+      BM = (double *) malloc(n1 * sizeof(double));
       spec_Basis_times_CoeffMatrix_direc(box, 1, BM, lX[ln1-1]);
     }
 

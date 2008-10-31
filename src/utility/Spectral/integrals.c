@@ -267,8 +267,8 @@ void spec_Int1(tBox *box, int direc, double *u, double *U)
   if(direc==1)      m3=n1;
   else if(direc==2) m3=n2;
   else              m3=n3;
-  uline = (double*) calloc(m3, sizeof(double));
-  Uline = (double*) calloc(m3, sizeof(double));
+  uline = (double*) malloc(m3 * sizeof(double));
+  Uline = (double*) malloc(m3 * sizeof(double));
 
   if(direc==1)
   {
@@ -326,9 +326,9 @@ void spec_definiteInt1(tBox *box, int direc, double a, double b,
 
   /* memory for lines and BM */
   linelen=max3(box->n1, box->n2, box->n3);
-  Uline = (double *) calloc(linelen, sizeof(double));
-  BM[0] = (double *) calloc(linelen, sizeof(double));
-  BM[1] = (double *) calloc(linelen, sizeof(double));
+  Uline = (double *) malloc(linelen * sizeof(double));
+  BM[0] = (double *) malloc(linelen * sizeof(double));
+  BM[1] = (double *) malloc(linelen * sizeof(double));
 
   /* obtain BM vectors for interpolation along direc */
   spec_Basis_times_CoeffMatrix_direc(box, direc, BM[0], a);

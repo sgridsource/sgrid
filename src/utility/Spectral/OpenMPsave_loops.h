@@ -27,8 +27,8 @@
   for(k=0; k<(n3); k++ )\
   {\
     int j;\
-    double *(uline)  = (double*)  calloc((n1), sizeof(double));\
-    double *(duline) = (double*)  calloc((n1), sizeof(double));\
+    double *(uline)  = (double*)  malloc((n1) * sizeof(double));\
+    double *(duline) = (double*)  malloc((n1) * sizeof(double));\
     for(j=0; j<(n2); j++)
 
 /* end the loop forLines_alloc2Lines */
@@ -39,9 +39,9 @@
   for(k=0; k<(n3); k++ )\
   {\
     int j;\
-    double *(uline)  = (double*)  calloc((n1), sizeof(double));\
-    double *(duline) = (double*)  calloc((n1), sizeof(double));\
-    double *(dduline)= (double*)  calloc((n1), sizeof(double));\
+    double *(uline)  = (double*)  malloc((n1) * sizeof(double));\
+    double *(duline) = (double*)  malloc((n1) * sizeof(double));\
+    double *(dduline)= (double*)  malloc((n1) * sizeof(double));\
     for(j=0; j<(n2); j++)
 
 /* end the loop forLines_alloc3Lines */
