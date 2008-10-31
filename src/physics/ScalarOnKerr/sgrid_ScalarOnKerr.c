@@ -130,6 +130,8 @@ int sgrid_ScalarOnKerr(void)
     if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
       AddVar("ScalarOnKerr_phimodes",  "i", "coeffs of phi_i");
   }
+  AddPar("ScalarOnKerr_DisableUnusedVars", "yes",
+         "disable vars that are not needed [no,yes]");
 
   return 0;
 }

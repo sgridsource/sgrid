@@ -178,6 +178,19 @@ int ScalarOnKerr_startup(tGrid *grid)
   /* initialize four3modes of rho at t=0 */
   ScalarOnKerr_init_rho0_four3modes(grid);
 
+  /* free some memory if possible */
+  if(Getv("ScalarOnKerr_DisableUnusedVars", "yes"))
+  {
+    if(Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
+    {
+      disablevar(grid, Ind("ScalarOnKerr_gtt"));
+      disablevar(grid, Ind("ScalarOnKerr_guptt"));
+      disablevar(grid, Ind("ScalarOnKerr_Gammattt"));
+      disablevar(grid, Ind("ScalarOnKerr_Gt"));
+      disablevar(grid, Ind("ScalarOnKerr_ddpsixx"));
+    }
+  }
+
   return 0;
 }
 
