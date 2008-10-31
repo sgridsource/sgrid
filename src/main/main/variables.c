@@ -702,3 +702,39 @@ void varadd(tGrid *grid, int ir, double ca, int ia, double cb, int ib)
   vlfree(b);
   vlfree(r);
 }
+
+/* add second var list to first: r += ca*a
+   special treatment for ca = 1 and ca = -1 */
+void vladdto(tVarList *r, const double ca, tVarList *a) 
+{
+  tGrid *grid = r->grid;
+  int bi;
+
+  if (ca == 0) return;
+  
+  for (bi = 0; bi < grid->nboxes; bi++)
+  {
+    tBox *box = grid->box[bi];
+    int nnodes = box->nnodes;
+    double *pr, *pa;
+    int i, n;
+
+    for (n = 0; n < r->n; n++)
+    {
+      pr = box->v[r->index[n]];
+      pa = box->v[a->index[n]];
+  
+      if (ca == 1) {
+        #pragma omp parallel for
+        for (i = 0; i < nnodes; i++) pr[i] += pa[i]; }
+      else if (ca == -1) {
+        #pragma omp parallel for
+        for (i = 0; i < nnodes; i++) pr[i] -= pa[i]; }
+      else {
+        #pragma omp parallel for
+        for (i = 0; i < nnodes; i++) pr[i] += ca * pa[i]; }
+    }
+  }
+  /* add times as well */
+  r->time += ca * a->time;
+}
