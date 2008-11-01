@@ -341,7 +341,7 @@ void numrec_cosft2(double y[], int n, int isign)
 NOTE: four_coeffs returns c[] that are N times of those of four_coeffs_alt */
 void four_coeffs_FFTW3(double *c, double *u, int n)
 {
-  int j;
+  int j, s;
   int N=n+1;
   fftw_plan plan;
   int Nc = ( N / 2 ) + 1;
@@ -354,7 +354,8 @@ void four_coeffs_FFTW3(double *c, double *u, int n)
   fftw_destroy_plan(plan);
 
   /* convert */
-  for(j=2; j<=N; j++)  c[j-1] = co[j];
+  for(s=1, j=2; j<=N; j++, s=-s)  c[j-1] = s*co[j];
+  c[0] = co[0];
 
   fftw_free(cco);
 }
@@ -362,24 +363,24 @@ void four_coeffs_FFTW3(double *c, double *u, int n)
 /* find function u from Four coeffs c[0...n], computed with four_coeffs */
 void four_eval_FFTW3(double *c, double *u, int n)
 {
-  int j;
+  int j, s;
   int N=n+1;
+  double ooN=1.0/N;
   fftw_plan plan;
   int Nc = ( N / 2 ) + 1;
   fftw_complex *cco = fftw_malloc(sizeof(fftw_complex) * Nc);
   double *co = (double *) cco;
 
   /* convert */
-  for(j=n; j>=2; j--)  co[j] = c[j-1];
-  c[1] = 0.0;
+  co[Nc*2-1] = 0.0;
+  for(s=1, j=2; j<=N; j++, s=-s)  co[j] = s*c[j-1]*ooN;
+  co[1] = 0.0;
+  co[0] = c[0]*ooN;
 
   /* make fftw plan, execute it, free plan mem. */
   plan = fftw_plan_dft_c2r_1d(N, cco, u, FFTW_ESTIMATE);
   fftw_execute(plan);
   fftw_destroy_plan(plan);
-
-//  /* convert */
-//  for(j=2; j<N; j++)  u[j-1] = u[j];
 
   fftw_free(cco);
 }
