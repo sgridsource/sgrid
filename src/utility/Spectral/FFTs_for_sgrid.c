@@ -5,6 +5,10 @@
 #include "sgrid.h"
 #include "Spectral.h"
 
+#ifdef FFTW3
+#include "fftw3.h"
+#endif
+
 /* define PI */
 #define twoPI  6.28318530717958647692528676655901
 #define PI     3.14159265358979323846264338327950
@@ -16,6 +20,7 @@ void numrec_four1(double data[], unsigned long nn, int isign);
 void numrec_realft(double data[], unsigned long n, int isign);
 void numrec_cosft1(double y[], int n);
 void numrec_cosft2(double y[], int n, int isign);
+
 
 
 
@@ -325,3 +330,69 @@ void numrec_cosft2(double y[], int n, int isign)
 		}
 	}
 }
+
+
+/*********************************************************************/
+/* FFTW3 transforms                                                  */
+/*********************************************************************/
+#ifdef FFTW3
+/* compute Four coeffs c[0...n] from function u 
+   at x_k = k/N, k=0,...,N-1 , N=n+1 
+NOTE: four_coeffs returns c[] that are N times of those of four_coeffs_alt */
+void four_coeffs_FFTW3(double *c, double *u, int n)
+{
+  int j;
+  int N=n+1;
+  fftw_plan plan;
+  int Nc = ( N / 2 ) + 1;
+  fftw_complex *cco = fftw_malloc(sizeof(fftw_complex) * Nc);
+  double *co = (double *) cco;
+
+  /* make fftw plan, execute it, free plan mem. */
+  plan = fftw_plan_dft_r2c_1d(N, u, cco, FFTW_ESTIMATE);
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
+
+  /* convert */
+  for(j=2; j<=N; j++)  c[j-1] = co[j];
+
+  fftw_free(cco);
+}
+
+/* find function u from Four coeffs c[0...n], computed with four_coeffs */
+void four_eval_FFTW3(double *c, double *u, int n)
+{
+  int j;
+  int N=n+1;
+  fftw_plan plan;
+  int Nc = ( N / 2 ) + 1;
+  fftw_complex *cco = fftw_malloc(sizeof(fftw_complex) * Nc);
+  double *co = (double *) cco;
+
+  /* convert */
+  for(j=n; j>=2; j--)  co[j] = c[j-1];
+  c[1] = 0.0;
+
+  /* make fftw plan, execute it, free plan mem. */
+  plan = fftw_plan_dft_c2r_1d(N, cco, u, FFTW_ESTIMATE);
+  fftw_execute(plan);
+  fftw_destroy_plan(plan);
+
+//  /* convert */
+//  for(j=2; j<N; j++)  u[j-1] = u[j];
+
+  fftw_free(cco);
+}
+
+#else
+void four_FFTW3_error(void)
+{
+  errorexit("four_coeffs_FFTW3/four_eval_FFTW3: in order to compile with\n"
+            "fftw3 use MyConfig with\n"
+            "DFLAGS += -DFFTW3\n"
+            //"SPECIALINCS += -I/usr/include\n"
+            "SPECIALLIBS += -lfftw3");
+}
+void four_coeffs_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
+void four_eval_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
+#endif

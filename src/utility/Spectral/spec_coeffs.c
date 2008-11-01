@@ -390,6 +390,9 @@ void set_TransformType_flags_inbox(tBox *box)
           (Getv(bas, "ChebZeros") && is_power_of_two(nb)) ||
           (Getv(bas, "Fourier") && is_power_of_two(nb))          )  )
       *Ttype=NUMREC_FFT;
+    else if( Getv(str, "FFTW3") && nb>=Geti(str) && Geti(str)>=0 &&
+             ( Getv(bas, "Fourier") )  )
+      *Ttype=FFTW3_FFT;
     else
       *Ttype=MATRIX_MULTIPLICATION;
   }
@@ -450,6 +453,11 @@ void get_spec_functionpointers_from_pars(tBox *box, int direc,
       *get_coeffs = four_coeffs_numrecFFT;
       *coeffs_of_int = four_int_numrecFFT;
       *eval_onPoints = four_eval_numrecFFT;
+    }
+    else if(*Ttype==FFTW3_FFT)
+    {
+      *get_coeffs = four_coeffs_FFTW3;
+      *eval_onPoints = four_eval_FFTW3;
     }
   }
   else if( Getv(str, "fd2_onesided") )
