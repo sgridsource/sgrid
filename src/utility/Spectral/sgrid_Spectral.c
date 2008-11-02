@@ -10,6 +10,10 @@ int sgrid_Spectral(void)
   int b;
   printf("Adding Spectral\n");
 
+  /* functions */
+  AddFun(PRE_GRID, init_FFTW3_plans, 
+         "initialize global FFTW3 plans in FFTs_for_sgrid.c");
+
   AddPar("Spectral_second_deriv_order", "123",
          "order in which mixed second derivs are taken "
          "[123,132,213,231,312,321]");

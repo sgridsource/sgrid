@@ -21,6 +21,11 @@ void numrec_realft(double data[], unsigned long n, int isign);
 void numrec_cosft1(double y[], int n);
 void numrec_cosft2(double y[], int n, int isign);
 
+/* some global FFTW3 plan arrays */
+#ifdef FFTW3
+fftw_plan *FFTW3_dft_r2c_1d_plan;
+fftw_plan *FFTW3_dft_c2r_1d_plan;
+#endif
 
 
 
@@ -336,6 +341,48 @@ void numrec_cosft2(double y[], int n, int isign)
 /* FFTW3 transforms                                                  */
 /*********************************************************************/
 #ifdef FFTW3
+/* initialize global plan arrays */
+int init_FFTW3_plans(tGrid* grid)
+{
+  int b;
+  int N, Nmax=512;
+
+  /* find max N on grid */
+  for(b=0; b<Geti("nboxes"); b++)
+  {
+    int n1,n2,n3, m3;
+    char str[1000];
+    snprintf(str, 999, "box%d_n1", b);  n1=Geti(str);
+    snprintf(str, 999, "box%d_n2", b);  n2=Geti(str);
+    snprintf(str, 999, "box%d_n3", b);  n3=Geti(str);    
+    m3=max3(n1,n2,n3)*Geti("nboxes");
+    if(m3>Nmax) Nmax=m3;
+    // printf("m3=%d Nmax=%d", m3, Nmax);
+  }
+
+  /* allocate arrays of plans for all cases */
+  FFTW3_dft_r2c_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+  FFTW3_dft_c2r_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+
+  /* make plans */
+  printf("init_FFTW3_plans: planning for N=1,...,%d\n", Nmax);
+  fflush(stdout);
+  for(N=1; N<=Nmax; N++)
+  {
+    int Nc = ( N / 2 ) + 1;
+    fftw_complex *cco = fftw_malloc(sizeof(fftw_complex) * Nc);
+    double *u = malloc(sizeof(double) * N);
+
+    FFTW3_dft_r2c_1d_plan[N] = 
+      fftw_plan_dft_r2c_1d(N, u, cco, FFTW_ESTIMATE | FFTW_UNALIGNED);
+    FFTW3_dft_c2r_1d_plan[N] =
+      fftw_plan_dft_c2r_1d(N, cco, u, FFTW_ESTIMATE | FFTW_UNALIGNED);
+    free(u);
+    fftw_free(cco);
+  }
+  return 0;
+} 
+
 /* compute Four coeffs c[0...n] from function u 
    at x_k = k/N, k=0,...,N-1 , N=n+1 
 NOTE: four_coeffs returns c[] that are N times of those of four_coeffs_alt */
@@ -343,15 +390,12 @@ void four_coeffs_FFTW3(double *c, double *u, int n)
 {
   int j, s;
   int N=n+1;
-  fftw_plan plan;
   int Nc = ( N / 2 ) + 1;
   fftw_complex *cco = fftw_malloc(sizeof(fftw_complex) * Nc);
   double *co = (double *) cco;
 
-  /* make fftw plan, execute it, free plan mem. */
-  plan = fftw_plan_dft_r2c_1d(N, u, cco, FFTW_ESTIMATE);
-  fftw_execute(plan);
-  fftw_destroy_plan(plan);
+  /* execute right plan */
+  fftw_execute_dft_r2c(FFTW3_dft_r2c_1d_plan[N], u, cco);
 
   /* convert */
   for(s=1, j=2; j<=N; j++, s=-s)  c[j-1] = s*co[j];
@@ -366,7 +410,6 @@ void four_eval_FFTW3(double *c, double *u, int n)
   int j, s;
   int N=n+1;
   double ooN=1.0/N;
-  fftw_plan plan;
   int Nc = ( N / 2 ) + 1;
   fftw_complex *cco = fftw_malloc(sizeof(fftw_complex) * Nc);
   double *co = (double *) cco;
@@ -377,10 +420,8 @@ void four_eval_FFTW3(double *c, double *u, int n)
   co[1] = 0.0;
   co[0] = c[0]*ooN;
 
-  /* make fftw plan, execute it, free plan mem. */
-  plan = fftw_plan_dft_c2r_1d(N, cco, u, FFTW_ESTIMATE);
-  fftw_execute(plan);
-  fftw_destroy_plan(plan);
+  /* execute right plan */
+  fftw_execute_dft_c2r(FFTW3_dft_c2r_1d_plan[N], cco, u);
 
   fftw_free(cco);
 }
@@ -388,12 +429,15 @@ void four_eval_FFTW3(double *c, double *u, int n)
 #else
 void four_FFTW3_error(void)
 {
-  errorexit("four_coeffs_FFTW3/four_eval_FFTW3: in order to compile with\n"
-            "fftw3 use MyConfig with\n"
+  errorexit("four_coeffs_FFTW3/four_eval_FFTW3: in order to compile with fftw3\n"
+            "use MyConfig with something like:\n"
             "DFLAGS += -DFFTW3\n"
-            //"SPECIALINCS += -I/usr/include\n"
+            "FFTW3DIR = /opt/fftw-3.1.3\n"
+            "SPECIALINCS += -I$(FFTW3DIR)/include\n"
+            "SPECIALLIBS += -L$(FFTW3DIR)/lib -lfftw3\n"
             "SPECIALLIBS += -lfftw3");
 }
+int init_FFTW3_plans(tGrid* grid) {return 0;}
 void four_coeffs_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
 void four_eval_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
 #endif
