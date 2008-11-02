@@ -206,5 +206,7 @@ int finalize_grid(tGrid *g)
 {
   prdivider(0);
   free_grid(g);
+  /* run e.g. cleanup stuff after freeing the grid */
+  RunFun(POST_FINALIZE_GRID, g);
   return 0;
 }

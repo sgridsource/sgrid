@@ -23,6 +23,7 @@ void numrec_cosft2(double y[], int n, int isign);
 
 /* some global FFTW3 plan arrays */
 #ifdef FFTW3
+int FFTW3_Nmax_of_plan_array;
 fftw_plan *FFTW3_dft_r2c_1d_plan;
 fftw_plan *FFTW3_dft_c2r_1d_plan;
 #endif
@@ -345,7 +346,7 @@ void numrec_cosft2(double y[], int n, int isign)
 int init_FFTW3_plans(tGrid* grid)
 {
   int b;
-  int N, Nmax=512;
+  int N, Nmax=1;
 
   /* find max N on grid */
   for(b=0; b<Geti("nboxes"); b++)
@@ -355,7 +356,7 @@ int init_FFTW3_plans(tGrid* grid)
     snprintf(str, 999, "box%d_n1", b);  n1=Geti(str);
     snprintf(str, 999, "box%d_n2", b);  n2=Geti(str);
     snprintf(str, 999, "box%d_n3", b);  n3=Geti(str);    
-    m3=max3(n1,n2,n3)*Geti("nboxes");
+    m3=max3(n1,n2,n3)*4;
     if(m3>Nmax) Nmax=m3;
     // printf("m3=%d Nmax=%d", m3, Nmax);
   }
@@ -380,6 +381,16 @@ int init_FFTW3_plans(tGrid* grid)
     free(u);
     fftw_free(cco);
   }
+  FFTW3_Nmax_of_plan_array = Nmax;
+  return 0;
+} 
+/* free the plans */
+int free_FFTW3_plans(tGrid* grid)
+{
+  /* free arrays of plans */
+  free(FFTW3_dft_r2c_1d_plan);
+  free(FFTW3_dft_c2r_1d_plan);
+  FFTW3_Nmax_of_plan_array = 0;
   return 0;
 } 
 
@@ -438,6 +449,7 @@ void four_FFTW3_error(void)
             "SPECIALLIBS += -lfftw3");
 }
 int init_FFTW3_plans(tGrid* grid) {return 0;}
+int free_FFTW3_plans(tGrid* grid) {return 0;}
 void four_coeffs_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
 void four_eval_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
 #endif
