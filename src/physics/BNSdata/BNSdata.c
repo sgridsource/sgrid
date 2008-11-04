@@ -1437,7 +1437,7 @@ int BNSdata_analyze(tGrid *grid)
   char *filename;
   int filenamelen;
   
-  printf("BNSdata: computing properties of BNS data\n");
+  printf("BNSdata_analyze: computing properties of BNS data\n");
 
   /* get inner and outer edges of both stars */
   xout1= grid->box[0]->x_of_X[1]((void *) grid->box[0], -1, 0.0,0.0,0.0);
@@ -1464,6 +1464,16 @@ int BNSdata_analyze(tGrid *grid)
   qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
   xmax1 = grid->box[bi1]->x_of_X[1]((void *) grid->box[bi1], -1, Xmax1,Ymax1,0.0);
   xmax2 = grid->box[bi2]->x_of_X[1]((void *) grid->box[bi2], -1, Xmax1,Ymax1,0.0);
+  /* set qmax1/2 */
+  Setd("BNSdata_qmax1", qmax1);
+  Setd("BNSdata_qmax2", qmax2);
+  /* set cart positions of qmax1/2 */
+  Setd("BNSdata_xmax1", xmax1);
+  Setd("BNSdata_xmax2", xmax1);
+  printf("BNSdata_analyze: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
+         "                 BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
+         Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
+         Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
 
   /* compute TOV */
   TOV_init(P_core1, kappa, Gamma, 0,
