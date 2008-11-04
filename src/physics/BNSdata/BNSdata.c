@@ -1406,84 +1406,119 @@ int BNSdata_verify_solution(tGrid *grid)
 /* compute absolute error in ANALYSIS */
 int BNSdata_analyze(tGrid *grid)
 {
-  int b;
-/*
-  double A         = Getd("BNSdata_A");
-*/
-  printf("BNSdata: computing absolute error\n");
+  double BNSdata_b = Getd("BNSdata_b");
+  double n = Getd("BNSdata_n");
+  double Gamma = 1.0 + 1.0/n;
+  double kappa = Getd("BNSdata_kappa");
+  double Omega = Getd("BNSdata_Omega");
+  double x_CM  = Getd("BNSdata_x_CM");
+  double xout1, xin1, xin2, xout2;
+  double M_ADM, J_ADM, m01, m02;
+  int isigma = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int b1n1 = grid->box[1]->n1;
+  int b1n2 = grid->box[1]->n2;
+  int b2n1 = grid->box[2]->n1;
+  int b2n2 = grid->box[2]->n2;
+  double sigp_00 = grid->box[1]->v[isigma][0]; /* sigma_p at B=phi=0 */
+  double sigp_10 = grid->box[1]->v[isigma][Ind_n1n2(0,b1n2-1,0, b1n1,b1n2)]; /* sigma_p at B=1, phi=0 */
+  double sigm_00 = grid->box[2]->v[isigma][0]; /* sigma_m at B=phi=0 */
+  double sigm_10 = grid->box[2]->v[isigma][Ind_n1n2(0,b2n2-1,0, b2n1,b2n2)]; /* sigma_m at B=1, phi=0 */
+  int itemp1 = Ind("BNSdata_temp1");
+  double *temp1 = grid->box[1]->v[itemp1];
+  double xmax1, qmax1, xmax2, qmax2;
+  int bi1, bi2;
+  double Xmax1,Ymax1, Xmax2,Ymax2;
+  double TOV_rf_surf1, TOV_m1, TOV_Phic1, TOV_Psic1, TOV_m01;  /* for TOV */
+  double TOV_rf_surf2, TOV_m2, TOV_Phic2, TOV_Psic2, TOV_m02;  /* for TOV */
+  double TOV_r_surf1, TOV_r_surf2, TOV_Psis1, TOV_Psis2;
+  FILE *fp;
+  char *outdir = Gets("outdir");
+  char *name = "BNSdata_properties.txt";
+  char *filename;
+  int filenamelen;
   
-  /* set initial data in boxes */
-  forallboxes(grid,b)
-  {  
-    tBox *box = grid->box[b];
-    int i;
-    double *pX = box->v[Ind("X")];
-    double *pY = box->v[Ind("Y")];
-    double *pZ = box->v[Ind("Z")];
-    double *px = box->v[Ind("x")];
-    double *py = box->v[Ind("y")];
-    double *pz = box->v[Ind("z")];
-    double *Psi    = box->v[Ind("BNSdata_Psi")];
-    double *PsiErr = box->v[Ind("BNSdata_Psi_Err")];
-    double *alphaP    = box->v[Ind("BNSdata_alphaP")];
-    double *alphaPErr = box->v[Ind("BNSdata_alphaP_Err")];
+  printf("BNSdata: computing properties of BNS data\n");
 
-    /* subtract true values */
-    forallpoints(box,i)
-    {
-      double x = pX[i];
-      double y = pY[i];
-      double z = pZ[i];
+  /* get inner and outer edges of both stars */
+  xout1= grid->box[0]->x_of_X[1]((void *) grid->box[0], -1, 0.0,0.0,0.0);
+  xin1 = grid->box[0]->x_of_X[1]((void *) grid->box[0], -1, 0.0,1.0,0.0);
+  xin2 = grid->box[3]->x_of_X[1]((void *) grid->box[3], -1, 0.0,1.0,0.0);
+  xout2= grid->box[3]->x_of_X[1]((void *) grid->box[3], -1, 0.0,0.0,0.0);
 
-      if(px!=NULL) 
-      {
-        x = px[i];
-        y = py[i];
-        z = pz[i];
-      }
-      if(Getv("BNSdata_grid", "SphericalDF"))
-      {
-        PsiErr[i] = Psi[i]-1.0/sqrt(x*x + y*y + z*z);
-        alphaPErr[i] = alphaP[i]-2.0/sqrt(x*x + y*y + z*z);
-      }
-      else if(Getv("BNSdata_grid", "AnsorgNS") || 
-              Getv("BNSdata_grid", "4ABphi_2xyz"))
-      {
-        double xmax1 = grid->box[0]->x_of_X[1](
-                        (void *) grid->box[0], 0, 0.0,0.0,0.0);
-        double xmin1 = grid->box[0]->x_of_X[1](
-                        (void *) grid->box[0], 0, 0.0,1.0,0.0);
-        double xmax2 = grid->box[3]->x_of_X[1](
-                        (void *) grid->box[3], 0, 0.0,1.0,0.0);
-        double xmin2 = grid->box[3]->x_of_X[1](
-                        (void *) grid->box[3], 0, 0.0,0.0,0.0);
-        double R1  = 0.5*(xmax1-xmin1);
-        double xc1 = 0.5*(xmax1+xmin1);
-        double R2  = 0.5*(xmax2-xmin2);
-        double xc2 = 0.5*(xmax2+xmin2);
+  /* compute rest masses m01, m02 */
+  m01 = GetInnerRestMass(grid, 0);
+  m02 = GetInnerRestMass(grid, 3);
 
-        if(b==1||b==2||b==3||b==4)
-        {
-          PsiErr[i] = Psi[i]-1.0/sqrt((x-xc1)*(x-xc1) + y*y + z*z);
-        }
-        if(b==0||b==5)
-        {
-          PsiErr[i] = 
-            Psi[i]-(-0.5*((x-xc1)*(x-xc1)+y*y+z*z)/(R1*R1*R1)+ 1/R1 + 0.5/R1);
-        }
-        if(b==1||b==2||b==0||b==5)
-        {
-          alphaPErr[i] = alphaP[i]-2.0/sqrt((x-xc2)*(x-xc2) + y*y + z*z);
-        }
-        if(b==3||b==4)
-        {
-          alphaPErr[i] = 
-            alphaP[i]-(-((x-xc2)*(x-xc2)+y*y+z*z)/(R2*R2*R2) + 2/R2 + 1/R2);
-        }
+  /* compute ADM mass and ang. mom. */
+  BNS_set_J_ADM_VolInt_integrand(grid, itemp1);
+  J_ADM = InnerVolumeIntergral(grid, 0, itemp1) +
+          InnerVolumeIntergral(grid, 3, itemp1);
+  M_ADM = ADMmass_fromPsi_inbox1_at_A1B0(grid);
 
-      }
-    }
-  }
+  /* find max q locations xmax1/2 in NS1/2 */
+  bi1=0;  bi2=3;
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
+  /* compute qmax1 and qmax2 */
+  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  xmax1 = grid->box[bi1]->x_of_X[1]((void *) grid->box[bi1], -1, Xmax1,Ymax1,0.0);
+  xmax2 = grid->box[bi2]->x_of_X[1]((void *) grid->box[bi2], -1, Xmax1,Ymax1,0.0);
+
+  /* compute TOV */
+  TOV_init(P_core1, kappa, Gamma, 0,
+           &TOV_rf_surf1, &TOV_m1, &TOV_Phic1, &TOV_Psic1, &TOV_m01);
+  TOV_init(P_core2, kappa, Gamma, 0,
+           &TOV_rf_surf2, &TOV_m2, &TOV_Phic2, &TOV_Psic2, &TOV_m02);
+  TOV_Psis1 = 1.0 + TOV_m1/(2.0*TOV_rf_surf1);
+  TOV_Psis2 = 1.0 + TOV_m2/(2.0*TOV_rf_surf2);
+  TOV_r_surf1 = TOV_rf_surf1 * TOV_Psis1*TOV_Psis1;
+  TOV_r_surf2 = TOV_rf_surf2 * TOV_Psis2*TOV_Psis2;
+/*
+printf("TOV_m1=%g TOV_r_surf1=%g TOV_Psic1=%g\n",
+TOV_m1,TOV_r_surf1, TOV_Psic1);
+printf("TOV_m1=%g TOV_r_surf1=%g TOV_Psis1=%g\n",
+TOV_m1,TOV_r_surf1, TOV_Psis1);
+*/
+  /* write into file */
+  filenamelen = strlen(outdir) + strlen(name) + 200;
+  filename = cmalloc(filenamelen+1);
+  snprintf(filename, filenamelen, "%s/%s", outdir, name);
+  fp = fopen(filename, "a");
+  if(!fp) errorexits("failed opening %s", filename);
+  fprintf(fp, "BNS data properties:\n");
+  fprintf(fp, "--------------------\n");
+  fprintf(fp, "n\t\t%.19g\n", n);
+  fprintf(fp, "Gamma\t\t%.19g\n", Gamma);
+  fprintf(fp, "kappa\t\t%.19g\n", kappa);
+  fprintf(fp, "x_CM\t\t%.19g\n", x_CM);
+  fprintf(fp, "Omega\t\t%.19g\n", Omega);
+  fprintf(fp, "m01\t\t%.19g\n", m01);
+  fprintf(fp, "m02\t\t%.19g\n", m02);
+  fprintf(fp, "M_ADM\t\t%.19g\n", M_ADM);
+  fprintf(fp, "J_ADM\t\t%.19g\n", J_ADM);
+  fprintf(fp, "\n");
+  fprintf(fp, "(m1/R)_inf\t%.19g\n", TOV_m1/TOV_r_surf1);
+  fprintf(fp, "(m01/R)_inf\t%.19g\n", m01/TOV_r_surf1);
+  fprintf(fp, "xin1\t\t%+.19g\n", xin1);
+  fprintf(fp, "xmax1\t\t%+.19g\n", xmax1);
+  fprintf(fp, "xout1\t\t%+.19g\n", xout1);
+  fprintf(fp, "qmax1\t\t%.19g\n", qmax1);
+  fprintf(fp, "\n");
+  fprintf(fp, "(m2/R)_inf\t%.19g\n", TOV_m2/TOV_r_surf2);
+  fprintf(fp, "(m02/R)_inf\t%.19g\n", m02/TOV_r_surf2);
+  fprintf(fp, "xin2\t\t%+.19g\n", xin2);
+  fprintf(fp, "xmax2\t\t%+.19g\n", xmax2);
+  fprintf(fp, "xout2\t\t%+.19g\n", xout2);
+  fprintf(fp, "qmax2\t\t%.19g\n", qmax2);
+  fprintf(fp, "\n");
+  fprintf(fp, "BNSdata_b\t%.19g\n", BNSdata_b);
+  fprintf(fp, "sigp_00\t\t%+.19g\n", sigp_00);
+  fprintf(fp, "sigp_10\t\t%+.19g\n", sigp_10);
+  fprintf(fp, "sigm_00\t\t%+.19g\n", sigm_00);
+  fprintf(fp, "sigm_10\t\t%+.19g\n", sigm_10);
+  fclose(fp);
+  free(filename);              
   return 0;
 }
 

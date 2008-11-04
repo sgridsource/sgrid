@@ -15,7 +15,7 @@ int sgrid_BNSdata()
   AddFun(POST_GRID, set_sigma_pm_vars, "setup the sigma_{+-} vars from AnsorgNS");
   AddFun(PRE_INITIALDATA, BNSdata_startup, "initialize BNSdata");
   AddFun(INITIALDATA, setBNSdata, "set the BNS data");
-//  AddFun(ANALYZE, BNSdata_analyze, "compute error");
+  AddFun(ANALYZE, BNSdata_analyze, "compute properties of BNS data");
 
   /* variables */
   AddVar("BNSdata_Psi",     "",     "new conf. factor");
