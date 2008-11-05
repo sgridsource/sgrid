@@ -14,7 +14,8 @@ variables = {g[a,b],  A[a,b],  G[a],  K,  phi,   alpha,  beta[a],  B[a],
 	     palphaDensity,
 	     psi, dpop[a], ddpop[a,b], K0,
              dgt[a,b,c], ddgt[a,b,c,d], dAt[a,b,c], dphi[a], ddphi[a,b], 
-             dGt[a,b], dK[a], dalp[a], ddalp[a,b], dbeta[a,b], ddbeta[a,b,c] }
+             dGt[a,b], dK[a], dalp[a], ddalp[a,b], dbeta[a,b], ddbeta[a,b,c],
+             alphaRHS }
 
 (* compute in this order *)
 tocompute = {
@@ -199,7 +200,8 @@ tocompute = {
   ralpha  == ralpha0 * nonconstantlapse *
              (oploglapse lapseharmonicf +
               oploglapse2 8/3/(3-alpha) +
-              harmoniclapse alpha) + addliealpha betadalp,
+              harmoniclapse alpha) + addliealpha betadalp +
+              addalphaRHSterm alphaRHS,
 
   Cif == densitizedLapse,
     (* exponentials of total conformal factor used in densitized lapse *)
@@ -414,6 +416,7 @@ BeginCFunction[] := Module[{},
   pr["int harmoniclapse       = Getv(\"BSSN_lapse\", \"harmonic\");\n"];
   pr["int subtractK0          = Getv(\"BSSN_subtractK0\", \"yes\");\n"];
   pr["int addliealpha         = Getv(\"BSSN_lapse\", \"addliealpha\");\n"];
+  pr["int addalphaRHSterm     = Getv(\"BSSN_lapse\", \"addalphaRHSterm\");\n"];
 
   pr["int densitizedLapse = !Getv(\"BSSN_densitizedLapse\", \"no\");\n"];
   pr["int densitizedoplogWithoutShift = Getv(\"BSSN_densitizedLapse\", \"1+log_withoutShift\");\n"];
@@ -465,6 +468,7 @@ variabledeclarations[] := Module[{},
   prdecvarname[{ddalp[a,b]},    "BSSN_ddalpxx"];
   prdecvarname[{dbeta[a,b]},    "BSSN_dbetaxx"];
   prdecvarname[{ddbeta[a,b,c]}, "BSSN_ddbetaxxx"];
+  prdecvarname[{alphaRHS},      "BSSN_alphaRHSterm"];
   pr["\n"];
 ];    
 (* auxillary variables are automatically inserted here *)

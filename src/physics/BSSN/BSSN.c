@@ -138,6 +138,35 @@ void ADMtoBSSN(tGrid *grid)
      through finite differencing */
   //bampi_synchronize(level, Ind("BSSN_Gx"));
   // admc_setbound(GH);
+
+  /* set BSSN_alphaRHSterm */
+  if(Getv("BSSN_set_alphaRHSterm", "harmonic0"))
+  {
+    int b;
+    forallboxes(grid, b)
+    {
+      tBox* box = grid->box[b];
+      int i;
+      double *alpha = box->v[Ind("alpha")];
+      double *dalpx = box->v[Ind("BSSN_dalpx")];
+      double *dalpy = box->v[Ind("BSSN_dalpx")+1];
+      double *dalpz = box->v[Ind("BSSN_dalpx")+2];
+      double *betax = box->v[Ind("betax")];
+      double *betay = box->v[Ind("betax")+1];
+      double *betaz = box->v[Ind("betax")+2];
+      double *K = box->v[Ind("BSSN_K")];
+      double *RHSterm = box->v[Ind("BSSN_alphaRHSterm")];
+
+      /* derivs of alpha */
+      FirstDerivsOf_S(box, Ind("alpha"), Ind("BSSN_dalpx"));
+      
+      /* set BSSN_alphaRHSterm = alpha^2 K - beta^i d_i alpha */
+      forallpoints(box, i)
+        RHSterm[i] = alpha[i] * alpha[i] * K[i] -
+        (betax[i]*dalpx[i] + betay[i]*dalpy[i] + betaz[i]*dalpz[i]);
+        
+    }
+  }
 }
 
 
@@ -230,17 +259,6 @@ int BSSN_startup(tGrid *grid)
                 "with maximal slicing");
   }
 
-  /* translate initial data in ADM variables to BSSN variables */
-  ADMtoBSSN(grid);
-  //set_boundary_symmetry(level, BSSNvars);
-
-
-  if(Getv("BSSN_filter_type", "coordinateDependentFilter"))
-    BSSN_ChooseAndApplyFilters(BSSNvars);
-
-  if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
-    reset_doubleCoveredPoints(BSSNvars);
-  
   /* enable all derivative vars */
   enablevar(grid, Ind("BSSN_dphix"));
   enablevar(grid, Ind("BSSN_ddphixx"));
@@ -250,6 +268,19 @@ int BSSN_startup(tGrid *grid)
   enablevar(grid, Ind("BSSN_ddalpxx"));
   enablevar(grid, Ind("BSSN_dbetaxx"));
   enablevar(grid, Ind("BSSN_ddbetaxxx"));
+
+  /* enable more vars */
+  enablevar(grid, Ind("BSSN_alphaRHSterm"));
+
+  /* translate initial data in ADM variables to BSSN variables */
+  ADMtoBSSN(grid);
+  //set_boundary_symmetry(level, BSSNvars);
+
+  if(Getv("BSSN_filter_type", "coordinateDependentFilter"))
+    BSSN_ChooseAndApplyFilters(BSSNvars);
+
+  if(Getv("BSSN_reset_doubleCoveredPoints", "yes"))
+    reset_doubleCoveredPoints(BSSNvars);
 
   return 0;
 }

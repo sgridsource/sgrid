@@ -39,7 +39,10 @@ int sgrid_BSSN(void)
   AddVar("BSSN_ddalp",  "(ij)", "2nd deriv of Lapse");
   AddVar("BSSN_dbeta",  "Ij",   "1st deriv of shift");
   AddVar("BSSN_ddbeta", "I(jk)","2nd deriv of shift");
-    
+
+  /* var we add to RHS of lapse */
+  AddVar("BSSN_alphaRHSterm", "", "term we can add to RHS of alpha");
+
   /* parameters */
   AddPar("BSSN_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
@@ -101,7 +104,12 @@ int sgrid_BSSN(void)
          
   AddPar("BSSN_shift", "constant", "shift equation [constant,gamma0,gamma2]");
   AddPar("BSSN_lapse", "constant", 
-	 "lapse equation [constant,1+log,1+log2,harmonic;withshift,addliealpha]");
+	 "lapse equation [constant,1+log,1+log2,harmonic;"
+         "withshift,addliealpha,addalphaRHSterm]");
+  /* addalphaRHSterm: whether we add BSSN_alphaRHSterm to RHS of lapse eqn */
+  AddPar("BSSN_set_alphaRHSterm", "harmonic0",
+         "set BSSN_alphaRHSterm [harmonic0] "
+         "harmonic0 means set BSSN_alphaRHSterm s.t. lapse RHS=0 at t=0");
 
   AddPar("BSSN_shift_stop_time", "-1.0", 
          "time when shift stops evolving (-1 for don't stop)");

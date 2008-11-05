@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 6.8.2007 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 5.11.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -39,6 +39,7 @@ int oplogwithshift      = Getv("BSSN_lapse", "withshift");
 int harmoniclapse       = Getv("BSSN_lapse", "harmonic");
 int subtractK0          = Getv("BSSN_subtractK0", "yes");
 int addliealpha         = Getv("BSSN_lapse", "addliealpha");
+int addalphaRHSterm     = Getv("BSSN_lapse", "addalphaRHSterm");
 int densitizedLapse = !Getv("BSSN_densitizedLapse", "no");
 int densitizedoplogWithoutShift = Getv("BSSN_densitizedLapse", "1+log_withoutShift");
 double alphaDensityWeight = Getd("BSSN_alphaDensityWeight");
@@ -311,6 +312,8 @@ double *ddbeta313 = box->v[index_BSSN_ddbetaxxx + 14];
 double *ddbeta322 = box->v[index_BSSN_ddbetaxxx + 15];
 double *ddbeta323 = box->v[index_BSSN_ddbetaxxx + 16];
 double *ddbeta333 = box->v[index_BSSN_ddbetaxxx + 17];
+int index_BSSN_alphaRHSterm = Ind("BSSN_alphaRHSterm");
+double *alphaRHS = box->v[index_BSSN_alphaRHSterm + 0];
 
 
 double AA;
@@ -2842,7 +2845,7 @@ ralpha
 =
 addliealpha*betadalp + nonconstantlapse*ralpha0*
    (lapseharmonicf*oploglapse + (8.*oploglapse2)/(9. - 3.*alpha[ijk]) + 
-     harmoniclapse*alpha[ijk])
+     harmoniclapse*alpha[ijk]) + addalphaRHSterm*alphaRHS[ijk]
 ;
 
 
@@ -3415,4 +3418,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 215, n* = 2185,  n/ = 85,  n+ = 1954, n = 4224, O = 1 */
+/* nvars = 216, n* = 2187,  n/ = 85,  n+ = 1957, n = 4229, O = 1 */
