@@ -1946,7 +1946,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
     r0 = sqrt(x0*x0 + y0*y0 + z0*z0);
     theta0 = acos(z0/r0);
     phi0 = Arg(x0, y0);
-    if(phi0<0.0) phi0 += PI;
+    if(phi0<0.0) phi0 += 2.0*PI;
 
 //printf("t=%g tKS=%g tSchw=%g\n", t,tKS,tSchw);
     forallboxes(grid,b)
