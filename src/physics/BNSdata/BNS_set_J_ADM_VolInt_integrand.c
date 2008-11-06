@@ -1,5 +1,5 @@
 /* BNS_set_J_ADM_VolInt_integrand.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 4.11.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
