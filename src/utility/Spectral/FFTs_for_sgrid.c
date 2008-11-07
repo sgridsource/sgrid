@@ -24,8 +24,11 @@ void numrec_cosft2(double y[], int n, int isign);
 /* some global FFTW3 plan arrays */
 #ifdef FFTW3
 int FFTW3_Nmax_of_plan_array;
-fftw_plan *FFTW3_dft_r2c_1d_plan;
-fftw_plan *FFTW3_dft_c2r_1d_plan;
+fftw_plan *FFTW3_dft_r2c_1d_plan; /* for FT of real data */
+fftw_plan *FFTW3_dft_c2r_1d_plan; /* for inverse FT of complex coeff to real */
+fftw_plan *FFTW_REDFT00_1d_plan;  /* like cosft1 in numrec */
+fftw_plan *FFTW_REDFT10_1d_plan;  /* like cosft2 in numrec */
+fftw_plan *FFTW_REDFT01_1d_plan;  /* like inverse cosft2 in numrec */
 #endif
 
 
@@ -356,7 +359,7 @@ int init_FFTW3_plans(tGrid* grid)
     snprintf(str, 999, "box%d_n1", b);  n1=Geti(str);
     snprintf(str, 999, "box%d_n2", b);  n2=Geti(str);
     snprintf(str, 999, "box%d_n3", b);  n3=Geti(str);    
-    m3=max3(n1,n2,n3)*4;
+    m3=max3(n1,n2,n3)*4 + 1;
     if(m3>Nmax) Nmax=m3;
     // printf("m3=%d Nmax=%d", m3, Nmax);
   }
@@ -364,6 +367,9 @@ int init_FFTW3_plans(tGrid* grid)
   /* allocate arrays of plans for all cases */
   FFTW3_dft_r2c_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
   FFTW3_dft_c2r_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+  FFTW_REDFT00_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+  FFTW_REDFT10_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+  FFTW_REDFT01_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
 
   /* make plans */
   printf("init_FFTW3_plans: planning for N=1,...,%d\n", Nmax);
@@ -373,11 +379,20 @@ int init_FFTW3_plans(tGrid* grid)
     int Nc = ( N / 2 ) + 1;
     fftw_complex *cco = fftw_malloc(sizeof(fftw_complex) * Nc);
     double *u = malloc(sizeof(double) * N);
+    double *c = malloc(sizeof(double) * N);
 
     FFTW3_dft_r2c_1d_plan[N] = 
       fftw_plan_dft_r2c_1d(N, u, cco, FFTW_ESTIMATE | FFTW_UNALIGNED);
     FFTW3_dft_c2r_1d_plan[N] =
       fftw_plan_dft_c2r_1d(N, cco, u, FFTW_ESTIMATE | FFTW_UNALIGNED);
+    FFTW_REDFT00_1d_plan[N] =
+      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT00, FFTW_ESTIMATE | FFTW_UNALIGNED);
+    FFTW_REDFT10_1d_plan[N] =
+      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT10, FFTW_ESTIMATE | FFTW_UNALIGNED);
+    FFTW_REDFT01_1d_plan[N] =
+      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT01, FFTW_ESTIMATE | FFTW_UNALIGNED);
+
+    free(c);
     free(u);
     fftw_free(cco);
   }
@@ -390,6 +405,9 @@ int free_FFTW3_plans(tGrid* grid)
   /* free arrays of plans */
   free(FFTW3_dft_r2c_1d_plan);
   free(FFTW3_dft_c2r_1d_plan);
+  free(FFTW_REDFT00_1d_plan);
+  free(FFTW_REDFT10_1d_plan);
+  free(FFTW_REDFT01_1d_plan);
   FFTW3_Nmax_of_plan_array = 0;
   return 0;
 } 
@@ -437,6 +455,49 @@ void four_eval_FFTW3(double *c, double *u, int n)
   fftw_free(cco);
 }
 
+/* compute Cheb coeffs c[0...n] from function u at the zeros of T_N(x).
+   Note N=n+1                                                           */
+void cheb_coeffs_fromZeros_FFTW3(double *c, double *u, int n)
+{
+  int j;
+  int N=n+1;
+//  double toN=2.0/N;
+
+  /* execute right plan */
+  fftw_execute_r2r(FFTW_REDFT10_1d_plan[N], u, c);
+}
+
+/* compute Cheb coeffs c[0...N] from function u at the extrema of T_N(x). */
+void cheb_coeffs_fromExtrema_FFTW3(double *c, double *u, int N)
+{
+  int j;
+//  double toN=2.0/N;
+
+  /* execute right plan */
+  fftw_execute_r2r(FFTW_REDFT00_1d_plan[N+1], u, c);
+//  c[N] *= 0.5;
+}
+
+/* find function u on the zeros of T_N(x).   Note N=n+1 */
+void cheb_eval_onZeros_FFTW3(double *c, double *u, int n)
+{
+  int j;
+  int N=n+1;
+
+  /* execute right plan */
+  fftw_execute_r2r(FFTW_REDFT01_1d_plan[N], c, u);
+}
+
+/* find function u on the extrema of T_N(X) */
+void cheb_eval_onExtrema_FFTW3(double *c, double *u, int N)
+{
+  int j;
+
+//  u[N] = c[N]*2.0;
+  /* execute right plan */
+  fftw_execute_r2r(FFTW_REDFT00_1d_plan[N+1], c, u);
+}
+
 #else
 void four_FFTW3_error(void)
 {
@@ -452,4 +513,8 @@ int init_FFTW3_plans(tGrid* grid) {return 0;}
 int free_FFTW3_plans(tGrid* grid) {return 0;}
 void four_coeffs_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
 void four_eval_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
+void cheb_coeffs_fromZeros_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
+void cheb_coeffs_fromExtrema_FFTW3(double *c, double *u, int N) {four_FFTW3_error();}
+void cheb_eval_onZeros_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
+void cheb_eval_onExtrema_FFTW3(double *c, double *u, int N) {four_FFTW3_error();}
 #endif
