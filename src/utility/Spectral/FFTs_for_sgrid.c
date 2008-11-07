@@ -501,13 +501,17 @@ void cheb_eval_onZeros_FFTW3(double *c, double *u, int n)
 void cheb_eval_onExtrema_FFTW3(double *c, double *u, int N)
 {
   int j;
+  double c_N = c[N];
 
   /* convert */
-  /* c[N] *= 2 * 0.5 ; */
-  for(j=0; j<N; j++)  c[j] *= 0.5;
+  c[N] *= 2.0;
 
   /* execute right plan */
   fftw_execute_r2r(FFTW_REDFT00_1d_plan[N+1], c, u);
+
+  /* convert */
+  c[N] = c_N;
+  for(j=0; j<=N; j++)  u[j] *= 0.5;
 }
 
 #else
