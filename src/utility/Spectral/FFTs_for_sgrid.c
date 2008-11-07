@@ -461,10 +461,13 @@ void cheb_coeffs_fromZeros_FFTW3(double *c, double *u, int n)
 {
   int j;
   int N=n+1;
-//  double toN=2.0/N;
+  double ooN=1.0/N;
 
   /* execute right plan */
   fftw_execute_r2r(FFTW_REDFT10_1d_plan[N], u, c);
+
+  /* convert */
+  for(j=0; j<N; j++)  c[j] *= ooN;
 }
 
 /* compute Cheb coeffs c[0...N] from function u at the extrema of T_N(x). */
@@ -489,6 +492,9 @@ void cheb_eval_onZeros_FFTW3(double *c, double *u, int n)
 
   /* execute right plan */
   fftw_execute_r2r(FFTW_REDFT01_1d_plan[N], c, u);
+
+  /* convert */
+  for(j=0; j<N; j++)  u[j] *= 0.5;
 }
 
 /* find function u on the extrema of T_N(X) */
@@ -497,8 +503,9 @@ void cheb_eval_onExtrema_FFTW3(double *c, double *u, int N)
   int j;
 
   /* convert */
+  /* c[N] *= 2 * 0.5 ; */
   for(j=0; j<N; j++)  c[j] *= 0.5;
-      
+
   /* execute right plan */
   fftw_execute_r2r(FFTW_REDFT00_1d_plan[N+1], c, u);
 }
