@@ -246,12 +246,21 @@ void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
     /* for all variables */
     for (j = 0; j < unew->n; j++)
     {
+      char str[1000];
+      int slen;
+
       i    = unew->index[j];
       v0   = VarPropSpeed(i);
       var0 = VarFarLimit(i);
 
-      /* keep this variable constant, just copy it */
-      if (Getv("boundary_radconstant", VarName(i))) v0 = 0;
+      /* do we keep this variable constant, and just copy it? */
+      snprintf(str, 999, "%s", VarName(i));  slen=strlen(str);
+      if(Getv("boundary_radconstant", str)) v0 = 0;
+
+      /* remove endings like "_r" from rk4 from var name in str */
+      if(slen>=3)
+        if(str[slen-2]=='_') str[slen-2]=0;
+      if(Getv("boundary_radconstant", str)) v0 = 0;
 
       /* do it */
       set_boundary_radiative(grid, 

@@ -91,11 +91,20 @@ void set_boundary_radiative_analytic(tVarList *unew, tVarList *upre,
   /* for all variables */
   for (j = 0; j < unew->n; j++)
   {
+    char str[1000];
+    int slen;
+
     i   = unew->index[j];
     v   = VarPropSpeed(i);
 
     /* keep this variable constant, just copy it */
-    if (Getv("boundary_radconstant", VarName(i))) v = 0;
+    snprintf(str, 999, "%s", VarName(i));  slen=strlen(str);
+    if(Getv("boundary_radconstant", str)) v = 0;
+
+    /* remove endings like "_r" from rk4 from var name in str */
+    if(slen>=3)
+      if(str[slen-2]=='_') str[slen-2]=0;
+    if(Getv("boundary_radconstant", str)) v = 0;
 
     /* do it */
     /* u-ua = w(r-vt)/r  =>  w = r (u-ua)  =>  w' = (u-ua) + r (u'-ua') 
