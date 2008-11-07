@@ -30,7 +30,9 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   if( get_coeffs==cheb_coeffs_fromExtrema ||
       get_coeffs==cheb_coeffs_fromZeros ||
       get_coeffs==cheb_coeffs_fromExtrema_numrecFFT ||
-      get_coeffs==cheb_coeffs_fromZeros_numrecFFT      ) imethod = chebmeth;
+      get_coeffs==cheb_coeffs_fromZeros_numrecFFT ||
+      get_coeffs==cheb_coeffs_fromExtrema_FFTW3 ||
+      get_coeffs==cheb_coeffs_fromZeros_FFTW3          ) imethod = chebmeth;
   if( get_coeffs==four_coeffs || 
       get_coeffs==four_coeffs_numrecFFT ||
       get_coeffs==four_coeffs_FFTW3        ) imethod = fourmeth;
@@ -196,7 +198,9 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   if( get_coeffs==cheb_coeffs_fromExtrema ||
       get_coeffs==cheb_coeffs_fromZeros ||
       get_coeffs==cheb_coeffs_fromExtrema_numrecFFT ||
-      get_coeffs==cheb_coeffs_fromZeros_numrecFFT      ) imethod = chebmeth;
+      get_coeffs==cheb_coeffs_fromZeros_numrecFFT   ||
+      get_coeffs==cheb_coeffs_fromExtrema_FFTW3 ||
+      get_coeffs==cheb_coeffs_fromZeros_FFTW3          ) imethod = chebmeth;
   if( get_coeffs==four_coeffs ||
       get_coeffs==four_coeffs_numrecFFT ||
       get_coeffs==four_coeffs_FFTW3        ) imethod = fourmeth;
