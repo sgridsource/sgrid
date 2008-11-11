@@ -1414,6 +1414,9 @@ int BNSdata_analyze(tGrid *grid)
   double x_CM  = Getd("BNSdata_x_CM");
   double xout1, xin1, xin2, xout2;
   double M_ADM, J_ADM, m01, m02;
+  double *M_ADM_ofA;
+  int iX = Ind("X");
+  int ix = Ind("x");
   int isigma = Ind("Coordinates_AnsorgNS_sigma_pm");
   int b1n1 = grid->box[1]->n1;
   int b1n2 = grid->box[1]->n2;
@@ -1436,6 +1439,7 @@ int BNSdata_analyze(tGrid *grid)
   char *name = "BNSdata_properties.txt";
   char *filename;
   int filenamelen;
+  int i;
   
   printf("BNSdata_analyze: computing properties of BNS data\n");
 
@@ -1453,7 +1457,9 @@ int BNSdata_analyze(tGrid *grid)
   BNS_set_J_ADM_VolInt_integrand(grid, itemp1);
   J_ADM = InnerVolumeIntergral(grid, 0, itemp1) +
           InnerVolumeIntergral(grid, 3, itemp1);
-  M_ADM = ADMmass_fromPsi_inbox1_at_A1B0(grid);
+  M_ADM = ADMmass_fromPsi_inbox1_at_A1B0(grid, itemp1);
+  M_ADM_ofA = dmalloc(b1n1);
+  for(i=0; i<b1n1; i++) M_ADM_ofA[i] = grid->box[1]->v[itemp1][i];
 
   /* find max q locations xmax1/2 in NS1/2 */
   bi1=0;  bi2=3;
@@ -1505,8 +1511,11 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   fprintf(fp, "Omega\t\t%.19g\n", Omega);
   fprintf(fp, "m01\t\t%.19g\n", m01);
   fprintf(fp, "m02\t\t%.19g\n", m02);
-  fprintf(fp, "M_ADM\t\t%.19g\n", M_ADM);
   fprintf(fp, "J_ADM\t\t%.19g\n", J_ADM);
+  fprintf(fp, "M_ADM\t\t%.19g\n", M_ADM);
+  for(i=b1n1-2; i>=b1n1-5 && i>=0; i--)
+    fprintf(fp, "M_ADM[%d]\t%.19g\t(A=%.16g  x=%.16g)\n", i, M_ADM_ofA[i],
+            grid->box[1]->v[iX][i], grid->box[1]->v[ix][i]);
   fprintf(fp, "\n");
   fprintf(fp, "(m1/R)_inf\t%.19g\n", TOV_m1/TOV_r_surf1);
   fprintf(fp, "(m01/R)_inf\t%.19g\n", m01/TOV_r_surf1);
@@ -1528,7 +1537,8 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   fprintf(fp, "sigm_00\t\t%+.19g\n", sigm_00);
   fprintf(fp, "sigm_10\t\t%+.19g\n", sigm_10);
   fclose(fp);
-  free(filename);              
+  free(filename);
+  free(M_ADM_ofA);
   return 0;
 }
 

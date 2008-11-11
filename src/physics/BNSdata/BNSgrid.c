@@ -1306,24 +1306,28 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
 /******************************************************************/
 
 /* compute ADM mass from point at A=1, B=0, phi=0 */
-double ADMmass_fromPsi_inbox1_at_A1B0(tGrid *grid)
+double ADMmass_fromPsi_inbox1_at_A1B0(tGrid *grid, int iADMmass)
 {
   int iPsi   = Ind("BNSdata_Psi");
-  int itemp1 = Ind("BNSdata_temp1");
   int isigma = Ind("Coordinates_AnsorgNS_sigma_pm");
   double sigp_00 = grid->box[1]->v[isigma][0]; /* sigma_pm at A=B=phi=0 */
   double Cp_00   = sqrt( tanh(0.25*sigp_00) );
   double BNSdata_b = Getd("BNSdata_b");
-  double *Psi   = grid->box[1]->v[iPsi];
-  double *temp1 = grid->box[1]->v[itemp1]; 
-  double ddA_Psi_A1B0;
+  double *Psi     = grid->box[1]->v[iPsi];
+  double *ADMmass = grid->box[1]->v[iADMmass]; 
+  double M_ADM;
+  int i;
   
-  /* set temp1 = d_A d_A Psi */
-  spec_Deriv2(grid->box[1], 1, Psi, temp1);
-  ddA_Psi_A1B0 = temp1[grid->box[1]->n1-1]; /* temp1 at A=1, B=phi=0 */
-  
-  /* M_ADM = 0.5*(BNSdata_b/(Cp_00*Cp_00)) * ddA_Psi_A1B0 */
-  return 0.5*(BNSdata_b/(Cp_00*Cp_00)) * ddA_Psi_A1B0;
+  /* compute d_A d_A Psi */
+  spec_Deriv2(grid->box[1], 1, Psi, ADMmass);
+
+  /* multiply by 0.5*(BNSdata_b/(Cp_00*Cp_00)) to get ADM mass estimate */
+  forallpoints(grid->box[1], i)
+    ADMmass[i] *= 0.5*(BNSdata_b/(Cp_00*Cp_00));
+
+  /* M_ADM = 0.5*(BNSdata_b/(Cp_00*Cp_00)) * d_A d_A Psi|A=1,B=0 */
+  M_ADM = ADMmass[grid->box[1]->n1-1]; /* ADMmass at A=1, B=phi=0 */
+  return M_ADM;
 }
 
 
