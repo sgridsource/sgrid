@@ -1332,8 +1332,8 @@ double ADMmass_fromPsi_inbox1_at_A1B0(tGrid *grid, int iADMmass)
 
 
 /* compute volume integral of var with index vind in domain0+5 (if b=0)
-   or domain3+4 (if b=3) */
-double InnerVolumeIntergral(tGrid *grid, int b, int vind)
+   or domain3+4 (if b=3). Note, this version, adds a Psi^6 vol. el. factor. */
+double InnerVolumeIntegral_withPsito6(tGrid *grid, int b, int vind)
 {
   tGrid *grid2;
   double *var2;
@@ -1501,6 +1501,182 @@ double InnerVolumeIntergral(tGrid *grid, int b, int vind)
 
     if(det!=0.0) jac = 1.0/fabs(det);   else jac = 0.0;
     Integ[i] = q * Psi_to6 * jac;
+  }
+
+  /* integrate */
+  VolInt = spec_3dIntegral(grid2->box[b], Integ, Temp3);
+
+  /* remove grid2 */
+  free_grid(grid2);
+
+  /* reset box0/3 pars */
+  Setd("box0_max1", box0_max1);
+  Sets("box0_n1", box0_n1_sav);
+  Setd("box3_max1", box3_max1);
+  Sets("box3_n1", box3_n1_sav);
+
+  free(box0_n1_sav);
+  free(box3_n1_sav);
+
+  return VolInt;
+}
+
+/* compute volume integral of var with index vind in domain0+5 (if b=0)
+   or domain3+4 (if b=3). Here any Psi^6 needs to be already included
+   in the var we integrate. */
+double InnerVolumeIntegral(tGrid *grid, int b, int vind)
+{
+  tGrid *grid2;
+  double *var2;
+  double *Integ;
+  double *Temp3;
+  double *pX;
+  double *pY;
+  double *pZ;
+  double *px;
+  double *py;
+  double *pz;
+  double *dXdx;
+  double *dXdy;
+  double *dXdz;
+  double *dYdx;
+  double *dYdy;
+  double *dYdz;
+  double *dZdx;
+  double *dZdy;
+  double *dZdz;
+  double *cv;
+  double box0_max1, box3_max1;  
+  int box0_n1, box3_n1;
+  char *box0_n1_sav = cmalloc( strlen(Gets("box0_n1"))+10 );
+  char *box3_n1_sav = cmalloc( strlen(Gets("box3_n1"))+10 );
+  int ib;
+  int i,j,k;
+  double Xmax;
+  double VolInt;
+  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
+
+  /* compute volume integral by making a new grid, where domain b
+     covers the entire inside of the star */
+
+  /* adjust box0 to cover the entire iside of star1 */
+  box0_max1 = Getd("box0_max1");
+  box0_n1   = Geti("box0_n1");
+  strcpy(box0_n1_sav, Gets("box0_n1")); /* save box0_n1 */
+  Sets("box0_max1", "1");
+  Seti("box0_n1", box0_n1+Geti("box5_n1")/2);
+
+  /* adjust box3 to cover the entire iside of star2 */
+  box3_max1 = Getd("box3_max1");
+  box3_n1   = Geti("box3_n1");
+  strcpy(box3_n1_sav, Gets("box3_n1")); /* save box3_n1 */
+  Sets("box3_max1", "1");
+  Seti("box3_n1", box3_n1+Geti("box4_n1")/2);
+
+  if(b==0) { ib=5; Xmax=box0_max1; }
+  else     { ib=4; Xmax=box3_max1; }
+
+  /* make grid with new adjusted boxes */
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  set_BoxStructures_fromPars(grid2, 0);
+
+  /* enable some vars needed on grid2 */
+  enablevar(grid2, vind);
+  enablevar(grid2, Ind("BNSdata_temp2"));
+  enablevar(grid2, Ind("BNSdata_temp3"));
+  enablevar(grid2, Ind("x"));
+  enablevar(grid2, Ind("y"));
+  enablevar(grid2, Ind("z"));
+  enablevar(grid2, Ind("dXdx"));
+  enablevar(grid2, Ind("dYdx"));
+  enablevar(grid2, Ind("dZdx"));
+  enablevar(grid2, Ind("Temp1"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_sigma_pm"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dB"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dphi"));  
+
+  /* set Coordinates_AnsorgNS_sigma_pm, ... on grid2. Since grid2
+     has different points only in the A-direc. we can copy it.    */  
+  {
+    int n1 = grid2->box[b]->n1;
+    int n2 = grid2->box[b]->n2;
+    int n3 = grid2->box[b]->n3;
+    int N1 = grid->box[b]->n1;
+    int N2 = grid->box[b]->n2;
+    double *sigp2      = grid2->box[b]->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+    double *dsigp_dB2  = grid2->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dB")];
+    double *dsigp_dphi2= grid2->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dphi")];
+    double *sigp       = grid->box[b]->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+    double *dsigp_dB   = grid->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dB")];
+    double *dsigp_dphi = grid->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dphi")];
+    int i,j,k;
+
+    for(k=0; k<n3; k++)
+    for(j=0; j<n2; j++)
+    for(i=0; i<n1; i++)
+    {
+      sigp2[(i)+n1*((j)+n2*(k))]       = sigp[0+N1*((j)+N2*(k))];
+      dsigp_dB2[(i)+n1*((j)+n2*(k))]   = dsigp_dB[0+N1*((j)+N2*(k))];
+      dsigp_dphi2[(i)+n1*((j)+n2*(k))] = dsigp_dphi[0+N1*((j)+N2*(k))];
+    } 
+  }
+
+  /* initialize coords on grid2 */
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
+  init_CoordTransform_And_Derivs(grid2);
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
+
+  /* set var on grid2 */
+  pX    = grid2->box[b]->v[Ind("X")];
+  pY    = grid2->box[b]->v[Ind("Y")];
+  pZ    = grid2->box[b]->v[Ind("Z")];
+  px    = grid2->box[b]->v[Ind("x")];
+  py    = grid2->box[b]->v[Ind("y")];
+  pz    = grid2->box[b]->v[Ind("z")];
+  dXdx  = grid2->box[b]->v[Ind("dXdx")];
+  dXdy  = grid2->box[b]->v[Ind("dXdx")+1];
+  dXdz  = grid2->box[b]->v[Ind("dXdx")+2];
+  dYdx  = grid2->box[b]->v[Ind("dYdx")];
+  dYdy  = grid2->box[b]->v[Ind("dYdx")+1];
+  dYdz  = grid2->box[b]->v[Ind("dYdx")+2];
+  dZdx  = grid2->box[b]->v[Ind("dZdx")];
+  dZdy  = grid2->box[b]->v[Ind("dZdx")+1];
+  dZdz  = grid2->box[b]->v[Ind("dZdx")+2];
+  var2  = grid2->box[b]->v[vind];
+  Integ = grid2->box[b]->v[Ind("BNSdata_temp2")];
+  Temp3 = grid2->box[b]->v[Ind("BNSdata_temp3")];
+  /* var   = grid->box[b]->v[vind]; */
+
+  /* coeffs of var */
+  spec_Coeffs(grid->box[b], grid->box[b]->v[vind], 
+                            grid->box[b]->v[Ind("temp1")]);
+  spec_Coeffs(grid->box[ib], grid->box[ib]->v[vind], 
+                             grid->box[ib]->v[Ind("temp1")]);
+
+  /* set var and Psi on grid2 by interpolation */
+  forallpoints(grid2->box[b], i)
+    if(pX[i]<Xmax)
+    {
+      cv = grid->box[b]->v[Ind("temp1")];
+      var2[i] = spec_interpolate(grid->box[b], cv, pX[i], pY[i], pZ[i]);
+    }
+    else
+    {
+      cv = grid->box[ib]->v[Ind("temp1")];
+      var2[i] = spec_interpolate(grid->box[ib], cv, px[i], py[i], pz[i]);
+    }
+
+  /* set integrand in Integ */
+  forallpoints(grid2->box[b], i)
+  {
+    double q   = var2[i];
+    double det = dXdx[i]*dYdy[i]*dZdz[i] + dXdy[i]*dYdz[i]*dZdx[i] +
+                 dXdz[i]*dYdx[i]*dZdy[i] - dXdz[i]*dYdy[i]*dZdx[i] -
+                 dXdy[i]*dYdx[i]*dZdz[i] - dXdx[i]*dYdz[i]*dZdy[i];
+    double jac;
+
+    if(det!=0.0) jac = 1.0/fabs(det);   else jac = 0.0;
+    Integ[i] = q * jac;
   }
 
   /* integrate */

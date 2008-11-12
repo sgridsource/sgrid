@@ -58,9 +58,8 @@ tocompute = {
     rho0 == -(Abs[q/kappa])^n,
   Cif == end,
 
-  (* Integrand for rest mass without all 3-volume element 
-     factors such as Psi^6 r^2 sin(theta) *)
-  Integ == rho0 * uzero * alpha,
+  (* Integrand for rest mass with 3-volume element factor Psi^6 *)
+  Integ == rho0 * uzero * alpha * Psi4*Psi2,
   (* Integ == rho0, *)
 
   Cinstruction == "} /* end of points loop */\n"

@@ -1455,8 +1455,8 @@ int BNSdata_analyze(tGrid *grid)
 
   /* compute ADM mass and ang. mom. */
   BNS_set_J_ADM_VolInt_integrand(grid, itemp1);
-  J_ADM = InnerVolumeIntergral(grid, 0, itemp1) +
-          InnerVolumeIntergral(grid, 3, itemp1);
+  J_ADM = InnerVolumeIntegral(grid, 0, itemp1) +
+          InnerVolumeIntegral(grid, 3, itemp1);
   M_ADM = ADMmass_fromPsi_inbox1_at_A1B0(grid, itemp1);
   M_ADM_ofA = dmalloc(b1n1);
   for(i=0; i<b1n1; i++) M_ADM_ofA[i] = grid->box[1]->v[itemp1][i];
@@ -3034,13 +3034,11 @@ double GetInnerRestMass(tGrid *grid, int bi)
 {
   int iInteg = Ind("BNSdata_temp1");
 
-  /* set BNSdata_temp1 = Integ = rho_0 u^0 alpha */
+  /* set BNSdata_temp1 = Integ = rho_0 u^0 alpha * Psi^6 */
   BNS_set_restmassintegrand(grid, iInteg);
-  /* Integ is integrand for rest mass.
-     Note: all 3-volume element factors e.g. Psi^6 r^2 sin(theta)
-           are taken care of in InnerVolumeIntergral.
+  /* Integ is integrand for rest mass. */
   /* get rest masses */
-  return InnerVolumeIntergral(grid, bi, iInteg);
+  return InnerVolumeIntegral(grid, bi, iInteg);
 }
 
 /* guess error in m01 from inner Volume int., but without adjusting

@@ -56,9 +56,8 @@ tocompute = {
   (* get fluid var j in 3+1 *)
   jup[a] == alpha (rhoE + P) uzerosqr (vR[a]+beta[a]),
 
- (* Integrand for rest mass without all 3-volume element
-     factors such as Psi^6 r^2 sin(theta) *)
-  Integ == Psi4 ( (x-xCM)*jup2 - y*jup1 ),
+ (* Integrand for rest mass with 3-volume element factor Psi^6 *)
+  Integ == Psi4 ( (x-xCM)*jup2 - y*jup1 ) * Psi4*Psi2,
 
   Cinstruction == "} /* end of points loop */\n"
 }
