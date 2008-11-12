@@ -173,6 +173,7 @@ int checkpoint_checkforfiles(char *suffix)
    the "outdir_previous" directory */
 int checkpoint_checkifrestart(tGrid* grid)
 {
+  printf("checkpoint_checkifrestart: checking if we can restart...\n");
   /* special for checkpointing:
      check whether we have a complete set of checkpoint files in
      the "outdir_previous" directory */
