@@ -29,9 +29,6 @@ tGrid *make_grid(int pr)
     printf("Creating grid\n");
   }
 
-  /* provide a hook for special grid preparation */
-  RunFun(PRE_GRID, 0);
-
   /* make grid structure with nboxes=1, nvariables */
   g = alloc_grid(nboxes, globalnvariables);
   printf("g->nboxes=%d g->box=%p\n", g->nboxes, g->box);
@@ -57,9 +54,6 @@ tGrid *make_grid(int pr)
   /* set all pointers in each tBox struct of grid from Pars */
   set_BoxStructures_fromPars(g, 0);
   if(pr) printgrid(g);
-
-  /* provide a hook for special treatmet after grid creation */
-  RunFun(POST_GRID, g);
 
   /* return pointer to newly created grid */
   return g;
