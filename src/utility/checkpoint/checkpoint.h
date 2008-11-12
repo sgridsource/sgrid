@@ -6,6 +6,7 @@
 /* checkpoint.c */
 char *checkpoint_filename(char *suffix);
 int checkpoint_checkforfiles(char *suffix);
+int checkpoint_checkifrestart(tGrid* grid);
 FILE *checkpoint_openfiles(char *suffix);
 tVarList *checkpoint_varlist(tGrid *grid);
 void checkpoint_copy_output();

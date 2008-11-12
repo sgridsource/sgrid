@@ -169,7 +169,20 @@ int checkpoint_checkforfiles(char *suffix)
   return 0;
 }
 
-
+/* check whether we have a complete set of checkpoint files in
+   the "outdir_previous" directory */
+int checkpoint_checkifrestart(tGrid* grid)
+{
+  /* special for checkpointing:
+     check whether we have a complete set of checkpoint files in
+     the "outdir_previous" directory */
+  if (checkpoint_checkforfiles("_previous")) 
+  {
+    /* go into restart mode */
+    Sets("checkpoint", "restart");
+  }
+  return 0;
+}
 
 
 /* copy output from previous run into current location so that all

@@ -9,9 +9,15 @@
 int sgrid_checkpoint(void)
 {
   printf("Adding checkpoint\n");
+
+  /* parameters */           
   AddPar("checkpoint", "no", "whether to checkpoint [no,yes]");
   if (Getv("checkpoint", "no")) return 0;
 
+  /* functions */
+  AddFun(PRE_GRID, checkpoint_checkifrestart, "check if we can restart");
+
+  /* rest of parameters */
   AddPar("checkpoint_di", "1", "how often to checkpoint");
   AddPar("checkpoint_dt", "0", "how often to checkpoint");
 
@@ -27,12 +33,5 @@ int sgrid_checkpoint(void)
   AddPar("checkpoint_previous", "no",
 	 "whether to keep previous directory [no]");
 
-  /* special for checkpointing:
-     check whether we have a complete set of checkpoint files in 
-     the "outdir_previous" directory */
-  if (checkpoint_checkforfiles("_previous")) {
-    /* go into restart mode */
-    Sets("checkpoint", "restart");
-  }
   return 0;
 }
