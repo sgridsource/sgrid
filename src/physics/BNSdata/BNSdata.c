@@ -1415,6 +1415,7 @@ int BNSdata_analyze(tGrid *grid)
   double xout1, xin1, xin2, xout2;
   double M_ADM, J_ADM, m01, m02;
   double *M_ADM_ofA;
+  double M_ADM_in0, M_ADM_in3, M_ADM_in1, M_ADM_in2; 
   int iX = Ind("X");
   int ix = Ind("x");
   int isigma = Ind("Coordinates_AnsorgNS_sigma_pm");
@@ -1453,13 +1454,27 @@ int BNSdata_analyze(tGrid *grid)
   m01 = GetInnerRestMass(grid, 0);
   m02 = GetInnerRestMass(grid, 3);
 
-  /* compute ADM mass and ang. mom. */
+  /* compute ADM ang. mom. */
   BNS_set_J_ADM_VolInt_integrand(grid, itemp1);
   J_ADM = InnerVolumeIntegral(grid, 0, itemp1) +
           InnerVolumeIntegral(grid, 3, itemp1);
+
+  /* compute ADM mass from second deriv of Psi */
   M_ADM = ADMmass_fromPsi_inbox1_at_A1B0(grid, itemp1);
   M_ADM_ofA = dmalloc(b1n1);
   for(i=0; i<b1n1; i++) M_ADM_ofA[i] = grid->box[1]->v[itemp1][i];
+
+  /* compute ADM mass from Volume int */
+  BNS_set_M_ADM_VolInt_integrand(grid, itemp1);
+  M_ADM_in0 = InnerVolumeIntegral(grid, 0, itemp1);
+  M_ADM_in3 = InnerVolumeIntegral(grid, 3, itemp1);
+  M_ADM_in1 = VolumeIntegral_inBNSgridBox(grid, 1, itemp1);
+  M_ADM_in2 = VolumeIntegral_inBNSgridBox(grid, 2, itemp1);
+  M_ADM = M_ADM_in0+M_ADM_in3+M_ADM_in1+M_ADM_in2;
+
+  printf("M_ADM_in0=%.9g M_ADM_in3=%.9g M_ADM_in1=%.9g M_ADM_in2=%.9g\n",
+         M_ADM_in0,M_ADM_in3, M_ADM_in1,M_ADM_in2);
+  printf("ADM quantities: M_ADM = %.16g  J_ADM = %.16g\n", M_ADM, J_ADM);
 
   /* find max q locations xmax1/2 in NS1/2 */
   bi1=0;  bi2=3;
@@ -1513,7 +1528,7 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   fprintf(fp, "m02\t\t%.19g\n", m02);
   fprintf(fp, "J_ADM\t\t%.19g\n", J_ADM);
   fprintf(fp, "M_ADM\t\t%.19g\n", M_ADM);
-  for(i=b1n1-2; i>=b1n1-5 && i>=0; i--)
+  for(i=b1n1-1; i>=b1n1-5 && i>=0; i--)
     fprintf(fp, "M_ADM[%d]\t%.19g\t(A=%.16g  x=%.16g)\n", i, M_ADM_ofA[i],
             grid->box[1]->v[iX][i], grid->box[1]->v[ix][i]);
   fprintf(fp, "\n");

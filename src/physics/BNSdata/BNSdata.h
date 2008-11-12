@@ -21,6 +21,7 @@ double BNS_compute_new_q_atXYZ(tGrid *grid, int bi,
                                double X, double Y, double Z);
 void BNS_set_restmassintegrand(tGrid *grid, int iInteg);
 void BNS_set_J_ADM_VolInt_integrand(tGrid *grid, int iInteg);
+void BNS_set_M_ADM_VolInt_integrand(tGrid *grid, int iInteg);
 
 /* for solving all ell. eqns together */
 void F_BNSdata(tVarList *vlFu, tVarList *vlu,
@@ -50,6 +51,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
                                          int innerdom,  int outerdom);
 double ADMmass_fromPsi_inbox1_at_A1B0(tGrid *grid, int iADMmass);
 double InnerVolumeIntegral(tGrid *grid, int b, int vind);
+double VolumeIntegral_inBNSgridBox(tGrid *grid, int b, int vind);
 void adjust_box4_5_pars(tGrid *grid);
 void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind);
 double BNS_update_q_atXYZ(tGrid *grid2, 
