@@ -1,5 +1,5 @@
 /* BNS_set_J_ADM_VolInt_integrand.c */
-/* Copyright (C) 2005 Wolfgang Tichy */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 11.11.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -228,7 +228,7 @@ alpha*(P + rhoE)*uzerosqr*(beta3 + vR3)
 
 Integ[ijk]
 =
-Psi4*(jup2*(-xCM + x[ijk]) - jup1*y[ijk])
+Psi2*(jup2*(-xCM + x[ijk]) - jup1*y[ijk])*pow2(Psi4)
 ;
 
 
@@ -240,4 +240,4 @@ Psi4*(jup2*(-xCM + x[ijk]) - jup1*y[ijk])
 }  /* end of function */
 
 /* BNS_set_J_ADM_VolInt_integrand.c */
-/* nvars = 16, n* = 60,  n/ = 22,  n+ = 61, n = 143, O = 1 */
+/* nvars = 16, n* = 61,  n/ = 22,  n+ = 61, n = 144, O = 1 */

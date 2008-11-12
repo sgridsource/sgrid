@@ -1,5 +1,5 @@
 /* BNS_set_restmassintegrand.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 23.9.2008 */
+/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 11.11.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -236,7 +236,7 @@ rho0
 
 Integ[ijk]
 =
-alpha*rho0*uzero
+alpha*Psi2*Psi4*rho0*uzero
 ;
 
 
@@ -248,4 +248,4 @@ alpha*rho0*uzero
 }  /* end of function */
 
 /* BNS_set_restmassintegrand.c */
-/* nvars = 16, n* = 59,  n/ = 35,  n+ = 54, n = 148, O = 1 */
+/* nvars = 16, n* = 61,  n/ = 35,  n+ = 54, n = 150, O = 1 */
