@@ -359,6 +359,30 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
     g_new->box[b]->basis2 = g_old->box[b]->basis2;
     g_new->box[b]->basis3 = g_old->box[b]->basis3;
 
+    /* copy FT func pointers */
+    g_new->box[b]->get_coeffs1 = g_old->box[b]->get_coeffs1;
+    g_new->box[b]->get_coeffs2 = g_old->box[b]->get_coeffs2;
+    g_new->box[b]->get_coeffs3 = g_old->box[b]->get_coeffs3;
+    g_new->box[b]->coeffs_of_deriv1 = g_old->box[b]->coeffs_of_deriv1;
+    g_new->box[b]->coeffs_of_deriv2 = g_old->box[b]->coeffs_of_deriv2;
+    g_new->box[b]->coeffs_of_deriv3 = g_old->box[b]->coeffs_of_deriv3;
+    g_new->box[b]->coeffs_of_2ndderiv1 = g_old->box[b]->coeffs_of_2ndderiv1;
+    g_new->box[b]->coeffs_of_2ndderiv2 = g_old->box[b]->coeffs_of_2ndderiv2;
+    g_new->box[b]->coeffs_of_2ndderiv3 = g_old->box[b]->coeffs_of_2ndderiv3;
+    g_new->box[b]->coeffs_of_int1 = g_old->box[b]->coeffs_of_int1;
+    g_new->box[b]->coeffs_of_int2 = g_old->box[b]->coeffs_of_int2;
+    g_new->box[b]->coeffs_of_int3 = g_old->box[b]->coeffs_of_int3;
+    g_new->box[b]->eval_onPoints1 = g_old->box[b]->eval_onPoints1;
+    g_new->box[b]->eval_onPoints2 = g_old->box[b]->eval_onPoints2;
+    g_new->box[b]->eval_onPoints3 = g_old->box[b]->eval_onPoints3;
+    g_new->box[b]->filter_coeffs1 = g_old->box[b]->filter_coeffs1;
+    g_new->box[b]->filter_coeffs2 = g_old->box[b]->filter_coeffs2;
+    g_new->box[b]->filter_coeffs3 = g_old->box[b]->filter_coeffs3;
+    /* copy type of FT */
+    g_new->box[b]->TransformType1 = g_old->box[b]->TransformType1;
+    g_new->box[b]->TransformType2 = g_old->box[b]->TransformType2;
+    g_new->box[b]->TransformType3 = g_old->box[b]->TransformType3;
+
     /* copy diff., filter matrices, ..., and all other arrays */
     for (i = 0; i < n1*n1; i++, ijk++)
     {
