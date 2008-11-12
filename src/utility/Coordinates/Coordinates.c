@@ -43,6 +43,7 @@ double Coordinates_AnsorgNS_b; /* value of x if A=1 in AnsorgNS0/3 */
 int init_CoordTransform_And_Derivs(tGrid *grid)
 {
   int pr = Getv("Coordinates_verbose", "yes");
+  int use_CoordinateTransforms_generic = 0;
   int var_x = Ind("x");
   int var_y = Ind("y");
   int var_z = Ind("z");
@@ -545,6 +546,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       enablevar_inbox(box, dZd);
 
       /* initialize if we use generic */
+      use_CoordinateTransforms_generic = 1;
       init_dXdx_generic(box);
       if(box->dX_dx[1][1]==NULL) box->dX_dx[1][1] = dX_dx_generic;
       if(box->dX_dx[1][2]==NULL) box->dX_dx[1][2] = dX_dy_generic;
@@ -570,6 +572,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       enablevar_inbox(box, Ind("temp3"));
 
       /* initialize generic */
+      use_CoordinateTransforms_generic = 1;
       init_ddXdxdx_generic(box);
       if(box->ddX_dxdx[1][1][1]==NULL) box->ddX_dxdx[1][1][1]=ddX_dxdx_generic;
       if(box->ddX_dxdx[1][1][2]==NULL) box->ddX_dxdx[1][1][2]=ddX_dxdy_generic;
@@ -621,7 +624,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   }
   /* compute cartesian coordinates x,y,z and derivs again 
      (in case generic changed some things) */
-  compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
+  if(use_CoordinateTransforms_generic)
+    compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
 
   return 0;
 }
