@@ -403,6 +403,7 @@ int init_FFTW3_plans(tGrid* grid)
 int free_FFTW3_plans(tGrid* grid)
 {
   /* free arrays of plans */
+  printf("free_FFTW3_plans: freeing global plan arrays.");
   free(FFTW3_dft_r2c_1d_plan);
   free(FFTW3_dft_c2r_1d_plan);
   free(FFTW_REDFT00_1d_plan);
