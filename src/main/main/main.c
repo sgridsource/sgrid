@@ -31,12 +31,13 @@ int main(int argc, char **argv)
   initialize_libraries();
 
   while (iterate_parameters()) {
-    RunFun(PRE_GRID, 0);  /* provide a hook for special grid preparation */
+    RunFun(PRE_GRID, 0);  /* hook for special grid preparation */
     g = make_grid(1);
-    RunFun(POST_GRID, g); /* provide a hook for special treatment after grid creation */
+    RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
     initialize_grid(g);
     evolve_grid(g);
     finalize_grid(g);
+    RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
   }
   return 0;
 }
@@ -208,7 +209,5 @@ int finalize_grid(tGrid *g)
 {
   prdivider(0);
   free_grid(g);
-  /* run e.g. cleanup stuff after freeing the grid */
-  RunFun(POST_FINALIZE_GRID, g);
   return 0;
 }
