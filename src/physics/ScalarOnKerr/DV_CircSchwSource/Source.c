@@ -61,9 +61,8 @@ void eval_source(double ts, double r, double theta, double phi)
     double M=ian_M;
     double Pi=3.14159265358979323846264338;
     
-    if(fabs(r-R)>3.5*M  && ian_W<1.0){
-        Del2Psi=0.0;    
-    }
+    //if(fabs(r-R)>3.5*M  && ian_W<1.0)  Del2Psi=0.0;
+    if(0) Del2Psi=0.0;
     else{                                    
     
     eval_THZ(ts,r,theta,phi);
