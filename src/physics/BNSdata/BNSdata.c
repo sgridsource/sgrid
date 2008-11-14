@@ -214,7 +214,7 @@ int BNSdata_startup(tGrid *grid)
   }
 
   /* if NS1 is shifted in y-direc. (for testing) adjust grid on right side */
-  if(ysh1 != 0.0)
+  if(ysh1 != 0.0 && Getv("BNSdata_adjustdomain01","yes"))
   {
     int bi;
 

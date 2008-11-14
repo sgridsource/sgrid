@@ -70,7 +70,11 @@ int sgrid_BNSdata()
          "[needs to be adjusted so that m02 stays the constant]");
   AddPar("BNSdata_guess", "TOV", "init. guess [TOV,TOVaverage]");
   if(Getd("BNSdata_m02")==0.0)
+  {
     AddPar("BNSdata_yshift1", "0", "shift NS1 in y-direction for testing");
+    AddPar("BNSdata_adjustdomain01", "yes", "if we adjust domainshapes "
+           "after shift [yes,no]");
+  }
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "maximal number of Newton iterations");
