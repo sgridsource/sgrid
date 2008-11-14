@@ -1852,6 +1852,8 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
                                     double *X1, double *Y1, double *Z1,
                                     int b, double x, double y, double z)
 {
+  static double Aguess_forb_5 = -1.0;
+  static double Aguess_forb_4 = -1.0;
   int b1;
   double X = *X1;
   double Y = *Y1;
@@ -1872,7 +1874,16 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
       if(b>=4)
       { 
         Z = Arg(Y,Z); if(Z<0.0) Z+=2.0*PI;
-        X = 0.85; /* bad guess ??? */
+        if(Aguess_forb_5<0.0 || Aguess_forb_4<0.0) /* init Aguess once */
+        { 
+          Aguess_forb_5 = Getd("BNSdata_box0_Amax");
+          Aguess_forb_4 = Getd("BNSdata_box3_Amax");
+          printf("BNSgrid_Get_BoxAndCoords_of_xyz: "
+                 "Aguess_forb_5=%g Aguess_forb_4=%g\n",
+                  Aguess_forb_5, Aguess_forb_4);
+        }
+        if(b==5) X = Aguess_forb_5; /* =0.85, bad guess ??? */
+        else     X = Aguess_forb_4; /* =0.85, bad guess ??? */
         Y = 0.5;  /* bad guess ??? */
       }
       if( b<4 && (dequal(Y, 0.0) || dequal(Y, 1.0)) )
