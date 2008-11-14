@@ -103,6 +103,7 @@ int BNSdata_startup(tGrid *grid)
                      (void *) grid->box[3], 0, 0.0,0.0,0.0);
   double xc1 = 0.5*(xmax1+xmin1);
   double xc2 = 0.5*(xmax2+xmin2);
+  double ysh1;
 
   printf("Initializing BNSdata:\n");
 
@@ -150,6 +151,10 @@ int BNSdata_startup(tGrid *grid)
   TOV_init(P_core1, kappa, Gamma, 1, &rs1, &m1, &Phic1, &Psic1, &m01);
   TOV_init(P_core2, kappa, Gamma, 1, &rs2, &m2, &Phic2, &Psic2, &m02);
 
+  /* get yshift1 (for testing) */
+  if(m02==0.0) ysh1 = Getd("BNSdata_yshift1");
+  else         ysh1 = 0.0;
+
   /* set initial values in all in boxes */
   forallboxes(grid,b)
   {  
@@ -182,7 +187,7 @@ int BNSdata_startup(tGrid *grid)
       /* set Psi, alphaP, q */
       if(TOVav || (b==0 || b==1 || b==5) )
       {
-        r1 = sqrt((x-xc1)*(x-xc1) + y*y + z*z);
+        r1 = sqrt((x-xc1)*(x-xc1) + (y-ysh1)*(y-ysh1) + z*z);
         TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
                                  P_core1, Phic1, Psic1,
                                  &m1, &P1, &Phi1, &Psi1, &m01);
@@ -205,6 +210,24 @@ int BNSdata_startup(tGrid *grid)
       BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
       BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
       BNSdata_q[i]     = q1 + q2;
+    }
+  }
+
+  /* if NS1 is shifted in y-direc. (for testing) adjust grid on right side */
+  if(ysh1 != 0.0)
+  {
+    int bi;
+
+    /* adjust grid so that new q=0 is at A=0 */
+    compute_new_q_and_adjust_domainshapes(grid, 0);
+
+    /* set q to zero if q<0, and also in region 1 & 2 */
+    forallboxes(grid, bi)
+    {
+      int i;
+      double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+      forallpoints(grid->box[bi], i)
+        if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
     }
   }
 
