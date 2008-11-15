@@ -1507,13 +1507,13 @@ int BNSdata_analyze(tGrid *grid)
   qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
   qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
   xmax1 = grid->box[bi1]->x_of_X[1]((void *) grid->box[bi1], -1, Xmax1,Ymax1,0.0);
-  xmax2 = grid->box[bi2]->x_of_X[1]((void *) grid->box[bi2], -1, Xmax1,Ymax1,0.0);
+  xmax2 = grid->box[bi2]->x_of_X[1]((void *) grid->box[bi2], -1, Xmax2,Ymax2,0.0);
   /* set qmax1/2 */
   Setd("BNSdata_qmax1", qmax1);
   Setd("BNSdata_qmax2", qmax2);
   /* set cart positions of qmax1/2 */
   Setd("BNSdata_xmax1", xmax1);
-  Setd("BNSdata_xmax2", xmax1);
+  Setd("BNSdata_xmax2", xmax2);
   printf("BNSdata_analyze: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
          "                 BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
          Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
