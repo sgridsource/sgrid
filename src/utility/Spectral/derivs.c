@@ -85,18 +85,22 @@ void get_memline(double *u, double *line, int direc, int i1, int i2,
   int i;
   if(direc==1)
   {
+    double *u_i1_i2 = u + Index(0,i1,i2);
     for(i=0; i<n1; i++)
-      line[i] = u[Index(i,i1,i2)];
+      line[i] = u_i1_i2[i]; /* line[i] = u[Index(i,i1,i2)]; */
   }
   else if(direc==2)
   {
+    double *u_i1_i2 = u + Index(i1,0,i2);
     for(i=0; i<n2; i++)
-      line[i] = u[Index(i1,i,i2)];
+      line[i] = u_i1_i2[i*n1]; /* line[i] = u[Index(i1,i,i2)]; */
   }
   else if(direc==3)
   {
+    int n1n2 = n1*n2;
+    double *u_i1_i2 = u + Index(i1,i2,0);
     for(i=0; i<n3; i++)
-      line[i] = u[Index(i1,i2,i)];
+      line[i] = u_i1_i2[i*n1n2]; /* line[i] = u[Index(i1,i2,i)]; */
   }
   else
    errorexit("get_memline: possible values for direction direc are 1,2,3.");
@@ -110,18 +114,22 @@ void put_memline(double *u, double *line, int direc, int i1, int i2,
   int i;
   if(direc==1)
   {
+    double *u_i1_i2 = u + Index(0,i1,i2);
     for(i=0; i<n1; i++)
-      u[Index(i,i1,i2)] = line[i];
+      u_i1_i2[i] = line[i]; /* u[Index(i,i1,i2)] = line[i]; */
   }
   else if(direc==2)
   {
+    double *u_i1_i2 = u + Index(i1,0,i2);
     for(i=0; i<n2; i++)
-      u[Index(i1,i,i2)] = line[i];
+      u_i1_i2[i*n1] = line[i]; /* u[Index(i1,i,i2)] = line[i]; */
   }
   else if(direc==3)
   {
+    int n1n2 = n1*n2;
+    double *u_i1_i2 = u + Index(i1,i2,0);
     for(i=0; i<n3; i++)
-      u[Index(i1,i2,i)] = line[i];
+      u_i1_i2[i*n1n2] = line[i]; /* u[Index(i1,i2,i)] = line[i]; */
   }
   else
    errorexit("put_memline: possible values for direction direc are 1,2,3.");
