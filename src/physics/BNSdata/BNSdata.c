@@ -1096,6 +1096,7 @@ int BNSdata_solve(tGrid *grid)
 {
   int    itmax        = Geti("BNSdata_itmax");
   double tol          = Getd("BNSdata_tol");
+  double adjusttol    = max2(tol, Getd("BNSdata_adjust_mintol"));
   double esw          = Getd("BNSdata_esw");
   int    allow_esw1_it= Geti("BNSdata_allow_esw1_first_at");
   int    Newton_itmax = itmax;
@@ -1336,19 +1337,19 @@ if(0) /* not working */
     /* choose how we adjust C1/2, Omega, xCM: */
     if( it>=Geti("BNSdata_adjust_first_at") &&
         Geti("BNSdata_adjust_first_at")>=0 )
-    { 
+    {
       if(Getv("BNSdata_adjust", "WT_L2_method"))
-        adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
+        adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, adjusttol, &dOmega);
       else if(Getv("BNSdata_adjust", "keep_xout"))
-        adjust_C1_C2_Omega_xCM_q_keep_xout(grid, it, tol);
+        adjust_C1_C2_Omega_xCM_q_keep_xout(grid, it, adjusttol);
       else if(Getv("BNSdata_adjust", "min_qchange"))
-        adjust_C1_C2_Omega_xCM_q_min_qchange(grid, it, tol, &dOmega);
+        adjust_C1_C2_Omega_xCM_q_min_qchange(grid, it, adjusttol, &dOmega);
       else /* adjust C1/2, q while keeping restmasses, Omega and xCM */
-        adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+        adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol);
     }
     else
     { /* adjust C1/2, q while keeping restmasses, Omega and xCM */
-      adjust_C1_C2_q_keep_restmasses(grid, it, tol);
+      adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol);
     }
 
     /* compute diagnostics like ham and mom */

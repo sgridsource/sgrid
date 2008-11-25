@@ -90,6 +90,8 @@ int sgrid_BNSdata()
          "[nothing,WT_L2_method,keep_xout [keep_one_xout,always]]");
   AddPar("BNSdata_adjust_first_at", "0", 
          "first iteration when we use BNSdata_adjust. -1 means never");
+  AddPar("BNSdata_adjust_mintol", "1e-10", "always use tol>=mintol in adjust, "
+         "e.g. when BNSdata_adjust=keep_xout");
   AddPar("BNSdata_dOmega_fac", "0.1", "dOmega = Omega*dOmega_Fac");
   AddPar("BNSdata_dx_CM_fac",  "0.1", "dx_CM = b*dx_CM_fac");
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",
