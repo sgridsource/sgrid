@@ -2595,8 +2595,8 @@ int BNS_Eqn_Iterator(tGrid *grid, int itmax, double tol, double *normres,
   int it;
   int prN=pr;
 
-  if(pr) printf("BNS_Eqn_Iterator:  starting iterations ...\n");
-
+  if(pr) printf("BNS_Eqn_Iterator:  starting iterations, itmax=%d tol=%g\n",
+                itmax, tol); 
   for (it = 0; it < itmax; it++)
   {
     tVarList *vlw, *vlwDerivs, *vlFw, *vldw, *vldwDerivs, *vlJdw;
