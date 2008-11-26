@@ -56,7 +56,8 @@ int Newton(
   int lin_its = 0;
   
   /* solve with Newton-Raphson iterations: */
-  if(pr) printf("Newton:  starting Newton iterations ...\n");
+  if(pr) printf("Newton:  starting Newton iterations, itmax=%d tol=%g\n",
+                itmax, tol);
   for (inewton = 0; inewton < itmax; inewton++)
   {
     /* compute vlFu = F(u) */
