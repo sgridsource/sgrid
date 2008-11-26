@@ -1098,6 +1098,7 @@ int BNSdata_solve(tGrid *grid)
   double tol          = Getd("BNSdata_tol");
   double adjusttol    = max2(tol, Getd("BNSdata_adjust_mintol"));
   double esw          = Getd("BNSdata_esw");
+  double esw1         = Getd("BNSdata_esw1");
   int    allow_esw1_it= Geti("BNSdata_allow_esw1_first_at");
   int    Newton_itmax = itmax;
   double NewtTolFac   = Getd("BNSdata_Newton_tolFac");
@@ -1261,10 +1262,10 @@ int BNSdata_solve(tGrid *grid)
     if(esw<1.0 && it>=allow_esw1_it && allow_esw1_it>=0)
     {
       /* complete step */
-      totalerr = average_current_and_old(1.0/esw, grid,vlFu,vlu,vluDerivs,vlJdu);
+      totalerr = average_current_and_old(esw1/esw, grid,vlFu,vlu,vluDerivs,vlJdu);
       /* but go back to esw if totalerr is larger */
       if(totalerr>=totalerr1)
-        totalerr = average_current_and_old(esw, grid,vlFu,vlu,vluDerivs,vlJdu);
+        totalerr = average_current_and_old(esw/esw1, grid,vlFu,vlu,vluDerivs,vlJdu);
     }
     else
       totalerr = totalerr1;

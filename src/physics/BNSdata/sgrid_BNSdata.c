@@ -84,7 +84,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_esw",   "1", "ell. solve weight: after ell. solve new "
          "and old values are averaged according to: "
          "new = esw*new + (1-esw)*old");
-  AddPar("BNSdata_allow_esw1_first_at", "-1", "first iteration when esw=1 "
+  AddPar("BNSdata_esw1",  "1", "second weight esw1 is used if better");
+  AddPar("BNSdata_allow_esw1_first_at", "-1", "first iteration when esw=esw1 "
          "will be tried and allowed if better [#,-1]. -1 means never");
   AddPar("BNSdata_adjust", "nothing", "what we adjust (apart from C1/2) "
          "after ell. solve. E.g. \"keep_xout keep_one_xout\" adjusts Omega "
