@@ -77,9 +77,11 @@ int sgrid_BNSdata()
   }
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
-  AddPar("BNSdata_itmax", "10", "maximal number of Newton iterations");
-  AddPar("BNSdata_tol",   "1e-6","tolerance for Newton step");
-  AddPar("BNSdata_esw",   "1",   "ell. solve weight: after ell. solve new "
+  AddPar("BNSdata_itmax", "10", "max. number of iterations in BNSdata_solve");
+  AddPar("BNSdata_tol",   "1e-6", "tolerance for BNSdata_solve");
+  AddPar("BNSdata_Newton_tolFac", "0.1", "tol for Newton is "
+         "Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac)");
+  AddPar("BNSdata_esw",   "1", "ell. solve weight: after ell. solve new "
          "and old values are averaged according to: "
          "new = esw*new + (1-esw)*old");
   AddPar("BNSdata_allow_esw1_first_at", "-1", "first iteration when esw=1 "

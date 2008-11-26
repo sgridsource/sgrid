@@ -1100,7 +1100,8 @@ int BNSdata_solve(tGrid *grid)
   double esw          = Getd("BNSdata_esw");
   int    allow_esw1_it= Geti("BNSdata_allow_esw1_first_at");
   int    Newton_itmax = itmax;
-  double Newton_tol   = tol*0.1;
+  double NewtTolFac   = Getd("BNSdata_Newton_tolFac");
+  double Newton_tol   = tol*NewtTolFac;
   int    linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
   double linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
   double linSolver_tol    = Getd("BNSdata_linSolver_tol");
@@ -1192,7 +1193,7 @@ int BNSdata_solve(tGrid *grid)
   /* choose initial Newton_tol */
   F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
   normresnonlin = GridL2Norm(vlFu);
-  Newton_tol = max2(normresnonlin*0.1, tol*0.1);
+  Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
 
   /* compute diagnostics like ham and mom */
   BNSdata_verify_solution(grid);
@@ -1363,7 +1364,7 @@ if(0) /* not working */
     if(normresnonlin<tol) break;
 
     /* set new tol for Newton */
-    Newton_tol = max2(normresnonlin*0.1, tol*0.1);
+    Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
 
     /* write current iteration if we are not done yet and increase counters */
     if(it<=itmax) write_grid(grid);
