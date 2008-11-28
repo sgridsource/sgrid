@@ -92,20 +92,20 @@ int set_boxsizes(tGrid *grid)
   /* reset initial BNSdata_m01/2 if needed */
   if(Getv("BNSdata_iterate_m0", "yes"))
   {
-    printf("BNSdata_iterate_m0 = yes : setting:\n");
+    printf(" BNSdata_iterate_m0 = yes : setting:\n");
     /* set BNSdata_desired_m01/2 if needed */
     if(Getd("BNSdata_desired_m01")<0.0) Setd("BNSdata_desired_m01", m01);
     if(Getd("BNSdata_desired_m02")<0.0) Setd("BNSdata_desired_m02", m02);
-    printf("  BNSdata_desired_m01 = %g\n", Getd("BNSdata_desired_m01"));
-    printf("  BNSdata_desired_m02 = %g\n", Getd("BNSdata_desired_m02"));
+    printf("   BNSdata_desired_m01 = %g\n", Getd("BNSdata_desired_m01"));
+    printf("   BNSdata_desired_m02 = %g\n", Getd("BNSdata_desired_m02"));
     /* set initial BNSdata_m01/2 */
     m01 = Getd("BNSdata_init_m01");
     m02 = Getd("BNSdata_init_m02");
     Setd("BNSdata_m01", m01);
     Setd("BNSdata_m02", m02);
-    printf("  BNSdata_m01 = BNSdata_init_m01 = m01 = %g\n", m01);
-    printf("  BNSdata_m02 = BNSdata_init_m02 = m02 = %g\n", m02);
-    printf("  BNSdata_m0change = %g\n", Getd("BNSdata_m0change"));
+    printf("   BNSdata_m01 = BNSdata_init_m01 = m01 = %g\n", m01);
+    printf("   BNSdata_m02 = BNSdata_init_m02 = m02 = %g\n", m02);
+    printf("   BNSdata_m0change = %g\n", Getd("BNSdata_m0change"));
   }
 
   /* set Coordinates_AnsorgNS_sigmap/m funcs, .s.t. it works with sigma1/2 */
