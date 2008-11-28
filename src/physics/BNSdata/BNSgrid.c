@@ -97,7 +97,7 @@ int set_boxsizes(tGrid *grid)
     if(Getd("BNSdata_desired_m01")<0.0) Setd("BNSdata_desired_m01", m01);
     if(Getd("BNSdata_desired_m02")<0.0) Setd("BNSdata_desired_m02", m02);
     printf("  BNSdata_desired_m01 = %g\n", Getd("BNSdata_desired_m01"));
-    printf("  BNSdata_desired_m01 = %g\n", Getd("BNSdata_desired_m02"));
+    printf("  BNSdata_desired_m02 = %g\n", Getd("BNSdata_desired_m02"));
     /* set initial BNSdata_m01/2 */
     m01 = Getd("BNSdata_init_m01");
     m02 = Getd("BNSdata_init_m02");
