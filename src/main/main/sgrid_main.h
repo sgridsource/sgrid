@@ -27,6 +27,8 @@
 #define dlesseq(a,b) ( (a)<(b)+dequaleps )
 #define dgreatereq(a,b) ( (a)>(b)-dequaleps )
 
+#define signum(v) (v) > 0.0 ? (1.0) : ((v) < 0.0 ? (-1.0) : (0.0))
+
 
 /* parameters.c */
 void AddPar(char *name, char *value, char *description);
