@@ -1219,6 +1219,26 @@ int adjust_Omega_xCM_keep_xmax(tGrid *grid, int it, double tol)
 }
 
 
+/* adjust m01 and m02 to let them e.g. grow during iterations */
+void adjust_BNSdata_m01_m02(void)
+{
+  double cm01 = Getd("BNSdata_m01");
+  double cm02 = Getd("BNSdata_m02");
+  double tm01 = Getd("BNSdata_desired_m01");
+  double tm02 = Getd("BNSdata_desired_m02");
+  double mCh1 = cm01*Getd("BNSdata_m0change");
+  double mCh2 = cm02*Getd("BNSdata_m0change");
+
+  /* change BNSdata_m01 and BNSdata_m02 by mCh1/2 to get closer to
+     BNSdata_desired_m01 and BNSdata_desired_m02 */
+  if(fabs(tm01-cm01) > mCh1) cm01 += mCh1*signum(tm01-cm01);
+  else                       cm01  = tm01;
+  if(fabs(tm02-cm02) > mCh2) cm02 += mCh2*signum(tm02-cm02);
+  else                       cm02  = tm02;
+  Setd("BNSdata_m01", cm01);
+  Setd("BNSdata_m02", cm02);
+}
+
 /* compute weighted average of current and old values,
    and return total error */
 double average_current_and_old(double weight, tGrid *grid,
@@ -1229,6 +1249,13 @@ double average_current_and_old(double weight, tGrid *grid,
   double tm02 = Getd("BNSdata_m02");
   double m01, m02;
   double normresnonlin, L2qdiff, dm01, dm02, m0err, error;
+
+  /* if we iterate over the rest masses the true mass goals are different */
+  if(Getv("BNSdata_iterate_m0", "yes"))
+  {
+    tm01 = Getd("BNSdata_desired_m01");
+    tm02 = Getd("BNSdata_desired_m02");
+  }
 
   /* reset new values from ell. solve as average between old and new.
      I.e. do: new = weight*new + (1-weight)*old  */
@@ -1439,6 +1466,9 @@ int BNSdata_solve(tGrid *grid)
     }
     else
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
+
+    /* if we iterate rest masses */
+    if(Getv("BNSdata_iterate_m0", "yes")) adjust_BNSdata_m01_m02();
 
     /* reset new values from ell. solve as average between old and new.
        I.e. do: new = esw*new + (1-esw)*old  */

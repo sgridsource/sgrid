@@ -55,6 +55,20 @@ int sgrid_BNSdata()
   /* parameters */
   AddPar("BNSdata_m01",   "0.141202", "rest mass of NS1");
   AddPar("BNSdata_m02",   "0.141202", "rest mass of NS2");
+  AddPar("BNSdata_iterate_m0", "no", "whether we iterate rest masses [no,yes]");
+  if(Getv("BNSdata_iterate_m0", "yes"))
+  {
+    AddPar("BNSdata_init_m01", "-1", "initial rest mass of NS1, if positive "
+           "BNSdata_m01 will be changed during the iterations until we reach "
+           "BNSdata_desired_m01");
+    AddPar("BNSdata_init_m02", "-1", "initial rest mass of NS2, if positive "
+           "BNSdata_m02 will be changed during the iterations until we reach "
+           "BNSdata_desired_m02");
+    AddPar("BNSdata_m0change", "0.1", "amount by which change BNSdata_m01/2 "
+           "during iterations");
+    AddPar("BNSdata_desired_m01", "-1", "desired rest mass1 if we iterate it");
+    AddPar("BNSdata_desired_m01", "-1", "desired rest mass2 if we iterate it");
+  }
   AddPar("BNSdata_qmax1", "0", "max q of NS1 along x-axis");
   AddPar("BNSdata_qmax2", "0", "max q of NS2 along x-axis");
   AddPar("BNSdata_xmax1", "0", "pos. of max q of NS1 along x-axis");
