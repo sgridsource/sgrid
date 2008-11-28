@@ -1207,6 +1207,24 @@ int adjust_Omega_xCM_keep_xmax(tGrid *grid, int it, double tol)
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
   prdivider(0);
 
+  /* check where max are and reset BNSdata_xmax1/2 if they are too far off */
+  if(Getv("BNSdata_adjust", "reset_xmax_if_problem"))
+  {
+    OmxCMvec[1] = Omega;
+    OmxCMvec[2] = x_CM;
+    xmaxs_error_VectorFunc__xmax1 = Getd("BNSdata_xmax1");
+    xmaxs_error_VectorFunc__xmax2 = Getd("BNSdata_xmax2");
+    xmaxs_error_VectorFunc(2, OmxCMvec, dxmax_00);
+    if(fabs(dxmax_00[1])>5.0*tol) xmaxs_error_VectorFunc__xmax1 += dxmax_00[1];
+    if(fabs(dxmax_00[2])>5.0*tol) xmaxs_error_VectorFunc__xmax2 += dxmax_00[2];
+    Setd("BNSdata_xmax1", xmaxs_error_VectorFunc__xmax1);
+    Setd("BNSdata_xmax2", xmaxs_error_VectorFunc__xmax2);
+    /* print current maxs */
+    printf("adjust_Omega_xCM_keep_xmax: resetting xmax1 = %g  xmax2 = %g\n",
+           xmaxs_error_VectorFunc__xmax1, xmaxs_error_VectorFunc__xmax2);
+    prdivider(0);
+  }
+
   /* set q to zero if q<0, and also in region 1 & 2 */
   forallboxes(grid, bi)
   {
