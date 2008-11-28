@@ -1089,7 +1089,6 @@ void xmaxs_error_VectorFunc(int n, double *vec, double *fvec)
 int adjust_Omega_xCM_keep_xmax(tGrid *grid, int it, double tol)
 {
   int check, stat, bi, i;
-  int xind = Ind("x");
   double OmxCMvec[3];
   double dxmax_m0[3];
   double dxmax_00[3];
@@ -1150,12 +1149,12 @@ int adjust_Omega_xCM_keep_xmax(tGrid *grid, int it, double tol)
       if(dxmax_m0[1]*dxmax_p0[1]>=0.0)
       {
         xmaxs_error_VectorFunc(2, OmxCMvec, dxmax_00);
-        xmaxs_error_VectorFunc__xmax1 = grid->box[0]->v[xind][0];
+        xmaxs_error_VectorFunc__xmax1 += dxmax_00[1];
       }
       if(dxmax_m0[2]*dxmax_p0[2]>=0.0)
       {
         xmaxs_error_VectorFunc(2, OmxCMvec, dxmax_00);
-        xmaxs_error_VectorFunc__xmax2 = grid->box[3]->v[xind][0];
+        xmaxs_error_VectorFunc__xmax2 += dxmax_00[2];
       }
       do_lnsrch = 1;
       printf("adjust_Omega_xCM_keep_xmax: "
