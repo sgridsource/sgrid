@@ -82,7 +82,7 @@ int sgrid_BNSdata()
          "[needs to be adjusted so that m01 stays the constant]");
   AddPar("BNSdata_C2",    "-1", "C2 in q = (C2/F-1)/(n+1) "
          "[needs to be adjusted so that m02 stays the constant]");
-  AddPar("BNSdata_guess", "TOV", "init. guess [TOV,TOVaverage]");
+  AddPar("BNSdata_guess", "TOV", "init. guess [TOV,TOVaverage,TOVproduct]");
   if(Getd("BNSdata_m02")==0.0)
   {
     AddPar("BNSdata_yshift1", "0", "shift NS1 in y-direction for testing");

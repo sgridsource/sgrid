@@ -89,6 +89,7 @@ int BNSdata_startup(tGrid *grid)
 {
   int b;
   int TOVav        = Getv("BNSdata_guess", "TOVaverage");
+  int TOVprod      = Getv("BNSdata_guess", "TOVproduct");
   double Omega     = Getd("BNSdata_Omega");
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_b = Getd("BNSdata_b");
@@ -188,7 +189,7 @@ int BNSdata_startup(tGrid *grid)
         z = pz[i];
       }
       /* set Psi, alphaP, q */
-      if(TOVav || (b==0 || b==1 || b==5) )
+      if(TOVav || TOVprod || (b==0 || b==1 || b==5) )
       {
         r1 = sqrt((x-xc1)*(x-xc1) + (y-ysh1)*(y-ysh1) + z*z);
         TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
@@ -198,7 +199,7 @@ int BNSdata_startup(tGrid *grid)
              pow(P1, 1.0/(1.0 + BNSdata_n));
       }
       else { m1 = P1 = Phi1 = m01 = q1 = 0.0;  Psi1 = 1.0; }
-      if(TOVav || (b==2 || b==3 || b==4) )
+      if(TOVav || TOVprod || (b==2 || b==3 || b==4) )
       {
         r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
         TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
@@ -210,9 +211,18 @@ int BNSdata_startup(tGrid *grid)
       else { m2 = P2 = Phi2 = m02 = q2 = 0.0;  Psi2 = 1.0; }
       
       /* set the data */
-      BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
-      BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
-      BNSdata_q[i]     = q1 + q2;
+      if(TOVprod)
+      {
+        BNSdata_Psi[i]   = Psi1*Psi2;
+        BNSdata_alphaP[i]= exp(Phi1+Phi2)*Psi1*Psi2;
+        BNSdata_q[i]     = q1 + q2;
+      }
+      else /* for TOVav or TOV */
+      {
+        BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
+        BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
+        BNSdata_q[i]     = q1 + q2;
+      }
     }
   }
 
