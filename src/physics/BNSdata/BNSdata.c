@@ -1237,6 +1237,10 @@ void adjust_BNSdata_m01_m02(void)
   else                       cm02  = tm02;
   Setd("BNSdata_m01", cm01);
   Setd("BNSdata_m02", cm02);
+  printf("adjust_BNSdata_m01_m02: BNSdata_m0change=%g mCh1=%g mCh2=%g\n",
+         Getd("BNSdata_m0change"), mCh1, mCh2);
+  printf(" => BNSdata_m01=%.13g BNSdata_m02=%.13g\n", cm01, cm02);
+  printf("    BNSdata_desired_m01=%.13g BNSdata_desired_m01=%.13g\n", tm01, tm02);
 }
 
 /* compute weighted average of current and old values,
