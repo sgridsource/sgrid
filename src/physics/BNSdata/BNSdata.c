@@ -90,26 +90,26 @@ void BNSdata_initial_shift(int star, double fac,
                            double rs, double x, double y, double z,
                            double *Bx, double *By, double *Bz)
 {
-  double F, Wy, dWydx,dWydy,dWydz, dXidx,dXidy,dXidz;
+  double F, eps, Wy, dWydx,dWydy,dWydz, dXidx,dXidy,dXidz;
   double r = sqrt(x*x + y*y + z*z);
   double nx = x;
   double ny = y;
   double nz = z;
 
   /* vector n = x/r */
-  if(r>0) {nx=x/r; ny=y/r; nz=z/r;}
+  if(r>0) { nx=x/r; ny=y/r; nz=z/r; }
 
   /* function F */
-  if(star==1) F = fac*m1*Omega*r12/(1.0+m1/m2);
-  else        F =-fac*m2*Omega*r12/(1.0+m2/m1);
+  if(star==1) { F = fac*m1*Omega*r12/(1.0+m1/m2); eps=+1; }
+  else        { F = fac*m2*Omega*r12/(1.0+m2/m1); eps=-1; }
 
   /* vector W , Wx = Wz = 0.0. And derivs of W and derivs of Xi */
   if(r<rs)
   {
     Wy = (6.0*F/rs)*( 1.0 - r*r/(3*rs*rs) );
-    dWydx = -(4.0*F/(rs*rs))*(r/rs)*nx;
-    dWydy = -(4.0*F/(rs*rs))*(r/rs)*ny;
-    dWydz = -(4.0*F/(rs*rs))*(r/rs)*nz;
+    dWydx = -(4.0*F/(rs*rs))*(r/rs)*nx*eps;
+    dWydy = -(4.0*F/(rs*rs))*(r/rs)*ny*eps;
+    dWydz = -(4.0*F/(rs*rs))*(r/rs)*nz*eps;
     dXidx = -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * nx;
     dXidy = -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * ny
             +((2.0*F)/rs) * (1.0 - 3.0*r*r/(5.0*rs*rs));
@@ -118,9 +118,9 @@ void BNSdata_initial_shift(int star, double fac,
   else
   {
     Wy = 4.0*F/r;
-    dWydx = (-4.0*F/(r*r))*nx;    
-    dWydy = (-4.0*F/(r*r))*ny;    
-    dWydz = (-4.0*F/(r*r))*nz;    
+    dWydx = (-4.0*F/(r*r))*nx*eps;    
+    dWydy = (-4.0*F/(r*r))*ny*eps;    
+    dWydz = (-4.0*F/(r*r))*nz*eps;    
     dXidx = -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*nx;
     dXidy = -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*ny;
             +((4.0*F)/5.0) * ((rs*rs)/(r*r*r));
@@ -253,7 +253,7 @@ int BNSdata_startup(tGrid *grid)
         q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
              pow(P1, 1.0/(1.0 + BNSdata_n));
         BNSdata_initial_shift(1, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs1, 
-                              x-xc1, y-ysh1, z,  &Bx1,&By1,&Bz1);
+                              -(x-xc1), -(y-ysh1), z,  &Bx1,&By1,&Bz1);
       }
       else { m1 = P1 = Phi1 = m01 = q1 = Bx1=By1=Bz1 = 0.0;  Psi1 = 1.0; }
       if(TOVav || TOVprod || (b==2 || b==3 || b==4) )
