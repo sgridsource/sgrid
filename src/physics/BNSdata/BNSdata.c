@@ -97,16 +97,16 @@ int BNSdata_startup(tGrid *grid)
   double Gamma     = 1.0 + 1.0/BNSdata_n;
   double rs1, m1, Phic1, Psic1, m01;
   double rs2, m2, Phic2, Psic2, m02;
-  double xmax1 = grid->box[0]->x_of_X[1](
+  double xout1 = grid->box[0]->x_of_X[1](
                      (void *) grid->box[0], 0, 0.0,0.0,0.0);
-  double xmin1 = grid->box[0]->x_of_X[1](
+  double xin1  = grid->box[0]->x_of_X[1](
                      (void *) grid->box[0], 0, 0.0,1.0,0.0);
-  double xmax2 = grid->box[3]->x_of_X[1](
+  double xin2  = grid->box[3]->x_of_X[1](
                      (void *) grid->box[3], 0, 0.0,1.0,0.0);
-  double xmin2 = grid->box[3]->x_of_X[1](
+  double xout2 = grid->box[3]->x_of_X[1](
                      (void *) grid->box[3], 0, 0.0,0.0,0.0);
-  double xc1 = 0.5*(xmax1+xmin1);
-  double xc2 = 0.5*(xmax2+xmin2);
+  double xc1 = 0.5*(xout1+xin1);
+  double xc2 = 0.5*(xin2+xout2);
   double ysh1;
 
   printf("Initializing BNSdata:\n");
