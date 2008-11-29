@@ -226,10 +226,25 @@ int BNSdata_startup(tGrid *grid)
     double *BNSdata_Bx     = box->v[Ind("BNSdata_Bx")];
     double *BNSdata_By     = box->v[Ind("BNSdata_Bx")+1];
     double *BNSdata_Bz     = box->v[Ind("BNSdata_Bx")+2];
-    double r1, m1, P1, Phi1, Psi1, m01, q1;
-    double r2, m2, P2, Phi2, Psi2, m02, q2;
+    double r1, m1_r, P1, Phi1, Psi1, m01_r, q1;
+    double r2, m2_r, P2, Phi2, Psi2, m02_r, q2;
     double Bx1,By1,Bz1;
     double Bx2,By2,Bz2;
+
+//double x,y,z;
+//printf("m1=%g m2=%g Omega=%g  rs1=%g rs2=%g xc1=%g xc2=%g  xc1-xc2=%g\n",
+//m1,m2, Omega, rs1,rs2, xc1,xc2, xc1-xc2);
+//y=z=0;
+//y=0.1; z=0.2;
+//for(y=-5; y<5; y+=0.1)
+//{
+//BNSdata_initial_shift(1, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs1,
+//                      -(x-xc1), -(y-ysh1), z,  &Bx1,&By1,&Bz1);
+//BNSdata_initial_shift(2, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs2,
+//                       x-xc2, y, z,  &Bx2,&By2,&Bz2);
+//printf("%g   %g\n", y, By1);
+//}
+//exit(11);
 
     forallpoints(box,i)
     {
@@ -249,25 +264,25 @@ int BNSdata_startup(tGrid *grid)
         r1 = sqrt((x-xc1)*(x-xc1) + (y-ysh1)*(y-ysh1) + z*z);
         TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
                                  P_core1, Phic1, Psic1,
-                                 &m1, &P1, &Phi1, &Psi1, &m01);
+                                 &m1_r, &P1, &Phi1, &Psi1, &m01_r);
         q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
              pow(P1, 1.0/(1.0 + BNSdata_n));
         BNSdata_initial_shift(1, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs1, 
                               -(x-xc1), -(y-ysh1), z,  &Bx1,&By1,&Bz1);
       }
-      else { m1 = P1 = Phi1 = m01 = q1 = Bx1=By1=Bz1 = 0.0;  Psi1 = 1.0; }
+      else { m1_r = P1 = Phi1 = m01_r = q1 = Bx1=By1=Bz1 = 0.0;  Psi1 = 1.0; }
       if(TOVav || TOVprod || (b==2 || b==3 || b==4) )
       {
         r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
         TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
                                  P_core2, Phic2, Psic2,
-                                 &m2, &P2, &Phi2, &Psi2, &m02);
+                                 &m2_r, &P2, &Phi2, &Psi2, &m02_r);
         q2 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
              pow(P2, 1.0/(1.0 + BNSdata_n));
         BNSdata_initial_shift(2, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs2, 
                               x-xc2, y, z,  &Bx2,&By2,&Bz2);
       }
-      else { m2 = P2 = Phi2 = m02 = q2 = Bx2=By2=Bz2 = 0.0;  Psi2 = 1.0; }
+      else { m2_r = P2 = Phi2 = m02_r = q2 = Bx2=By2=Bz2 = 0.0;  Psi2 = 1.0; }
       
       /* set the data */
       if(TOVprod)
