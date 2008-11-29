@@ -95,6 +95,7 @@ void BNSdata_initial_shift(int star, double fac,
   double nx = x;
   double ny = y;
   double nz = z;
+  double xz_on = 0.0;
 
   /* vector n = x/r */
   if(r>0) { nx=x/r; ny=y/r; nz=z/r; }
@@ -128,9 +129,9 @@ void BNSdata_initial_shift(int star, double fac,
   }
 
   /* shift */
-  *Bx = (          - 0.125*(dXidx + y*dWydx) )*epsxy;
+  *Bx = (          - 0.125*(dXidx + y*dWydx) )*epsxy *xz_on;
   *By = ( 0.875*Wy - 0.125*(dXidy + y*dWydy) )*epsxy;
-  *Bz =            - 0.125*(dXidz + y*dWydz);
+  *Bz =            - 0.125*(dXidz + y*dWydz) *xz_on;
 }
 
 /* initialize BNSdata */
