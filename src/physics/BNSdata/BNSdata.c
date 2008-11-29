@@ -84,12 +84,62 @@ void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec);
 
 
 
+/* initial shift as in gr-qc/0007028v2*/
+void BNSdata_initial_shift(int star, double fac, 
+                           double m1, double m2, double Omega, double r12,
+                           double rs, double x, double y, double z,
+                           double *Bx, double *By, double *Bz)
+{
+  double F, Wy, dWydx,dWydy,dWydz, dXidx,dXidy,dXidz;
+  double r = sqrt(x*x + y*y + z*z);
+  double nx = x;
+  double ny = y;
+  double nz = z;
+
+  /* vector n = x/r */
+  if(r>0) {nx=x/r; ny=y/r; nz=z/r;}
+
+  /* function F */
+  if(star==1) F = fac*m1*Omega*r12/(1.0+m1/m2);
+  else        F =-fac*m2*Omega*r12/(1.0+m2/m1);
+
+  /* vector W , Wx = Wz = 0.0. And derivs of W and derivs of Xi */
+  if(r<rs)
+  {
+    Wy = (6.0*F/rs)*( 1.0 - r*r/(3*rs*rs) );
+    dWydx = -(4.0*F/(rs*rs))*(r/rs)*nx;
+    dWydy = -(4.0*F/(rs*rs))*(r/rs)*ny;
+    dWydz = -(4.0*F/(rs*rs))*(r/rs)*nz;
+    dXidx = -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * nx;
+    dXidy = -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * ny
+            +((2.0*F)/rs) * (1.0 - 3.0*r*r/(5.0*rs*rs));
+    dXidz = -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * nz;
+  }
+  else
+  {
+    Wy = 4.0*F/r;
+    dWydx = (-4.0*F/(r*r))*nx;    
+    dWydy = (-4.0*F/(r*r))*ny;    
+    dWydz = (-4.0*F/(r*r))*nz;    
+    dXidx = -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*nx;
+    dXidy = -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*ny;
+            +((4.0*F)/5.0) * ((rs*rs)/(r*r*r));
+    dXidz = -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*nz;
+  }
+
+  /* shift */
+  *Bx =          - 0.125*(dXidx + y*dWydx);
+  *By = 0.875*Wy - 0.125*(dXidy + y*dWydy);
+  *Bz =          - 0.125*(dXidz + y*dWydz);
+}
+
 /* initialize BNSdata */
 int BNSdata_startup(tGrid *grid)
 {
   int b;
   int TOVav        = Getv("BNSdata_guess", "TOVaverage");
   int TOVprod      = Getv("BNSdata_guess", "TOVproduct");
+  int initShift    = Getv("BNSdata_guess", "TaniguchiShift");
   double Omega     = Getd("BNSdata_Omega");
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_b = Getd("BNSdata_b");
@@ -173,8 +223,13 @@ int BNSdata_startup(tGrid *grid)
     double *BNSdata_Psi    = box->v[Ind("BNSdata_Psi")];
     double *BNSdata_alphaP = box->v[Ind("BNSdata_alphaP")];
     double *BNSdata_q      = box->v[Ind("BNSdata_q")];
+    double *BNSdata_Bx     = box->v[Ind("BNSdata_Bx")];
+    double *BNSdata_By     = box->v[Ind("BNSdata_Bx")+1];
+    double *BNSdata_Bz     = box->v[Ind("BNSdata_Bx")+2];
     double r1, m1, P1, Phi1, Psi1, m01, q1;
     double r2, m2, P2, Phi2, Psi2, m02, q2;
+    double Bx1,By1,Bz1;
+    double Bx2,By2,Bz2;
 
     forallpoints(box,i)
     {
@@ -197,8 +252,10 @@ int BNSdata_startup(tGrid *grid)
                                  &m1, &P1, &Phi1, &Psi1, &m01);
         q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
              pow(P1, 1.0/(1.0 + BNSdata_n));
+        BNSdata_initial_shift(1, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs1, 
+                              x-xc1, y-ysh1, z,  &Bx1,&By1,&Bz1);
       }
-      else { m1 = P1 = Phi1 = m01 = q1 = 0.0;  Psi1 = 1.0; }
+      else { m1 = P1 = Phi1 = m01 = q1 = Bx1=By1=Bz1 = 0.0;  Psi1 = 1.0; }
       if(TOVav || TOVprod || (b==2 || b==3 || b==4) )
       {
         r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
@@ -207,8 +264,10 @@ int BNSdata_startup(tGrid *grid)
                                  &m2, &P2, &Phi2, &Psi2, &m02);
         q2 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
              pow(P2, 1.0/(1.0 + BNSdata_n));
+        BNSdata_initial_shift(2, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs2, 
+                              x-xc2, y, z,  &Bx2,&By2,&Bz2);
       }
-      else { m2 = P2 = Phi2 = m02 = q2 = 0.0;  Psi2 = 1.0; }
+      else { m2 = P2 = Phi2 = m02 = q2 = Bx2=By2=Bz2 = 0.0;  Psi2 = 1.0; }
       
       /* set the data */
       if(TOVprod)
@@ -222,6 +281,12 @@ int BNSdata_startup(tGrid *grid)
         BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
         BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
         BNSdata_q[i]     = q1 + q2;
+      }
+      if(initShift)
+      {
+        BNSdata_Bx[i] = Bx1 + Bx2;
+        BNSdata_By[i] = By1 + By2;
+        BNSdata_Bz[i] = Bz1 + Bz2;
       }
     }
   }
