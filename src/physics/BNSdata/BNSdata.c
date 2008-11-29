@@ -106,7 +106,7 @@ void BNSdata_initial_shift(int star, double fac,
   /* vector W , Wx = Wz = 0.0. And derivs of W and derivs of Xi */
   if(r<rs)
   {
-    Wy = (6.0*F/rs)*( 1.0 - r*r/(3*rs*rs) );
+    Wy = (6.0*F/rs)*( 1.0 - r*r/(3*rs*rs) )*eps;
     dWydx = -(4.0*F/(rs*rs))*(r/rs)*nx*eps;
     dWydy = -(4.0*F/(rs*rs))*(r/rs)*ny*eps;
     dWydz = -(4.0*F/(rs*rs))*(r/rs)*nz*eps;
@@ -117,7 +117,7 @@ void BNSdata_initial_shift(int star, double fac,
   }
   else
   {
-    Wy = 4.0*F/r;
+    Wy = (4.0*F/r)*eps;
     dWydx = (-4.0*F/(r*r))*nx*eps;    
     dWydy = (-4.0*F/(r*r))*ny*eps;    
     dWydz = (-4.0*F/(r*r))*nz*eps;    
