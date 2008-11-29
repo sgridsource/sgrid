@@ -90,7 +90,7 @@ void BNSdata_initial_shift(int star, double fac,
                            double rs, double x, double y, double z,
                            double *Bx, double *By, double *Bz)
 {
-  double F, eps, Wy, dWydx,dWydy,dWydz, dXidx,dXidy,dXidz;
+  double F, epsW, epsXi, epsxy, Wy, dWydx,dWydy,dWydz, dXidx,dXidy,dXidz;
   double r = sqrt(x*x + y*y + z*z);
   double nx = x;
   double ny = y;
@@ -100,37 +100,37 @@ void BNSdata_initial_shift(int star, double fac,
   if(r>0) { nx=x/r; ny=y/r; nz=z/r; }
 
   /* function F */
-  if(star==1) { F = fac*m1*Omega*r12/(1.0+m1/m2); eps=+1; }
-  else        { F = fac*m2*Omega*r12/(1.0+m2/m1); eps=-1; }
+  if(star==1) { F=fac*m1*Omega*r12/(1.0+m1/m2); epsW=+1; epsXi=+1; epsxy=-1; }
+  else        { F=fac*m2*Omega*r12/(1.0+m2/m1); epsW=+1; epsXi=+1; epsxy=+1; }
 
   /* vector W , Wx = Wz = 0.0. And derivs of W and derivs of Xi */
   if(r<rs)
   {
-    Wy = (6.0*F/rs)*( 1.0 - r*r/(3*rs*rs) )*eps;
-    dWydx = -(4.0*F/(rs*rs))*(r/rs)*nx*eps;
-    dWydy = -(4.0*F/(rs*rs))*(r/rs)*ny*eps;
-    dWydz = -(4.0*F/(rs*rs))*(r/rs)*nz*eps;
-    dXidx = -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * nx;
-    dXidy = -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * ny
-            +((2.0*F)/rs) * (1.0 - 3.0*r*r/(5.0*rs*rs));
-    dXidz = -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * nz;
+    Wy = (6.0*F/rs)*( 1.0 - r*r/(3*rs*rs) )*epsW;
+    dWydx = ( -(4.0*F/(rs*rs))*(r/rs)*nx )*epsW;
+    dWydy = ( -(4.0*F/(rs*rs))*(r/rs)*ny )*epsW;
+    dWydz = ( -(4.0*F/(rs*rs))*(r/rs)*nz )*epsW;
+    dXidx = ( -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * nx )*epsXi;
+    dXidy = ( -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * ny
+              +((2.0*F)/rs) * (1.0 - 3.0*r*r/(5.0*rs*rs)) )*epsXi;
+    dXidz = ( -((12.0*F)/(5.0*rs)) * ((r*y)/(rs*rs)) * nz )*epsXi;
   }
   else
   {
-    Wy = (4.0*F/r)*eps;
-    dWydx = (-4.0*F/(r*r))*nx*eps;    
-    dWydy = (-4.0*F/(r*r))*ny*eps;    
-    dWydz = (-4.0*F/(r*r))*nz*eps;    
-    dXidx = -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*nx;
-    dXidy = -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*ny;
-            +((4.0*F)/5.0) * ((rs*rs)/(r*r*r));
-    dXidz = -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*nz;
+    Wy = (4.0*F/r)*epsW;
+    dWydx = ( (-4.0*F/(r*r))*nx )*epsW;    
+    dWydy = ( (-4.0*F/(r*r))*ny )*epsW;    
+    dWydz = ( (-4.0*F/(r*r))*nz )*epsW;    
+    dXidx = ( -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*nx )*epsXi;
+    dXidy = ( -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*ny
+              +((4.0*F)/5.0) * ((rs*rs)/(r*r*r)) )*epsXi;
+    dXidz = ( -((12.0*F)/(5.0*r)) * ((rs*rs)/(r*r)) * ny*nz )*epsXi;
   }
 
   /* shift */
-  *Bx =          - 0.125*(dXidx + y*dWydx);
-  *By = 0.875*Wy - 0.125*(dXidy + y*dWydy);
-  *Bz =          - 0.125*(dXidz + y*dWydz);
+  *Bx = (          - 0.125*(dXidx + y*dWydx) )*epsxy;
+  *By = ( 0.875*Wy - 0.125*(dXidy + y*dWydy) )*epsxy;
+  *Bz =            - 0.125*(dXidz + y*dWydz);
 }
 
 /* initialize BNSdata */
@@ -238,11 +238,13 @@ int BNSdata_startup(tGrid *grid)
 //y=0.1; z=0.2;
 //for(y=-5; y<5; y+=0.1)
 //{
+//z=0;
+//x=0.1*y;
 //BNSdata_initial_shift(1, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs1,
 //                      -(x-xc1), -(y-ysh1), z,  &Bx1,&By1,&Bz1);
 //BNSdata_initial_shift(2, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs2,
 //                       x-xc2, y, z,  &Bx2,&By2,&Bz2);
-//printf("%g   %g\n", y, By1);
+//printf("%g  %g  %g\n", y, Bx1,Bx2);
 //}
 //exit(11);
 
