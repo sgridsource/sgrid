@@ -248,6 +248,8 @@ int set_boxsizes(tGrid *grid)
          0.5*(xmax1-xmin1), 0.5*(xmax2-xmin2) );
   xc1 = 0.5*(xmax1+xmin1);
   xc2 = 0.5*(xmax2+xmin2);
+  printf(" => center of domain0 = %g,   center of domain3 = %g\n", xc1, xc2);
+  printf(" BNSdata_b = %g\n", Getd("BNSdata_b"));
   DoM = fabs(xc1-xc2)/(m01+m02);
   DoM3 = DoM*DoM*DoM;
   DoM4 = DoM3*DoM;
