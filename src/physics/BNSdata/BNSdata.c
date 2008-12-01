@@ -1676,7 +1676,7 @@ if(0) /* not working */
       else if(Getv("BNSdata_adjust", "keep_xmax"))
       { /* keep xmax1/2 in place */
         adjust_Omega_xCM_keep_xmax(grid, it, adjusttol);
-        adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol);
+        adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
       }
       else if(Getv("BNSdata_adjust", "min_qchange"))
         adjust_C1_C2_Omega_xCM_q_min_qchange(grid, it, adjusttol, &dOmega);
