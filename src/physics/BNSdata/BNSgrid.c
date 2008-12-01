@@ -248,7 +248,9 @@ int set_boxsizes(tGrid *grid)
          0.5*(xmax1-xmin1), 0.5*(xmax2-xmin2) );
   xc1 = 0.5*(xmax1+xmin1);
   xc2 = 0.5*(xmax2+xmin2);
-  printf(" => center of domain0 = %g,   center of domain3 = %g\n", xc1, xc2);
+  printf(" => domain0 entends from  xin1 = %g  to  xout1 = %g\n", xmin1,xmax1);
+  printf(" => domain3 entends from  xout2 = %g  to  xin2 = %g\n", xmin2,xmax2);
+  printf(" => A=1 in domain0 and 3 is at: xc1 = %g,  xc2 = %g\n", xc1, xc2);
   printf(" BNSdata_b = %g\n", Getd("BNSdata_b"));
   DoM = fabs(xc1-xc2)/(m01+m02);
   DoM3 = DoM*DoM*DoM;
