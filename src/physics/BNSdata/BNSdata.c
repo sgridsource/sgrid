@@ -646,8 +646,8 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   /* set desired masses for this iteration */
   m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
   m0_errors_VectorFunc__m02 = Getd("BNSdata_m02"); // + dm02*0.9;
-  printf(" adjusting q,C1,C2 to achieve: m01=%g  m02=%g\n",
-         m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02);
+  printf(" adjusting q,C1,C2 to achieve: m01=%g  m02=%g  tol*0.01=%g\n",
+         m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02, tol*0.01);
 
   /* print C1/2 we used before */
   printf(" old: BNSdata_C1=%g BNSdata_C2=%g\n",
@@ -1200,8 +1200,8 @@ int adjust_Omega_xCM_keep_xmax(tGrid *grid, int it, double tol)
   dx_CM = Getd("BNSdata_b") * Getd("BNSdata_dx_CM_fac");
   prdivider(0);
   printf("adjust_Omega_xCM_keep_xmax: in BNSdata_solve step %d\n"
-         "adjust_Omega_xCM_keep_xmax: old Omega = %g  x_CM = %g\n",
-         it, Omega, x_CM);
+         "adjust_Omega_xCM_keep_xmax: old Omega = %g  x_CM = %g  tol = %g\n",
+         it, Omega, x_CM, tol);
 
   /* set global vars */
   xmaxs_error_VectorFunc__grid  = grid;
