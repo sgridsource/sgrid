@@ -24,6 +24,15 @@ double xouts_error_VectorFunc__xout2;  /* xout2 we currently try to achieve */
 tGrid *xmaxs_error_VectorFunc__grid; /* grid var for xmaxs_error_VectorFunc */
 double xmaxs_error_VectorFunc__xmax1;  /* xmax1 we currently try to achieve */
 double xmaxs_error_VectorFunc__xmax2;  /* xmax2 we currently try to achieve */
+tGrid *dqdx_at_Xmax1_2_VectorFunc__grid;  /* grid var for dqdx_at_Xmax1_2_VectorFunc */
+int dqdx_at_Xmax1_2_VectorFunc__bi1; /* boxind of max1 */
+int dqdx_at_Xmax1_2_VectorFunc__bi2; /* boxind of max2 */
+double dqdx_at_Xmax1_2_VectorFunc__Xmax1; /* pos. of max1 */
+double dqdx_at_Xmax1_2_VectorFunc__Ymax1; /* pos. of max1 */
+double dqdx_at_Xmax1_2_VectorFunc__Xmax2; /* pos. of max2 */
+double dqdx_at_Xmax1_2_VectorFunc__Ymax2; /* pos. of max2 */
+              
+
 
 /* global var lists */
 tVarList *vlu, *vlFu, *vluDerivs;
@@ -1329,6 +1338,198 @@ int adjust_Omega_xCM_keep_xmax(tGrid *grid, int it, double tol)
   return 0;
 }
 
+/* for newton_linesrch_its: compute derivs of q in domain 0 and 3 */
+/* if n=1 only BNSdata_Omega is adjusted
+   if n=2 both BNSdata_Omega & BNSdata_x_CM are adjusted */
+void dqdx_at_Xmax1_2_VectorFunc(int n, double *vec, double *fvec)
+{
+  tGrid *grid = dqdx_at_Xmax1_2_VectorFunc__grid;
+  int bi1 = dqdx_at_Xmax1_2_VectorFunc__bi1;
+  int bi2 = dqdx_at_Xmax1_2_VectorFunc__bi2;
+  double Xmax1 = dqdx_at_Xmax1_2_VectorFunc__Xmax1;
+  double Ymax1 = dqdx_at_Xmax1_2_VectorFunc__Ymax1;
+  double Xmax2 = dqdx_at_Xmax1_2_VectorFunc__Xmax2;
+  double Ymax2 = dqdx_at_Xmax1_2_VectorFunc__Ymax2;
+  int b;
+
+//  /* save old q in BNSdata_qold */
+//  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+
+  /* set BNSdata_Omega & BNSdata_x_CM */
+  Setd("BNSdata_Omega", vec[1]);
+  if(n>=2) Setd("BNSdata_x_CM",  vec[2]);
+
+  /* compute new q */
+  BNS_compute_new_q(grid);
+
+  /* get deriv dq of q in box bi1 and bi2 in BNSdata_temp1
+     and dq's coeffs c in BNSdata_temp2 */
+  forallboxes(grid, b) if(b==bi1 || b==bi2)
+  {
+    tBox *box = grid->box[b];
+    double *q = box->v[Ind("BNSdata_q")];
+    double *dq= box->v[Ind("BNSdata_temp1")];
+    double *c = box->v[Ind("BNSdata_temp2")];
+    spec_Deriv1(box, 1, q, dq);
+    spec_Coeffs(box, dq, c);
+  }
+
+  /* find dq/dx at the locations Xmax1/2 in NS1/2 and store
+     them in fvec[1] and fvec[2] */
+  fvec[1] = spec_interpolate(grid->box[0],
+                       grid->box[0]->v[Ind("BNSdata_temp2")], Xmax1,Ymax1,0);
+  if(n>=2) fvec[2] = spec_interpolate(grid->box[3], 
+                       grid->box[3]->v[Ind("BNSdata_temp2")], Xmax2,Ymax2,0);
+
+  printf("dqdx_at_Xmax1_2_VectorFunc: Omega=%.13g x_CM=%.13g\n"
+         "  => dq/dx(xmax1)=%.13g",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"), fvec[1]);
+
+  if(n>=2) printf("  dq/dx(xmax2)=%.13g\n", fvec[2]);
+  else	   printf("\n");
+  fflush(stdout);
+  prdivider(0);
+}
+
+/* Adjust Omega and x_CM so that point with max q, xmax1/2 stay put */
+int adjust_Omega_xCM_keep_dqdxmax_eq_0(tGrid *grid, int it, double tol)
+{
+  int check, stat, bi, i;
+  double OmxCMvec[3];
+  double dqdx_m0[3];
+  double dqdx_00[3];
+  double dqdx_p0[3];
+  double dqdx_0m[3];
+  double dqdx_0p[3];
+  double Omega, x_CM;
+  double dOmega, dx_CM;
+  double xmax1, xmax2;
+  int do_lnsrch = Getv("BNSdata_adjust", "always");
+  int pr_curxmax =Getv("BNSdata_adjust", "print_current_xmax");
+
+  /* save old Omega, x_CM */
+  Omega = Getd("BNSdata_Omega");
+  x_CM  = Getd("BNSdata_x_CM");
+  dOmega= Omega * Getd("BNSdata_dOmega_fac");
+  dx_CM = Getd("BNSdata_b") * Getd("BNSdata_dx_CM_fac");
+  prdivider(0);
+  printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: in BNSdata_solve step %d\n"
+         "adjust_Omega_xCM_keep_dqdxmax_eq_0: old Omega=%g x_CM=%g tol=%g\n",
+         it, Omega, x_CM, tol);
+
+  /* save BNSdata_xmax1/2 */
+  xmax1 = Getd("BNSdata_xmax1");
+  xmax2 = Getd("BNSdata_xmax2");
+
+  /* set global vars */
+  dqdx_at_Xmax1_2_VectorFunc__grid  = grid;
+  /* for now we assume that the max are in box0/3 at Y=B=0 */
+  dqdx_at_Xmax1_2_VectorFunc__bi1 = 0; 
+  dqdx_at_Xmax1_2_VectorFunc__Ymax1 = 0.0;
+  X_of_x_forgiven_YZ(grid->box[0], &dqdx_at_Xmax1_2_VectorFunc__Xmax1,
+                     xmax1, 0.0,0.0);
+  dqdx_at_Xmax1_2_VectorFunc__bi2 = 3;
+  dqdx_at_Xmax1_2_VectorFunc__Ymax2 = 0.0;
+  X_of_x_forgiven_YZ(grid->box[3], &dqdx_at_Xmax1_2_VectorFunc__Xmax2,
+                     xmax2, 0.0,0.0);
+  printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: xmax1=%g xmax2=%g\n",
+         xmax1, xmax2);
+  printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: Xmax1=%g Xmax2=%g\n",
+         dqdx_at_Xmax1_2_VectorFunc__Xmax2, dqdx_at_Xmax1_2_VectorFunc__Xmax2);
+  prdivider(0);
+
+  if(do_lnsrch==0)
+  {
+    /* find deviations for Omega +/- dOmega, x_CM */
+    OmxCMvec[2] = x_CM;
+    OmxCMvec[1] = Omega - dOmega;
+    dqdx_at_Xmax1_2_VectorFunc(2, OmxCMvec, dqdx_m0);
+    OmxCMvec[1] = Omega + dOmega;
+    dqdx_at_Xmax1_2_VectorFunc(2, OmxCMvec, dqdx_p0);
+    OmxCMvec[1] = Omega;
+    /* dqdx_at_Xmax1_2_VectorFunc(2, OmxCMvec, dqdx_00); */
+    printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: dqdx_m0[1]=%g dqdx_m0[2]=%g\n",
+           dqdx_m0[1], dqdx_m0[2]);
+    /* printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: dqdx_00[1]=%g dqdx_00[2]=%g\n",
+           dqdx_00[1], dqdx_00[2]); */
+    printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: dqdx_p0[1]=%g dqdx_p0[2]=%g\n",
+           dqdx_p0[1], dqdx_p0[2]);
+    prdivider(0);
+  }
+  /* check if there is a zero, if so set do_lnsrch=1 */
+  if( (dqdx_m0[1]*dqdx_p0[1]<0.0) && (dqdx_m0[2]*dqdx_p0[2]<0.0) )
+    do_lnsrch = 1;
+  if( (do_lnsrch==0) &&
+      ((dqdx_m0[1]*dqdx_p0[1]<0.0) || (dqdx_m0[2]*dqdx_p0[2]<0.0)) )
+  {
+    /* find deviations for Omega, x_CM +/- dx_CM */
+    {
+      OmxCMvec[1] = Omega;
+      OmxCMvec[2] = x_CM - dx_CM;
+      dqdx_at_Xmax1_2_VectorFunc(2, OmxCMvec, dqdx_0m);
+      OmxCMvec[2] = x_CM + dx_CM;
+      dqdx_at_Xmax1_2_VectorFunc(2, OmxCMvec, dqdx_0p);
+      OmxCMvec[2] = x_CM;
+      /* dqdx_at_Xmax1_2_VectorFunc(2, OmxCMvec, dqdx_00); */
+      printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: dqdx_0m[1]=%g dqdx_0m[2]=%g\n",
+             dqdx_m0[1], dqdx_m0[2]);
+      /* printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: dqdx_00[1]=%g dqdx_00[2]=%g\n",
+             dqdx_00[1], dqdx_00[2]); */
+      printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: dqdx_0p[1]=%g dqdx_0p[2]=%g\n",
+             dqdx_p0[1], dqdx_p0[2]);
+  
+      if( (dqdx_m0[1]*dqdx_p0[1]<0.0) && (dqdx_0m[2]*dqdx_0p[2]<0.0) )
+        do_lnsrch = 1;
+      if( (dqdx_m0[2]*dqdx_p0[2]<0.0) && (dqdx_0m[1]*dqdx_0p[1]<0.0) )
+        do_lnsrch = 1;
+    }
+  }
+  printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: do_lnsrch = %d\n", do_lnsrch);
+  prdivider(0);
+  if(do_lnsrch)
+  {
+    /**************************************************************************/
+    /* do newton_linesrch_its iterations until xmax1/2 are where we want them */
+    /**************************************************************************/
+    OmxCMvec[1] = Omega;
+    OmxCMvec[2] = x_CM;
+    stat = newton_linesrch_its(OmxCMvec, 2, &check, dqdx_at_Xmax1_2_VectorFunc,
+                               1000, tol*0.5);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  }
+  else
+  {
+    OmxCMvec[1] = Omega;
+    dqdx_at_Xmax1_2_VectorFunc(2, OmxCMvec, dqdx_00);
+    printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: dqdx_00[1]=%g dqdx_00[2]=%g\n",
+           dqdx_00[1], dqdx_00[2]);
+  }
+  printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: new Omega=%g x_CM=%g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+  prdivider(0);
+
+  /* find and print current xmax1/2 */
+  if(pr_curxmax)
+  {
+    double dxmax[3];
+    xmaxs_error_VectorFunc__grid  = grid;
+    xmaxs_error_VectorFunc__xmax1 = Getd("BNSdata_xmax1");
+    xmaxs_error_VectorFunc__xmax2 = Getd("BNSdata_xmax2");
+    xmaxs_error_VectorFunc(2, OmxCMvec, dxmax);
+  }
+
+  /* set q to zero if q<0, and also in region 1 & 2 */
+  forallboxes(grid, bi)
+  {
+    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+    forallpoints(grid->box[bi], i)
+      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+  }
+
+  return 0;
+}
+
+
 
 /* adjust m01 and m02 to let them e.g. grow during iterations */
 void adjust_BNSdata_m01_m02(void)
@@ -1673,9 +1874,14 @@ if(0) /* not working */
         adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, adjusttol, &dOmega);
       else if(Getv("BNSdata_adjust", "keep_xout"))
         adjust_C1_C2_Omega_xCM_q_keep_xout(grid, it, adjusttol);
-      else if(Getv("BNSdata_adjust", "keep_xmax"))
+      else if(Getv("BNSdata_adjust", "findandkeep_xmax")) /* old keep_xmax */
       { /* keep xmax1/2 in place */
         adjust_Omega_xCM_keep_xmax(grid, it, adjusttol);
+        adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
+      }
+      else if(Getv("BNSdata_adjust", "keep_xmax"))
+      { /* keep xmax1/2 in place, by keeping the pos. of dq/dx=0 in place */
+        adjust_Omega_xCM_keep_dqdxmax_eq_0(grid, it, adjusttol);
         adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
       }
       else if(Getv("BNSdata_adjust", "min_qchange"))
@@ -3590,7 +3796,7 @@ void m01_error_VectorFunc(int n, double *vec, double *fvec)
   /* get rest mass */
   m01 = GetInnerRestMass(grid, 0);
 
-  printf("m01_error_VectorFunc: C1=%g  m01=%g\n", vec[1], m01);
+  printf("m01_error_VectorFunc: C1=%.13g  m01=%.13g\n", vec[1], m01);
   fflush(stdout);
 //grid->time=-100;
 //write_grid(grid);
@@ -3616,7 +3822,7 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
   /* get rest mass */
   m02 = GetInnerRestMass(grid, 3);
 
-  printf("m02_error_VectorFunc: C2=%g  m02=%g\n", vec[1], m02);
+  printf("m02_error_VectorFunc: C2=%.13g  m02=%.13g\n", vec[1], m02);
   fflush(stdout);
 //grid->time=-200;
 //write_grid(grid);
