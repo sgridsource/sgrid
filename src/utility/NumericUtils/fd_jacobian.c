@@ -4,7 +4,8 @@
 #include <math.h>
 #define NRANSI
 #include "nrutil.h"
-#define EPS 1.0e-4
+#define EPS 1.0e-4    /* should be approx square root of machine precision */
+#define HMIN 1.0e-10  /* min h we use in fin. diff. computation of derivs */
 
 void fd_jacobian(int n, double x[], double fvec[], double **df,
 	void (*vecfunc)(int, double [], double []))
@@ -16,7 +17,7 @@ void fd_jacobian(int n, double x[], double fvec[], double **df,
 	for (j=1;j<=n;j++) {
 		temp=x[j];
 		h=EPS*fabs(temp);
-		if (h == 0.0) h=EPS;
+		if (h < HMIN) h=HMIN; /* make sure h is never below HMIN */
 		x[j]=temp+h;
 		h=x[j]-temp;
 		(*vecfunc)(n,x,f);
@@ -25,5 +26,6 @@ void fd_jacobian(int n, double x[], double fvec[], double **df,
 	}
 	free_vector(f,1,n);
 }
+#undef HMIN
 #undef EPS
 #undef NRANSI
