@@ -1685,7 +1685,7 @@ if(0) /* not working */
     }
     else
     { /* adjust C1/2, q while keeping restmasses, Omega and xCM */
-      adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol);
+      adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
     }
 
     /* compute diagnostics like ham and mom */
