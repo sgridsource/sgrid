@@ -381,8 +381,9 @@ void find_qmaxs_along_x_axis_and_reset_qmaxs_xmaxs_pars(tGrid *grid)
   /* set cart positions of qmax1/2 */
   Setd("BNSdata_xmax1", xmax1);
   Setd("BNSdata_xmax2", xmax2);
-  printf("BNSdata_analyze: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
-         "                 BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
+  printf("find_qmaxs_along_x_axis_and_reset_qmaxs_xmaxs_pars:\n");
+  printf("  resetting: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
+         "             BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
          Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
          Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
 }
