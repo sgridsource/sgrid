@@ -102,6 +102,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_esw1",  "1", "second weight esw1 is used if better");
   AddPar("BNSdata_allow_esw1_first_at", "-1", "first iteration when esw=esw1 "
          "will be tried and allowed if better [#,-1]. -1 means never");
+  AddPar("BNSdata_reset_qmax_xmax_pars_at", "-1", "list of its when we "
+         "reset BNSdata_qmax1/2, BNSdata_xmax1/2");
   AddPar("BNSdata_adjust", "nothing", "what we adjust (apart from C1/2) "
          "after ell. solve. E.g. \"keep_xout keep_one_xout\" adjusts Omega "
          "and x_CM to keep either xout1 or xout2 in place. "

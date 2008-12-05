@@ -353,6 +353,41 @@ int BNSdata_startup(tGrid *grid)
 }
 
 
+/* find both qmax and reset BNSdata_qmax1/2, BNSdata_xmax1/2 accordingly */
+void find_qmaxs_along_x_axis_and_reset_qmaxs_xmaxs_pars(tGrid *grid)
+{
+  int bi1, bi2;
+  double xmax1, qmax1, xmax2, qmax2;
+  double Xmax1,Ymax1, Xmax2,Ymax2;
+
+  /* find max q locations xmax1/2 in NS1/2 */
+  bi1=0;  bi2=3;
+  find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
+  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
+  /* compute qmax1 and qmax2 */
+  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  if(grid->box[bi1]->x_of_X[1] != NULL)
+    xmax1 = grid->box[bi1]->x_of_X[1]((void *) grid->box[bi1], -1, Xmax1,Ymax1,0.0);
+  else
+    xmax1 = Xmax1;
+  if(grid->box[bi2]->x_of_X[1] != NULL)
+    xmax2 = grid->box[bi2]->x_of_X[1]((void *) grid->box[bi2], -1, Xmax2,Ymax2,0.0);
+  else
+    xmax2 = Xmax2;
+  /* set qmax1/2 */
+  Setd("BNSdata_qmax1", qmax1);
+  Setd("BNSdata_qmax2", qmax2);
+  /* set cart positions of qmax1/2 */
+  Setd("BNSdata_xmax1", xmax1);
+  Setd("BNSdata_xmax2", xmax2);
+  printf("BNSdata_analyze: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
+         "                 BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
+         Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
+         Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
+}
+
+
 /* adjust C1/2 and Omega as in Pedro's NS ini dat paper.
    BUT with this algorithm the iterations fail... */
 int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
@@ -1643,6 +1678,7 @@ int BNSdata_solve(tGrid *grid)
   int it;
   double dOmega = Getd("BNSdata_Omega")*0.1;
   double totalerr1, totalerr;
+  char str[1000];
 
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
@@ -1866,6 +1902,13 @@ if(0) /* not working */
     /* adjust C1/2, Omega, xCM according to WT with L2 */
     adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
 }
+
+    /* reset BNSdata_qmax1/2, BNSdata_xmax1/2 pars if the iteration 
+       # it is contained in the list BNSdata_reset_qmax_xmax_pars_at */
+    snprintf(str, 999, "%d", it);
+    if( Getv("BNSdata_reset_qmax_xmax_pars_at", str) )
+      find_qmaxs_along_x_axis_and_reset_qmaxs_xmaxs_pars(grid);
+      
     /* choose how we adjust C1/2, Omega, xCM: */
     if( it>=Geti("BNSdata_adjust_first_at") &&
         Geti("BNSdata_adjust_first_at")>=0 )
