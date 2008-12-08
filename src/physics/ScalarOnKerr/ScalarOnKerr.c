@@ -1797,22 +1797,27 @@ void filter_unew_radially(tVarList *unew, tVarList *upre)
     int n1=box->n1;
     int n2=box->n2;
     int n3=box->n3;
-    int i,j,k, f, vi;
-
-    f=3*n1/2;
+    int i,j,k, vi;
 
     /* filter all vars */
     for(vi=0; vi<unew->n; vi++)
     {
       double *var = vlldataptr(unew, box, vi);
-      double *temp1 = box->v[Ind("temp1")];
-//printf("filter_unew_radially: %s\n", VarName(unew->index[vi]));
+      double *vc  = box->v[Ind("temp1")];
 
-      spec_analysis1(box, 1, var, temp1);
-      forallijk(i,j,k) if(i>f) temp1[Index(i,j,k)]=0.0;
-      spec_synthesis1(box, 1, var, temp1);
+      /* compute coeffs of var in X-dir */
+      spec_analysis1(box, 1, var, vc);
+
+      /* remove all coeffs with i>=2*(n1/3) */
+      for(k=0; k<n3; k++)
+        for(j=0; j<n2; j++)
+          for(i=(n1/3)*2; i<n1; i++)
+              vc[Index(i,j,k)]=0.0;
+
+      /* use modified coeffs to change var */
+      spec_synthesis1(box, 1, var, vc);
     }
-  } /* end forallboxes */
+  }
 }
 
 
