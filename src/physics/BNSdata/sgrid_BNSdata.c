@@ -84,6 +84,7 @@ int sgrid_BNSdata()
          "[needs to be adjusted so that m02 stays the constant]");
   AddPar("BNSdata_guess", "TOV", "init. guess for Psi, alphaP and "
          "q [TOV,TOVaverage,TOVproduct] for shift [TaniguchiShift]");
+  AddPar("BNSdata_init_q_fromfields", "no", "init q from other fields [no,yes]");
   if(Getd("BNSdata_m02")==0.0)
   {
     AddPar("BNSdata_yshift1", "0", "shift NS1 in y-direction for testing");

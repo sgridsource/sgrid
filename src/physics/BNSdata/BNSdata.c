@@ -349,6 +349,25 @@ int BNSdata_startup(tGrid *grid)
          Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
          Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
 
+  /* recompute q from the other fields */
+  if(Getv("BNSdata_init_q_fromfields", "yes"))
+  {
+    int bi;
+
+    /* adjust grid so that new q=0 is at A=0 */
+    compute_new_q_and_adjust_domainshapes(grid, 0);
+    compute_new_q_and_adjust_domainshapes(grid, 3);
+  
+    /* set q to zero if q<0, and also in region 1 & 2 */
+    forallboxes(grid, bi)
+    {
+      int i;
+      double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+      forallpoints(grid->box[bi], i)
+        if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+    }
+  }
+
   return 0;
 }
 
