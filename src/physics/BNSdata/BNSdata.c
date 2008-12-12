@@ -1783,7 +1783,7 @@ int BNSdata_solve(tGrid *grid)
   BNSdata_verify_solution(grid);
   
   /* output grid before any iterations are done */
-  grid->time  = -itmax-1;
+  grid->time  = -itmax;
   write_grid(grid);
   BNSdata_analyze(grid);
   grid->time += 1.0;
