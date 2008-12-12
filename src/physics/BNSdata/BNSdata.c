@@ -2169,7 +2169,7 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   fprintf(fp, "J_ADM\t\t%.19g\n", J_ADM);
   fprintf(fp, "M_ADM\t\t%.19g\n", M_ADM);
   for(i=b1n1-1; i>=b1n1-5 && i>=0; i--)
-    fprintf(fp, "M_ADM[%d]\t%.19g\t(A=%.16g  x=%.16g)\n", i, M_ADM_ofA[i],
+    fprintf(fp, "MpADM[%d]\t%.19g\t(A=%.16g  x=%.16g)\n", i, M_ADM_ofA[i],
             grid->box[1]->v[iX][i], grid->box[1]->v[ix][i]);
   fprintf(fp, "\n");
   fprintf(fp, "(m1/R)_inf\t%.19g\n", TOV_m1/TOV_r_surf1);
