@@ -1785,6 +1785,7 @@ int BNSdata_solve(tGrid *grid)
   /* output grid before any iterations are done */
   grid->time  = -itmax-1;
   write_grid(grid);
+  BNSdata_analyze(grid);
   grid->time += 1.0;
 
   /* main iteration loop, do it until res is small enough */
@@ -1971,7 +1972,11 @@ if(0) /* not working */
     Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
 
     /* write current iteration if we are not done yet and increase counters */
-    if(it<=itmax) write_grid(grid);
+    if(it<=itmax)
+    {
+      write_grid(grid);
+      BNSdata_analyze(grid);
+    }
     grid->time += 1.0;
   }
   if(it>itmax)
@@ -2152,8 +2157,8 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   snprintf(filename, filenamelen, "%s/%s", outdir, name);
   fp = fopen(filename, "a");
   if(!fp) errorexits("failed opening %s", filename);
-  fprintf(fp, "BNS data properties:\n");
-  fprintf(fp, "--------------------\n");
+  fprintf(fp, "BNS data properties (time = %g):\n", grid->time);
+  fprintf(fp, "-------------------\n");
   fprintf(fp, "n\t\t%.19g\n", n);
   fprintf(fp, "Gamma\t\t%.19g\n", Gamma);
   fprintf(fp, "kappa\t\t%.19g\n", kappa);
@@ -2186,6 +2191,7 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   fprintf(fp, "sigp_10\t\t%+.19g\n", sigp_10);
   fprintf(fp, "sigm_00\t\t%+.19g\n", sigm_00);
   fprintf(fp, "sigm_10\t\t%+.19g\n", sigm_10);
+  fprintf(fp, "\n");
   fclose(fp);
   free(filename);
   free(M_ADM_ofA);
