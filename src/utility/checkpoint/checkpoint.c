@@ -21,12 +21,16 @@ int checkpoint(tGrid *grid)
 {
   int di;
   double dt, dT;
+  int restart_it;
   int pr = 0;
 
   /* check whether we are on */
   if(Getv("checkpoint", "no")) return 0;
   if(pr) printf("checkpoint called at top grid iteration %d\n",
 		 grid->iteration);
+
+  /* iteration at which we will do a restart if there are checkpoint files */
+  restart_it = Geti("checkpoint_restart_it");
 
   /* if we are in the restart phase */
   if (Getv("checkpoint", "restart"))
@@ -35,8 +39,9 @@ int checkpoint(tGrid *grid)
     if (grid->iteration == 0)
       ;
     
-    /* clobber data after one full evolution step */
-    if (grid->iteration == 1) {
+    /* clobber data at restart_it, usually after one full evolution step */
+    if (grid->iteration == restart_it || restart_it<0)
+    {
       printf("checkpoint restart: read files\n");
       checkpoint_read(grid);
       checkpoint_copy_output();
@@ -76,10 +81,8 @@ int checkpoint(tGrid *grid)
     return 0;
   }
 
-  /* for now do not write checkpoints after initial data */
-  if (grid->iteration == 0) {
-    return 0;
-  }
+  /* we do not write checkpoints after initial data, if restart_it>0 */
+  if(grid->iteration == 0 && restart_it>0)  return 0;
 
   /* write checkpoint */
   checkpoint_write(grid);

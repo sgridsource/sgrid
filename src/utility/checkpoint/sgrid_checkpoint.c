@@ -20,6 +20,8 @@ int sgrid_checkpoint(void)
   /* rest of parameters */
   AddPar("checkpoint_di", "1", "how often to checkpoint");
   AddPar("checkpoint_dt", "0", "how often to checkpoint");
+  AddPar("checkpoint_restart_it", "1", "iteration at which we "
+         "restart (-1 means any) [1,0,-1]");
 
   AddPar("checkpoint_DeltaT", "0",
 	 "run for that much beyond previous checkpoint");
