@@ -1794,6 +1794,24 @@ int BNSdata_solve(tGrid *grid)
     printf("BNSdata_solve step %d:\n", it);
     prdivider(1);
 
+    /* update pars from file, and write new pars */
+    if(parameterio_update_pars(grid) == 0)
+    {
+      itmax        = Geti("BNSdata_itmax");
+      tol          = Getd("BNSdata_tol");
+      adjusttol    = max2(tol, Getd("BNSdata_adjust_mintol"));
+      esw          = Getd("BNSdata_esw");
+      esw1         = Getd("BNSdata_esw1");
+      allow_esw1_it= Geti("BNSdata_allow_esw1_first_at");
+      Newton_itmax = itmax;
+      NewtTolFac   = Getd("BNSdata_Newton_tolFac");
+      Newton_tol   = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+      linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
+      linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
+      linSolver_tol    = Getd("BNSdata_linSolver_tol");
+    }
+    parameterio_write_current_pars(grid);
+
     /* save old values before ell. solve */
     varcopy(grid, Ind("BNSdata_Psiold"),    Ind("BNSdata_Psi"));
     varcopy(grid, Ind("BNSdata_alphaPold"), Ind("BNSdata_alphaP"));
