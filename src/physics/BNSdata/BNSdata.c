@@ -1794,6 +1794,9 @@ int BNSdata_solve(tGrid *grid)
     printf("BNSdata_solve step %d:\n", it);
     prdivider(1);
 
+    /* do checkpointing (works only if checkpoint_restart_it<1) */
+    checkpoint(grid);
+
     /* update pars from file, and write new pars */
     if(parameterio_update_pars(grid) == 0)
     {
