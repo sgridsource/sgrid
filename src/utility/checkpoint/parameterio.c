@@ -82,15 +82,15 @@ int parameterio_update_pars(tGrid *g)
       if(1) printf("  overwriting %s = %s -> %s\n",
 		      name, currentvalue, value);
       Sets(name, value);
+      parsread++;
     }
-    parsread++;
   }
   printf("  updated %d parameters\n", parsread);
   fclose(fp);
 
   /* rename sgrid_update_parameters.par */  
   sprintf(str, "%s_done", filename);
-  system3("mv -f ", filename, str);
+  system3("mv -f", filename, str);
 
   return 0;
 }

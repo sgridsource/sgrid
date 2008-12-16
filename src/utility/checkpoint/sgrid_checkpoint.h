@@ -2,3 +2,5 @@
 /* Wolfgang Tichy 11/2008 */
 
 int checkpoint(tGrid *grid);
+int parameterio_write_current_pars(tGrid *g);
+int parameterio_update_pars(tGrid *g);
