@@ -57,11 +57,11 @@ int checkpoint(tGrid *grid)
 	printf("embarking on iterations %d to %d\n",
 	       grid->iteration + 1, Geti("iterations")); 
       }
+      return 1; /* return 1 after a real restart */
     }
 
     /* return since we are still starting up and 
-       don't want new checkpoint files
-    */
+       don't want new checkpoint files            */
     return 0;
   }
 
