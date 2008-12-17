@@ -50,7 +50,7 @@ int parameterio_update_pars(tGrid *g)
 
   /* open file for reading */
   fp = fopen(filename, "rb");
-  if (!fp) return 1; /* errorexits("failed opening %s", filename); */
+  if (!fp) return 0; /* errorexits("failed opening %s", filename); */
 
   /* read parameters */
   if(1) printf("parameterio_update_pars:\n");
@@ -92,5 +92,5 @@ int parameterio_update_pars(tGrid *g)
   sprintf(str, "%s_done", filename);
   system3("mv -f", filename, str);
 
-  return 0;
+  return 1;
 }

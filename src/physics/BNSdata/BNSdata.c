@@ -1800,7 +1800,7 @@ int BNSdata_solve(tGrid *grid)
     restart = checkpoint(grid);
 
     /* update pars from file, and write new pars */
-    if(parameterio_update_pars(grid) == 0 || restart == 1)
+    if(parameterio_update_pars(grid) == 1 || restart == 1)
     {
       itmax        = Geti("BNSdata_itmax");
       tol          = Getd("BNSdata_tol");
