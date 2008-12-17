@@ -29,7 +29,23 @@ void checkpoint_read(tGrid *g)
   {
     /* read if it is my turn */
     if (i == sgrid_mpi_rank())
+    {
+      tGrid *g2;
+      /* get new pars */
       checkpoint_read_ParsAndIterations_local(g, fp);
+ 
+      /* make temporary grid g2, using new pars */
+      g2 = make_grid(1);
+      /* copy all from g (except vars) into g2 */
+      copy_grid_withoutvars(g, g2, 0);
+      /* read all that it new into g2 */
+      rewind(fp);
+      checkpoint_read_ParsAndIterations_local(g2, fp);
+
+      /* copy g2 into g */
+      copy_grid_withoutvars(g2, g, 0);
+      free_grid(g2);	
+    }
     /* everyone please wait here */
     sgrid_mpi_barrier();
   }
