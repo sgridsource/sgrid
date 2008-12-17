@@ -1810,10 +1810,13 @@ int BNSdata_solve(tGrid *grid)
       allow_esw1_it= Geti("BNSdata_allow_esw1_first_at");
       Newton_itmax = itmax;
       NewtTolFac   = Getd("BNSdata_Newton_tolFac");
-      Newton_tol   = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
       linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
       linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
       linSolver_tol    = Getd("BNSdata_linSolver_tol");
+      /* reset Newton_tol */
+      F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+      normresnonlin = GridL2Norm(vlFu);
+      Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
     }
     parameterio_write_current_pars(grid);
 
