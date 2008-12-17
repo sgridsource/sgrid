@@ -1791,14 +1791,16 @@ int BNSdata_solve(tGrid *grid)
   /* main iteration loop, do it until res is small enough */
   for(it=1; it <= itmax; it++)
   {
+    int restart; 
+
     printf("BNSdata_solve step %d:\n", it);
     prdivider(1);
 
     /* do checkpointing (works only if checkpoint_restart_it<1) */
-    checkpoint(grid);
+    restart = checkpoint(grid);
 
     /* update pars from file, and write new pars */
-    if(parameterio_update_pars(grid) == 0)
+    if(parameterio_update_pars(grid) == 0 || restart == 1)
     {
       itmax        = Geti("BNSdata_itmax");
       tol          = Getd("BNSdata_tol");
