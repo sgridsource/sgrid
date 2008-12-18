@@ -1,5 +1,5 @@
 /* Z4secondO_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 25.6.2005 */
+/* Copyright (C) 2005 Wolfgang Tichy */
 /* Produced with Mathematica */
 
 #include "sgrid.h"

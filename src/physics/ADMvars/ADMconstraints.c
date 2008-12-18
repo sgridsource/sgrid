@@ -1,5 +1,5 @@
 /* ADMconstraints.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 25.9.2008 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 18.12.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -3134,4 +3134,4 @@ Cal(denom <= 0.,0.,mom3[ijk]/denom)
 }  /* end of function */
 
 /* ADMconstraints.c */
-/* nvars = 127, n* = 2088,  n/ = 36,  n+ = 2041, n = 4165, O = 1 */
+/* nvars = 127, n* = 2088,  n/ = 36,  n+ = 2042, n = 4166, O = 1 */

@@ -1,5 +1,5 @@
 /* ADMenergy_spheric_intergrand.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 31.8.2005 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 18.12.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -427,4 +427,4 @@ integrand
 }  /* end of function */
 
 /* ADMenergy_spheric_intergrand.c */
-/* nvars = 32, n* = 221,  n/ = 31,  n+ = 173, n = 425, O = 1 */
+/* nvars = 32, n* = 221,  n/ = 31,  n+ = 174, n = 426, O = 1 */

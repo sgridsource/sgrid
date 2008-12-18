@@ -26,7 +26,7 @@ pr[x_] := Module[{s},
 ]
 
 pr["/* "<>CFunctionFile<>" */\n"];
-pr["/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, "<>
+pr["/* Copyright (C) 2005-2008 Wolfgang Tichy, "<>
        ToString[Date[][[3]]]<>"."<>
        ToString[Date[][[2]]]<>"."<>
        ToString[Date[][[1]]]<>" */\n"];

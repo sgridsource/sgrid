@@ -1,5 +1,5 @@
 /* BSSN_rhs.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 5.11.2008 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 18.12.2008 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -3418,4 +3418,4 @@ rB3
 }  /* end of function */
 
 /* BSSN_rhs.c */
-/* nvars = 216, n* = 2187,  n/ = 85,  n+ = 1957, n = 4229, O = 1 */
+/* nvars = 216, n* = 2187,  n/ = 85,  n+ = 1958, n = 4230, O = 1 */
