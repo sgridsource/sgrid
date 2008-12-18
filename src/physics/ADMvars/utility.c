@@ -1,5 +1,5 @@
 /* utility.c */
-/* Bernd Bruegmann 6/02 */
+/* Wolfgang Tichy, 2005 */
 
 #include "sgrid.h"
 #include "ADMvars.h"

@@ -1,5 +1,5 @@
 /* ADMvars.c */
-/* Bernd Bruegmann 11/02 */
+/* Wolfgang Tichy 2004, 2008 */
 
 #include "sgrid.h"
 #include "ADMvars.h"

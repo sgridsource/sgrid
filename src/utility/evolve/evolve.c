@@ -1,7 +1,7 @@
 /* evolve.c */
-/* Wolfgang Tichy, April 2005  &  Bernd Bruegmann 6/02 */
+/* Wolfgang Tichy, April 2005 */
 
-/* provide the glue for the different evolution schemes */
+/* provide common vars and funcs for the different evolution schemes */
 
 #include "sgrid.h"
 #include "evolve.h"

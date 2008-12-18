@@ -1,5 +1,4 @@
 (* BSSN_init.m 
-   Bernd Bruegmann 10/98, 10/02
    Wolfgang Tichy  4/2004       *)
 
 (* initialize BSSN variables from ADM variables *)

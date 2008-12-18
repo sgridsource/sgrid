@@ -1,5 +1,5 @@
 /* ADMvars.h */
-/* Bernd Bruegmann, 6/02 */
+/* Wolfgang Tichy, 2005 */
 
 void ADMconstraints(tVarList *u);
 int allocateADMvars(tGrid *grid);

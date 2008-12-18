@@ -1,5 +1,5 @@
 /* sgrid_testwave.c */
-/* Wolfgang Tichy, April 2005  &  Bernd Bruegmann 6/02 */
+/* Wolfgang Tichy, April 2005 */
 
 #include "sgrid.h"
 #include "testwave.h"

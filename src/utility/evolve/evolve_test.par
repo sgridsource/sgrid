@@ -1,5 +1,5 @@
 # evolve_test.par
-# BB 10/03
+# WT 2005
 # 
 # basic test for time integrators using ODE
 # you can look at it with

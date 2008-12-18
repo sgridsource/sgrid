@@ -1,5 +1,5 @@
 /* sgrid_boundary.c */
-/* Bernd Bruegmann 01/00 */
+/* Wolfgang Tichy 5/2005 */
 
 #include "sgrid.h"
 #include "boundary.h"

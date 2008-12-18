@@ -1,5 +1,5 @@
 /* sgrid_ADMvars.h */
-/* Bernd Bruegmann, 6/02 */
+/* Wolfgang Tichy, 2005 */
 
 extern tVarList *psiandderivs, *K_initial;
 

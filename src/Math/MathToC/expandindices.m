@@ -1,5 +1,5 @@
 (* expandindices.m *)
-(* Bernd Bruegmann, 2/96, 10/02 *)
+(*  Wolfgang Tichy 2005, Bernd Bruegmann, 2/96, 10/02 *)
 
 (* Mathematica script, to be read by TensorEquationsToC.m:
 

@@ -1,5 +1,4 @@
 /* BSSN.h */
-/* Bernd Bruegmann, 6/02 */
 /* Wolfgang Tichy  4/2004 */
 
 

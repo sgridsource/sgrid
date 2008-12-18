@@ -1,5 +1,5 @@
 /* fit.c */
-/* Wolfgang Tichy, April 2005  &  Bernd Bruegmann 11/03 */
+/* Wolfgang Tichy, April 2005 */
 
 /* test fitting routines from Numerical Recipes 
 

@@ -1,5 +1,5 @@
 /* sgrid_ParManipulator.c */
-/* Bernd Bruegmann 01/00 */
+/* Wolfgang Tichy 2008 */
 
 #include "sgrid.h"
 #include "ParManipulator.h"

@@ -1,7 +1,7 @@
 /* rk.c */
 /* Wolfgang Tichy, April 2005  &  Bernd Bruegmann 10/03 */
 
-/* First version in admc_rk.c for Cactus, Wolfgang Tichy, April 2005  &  Bernd Bruegmann 6/99.
+/* Runge-Kutta:
    Now generalized with the more general setup found in Mathematica
    http://documents.wolfram.com/v5/Built-inFunctions/NumericalComputation/
      EquationSolving/AdvancedDocumentation/NDSolve.html

@@ -1,5 +1,5 @@
 /* variables.c */
-/* Wolfgang Tichy, April 2005  &  Bernd Bruegmann 12/99 */
+/* Wolfgang Tichy, April 2005 */
 
 
 #include "sgrid.h"

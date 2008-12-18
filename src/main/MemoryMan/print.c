@@ -1,5 +1,5 @@
 /* print.c */
-/* Wolfgang Tichy, April 2005  &  Bernd Bruegmann, 12/99, 3/03 */
+/* Wolfgang Tichy, April 2005 */
 
 #include "sgrid.h"
 #include "MemoryMan.h"
