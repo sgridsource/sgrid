@@ -1,6 +1,5 @@
 /* BSSN_init.c */
 /* Copyright (C) 2005 Wolfgang Tichy */
-/* Produced with Mathematica */
 
 #include "sgrid.h"
 #include "BSSN.h"
