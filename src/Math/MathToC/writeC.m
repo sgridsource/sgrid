@@ -115,13 +115,14 @@ writeCassign[e_] := Module[{x, nfields, nf, acc, one},
     one = N[1,acc];
     x = N[x,acc];
     x = x /. -1. xxx_ -> -xxx;
-    (* x = x /.  1. xxx_ -> xxx; *)
     x = x /. -one xxx_ -> -xxx;
-    x = x /. -one xxx_ -> -xxx;
-    x = x /. -one xxx_ -> -xxx;
-    x = x /.  one xxx_ -> xxx;
-    x = x /.  one xxx_ -> xxx;
-    x = x /.  one xxx_ -> xxx;
+    (* x = x /.  1. xxx_ -> xxx;
+       x = x /. -one xxx_ -> -xxx;
+       x = x /. -one xxx_ -> -xxx;
+       x = x /. -one xxx_ -> -xxx;
+       x = x /.  one xxx_ -> xxx;
+       x = x /.  one xxx_ -> xxx; *)
+    (* x = x /.  one xxx_ -> xxx; *)
     Print[ CForm[ x[[1]] ] ];
 
     PutAppend[CForm[ x[[1]] ], CFunctionFile];
