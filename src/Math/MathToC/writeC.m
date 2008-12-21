@@ -102,7 +102,7 @@ InitializationCommands[];
 (***************************************************************************)
 (* write equations *)
 
-writeCassign[e_] := Module[{x, nfields, nf},
+writeCassign[e_] := Module[{x, nfields, nf, acc, one},
 
   If[e[[1]] =!= Cif && e[[1]] =!= Cinstruction,
 
@@ -110,11 +110,21 @@ writeCassign[e_] := Module[{x, nfields, nf},
     x = StringReplace[x, "[ijk]" -> "[[ijk]]"];
     x = ToExpression[x];
     x = x /. colpow;
-    Print[ CForm[ N[x[[1]],20] /. -1. xxx_ -> -xxx ] ];
+    (* use N to get numerical expressions and get rid of 1. X and such *)
+    acc = 20;
+    one = N[1,acc];
+    x = N[x,acc];
+    x = x /. -one xxx_ -> -xxx;
+    x = x /. -one xxx_ -> -xxx;
+    x = x /. -one xxx_ -> -xxx;
+    x = x /.  one xxx_ -> xxx;
+    x = x /.  one xxx_ -> xxx;
+    x = x /.  one xxx_ -> xxx;
+    Print[ CForm[ x[[1]] ] ];
 
-    PutAppend[CForm[ N[x[[1]],20] /. -1. xxx_ -> -xxx ], CFunctionFile];
+    PutAppend[CForm[ x[[1]] ], CFunctionFile];
     pr["=\n"];        (* to avoid assignment in CForm *)
-    PutAppend[CForm[ N[x[[2]],20] /. -1. xxx_ -> -xxx ], CFunctionFile];
+    PutAppend[CForm[ x[[2]] ], CFunctionFile];
     pr[";\n\n"];
   ];
 
