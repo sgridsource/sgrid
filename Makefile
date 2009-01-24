@@ -16,6 +16,8 @@ EXECDIR = $(TOP)/exe
 
 # variables common to all setups
 CC = gcc	# gcc or icc
+CXX =		# g++ or icc
+CLINKER = # will be used only in src/main/main/Makefile for linking
 
 INCS = -I$(TOP)/src/main/main
 LIBS = -L$(TOP)/lib
@@ -47,6 +49,15 @@ libpaths += src/utility/checkpoint
 # --------------------------------------------------------------------------
 # the user choses the libraries and some options in the file MyConfig
 include MyConfig
+
+# set CXX and CLINKER to CC if they are not set in MyConfig
+ifeq ($(CXX),)
+CXX = $(CC)
+endif
+
+ifeq ($(CLINKER),)
+CLINKER = $(CC)
+endif
 
 # --------------------------------------------------------------------------
 # manage how the sgrid sources are compiled
@@ -97,6 +108,9 @@ export
 # --------------------------------------------------------------------------
 # default target
 sgrid: $(autoinclude) $(autoinitial)
+	@echo CC=$(CC)
+	@echo CXX=$(CXX)
+	@echo CLINKER=$(CLINKER)
 	for X in $(libnames); do mkdir -p lib/obj/$$X; done
 	for X in $(libpaths); do $(MAKE) -C $$X; done
 

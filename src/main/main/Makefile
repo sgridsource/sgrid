@@ -18,7 +18,7 @@ OBJSWITHPATH = $(addprefix $(OBJDIR)/,$(OBJS))
 # main target is the executable
 # note that $@ is the matched target
 $(EXECDIR)/$(EXEC): $(OBJSWITHPATH) $(wildcard $(LIBDIR)/*)
-	$(CC) $(CFLAGS) -o $@ $(OBJSWITHPATH) $(LIBS)
+	$(CLINKER) $(CFLAGS) -o $@ $(OBJSWITHPATH) $(LIBS)
 
 # secondary target: build object files
 # note that $@ is the matched target, 

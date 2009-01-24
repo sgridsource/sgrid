@@ -43,8 +43,8 @@ $(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
 
 $(OBJDIR)/%.o: %.c* $(TOP)/src/main/main/sgrid.h sgrid_$(NAME).h $(NAME).h Makefile
 	@if [ -f $*.cc ]; \
-	then echo $(CC) $(CFLAGS) -o $@ -c $*.cc ; \
-	          $(CC) $(CFLAGS) -o $@ -c $*.cc ; \
+	then echo $(CXX) $(CFLAGS) -o $@ -c $*.cc ; \
+	          $(CXX) $(CFLAGS) -o $@ -c $*.cc ; \
 	else echo $(CC) $(CFLAGS) -o $@ -c $*.c  ; \
 	          $(CC) $(CFLAGS) -o $@ -c $*.c  ; \
 	fi;
