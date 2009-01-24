@@ -36,6 +36,15 @@ $(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
 
 # secondary target: build object files
 # note that $@ is the matched target, $* is the stem of the target defined by %
+# we could use:
+#$(OBJDIR)/%.o: %.c $(TOP)/src/main/main/sgrid.h sgrid_$(NAME).h $(NAME).h Makefile
+#	$(CC) $(CFLAGS) -o $@ -c $*.c
+# but if we also have .cc files (c++ files) it's better to use this:
 
-$(OBJDIR)/%.o: %.c $(TOP)/src/main/main/sgrid.h sgrid_$(NAME).h $(NAME).h Makefile
-	$(CC) $(CFLAGS) -o $@ -c $*.c
+$(OBJDIR)/%.o: %.c* $(TOP)/src/main/main/sgrid.h sgrid_$(NAME).h $(NAME).h Makefile
+	@if [ -f $*.cc ]; \
+	then echo $(CC) $(CFLAGS) -o $@ -c $*.cc ; \
+	          $(CC) $(CFLAGS) -o $@ -c $*.cc ; \
+	else echo $(CC) $(CFLAGS) -o $@ -c $*.c  ; \
+	          $(CC) $(CFLAGS) -o $@ -c $*.c  ; \
+	fi;
