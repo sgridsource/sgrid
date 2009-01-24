@@ -3,8 +3,6 @@
 
 #include "sgrid.h"
 #include "ScalarOnKerr.h"
-#include "DV_CircSchwSource/Constants.h"
-#include "DV_CircSchwSource/Source.h"
 
 #define KSTIMESHIFT 2.772588722239781
 //#define KSTIMESHIFT 1.204119982655925
@@ -430,8 +428,7 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
     Omega = sqrt(M/(r0*r0*r0));
     /* call Ian's func to set mass, q, radius, and window func pars... */
     //set_mass_radius(M, r0);
-    set_parameters(M, q, r0, Getd("DV_CircSchwSource_DVWindow_n"), 
-                   Getd("DV_CircSchwSource_DVWindow_width"));
+    DV_set_parameters(M, q, r0);
   }
 
   /* select source */
@@ -447,12 +444,12 @@ double ScalarOnKerr_Source(tBox *box, double t, double x,double y,double z)
   }
   else if(sourcetype==2) /* use Ian's source with Window */
   {
-    rho = SourceInKerrSchild(KSTIMESHIFT + t, x, y, z);
+    rho = DV_SourceInKerrSchild(KSTIMESHIFT + t, x, y, z);
   }
   else /* use Ian's source without Window */
   {
     if( (r0-box->bbox[0])*(r0-box->bbox[1])<=0.0 )
-      rho = SourceInKerrSchild(KSTIMESHIFT + t, x, y, z);
+      rho = DV_SourceInKerrSchild(KSTIMESHIFT + t, x, y, z);
     else rho=0.0;
   }
   return rho;
@@ -1945,9 +1942,9 @@ int ScalarOnKerr_analyze(tGrid *grid)
     //z0 = 0.0;
     
     /* use Ian's funcs to get particle position x0,y0,z0 */
-    x0 = current_x(tKS);
-    y0 = current_y(tKS);
-    z0 = current_z(tKS);
+    x0 = DV_current_xKS(tKS);
+    y0 = DV_current_yKS(tKS);
+    z0 = DV_current_zKS(tKS);
     r0 = sqrt(x0*x0 + y0*y0 + z0*z0);
     theta0 = acos(z0/r0);
     phi0 = Arg(x0, y0);
