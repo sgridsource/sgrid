@@ -6,6 +6,4 @@
 /***************************************************/
 void DV_set_parameters(double M, double q, double r0);
 double DV_SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS);
-double DV_current_xKS(double t_KS);
-double DV_current_yKS(double t_KS);
-double DV_current_zKS(double t_KS);
+void DV_current_particle_xyzKS(double t_KS, double *x0, double *y0, double *z0);

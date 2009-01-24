@@ -1942,9 +1942,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
     //z0 = 0.0;
     
     /* use Ian's funcs to get particle position x0,y0,z0 */
-    x0 = DV_current_xKS(tKS);
-    y0 = DV_current_yKS(tKS);
-    z0 = DV_current_zKS(tKS);
+    DV_current_particle_xyzKS(tKS, &x0,&y0,&z0);
     r0 = sqrt(x0*x0 + y0*y0 + z0*z0);
     theta0 = acos(z0/r0);
     phi0 = Arg(x0, y0);

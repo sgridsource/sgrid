@@ -23,18 +23,10 @@ double DV_SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS)
   return SourceInKerrSchild(tKS, xKS,yKS,zKS);
 }
 
-/* get current xKS od particle */
-double DV_current_xKS(double t_KS)
+/* get current KS coords of particle position */
+void DV_current_particle_xyzKS(double t_KS, double *x0, double *y0, double *z0)
 {
-  return current_x(t_KS);
-}
-/* get current yKS od particle */
-double DV_current_yKS(double t_KS)
-{
-  return current_y(t_KS);
-}
-/* get current zKS od particle */
-double DV_current_zKS(double t_KS)
-{
-  return current_z(t_KS);
+  *x0 = current_x(t_KS);
+  *y0 = current_y(t_KS);
+  *z0 = current_z(t_KS);
 }
