@@ -40,8 +40,9 @@ $(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
 #$(OBJDIR)/%.o: %.c $(TOP)/src/main/main/sgrid.h sgrid_$(NAME).h $(NAME).h Makefile
 #	$(CC) $(CFLAGS) -o $@ -c $*.c
 # but if we also have .cc files (c++ files) it's better to use this:
+# [ Note: $(wildcard %.c*) should be the same as %.c* ]
 
-$(OBJDIR)/%.o: %.c* $(TOP)/src/main/main/sgrid.h sgrid_$(NAME).h $(NAME).h Makefile
+$(OBJDIR)/%.o: $(wildcard %.c*) $(TOP)/src/main/main/sgrid.h sgrid_$(NAME).h $(NAME).h Makefile
 	@if [ -f $*.cc ]; \
 	then echo $(CXX) $(CFLAGS) -o $@ -c $*.cc ; \
 	          $(CXX) $(CFLAGS) -o $@ -c $*.cc ; \
