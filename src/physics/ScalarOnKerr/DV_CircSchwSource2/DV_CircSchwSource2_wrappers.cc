@@ -7,6 +7,8 @@
 //#include "DV_CircSchwSource2.h"
 /* do not include "sgrid.h", just declare the funcs we are using here */
 extern "C" double Getd(char *name);
+extern "C" int    Geti(char *name);
+extern "C" int    Getv(char *name, char *value);
 
 /* tell the C++ compiler to create functions that are callabe from C */
 extern "C" void DV_set_parameters(double M, double q, double r0);
@@ -26,15 +28,27 @@ constants DV_params[1];
 /* initialize internal pars in Ian's code */
 void DV_set_parameters(double M, double q, double r0)
 {
-  double q1=1.2, s1=1.9, r1=0, r2=0;
-  double q3=0,   s3=0,   r3=0, r4=0;
-  int smooth=0;
+  int I_n = Geti("DV_CircSchwSource_DVWindow_n");
+  double I_width = Getd("DV_CircSchwSource_DVWindow_width");
+  int smooth = Geti("DV_CircSchwSource_DVWindow_smooth");
+  double q1 = Getd("DV_CircSchwSource_DVWindow_q1");
+  double s1 = Getd("DV_CircSchwSource_DVWindow_s1");
+  double r1 = Getd("DV_CircSchwSource_DVWindow_r1");
+  double r2 = Getd("DV_CircSchwSource_DVWindow_r2");
+  double q3 = Getd("DV_CircSchwSource_DVWindow_q3");
+  double s3 = Getd("DV_CircSchwSource_DVWindow_s3");
+  double r3 = Getd("DV_CircSchwSource_DVWindow_r3");
+  double r4 = Getd("DV_CircSchwSource_DVWindow_r4");
 
   set_orbit(DV_params, r0, M, q);
-  // set_NoWindow(DV_params); // sets the window function to 1 everyhere
-  set_OrigWindow(DV_params, Getd("DV_CircSchwSource_DVWindow_n"),
-                 Getd("DV_CircSchwSource_DVWindow_width"), smooth);
-  //set_WolfWindow(DV_params, q1,s1,r1,r2, q3,s3,r3,r4, smooth);
+  
+  if(Getv("DV_CircSchwSource_useWindow", "no") ||
+     Getv("DV_CircSchwSource_DVWindow_type", "no"))
+    set_NoWindow(DV_params); // sets the window function to 1 everyhere
+  else if(Getv("DV_CircSchwSource_DVWindow_type", "orig"))
+    set_OrigWindow(DV_params, I_n, I_width, smooth);
+  else // if(Getv("DV_CircSchwSource_DVWindow_type", "wolf"))
+    set_WolfWindow(DV_params, q1,s1,r1,r2, q3,s3,r3,r4, smooth);
 }
 
 void DV_show_parameters(void)
