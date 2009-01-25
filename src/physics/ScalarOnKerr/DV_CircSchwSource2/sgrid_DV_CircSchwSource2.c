@@ -20,7 +20,7 @@ int sgrid_DV_CircSchwSource2(void)
   //AddVar("DV_CircSchwSource_psi", "", "scalar");
 
   /* parameters */
-  AddPar("DV_CircSchwSource_useWindow", "no", "if we use Windowfunc. [no,yes]");
+  AddPar("DV_CircSchwSource_useWindow", "yes", "if we use Windowfunc. [no,yes]");
   AddPar("DV_CircSchwSource_DVWindow_type",  "orig",
          "window type we use [orig,wolf,no]");
   AddPar("DV_CircSchwSource_DVWindow_n",     "8", "ian_n in set_OrigWindow");
