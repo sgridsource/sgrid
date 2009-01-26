@@ -30,22 +30,22 @@ void DV_set_parameters(double M, double q, double r0)
 {
   int I_n = Geti("DV_CircSchwSource_DVWindow_n");
   double I_width = Getd("DV_CircSchwSource_DVWindow_width");
-  int smooth = Geti("DV_CircSchwSource_DVWindow_smooth");
-  double q1 = Getd("DV_CircSchwSource_DVWindow_q1");
-  double s1 = Getd("DV_CircSchwSource_DVWindow_s1");
-  double r1 = Getd("DV_CircSchwSource_DVWindow_r1");
-  double r2 = Getd("DV_CircSchwSource_DVWindow_r2");
-  double q3 = Getd("DV_CircSchwSource_DVWindow_q3");
-  double s3 = Getd("DV_CircSchwSource_DVWindow_s3");
-  double r3 = Getd("DV_CircSchwSource_DVWindow_r3");
-  double r4 = Getd("DV_CircSchwSource_DVWindow_r4");
+  int smooth = Geti("DV_CircSchwSource_Window_smooth");
+  double q1 = Getd("DV_CircSchwSource_Window_q1");
+  double s1 = Getd("DV_CircSchwSource_Window_s1");
+  double r1 = Getd("DV_CircSchwSource_Window_r1");
+  double r2 = Getd("DV_CircSchwSource_Window_r2");
+  double q3 = Getd("DV_CircSchwSource_Window_q3");
+  double s3 = Getd("DV_CircSchwSource_Window_s3");
+  double r3 = Getd("DV_CircSchwSource_Window_r3");
+  double r4 = Getd("DV_CircSchwSource_Window_r4");
 
   set_orbit(DV_params, r0, M, q);
   
   if(Getv("DV_CircSchwSource_useWindow", "no") ||
-     Getv("DV_CircSchwSource_DVWindow_type", "no"))
+     Getv("DV_CircSchwSource_Window_type", "no"))
     set_NoWindow(DV_params); // sets the window function to 1 everyhere
-  else if(Getv("DV_CircSchwSource_DVWindow_type", "orig"))
+  else if(Getv("DV_CircSchwSource_Window_type", "orig"))
     set_OrigWindow(DV_params, I_n, I_width, smooth);
   else // if(Getv("DV_CircSchwSource_DVWindow_type", "wolf"))
     set_WolfWindow(DV_params, q1,s1,r1,r2, q3,s3,r3,r4, smooth);
