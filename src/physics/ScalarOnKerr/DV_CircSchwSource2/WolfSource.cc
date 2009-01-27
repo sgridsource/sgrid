@@ -1,4 +1,4 @@
-// WolfSource_Jan25-09.cpp
+// WolfSource_Jan25-09a.cpp
 
 // To use this in a stand-alone fashion, just call standalone_main(),
 // which you might want to edit.
@@ -64,9 +64,9 @@
 // is performed.
 //
 //
-// Finally we have a new function that prints out the parameters in force at the time. 
-// The parameters go to "stdout" and each line is started with "##" which makes 
-// these lines ignorable by gnuplot. 
+// Finally we have a new function that prints out the parameters in force at the time.
+// The parameters go to "stdout" and each line is started with "##" which makes
+// these lines ignorable by gnuplot.
 //     void show_parameters(constants* p);
 //
 //
@@ -144,17 +144,17 @@
 //   If s1=1, then (r2-r1)*dW/dr ~ 1 at the location of W=1/2
 //
 //
-// For the range outside the particle orbit, similar descriptions hold. 
+// For the range outside the particle orbit, similar descriptions hold.
 //   r3 is the inner radius where W=1 and r4 is where W=0.
 //   q3 determines the value of r where the window function, W, is 1/2,
 //   s3 is related to the radial derivative of W at r = q3,
 //   All derivatives of W=0 at r3 and at r4.
 //
 //
-// The window function is identically 1, with all derivatives = 0, between the 
-//   inner and outer ranges, that is for r2 <= r <= r3, which must include the 
-//   particle. 
-//   There appears to be no difficulty with choosing 
+// The window function is identically 1, with all derivatives = 0, between the
+//   inner and outer ranges, that is for r2 <= r <= r3, which must include the
+//   particle.
+//   There appears to be no difficulty with choosing
 //   r2 = r3 = location of particle.
 //
 //
@@ -184,9 +184,9 @@
 //   that should be experimented with at some point.
 //
 //
-// If you wish to excerise the code and geerate  data for a plot of Psi^S 
-//   or the source for one of the window functions, then just call 
-//             standalone_main() 
+// If you wish to excerise the code and geerate  data for a plot of Psi^S
+//   or the source for one of the window functions, then just call
+//             standalone_main()
 //   which is the last function in the file.
 //
 /////////////////////////////////////////////////////////////////////////
@@ -195,13 +195,13 @@
 #define SHOW(a)    " "<<#a<<" = "<<a<<" "
 
 #include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <math.h>
-#include <ctime>
-#include <assert.h>
-#include <stdlib.h>
-       
+//  #include <iomanip>
+//  #include <fstream>
+#include <cmath>
+//  #include <ctime>
+#include <cassert>
+#include <cstdlib>
+
 // A reasonably arbitrary integer constant
 #define CHECK 314159
 
@@ -227,7 +227,7 @@ struct constants
 
 // These are the prototypes for returning the source or Psi in Schw or K-S coordinates.
 
-double SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS, constants * param);
+double SourceinKerrSchild(double tKS, double xKS, double yKS, double zKS, constants * param);
 double SourceInSchwarzschild(double, double, double, double, constants *);
 double PsiSinKerrSchild(double tKS, double xKS, double yKS, double zKS, constants * param);
 double PsiSinSchwarzschild(double t_s, double r_s, double th_s, double ph_s, constants* param);
@@ -248,9 +248,9 @@ void set_WolfWindow(constants* p,
 
 
 
-// This function prints out the parameters in force at the time. They are  
-// preceded  by ## in the first two columns, which makes these lines ignorable by 
-// gnuplot. 
+// This function prints out the parameters in force at the time. They are
+// preceded  by ## in the first two columns, which makes these lines ignorable by
+// gnuplot.
 
 void show_parameters(constants* p);
 
@@ -913,7 +913,8 @@ void eval_source_elements(double ts,double r, double theta, double phi,
             Tan = tan(Pi*(r-(*param).r1)/2./w);
           } else {  // within outer window range
             SIGN = -1;
-            q2 = (*param).q3*(*param).q1;
+//det corrected 1/27/2009    q2 = (*param).q3*(*param).q1;
+            q2 = (*param).q3*(*param).q3;
             s = (*param).s3;
             w = (*param).r4 -(*param).r3;
             Tan = tan(Pi*(r-(*param).r4)/2./w);
@@ -976,7 +977,7 @@ double eval_source(double ts, double r, double theta, double phi,
         double y=(*thz).y;
         double z=(*thz).z;
 
-// Keep the field point away from troublesome points.
+// Keep the field point away from troublesome points too near the charge.
         if(sqrt(x*x+y*y+z*z)<0.005*M)
         {
             r=R+0.006*M;
@@ -1331,8 +1332,8 @@ exit(0);
   return 0;
 }
 
-//int main() {
 int standalone_main() {
+//int main() {
     constants P;
 
      set_orbit(&P, 10);
