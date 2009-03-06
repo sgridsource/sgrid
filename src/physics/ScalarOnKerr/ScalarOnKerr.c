@@ -2024,7 +2024,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
           dpsidr[i] = (phix[i]*x[i] + phiy[i]*y[i] + phiz[i]*z[i])/r;
           /* (flux integrand for flux at r) * sqrt(1-2M/r) */
           flux[i]   = ( (2.0*M/r)*psidot[i]*psidot[i] +
-                        (1.0-2.0*M/r)*psidot[i]*dpsidr[i] ) * r*r;
+                        (1.0-2.0*M/r)*psidot[i]*dpsidr[i] );
         }
         /* integrate flux integrand to get real flux */
         snprintf(str, 999, "box%d_Coordinates", b);
