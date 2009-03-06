@@ -159,6 +159,10 @@ int ScalarOnKerr_startup(tGrid *grid)
      Getv("ScalarOnKerr_1stOrder_inSpace", "yes"))
      enablevar(grid, Ind("ScalarOnKerr_Cx"));
 
+  /* enable flux var */
+  if(Getv("ScalarOnKerr_fluxes", "yes"))
+    enablevar(grid, Ind("ScalarOnKerr_flux"));
+
   /* set Kerr metric and Christoffels */
   Kerr(grid, Ind("x"), Ind("ScalarOnKerr_gtt"), Ind("ScalarOnKerr_guptt"),
        Ind("ScalarOnKerr_Gammattt"), Ind("ScalarOnKerr_Gt"));
@@ -1917,6 +1921,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
      timeforoutput_di_dt(grid, Geti("0doutiter"), Getd("0douttime")))
   {
     double M = Getd("BHmass");
+    double q  = 1.0;
     //double r0 = 10.0*M;
     double r0;
     //double Omega = sqrt(M/(r0*r0*r0));
@@ -1926,7 +1931,9 @@ int ScalarOnKerr_analyze(tGrid *grid)
     //double phi0 = Omega*tSchw;
     double phi0, theta0;
     double x0,y0,z0;
-    double Ft,Fx,Fy,Fz, psiR; /* self force and psi */
+    double Ft,Fx,Fy,Fz, Fr, psiR; /* self force and psi */
+    double Edot_H, Edot_r; /* flux through horizon (r=2M) and outward flux at r */
+    double Ft_flux; /* Ft computed from Edot_H and Edot_r at r=infty */
     FILE *fp;
     char *outdir = Gets("outdir");
     char *name = "ScalarOnKerr_Force";
@@ -1948,7 +1955,6 @@ int ScalarOnKerr_analyze(tGrid *grid)
     phi0 = Arg(x0, y0);
     if(phi0<0.0) phi0 += 2.0*PI;
 
-//printf("t=%g tKS=%g tSchw=%g\n", t,tKS,tSchw);
     forallboxes(grid,b)
     {
       tBox *box = grid->box[b];
@@ -1969,7 +1975,14 @@ int ScalarOnKerr_analyze(tGrid *grid)
       double *betax = box->v[i_beta];
       double *betay = box->v[i_beta+1];
       double *betaz = box->v[i_beta+2];
-      
+
+      double *dpsidr = box->v[Ind("temp3")];
+      double *x =  box->v[Ind("x")];
+      double *y =  box->v[Ind("y")];
+      double *z =  box->v[Ind("z")];
+      double *flux = NULL;
+        
+      /* compute  Ft,Fx,Fy,Fz, psiR in boxes that contain r0 */
       if( (r0-box->bbox[0])*(r0-box->bbox[1])<=0.0 )
       {
         /* compute psidot */
@@ -1991,15 +2004,73 @@ int ScalarOnKerr_analyze(tGrid *grid)
         spec_Coeffs(box, psi, coeffs);
         psiR = spec_interpolate(box, coeffs, r0,theta0,phi0);
       }
+
+      /* compute flux at r and at at r=2M at the same time */
+      if(Getv("ScalarOnKerr_fluxes", "yes"))
+      {
+        char str[1000];
+
+        if(Getv("ScalarOnKerr_fluxes", "yes"))
+          flux = box->v[Ind("ScalarOnKerr_flux")];
+
+        /* compute psidot, dpsidr, and put flux interand into flux */
+        forallpoints(box,i)
+        {
+          double r = sqrt(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
+          double beta_phi = betax[i]*phix[i] + betay[i]*phiy[i] + 
+                             betaz[i]*phiz[i];
+
+          psidot[i] = beta_phi - alpha[i]*Pi[i];
+          dpsidr[i] = (phix[i]*x[i] + phiy[i]*y[i] + phiz[i]*z[i])/r;
+          /* (flux integrand for flux at r) * sqrt(1-2M/r) */
+          flux[i]   = ( (2.0*M/r)*psidot[i]*psidot[i] +
+                        (1.0-2.0*M/r)*psidot[i]*dpsidr[i] ) * r*r;
+        }
+        /* integrate flux integrand to get real flux */
+        snprintf(str, 999, "box%d_Coordinates", b);
+        if( Getv(str, "SphericalDF") )
+          spec_sphericalDF2dIntegral(box, flux, flux);
+        else
+          errorexits("ScalarOnKerr_analyze: I don't know how to do surface "
+                     "integrals in %s coordinates", Gets(str));
+
+        /* interpolate flux to r=2M to get flux at horizon */
+        if( (2.0*M-box->bbox[0])*(2.0*M-box->bbox[1])<=0.0 )
+        {
+          spec_Coeffs(box, flux, coeffs);
+          Edot_H = -spec_interpolate(box, coeffs, 2.0*M,0.5*PI,0);
+        }
+        /* multiply flux by 1/sqrt(1-2M/r) */
+        forallpoints(box,i)
+        {
+          double r = sqrt(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
+          flux[i] = flux[i]/sqrt(1.0-2.0*M/r);
+        }
+        /* get Edot_r from flux at first point in last box */
+        Edot_r = flux[0];
+      }
     } /* end:     forallboxes(grid,b) */
-    /* write force */
+
+    /* compute Fr and Ft_flux */
+    Fr = (Fx*x0 + Fy*y0 + Fz*z0)/r0;
+    Ft_flux = -(Edot_H + Edot_r)/(4.0*PI*q*sqrt(1.0-3.0*M/r0));
+
+    /* write force and possibly fluxes */
     n = strlen(outdir) + strlen(name) + 200;
     filename = cmalloc(n+1);
     snprintf(filename, n, "%s/%s.txyz", outdir, name);
     fp = fopen(filename, "a");
     if(!fp) errorexits("failed opening %s", filename);
+    if(grid->iteration==0)
+      fprintf(fp, "# t,x0,y0,z0, Ft,Fx,Fy,Fz, Fr,0,0, psiR, "
+                  "Edot_H, Edot_r, Ft_flux\n");
     fprintf(fp, "%.16g %.16g %.16g %.16g  ", t,x0,y0,z0);
-    fprintf(fp, "%.16g %.16g %.16g %.16g  %.16g\n", Ft,Fx,Fy,Fz, psiR);
+    fprintf(fp, "%.16g %.16g %.16g %.16g  ", Ft,Fx,Fy,Fz);
+    fprintf(fp, "%.16g %.16g %.16g  %.16g  ", Fr,0.0,0.0, psiR);
+    if(Getv("ScalarOnKerr_fluxes", "yes"))
+      fprintf(fp, "%.16g %.16g  %.16g\n", Edot_H, Edot_r, Ft_flux);
+    else
+      fprintf(fp, "\n");
     fclose(fp);
     free(filename);              
   }
