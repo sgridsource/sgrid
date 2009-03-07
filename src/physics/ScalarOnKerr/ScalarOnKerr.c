@@ -2041,14 +2041,17 @@ int ScalarOnKerr_analyze(tGrid *grid)
           Edot_H = -spec_interpolate(box, coeffs, 2.0*M,0.5*PI,0);
         }
         /* multiply flux by 1/sqrt(1-2M/r) */
-        if( (2.0*M-box->bbox[0])*(2.0*M-box->bbox[1])>0.0 )
+        if( (2.0*M-box->bbox[0])*(2.0*M-box->bbox[1])>0.0 || grid->nboxes==1 )
         forallpoints(box,i)
         {
           double r = sqrt(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
           flux[i] = flux[i]/sqrt(1.0-2.0*M/r);
         }
-        /* get Edot_r from flux at first point in last box */
-        Edot_r = flux[0];
+        /* get Edot_r from flux at point with index 
+           (box->n1-1) * Getd("ScalarOnKerr_extract_flux_at")
+           in last box */
+        Edot_r = flux[(int) ((box->n1-1) *
+                             Getd("ScalarOnKerr_extract_flux_at"))];
       }
     } /* end:     forallboxes(grid,b) */
 

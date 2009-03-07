@@ -133,6 +133,9 @@ int sgrid_ScalarOnKerr(void)
   AddPar("ScalarOnKerr_fluxes", "no", "compute fluxes [no,yes]");
   if(Getv("ScalarOnKerr_fluxes", "yes"))
   {
+    AddPar("ScalarOnKerr_extract_flux_at", "0.8", "extract flux at point "
+           "with index (box->n1-1)*(this number e.g. 0.8) "
+           "in the last box [0...1]");
     AddVar("ScalarOnKerr_flux", "", "outgoing energy flux at r");
   }
   AddPar("ScalarOnKerr_DisableUnusedVars", "yes",
