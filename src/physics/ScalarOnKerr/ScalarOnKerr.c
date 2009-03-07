@@ -2057,7 +2057,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
 
     /* compute Fr and Ft_flux */
     Fr = (Fx*x0 + Fy*y0 + Fz*z0)/r0;
-    Ft_flux = -(Edot_H + Edot_r)/(4.0*PI*q*sqrt(1.0-3.0*M/r0));
+    Ft_flux = (Edot_H + Edot_r)/(4.0*PI*q*sqrt(1.0-3.0*M/r0));
 
     /* write force and possibly fluxes */
     n = strlen(outdir) + strlen(name) + 200;
