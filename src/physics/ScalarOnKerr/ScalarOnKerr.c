@@ -1933,6 +1933,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
     double x0,y0,z0;
     double Ft,Fx,Fy,Fz, Fr, psiR; /* self force and psi */
     double Edot_H, Edot_r; /* flux through horizon (r=2M) and outward flux at r */
+    double r_extr;
     double Ft_flux; /* Ft computed from Edot_H and Edot_r at r=infty */
     FILE *fp;
     char *outdir = Gets("outdir");
@@ -2047,11 +2048,13 @@ int ScalarOnKerr_analyze(tGrid *grid)
           double r = sqrt(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
           flux[i] = flux[i]/sqrt(1.0-2.0*M/r);
         }
-        /* get Edot_r from flux at point with index 
-           (box->n1-1) * Getd("ScalarOnKerr_extract_flux_at")
-           in last box */
-        Edot_r = flux[(int) ((box->n1-1) *
-                             Getd("ScalarOnKerr_extract_flux_at"))];
+        /*  get Edot_r from flux at r_extr */
+        r_extr = Getd("ScalarOnKerr_flux_extraction_radius");
+        if( (r_extr-box->bbox[0])*(r_extr-box->bbox[1])<=0.0 )
+        {
+          spec_Coeffs(box, flux, coeffs);
+          Edot_r = spec_interpolate(box, coeffs, r_extr,0.5*PI,0);
+        }
       }
     } /* end:     forallboxes(grid,b) */
 
