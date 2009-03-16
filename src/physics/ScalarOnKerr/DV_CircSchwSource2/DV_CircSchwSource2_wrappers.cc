@@ -59,7 +59,7 @@ void DV_show_parameters(void)
 /* get Source at (tKS, xKS,yKS,zKS) */
 double DV_SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS)
 {
-  return SourceInKerrSchild(tKS, xKS,yKS,zKS, DV_params);
+  return -SourceInKerrSchild(tKS, xKS,yKS,zKS, DV_params);
 }
 
 /* get current KS coords of particle position */
