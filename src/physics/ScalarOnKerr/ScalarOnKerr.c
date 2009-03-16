@@ -1982,6 +1982,8 @@ int ScalarOnKerr_analyze(tGrid *grid)
       double *y =  box->v[Ind("y")];
       double *z =  box->v[Ind("z")];
       double *flux = NULL;
+      int N = box->n2;
+      double  thm0 = theta0 - PI/((1+N%2)*N); /* theta = thm + PI/((1+N%2)*N); */
         
       /* compute  Ft,Fx,Fy,Fz, psiR in boxes that contain r0 */
       if( (r0-box->bbox[0])*(r0-box->bbox[1])<=0.0 )
@@ -1995,15 +1997,15 @@ int ScalarOnKerr_analyze(tGrid *grid)
         }
         /* interpolate force */
         spec_Coeffs(box, psidot, coeffs);
-        Ft = spec_interpolate(box, coeffs, r0,theta0,phi0);
+        Ft = spec_interpolate(box, coeffs, r0,thm0,phi0);
         spec_Coeffs(box, phix, coeffs);
-        Fx = spec_interpolate(box, coeffs, r0,theta0,phi0);
+        Fx = spec_interpolate(box, coeffs, r0,thm0,phi0);
         spec_Coeffs(box, phiy, coeffs);
-        Fy = spec_interpolate(box, coeffs, r0,theta0,phi0);
+        Fy = spec_interpolate(box, coeffs, r0,thm0,phi0);
         spec_Coeffs(box, phiz, coeffs);
-        Fz = spec_interpolate(box, coeffs, r0,theta0,phi0);
+        Fz = spec_interpolate(box, coeffs, r0,thm0,phi0);
         spec_Coeffs(box, psi, coeffs);
-        psiR = spec_interpolate(box, coeffs, r0,theta0,phi0);
+        psiR = spec_interpolate(box, coeffs, r0,thm0,phi0);
       }
 
       /* compute flux at r and at at r=2M at the same time */
@@ -2060,7 +2062,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
 
     /* compute Fr and Ft_flux */
     Fr = (Fx*x0 + Fy*y0 + Fz*z0)/r0;
-    Ft_flux = (Edot_H + Edot_r)/(4.0*PI*q*sqrt(1.0-3.0*M/r0));
+    Ft_flux = -(Edot_H + Edot_r)/(4.0*PI*q*sqrt(1.0-3.0*M/r0));
 
     /* write force and possibly fluxes */
     n = strlen(outdir) + strlen(name) + 200;
@@ -2069,8 +2071,8 @@ int ScalarOnKerr_analyze(tGrid *grid)
     fp = fopen(filename, "a");
     if(!fp) errorexits("failed opening %s", filename);
     if(grid->iteration==0)
-      fprintf(fp, "# t,x0,y0,z0, Ft,Fx,Fy,Fz, Fr,0,0, psiR, "
-                  "Edot_H, Edot_r, Ft_flux\n");
+      fprintf(fp, "# t x0 y0 z0  Ft Fx Fy Fz  Fr 0 0  psiR  "
+                  "Edot_H  Edot_r  Ft_flux\n");
     fprintf(fp, "%.16g %.16g %.16g %.16g  ", t,x0,y0,z0);
     fprintf(fp, "%.16g %.16g %.16g %.16g  ", Ft,Fx,Fy,Fz);
     fprintf(fp, "%.16g %.16g %.16g  %.16g  ", Fr,0.0,0.0, psiR);
