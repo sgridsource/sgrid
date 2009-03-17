@@ -2073,7 +2073,7 @@ int ScalarOnKerr_analyze(tGrid *grid)
     if(grid->iteration==0)
       fprintf(fp, "# t x0 y0 z0  Ft Fx Fy Fz  Fr 0 0  psiR  "
                   "Edot_H  Edot_r  Ft_flux\n");
-    fprintf(fp, "%.16g\t%.16g\t%.16g\t%.16g\t", t,x0,y0,z0);
+    fprintf(fp, "%.14g\t%.16g\t%.16g\t%.16g\t", t,x0,y0,z0);
     fprintf(fp, "%.16g\t%.16g\t%.16g\t%.16g\t", Ft,Fx,Fy,Fz);
     fprintf(fp, "%.16g\t%.16g\t%.16g\t%.16g",   Fr,0.0,0.0, psiR);
     if(Getv("ScalarOnKerr_fluxes", "yes"))
