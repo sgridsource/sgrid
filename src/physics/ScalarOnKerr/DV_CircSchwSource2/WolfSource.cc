@@ -1,7 +1,19 @@
-// WolfSource_Jan25-09a.cpp
+// WolfSource_Jan25-09c.cpp
+// An error: early in SourceInKerrSchild() always ouputs the source as zero for r <=2.5M
+// was corrected on 30Mar09
 
+// WolfSource_Jan25-09b.cpp
+// Generic instructions:
 // To use this in a stand-alone fashion, just call standalone_main(),
 // which you might want to edit.
+
+// version: Jan25-09b included
+//   #include <cstdlib>
+//   #include <cstdlib>
+// to make compilation easier for everyone.
+
+// version: Jan25-09a corrected a logic error involving the initialization and
+// defaults of the parameters of WolfWindow
 
 // WolfSource_Jan25-09.cpp
 // Add in a new window function suggested by Wolfgang
@@ -14,12 +26,12 @@
 
 // Add in an integer parameter "NoWindow which has the "window
 //  function" set to 1 everywhere. This allows for exploring the
-//  possibilty of dealing with buondary conditions in different ways.
+//  possibility of dealing with boundary conditions in different ways.
 
 // RegSource_Oct1.cpp
 //det  cd /cygdrive/c/work/code/scalarSource/RegSource
 //det  cd /cygdrive/e/code/scalarSource/RegSource
-//det  g++ -Wall -fno-rtti -o s  WolfSource_Jan25-09.cpp
+//det  g++ -Wall -fno-rtti -o s  WolfSource_Jan25-09c.cpp
 
 ///////////////////////////////////////////////////////////////////////////////////
 // WolfSource_Jan25-09.cpp
@@ -184,7 +196,7 @@
 //   that should be experimented with at some point.
 //
 //
-// If you wish to excerise the code and geerate  data for a plot of Psi^S
+// If you wish to exercise the code and generate  data for a plot of Psi^S
 //   or the source for one of the window functions, then just call
 //             standalone_main()
 //   which is the last function in the file.
@@ -194,13 +206,13 @@
 
 #define SHOW(a)    " "<<#a<<" = "<<a<<" "
 
+
 #include <iostream>
+#include <cstdlib>
+#include <cmath>
+#include <cassert>
 //  #include <iomanip>
 //  #include <fstream>
-#include <cmath>
-//  #include <ctime>
-#include <cassert>
-#include <cstdlib>
 
 // A reasonably arbitrary integer constant
 #define CHECK 314159
@@ -1079,7 +1091,8 @@ double SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS, consta
     double r = sqrt(xKS*xKS+yKS*yKS+zKS*zKS);
 
 //    if(1==2 /*Det r<=2.5*M */){
-    if( r<=2.5*M ){
+// det corrected on 30Mar09:    if( r<=2.5*M ){
+    if( r<=2.0*M ){
         return 0.0;
     }
     else{
@@ -1090,7 +1103,7 @@ double SourceInKerrSchild(double tKS, double xKS, double yKS, double zKS, consta
         }
         else theta = Pi/2.0;
 
-        double phi;
+        double phi;  // 0 <= phi < 2*Pi
         if(xKS == 0.0){
             if(yKS>= 0.0) phi = Pi/2.0;
             else phi = -Pi/2.0;
@@ -1333,18 +1346,24 @@ exit(0);
 }
 
 int standalone_main() {
-//int main() {
+// int main() {
     constants P;
 
      set_orbit(&P, 10);
-     set_WolfWindow(&P);
+     set_WolfWindow(&P, 0.6, 3.6, 2.1, 0, 1.2, 1.9);
+
+//  > q1     = 0.6
+//  > s1     = 3.6
+//  > r1     = 2.1
+//  > q3     = 1.2
+//  > s3     = 1.9);
      show_parameters(&P);
 
     double x,y,z;
-    for(x=0; x < 20. ; x+=0.3) {
-      for(y=-10; y <10.1; y+=0.3) {
+    for(x=0; x < 12. ; x+=0.3) {
+      for(y=-10.0; y <10.1; y+=.3) {
         z = 0; // r*cos(th);
-        if ((x*x+y*y+z*z) < 4.1*(P.M)*(P.M)) { // Inside the hole
+        if ((x*x+y*y+z*z) <= 4.0*(P.M)*(P.M)) { // Inside the hole
           printf("%f %f 0.0 \n", x, y);
         } else {
 
@@ -1357,7 +1376,7 @@ int standalone_main() {
 
 // //        printf("%f %f %3.10e \n",
 // //               r, ph, SourceInSchwarzschild(0.0*M,r,th,ph*3.14159,&P));
-        }
+      }
     }
     printf("\n");
   }
