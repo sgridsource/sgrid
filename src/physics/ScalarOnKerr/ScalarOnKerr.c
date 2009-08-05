@@ -309,6 +309,13 @@ int KerrChecker(tGrid *grid)
       double Jy = ( ny*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M)) );
       double Jz = ( nz*2.0*M*(r + 4.0*M)/(r*(r+2.0*M)*(r+2.0*M)) );
       double K = ( 2.0*M*(r + 3.0*M)/(r*(r+2.0*M)*(r+2.0*M)) )/N;
+      /* expressions for K and Gamma^i in paper entered by Peter */
+      double H = 2.0*M/r;
+      double Kp = pow(1.0+H,-1.5)*(H/r)*(1.0+3.0*M/r);
+      double Gpx = 0.5*pow(1.0+H,-2.0)*(H/r)*(3.0+8.0*M/r)*nx;
+      double Gpy = 0.5*pow(1.0+H,-2.0)*(H/r)*(3.0+8.0*M/r)*ny;
+      double Gpz = 0.5*pow(1.0+H,-2.0)*(H/r)*(3.0+8.0*M/r)*nz;
+
       /* check upper 3-metric */
       if(fabs(gxx[i]-gupxx)>tiny || fabs(gxy[i]-gupxy)>tiny ||
          fabs(gxz[i]-gupxz)>tiny || fabs(gyy[i]-gupyy)>tiny ||
@@ -357,12 +364,31 @@ int KerrChecker(tGrid *grid)
         printf("Ji              =%g %g %g\n", Jx,Jy,Jz);
         err=1;
       }
+      /* check upper contracted 3-Gamma, compare with Gp this time */
+      if(fabs(G3x[i]-Gpx)>tiny ||
+         fabs(G3y[i]-Gpy)>tiny ||
+         fabs(G3z[i]-Gpz)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("Gi  =%g %g %g\n", Gx[i],Gy[i],Gz[i]);
+        printf("G3i =%g %g %g\n", G3x[i],G3y[i],G3z[i]);
+        printf("Gpi =%g %g %g\n", Gpx,Gpy,Gpz);
+        err=1;
+      }
       /* check TrK */
       if(fabs(TrK[i]-K)>tiny)
       {
         printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
         printf("TrK=%g\n", TrK[i]);
         printf("K  =%g\n", K);
+        err=1;
+      }
+      /* check TrK, compare with Kp this time */
+      if(fabs(TrK[i]-Kp)>tiny)
+      {
+        printf("i=%d (x,y,z)=(%g,%g,%g)\n",i, x,y,z);
+        printf("TrK=%g\n", TrK[i]);
+        printf("Kp =%g\n", Kp);
         err=1;
       }
       /* check lapse derivs */
