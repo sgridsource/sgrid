@@ -51,7 +51,7 @@ int sgrid_BSSN(void)
          "which vars we filter in each evo substep [no,all]");
   AddPar("BSSN_filter_type", "none",
          "how we filter [old_spec_filters,coordinateDependentFilter,"
-         "simple,naive_Ylm,Ylm_lmshift,X2/3]");
+         "simple,naive_Ylm,Ylm_lmshift,X2/3,XYZ2/3,X2/3-1]");
   AddPar("BSSN_filter_time", "afterBC", 
          "when we filter in evo substep [afterRHS,afterBC] or [POST_EVOLVE]");
   if(Getv("BSSN_filter_time", "POST_EVOLVE"))

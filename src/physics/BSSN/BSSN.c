@@ -454,6 +454,94 @@ void filter_with2o3rule_inX(tVarList *unew, tVarList *upre)
   }
 }    
 
+/* filter unew with 2/3 rule in X-, Y- and Z-directions */
+void filter_with2o3rule_inXYZ(tVarList *unew, tVarList *upre)
+{
+  tGrid *grid = unew->grid;
+  int b;
+
+  /* loop over boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k, vi;
+
+    /* filter all vars */
+    for(vi=0; vi<unew->n; vi++)
+    {
+      double *var = vlldataptr(unew, box, vi);
+      double *vc  = box->v[Ind("temp1")];
+
+      /* compute coeffs of var */
+      spec_Coeffs(box, var, vc);
+
+      /* remove all coeffs with i>=2*(n1/3) */
+      for(k=0; k<n3; k++)
+        for(j=0; j<n2; j++)
+          for(i=(n1/3)*2; i<n1; i++)
+            vc[Index(i,j,k)]=0.0;
+
+      /* also remove all coeffs with j>=2*(n2/3) */
+      for(k=0; k<n3; k++)
+        for(j=(n2/3)*2; j<n2; j++)
+          for(i=0; i<=(n1/3)*2; i++)
+            vc[Index(i,j,k)]=0.0;
+
+      /* also remove all coeffs with k>=2*(n3/3) */
+      for(k=(n3/3)*2; k<n3; k++)
+        for(j=0; j<=(n2/3)*2; j++)
+          for(i=0; i<=(n1/3)*2; i++)
+            vc[Index(i,j,k)]=0.0;
+
+      /* use modified coeffs to change var */
+      spec_Eval(box, var, vc);
+    }
+  }
+}    
+
+/* filter unew with 2/3 rule in X-direction, but always kill one
+   more coefficient so that we always keep an odd number of coeffs */
+void filter_with2o3rule_minus1_inX(tVarList *unew, tVarList *upre)
+{
+  tGrid *grid = unew->grid;
+  int b;
+
+  /* loop over boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k, icut, vi;
+
+    /* filter all vars */
+    for(vi=0; vi<unew->n; vi++)
+    {
+      double *var = vlldataptr(unew, box, vi);
+      double *vc  = box->v[Ind("temp1")];
+
+      /* compute coeffs of var in X-dir */
+      spec_analysis1(box, 1, var, vc);
+
+      /* remove all coeffs with i>=2*(n1/3) - 1 */
+      icut = (n1/3)*2 - 1;
+      if(icut<0) icut=0;
+      for(k=0; k<n3; k++)
+        for(j=0; j<n2; j++)
+          for(i=icut; i<n1; i++)
+              vc[Index(i,j,k)]=0.0;
+
+      /* use modified coeffs to change var */
+      spec_synthesis1(box, 1, var, vc);
+    }
+  }
+}    
+
+/* select filters, and apply them */
 void BSSN_ChooseAndApplyFilters(tVarList *vl)
 {
   if(!Getv("BSSN_filter_vars", "no"))
@@ -494,5 +582,9 @@ void BSSN_ChooseAndApplyFilters(tVarList *vl)
     }
     if(Getv("BSSN_filter_type", "X2/3"))
       filter_with2o3rule_inX(vl, NULL);
+    if(Getv("BSSN_filter_type", "XYZ2/3"))
+      filter_with2o3rule_inXYZ(vl, NULL);
+    if(Getv("BSSN_filter_type", "X2/3-1"))
+      filter_with2o3rule_minus1_inX(vl, NULL);
   }
 }
