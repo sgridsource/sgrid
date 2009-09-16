@@ -14,8 +14,13 @@ int sgrid_TestID()
   AddFun(INITIALDATA, TestID, "TestID: set initial data for a single BH");
 
   /* Parameters: */
-  AddPar("TestID_type", "1dGaugeWave", "type of ini. data [1dGaugeWave]");
+  AddPar("TestID_type", "1dGaugeWave",
+         "type of ini. data [1dGaugeWave,1dLinearWave]");
   AddPar("TestID_amplitude", "0.1", "amplitude A of test data");
+  AddPar("TestID_initial_lapse", "donothing",
+         "initial lapse [donothing,one]");
+  AddPar("TestID_initial_shift", "donothing",
+         "initial shift [donothing,zero]");
 
   return 0;
 }
