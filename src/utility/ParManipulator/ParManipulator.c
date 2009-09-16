@@ -10,6 +10,7 @@ int ParManipulator_setPars(tGrid *grid)
 {
   int nboxes = Geti("nboxes");
   int b;
+  double dtmin = 1e300; /* ridiculously large dt, too be reduced below */
 
   for(b=0; b<nboxes; b++)
   {
@@ -97,17 +98,30 @@ int ParManipulator_setPars(tGrid *grid)
     }
 
     /* set dt */
-    if(Getv("ParManipulator_dt_scaling", "1/n1^2"))
+    if(!Getv("ParManipulator_dt_scaling", "no"))
     {
-      int n1 = Geti("n1");
       double coeff = Getd("ParManipulator_ds_min_coeff");
       double time = Getd("ParManipulator_requiredtime");
       double dt;
-      int i;
-      Setd("ParManipulator_ds_min", coeff/(n1*n1));
+      int n1, i;
+
+      /* get n1 in this box */      
+      snprintf(str, 999, "box%d_n1", b);
+      n1 = Geti(str);
+            
+      if(Getv("ParManipulator_dt_scaling", "1/n1^2"))
+        Setd("ParManipulator_ds_min", coeff/(n1*n1));
+      else if(Getv("ParManipulator_dt_scaling", "1/n1"))
+        Setd("ParManipulator_ds_min", coeff/n1);
+      else
+        errorexit("unknown ParManipulator_dt_scaling");
+
+      /* compute dt from ds_min */
       dt = Getd("ParManipulator_dtfac")*Getd("ParManipulator_ds_min");
       if(time>0) { i = 1 + time/dt;  dt = time/i; }
-      Setd("dt", dt);
+      
+      /* if dt<dtmin set par dt, so that par dt is smallest dt */
+      if(dt<dtmin) { dtmin=dt; Setd("dt", dt); }
     }
   }
 
