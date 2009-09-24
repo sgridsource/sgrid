@@ -19,7 +19,7 @@ box0_n2		= 1
 box0_n3		= 1
 
 iterate_parameters = yes
-iterate_parameter1 = box0_n1 15 21 27 33 39 45 51 47
+iterate_parameter1 = box0_n1 15 21 27 33 39 45 51 57
 
 box0_Coordinates	= Cartesian
 
