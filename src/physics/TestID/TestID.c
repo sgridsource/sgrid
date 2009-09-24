@@ -30,6 +30,10 @@ int TestID(tGrid *grid)
     TestID_1dLinearWave(grid, Ind("x"), Ind("gxx"), Ind("Kxx"), 
                         Ind("psi"), Ind("dpsiopsix"), Ind("ddpsiopsixx"), 
                         Ind("alpha"), Ind("betax") );
+  else if(Getv("TestID_type", "1dRandomNoise"))
+    TestID_1dRandomNoise(grid, Ind("x"), Ind("gxx"), Ind("Kxx"), 
+                         Ind("psi"), Ind("dpsiopsix"), Ind("ddpsiopsixx"), 
+                         Ind("alpha"), Ind("betax") );
   else
     errorexit("unknown TestID_type");
     
