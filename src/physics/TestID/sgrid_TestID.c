@@ -15,7 +15,7 @@ int sgrid_TestID()
 
   /* Parameters: */
   AddPar("TestID_type", "1dGaugeWave",
-         "type of ini. data [1dGaugeWave,1dLinearWave,1dRandomNoise]");
+         "type of ini. data [1dGaugeWave,1dLinearWave,RandomNoise]");
   AddPar("TestID_amplitude", "1", "amplitude A of test data");
   AddPar("TestID_initial_lapse", "donothing",
          "initial lapse [donothing,one]");

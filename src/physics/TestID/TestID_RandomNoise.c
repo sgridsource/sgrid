@@ -1,4 +1,4 @@
-/* TestID_1dGaugeWave.c */
+/* TestID_RandomNoise.c */
 /* Copyright (C) 2009 Wolfgang Tichy */
 
 #include "sgrid.h"
@@ -7,9 +7,9 @@
 #define RND 2.5e-7*A*( (2.0*rand())/RAND_MAX - 1.0 )/(n1*n1)
 
 
-void TestID_1dRandomNoise(tGrid *grid, int i_x, int i_gb, int i_K, int i_psi, 
-                          int i_dpsiopsi, int i_ddpsiopsi, 
-                          int i_alpha, int i_beta)
+void TestID_RandomNoise(tGrid *grid, int i_x, int i_gb, int i_K, int i_psi, 
+                        int i_dpsiopsi, int i_ddpsiopsi, 
+                        int i_alpha, int i_beta)
 {
   int bi;
   double t = 0.0;

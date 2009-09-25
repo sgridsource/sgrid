@@ -19,7 +19,7 @@ box0_n2		= 1
 box0_n3		= 1
 
 iterate_parameters = yes
-iterate_parameter1 = box0_n1 15 21 27 33 39 45 51 57
+iterate_parameter1 = box0_n1 15 21 27 33 39 45 51 57 69
 
 box0_Coordinates	= Cartesian
 
@@ -41,7 +41,7 @@ box0_TransformType3 = 24 FFTW3 # 512 NUMREC_FFT
 
 #===========================================================================
 # initial data
-TestID_type		= 1dRandomNoise
+TestID_type		= RandomNoise
 TestID_amplitude	= 1
 TestID_initial_lapse	= one
 TestID_initial_shift	= zero

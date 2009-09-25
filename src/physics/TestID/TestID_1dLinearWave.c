@@ -1,4 +1,4 @@
-/* TestID_1dGaugeWave.c */
+/* TestID_1dLinearWave.c */
 /* Copyright (C) 2009 Wolfgang Tichy */
 
 #include "sgrid.h"
