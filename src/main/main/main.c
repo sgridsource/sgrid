@@ -35,7 +35,6 @@ int main(int argc, char **argv)
     g = make_grid(1);
     RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
     initialize_grid(g);
-printf("argv[3]=%s\n", Gets("argv[3]"));
     evolve_grid(g);
     finalize_grid(g);
     RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
