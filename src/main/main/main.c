@@ -58,7 +58,9 @@ int read_command_line(int argc, char **argv)
   {
     printf("Welcome to sgrid.\n");
     printf("Usage:  sgrid name.par\n");
-    printf("or:     sgrid name.par extra arguments\n");
+    printf("or:     sgrid name.par options and extra arguments\n");
+    printf("\n");
+    printf("options: --keep_previous           do not touch name_previous\n");
     exit(0);
   }
 
@@ -69,6 +71,10 @@ int read_command_line(int argc, char **argv)
   /* got two parameters */
   if (argc >= 2)
   {
+    int nopts, nargs;
+    char argi[1000];
+    char descr[1000];
+    char options[1000];
     char *parfile = (char *) calloc(sizeof(char), strlen(argv[1])+40);
     char *outdir  = (char *) calloc(sizeof(char), strlen(argv[1])+40);
     char *outdirp = (char *) calloc(sizeof(char), strlen(argv[1])+40);
@@ -79,13 +85,9 @@ int read_command_line(int argc, char **argv)
     strcpy(outdir, parfile);
     *strstr(outdir, ".par") = '\0';
     
-    /* make output directory, save current one */
+    /* set outdirp to outdir_previous */
     strcpy(outdirp, outdir);
     strcat(outdirp, "_previous");
-    system2("rm -rf", outdirp);
-    system3("mv", outdir, outdirp); 
-    system2("mkdir", outdir);
-    system3("cp", parfile, outdir);
 
     /* first parameter initializes parameter data base */
     printf("Adding command line parameters\n");
@@ -95,15 +97,41 @@ int read_command_line(int argc, char **argv)
     // AddPar("trace_memory", "no", "enable memory tracing");
 
     /* add other args */
+    nargs=nopts=0;
+    options[0]=0;
     for(i=2; i<argc; i++)
     {
-      char argi[400];
-      char descr[400];  
-      sprintf(argi, "argv[%d]", i);
-      sprintf(descr, "command line argument%d", i);
-      AddPar(argi, argv[i], descr);
+      if(argv[i][0]=='-')
+      {
+        /* save all options in options */
+        if(nopts>0) strcat(options, " ");
+        strcat(options, argv[i]);
+        nopts++;
+      }
+      else
+      {
+        sprintf(argi, "sgrid_arg%d", nargs+2);
+        sprintf(descr, "sgrid command line argument%d", nargs+2);
+        AddPar(argi, argv[i], descr);
+        nargs++;
+      }
     }
+    /* add sgrid command line options */
+    if(nopts>0) AddPar("sgrid_options", options, "sgrid command line options");
+
+    /* check if we remove outdir_previous */
+    if(!GetvLax("sgrid_options", "--keep_previous"))
+    {
+      /* remove outdir_previous and move outdir to outdir_previous */
+      system2("rm -rf", outdirp);
+      system3("mv", outdir, outdirp);
+    }
+
+    /* make output directory, save parfile */
+    system2("mkdir", outdir);
+    system3("cp", parfile, outdir);
   }
+
 
   /* more initialization */
   return 0;
