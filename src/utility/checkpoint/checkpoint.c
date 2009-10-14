@@ -209,7 +209,8 @@ void checkpoint_copy_output()
     system2("rm -rf", current);
 
     /* move or copy previous output */
-    if (Getv("checkpoint_previous", "no"))
+    if( Getv("checkpoint_previous", "no") &&
+       !GetvLax("sgrid_options", "--keep_previous") )
       system3("mv", previous, current);
     else
       system3("cp -pr", previous, current);
