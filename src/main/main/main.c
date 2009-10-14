@@ -35,6 +35,7 @@ int main(int argc, char **argv)
     g = make_grid(1);
     RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
     initialize_grid(g);
+printf("argv[3]=%s\n", Gets("argv[3]"));
     evolve_grid(g);
     finalize_grid(g);
     RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
@@ -54,10 +55,11 @@ int read_command_line(int argc, char **argv)
     for (i = 0; i < argc; i++)
       printf("argv[%d] = %s\n", i, argv[i]);
 
-  if (argc != 2)
+  if (argc < 2)
   {
     printf("Welcome to sgrid.\n");
     printf("Usage:  sgrid name.par\n");
+    printf("or:     sgrid name.par extra arguments\n");
     exit(0);
   }
 
@@ -66,7 +68,8 @@ int read_command_line(int argc, char **argv)
   prdivider(0);
 
   /* got two parameters */
-  if (argc == 2) {
+  if (argc >= 2)
+  {
     char *parfile = (char *) calloc(sizeof(char), strlen(argv[1])+40);
     char *outdir  = (char *) calloc(sizeof(char), strlen(argv[1])+40);
     char *outdirp = (char *) calloc(sizeof(char), strlen(argv[1])+40);
@@ -91,6 +94,16 @@ int read_command_line(int argc, char **argv)
     AddPar("parameterfile", parfile, 
 	   "name of parameter file given on command line");
     // AddPar("trace_memory", "no", "enable memory tracing");
+
+    /* add other args */
+    for(i=2; i<argc; i++)
+    {
+      char argi[400];
+      char descr[400];  
+      sprintf(argi, "argv[%d]", i);
+      sprintf(descr, "command line argument%d", i);
+      AddPar(argi, argv[i], descr);
+    }
   }
 
   /* more initialization */
