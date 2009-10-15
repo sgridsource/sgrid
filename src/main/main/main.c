@@ -29,6 +29,7 @@ int main(int argc, char **argv)
   read_command_line(argc, argv);
   parse_parameter_file(Gets("parameterfile"));
   initialize_libraries();
+  parse_command_line_options();
 
   while (iterate_parameters()) {
     RunFun(PRE_GRID, 0);  /* hook for special grid preparation */
@@ -61,6 +62,8 @@ int read_command_line(int argc, char **argv)
     printf("or:     sgrid name.par options and extra arguments\n");
     printf("\n");
     printf("options: --keep_previous           do not touch name_previous\n");
+    printf("         --modify-par:\"P=v\"      set par P to value v\n");
+    printf(" all options must start with --\n"); 
     exit(0);
   }
 
@@ -103,15 +106,17 @@ int read_command_line(int argc, char **argv)
     {
       if(argv[i][0]=='-')
       {
+        if(strlen(argv[i])==1) errorexit("- is not a valid option");
+        if(argv[i][1]!='-') errorexit("all options must start with --");
         /* save all options in options */
-        if(nopts>0) strcat(options, " ");
-        strcat(options, argv[i]);
+        if(nopts>0) strncat(options, " ", 999);
+        strncat(options, argv[i], 999);
         nopts++;
       }
       else
       {
-        sprintf(argi, "sgrid_arg%d", nargs+2);
-        sprintf(descr, "sgrid command line argument%d", nargs+2);
+        snprintf(argi, 999, "sgrid_arg%d", nargs+2);
+        snprintf(descr, 999, "sgrid command line argument%d", nargs+2);
         AddPar(argi, argv[i], descr);
         nargs++;
       }
@@ -137,7 +142,44 @@ int read_command_line(int argc, char **argv)
   return 0;
 }
 
+/* go through options and act accordingly */
+int parse_command_line_options()
+{
+  char *optionstr;
+  char *str1;
+  char *str2;
+  char *par;
+  char *val;
+  
+  /* get length of sgrid_options string */
+  if(GetsLax("sgrid_options")==0) return 0;
 
+  /* parse for all --modify-par: */
+  optionstr = strdup((GetsLax("sgrid_options")));
+  str1 = optionstr;
+  while( (str1=strstr(str1, "--modify-par:"))!=NULL )
+  {
+    str1+=13;
+    str2=strstr(str1, "=");
+    if(str2==NULL) break;
+    str2[0]=0; /* replace = with 0 */
+    par=str1;
+    val=str2+1;
+    str2=strstr(val, " --");
+    if(str2!=NULL) str2[0]=0; /* now val is 0 terminated for sure */
+    if(0) printf("par=%s|val=%s|\n", par,val);
+    
+    /* set par to new value */
+    AddOrModifyPar(par, val, "set with --modify-par option");
+
+    /* move forward in str1 */
+    if(str2!=NULL) str2[0]=' '; /* restore space before -- */
+    str1=val;
+    if(0) printf("str1=%s|\n", str1);
+  }
+  free(optionstr);
+  return 0;
+} 
 
 
 /* initialize grid */

@@ -32,6 +32,7 @@
 
 /* parameters.c */
 void AddPar(char *name, char *value, char *description);
+void AddOrModifyPar(char *name, char *value, char *description);
 void Sets(char *name, char *value);
 void Seti(char *name, int i);
 void Setd(char *name, double d);
