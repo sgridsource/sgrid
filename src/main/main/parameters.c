@@ -278,6 +278,7 @@ void AddOrModifyPar(char *name, char *value, char *description)
     makeparameter(name, value, description);
   else
     setparameter(name, value);
+  printf("  parameter %-25s  =  %s\n", name, Gets(name));
 }
 
 
