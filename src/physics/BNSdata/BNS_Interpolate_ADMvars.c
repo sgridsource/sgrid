@@ -7,8 +7,8 @@
 
 
 
-/* position filepointer after the string str */
-int position_fileptr_after_str(FILE *in, char *str)
+/* position filepointer below the label str */
+int position_fileptr_below_label(FILE *in, char *str)
 {
   char line[1000];
   
@@ -89,7 +89,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   fprintf(out, "%s", "\n");
   fprintf(out, "%s\n", "$BEGIN_data:");
   
-  j=position_fileptr_after_str(in, "$BEGIN_data:\n");
+  j=position_fileptr_below_label(in, "$BEGIN_data:");
   if(j==EOF) errorexits("could not find $BEGIN_data: in %s", pointsfile);
   while(read_next_xyz_from_pointsfile(in, &x,&y,&z)!=EOF)
   {
