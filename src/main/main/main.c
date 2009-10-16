@@ -153,6 +153,7 @@ int parse_command_line_options()
   
   /* get length of sgrid_options string */
   if(GetsLax("sgrid_options")==0) return 0;
+  printf("Parsing command line options\n");
 
   /* parse for all --modify-par: */
   optionstr = strdup((GetsLax("sgrid_options")));
