@@ -1,7 +1,6 @@
 /* checkpoint.h */
 /* Wolfgang Tichy 11/2008 */
 
-#include "wolfio.h"
 
 /* checkpoint.c */
 char *checkpoint_filename(char *suffix);

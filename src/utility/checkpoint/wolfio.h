@@ -50,10 +50,11 @@ int fscanf1(FILE *in, char *fmt, char *str);
   read one string as with fscanf but using fscan_str_using_getc 
 */
 
-
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+*/
 
 /* Functions */
 int fgotonext(FILE *in, const char *label);
