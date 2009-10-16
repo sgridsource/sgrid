@@ -53,6 +53,9 @@ double ADMmass_fromPsi_inbox1_at_A1B0(tGrid *grid, int iADMmass);
 double InnerVolumeIntegral(tGrid *grid, int b, int vind);
 double VolumeIntegral_inBNSgridBox(tGrid *grid, int b, int vind);
 void adjust_box4_5_pars(tGrid *grid);
+int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
+                                    double *X1, double *Y1, double *Z1,
+                                    int b, double x, double y, double z);
 void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind);
 double BNS_update_q_atXYZ(tGrid *grid2, 
                           int b2, double X2, double Y2, double Z2,
