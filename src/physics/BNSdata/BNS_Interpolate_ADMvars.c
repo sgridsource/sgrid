@@ -37,6 +37,7 @@ int read_next_xyz_from_pointsfile(FILE *in, double *x, double *y, double *z)
 /* interpolate ADM initial data onto points listed in pointsfile */
 int BNS_Interpolate_ADMvars(tGrid *grid)
 {
+  int pr=0;
   FILE *in, *out;
   char *pointsfile;
   char *outfile;
@@ -56,7 +57,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   /* add all vars to vlu */
   vlpush(vlu, Ind("gxx"));
   vlpush(vlu, Ind("alpha"));
-  vlpush(vlu, Ind("betax"));
+  vlpush(vlu, Ind("BNSdata_Bx"));
   vlpush(vlu, Ind("Kxx"));
   vlpush(vlu, Ind("rho"));
   vlpush(vlu, Ind("jx"));
@@ -78,7 +79,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   /* open both files */
   in = fopen(pointsfile, "rb");
   if(!in) errorexits("failed opening %s", pointsfile);
-  out = fopen(outfile, "a");
+  out = fopen(outfile, "wb");
   if(!out) errorexits("failed opening %s", outfile);
 
   /* write header info */  
@@ -88,14 +89,19 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   fprintf(out, "%s", "\n");
   fprintf(out, "%s\n", "$BEGIN_data:");
   
-  position_fileptr_after_str(in, "$BEGIN_data:\n");
+  j=position_fileptr_after_str(in, "$BEGIN_data:\n");
+  if(j==EOF) errorexits("could not find $BEGIN_data: in %s", pointsfile);
   while(read_next_xyz_from_pointsfile(in, &x,&y,&z)!=EOF)
   {
+    if(pr) printf("(x,y,z)=(%g,%g,%g)\n", x,y,z);
+
     /* initial guess for X,Y,Z, b: */
     nearest_b_XYZ_of_xyz(grid, &b, &ind, &X,&Y,&Z, x,y,z);
+    if(pr) printf("nearest: b=%d (X,Y,Z)=(%g,%g,%g) ind=%d\n", b, X,Y,Z, ind);
 
     /* get X,Y,Z, b of x,y,z */
     b=BNSgrid_Get_BoxAndCoords_of_xyz(grid, &X,&Y,&Z,b, x,y,z);
+    if(pr) printf("actual:  b=%d (X,Y,Z)=(%g,%g,%g)\n", b, X,Y,Z);
 
     /* interpolate vlu (using coeffs in vlc) to X,Y,Z in box b */
     for(j=0; j<vlc->n; j++)
@@ -103,6 +109,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
       tBox *box = grid->box[b];
       double *c = box->v[vlc->index[j]];
       val = spec_interpolate(box, c, X,Y,Z);
+      if(pr) printf("%s=%g\n", VarName(vlu->index[j]), val);
       fwrite(&val, sizeof(double), 1, out);
     }
   }
