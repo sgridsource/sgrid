@@ -62,7 +62,7 @@ int read_command_line(int argc, char **argv)
     printf("or:     sgrid name.par options and extra arguments\n");
     printf("\n");
     printf("options: --keep_previous           do not touch name_previous\n");
-    printf("         --modify-par:\"P=v\"      set par P to value v\n");
+    printf("         --modify-par:\"P=v\"        set par P to value v\n");
     printf(" all options must start with --\n"); 
     exit(0);
   }
