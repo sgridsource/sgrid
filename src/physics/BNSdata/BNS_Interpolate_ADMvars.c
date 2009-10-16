@@ -47,6 +47,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   tVarList *vlc;
 
   if(GetsLax("BNSdata_Interpolate_pointsfile")==0) return 0;
+  printf("BNS_Interpolate_ADMvars:\n");
 
   /* allocate varlists */
   vlu = vlalloc(grid);
@@ -71,6 +72,8 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   /* filenames */
   pointsfile = Gets("BNSdata_Interpolate_pointsfile");
   outfile    = Gets("BNSdata_Interpolate_output");
+  printf("BNSdata_Interpolate_pointsfile=%s\n", pointsfile);
+  printf("BNSdata_Interpolate_output=%s\n", outfile);
 
   /* open both files */
   in = fopen(pointsfile, "rb");

@@ -16,6 +16,8 @@ int sgrid_BNSdata()
   AddFun(PRE_INITIALDATA, BNSdata_startup, "initialize BNSdata");
   AddFun(INITIALDATA, setBNSdata, "set the BNS data");
   AddFun(ANALYZE, BNSdata_analyze, "compute properties of BNS data");
+  AddFun(OUTPUT, BNS_Interpolate_ADMvars,
+         "interpolate ADM initial data using BNSdata_Interpolate_pointsfile");
 
   /* variables */
   AddVar("BNSdata_Psi",     "",     "new conf. factor");

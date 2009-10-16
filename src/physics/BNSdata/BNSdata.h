@@ -65,3 +65,6 @@ void BNSgrid_init_Coords(tGrid *grid);
 void BNSgrid_copy_DomainShape(tGrid *grid, int ibd);
 void BNSgrid_set_Var_equalmasses_sym(tGrid *grid, int ibd, int iv, int sym);
 void BNSgrid_set_allVars_onLeft_equalmasses(tGrid *grid);
+
+/* from BNS_Interpolate_ADMvars.c */
+int BNS_Interpolate_ADMvars(tGrid *grid);
