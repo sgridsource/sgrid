@@ -101,3 +101,5 @@ double spec_sphericalDF3dIntegral(tBox *box, double *u, double *U);
 void spec_Coeffs(tBox *box, double *u, double *c);
 void spec_Eval(tBox *box, double *u, double *c);
 double spec_interpolate(tBox *box, double *c, double X, double Y, double Z);
+void spec_Coeffs_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
+void spec_Eval_varlist(tBox *box, tVarList *vlu, tVarList *vlc);

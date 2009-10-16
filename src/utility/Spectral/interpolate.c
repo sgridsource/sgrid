@@ -128,3 +128,30 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
 
   return sum;
 }
+
+
+/* get vlc=c_ijk of varlist vlu in box */
+void spec_Coeffs_varlist(tBox *box, tVarList *vlu, tVarList *vlc)
+{
+  int j;
+
+  for(j=0; j<vlu->n; j++)
+  {
+    double *u = box->v[vlu->index[j]]; 
+    double *c = box->v[vlc->index[j]]; 
+    spec_Coeffs(box, u, c);
+  }
+}
+
+/* get varlist vlu from coeff varlist vlc=c_ijk */
+void spec_Eval_varlist(tBox *box, tVarList *vlu, tVarList *vlc)
+{
+  int j;
+
+  for(j=0; j<vlc->n; j++)
+  {
+    double *u = box->v[vlu->index[j]]; 
+    double *c = box->v[vlc->index[j]]; 
+    spec_Eval(box, u, c);
+  }
+}
