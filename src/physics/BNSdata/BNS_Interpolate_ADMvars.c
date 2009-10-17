@@ -76,6 +76,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
      with grid2 finds points that are closer to the correct point. */
   /* use 40 points in A,B and leave point number in other directions. */
   printf(" making finer grid2 to get a good guess for XYZ ...\n");
+  fflush(stdout);
   grid2 = make_grid_with_sigma_pm(grid, 40, 
                                         grid->box[1]->n3, grid->box[5]->n1);
 
@@ -84,6 +85,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   outfile    = Gets("BNSdata_Interpolate_output");
   printf(" BNSdata_Interpolate_pointsfile = %s\n", pointsfile);
   printf(" BNSdata_Interpolate_output = %s\n", outfile);
+  fflush(stdout);
 
   /* open both files */
   in = fopen(pointsfile, "rb");
@@ -152,7 +154,11 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   /* free var lists */
   vlfree(vlu);
   VLDisableFree(vlc);
+
+  printf("BNS_Interpolate_ADMvars: finished interpolations "
+         "and wrote all output.\n");
   prdivider(0);
-      
+  fflush(stdout);
+     
   return 0;
 }
