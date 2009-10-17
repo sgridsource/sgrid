@@ -93,15 +93,23 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   if(j==EOF) errorexits("could not find $BEGIN_data: in %s", pointsfile);
   while(read_next_xyz_from_pointsfile(in, &x,&y,&z)!=EOF)
   {
+    int blist[6];
+
     if(pr) printf("(x,y,z)=(%g,%g,%g)\n", x,y,z);
 
     /* initial guess for X,Y,Z, b: */
-    nearest_b_XYZ_of_xyz(grid, &b, &ind, &X,&Y,&Z, x,y,z);
-    if(pr) printf("nearest: b=%d (X,Y,Z)=(%g,%g,%g) ind=%d\n", b, X,Y,Z, ind);
+    if(x>=0.0) { blist[0]=1;  blist[1]=0;   blist[2]=5; }
+    else       { blist[0]=2;  blist[1]=3;   blist[2]=4; }
+    nearest_b_XYZ_of_xyz_inboxlist(grid, blist,3, &b, &ind, &X,&Y,&Z, x,y,z);
+    if(dequal(Y, 0.0)) Y=0.01;
+    if(dequal(Y, 1.0)) Y=1.0-0.01;
+    Z = Arg_plus(y,z);
+    if(pr) printf("guess:  b=%d (X,Y,Z)=(%g,%g,%g)  nearest ind=%d\n", b, X,Y,Z, ind);
 
     /* get X,Y,Z, b of x,y,z */
     b=BNSgrid_Get_BoxAndCoords_of_xyz(grid, &X,&Y,&Z,b, x,y,z);
-    if(pr) printf("actual:  b=%d (X,Y,Z)=(%g,%g,%g)\n", b, X,Y,Z);
+    if(pr) printf("actual: b=%d (X,Y,Z)=(%g,%g,%g)\n", b, X,Y,Z);
+    if(b<0) errorexit("could not find point");
 
     /* interpolate vlu (using coeffs in vlc) to X,Y,Z in box b */
     for(j=0; j<vlc->n; j++)
@@ -109,6 +117,8 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
       tBox *box = grid->box[b];
       double *c = box->v[vlc->index[j]];
       val = spec_interpolate(box, c, X,Y,Z);
+      if(!finite(val))
+        errorexit("spec_interpolate returned NAN, probably (X,Y,Z) was bad!");
       if(pr) printf("%s=%g\n", VarName(vlu->index[j]), val);
       fwrite(&val, sizeof(double), 1, out);
     }
