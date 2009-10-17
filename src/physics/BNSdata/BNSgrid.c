@@ -1776,6 +1776,149 @@ double VolumeIntegral_inBNSgridBox(tGrid *grid, int b, int vind)
 }
 
 
+/* make a grid with a different number of points in A-,B- and phi-dir */
+tGrid *make_grid_with_sigma_pm(tGrid *grid, int nAB, int nphi, int nxyz)
+{
+  int pr=0;
+  tGrid *grid2;
+  char *box0_n1_sav = strdup(Gets("box0_n1"));
+  char *box1_n1_sav = strdup(Gets("box1_n1"));
+  char *box2_n1_sav = strdup(Gets("box2_n1"));
+  char *box3_n1_sav = strdup(Gets("box3_n1"));
+  char *box0_n2_sav = strdup(Gets("box0_n2"));
+  char *box1_n2_sav = strdup(Gets("box1_n2"));
+  char *box2_n2_sav = strdup(Gets("box2_n2"));
+  char *box3_n2_sav = strdup(Gets("box3_n2"));
+  char *box0_n3_sav = strdup(Gets("box0_n3"));
+  char *box1_n3_sav = strdup(Gets("box1_n3"));
+  char *box2_n3_sav = strdup(Gets("box2_n3"));
+  char *box3_n3_sav = strdup(Gets("box3_n3"));
+  int b;
+  int i,j,k;
+  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
+
+  /* adjust n1,n2,n3 in boxes */
+  Seti("box0_n1", nAB);
+  Seti("box1_n1", nAB);
+  Seti("box2_n1", nAB);
+  Seti("box3_n1", nAB);
+  Seti("box0_n2", nAB);
+  Seti("box1_n2", nAB);
+  Seti("box2_n2", nAB);
+  Seti("box3_n2", nAB);
+  Seti("box0_n3", nphi);
+  Seti("box1_n3", nphi);
+  Seti("box2_n3", nphi);
+  Seti("box3_n3", nphi);
+
+  /* make grid with new adjusted boxes */
+  grid2 = make_empty_grid(grid->nvariables, pr);
+  set_BoxStructures_fromPars(grid2, pr);
+
+  /* enable some vars needed on grid2 */
+  enablevar(grid2, Ind("x"));
+  enablevar(grid2, Ind("y"));
+  enablevar(grid2, Ind("z"));
+  enablevar(grid2, Ind("dXdx"));
+  enablevar(grid2, Ind("dYdx"));
+  enablevar(grid2, Ind("dZdx"));
+  enablevar(grid2, Ind("Temp1"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_sigma_pm"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dB"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dphi"));  
+
+  /* coeffs of Coordinates_AnsorgNS_sigma_pm and its derivs */
+  for(b=0; b<=3; b++)
+  {
+    spec_Coeffs(grid->box[b],
+                grid->box[b]->v[Ind("Coordinates_AnsorgNS_sigma_pm")], 
+                grid->box[b]->v[Ind("temp1")]);
+    spec_Coeffs(grid->box[b],
+                grid->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dB")], 
+                grid->box[b]->v[Ind("temp2")]);
+    spec_Coeffs(grid->box[b],
+                grid->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dphi")], 
+                grid->box[b]->v[Ind("temp3")]);
+  }
+
+  /* set var and Psi on grid2 by interpolation */
+  for(b=0; b<=3; b++)
+  {
+    double *c1 = grid->box[b]->v[Ind("temp1")];
+    double *c2 = grid->box[b]->v[Ind("temp2")];
+    double *c3 = grid->box[b]->v[Ind("temp3")];
+    double *sig   =grid2->box[b]->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+    double *sigB  =grid2->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dB")];
+    double *sigphi=grid2->box[b]->v[Ind("Coordinates_AnsorgNS_dsigma_pm_dphi")];
+    double *X = grid2->box[b]->v[Ind("X")];
+    double *Y = grid2->box[b]->v[Ind("Y")];
+    double *Z = grid2->box[b]->v[Ind("Z")];
+    int n1 = grid2->box[b]->n1;
+    int n2 = grid2->box[b]->n2;
+    int n3 = grid2->box[b]->n3;
+    int ind;
+
+    /* interpolate for i=0 <===> A=0 */
+    i=0; /* A=0 */
+    for(k=0; k<n3; k++)
+    for(j=0; j<n2; j++)
+    {
+      ind = Index(0,j,k);
+      sig[ind]  = spec_interpolate(grid->box[b], c1, X[ind], Y[ind], Z[ind]);
+      sigB[ind] = spec_interpolate(grid->box[b], c2, X[ind], Y[ind], Z[ind]);
+      sigphi[ind]=spec_interpolate(grid->box[b], c3, X[ind], Y[ind], Z[ind]);
+      if(pr) 
+       printf("(X,Y,Z)=(%g,%g,%g) (i,j,k)=(%d,%d,%d) sig=%g sigB=%g sigphi=%g\n",
+              X[ind],Y[ind],Z[ind], i,j,k, sig[ind],sigB[ind],sigphi[ind]);
+    }
+    /* copy for all other i */
+    for(k=0; k<n3; k++)
+    for(j=0; j<n2; j++)
+    for(i=1; i<n1; i++)
+    {
+      sig[Index(i,j,k)]    = sig[Index(0,j,k)];
+      sigB[Index(i,j,k)]   = sigB[Index(0,j,k)];
+      sigphi[Index(i,j,k)] = sigphi[Index(0,j,k)];
+    }
+  }
+
+  /* initialize coords on grid2 */
+  if(Coordinates_verbose && pr==0) Sets("Coordinates_verbose", "no");
+  init_CoordTransform_And_Derivs(grid2);
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
+
+  /* reset box pars */
+  Sets("box0_n1", box0_n1_sav);
+  Sets("box1_n1", box1_n1_sav);
+  Sets("box2_n1", box2_n1_sav);
+  Sets("box3_n1", box3_n1_sav);
+  Sets("box0_n2", box0_n2_sav);
+  Sets("box1_n2", box1_n2_sav);
+  Sets("box2_n2", box2_n2_sav);
+  Sets("box3_n2", box3_n2_sav);
+  Sets("box0_n3", box0_n3_sav);
+  Sets("box1_n3", box1_n3_sav);
+  Sets("box2_n3", box2_n3_sav);
+  Sets("box3_n3", box3_n3_sav);
+  
+  /* free saved strings */
+  free(box0_n1_sav);
+  free(box1_n1_sav);
+  free(box2_n1_sav);
+  free(box3_n1_sav);
+  free(box0_n2_sav);
+  free(box1_n2_sav);
+  free(box2_n2_sav);
+  free(box3_n2_sav);
+  free(box0_n3_sav);
+  free(box1_n3_sav);
+  free(box2_n3_sav);
+  free(box3_n3_sav);
+
+  return grid2;
+}
+
+
 /* figure out max A inside stars and adjust boxes4/5 accordingly */
 void adjust_box4_5_pars(tGrid *grid)
 {

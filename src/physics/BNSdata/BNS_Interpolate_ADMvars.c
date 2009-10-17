@@ -41,6 +41,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   FILE *in, *out;
   char *pointsfile;
   char *outfile;
+  tGrid *grid2;
   double x,y,z, val;
   double X,Y,Z;
   int ind,j,b;
@@ -82,6 +83,12 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   out = fopen(outfile, "wb");
   if(!out) errorexits("failed opening %s", outfile);
 
+  /* make a finer grid2 so that nearest_b_XYZ_of_xyz_inboxlist used
+     with grid2 finds points that are closer to the correct point */
+  /* use 40 points in A,B and leave point number in other directions. */
+  grid2 = make_grid_with_sigma_pm(grid, 40, 
+                                        grid->box[1]->n3, grid->box[5]->n1);
+
   /* write header info */  
   fprintf(out, "%s", "#");
   for(j=0; j<vlu->n; j++)
@@ -100,7 +107,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
     /* initial guess for X,Y,Z, b: */
     if(x>=0.0) { blist[0]=1;  blist[1]=0;   blist[2]=5; }
     else       { blist[0]=2;  blist[1]=3;   blist[2]=4; }
-    nearest_b_XYZ_of_xyz_inboxlist(grid, blist,3, &b, &ind, &X,&Y,&Z, x,y,z);
+    nearest_b_XYZ_of_xyz_inboxlist(grid2, blist,3, &b, &ind, &X,&Y,&Z, x,y,z);
     if(dequal(Y, 0.0)) Y=0.01;
     if(dequal(Y, 1.0)) Y=1.0-0.01;
     Z = Arg_plus(y,z);
@@ -131,6 +138,9 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
       fwrite(&val, sizeof(double), 1, out);
     }
   }
+  
+  /* remove grid2 */
+  free_grid(grid2);
 
   /* close files */
   fclose(out);
