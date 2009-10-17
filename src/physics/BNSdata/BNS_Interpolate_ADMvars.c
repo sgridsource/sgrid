@@ -49,6 +49,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   tVarList *vlc;
 
   if(GetsLax("BNSdata_Interpolate_pointsfile")==0) return 0;
+  prdivider(0);
   printf("BNS_Interpolate_ADMvars:\n");
 
   /* allocate varlists */
@@ -71,11 +72,18 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   forallboxes(grid, b)
     spec_Coeffs_varlist(grid->box[b], vlu, vlc);
 
+  /* make a finer grid2 so that nearest_b_XYZ_of_xyz_inboxlist used
+     with grid2 finds points that are closer to the correct point. */
+  /* use 40 points in A,B and leave point number in other directions. */
+  printf(" making finer grid2 to get a good guess for XYZ ...\n");
+  grid2 = make_grid_with_sigma_pm(grid, 40, 
+                                        grid->box[1]->n3, grid->box[5]->n1);
+
   /* filenames */
   pointsfile = Gets("BNSdata_Interpolate_pointsfile");
   outfile    = Gets("BNSdata_Interpolate_output");
-  printf("BNSdata_Interpolate_pointsfile=%s\n", pointsfile);
-  printf("BNSdata_Interpolate_output=%s\n", outfile);
+  printf(" BNSdata_Interpolate_pointsfile = %s\n", pointsfile);
+  printf(" BNSdata_Interpolate_output = %s\n", outfile);
 
   /* open both files */
   in = fopen(pointsfile, "rb");
@@ -83,11 +91,6 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   out = fopen(outfile, "wb");
   if(!out) errorexits("failed opening %s", outfile);
 
-  /* make a finer grid2 so that nearest_b_XYZ_of_xyz_inboxlist used
-     with grid2 finds points that are closer to the correct point */
-  /* use 40 points in A,B and leave point number in other directions. */
-  grid2 = make_grid_with_sigma_pm(grid, 40, 
-                                        grid->box[1]->n3, grid->box[5]->n1);
 
   /* write header info */  
   fprintf(out, "%s", "#");
@@ -149,6 +152,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   /* free var lists */
   vlfree(vlu);
   VLDisableFree(vlc);
+  prdivider(0);
       
   return 0;
 }
