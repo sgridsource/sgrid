@@ -185,6 +185,30 @@ double nearest_b_XYZ_of_xyz(tGrid *grid,  int *b, int *ind,
   return rmin;
 }
 
+/* find nearest X,Y,Z on grid from x,y,z */
+double nearest_b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb, 
+                            int *b, int *ind,
+                            double *X, double *Y, double *Z,
+                            double x, double y, double z)
+{
+  double r, rmin=-1.0;
+  double X1,Y1,Z1;
+  int ind1, bi, i;
+  tBox *box;
+
+  for(i=0; i<nb; i++)
+  {
+    bi = blist[i];
+    box = grid->box[bi];
+    r = nearestXYZ_of_xyz(box, &ind1, &X1,&Y1,&Z1, x,y,z);
+    if(r<=rmin || rmin<0.0 )
+    {
+      rmin=r;  *b=bi;  *ind=ind1;   *X=X1;  *Y=Y1;  *Z=Z1;
+    }
+  }
+  return rmin;
+}
+
 /* find nearest X,Y,Z in grid-plane from x,y,z */
 double nearestXYZ_of_xyz_inplane(tBox *box, int *ind, 
                                  double *X, double *Y, double *Z,
