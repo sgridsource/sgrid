@@ -109,8 +109,12 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
     /* get X,Y,Z, b of x,y,z */
     b=BNSgrid_Get_BoxAndCoords_of_xyz(grid, &X,&Y,&Z,b, x,y,z);
     if(pr) printf("actual: b=%d (X,Y,Z)=(%g,%g,%g)\n", b, X,Y,Z);
-    if(b<0) errorexit("could not find point");
-
+    if(b<0)
+    {
+      printf("point: (x,y,z)=(%g,%g,%g)\n", x,y,z);
+      printf("error: b=%d (X,Y,Z)=(%g,%g,%g)\n", b, X,Y,Z); 
+      errorexit("could not find point");
+    }
     /* interpolate vlu (using coeffs in vlc) to X,Y,Z in box b */
     for(j=0; j<vlc->n; j++)
     {
@@ -118,7 +122,11 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
       double *c = box->v[vlc->index[j]];
       val = spec_interpolate(box, c, X,Y,Z);
       if(!finite(val))
+      {
+        printf("point:  (x,y,z)=(%g,%g,%g)\n", x,y,z);
+        printf("NAN at: b=%d (X,Y,Z)=(%g,%g,%g)\n", b, X,Y,Z); 
         errorexit("spec_interpolate returned NAN, probably (X,Y,Z) was bad!");
+      }
       if(pr) printf("%s=%g\n", VarName(vlu->index[j]), val);
       fwrite(&val, sizeof(double), 1, out);
     }
