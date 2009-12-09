@@ -61,9 +61,14 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   vlpush(vlu, Ind("BNSdata_Bx"));
   vlpush(vlu, Ind("gxx"));
   vlpush(vlu, Ind("Kxx"));
-  vlpush(vlu, Ind("rho"));
-  vlpush(vlu, Ind("jx"));
-  vlpush(vlu, Ind("Sxx"));
+  vlpush(vlu, Ind("BNSdata_q"));
+  vlpush(vlu, Ind("BNSdata_vRSx"));
+  vlpush(vlu, Ind("BNSdata_Sigmax"));
+  /* Those we do not need:
+    vlpush(vlu, Ind("rho"));
+    vlpush(vlu, Ind("jx"));
+    vlpush(vlu, Ind("Sxx"));
+  */
 
   /* now duplicate vlu to get vlc */  
   vlc = AddDuplicateEnable(vlu, "_c");
