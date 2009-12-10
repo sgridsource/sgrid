@@ -137,7 +137,29 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
     {
       tBox *box = grid->box[b];
       double *c = box->v[vlc->index[j]];
-      val = spec_interpolate(box, c, X,Y,Z);
+      double gxx=-1e300;
+
+      /* HACK: don't interpolate for some vars that are zero
+         or already known */
+      if( strcmp(VarName(vlu->index[j]),"gxx")==0 ) 
+        gxx = val = spec_interpolate(box, c, X,Y,Z);
+      else if( strcmp(VarName(vlu->index[j]),"gyy")==0 ||
+               strcmp(VarName(vlu->index[j]),"gzz")==0   )
+        val = gxx;
+      else if( strcmp(VarName(vlu->index[j]),"gxy")==0 ||
+               strcmp(VarName(vlu->index[j]),"gxz")==0 ||
+               strcmp(VarName(vlu->index[j]),"gyz")==0   )
+        val=0.0;
+      else if( strcmp(VarName(vlu->index[j]),"BNSdata_vRSx")==0 ||
+               strcmp(VarName(vlu->index[j]),"BNSdata_vRSy")==0 ||
+               strcmp(VarName(vlu->index[j]),"BNSdata_vRSz")==0 ||
+               strcmp(VarName(vlu->index[j]),"BNSdata_Sigmax")==0 ||
+               strcmp(VarName(vlu->index[j]),"BNSdata_Sigmay")==0 ||
+               strcmp(VarName(vlu->index[j]),"BNSdata_Sigmaz")==0   )
+        val=0.0; /* <-- true in corotating case */
+      else val = spec_interpolate(box, c, X,Y,Z);
+      /* if we always interpolate we need:
+      val = spec_interpolate(box, c, X,Y,Z); */
       if(!finite(val))
       {
         printf("point:  (x,y,z)=(%g,%g,%g)\n", x,y,z);
