@@ -33,7 +33,8 @@ int sgrid_BNSdata()
   AddVar("BNSdata_Sigma",   "i",    "1st deriv of Sigma");
   AddVar("BNSdata_Sigma",   "(ij)", "2nd deriv of Sigma");
 
-  AddVar("BNSdata_vRS", "I", "solenoidal velocity in rotating frame");
+  AddVar("BNSdata_vRS", "I", "solenoidal velocity in rotating frame. "
+                             "Note: v^i = u^i/u^0, i.e. it is not u^i/(alpha u^0)");
   AddVar("BNSdata_q",   "",  "q := P/rho0");
   AddVar("BNSdata_vRS", "Ij","1st deriv of vRS");
   AddVar("BNSdata_q",   "i", "1st deriv of q");
