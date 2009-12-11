@@ -43,6 +43,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   char *outfile;
   tGrid *grid2;
   double x,y,z, val;
+  double gxx=-1e300;
   double X,Y,Z;
   int ind,j,b;
   tVarList *vlu;
@@ -137,7 +138,6 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
     {
       tBox *box = grid->box[b];
       double *c = box->v[vlc->index[j]];
-      double gxx=-1e300;
 
       /* HACK: don't interpolate for some vars that are zero
          or already known */
