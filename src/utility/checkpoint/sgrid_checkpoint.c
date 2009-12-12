@@ -25,6 +25,9 @@ int sgrid_checkpoint(void)
 
   AddPar("checkpoint_DeltaT", "0",
 	 "run for that much beyond previous checkpoint");
+  AddPar("checkpoint_no_read_parlist",
+         "checkpoint finaltime iterations outdir",
+	 "list of parameters that are not read from checkpoint");
 
   AddPar("checkpoint_variables", "auto",
 	 "which variables to checkpoint [auto,all]");
@@ -32,6 +35,8 @@ int sgrid_checkpoint(void)
      besides the ones implied by auto */
   AddPar("checkpoint_additional_variables", "",
 	 "additional variables we need to save [any varnames]");
+  AddPar("checkpoint_outdir","", "dir for writing checkpoints (if non-empty)");
+  AddPar("checkpoint_indir", "", "dir for reading checkpoints (if non-empty)");
   AddPar("checkpoint_previous", "no",
 	 "whether to keep previous directory [no]");
 

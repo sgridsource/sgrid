@@ -99,15 +99,28 @@ int checkpoint(tGrid *grid)
    - it may be more efficient to collect all data onto processor 0
      and then write one file
 */
-char *checkpoint_filename(char *suffix)
+char *checkpoint_filename(char *suffix, char *flag)
 {
-  char *dir = cmalloc(strlen(Gets("outdir")) + strlen(suffix) + 1);
+  char *dir;
   char *filename = cmalloc(1000);
   char formatstring[100];
 
   /* name of directory */
-  sprintf(dir, "%s%s", Gets("outdir"), suffix);
-    
+  if( strlen(Gets("checkpoint_indir"))>0 && strstr(flag, "r") )
+  {
+    dir = cmalloc(strlen(Gets("checkpoint_indir")) + 2);
+    sprintf(dir, "%s", Gets("checkpoint_indir"));
+  }
+  else if( strlen(Gets("checkpoint_outdir"))>0 && strstr(flag, "w") )
+  {
+    dir = cmalloc(strlen(Gets("checkpoint_outdir")) + 2);
+    sprintf(dir, "%s", Gets("checkpoint_outdir"));
+  }
+  else
+  {
+    dir = cmalloc(strlen(Gets("outdir")) + strlen(suffix) + 1);
+    sprintf(dir, "%s%s", Gets("outdir"), suffix);
+  } 
   /* variable length format for different number of processors
      (same as for stdout.01 etc.)
   */
@@ -115,7 +128,7 @@ char *checkpoint_filename(char *suffix)
 	   (int) log10(sgrid_mpi_size())+1);
   snprintf(filename, 1000, formatstring, dir, sgrid_mpi_rank());
 
-  if (1) printf("  checkpoint filename = %s\n", filename);
+  if(1) printf("  checkpoint filename = %s\n", filename);
 
   free(dir);
   return filename;
@@ -131,7 +144,7 @@ char *checkpoint_filename(char *suffix)
 */
 FILE *checkpoint_openfiles(char *suffix)
 {
-  char *filename = checkpoint_filename(suffix);
+  char *filename = checkpoint_filename(suffix, "r");
   FILE *fp;
   int nfp;
 

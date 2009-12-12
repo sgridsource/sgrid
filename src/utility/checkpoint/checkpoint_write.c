@@ -20,7 +20,7 @@
 */
 void checkpoint_write(tGrid *g)
 {
-  char *filename = checkpoint_filename("");
+  char *filename = checkpoint_filename("", "w");
   char *filename_new;
   FILE *fp;
   int i;

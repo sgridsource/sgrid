@@ -137,15 +137,16 @@ void checkpoint_read_ParsAndIterations_local(tGrid *grid, FILE *fp)
     }
     if(strcmp(value, currentvalue) != 0)
     {
-      /* handle list of parameters that are allowed to keep a new value
-         (should be made actual list)
-      */
-      if(strcmp(name, "checkpoint") &&
-	 strcmp(name, "finaltime")  &&
-	 strcmp(name, "iterations")  )
+      /* handle list of parameters that are allowed to keep a new value */
+      if(Getv("checkpoint_no_read_parlist", name))
       {
-	if (1) printf("overwriting %s = %s -> %s\n",
-		      name, currentvalue, value);
+        if(1) printf("keeping %s = %s  != %s\n",
+		     name, currentvalue, value);
+      }
+      else
+      {
+	if(1) printf("overwriting %s = %s -> %s\n",
+		     name, currentvalue, value);
 	Sets(name, value);
       }
     }
