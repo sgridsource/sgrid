@@ -28,8 +28,9 @@ int main(int argc, char **argv)
 
   read_command_line(argc, argv);
   parse_parameter_file(Gets("parameterfile"));
-  initialize_libraries();
   parse_command_line_options();
+  make_output_directory();
+  initialize_libraries();
 
   while (iterate_parameters()) {
     RunFun(PRE_GRID, 0);  /* hook for special grid preparation */
@@ -78,19 +79,18 @@ int read_command_line(int argc, char **argv)
     char argi[1000];
     char descr[1000];
     char options[1000];
-    char *parfile = (char *) calloc(sizeof(char), strlen(argv[1])+40);
-    char *outdir  = (char *) calloc(sizeof(char), strlen(argv[1])+40);
-    char *outdirp = (char *) calloc(sizeof(char), strlen(argv[1])+40);
+    char *parfile = (char *) calloc(strlen(argv[1])+40, sizeof(char));
+    char *outdir  = (char *) calloc(strlen(argv[1])+40, sizeof(char));
+    int parnamelen;
 
     /* determine name of parameter file and output directory */
     strcpy(parfile, argv[1]);
-    if (!strstr(parfile, ".par")) strcat(parfile, ".par");
+    parnamelen = strlen(parfile);
+    if(!strstr(parfile, ".par") || parnamelen<5) strcat(parfile, ".par");
+    parnamelen = strlen(parfile);
+    if(!strstr(parfile+parnamelen-4, ".par")) strcat(parfile, ".par");
     strcpy(outdir, parfile);
-    *strstr(outdir, ".par") = '\0';
-    
-    /* set outdirp to outdir_previous */
-    strcpy(outdirp, outdir);
-    strcat(outdirp, "_previous");
+    outdir[strlen(outdir)-4]=0; /* remove .par */
 
     /* first parameter initializes parameter data base */
     printf("Adding command line parameters\n");
@@ -124,23 +124,40 @@ int read_command_line(int argc, char **argv)
     /* add sgrid command line options */
     if(nopts>0) AddPar("sgrid_options", options, "sgrid command line options");
 
-    /* check if we remove outdir_previous */
-    if(!GetvLax("sgrid_options", "--keep_previous"))
-    {
-      /* remove outdir_previous and move outdir to outdir_previous */
-      system2("rm -rf", outdirp);
-      system3("mv", outdir, outdirp);
-    }
-
-    /* make output directory, save parfile */
-    system2("mkdir", outdir);
-    system3("cp", parfile, outdir);
+    free(parfile);
+    free(outdir);
   }
 
-
   /* more initialization */
+
   return 0;
 }
+
+int make_output_directory()
+{
+  char *outdir  = Gets("outdir");
+  char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
+
+  /* set outdirp to outdir_previous */
+  strcpy(outdirp, outdir);
+  strcat(outdirp, "_previous");
+
+  /* check if we remove outdir_previous */
+  if(!GetvLax("sgrid_options", "--keep_previous"))
+  {
+    /* remove outdir_previous and move outdir to outdir_previous */
+    system2("rm -rf", outdirp);
+    system3("mv", outdir, outdirp);
+  }
+
+  /* make output directory, save parfile */
+  system2("mkdir", outdir);
+  system3("cp", Gets("parameterfile"), outdir);
+
+  free(outdirp);
+  return 0;
+}
+
 
 /* go through options and act accordingly */
 int parse_command_line_options()
