@@ -17,7 +17,6 @@ const double rhob=1e15, Ms=1.99e33, rb=1e6, G=6.67e-8, c=3.00e10, Kb=5.38e9;
 const double Gammab=1.666666666666666666666666666666667; */
 /* no scaling: just G=c=1 */
 const double rhob=1.0, Ms=1.0, rb=1.0, G=1.0, c=1.0, Kb=1.0;
-const double Gammab=1.0;
 
 
 
@@ -58,14 +57,14 @@ int TOV_init(double Pc, double kappa, double Gam, int pr, double *rf_surf,
   K = kappa;
 
   /* initialize scaling as in gr1.c */
-  Pb=Kb*pow(rhob,Gammab);          
+  Pb=Kb*pow(rhob,Gamma);          
   A=4*PI*rhob*rb*rb*rb/Ms;
   B=G*Ms*rhob/(Pb*rb);
   C=Pb/(rhob*c*c);
   D=4*PI*Pb*rb*rb*rb/(Ms*c*c);
   E=G*Ms/(rb*c*c);
   F=E;
-  R=pow(Pb/Kb,1.0/Gamma)/rhob;
+  R=pow(Pb/K,1.0/Gamma)/rhob;
   S=Pb/((Gamma-1)*c*c*rhob);
   if(pr) printf(" gr1 constants set to: G=%g c=%g\n", G, c);
   if(pr) printf(" A=%g B=%g C=%g D=%g E=%g=F=%g\n K=%g Gamma=%g  R=%g S=%g\n",
@@ -325,11 +324,10 @@ void TOV_ODEs(double rf, double *y, double *dy)
 //  const double Gammab=1.666666666666666666666666666666667;  */
 //  /* no scaling: just G=c=1 */
 //  const double rhob=1.0, Ms=1.0, rb=1.0, G=1.0, c=1.0, Kb=1.0;
-//  const double Gammab=1.0;
 //  double Pb; /* Pbar */
 //
 //  /* scale as in gr1.c */
-//  Pb=Kb*pow(rhob,Gammab);          
+//  Pb=K*pow(rhob,Gammab);          
 //  A=4*PI*rhob*rb*rb*rb/Ms;
 //  B=G*Ms*rhob/(Pb*rb);
 //  C=Pb/(rhob*c*c);
