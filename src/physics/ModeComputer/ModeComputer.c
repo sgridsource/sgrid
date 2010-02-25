@@ -120,6 +120,7 @@ int ModeComputer_read_spheredata(tGrid *grid, FILE *fp, char *gridtype,
   int i,j,k;
   char str[STRLEN];
   double val;
+  int bitantsym, rotantsym, octantsym;
 
   /* check if there is one more iteration */
   if(fgotonext(fp, "iteration")==EOF) return EOF;
@@ -135,49 +136,44 @@ int ModeComputer_read_spheredata(tGrid *grid, FILE *fp, char *gridtype,
     val = atof(str);
     for(i=0; i<n1; i++) var[Index(i,j,k)]=val; 
   }
-  
-  if(strcmp(gridtype,"bitant")==0)
-  { /* copy into region with theta>PI/2 i.e. j>=ntheta */
-    for(k=0; k<n3; k++)
-    for(j=ntheta; j<n2/2; j++)
-    for(i=0; i<n1; i++)
-      var[Index(i,j,k)] = var[Index(i,n2/2-j-1,k)];
+
+  /* deal with symmetries in bam */
+  if(strstr(VarName(vind), "_Re_")!=NULL)
+  {
+    bitantsym = Geti("ModeComputer_Re_bitantsym");
+    rotantsym = Geti("ModeComputer_Re_rotantsym");
+    octantsym = Geti("ModeComputer_Re_octantsym");
   }
-  else if(strcmp(gridtype,"quadrant")==0)
+  else if(strstr(VarName(vind), "_Im_")!=NULL)
+  {
+    bitantsym = Geti("ModeComputer_Im_bitantsym");
+    rotantsym = Geti("ModeComputer_Im_rotantsym");
+    octantsym = Geti("ModeComputer_Im_octantsym");
+  }
+  if(strcmp(gridtype,"bitant")==0 ||
+     strcmp(gridtype,"quadrant")==0 ||
+     strcmp(gridtype,"octant")==0)
   { /* copy into region with theta>PI/2 i.e. j>=ntheta */
     for(k=0; k<nphi; k++)
     for(j=ntheta; j<n2/2; j++)
     for(i=0; i<n1; i++)
-      var[Index(i,j,k)] = var[Index(i,n2/2-j-1,k)];
-    /* copy into region with phi>=PI i.e. k>=n3/2 */
-    for(k=nphi; k<n3; k++)
+      var[Index(i,j,k)] = bitantsym * var[Index(i,n2/2-j-1,k)];
+  }
+  if(strcmp(gridtype,"octant")==0)
+  { /* copy into region with PI/2<=phi<PI i.e. nphi<=k<n3/2 */
+    for(k=nphi; k<n3/2; k++)
     for(j=0; j<n2/2; j++)
     for(i=0; i<n1; i++)
-      var[Index(i,j,k)] = var[Index(i,j,k-n3/2)];
+      var[Index(i,j,k)] = octantsym * var[Index(i,j,n3/2-k)];
   }
-  else if(strcmp(gridtype,"rotant")==0)
+  if(strcmp(gridtype,"rotant")==0 ||
+     strcmp(gridtype,"quadrant")==0 ||
+     strcmp(gridtype,"octant")==0)
   { /* copy into region with phi>=PI i.e. k>=n3/2 */
     for(k=nphi; k<n3; k++)
     for(j=0; j<n2/2; j++)
     for(i=0; i<n1; i++)
-      var[Index(i,j,k)] = var[Index(i,j,k-n3/2)];
-  }
-  else if(strcmp(gridtype,"octant")==0)
-  { /* copy into region with theta>PI/2 i.e. j>=ntheta */
-    for(k=0; k<nphi; k++)
-    for(j=ntheta; j<n2/2; j++)
-    for(i=0; i<n1; i++)
-      var[Index(i,j,k)] = var[Index(i,n2/2-j-1,k)];
-    /* copy into region with PI/2<=phi<PI i.e. nphi<=k<n3/2 */
-    for(k=nphi; k<n3/2; k++)
-    for(j=0; j<n2/2; j++)
-    for(i=0; i<n1; i++)
-      var[Index(i,j,k)] = var[Index(i,j,n3/2-k)];
-    /* copy into region with phi>=PI i.e. k>=n3/2 */
-    for(k=n3/2; k<n3; k++)
-    for(j=0; j<n2/2; j++)
-    for(i=0; i<n1; i++)
-      var[Index(i,j,k)] = var[Index(i,j,k-n3/2)];
+      var[Index(i,j,k)] = rotantsym * var[Index(i,j,k-n3/2)];
   }
 
   /* copy var into double covered regions */

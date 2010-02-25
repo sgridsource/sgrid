@@ -30,6 +30,12 @@ int sgrid_ModeComputer()
          "imaginary part of data on sphere");
   AddPar("ModeComputer_lmax", "6", "max l mode we compute");
   AddPar("ModeComputer_spinweight", "2", "spin weight s we use in sYlm");
+  AddPar("ModeComputer_Re_bitantsym","+1", "symmetry factor for bitant of real part");
+  AddPar("ModeComputer_Re_rotantsym","+1", "symmetry factor for rotant of real part");
+  AddPar("ModeComputer_Re_octantsym","+1", "symmetry factor for octant of real part");
+  AddPar("ModeComputer_Im_bitantsym","-1", "symmetry factor for bitant of imaginary part");
+  AddPar("ModeComputer_Im_rotantsym","+1", "symmetry factor for rotant of imaginary part");
+  AddPar("ModeComputer_Im_octantsym","+1", "symmetry factor for octant of imaginary part");
 
   return 0;
 }
