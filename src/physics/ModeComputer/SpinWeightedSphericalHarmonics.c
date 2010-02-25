@@ -43,10 +43,8 @@ double Wigner_d_function(int l, int m, int s, double costheta)
       for( t = c1+1; t <= c2; t+=2)
         dWig += pow(coshtheta,2*l+m-s-2*t)*pow(sinhtheta,2*t+s-m)/( fact(l+m-t) * fact(l-s-t) * fact(t) * fact(t+s-m) );
     }
-// ??? is this correct
+
     return (sqrt(fact(l+m) * fact(l-m) * fact(l+s) * fact(l-s)) * dWig);
-// should it be
-//  return (sqrt( fact(l+m) * fact(l-m) /(fact(l+s) * fact(l-s)) ) * dWig); 
 }
 
 
@@ -54,7 +52,6 @@ double Wigner_d_function(int l, int m, int s, double costheta)
 double Re_sYlm(int l, int m, int s, double costheta, double phi)
 {
   double c = sqrt( (2.0*l+1)/(4*PI) );
-//if(m<0) m=-m;
   return c*Wigner_d_function(l, m, s, costheta) * cos(m*phi);
 }
 
@@ -62,7 +59,5 @@ double Re_sYlm(int l, int m, int s, double costheta, double phi)
 double Im_sYlm(int l, int m, int s, double costheta, double phi)
 {
   double c = sqrt( (2.0*l+1)/(4*PI) );
-//if(m<0) m=-m;
-
   return c*Wigner_d_function(l, m, s, costheta) * sin(m*phi);
 }
