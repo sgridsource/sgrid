@@ -215,6 +215,7 @@ int ModeComputer(tGrid *grid)
   printf("ModeComputer: Computing Modes\n");
   s    = Geti("ModeComputer_spinweight"); /* spin weight we use */
   lmax = Geti("ModeComputer_lmax");
+  printf("lmax=%d  s=%d\n", lmax, s);
 
   /* open files */
   sprintf(Re_file, "%s", Gets("ModeComputer_Re_sphere_data"));
@@ -231,7 +232,7 @@ int ModeComputer(tGrid *grid)
     /* open output file */
     sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
     Gets("ModeComputer_outfile_prefix"), l,m,s);
-    printf("making mode file %s\n", outname);
+    printf("l=%d m=%+d mode:  %s\n", l,m, outname);
     out = fopen(outname, "w");
     if(!out) errorexits("failed opening %s", outname);
 
@@ -243,8 +244,11 @@ int ModeComputer(tGrid *grid)
 
   /* get grid type */
   ModeComputer_read_spheregrid(in1, &j, &k, gridtype, &ntheta, &nphi);
+  printf("data file %s:  gridtype=%s  ntheta=%d  nphi=%d\n",
+         Re_file, gridtype, ntheta, nphi);
 
   /* step from time label to time label and read data */
+  printf("computing modes at different times:\n");
   while(ModeComputer_read_spheredata(grid, in1, gridtype, ntheta, nphi, 
                                      &time1, Re_vind)!=EOF)
   {
