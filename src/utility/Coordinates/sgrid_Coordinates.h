@@ -15,6 +15,7 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
 
 /* doubleCovering.c */
 void reset_doubleCoveredPoints(tVarList *unew);
+void copy_to_doubleCoveredPoints_SphericalDF(tBox *box, int vind);
 
 /* coordFilters.c */
 void coordinateDependentFilter(tVarList *unew);

@@ -82,3 +82,35 @@ void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew)
         }
   }
 }
+
+
+/* copy var with index vind into double covered regions */
+void copy_to_doubleCoveredPoints_SphericalDF(tBox *box, int vind)
+{
+  int k;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  double *var = box->v[vind];
+
+  /* check if we can copy data into double covered regions */
+  if( n2%2 || n3%2 ) 
+    errorexit("copy_to_doubleCoveredPoints_SphericalDF: "
+              "n2 and n3  must be even!");
+  
+  /* copy var into double covered regions */
+  #pragma omp parallel for
+  for(k = 0;    k < n3/2; k++)
+  { int i,j;
+    for(j = n2/2; j < n2; j++)
+    for(i = 0;    i < n1; i++)
+      var[Index(i,j,k)] = var[Index(i,n2-j-1,k+n3/2)];
+  }
+  #pragma omp parallel for
+  for(k = n3/2; k < n3; k++)
+  { int i,j;
+    for(j = n2/2; j < n2; j++)
+    for(i = 0;    i < n1; i++)
+      var[Index(i,j,k)] = var[Index(i,n2-j-1,k-n3/2)];
+  }
+}
