@@ -173,6 +173,8 @@ double spec_3dIntegral(tBox *box, double *u, double *U)
 
 
 /* compute U = 2d integral of var u over theta and phi */
+/* Note: U(r) = \int_0^{pi) dtheta \int_0^{2pi) dphi  
+                u(r,theta,phi) |sin(theta)| r^2        */
 void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
 {
   int i,j,k;
