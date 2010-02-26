@@ -5,10 +5,13 @@
 #include "ModeComputer.h"
 
 /*
-compared to arXiv:0709.0093v2 [gr-qc] at http://arxiv.org/abs/0709.0093
-and also arXiv:gr-qc/0610128, there are some differences here:
--We call usually call Wigner_d_function with arg s=2 not -2
-hmmm???
+We use the same spin weighted spherical harmonics as: 
+-arXiv:0709.0093v2 [gr-qc] at http://arxiv.org/abs/0709.0093
+-arXiv:gr-qc/0610128
+-astro-ph/0508514v3
+NOTE: The spin weight n of astro-ph/0508514v3 is denoted by s here. i.e. s=n.
+BUT arXiv:0709.0093v2 and arXiv:gr-qc/0610128 seem to use s=-n.
+In bam s=-n. So for spin weight n=-2 bam has s=2, while sgrid has s=-2.
 */
 
 /* factorial */
