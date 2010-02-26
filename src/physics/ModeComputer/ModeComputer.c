@@ -264,18 +264,17 @@ int ModeComputer(tGrid *grid)
       for(k=0; k<n3; k++)
       for(j=0; j<n2/2; j++)
       {
-        double R,I, r,theta,phi, costheta, RsYlm,IsYlm;
+        double R,I, r,theta,phi, RsYlm,IsYlm;
         ijk=Index(i,j,k);
 
         /* get r, theta, phi */
         r     = Xp[ijk];
         theta = Yp[ijk] + PI/((1+n2%2)*n2);
         phi   = Zp[ijk];
-        costheta = cos(theta);
 
         /* get spin-weighted spherical harmonic sYlm */
-        RsYlm = Re_sYlm(l,m,s, costheta, phi);
-        IsYlm = Im_sYlm(l,m,s, costheta, phi);
+        RsYlm = Re_sYlm(l,m,s, theta, phi);
+        IsYlm = Im_sYlm(l,m,s, theta, phi);
         
         /* get Re and Im part of data */
         R=Re_varp[ijk];
