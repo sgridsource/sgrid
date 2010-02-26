@@ -90,7 +90,7 @@ double Re_sYlm(int l, int m, int s, double theta, double phi)
 {
   double c = sqrt( (2.0*l+1)/(4*PI) );
   if(s%2 != 0) c=-c; /* multiply by (-1)^s */
-  return c*Wigner_d_function_WT(l, m, s, theta) * cos(m*phi);
+  return c*Wigner_d_function_WT(l, m, -s, theta) * cos(m*phi);
 }
 
 /* imaginary part of spin-weighted spherical harmonic sYlm */
@@ -98,5 +98,5 @@ double Im_sYlm(int l, int m, int s, double theta, double phi)
 {
   double c = sqrt( (2.0*l+1)/(4*PI) );
   if(s%2 != 0) c=-c; /* multiply by (-1)^s */
-  return c*Wigner_d_function_WT(l, m, s, theta) * sin(m*phi);
+  return c*Wigner_d_function_WT(l, m, -s, theta) * sin(m*phi);
 }
