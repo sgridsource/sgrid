@@ -4,6 +4,13 @@
 #include "sgrid.h"
 #include "ModeComputer.h"
 
+/*
+compared to arXiv:0709.0093v2 [gr-qc] at http://arxiv.org/abs/0709.0093
+there are some differences here:
+-We call Wigner_d_function with arg s=2 not -2
+-a factor (-1)^s is missing in the sYlm, comp Eqn 11.7
+hmmm???
+*/
 
 /* factorial */
 double fact(double n)
