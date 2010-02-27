@@ -11,15 +11,16 @@ If we have output at the points of SphericalDF in sgrid I can use
 spec_2dIntegral with SphericalDF to compute any surface integrals I like.
 E.g. for each mode I intend to compute, I could add one radial point.
 E.g. make a var where at
-i=0     we put rpsi
+i=0     we put rpsi*rY_0^{0}  + ipsi*iY_0^{0}
 i=1     we put rpsi*rY_1^{-1} + ipsi*iY_1^{-1}
 i=2     we put rpsi*rY_1^{0}  + ipsi*iY_1^{0}
 i=3     we put rpsi*rY_1^{1}  + ipsi*iY_1^{1}
 i=4     we put rpsi*rY_2^{-2} + ipsi*iY_2^{-2}
 i=5     we put rpsi*rY_2^{-1} + ipsi*iY_2^{-1}
 i=6     we put rpsi*rY_2^{0}  + ipsi*iY_2^{0}
-i=6     we put rpsi*rY_2^{1}  + ipsi*iY_2^{1}
-This way I can use spec_2dIntegral over this var to compute all modes.
+i=7     we put rpsi*rY_2^{1}  + ipsi*iY_2^{1}
+Then I can use spec_2dIntegral over this var to compute the real part
+of all modes.
 */                         
 
 
