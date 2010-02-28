@@ -1,0 +1,9 @@
+physics = ModeComputer
+
+ModeComputer_lmax = 10
+
+#1doutiter = 1
+#1doutput = ModeComputer_Re_var ModeComputer_Im_var ModeComputer_Re_mode ModeComputer_Im_mode
+
+#2doutiter = 1
+#2doutput = ModeComputer_Re_var ModeComputer_Im_var ModeComputer_Re_mode ModeComputer_Im_mode
