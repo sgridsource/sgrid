@@ -1,3 +1,7 @@
+(* from:
+   http://demonstrations.wolfram.com/SpinWeightedSphericalHarmonics/ 
+*)
+
 (* Spin-Weighted Spherical Harmonics *)
 \!\(Y[s_, l_, m_, \[Theta]_, \[Phi]_] := \(\((\(-1\))\)\^m\) 
       Simplify[\(\@\(\(\(\((l + m)\)!\) \(\((l - m)\)!\) \((2  l + 
