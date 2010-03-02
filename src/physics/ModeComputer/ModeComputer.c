@@ -171,7 +171,7 @@ int ModeComputer_read_spheredata(tGrid *grid, FILE *fp, char *gridtype,
      strcmp(gridtype,"quadrant")==0 ||
      strcmp(gridtype,"octant")==0)
   { /* copy into region with phi>=PI i.e. k>=n3/2 */
-    for(k=nphi; k<n3; k++)
+    for(k=n3/2; k<n3; k++)
     for(j=0; j<n2/2; j++)
     for(i=0; i<n1; i++)
       var[Index(i,j,k)] = rotantsym * var[Index(i,j,k-n3/2)];
