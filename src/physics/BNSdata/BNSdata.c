@@ -1822,7 +1822,7 @@ int BNSdata_solve(tGrid *grid)
 
     /* If we read a checkpoint that had finished the solve, i.e.
        that has $time = 0, do not solve again! */
-    if(grid->time==0.0 && it==1) break;
+    if(grid->time==0.0 && restart == 1) break;
 
     /* save old values before ell. solve */
     varcopy(grid, Ind("BNSdata_Psiold"),    Ind("BNSdata_Psi"));
