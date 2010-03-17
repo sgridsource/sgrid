@@ -1,0 +1,63 @@
+#storage_verbose = yes
+
+physics = ADMvars BNSdata
+BNSdata_n	= 1
+BNSdata_b	= 1.8412
+#BNSdata_Omega	= 0.07
+BNSdata_m01	= 0.05952
+BNSdata_m02	= 0.05952
+
+GridIterators_Newtonstep	= backtrack
+BNSdata_EllSolver_method	= BNS_Eqn_Iterator # sequence2
+BNSdata_linSolver		= UMFPACK
+BNSdata_guess 			= TOV # TOVaverage
+BNSdata_esw			= 0.4 # 1
+BNSdata_allow_esw1_first_at	= 40 
+BNSdata_adjust			= keep_xout always
+BNSdata_adjust_first_at		= 0 # 20
+BNSdata_itmax			= 99 # 30
+BNSdata_tol			= 1e-4
+
+Coordinates_AnsorgNS_sigma_pm_vars = yes
+BNSdata_grid = 4ABphi_2xyz
+nboxes = 6
+n1 = 14
+n2 = 14
+n3 = 8
+BNSdata_2xyz_n = 6
+
+iterate_parameters = yes # no # yes
+iterate_parameter1 = n1  12 14 16 18 20 # 22 26 30
+iterate_parameter2 = n2  12 14 16 18 20 # 22 26 30
+iterate_parameter3 = BNSdata_tol  5e-4 1e-4 5e-5 1e-5 5e-6 # 1e-6
+
+finaltime = 0
+
+0doutiter	= 1
+0doutput	= BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err ham momx trK dtrK_dt normham normmomx
+0doutputall	= yes
+0doutput_VolumeIntegralJacobian = one
+ADMvars_normalizedConstraints = yes
+
+1doutiter	= 1
+1doutput	= BNSdata_q BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Sigma BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi alpha betax psi gxx Kxx rho jx Sxx ham momx trK dtrK_dt x y z  X Y Z
+1doutputall	= yes
+
+2doutiter	= 1
+2doutput	= BNSdata_q BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Sigma BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm ham momx trK dtrK_dt x y z
+2doutputall	= yes
+
+#outputY0_box0 = 0.75
+
+outputReplaceXby_box0 = x
+outputReplaceYby_box0 = y
+outputReplaceZby_box0 = z
+outputReplaceXby_box1 = x
+outputReplaceYby_box1 = y
+outputReplaceZby_box1 = z
+outputReplaceXby_box2 = x
+outputReplaceYby_box2 = y
+outputReplaceZby_box2 = z
+outputReplaceXby_box3 = x
+outputReplaceYby_box3 = y
+outputReplaceZby_box3 = z
