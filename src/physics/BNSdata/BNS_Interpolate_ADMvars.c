@@ -119,9 +119,19 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
     if(x>=0.0) { blist[0]=1;  blist[1]=0;   blist[2]=5; }
     else       { blist[0]=2;  blist[1]=3;   blist[2]=4; }
     nearest_b_XYZ_of_xyz_inboxlist(grid2, blist,3, &b, &ind, &X,&Y,&Z, x,y,z);
-    if(dequal(Y, 0.0)) Y=0.01;
-    if(dequal(Y, 1.0)) Y=1.0-0.01;
-    Z = Arg_plus(y,z);
+    if(b<4)
+    {
+      if(dequal(Y, 0.0)) Y=0.01;
+      if(dequal(Y, 1.0)) Y=1.0-0.01;
+      Z = Arg_plus(y,z);
+    }
+    else
+    {
+      X=x;
+      Y=y;
+      Z=z;
+    }
+    
     if(pr) printf("guess:  b=%d (X,Y,Z)=(%g,%g,%g)  nearest ind=%d\n", b, X,Y,Z, ind);
 
     /* get X,Y,Z, b of x,y,z */
