@@ -20,6 +20,8 @@ int sgrid_ModeComputer()
   AddVar("ModeComputer_Im_var",  "", "imaginary part of variable");
   AddVar("ModeComputer_Re_mode", "", "real part of mode");
   AddVar("ModeComputer_Im_mode", "", "imaginary part of mode");
+  AddVar("ModeComputer_Re_sYlm", "", "real part of spin-weighted Ylm");
+  AddVar("ModeComputer_Im_sYlm", "", "imaginary part spin-weighted Ylm");
 
   /* Parameters: */
   AddPar("ModeComputer_Re_sphere_data", "rpsi4.r3.l3",

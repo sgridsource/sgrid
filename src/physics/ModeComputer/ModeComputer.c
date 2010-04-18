@@ -75,6 +75,53 @@ int ModeComputer_set_boxsize(tGrid *grid)
 }
 
 
+/* put the sYlm in two variables on the grid */
+int ModeComputer_set_sYlm_inbox(tBox *box, int Re_sYlmind, int Im_sYlmind, 
+                                int s, int lmax)
+{
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  double *Re_sYlmp = box->v[Re_sYlmind];
+  double *Im_sYlmp = box->v[Im_sYlmind];
+  /* double *Xp = box->v[Ind("X")]; */
+  double *Yp = box->v[Ind("Y")];
+  double *Zp = box->v[Ind("Z")];
+  int l,m, i,j,k, ijk;
+
+  /* loop over l and m and set sYlm over sphere. Put each sYlm at a 
+     different radial coord for each l,m */
+  printf("setting sYlm in box%d\n", box->b);
+  i=0;
+  for(l=0; l<=lmax; l++)
+  for(m=-l; m<=l; m++)
+  {
+    for(k=0; k<n3; k++)
+    for(j=0; j<n2/2; j++)
+    {
+      double R,I, theta,phi;
+      ijk=Index(i,j,k);
+
+      /* get theta, phi */
+      theta = Yp[ijk] + PI/((1+n2%2)*n2);
+      phi   = Zp[ijk];
+
+      /* get spin-weighted spherical harmonic sYlm */
+      Re_sYlmp[ijk] = Re_sYlm(l,m,s, theta, phi);
+      Im_sYlmp[ijk] = Im_sYlm(l,m,s, theta, phi);
+    }
+    i++;
+  }
+    
+  /* set double covered points of sYlm */
+  copy_to_doubleCoveredPoints_SphericalDF(box, Re_sYlmind);
+  copy_to_doubleCoveredPoints_SphericalDF(box, Im_sYlmind);
+
+  /* return total number of modes up to l=lmax */
+  return i;
+}
+
+
 /* startup routine */
 int ModeComputer_startup(tGrid *grid)
 {
@@ -82,6 +129,8 @@ int ModeComputer_startup(tGrid *grid)
   enablevar(grid, Ind("ModeComputer_Im_var")); 
   enablevar(grid, Ind("ModeComputer_Re_mode")); 
   enablevar(grid, Ind("ModeComputer_Im_mode")); 
+  enablevar(grid, Ind("ModeComputer_Re_sYlm"));
+  enablevar(grid, Ind("ModeComputer_Im_sYlm"));
 
   return 0;
 }
@@ -205,10 +254,14 @@ int ModeComputer(tGrid *grid)
   int Im_vind = Ind("ModeComputer_Im_var");
   int Re_mind = Ind("ModeComputer_Re_mode");
   int Im_mind = Ind("ModeComputer_Im_mode");
+  int Re_sYlmind = Ind("ModeComputer_Re_sYlm");
+  int Im_sYlmind = Ind("ModeComputer_Im_sYlm");
   double *Re_varp = box->v[Re_vind];
   double *Im_varp = box->v[Im_vind];
   double *Re_modep = box->v[Re_mind];
   double *Im_modep = box->v[Im_mind];
+  double *Re_sYlmp = box->v[Re_sYlmind];
+  double *Im_sYlmp = box->v[Im_sYlmind];
   double *Xp = box->v[Ind("X")];
   double *Yp = box->v[Ind("Y")];
   double *Zp = box->v[Ind("Z")];
@@ -217,6 +270,9 @@ int ModeComputer(tGrid *grid)
   s    = Geti("ModeComputer_spinweight"); /* spin weight we use */
   lmax = Geti("ModeComputer_lmax");
   printf("lmax=%d  s=%d\n", lmax, s);
+
+  /* precompute the sYlm */
+  ModeComputer_set_sYlm_inbox(box, Re_sYlmind, Im_sYlmind, s, lmax);
 
   /* open files */
   sprintf(Re_file, "%s", Gets("ModeComputer_Re_sphere_data"));
@@ -265,18 +321,18 @@ int ModeComputer(tGrid *grid)
       for(k=0; k<n3; k++)
       for(j=0; j<n2/2; j++)
       {
-        double R,I, r,theta,phi, RsYlm,IsYlm;
+        double R,I, RsYlm,IsYlm, r; /* ,theta,phi */
         ijk=Index(i,j,k);
 
         /* get r, theta, phi */
         r     = Xp[ijk];
-        theta = Yp[ijk] + PI/((1+n2%2)*n2);
-        phi   = Zp[ijk];
+        /* theta = Yp[ijk] + PI/((1+n2%2)*n2); */
+        /* phi   = Zp[ijk]; */
 
         /* get spin-weighted spherical harmonic sYlm */
-        RsYlm = Re_sYlm(l,m,s, theta, phi);
-        IsYlm = Im_sYlm(l,m,s, theta, phi);
-        
+        RsYlm = Re_sYlmp[ijk];
+        IsYlm = Im_sYlmp[ijk];
+
         /* get Re and Im part of data */
         R=Re_varp[ijk];
         I=Im_varp[ijk];
