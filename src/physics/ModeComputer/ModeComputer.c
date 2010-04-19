@@ -314,6 +314,7 @@ int ModeComputer(tGrid *grid)
     if(time1!=time2) errorexit("times in files for Re and Im part disagree");
     printf("time = %g\n", time1);
 
+    /* set integrands */
     i=0;
     for(l=0; l<=lmax; l++)
     for(m=-l; m<=l; m++)
