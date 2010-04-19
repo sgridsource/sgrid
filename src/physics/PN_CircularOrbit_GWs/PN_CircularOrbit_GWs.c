@@ -68,12 +68,12 @@ int PN_CircularOrbit_GWs_set_boxsize(tGrid *grid)
 /* startup routine */
 int PN_CircularOrbit_GWs_startup(tGrid *grid)
 {
-  enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_var")); 
-  enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_var")); 
-  enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_mode")); 
-  enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_mode")); 
-  enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_sYlm"));
-  enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_sYlm"));
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_hplus")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_hcross")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_Hmode")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_Hmode")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_sYlm")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_sYlm")); 
 
   return 0;
 }
@@ -149,7 +149,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   hi1 = 1.0;
   hi2 = 1.0;
   ti = 0.0;
-  tf = 10.0;
+  tf = 1000.0;
+  dt = 50.0;
   D = 1.0;
   yvec[0] = 0.0;  // you don't need to initialize this field it will be used as the storage of the separation
   yvec[1] = 0.01; // initial orbital frequency
@@ -166,7 +167,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 
   /* compute h+, hx at different times */
   printf("computing h+, hx at different times:\n");
-  for(time=ti; time<=tf; time+=dt)
+  for(time=ti+dt; time<=tf; time+=dt)
   {
     printf("time = %g\n", time);
 
