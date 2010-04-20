@@ -109,10 +109,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   double *Zp = box->v[Ind("Z")];
   double yvec[12];  /* state vector used in odeint */
   double m1, m2, D; /* masses and distance of observer of h+,hx */
-  double chi1, chi2; /* S1/m1^2, S2/m2^2 */
-  double chi1x, chi1y, chi1z;  /* x,y,z comp of chi1 */
-  double chi2x, chi2y, chi2z;  /* x,y,z comp of chi2 */
-  double hi1, hi2;  /* is this chi1/2 ??? Is it used at all by anything??? */
+  double chi1x, chi1y, chi1z;  /* x,y,z comp of chi1 = S1/m1^2 */
+  double chi2x, chi2y, chi2z;  /* x,y,z comp of chi2 = S2/m2^2 */
   double t1, t2, dt;   /* initial, final time, time step */
   double ti, tf;       /* initial and final time for integrator */
 
@@ -155,12 +153,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   chi2x = Getd("PN_CircularOrbit_GWs_chi2x");
   chi2y = Getd("PN_CircularOrbit_GWs_chi2y");
   chi2z = Getd("PN_CircularOrbit_GWs_chi2z");
-  chi1 = sqrt(chi1x*chi1x + chi1y*chi1y + chi1z*chi1z);
-  chi2 = sqrt(chi2x*chi2x + chi2y*chi2y + chi2z*chi2z);
-  hi1 = 1.0; /* what is this??? */
-  hi2 = 1.0; /* what is this??? */
-  hi1 = chi1;
-  hi2 = chi2;
+  /* chi1 = sqrt(chi1x*chi1x + chi1y*chi1y + chi1z*chi1z);
+     chi2 = sqrt(chi2x*chi2x + chi2y*chi2y + chi2z*chi2z); */
   t1 = Getd("PN_CircularOrbit_GWs_t1");
   t2 = Getd("PN_CircularOrbit_GWs_t2");
   dt = Getd("PN_CircularOrbit_GWs_dt");
@@ -180,17 +174,6 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   for(i=0; i<=11; i++)
     printf("yvec[%d] = %g\n", i, yvec[i]);
 
-  printf("TEST:\n");
-  yvec[2] = 0.1;  // S1x not Scap1! S1 = hi1*m1^2*Scap1
-  yvec[3] = 0.2;  // S1y
-  yvec[4] = 0.3;  // S1z
-  yvec[5] =-0.1;  // S2x
-  yvec[6] = 0.2;  // S2y
-  yvec[7] = 0.3;  // S2z 
-  for(i=0; i<=11; i++)
-    printf("yvec[%d] = %g\n", i, yvec[i]);
-
-
   /* compute h+, hx at different times */
   printf("computing h+, hx at different times:\n");
   for(time=t1+dt; time<=t2; time+=dt)
@@ -200,7 +183,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     /* compute orbit at time */
     ti=time-dt;
     tf=time;
-    xodeint(m1, m2, hi1, hi2, ti, tf, yvec);
+    xodeint(m1, m2, ti, tf, yvec);
 
     /* compute hplus and hcross */
     for(k=0; k<n3; k++)  

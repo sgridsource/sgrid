@@ -1,3 +1,4 @@
+
 /* Driver for routine odeint */
 
 /* changed by WT */
@@ -28,7 +29,7 @@ void compute_constants(void)
     double theta_cap, pi, gammaE;
 
     pi = 3.1415926535897932384626433;
-    gammaE = 0.577215664901532860606512090082402431042;
+    gammaE = 0.5772156649015328606065;
     theta_cap = 1039.0/4620.0;
     m   = m1 + m2;
     mu  = m1*m2/m;
@@ -68,6 +69,8 @@ void derivs(double x,double y[],double dydx[])
         double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
 	double *Ln_cap, *S1, *S2, *LNS1, *LNS2, *LNS, Ln_cap_dot_S1, Ln_cap_dot_S2, S1_dot_S2, Ln_cap_mod;
 
+        nrhs++;
+
         Ln_cap = dvector(1,3); 
         S1 = dvector(1,3); 
         S2 = dvector(1,3); 
@@ -105,7 +108,7 @@ void derivs(double x,double y[],double dydx[])
             LNS[i]  = c16*S1[i] + c18*S2[i] - c19*t1*( S1[i]*Ln_cap_dot_S2 + S2[i]*Ln_cap_dot_S1 );      
         } 
 // Omega
-        dydx[1] = c1*y[1]*y[1]*t4*(1.0 
+        dydx[1] = m*c1*y[1]*y[1]*t4*(1.0 
                                   - c2*t2 
                                   - (c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5)*t0 
                                   + c6*t3
@@ -115,22 +118,22 @@ void derivs(double x,double y[],double dydx[])
                                   + (c10 + c11 + c12 - c13*log(16.0*t2))*t5 
                                   + c14*t6 );
 // Spin1	 
-	dydx[2] =  LNS1[2]*S1[3] - S1[2]*LNS1[3]; 
-	dydx[3] = -LNS1[1]*S1[3] + S1[1]*LNS1[3];
-	dydx[4] =  LNS1[1]*S1[2] - S1[1]*LNS1[2];
+	dydx[2] = m*(LNS1[2]*S1[3] - S1[2]*LNS1[3]); 
+	dydx[3] = m*(-LNS1[1]*S1[3] + S1[1]*LNS1[3]);
+	dydx[4] = m*(LNS1[1]*S1[2] - S1[1]*LNS1[2]);
 // Spin2
-        dydx[5] =  LNS2[2]*S2[3] - S2[2]*LNS2[3];
-	dydx[6] = -LNS2[1]*S2[3] + S2[1]*LNS2[3]; 
-	dydx[7] =  LNS2[1]*S2[2] - S2[1]*LNS2[2]; 
+        dydx[5] = m*(LNS2[2]*S2[3] - S2[2]*LNS2[3]);
+	dydx[6] = m*(-LNS2[1]*S2[3] + S2[1]*LNS2[3]); 
+	dydx[7] = m*(LNS2[1]*S2[2] - S2[1]*LNS2[2]); 
 // Ln_cap
-        dydx[8] = c20*t5*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]);
-	dydx[9] = c20*t5*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3]); 
-	dydx[10] = c20*t5*( LNS[1]*Ln_cap[2] - Ln_cap[1]*LNS[2]);
+        dydx[8] = m*(c20*t5*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]));
+	dydx[9] = m*(c20*t5*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3])); 
+	dydx[10] = m*(c20*t5*( LNS[1]*Ln_cap[2] - Ln_cap[1]*LNS[2]));
 
         if((Ln_cap[1]==0.0)&&(Ln_cap[2]==0.0))
-            dydx[11] = 0.0;
+            dydx[11] = m*y[1];
         else
-            dydx[11] = y[1] - Ln_cap[3]*(Ln_cap[1]*dydx[9] - Ln_cap[2]*dydx[8])/(Ln_cap[1]*Ln_cap[1] + Ln_cap[2]*Ln_cap[2]);
+            dydx[11] = m*y[1] - m*Ln_cap[3]*(Ln_cap[1]*dydx[9] - Ln_cap[2]*dydx[8])/(Ln_cap[1]*Ln_cap[1] + Ln_cap[2]*Ln_cap[2]);
         free_dvector(Ln_cap,1,3);
         free_dvector(S1,1,3);
         free_dvector(S2,1,3);
@@ -158,7 +161,7 @@ double compute_r(double y[])
     return r;	    
 }
 
-void xodeint(double m1_in, double m2_in, double hi1_in, double hi2_in, double t1, double t2, double ystart_in[])
+void xodeint(double m1_in, double m2_in, double t1, double t2, double ystart_in[])
 {
         int status; /* added by WT */
 	int i,nbad,nok;
@@ -176,8 +179,6 @@ void xodeint(double m1_in, double m2_in, double hi1_in, double hi2_in, double t1
 	yp = dmatrix(1,11,1,200);
         m1 = m1_in;
         m2 = m2_in;
-        hi1 = hi1_in;
-        hi2 = hi2_in;
         compute_constants();
 //	ystart[1] = 0.01;
 //	ystart[2] = 0.1;
@@ -199,7 +200,7 @@ void xodeint(double m1_in, double m2_in, double hi1_in, double hi2_in, double t1
 */	/* changed by WT */
 	odeintegrate(ystart,N,x1,x2,eps,h1,hmin,&nok,&nbad,derivs,rkqs,
 	             kmax,&kount,xp,yp,dxsav, &status);
-	             
+
 //	printf("\n%s %13s %3d\n","successful steps:"," ",nok);
 //	printf("%s %20s %3d\n","bad steps:"," ",nbad);
 //	printf("%s %9s %3d\n","function evaluations:"," ",nrhs);
