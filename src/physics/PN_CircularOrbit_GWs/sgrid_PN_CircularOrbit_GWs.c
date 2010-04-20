@@ -35,5 +35,22 @@ int sgrid_PN_CircularOrbit_GWs()
          "max l mode we can represent on grid. We need Lmax>=lmax");
   AddPar("PN_CircularOrbit_GWs_spinweight", "-2", "spin weight we use in sYlm");
 
+  AddPar("PN_CircularOrbit_GWs_omega", "0.01", "initial orbital frequency * m");
+  AddPar("PN_CircularOrbit_GWs_m1", "0.5", "mass of particle 1");
+  AddPar("PN_CircularOrbit_GWs_m2", "0.5", "mass of particle 2");
+  AddPar("PN_CircularOrbit_GWs_chi1x", "0", "initial S1x/m1^2");
+  AddPar("PN_CircularOrbit_GWs_chi1y", "0", "initial S1y/m1^2");
+  AddPar("PN_CircularOrbit_GWs_chi1z", "0", "initial S1z/m1^2");
+  AddPar("PN_CircularOrbit_GWs_chi2x", "0", "initial S2x/m2^2");
+  AddPar("PN_CircularOrbit_GWs_chi2y", "0", "initial S2y/m2^2");
+  AddPar("PN_CircularOrbit_GWs_chi2z", "0", "initial S2z/m2^2");
+  AddPar("PN_CircularOrbit_GWs_Lnx", "0", "initial L_hat_Newton_x");
+  AddPar("PN_CircularOrbit_GWs_Lny", "0", "initial L_hat_Newton_y");
+  AddPar("PN_CircularOrbit_GWs_Lnz", "1", "initial L_hat_Newton_z");
+  AddPar("PN_CircularOrbit_GWs_Phi", "0", "initial orbital phase Phi");
+  AddPar("PN_CircularOrbit_GWs_t1", "0",    "initial time");
+  AddPar("PN_CircularOrbit_GWs_t2", "1000", "final time");
+  AddPar("PN_CircularOrbit_GWs_dt", "10",   "time step");               
+
   return 0;
 }

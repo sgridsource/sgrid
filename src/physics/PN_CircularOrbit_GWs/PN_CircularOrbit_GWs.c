@@ -109,9 +109,12 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   double *Zp = box->v[Ind("Z")];
   double yvec[12];  /* state vector used in odeint */
   double m1, m2, D; /* masses and distance of observer of h+,hx */
+  double chi1, chi2; /* S1/m1^2, S2/m2^2 */
+  double chi1x, chi1y, chi1z;  /* x,y,z comp of chi1 */
+  double chi2x, chi2y, chi2z;  /* x,y,z comp of chi2 */
   double hi1, hi2;  /* is this chi1/2 ??? Is it used at all by anything??? */
-  double ti, tf, dt;   /* initial, final time, time step */
-  double t1, t2;       /* initial and final time for integrator */
+  double t1, t2, dt;   /* initial, final time, time step */
+  double ti, tf;       /* initial and final time for integrator */
 
   printf("PN_CircularOrbit_GWs: Computing h+,hx\n");
   s    = Geti("PN_CircularOrbit_GWs_spinweight"); /* spin weight we use */
@@ -144,37 +147,60 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   }
 
   /* initial values */
-  m1 = 0.5;
-  m2 = 0.5;
-  hi1 = 1.0;
-  hi2 = 1.0;
-  ti = 0.0;
-  tf = 1000.0;
-  dt = 50.0;
+  m1 = Getd("PN_CircularOrbit_GWs_m1");
+  m2 = Getd("PN_CircularOrbit_GWs_m1");
+  chi1x = Getd("PN_CircularOrbit_GWs_chi1x");
+  chi1y = Getd("PN_CircularOrbit_GWs_chi1y");
+  chi1z = Getd("PN_CircularOrbit_GWs_chi1z");
+  chi2x = Getd("PN_CircularOrbit_GWs_chi2x");
+  chi2y = Getd("PN_CircularOrbit_GWs_chi2y");
+  chi2z = Getd("PN_CircularOrbit_GWs_chi2z");
+  chi1 = sqrt(chi1x*chi1x + chi1y*chi1y + chi1z*chi1z);
+  chi2 = sqrt(chi2x*chi2x + chi2y*chi2y + chi2z*chi2z);
+  hi1 = 1.0; /* what is this??? */
+  hi2 = 1.0; /* what is this??? */
+  hi1 = chi1;
+  hi2 = chi2;
+  t1 = Getd("PN_CircularOrbit_GWs_t1");
+  t2 = Getd("PN_CircularOrbit_GWs_t2");
+  dt = Getd("PN_CircularOrbit_GWs_dt");
   D = 1.0;
   yvec[0] = 0.0;  // you don't need to initialize this field it will be used as the storage of the separation
-  yvec[1] = 0.01; // initial orbital frequency
+  yvec[1] = Getd("PN_CircularOrbit_GWs_omega"); // initial orbital frequency
+  yvec[2] = chi1x*m1*m1;  // S1x not Scap1! S1 = hi1*m1^2*Scap1
+  yvec[3] = chi1y*m1*m1;  // S1y
+  yvec[4] = chi1z*m1*m1;  // S1z
+  yvec[5] = chi2x*m2*m2;  // S2x
+  yvec[6] = chi2y*m2*m2;  // S2y
+  yvec[7] = chi2z*m2*m2;  // S2z 
+  yvec[8] = Getd("PN_CircularOrbit_GWs_Lnx");  // Lnx
+  yvec[9] = Getd("PN_CircularOrbit_GWs_Lny");  // Lny
+  yvec[10]= Getd("PN_CircularOrbit_GWs_Lnz");  // Lnz
+  yvec[11]= Getd("PN_CircularOrbit_GWs_Phi");  // Phi orbital phase         
+  for(i=0; i<=11; i++)
+    printf("yvec[%d] = %g\n", i, yvec[i]);
+
+  printf("TEST:\n");
   yvec[2] = 0.1;  // S1x not Scap1! S1 = hi1*m1^2*Scap1
   yvec[3] = 0.2;  // S1y
   yvec[4] = 0.3;  // S1z
   yvec[5] =-0.1;  // S2x
   yvec[6] = 0.2;  // S2y
   yvec[7] = 0.3;  // S2z 
-  yvec[8] = 0.0;  // Lnx
-  yvec[9] = 0.0;  // Lny
-  yvec[10]= 1.0;  // Lnz
-  yvec[11]= 0.0;  // Phi orbital phase         
+  for(i=0; i<=11; i++)
+    printf("yvec[%d] = %g\n", i, yvec[i]);
+
 
   /* compute h+, hx at different times */
   printf("computing h+, hx at different times:\n");
-  for(time=ti+dt; time<=tf; time+=dt)
+  for(time=t1+dt; time<=t2; time+=dt)
   {
     printf("time = %g\n", time);
 
     /* compute orbit at time */
-    t1=time-dt;
-    t2=time;
-    xodeint(m1, m2, hi1, hi2, t1, t2, yvec);
+    ti=time-dt;
+    tf=time;
+    xodeint(m1, m2, hi1, hi2, ti, tf, yvec);
 
     /* compute hplus and hcross */
     for(k=0; k<n3; k++)  
