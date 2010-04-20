@@ -82,8 +82,8 @@ int PN_CircularOrbit_GWs_startup(tGrid *grid)
 /* compute Modes */
 int PN_CircularOrbit_GWs(tGrid *grid)
 {
-//  FILE *in1;
-//  char Re_file[STRLEN];
+  FILE *out_orb;
+  char orbit[STRLEN];
   FILE *out;
   char outname[STRLEN];
   int lmax, l,m,s, i,j,k, ijk;
@@ -123,12 +123,12 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   ModeComputer_set_sYlm_inbox(box, Re_sYlmind, Im_sYlmind, s, lmax);
 
   /* open files */
-  //sprintf(Re_file, "%s", Gets("PN_CircularOrbit_GWs_Re_sphere_data"));
-  //in1 = fopen(Re_file, "rb");
-  //if(!in1) errorexits("failed opening %s", Re_file);
+  sprintf(orbit, "%s/%s", Gets("outdir"), Gets("PN_CircularOrbit_GWs_orbitfile"));
+  out_orb = fopen(orbit, "w");
+  if(!out_orb) errorexits("failed opening %s", orbit);
 
   /* write header in output files */
-  for(l=0; l<=lmax; l++)
+  for(l=2; l<=lmax; l++)
   for(m=-l; m<=l; m++)
   {
     /* open output file */
@@ -171,8 +171,18 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   yvec[9] = Getd("PN_CircularOrbit_GWs_Lny");  // Lny
   yvec[10]= Getd("PN_CircularOrbit_GWs_Lnz");  // Lnz
   yvec[11]= Getd("PN_CircularOrbit_GWs_Phi");  // Phi orbital phase         
+  /*
   for(i=0; i<=11; i++)
     printf("yvec[%d] = %g\n", i, yvec[i]);
+  */
+
+  /* print in orbit file */
+  fprintf(out_orb, "# time  separation  omega  S1x  S1y  S1z  S2x  S2y  S2z"
+                   "  Lnx  Lny  Lnz  Phi\n");
+  fprintf(out_orb, "%-15.8g", t1);
+  for(i=0; i<=11; i++)
+    fprintf(out_orb, "  %16.10e", yvec[i]);
+  fprintf(out_orb, "\n");
 
   /* compute h+, hx at different times */
   printf("computing h+, hx at different times:\n");
@@ -184,6 +194,10 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     ti=time-dt;
     tf=time;
     xodeint(m1, m2, ti, tf, yvec);
+    fprintf(out_orb, "%-15.8g", tf);
+    for(i=0; i<=11; i++)
+      fprintf(out_orb, "  %16.10e", yvec[i]);
+    fprintf(out_orb, "\n");
 
     /* compute hplus and hcross */
     for(k=0; k<n3; k++)  
@@ -255,8 +269,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     spec_sphericalDF2dIntegral(box, Im_Hmodep, Im_Hmodep);
             
     /* output */
-    i=0;
-    for(l=0; l<=lmax; l++)
+    i=4;  /* (1+1)^2 */
+    for(l=2; l<=lmax; l++)
     for(m=-l; m<=l; m++)
     {
       /* open output file */
@@ -274,6 +288,6 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     }
   }
 
-//  fclose(in1);
+  fclose(out_orb);
   return 0;
 }

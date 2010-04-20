@@ -30,6 +30,8 @@ int sgrid_PN_CircularOrbit_GWs()
   /* Parameters: */
   AddPar("PN_CircularOrbit_GWs_outfile_prefix", "h_",
          "imaginary part of data on sphere");
+  AddPar("PN_CircularOrbit_GWs_orbitfile", "orbit.t",
+         "imaginary part of data on sphere");
   AddPar("PN_CircularOrbit_GWs_lmax", "6", "max l mode we compute");
   AddPar("PN_CircularOrbit_GWs_sphere_Lmax", "13",
          "max l mode we can represent on grid. We need Lmax>=lmax");
