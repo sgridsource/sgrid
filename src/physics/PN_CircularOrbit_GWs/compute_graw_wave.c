@@ -1,12 +1,6 @@
-/* changed by WT */
+/* compute hplus and hcross in Quadruploe approx */
+
 #include "sgrid.h"
-/*
-#include <stdio.h>
-#include <math.h>
-#include "nr.h"
-#include "nrutil.h"
-*/
-#define NRANSI
 
 void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, double theta, double phi, double m1, double m2)
 {
@@ -135,4 +129,3 @@ void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, d
    free_dmatrix(Tplus,1,3,1,3);
    return;
 }
-#undef NRANSI

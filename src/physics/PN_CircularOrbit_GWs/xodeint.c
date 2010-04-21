@@ -1,15 +1,7 @@
 
 /* Driver for routine odeint */
 
-/* changed by WT */
 #include "sgrid.h"
-/*
-#include <stdio.h>
-#include <math.h>
-#include "nr.h"
-#include "nrutil.h"
-*/
-#define NRANSI
 
 #define N 11
 
@@ -29,7 +21,7 @@ void compute_constants(void)
     double theta_cap, pi, gammaE;
 
     pi = 3.1415926535897932384626433;
-    gammaE = 0.5772156649015328606065;
+    gammaE = 0.577215664901532860606512090082402431042;
     theta_cap = 1039.0/4620.0;
     m   = m1 + m2;
     mu  = m1*m2/m;
@@ -175,6 +167,7 @@ void xodeint(double m1_in, double m2_in, double t1, double t2, double ystart_in[
 	ystart = dvector(1,N);
         for(i=1;i<=N;i++)
             ystart[i]=ystart_in[i];
+//         printf("%s %10.4e %16.6e \n","PHI before",x1, ystart[11]);
 	xp = dvector(1,200);
 	yp = dmatrix(1,11,1,200);
         m1 = m1_in;
@@ -196,11 +189,11 @@ void xodeint(double m1_in, double m2_in, double t1, double t2, double ystart_in[
 	nrhs=0;
 	kmax=100;
 	dxsav=(x2-x1)/(kmax-1);
-/*	odeint(ystart,N,x1,x2,eps,h1,hmin,&nok,&nbad,derivs,rkqs);
-*/	/* changed by WT */
-	odeintegrate(ystart,N,x1,x2,eps,h1,hmin,&nok,&nbad,derivs,rkqs,
-	             kmax,&kount,xp,yp,dxsav, &status);
-
+        /* changed by WT */
+        odeintegrate(ystart,N,x1,x2,eps,h1,hmin,&nok,&nbad,derivs,rkqs,
+                             kmax,&kount,xp,yp,dxsav, &status);
+        if(status!=0)
+          printf("odeintegrate: status=%d\n", status);
 //	printf("\n%s %13s %3d\n","successful steps:"," ",nok);
 //	printf("%s %20s %3d\n","bad steps:"," ",nbad);
 //	printf("%s %9s %3d\n","function evaluations:"," ",nrhs);
@@ -212,10 +205,10 @@ void xodeint(double m1_in, double m2_in, double t1, double t2, double ystart_in[
 //        printf("%10.4e %16.6e \n",x2, ystart[1]);
         for(i=1;i<=N;i++)
             ystart_in[i]=ystart[i];
+//         printf("%s %10.4e %16.6e \n","PHI after",x2, ystart_in[11]); 
         ystart_in[0] = compute_r(ystart);      
 	free_dmatrix(yp,1,10,1,200);
 	free_dvector(xp,1,200);
 	free_dvector(ystart,1,N);
         return;
 }
-#undef NRANSI

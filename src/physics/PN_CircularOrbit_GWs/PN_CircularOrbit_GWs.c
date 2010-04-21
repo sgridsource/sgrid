@@ -113,6 +113,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   double chi2x, chi2y, chi2z;  /* x,y,z comp of chi2 = S2/m2^2 */
   double t1, t2, dt;   /* initial, final time, time step */
   double ti, tf;       /* initial and final time for integrator */
+//testPetr();
+//exit(88);
 
   printf("PN_CircularOrbit_GWs: Computing h+,hx\n");
   s    = Geti("PN_CircularOrbit_GWs_spinweight"); /* spin weight we use */
@@ -146,7 +148,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 
   /* initial values */
   m1 = Getd("PN_CircularOrbit_GWs_m1");
-  m2 = Getd("PN_CircularOrbit_GWs_m1");
+  m2 = Getd("PN_CircularOrbit_GWs_m2");
   chi1x = Getd("PN_CircularOrbit_GWs_chi1x");
   chi1y = Getd("PN_CircularOrbit_GWs_chi1y");
   chi1z = Getd("PN_CircularOrbit_GWs_chi1z");
@@ -160,7 +162,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   dt = Getd("PN_CircularOrbit_GWs_dt");
   D = 1.0;
   yvec[0] = 0.0;  // you don't need to initialize this field it will be used as the storage of the separation
-  yvec[1] = Getd("PN_CircularOrbit_GWs_omega"); // initial orbital frequency
+  yvec[1] = Getd("PN_CircularOrbit_GWs_omega")/(m1+m2); // initial orbital frequency
   yvec[2] = chi1x*m1*m1;  // S1x not Scap1! S1 = hi1*m1^2*Scap1
   yvec[3] = chi1y*m1*m1;  // S1y
   yvec[4] = chi1z*m1*m1;  // S1z
@@ -171,33 +173,21 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   yvec[9] = Getd("PN_CircularOrbit_GWs_Lny");  // Lny
   yvec[10]= Getd("PN_CircularOrbit_GWs_Lnz");  // Lnz
   yvec[11]= Getd("PN_CircularOrbit_GWs_Phi");  // Phi orbital phase         
-  /*
+  xodeint(m1, m2, t1, t1, yvec); /* do this to initialize yvec[0] */
+/*
   for(i=0; i<=11; i++)
     printf("yvec[%d] = %g\n", i, yvec[i]);
-  */
+*/
 
-  /* print in orbit file */
+  /* print header in orbit file */
   fprintf(out_orb, "# time  separation  omega  S1x  S1y  S1z  S2x  S2y  S2z"
                    "  Lnx  Lny  Lnz  Phi\n");
-  fprintf(out_orb, "%-15.8g", t1);
-  for(i=0; i<=11; i++)
-    fprintf(out_orb, "  %16.10e", yvec[i]);
-  fprintf(out_orb, "\n");
 
   /* compute h+, hx at different times */
   printf("computing h+, hx at different times:\n");
-  for(time=t1+dt; time<=t2; time+=dt)
+  for(time=t1; time<=t2; time+=dt)
   {
     printf("time = %g\n", time);
-
-    /* compute orbit at time */
-    ti=time-dt;
-    tf=time;
-    xodeint(m1, m2, ti, tf, yvec);
-    fprintf(out_orb, "%-15.8g", tf);
-    for(i=0; i<=11; i++)
-      fprintf(out_orb, "  %16.10e", yvec[i]);
-    fprintf(out_orb, "\n");
 
     /* compute hplus and hcross */
     for(k=0; k<n3; k++)  
@@ -223,7 +213,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     }
     /* set double covered points for h+, hx */
     copy_to_doubleCoveredPoints_SphericalDF(box, hpind);
-    copy_to_doubleCoveredPoints_SphericalDF(box, hpind);
+    copy_to_doubleCoveredPoints_SphericalDF(box, hxind);
 
     /* set integrands */
     i=0;
@@ -248,7 +238,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
         /* get Re and Im part of H = h+ - i hx */
         R=+hpp[ijk];
         I=-hxp[ijk];
-        
+
         /* compute modes of H */
         Re_Hmodep[ijk] = RsYlm * R + IsYlm * I;
         Im_Hmodep[ijk] = RsYlm * I - IsYlm * R;
@@ -286,8 +276,20 @@ int PN_CircularOrbit_GWs(tGrid *grid)
       fclose(out); 
       i++;
     }
-  }
 
+    /* output orbit file */
+    fprintf(out_orb, "%-15.8g", time);
+    for(i=0; i<=11; i++)
+      fprintf(out_orb, "  %16.10e", yvec[i]);
+    fprintf(out_orb, "\n");
+
+    /* advance orbit to time+dt */
+    ti=time;
+    tf=time+dt;
+    xodeint(m1, m2, ti, tf, yvec);
+  }
+  /* set time to last time so that any other output get correct time label */
+  grid->time=time-dt;
   fclose(out_orb);
   return 0;
 }
