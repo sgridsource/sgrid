@@ -36,6 +36,8 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_sphere_Lmax", "13",
          "max l mode we can represent on grid. We need Lmax>=lmax");
   AddPar("PN_CircularOrbit_GWs_spinweight", "-2", "spin weight we use in sYlm");
+  AddPar("PN_CircularOrbit_GWs_HmodeOutputFormat", "plus_cross",
+         "Output format for Hmodes [plus_cross,Re_Im] (NINJA uses plus_cross)");
 
   AddPar("PN_CircularOrbit_GWs_omega", "0.01", "initial orbital frequency * m");
   AddPar("PN_CircularOrbit_GWs_m1", "0.5", "mass of particle 1");

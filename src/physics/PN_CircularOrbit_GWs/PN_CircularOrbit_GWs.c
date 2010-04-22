@@ -113,8 +113,13 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   double chi2x, chi2y, chi2z;  /* x,y,z comp of chi2 = S2/m2^2 */
   double t1, t2, dt;   /* initial, final time, time step */
   double ti, tf;       /* initial and final time for integrator */
-//testPetr();
-//exit(88);
+  int ImHmodesign;
+
+  /* flip sign of Im H mode in case of plus_cross format (as for NINJA) */
+  if(Getv("PN_CircularOrbit_GWs_HmodeOutputFormat", "plus_cross"))
+    ImHmodesign=-1;
+  else
+    ImHmodesign=+1;
 
   printf("PN_CircularOrbit_GWs: Computing h+,hx\n");
   s    = Geti("PN_CircularOrbit_GWs_spinweight"); /* spin weight we use */
@@ -141,7 +146,10 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     if(!out) errorexits("failed opening %s", outname);
 
     /* write header */
-    fprintf(out, "%s\n", "# time             Re_Hmode           Im_Hmode");
+    if(ImHmodesign==-1)
+      fprintf(out, "%s\n", "# time             hplus              hcross");
+    else
+      fprintf(out, "%s\n", "# time             Re_Hmode           Im_Hmode");
 
     fclose(out); 
   }
@@ -271,7 +279,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 
       /* write time Re and Im part of mode */      
       //printf("%.13g  %.13g  %.13g\n", time1, Re_Hmodep[i], Im_Hmodep[i]);
-      fprintf(out, "%-15.8g  %16.10e  %16.10e\n", time, Re_Hmodep[i], Im_Hmodep[i]);
+      fprintf(out, "%-15.8g  %16.10e  %16.10e\n",
+              time, Re_Hmodep[i], ImHmodesign*Im_Hmodep[i]);
 
       fclose(out); 
       i++;
