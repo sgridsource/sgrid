@@ -168,6 +168,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   t1 = Getd("PN_CircularOrbit_GWs_t1");
   t2 = Getd("PN_CircularOrbit_GWs_t2");
   dt = Getd("PN_CircularOrbit_GWs_dt");
+  if(t1>t2) dt=-dt;
   D = 1.0;
   yvec[0] = 0.0;  // you don't need to initialize this field it will be used as the storage of the separation
   yvec[1] = Getd("PN_CircularOrbit_GWs_omega")/(m1+m2); // initial orbital frequency
@@ -193,7 +194,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 
   /* compute h+, hx at different times */
   printf("computing h+, hx at different times:\n");
-  for(time=t1; time<=t2; time+=dt)
+  for(time=t1; (dt>0)&&(time<=t2) || (dt<0)&&(time>=t2); time+=dt)
   {
     printf("time = %g\n", time);
 
