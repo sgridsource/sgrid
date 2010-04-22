@@ -52,6 +52,7 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_Lny", "0", "initial L_hat_Newton_y");
   AddPar("PN_CircularOrbit_GWs_Lnz", "1", "initial L_hat_Newton_z");
   AddPar("PN_CircularOrbit_GWs_Phi", "0", "initial orbital phase Phi");
+  AddPar("PN_CircularOrbit_GWs_D", "1.26", "distance from source");
   AddPar("PN_CircularOrbit_GWs_t1", "0",    "initial time");
   AddPar("PN_CircularOrbit_GWs_t2", "1000", "final time");
   AddPar("PN_CircularOrbit_GWs_dt", "10",   "time step");               

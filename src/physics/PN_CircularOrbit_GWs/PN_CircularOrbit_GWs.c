@@ -165,11 +165,12 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   chi2z = Getd("PN_CircularOrbit_GWs_chi2z");
   /* chi1 = sqrt(chi1x*chi1x + chi1y*chi1y + chi1z*chi1z);
      chi2 = sqrt(chi2x*chi2x + chi2y*chi2y + chi2z*chi2z); */
+  D = Getd("PN_CircularOrbit_GWs_D");
   t1 = Getd("PN_CircularOrbit_GWs_t1");
   t2 = Getd("PN_CircularOrbit_GWs_t2");
   dt = Getd("PN_CircularOrbit_GWs_dt");
   if(t1>t2) dt=-dt;
-  D = 1.0;
+
   yvec[0] = 0.0;  // you don't need to initialize this field it will be used as the storage of the separation
   yvec[1] = Getd("PN_CircularOrbit_GWs_omega")/(m1+m2); // initial orbital frequency
   yvec[2] = chi1x*m1*m1;  // S1x not Scap1! S1 = hi1*m1^2*Scap1
