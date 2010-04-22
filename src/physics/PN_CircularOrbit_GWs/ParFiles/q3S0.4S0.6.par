@@ -1,0 +1,21 @@
+physics = PN_CircularOrbit_GWs
+
+PN_CircularOrbit_GWs_lmax = 2
+PN_CircularOrbit_GWs_sphere_Lmax = 2
+
+PN_CircularOrbit_GWs_omega = 0.025
+PN_CircularOrbit_GWs_m1 = 0.25
+PN_CircularOrbit_GWs_m2 = 0.75
+PN_CircularOrbit_GWs_chi1x = 0
+PN_CircularOrbit_GWs_chi1y = 0
+PN_CircularOrbit_GWs_chi1z = 0.4
+PN_CircularOrbit_GWs_chi2x = 0
+PN_CircularOrbit_GWs_chi2y = 0
+PN_CircularOrbit_GWs_chi2z = 0.6
+PN_CircularOrbit_GWs_Lnx = 0 
+PN_CircularOrbit_GWs_Lny = 0
+PN_CircularOrbit_GWs_Lnz = 1
+PN_CircularOrbit_GWs_Phi = 0
+PN_CircularOrbit_GWs_t1 = -200
+PN_CircularOrbit_GWs_t2 = 200
+PN_CircularOrbit_GWs_dt = 10               

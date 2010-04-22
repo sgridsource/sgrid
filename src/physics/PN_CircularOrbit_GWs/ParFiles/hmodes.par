@@ -1,0 +1,24 @@
+physics = PN_CircularOrbit_GWs
+
+PN_CircularOrbit_GWs_omega = 0.03
+PN_CircularOrbit_GWs_m1 = 0.25
+PN_CircularOrbit_GWs_m2 = 0.75
+PN_CircularOrbit_GWs_chi1x = 0.05
+PN_CircularOrbit_GWs_chi1y = 0.15
+PN_CircularOrbit_GWs_chi1z = 0.4
+PN_CircularOrbit_GWs_chi2x = 0.1
+PN_CircularOrbit_GWs_chi2y = -0.2
+PN_CircularOrbit_GWs_chi2z = 0.6
+PN_CircularOrbit_GWs_Lnx = 0.4472135954999579 
+PN_CircularOrbit_GWs_Lny = 0.4
+PN_CircularOrbit_GWs_Lnz = 0.8
+PN_CircularOrbit_GWs_Phi = 3
+PN_CircularOrbit_GWs_t1 = 1
+PN_CircularOrbit_GWs_t2 = 901
+PN_CircularOrbit_GWs_dt = 10               
+
+outputY0_box0 = 1
+outputZ0_box0 = 1
+
+1doutiter = 1
+1doutput = PN_CircularOrbit_GWs_hplus PN_CircularOrbit_GWs_hcross
