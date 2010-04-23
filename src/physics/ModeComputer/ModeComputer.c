@@ -294,7 +294,7 @@ int ModeComputer(tGrid *grid)
     if(!out) errorexits("failed opening %s", outname);
 
     /* write header */
-    fprintf(out, "%s\n", "# time             Re_mode            Im_mode");
+    fprintf(out, "%s\n", "# time                    Re_mode            Im_mode");
 
     fclose(out); 
   }
@@ -373,7 +373,7 @@ int ModeComputer(tGrid *grid)
 
       /* write time Re and Im part of mode */      
       //printf("%.13g  %.13g  %.13g\n", time1, Re_modep[i], Im_modep[i]);
-      fprintf(out, "%-15.8g  %16.10e  %16.10e\n", time1, Re_modep[i], Im_modep[i]);
+      fprintf(out, "%-.16e  %+.10e  %+.10e\n", time1, Re_modep[i], Im_modep[i]);
 
       fclose(out); 
       i++;

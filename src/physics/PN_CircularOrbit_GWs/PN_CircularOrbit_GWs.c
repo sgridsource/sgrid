@@ -147,9 +147,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 
     /* write header */
     if(ImHmodesign==-1)
-      fprintf(out, "%s\n", "# time             hplus              hcross");
+      fprintf(out, "%s\n", "# time                    hplus              hcross");
     else
-      fprintf(out, "%s\n", "# time             Re_Hmode           Im_Hmode");
+      fprintf(out, "%s\n", "# time                    Re_Hmode           Im_Hmode");
 
     fclose(out); 
   }
@@ -281,7 +281,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 
       /* write time Re and Im part of mode */      
       //printf("%.13g  %.13g  %.13g\n", time1, Re_Hmodep[i], Im_Hmodep[i]);
-      fprintf(out, "%-15.8g  %16.10e  %16.10e\n",
+      fprintf(out, "%-.16e  %+.10e  %+.10e\n",
               time, Re_Hmodep[i], ImHmodesign*Im_Hmodep[i]);
 
       fclose(out); 
@@ -289,9 +289,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     }
 
     /* output orbit file */
-    fprintf(out_orb, "%-15.8g", time);
+    fprintf(out_orb, "%-.16e", time);
     for(i=0; i<=11; i++)
-      fprintf(out_orb, "  %16.10e", yvec[i]);
+      fprintf(out_orb, "  %+.16e", yvec[i]);
     fprintf(out_orb, "\n");
 
     /* advance orbit to time+dt */
