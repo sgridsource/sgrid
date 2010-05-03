@@ -35,6 +35,10 @@ double integral3D(double (*int_meth)(double (*f_int)(double),
                   double sx, double sy, double sz, 
                   int maxx, int maxy, int maxz);
 
+/* from integrals_1Dgrid.c */
+double integrate_simpson_1Dgrid(double* f, double dx, int i1, int i2);
+double integrate_trapez_1Dgrid(double* f, double dx, int i1, int i2);
+
 /* Attenuation functions */
 double Attenuation01(double x, double s, double p);
 
