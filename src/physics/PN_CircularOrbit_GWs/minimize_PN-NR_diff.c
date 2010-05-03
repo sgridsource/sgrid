@@ -128,7 +128,7 @@ double PNPsi4_NRPsi4_diff_inbox(tBox *box, int Re_PNPsi4ind, int Im_PNPsi4ind,
   double *Im_PNPsi4p = box->v[Im_PNPsi4ind];
   double *Re_NRPsi4p = box->v[Re_NRPsi4ind];
   double *Im_NRPsi4p = box->v[Im_NRPsi4ind];
-  double *temp = box->v[Ind("temp")];
+  double *PN_NR_diff = box->v[Ind("PN_CircularOrbit_GWs_PN_NR_diff")];
   double R,I;
 
   /* set integrand at i=0 */
@@ -143,14 +143,14 @@ double PNPsi4_NRPsi4_diff_inbox(tBox *box, int Re_PNPsi4ind, int Im_PNPsi4ind,
     I = Im_PNPsi4p[ijk] - Im_NRPsi4p[ijk];
 
     /* compute diff^2 integrand */
-    temp[ijk] = R*R + I*I;
+    PN_NR_diff[ijk] = R*R + I*I;
   }
   
   /* do surface integral over diff^2 integrand */
   i=0;
-  spec_sphericalDF2dIntegral_at_radial_index_i(box, temp, temp, i);
+  spec_sphericalDF2dIntegral_at_radial_index_i(box, PN_NR_diff, PN_NR_diff, i);
   
-  return temp[0];
+  return PN_NR_diff[0];
 }
 
 
@@ -163,9 +163,9 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
   int ndata = (t2-t1)/dt + 1;
   double *diff;
   double time, tdiff;
-  int Re_NRPsi4ind = Ind("PN_CircularOrbit_GWs_Re_NRPsi4");
+  int Re_NRPsi4ind = Ind("PN_CircularOrbit_GWs_Re_NRPsi4"); /* NR Psi4 */
   int Im_NRPsi4ind = Ind("PN_CircularOrbit_GWs_Im_NRPsi4");
-  int Re_PNPsi4ind = Ind("PN_CircularOrbit_GWs_Re_Psi4");
+  int Re_PNPsi4ind = Ind("PN_CircularOrbit_GWs_Re_Psi4"); /* PN Psi4 */
   int Im_PNPsi4ind = Ind("PN_CircularOrbit_GWs_Im_Psi4");
   int hpind = Ind("PN_CircularOrbit_GWs_hplus");
   int hxind = Ind("PN_CircularOrbit_GWs_hcross");
@@ -302,7 +302,7 @@ int minimize_PN_NR_diff(tGrid *grid)
   /* ??? pick PN pars */
 
   /* ??? test out diff */
-  tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
+tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
                                                               
   /* free arrays with numerical Psi4 modes */
   free_dmatrix(ReNRPsi4mode, 0,n1, 0,ndata+1);

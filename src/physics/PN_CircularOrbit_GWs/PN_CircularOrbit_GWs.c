@@ -78,6 +78,12 @@ int PN_CircularOrbit_GWs_startup(tGrid *grid)
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_Psi4")); 
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_Psi4mode")); 
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_Psi4mode")); 
+  if(Getv("PN_CircularOrbit_GWs_match_NR", "yes"))
+  {
+    enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_NRPsi4"));
+    enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_NRPsi4"));
+    enablevar(grid, Ind("PN_CircularOrbit_GWs_PN_NR_diff"));
+  }
 
   return 0;
 }

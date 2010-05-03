@@ -47,6 +47,7 @@ int sgrid_PN_CircularOrbit_GWs()
   {
     AddVar("PN_CircularOrbit_GWs_Re_NRPsi4", "", "real part of NR Psi4");
     AddVar("PN_CircularOrbit_GWs_Im_NRPsi4", "", "imag part of NR Psi4");
+    AddVar("PN_CircularOrbit_GWs_PN_NR_diff", "", "PN - NR");
 
     AddPar("PN_CircularOrbit_GWs_NRPsi4file_prefix", "psi4_",
            "prefix for file containing numerical Psi4 modes");
