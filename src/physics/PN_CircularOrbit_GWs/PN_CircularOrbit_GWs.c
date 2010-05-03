@@ -88,11 +88,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   char orbit[STRLEN];
   FILE *out;
   char outname[STRLEN];
-  int lmax, l,m,s, i,j,k, ijk;
+  int lmax, l,m,s, i;
   tBox *box = grid->box[0];
   int n1=box->n1;
-  int n2=box->n2;
-  int n3=box->n3;
   double time;
   int hpind = Ind("PN_CircularOrbit_GWs_hplus");
   int hxind = Ind("PN_CircularOrbit_GWs_hcross");
@@ -102,17 +100,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   int Im_sYlmind = Ind("PN_CircularOrbit_GWs_Im_sYlm");
   int Re_Psi4ind = Ind("PN_CircularOrbit_GWs_Re_Psi4");
   int Im_Psi4ind = Ind("PN_CircularOrbit_GWs_Im_Psi4");
-  double *hpp = box->v[hpind];
-  double *hxp = box->v[hxind];
   double *Re_Hmodep = box->v[Re_Hmind];
   double *Im_Hmodep = box->v[Im_Hmind];
-  double *Re_sYlmp = box->v[Re_sYlmind];
-  double *Im_sYlmp = box->v[Im_sYlmind];
-  double *Re_Psi4p = box->v[Re_Psi4ind];
-  double *Im_Psi4p = box->v[Im_Psi4ind];
-  double *Xp = box->v[Ind("X")];
-  double *Yp = box->v[Ind("Y")];
-  double *Zp = box->v[Ind("Z")];
   double yvec[12];  /* state vector used in odeint */
   double m1, m2, D; /* masses and distance of observer of h+,hx */
   double chi1x, chi1y, chi1z;  /* x,y,z comp of chi1 = S1/m1^2 */
@@ -391,8 +380,8 @@ void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
   double *Re_sYlmp = box->v[Re_sYlmind];
   double *Im_sYlmp = box->v[Im_sYlmind];
   double *Xp = box->v[Ind("X")];
-  double *Yp = box->v[Ind("Y")];
-  double *Zp = box->v[Ind("Z")];
+  /* double *Yp = box->v[Ind("Y")];
+     double *Zp = box->v[Ind("Z")]; */
 
   /* set integrands */
   i=0;
