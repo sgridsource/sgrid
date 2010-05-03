@@ -209,48 +209,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     compute_hplus_hcross_on_sphere(box, hpind, hxind,
                                    yvec, D,m1,m2, 0,n1-1, 1);
 
-    /* set integrands */
-    i=0;
-    for(l=0; l<=lmax; l++)
-    for(m=-l; m<=l; m++)
-    {
-      for(k=0; k<n3; k++)
-      for(j=0; j<n2/2; j++)
-      {
-        double R,I, RsYlm,IsYlm, r; /* ,theta,phi */
-        ijk=Index(i,j,k);
-
-        /* get r, theta, phi */
-        r     = Xp[ijk];
-        /* theta = Yp[ijk] + PI/((1+n2%2)*n2); */
-        /* phi   = Zp[ijk]; */
-
-        /* get spin-weighted spherical harmonic sYlm */
-        RsYlm = Re_sYlmp[ijk];
-        IsYlm = Im_sYlmp[ijk];
-
-        /* get Re and Im part of H = h+ - i hx */
-        R=+hpp[ijk];
-        I=-hxp[ijk];
-
-        /* compute modes of H */
-        Re_Hmodep[ijk] = RsYlm * R + IsYlm * I;
-        Im_Hmodep[ijk] = RsYlm * I - IsYlm * R;
-
-        /* devide by r^2 since spec_sphericalDF2dIntegral multiplies by r^2 */
-        Re_Hmodep[ijk] = Re_Hmodep[ijk]/(r*r);
-        Im_Hmodep[ijk] = Im_Hmodep[ijk]/(r*r);
-      }
-      i++;
-    }
-    
-    /* set double covered points of modes */
-    copy_to_doubleCoveredPoints_SphericalDF(box, Re_Hmind);
-    copy_to_doubleCoveredPoints_SphericalDF(box, Im_Hmind);
-
-    /* integrate over spheres */
-    spec_sphericalDF2dIntegral(box, Re_Hmodep, Re_Hmodep);
-    spec_sphericalDF2dIntegral(box, Im_Hmodep, Im_Hmodep);
+    /* get modes of H = h+ - i hx  <-- sign of Im H is neg */
+    compute_sYlmModes_of_PN_H(box, hpind, hxind, Re_sYlmind, Im_sYlmind, lmax,
+                              Re_Hmind, Im_Hmind, -1); 
             
     /* output */
     i=4;  /* (1+1)^2 */
