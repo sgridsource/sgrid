@@ -74,6 +74,8 @@ int PN_CircularOrbit_GWs_startup(tGrid *grid)
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_Hmode")); 
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_sYlm")); 
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_sYlm")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_Psi4")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_Psi4")); 
 
   return 0;
 }
@@ -98,12 +100,16 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   int Im_Hmind = Ind("PN_CircularOrbit_GWs_Im_Hmode");
   int Re_sYlmind = Ind("PN_CircularOrbit_GWs_Re_sYlm");
   int Im_sYlmind = Ind("PN_CircularOrbit_GWs_Im_sYlm");
+  int Re_Psi4ind = Ind("PN_CircularOrbit_GWs_Re_Psi4");
+  int Im_Psi4ind = Ind("PN_CircularOrbit_GWs_Im_Psi4");
   double *hpp = box->v[hpind];
   double *hxp = box->v[hxind];
   double *Re_Hmodep = box->v[Re_Hmind];
   double *Im_Hmodep = box->v[Im_Hmind];
   double *Re_sYlmp = box->v[Re_sYlmind];
   double *Im_sYlmp = box->v[Im_sYlmind];
+  double *Re_Psi4p = box->v[Re_Psi4ind];
+  double *Im_Psi4p = box->v[Im_Psi4ind];
   double *Xp = box->v[Ind("X")];
   double *Yp = box->v[Ind("Y")];
   double *Zp = box->v[Ind("Z")];
@@ -340,7 +346,6 @@ void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind,
                                    double t, double dt,
                                    int imin, int imax,
                                    int set_doublecovered_points)
-
 {
   double yvec[12];
   int i,j,k, ijk;
@@ -406,4 +411,68 @@ void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind,
     copy_to_doubleCoveredPoints_SphericalDF(box, hpind);
     copy_to_doubleCoveredPoints_SphericalDF(box, hxind);
   }
+}
+
+/* compute the modes of any complex function H = ReH + i ImH * ImHmodeSign */
+void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
+                               int Re_sYlmind, int Im_sYlmind, int lmax,
+                               int Re_Hmind, int Im_Hmind, 
+                               int ImHmodeSign)
+{
+  int l,m, i,j,k, ijk;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  double *ReHp = box->v[ReHind];
+  double *ImHp = box->v[ImHind];
+  double *Re_Hmodep = box->v[Re_Hmind];
+  double *Im_Hmodep = box->v[Im_Hmind];
+  double *Re_sYlmp = box->v[Re_sYlmind];
+  double *Im_sYlmp = box->v[Im_sYlmind];
+  double *Xp = box->v[Ind("X")];
+  double *Yp = box->v[Ind("Y")];
+  double *Zp = box->v[Ind("Z")];
+
+  /* set integrands */
+  i=0;
+  for(l=0; l<=lmax; l++)
+  for(m=-l; m<=l; m++)
+  {
+    for(k=0; k<n3; k++)
+    for(j=0; j<n2/2; j++)
+    {
+      double R,I, RsYlm,IsYlm, r; /* ,theta,phi */
+      ijk=Index(i,j,k);
+
+      /* get r, theta, phi */
+      r     = Xp[ijk];
+      /* theta = Yp[ijk] + PI/((1+n2%2)*n2); */
+      /* phi   = Zp[ijk]; */
+
+      /* get spin-weighted spherical harmonic sYlm */
+      RsYlm = Re_sYlmp[ijk];
+      IsYlm = Im_sYlmp[ijk];
+
+      /* get Re and Im part of H */
+      R=+ReHp[ijk];
+      I=+ImHp[ijk]*ImHmodeSign;
+
+      /* compute modes of H */
+      Re_Hmodep[ijk] = RsYlm * R + IsYlm * I;
+      Im_Hmodep[ijk] = RsYlm * I - IsYlm * R;
+
+      /* devide by r^2 since spec_sphericalDF2dIntegral multiplies by r^2 */
+      Re_Hmodep[ijk] = Re_Hmodep[ijk]/(r*r);
+      Im_Hmodep[ijk] = Im_Hmodep[ijk]/(r*r);
+    }
+    i++;
+  }
+  
+  /* set double covered points of modes */
+  copy_to_doubleCoveredPoints_SphericalDF(box, Re_Hmind);
+  copy_to_doubleCoveredPoints_SphericalDF(box, Im_Hmind);
+
+  /* integrate over spheres */
+  spec_sphericalDF2dIntegral(box, Re_Hmodep, Re_Hmodep);
+  spec_sphericalDF2dIntegral(box, Im_Hmodep, Im_Hmodep);
 }

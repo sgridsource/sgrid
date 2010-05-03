@@ -10,6 +10,17 @@ void compute_hplus_hcross_on_sphere(tBox *box, int hpind, int hxind,
                                     double D, double m1, double m2,
                                     int imin, int imax,
                                     int set_doublecovered_points);
+void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind, 
+                                   int hpind, int hxind, double *yin, 
+                                   double D, double m1, double m2,
+                                   double t, double dt,
+                                   int imin, int imax,
+                                   int set_doublecovered_points);
+void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
+                               int Re_sYlmind, int Im_sYlmind, int lmax,
+                               int Re_Hmind, int Im_Hmind, 
+                               int ImHmodeSign);
+
 
 /* Petr's funcs in compute_graw_wave.c and xodeint.c */
 void xodeint(double m1_in, double m2_in, double t1, double t2, double ystart_in[]);
