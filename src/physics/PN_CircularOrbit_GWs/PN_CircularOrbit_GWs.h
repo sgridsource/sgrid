@@ -20,6 +20,9 @@ void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
                                int Re_sYlmind, int Im_sYlmind, int lmax,
                                int Re_Hmind, int Im_Hmind, 
                                int ImHmodeSign);
+void output_sYlmModes_of_PN_H(char *outname, double time,
+                              double *Re_Hmodep, double *Im_Hmodep,
+                              int lmax, int s, int ImHmodeSign);
 
 
 /* Petr's funcs in compute_graw_wave.c and xodeint.c */

@@ -202,25 +202,11 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     compute_sYlmModes_of_PN_H(box, hpind, hxind, Re_sYlmind, Im_sYlmind, lmax,
                               Re_Hmind, Im_Hmind, -1); 
             
-    /* output */
-    i=4;  /* (1+1)^2 */
-    for(l=2; l<=lmax; l++)
-    for(m=-l; m<=l; m++)
-    {
-      /* open output file */
-      sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
-      Gets("PN_CircularOrbit_GWs_hfile_prefix"), l,m,s);
-      out = fopen(outname, "a");
-      if(!out) errorexits("failed opening %s", outname);
-
-      /* write time Re and Im part of mode */      
-      //printf("%.13g  %.13g  %.13g\n", time1, Re_Hmodep[i], Im_Hmodep[i]);
-      fprintf(out, "%-.16e  %+.10e  %+.10e\n",
-              time, Re_Hmodep[i], ImHmodesign*Im_Hmodep[i]);
-
-      fclose(out); 
-      i++;
-    }
+    /* output H modes */
+    sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
+            Gets("PN_CircularOrbit_GWs_hfile_prefix"), l,m,s);
+    output_sYlmModes_of_PN_H(outname, time, Re_Hmodep, Im_Hmodep,
+                             lmax,s, ImHmodesign);
 
     /* output orbit file */
     fprintf(out_orb, "%-.16e", time);
@@ -363,11 +349,11 @@ void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind,
   }
 }
 
-/* compute the modes of any complex function H = ReH + i ImH * ImHmodeSign */
+/* compute the modes of any complex function H = ReH + i ImH * ImHsign */
 void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
                                int Re_sYlmind, int Im_sYlmind, int lmax,
                                int Re_Hmind, int Im_Hmind, 
-                               int ImHmodeSign)
+                               int ImHsign)
 {
   int l,m, i,j,k, ijk;
   int n1=box->n1;
@@ -405,7 +391,7 @@ void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
 
       /* get Re and Im part of H */
       R=+ReHp[ijk];
-      I=+ImHp[ijk]*ImHmodeSign;
+      I=+ImHp[ijk]*ImHsign;
 
       /* compute modes of H */
       Re_Hmodep[ijk] = RsYlm * R + IsYlm * I;
@@ -425,4 +411,33 @@ void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
   /* integrate over spheres */
   spec_sphericalDF2dIntegral(box, Re_Hmodep, Re_Hmodep);
   spec_sphericalDF2dIntegral(box, Im_Hmodep, Im_Hmodep);
+}
+
+/* output modes ReHmode, ImHmode * ImHmodeSign */
+void output_sYlmModes_of_PN_H(char *outname, double time,
+                              double *Re_Hmodep, double *Im_Hmodep,
+                              int lmax, int s, int ImHmodeSign)
+{
+  int i, l,m;
+  FILE *out;
+
+  /* output */
+  i=4;  /* (1+1)^2 */
+  for(l=2; l<=lmax; l++)
+  for(m=-l; m<=l; m++)
+  {
+    /* open output file */
+    sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
+    Gets("PN_CircularOrbit_GWs_hfile_prefix"), l,m,s);
+    out = fopen(outname, "a");
+    if(!out) errorexits("failed opening %s", outname);
+
+    /* write time Re and Im part of mode */      
+    //printf("%.13g  %.13g  %.13g\n", time1, Re_Hmodep[i], Im_Hmodep[i]);
+    fprintf(out, "%-.16e  %+.10e  %+.10e\n",
+            time, Re_Hmodep[i], ImHmodeSign*Im_Hmodep[i]);
+
+    fclose(out); 
+    i++;
+  }
 }
