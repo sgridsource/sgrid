@@ -257,8 +257,7 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
   }
 
   /* integrate diff[n] over time to get tdiff */
-//...
-tdiff=diff[0];
+  tdiff=integrate_simpson_1Dgrid(diff, dt, 0, ndata-1);
 
   /* free array for diff at different times */
   free_dvector(diff, 0,ndata-1);
@@ -303,7 +302,8 @@ int minimize_PN_NR_diff(tGrid *grid)
 
   /* ??? test out diff */
 tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
-                                                              
+printf("tdiff=%g\n", tdiff);
+                                                             
   /* free arrays with numerical Psi4 modes */
   free_dmatrix(ReNRPsi4mode, 0,n1, 0,ndata+1);
   free_dmatrix(ImNRPsi4mode, 0,n1, 0,ndata+1);
