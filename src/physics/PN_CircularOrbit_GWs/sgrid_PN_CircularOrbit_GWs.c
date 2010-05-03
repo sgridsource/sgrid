@@ -45,6 +45,9 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_match_NR", "no", "if we match NR Psi4 [no,yes]");
   if(Getv("PN_CircularOrbit_GWs_match_NR", "yes"))
   {
+    AddFun(POST_INITIALDATA, minimize_PN_NR_diff,
+           "minimize_PN_NR_diff: minimize PN-NR difference");
+    
     AddVar("PN_CircularOrbit_GWs_Re_NRPsi4", "", "real part of NR Psi4");
     AddVar("PN_CircularOrbit_GWs_Im_NRPsi4", "", "imag part of NR Psi4");
     AddVar("PN_CircularOrbit_GWs_PN_NR_diff", "", "PN - NR");
