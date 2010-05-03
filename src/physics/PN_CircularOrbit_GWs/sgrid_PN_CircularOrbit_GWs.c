@@ -42,6 +42,16 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_HmodeOutputFormat", "plus_cross",
          "Output format for Hmodes [plus_cross,Re_Im] (NINJA uses plus_cross)");
 
+  AddPar("PN_CircularOrbit_GWs_match_NR", "no", "if we match NR Psi4 [no,yes]");
+  if(Getv("PN_CircularOrbit_GWs_match_NR", "yes"))
+  {
+    AddVar("PN_CircularOrbit_GWs_Re_NRPsi4", "", "real part of NR Psi4");
+    AddVar("PN_CircularOrbit_GWs_Im_NRPsi4", "", "imag part of NR Psi4");
+
+    AddPar("PN_CircularOrbit_GWs_NRPsi4file_prefix", "psi4_",
+           "prefix for file containing numerical Psi4 modes");
+  }
+
   AddPar("PN_CircularOrbit_GWs_omega", "0.01", "initial orbital frequency * m");
   AddPar("PN_CircularOrbit_GWs_m1", "0.5", "mass of particle 1");
   AddPar("PN_CircularOrbit_GWs_m2", "0.5", "mass of particle 2");
