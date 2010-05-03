@@ -60,7 +60,7 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
       for(n=0; n<ndata; n++)
         ReNRPsi4mode[i][n] = ImNRPsi4mode[i][n] = 0.0;
     }
-    fclose(in); 
+    if(in) fclose(in); 
     i++;
   }
 }
