@@ -349,8 +349,8 @@ void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind,
     hcross   = hxp[ijk+1];
     hplus_p  = hpp[ijk+2];
     hcross_p = hxp[ijk+2];
-    Repsi4 = (hplus_p + hplus_m - 2.0*hplus)*0.5/(dt*dt);
-    Impsi4 = (hcross_p + hcross_m - 2.0*hcross)*0.5/(dt*dt);
+    Repsi4 = (hplus_p + hplus_m - 2.0*hplus)/(dt*dt);
+    Impsi4 = (hcross_p + hcross_m - 2.0*hcross)/(dt*dt);
 
     if(imax>=n1) errorexit("compute_hplus_hcross_on_sphere: imax>=n1");
     for(i=imin; i<=imax; i++)
