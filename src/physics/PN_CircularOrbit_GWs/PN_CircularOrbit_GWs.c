@@ -76,6 +76,8 @@ int PN_CircularOrbit_GWs_startup(tGrid *grid)
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_sYlm")); 
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_Psi4")); 
   enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_Psi4")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_Re_Psi4mode")); 
+  enablevar(grid, Ind("PN_CircularOrbit_GWs_Im_Psi4mode")); 
 
   return 0;
 }
@@ -100,8 +102,12 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   int Im_sYlmind = Ind("PN_CircularOrbit_GWs_Im_sYlm");
   int Re_Psi4ind = Ind("PN_CircularOrbit_GWs_Re_Psi4");
   int Im_Psi4ind = Ind("PN_CircularOrbit_GWs_Im_Psi4");
+  int Re_Psi4mind = Ind("PN_CircularOrbit_GWs_Re_Psi4mode");
+  int Im_Psi4mind = Ind("PN_CircularOrbit_GWs_Im_Psi4mode");
   double *Re_Hmodep = box->v[Re_Hmind];
   double *Im_Hmodep = box->v[Im_Hmind];
+  double *Re_Psi4modep = box->v[Re_Psi4mind];
+  double *Im_Psi4modep = box->v[Im_Psi4mind];
   double yvec[12];  /* state vector used in odeint */
   double m1, m2, D; /* masses and distance of observer of h+,hx */
   double chi1x, chi1y, chi1z;  /* x,y,z comp of chi1 = S1/m1^2 */
@@ -194,18 +200,35 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   {
     printf("time = %g\n", time);
 
-    /* compute hplus and hcross */
-    compute_hplus_hcross_on_sphere(box, hpind, hxind,
-                                   yvec, D,m1,m2, 0,n1-1, 1);
+    /* see if we want Psi4 as well */
+    if(Getv("PN_CircularOrbit_GWs_computePsi4", "yes"))
+    {
+      /* compute Psi4 and hplus and hcross */
+      compute_psi4_and_hplus_hcross(box, Re_Psi4ind, Im_Psi4ind,
+                                    hpind, hxind, yvec, D,m1,m2,
+                                    time, dt*0.001, 0,n1-1, 1);
+      /* get modes of Psi4 */
+      compute_sYlmModes_of_PN_H(box, Re_Psi4ind, Im_Psi4ind,
+                                Re_sYlmind, Im_sYlmind, lmax,
+                                Re_Psi4mind, Im_Psi4mind, +1); 
+      /* output Psi4 modes */
+      output_sYlmModes_of_PN_H(Gets("PN_CircularOrbit_GWs_Psi4file_prefix"), 
+                               time, Re_Psi4modep, Im_Psi4modep,
+                               lmax,s, +1);
+    }
+    else
+    {
+      /* compute hplus and hcross */
+      compute_hplus_hcross_on_sphere(box, hpind, hxind,
+                                     yvec, D,m1,m2, 0,n1-1, 1);
+    }
 
     /* get modes of H = h+ - i hx  <-- sign of Im H is neg */
     compute_sYlmModes_of_PN_H(box, hpind, hxind, Re_sYlmind, Im_sYlmind, lmax,
                               Re_Hmind, Im_Hmind, -1); 
-            
     /* output H modes */
-    sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
-            Gets("PN_CircularOrbit_GWs_hfile_prefix"), l,m,s);
-    output_sYlmModes_of_PN_H(outname, time, Re_Hmodep, Im_Hmodep,
+    output_sYlmModes_of_PN_H(Gets("PN_CircularOrbit_GWs_hfile_prefix"),
+                             time, Re_Hmodep, Im_Hmodep,
                              lmax,s, ImHmodesign);
 
     /* output orbit file */
@@ -326,8 +349,8 @@ void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind,
     hcross   = hxp[ijk+1];
     hplus_p  = hpp[ijk+2];
     hcross_p = hxp[ijk+2];
-    Repsi4 = (hplus_p + hplus_m - 2.0*hplus)*0.5/dt;
-    Impsi4 = (hcross_p + hcross_m - 2.0*hcross)*0.5/dt;
+    Repsi4 = (hplus_p + hplus_m - 2.0*hplus)*0.5/(dt*dt);
+    Impsi4 = (hcross_p + hcross_m - 2.0*hcross)*0.5/(dt*dt);
 
     if(imax>=n1) errorexit("compute_hplus_hcross_on_sphere: imax>=n1");
     for(i=imin; i<=imax; i++)
@@ -414,12 +437,13 @@ void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
 }
 
 /* output modes ReHmode, ImHmode * ImHmodeSign */
-void output_sYlmModes_of_PN_H(char *outname, double time,
+void output_sYlmModes_of_PN_H(char *prefix, double time,
                               double *Re_Hmodep, double *Im_Hmodep,
                               int lmax, int s, int ImHmodeSign)
 {
   int i, l,m;
   FILE *out;
+  char outname[STRLEN];
 
   /* output */
   i=4;  /* (1+1)^2 */
@@ -428,7 +452,7 @@ void output_sYlmModes_of_PN_H(char *outname, double time,
   {
     /* open output file */
     sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
-    Gets("PN_CircularOrbit_GWs_hfile_prefix"), l,m,s);
+            prefix, l,m,s);
     out = fopen(outname, "a");
     if(!out) errorexits("failed opening %s", outname);
 
