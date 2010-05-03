@@ -204,9 +204,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     if(Getv("PN_CircularOrbit_GWs_computePsi4", "yes"))
     {
       /* compute Psi4 and hplus and hcross */
-      compute_psi4_and_hplus_hcross(box, Re_Psi4ind, Im_Psi4ind,
-                                    hpind, hxind, yvec, D,m1,m2,
-                                    time, dt*0.001, 0,n1-1, 1);
+      compute_FDpsi4_and_hplus_hcross_on_sphere(box, Re_Psi4ind, Im_Psi4ind,
+                                                hpind, hxind, yvec, D,m1,m2,
+                                                0, dt*0.001, 0,n1-1, 1);
       /* get modes of Psi4 */
       compute_sYlmModes_of_PN_H(box, Re_Psi4ind, Im_Psi4ind,
                                 Re_sYlmind, Im_sYlmind, lmax,
@@ -299,12 +299,13 @@ void compute_hplus_hcross_on_sphere(tBox *box, int hpind, int hxind,
 
 /* use 2nd order fin diff in time to find psi4 from H = h+ - i hx
    and h+, hx */
-void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind, 
-                                   int hpind, int hxind, double *yin, 
-                                   double D, double m1, double m2,
-                                   double t, double dt,
-                                   int imin, int imax,
-                                   int set_doublecovered_points)
+void compute_FDpsi4_and_hplus_hcross_on_sphere(tBox *box,
+                                               int Rpsi4ind, int Ipsi4ind, 
+                                               int hpind, int hxind, double *yin, 
+                                               double D, double m1, double m2,
+                                               double t, double dt,
+                                               int imin, int imax,
+                                               int set_doublecovered_points)
 {
   double yvec[12];
   int i,j,k, ijk;
@@ -350,7 +351,7 @@ void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind,
     hplus_p  = hpp[ijk+2];
     hcross_p = hxp[ijk+2];
     Repsi4 = (hplus_p + hplus_m - 2.0*hplus)/(dt*dt);
-    Impsi4 = (hcross_p + hcross_m - 2.0*hcross)/(dt*dt);
+    Impsi4 =-(hcross_p + hcross_m - 2.0*hcross)/(dt*dt);
 
     if(imax>=n1) errorexit("compute_hplus_hcross_on_sphere: imax>=n1");
     for(i=imin; i<=imax; i++)
