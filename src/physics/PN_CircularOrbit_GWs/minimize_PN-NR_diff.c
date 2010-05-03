@@ -53,6 +53,7 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
           }
         }
       } /* end while */
+      fclose(in);
     }
     else /* if file does not exist */
     {
@@ -60,7 +61,6 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
       for(n=0; n<ndata; n++)
         ReNRPsi4mode[i][n] = ImNRPsi4mode[i][n] = 0.0;
     }
-    if(in) fclose(in); 
     i++;
   }
 }
