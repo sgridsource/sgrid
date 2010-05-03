@@ -5,6 +5,11 @@
 int PN_CircularOrbit_GWs_set_boxsize(tGrid *grid);
 int PN_CircularOrbit_GWs_startup(tGrid *grid);
 int PN_CircularOrbit_GWs(tGrid *grid);
+void compute_hplus_hcross_on_sphere(tBox *box, int hpind, int hxind,
+                                    double *yvec, 
+                                    double D, double m1, double m2,
+                                    int imin, int imax,
+                                    int set_doublecovered_points);
 
 /* Petr's funcs in compute_graw_wave.c and xodeint.c */
 void xodeint(double m1_in, double m2_in, double t1, double t2, double ystart_in[]);

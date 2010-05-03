@@ -200,30 +200,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     printf("time = %g\n", time);
 
     /* compute hplus and hcross */
-    for(k=0; k<n3; k++)  
-    for(j=0; j<n2/2; j++)
-    {
-      double hplus, hcross;
-      double theta,phi;
-
-      ijk=Index(0,j,k);
-
-      /* theta, phi */
-      theta = Yp[ijk] + PI/((1+n2%2)*n2);
-      phi   = Zp[ijk];
-
-      /* compute hplus and hcross, and put them all radial points */
-      /* FIXME: maybe store only at i=0 */
-      compute_hcross_hplus(yvec, &hcross, &hplus, D, theta, phi, m1, m2);
-      for(i=0; i<n1; i++)
-      {
-        hpp[ijk+i] = hplus;
-        hxp[ijk+i] = hcross;
-      }
-    }
-    /* set double covered points for h+, hx */
-    copy_to_doubleCoveredPoints_SphericalDF(box, hpind);
-    copy_to_doubleCoveredPoints_SphericalDF(box, hxind);
+    compute_hplus_hcross_on_sphere(box, hpind, hxind,
+                                   yvec, D,m1,m2, 0,n1-1, 1);
 
     /* set integrands */
     i=0;
@@ -303,4 +281,129 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   grid->time=time-dt;
   fclose(out_orb);
   return 0;
+}
+
+
+/* compute hplus and hcross on sphere, 
+   and put them on radial points imin<=i<=imax */ 
+void compute_hplus_hcross_on_sphere(tBox *box, int hpind, int hxind,
+                                    double *yvec, 
+                                    double D, double m1, double m2,
+                                    int imin, int imax,
+                                    int set_doublecovered_points)
+{
+  int i,j,k, ijk;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  double *hpp = box->v[hpind];
+  double *hxp = box->v[hxind];
+  /* double *Xp = box->v[Ind("X")]; */
+  double *Yp = box->v[Ind("Y")];
+  double *Zp = box->v[Ind("Z")];
+
+  /* compute hplus and hcross */
+  for(k=0; k<n3; k++)  
+  for(j=0; j<n2/2; j++)
+  {
+    double hplus, hcross;
+    double theta,phi;
+
+    ijk=Index(0,j,k);
+
+    /* theta, phi */
+    theta = Yp[ijk] + PI/((1+n2%2)*n2);
+    phi   = Zp[ijk];
+
+    /* compute hplus and hcross, and put them on radial points imin<=i<=imax */
+    compute_hcross_hplus(yvec, &hcross, &hplus, D, theta, phi, m1, m2);
+    if(imax>=n1) errorexit("compute_hplus_hcross_on_sphere: imax>=n1");
+    for(i=imin; i<=imax; i++)
+    {
+      hpp[ijk+i] = hplus;
+      hxp[ijk+i] = hcross;
+    }
+  }
+  /* set double covered points for h+, hx */
+  if(set_doublecovered_points)
+  {
+    copy_to_doubleCoveredPoints_SphericalDF(box, hpind);
+    copy_to_doubleCoveredPoints_SphericalDF(box, hxind);
+  }
+}
+
+/* use 2nd order fin diff in time to find psi4 from H = h+ - i hx
+   and h+, hx */
+void compute_psi4_and_hplus_hcross(tBox *box, int Rpsi4ind, int Ipsi4ind, 
+                                   int hpind, int hxind, double *yin, 
+                                   double D, double m1, double m2,
+                                   double t, double dt,
+                                   int imin, int imax,
+                                   int set_doublecovered_points)
+
+{
+  double yvec[12];
+  int i,j,k, ijk;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  double *hpp = box->v[hpind];
+  double *hxp = box->v[hxind];
+  double *Rpsi4p = box->v[Rpsi4ind];
+  double *Ipsi4p = box->v[Ipsi4ind];
+
+  /* copy yin, (we never change yin) */
+  for(i=0; i<12; i++) yvec[i]=yin[i]; 
+
+  /* use 2nd order fin diff in time */
+  /* put H(t) = h+ - i hx at i=1 */ 
+  compute_hplus_hcross_on_sphere(box, hpind, hxind, yvec, D,m1,m2, 1,1, 0);
+  
+  /* set yvec at -dt */
+  xodeint(m1, m2, t, t-dt, yvec); 
+  /* put H(t-dt) = h+ - i hx at i=0 */ 
+  compute_hplus_hcross_on_sphere(box, hpind, hxind, yvec, D,m1,m2, 0,0, 0);
+
+  /* set yvec at +dt */
+  for(i=0; i<12; i++) yvec[i]=yin[i]; 
+  xodeint(m1, m2, t, t+dt, yvec);
+  /* put H(t+dt) = h+ - i hx at i=2 */ 
+  compute_hplus_hcross_on_sphere(box, hpind, hxind, yvec, D,m1,m2, 2,2, 0);
+    
+  /* use 2nd order fin diff in time to find psi4
+     and set psi4 and h+, hx for all imin<=i<=imax from i=1 */
+  for(k=0; k<n3; k++)  
+  for(j=0; j<n2/2; j++)
+  {
+    double hplus, hcross,  hplus_m, hcross_m,  hplus_p, hcross_p; 
+    double Repsi4, Impsi4;
+
+    ijk=Index(0,j,k);
+    hplus_m  = hpp[ijk+0];
+    hcross_m = hxp[ijk+0];
+    hplus    = hpp[ijk+1];
+    hcross   = hxp[ijk+1];
+    hplus_p  = hpp[ijk+2];
+    hcross_p = hxp[ijk+2];
+    Repsi4 = (hplus_p + hplus_m - 2.0*hplus)*0.5/dt;
+    Impsi4 = (hcross_p + hcross_m - 2.0*hcross)*0.5/dt;
+
+    if(imax>=n1) errorexit("compute_hplus_hcross_on_sphere: imax>=n1");
+    for(i=imin; i<=imax; i++)
+    {
+      hpp[ijk+i] = hplus;
+      hxp[ijk+i] = hcross;
+      Rpsi4p[ijk+i] = Repsi4;
+      Ipsi4p[ijk+i] = Impsi4;
+    }
+  }
+
+  /* set double covered points for psi4 and h+, hx */
+  if(set_doublecovered_points)
+  {
+    copy_to_doubleCoveredPoints_SphericalDF(box, Rpsi4ind);
+    copy_to_doubleCoveredPoints_SphericalDF(box, Ipsi4ind);
+    copy_to_doubleCoveredPoints_SphericalDF(box, hpind);
+    copy_to_doubleCoveredPoints_SphericalDF(box, hxind);
+  }
 }
