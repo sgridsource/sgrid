@@ -261,6 +261,85 @@ double spec_sphericalDF3dIntegral(tBox *box, double *u, double *U)
 }
 
 
+/* same as spec_sphericalDF2dIntegral, but do it only at radial index i */
+/* Note: U(i) = \int_0^{pi) dtheta \int_0^{2pi) dphi  
+                u(r,theta,phi) |sin(theta)| r(i)^2        */
+void spec_sphericalDF2dIntegral_at_radial_index_i(tBox *box, 
+                                                  double *u, double *U, int i)
+{
+  int j,k;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  void (*get_coeffs)(double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
+  void (*eval_onPoints)(double *,double *, int)=NULL;
+  void (*filter_coeffs)(double *, int, int)=NULL;
+  double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
+  double *pX = box->v[Ind("X")];
+  int imethod, chebmeth=1, fourmeth=2;
+
+  /* do phi integral */
+  spec_Integral1(box, 3, u, U);
+
+  get_spec_functionpointers(box, 2, &get_coeffs, &coeffs_of_deriv,
+                            &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
+                            &filter_coeffs, &basisfunc);
+  if( get_coeffs==cheb_coeffs_fromExtrema ||
+      get_coeffs==cheb_coeffs_fromZeros ||
+      get_coeffs==cheb_coeffs_fromExtrema_numrecFFT ||
+      get_coeffs==cheb_coeffs_fromZeros_numrecFFT   ||
+      get_coeffs==cheb_coeffs_fromExtrema_FFTW3 ||
+      get_coeffs==cheb_coeffs_fromZeros_FFTW3          ) imethod = chebmeth;
+  if( get_coeffs==four_coeffs ||
+      get_coeffs==four_coeffs_numrecFFT ||
+      get_coeffs==four_coeffs_FFTW3        ) imethod = fourmeth;
+
+  {
+    /* write spec coeffs into U */
+    spec_analysis1(box, 2, U, U);
+
+    /* write four-integral from a to b into U */
+    if(imethod==fourmeth)
+      for (k = 0; k < n3; k++)
+        {
+          double sum;
+          double L = box->bbox[3] - box->bbox[2];
+          int n;
+          int N = box->n2;
+          /* double theta = thm + PI/((1+N%2)*N); */
+          double d = 1.0/(2.0*(1+N%2)*N);
+          double PI2 = 2.0*PI;
+          double Re_c_n, Im_c_n;
+
+          /* sum over all theta-integrated terms */
+          sum = (1.0/PI) * U[Index(i,0,k)];
+          sum += 0.5*( sin(PI2*d) * U[Index(i,1,k)]
+                      +cos(PI2*d) * U[Index(i,2,k)] );
+          for(n=2;n<N/2;n+=2)
+          {
+            Re_c_n = U[Index(i, 2*n-1, k)]; /* c[2*n-1]; */
+            Im_c_n = U[Index(i, 2*n, k)];   /* c[2*n];   */
+            sum += 2.0*( cos(PI2*n*d)/((1-n*n)*PI) * Re_c_n 
+                        +sin(PI2*n*d)/((n*n-1)*PI) * Im_c_n );
+          }
+          if( N%4 == 0 )
+            sum += cos(PI2*(N/2)*d)/((1-N*N/4)*PI) * U[Index(i,N-1,k)];
+
+          /* adjust sum for L and N to obtain integral over theta */
+          sum *= L/N;
+
+          /* write integral into U along direction 2, and multiply by r^2  */
+          for(j = 0; j < n2; j++)
+            U[Index(i,j,k)] = sum*pX[Index(i,j,k)]*pX[Index(i,j,k)];
+        }
+    else errorexit("spec_sphericalDF2dIntegral: you need Fourier in direction 2");
+  }
+}
+
+
 /* compute the indefinite integral U of 3d var u in direction direc on a box */
 void spec_Int1(tBox *box, int direc, double *u, double *U)
 {
