@@ -135,7 +135,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   {
     /* open output file */
     sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
-    Gets("PN_CircularOrbit_GWs_outfile_prefix"), l,m,s);
+    Gets("PN_CircularOrbit_GWs_hfile_prefix"), l,m,s);
     printf("l=%d m=%+d mode:  %s\n", l,m, outname);
     out = fopen(outname, "w");
     if(!out) errorexits("failed opening %s", outname);
@@ -209,7 +209,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     {
       /* open output file */
       sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
-      Gets("PN_CircularOrbit_GWs_outfile_prefix"), l,m,s);
+      Gets("PN_CircularOrbit_GWs_hfile_prefix"), l,m,s);
       out = fopen(outname, "a");
       if(!out) errorexits("failed opening %s", outname);
 

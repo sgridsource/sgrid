@@ -28,8 +28,11 @@ int sgrid_PN_CircularOrbit_GWs()
   AddVar("PN_CircularOrbit_GWs_Im_sYlm", "", "imaginary part spin-weighted Ylm");
 
   /* Parameters: */
-  AddPar("PN_CircularOrbit_GWs_outfile_prefix", "h_",
-         "imaginary part of data on sphere");
+  AddPar("PN_CircularOrbit_GWs_hfile_prefix", "h_",
+         "prefix for GW file containing h");
+  AddPar("PN_CircularOrbit_GWs_computePsi4", "no", "if we compute Psi4 [no,yes]");
+  AddPar("PN_CircularOrbit_GWs_Psi4file_prefix", "psi4_",
+         "prefix for GW file containing Psi4");
   AddPar("PN_CircularOrbit_GWs_orbitfile", "orbit.t",
          "imaginary part of data on sphere");
   AddPar("PN_CircularOrbit_GWs_lmax", "6", "max l mode we compute");
