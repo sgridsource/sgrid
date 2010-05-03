@@ -22,6 +22,8 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
   int ndata = (t2-t1)/dt + 1;
   double t, time, Re, Im;
 
+  printf("read_sYlmModes_of_NR_Psi4:\n");
+
   /* set all modes to zero at all times */
   for(i=0; i<n1; i++)
   for(n=0; n<ndata; n++)
@@ -37,6 +39,7 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
     if(in) /* if file exists */
     {
       /* read from file */
+      printf("  reading %s\n", name);
       while(fscanline(in, str)!=EOF)
       {
         if(str[0] == '#' || str[0] == '\n') continue;
@@ -57,6 +60,8 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
     }
     else /* if file does not exist */
     {
+      printf("  skipping %s\n", name);
+
       /* set mode to zero */
       for(n=0; n<ndata; n++)
         ReNRPsi4mode[i][n] = ImNRPsi4mode[i][n] = 0.0;
