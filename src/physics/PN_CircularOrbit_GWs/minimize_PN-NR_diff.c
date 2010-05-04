@@ -18,7 +18,6 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
   FILE *in;
   char name[STRLEN];
   char str[STRLEN];
-  char str2[STRLEN];
   int ndata = (t2-t1)/dt + 1;
   double t, time, Re, Im;
 
@@ -43,12 +42,11 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
       while(fscanline(in, str)!=EOF)
       {
         if(str[0] == '#' || str[0] == '\n') continue;
-        sscanf(str, "%s", str2);  time=atof(str2);
-        sscanf(str, "%s", str2);  Re=atof(str2);
-        sscanf(str, "%s", str2);  Im=atof(str2);
+        sscanf(str, "%le %le %le", &time, &Re, &Im);
+        //printf("%g\t %g\t %g\n", time, Re, Im);
         for(n=0; n<ndata; n++)
         {
-          t = n*dt;
+          t = t1 + n*dt;
           if(dequal( (time-t)/t, 0.0 ))
           {
             ReNRPsi4mode[i][n] = Re;
@@ -110,12 +108,12 @@ void set_NRPsi4_inbox_from_modes(tBox *box, int Re_NRPsi4ind, int Im_NRPsi4ind,
       R += (Rmode * RsYlm - Imode * IsYlm);
       I += (Rmode * IsYlm + Imode * RsYlm);
     }
-    /* now set NRPsi4 on all radial indecies i=imin...imax */
+    /* now set NRPsi4 on all radial indices i=imin...imax */
     for(i=imin; i<=imax; i++)
     {
       ijk=Index(i,j,k);
       Re_NRPsi4p[ijk] = R;
-      Re_NRPsi4p[ijk] = I;
+      Im_NRPsi4p[ijk] = I;
     }
   }
 }
@@ -230,17 +228,17 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
                                               hpind, hxind, yvec, D,m1,m2,
                                               0, dt*0.001, 0,0, 1);
 //    /* get modes of Psi4 */
-//    compute_sYlmModes_of_PN_H(box, Re_Psi4ind, Im_Psi4ind,
-//                              Re_sYlmind, Im_sYlmind, lmax,
-//                              Re_Psi4mind, Im_Psi4mind, +1); 
+//    compute_sYlmModes_of_H(box, Re_Psi4ind, Im_Psi4ind,
+//                           Re_sYlmind, Im_sYlmind, lmax,
+//                           Re_Psi4mind, Im_Psi4mind, +1); 
 //    /* output Psi4 modes */
 //    output_sYlmModes_of_PN_H(Gets("PN_CircularOrbit_GWs_Psi4file_prefix"), 
 //                             time, Re_Psi4modep, Im_Psi4modep,
 //                             lmax,s, +1);
 
 //    /* get modes of H = h+ - i hx  <-- sign of Im H is neg */
-//    compute_sYlmModes_of_PN_H(box, hpind, hxind, Re_sYlmind, Im_sYlmind, lmax,
-//                              Re_Hmind, Im_Hmind, -1); 
+//    compute_sYlmModes_of_H(box, hpind, hxind, Re_sYlmind, Im_sYlmind, lmax,
+//                           Re_Hmind, Im_Hmind, -1); 
 //    /* output H modes */
 //    output_sYlmModes_of_PN_H(Gets("PN_CircularOrbit_GWs_hfile_prefix"),
 //                             time, Re_Hmodep, Im_Hmodep,
@@ -255,6 +253,15 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
     set_NRPsi4_inbox_from_modes(box, Re_NRPsi4ind, Im_NRPsi4ind,
                                 Re_sYlmind, Im_sYlmind,
                                 ReNRPsi4mode, ImNRPsi4mode, n, 0,0);
+/* get modes of Psi4 */
+//set_NRPsi4_inbox_from_modes(box, Re_NRPsi4ind, Im_NRPsi4ind,
+//                            Re_sYlmind, Im_sYlmind,
+//                            ReNRPsi4mode, ImNRPsi4mode, n, 0,box->n1-1);
+//compute_sYlmModes_of_H(box, Re_NRPsi4ind, Im_NRPsi4ind,
+//                       Re_sYlmind, Im_sYlmind, 2, hpind, hxind, +1); 
+//double *Re_p = box->v[hpind];
+//double *Im_p = box->v[hxind];
+//output_sYlmModes_of_PN_H("NRpsi4_",time, Re_p, Im_p, 2,-2, +1);
 
     /* compute diff between PN and NR */
     diff[n] = PNPsi4_NRPsi4_diff_inbox(box, Re_PNPsi4ind, Im_PNPsi4ind,
