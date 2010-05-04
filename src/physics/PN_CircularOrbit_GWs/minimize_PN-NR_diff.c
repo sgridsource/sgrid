@@ -288,20 +288,32 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
 double func_to_minimize_for_numrec(double *p)
 {
   double t1, t2, dt, tdiff;
+  int n, npar;
 
   /* set sgrid pars from p array */
   switch(p_format__func_to_minimize_for_numrec)
   {
     case 1:
+      npar = 1;
       Setd("PN_CircularOrbit_GWs_Phi", p[1]);
+      npar = 1;
       break;
     case 2:
+      
       Setd("PN_CircularOrbit_GWs_Phi", p[1]);
       Setd("PN_CircularOrbit_GWs_omega", p[2]);
+      npar = 2;
+      break;
+    case 3:
+      Setd("PN_CircularOrbit_GWs_Phi", p[1]);
+      Setd("PN_CircularOrbit_GWs_omega", p[2]);
+      Setd("PN_CircularOrbit_GWs_D", p[3]);
+      npar = 3;
       break;
     default :
       errorexit("p_format__func_to_minimize_for_numrec has undefined value");
   }
+  for(n=1; n<=npar; n++)  printf(" %.4g", p[n]);
 
   /* set args for PNPsi4_NRPsi4_totaldiff */
   t1 = Getd("PN_CircularOrbit_GWs_t1");
@@ -312,8 +324,7 @@ double func_to_minimize_for_numrec(double *p)
                                   ReNRPsi4mode__func_to_minimize_for_numrec,
                                   ImNRPsi4mode__func_to_minimize_for_numrec,
                                   t1,t2,dt);
-
-//tdiff = (p[1]-1)*(p[1]-1);
+  printf(" => %.3g\n", tdiff);
   return tdiff;
 }
 
@@ -330,7 +341,7 @@ int minimize_PN_NR_diff(tGrid *grid)
   int Re_sYlmind = Ind("PN_CircularOrbit_GWs_Re_sYlm");
   int Im_sYlmind = Ind("PN_CircularOrbit_GWs_Im_sYlm");
   double tdiff;
-  int nparmax = 20;
+  int npar, nparmax = 20;
   double *p;   /* array for pars over which we minimize */
   double **xi; /* matrix with initial directions */
   int iter, i,j;
@@ -364,12 +375,6 @@ int minimize_PN_NR_diff(tGrid *grid)
   tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
   printf("Difference before minimization: tdiff=%g\n", tdiff);
 
-  /* global vars for func_to_minimize_for_numrec */
-  box__func_to_minimize_for_numrec = box;
-  ReNRPsi4mode__func_to_minimize_for_numrec = ReNRPsi4mode;
-  ImNRPsi4mode__func_to_minimize_for_numrec = ImNRPsi4mode;
-  p_format__func_to_minimize_for_numrec = 1;
-
   /* call minimizer */
   /* set initial par guesses for minimizer */
   /* note p[0] is not used */
@@ -395,13 +400,23 @@ int minimize_PN_NR_diff(tGrid *grid)
   for(i=1; i<=nparmax; i++)
   for(j=1; j<=nparmax; j++)
   {
-    if(i==j) xi[i][j] = 1.0;
+    if(i==j) xi[i][j] = 1e-4;
     else     xi[i][j] = 0.0;
   }
 
+  /* global vars for func_to_minimize_for_numrec */
+  box__func_to_minimize_for_numrec = box;
+  ReNRPsi4mode__func_to_minimize_for_numrec = ReNRPsi4mode;
+  ImNRPsi4mode__func_to_minimize_for_numrec = ImNRPsi4mode;
+  p_format__func_to_minimize_for_numrec = 3;
+ 
+  /* set npar from p_format__func_to_minimize_for_numrec */
+  npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
+
   /* call minimizer */  
-  powell(p, xi, 1, 1e-9, &iter, &fret, func_to_minimize_for_numrec);
-  printf("p[1]=%g  p[2]=%g  iter=%d  fret=%g\n", p[1],p[2], iter, fret);
+  powell(p, xi, npar, 1e-9, &iter, &fret, func_to_minimize_for_numrec);
+  for(i=1; i<=npar; i++)  printf(" %.4g", p[i]);
+  printf(":  iter=%d  fret=%g\n", iter, fret);
 
   /* final diff */
   tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
