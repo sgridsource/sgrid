@@ -194,7 +194,7 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
   else
     ImHmodesign=+1;
 
-  printf("PNPsi4_NRPsi4_totaldiff: Computing PN-NR diff\n");
+  //printf("PNPsi4_NRPsi4_totaldiff: Computing PN-NR diff\n");
 
   /* initial values for PN */
   m1 = Getd("PN_CircularOrbit_GWs_m1");
@@ -295,6 +295,10 @@ double func_to_minimize_for_numrec(double *p)
     case 1:
       Setd("PN_CircularOrbit_GWs_Phi", p[1]);
       break;
+    case 2:
+      Setd("PN_CircularOrbit_GWs_Phi", p[1]);
+      Setd("PN_CircularOrbit_GWs_omega", p[2]);
+      break;
     default :
       errorexit("p_format__func_to_minimize_for_numrec has undefined value");
   }
@@ -308,6 +312,8 @@ double func_to_minimize_for_numrec(double *p)
                                   ReNRPsi4mode__func_to_minimize_for_numrec,
                                   ImNRPsi4mode__func_to_minimize_for_numrec,
                                   t1,t2,dt);
+
+//tdiff = (p[1]-1)*(p[1]-1);
   return tdiff;
 }
 
@@ -327,7 +333,7 @@ int minimize_PN_NR_diff(tGrid *grid)
   int nparmax = 20;
   double *p;   /* array for pars over which we minimize */
   double **xi; /* matrix with initial directions */
-  int iter;
+  int iter, i,j;
   double fret;
 
   /* allocate pars and matrix for powell */
@@ -385,9 +391,18 @@ int minimize_PN_NR_diff(tGrid *grid)
   p[13] = Getd("PN_CircularOrbit_GWs_m1");
   p[14] = Getd("PN_CircularOrbit_GWs_m2");
 
+  /* set initial directions for minimizer */
+  for(i=1; i<=nparmax; i++)
+  for(j=1; j<=nparmax; j++)
+  {
+    if(i==j) xi[i][j] = 1.0;
+    else     xi[i][j] = 0.0;
+  }
+
   /* call minimizer */  
   powell(p, xi, 1, 1e-9, &iter, &fret, func_to_minimize_for_numrec);
-            
+  printf("p[1]=%g  p[2]=%g  iter=%d  fret=%g\n", p[1],p[2], iter, fret);
+
   /* final diff */
   tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
   printf("Difference after minimization: tdiff=%g\n", tdiff);
