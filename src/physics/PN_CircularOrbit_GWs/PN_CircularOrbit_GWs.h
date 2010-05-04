@@ -17,10 +17,10 @@ void compute_FDpsi4_and_hplus_hcross_on_sphere(tBox *box,
                                                double t, double dt,
                                                int imin, int imax,
                                                int set_doublecovered_points);
-void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
-                               int Re_sYlmind, int Im_sYlmind, int lmax,
-                               int Re_Hmind, int Im_Hmind, 
-                               int ImHmodeSign);
+void compute_sYlmModes_of_H(tBox *box, int ReHind, int ImHind,
+                            int Re_sYlmind, int Im_sYlmind, int lmax,
+                            int Re_Hmind, int Im_Hmind, 
+                            int ImHmodeSign);
 void output_sYlmModes_of_PN_H(char *outname, double time,
                               double *Re_Hmodep, double *Im_Hmodep,
                               int lmax, int s, int ImHmodeSign);

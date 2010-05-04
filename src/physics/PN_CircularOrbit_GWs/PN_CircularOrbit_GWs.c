@@ -214,9 +214,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
                                                 hpind, hxind, yvec, D,m1,m2,
                                                 0, dt*0.001, 0,n1-1, 1);
       /* get modes of Psi4 */
-      compute_sYlmModes_of_PN_H(box, Re_Psi4ind, Im_Psi4ind,
-                                Re_sYlmind, Im_sYlmind, lmax,
-                                Re_Psi4mind, Im_Psi4mind, +1); 
+      compute_sYlmModes_of_H(box, Re_Psi4ind, Im_Psi4ind,
+                             Re_sYlmind, Im_sYlmind, lmax,
+                             Re_Psi4mind, Im_Psi4mind, +1); 
       /* output Psi4 modes */
       output_sYlmModes_of_PN_H(Gets("PN_CircularOrbit_GWs_Psi4file_prefix"), 
                                time, Re_Psi4modep, Im_Psi4modep,
@@ -230,8 +230,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     }
 
     /* get modes of H = h+ - i hx  <-- sign of Im H is neg */
-    compute_sYlmModes_of_PN_H(box, hpind, hxind, Re_sYlmind, Im_sYlmind, lmax,
-                              Re_Hmind, Im_Hmind, -1); 
+    compute_sYlmModes_of_H(box, hpind, hxind, Re_sYlmind, Im_sYlmind, lmax,
+                           Re_Hmind, Im_Hmind, -1); 
     /* output H modes */
     output_sYlmModes_of_PN_H(Gets("PN_CircularOrbit_GWs_hfile_prefix"),
                              time, Re_Hmodep, Im_Hmodep,
@@ -380,10 +380,10 @@ void compute_FDpsi4_and_hplus_hcross_on_sphere(tBox *box,
 }
 
 /* compute the modes of any complex function H = ReH + i ImH * ImHsign */
-void compute_sYlmModes_of_PN_H(tBox *box, int ReHind, int ImHind,
-                               int Re_sYlmind, int Im_sYlmind, int lmax,
-                               int Re_Hmind, int Im_Hmind, 
-                               int ImHsign)
+void compute_sYlmModes_of_H(tBox *box, int ReHind, int ImHind,
+                            int Re_sYlmind, int Im_sYlmind, int lmax,
+                            int Re_Hmind, int Im_Hmind, 
+                            int ImHsign)
 {
   int l,m, i,j,k, ijk;
   int n1=box->n1;
