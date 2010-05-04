@@ -100,7 +100,7 @@ void derivs(double x,double y[],double dydx[])
             LNS[i]  = c16*S1[i] + c18*S2[i] - c19*t1*( S1[i]*Ln_cap_dot_S2 + S2[i]*Ln_cap_dot_S1 );      
         } 
 // Omega
-        dydx[1] = m*c1*y[1]*y[1]*t4*(1.0 
+        dydx[1] = c1*y[1]*y[1]*t4*(1.0 
                                   - c2*t2 
                                   - (c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5)*t0 
                                   + c6*t3
@@ -110,22 +110,22 @@ void derivs(double x,double y[],double dydx[])
                                   + (c10 + c11 + c12 - c13*log(16.0*t2))*t5 
                                   + c14*t6 );
 // Spin1	 
-	dydx[2] = m*(LNS1[2]*S1[3] - S1[2]*LNS1[3]); 
-	dydx[3] = m*(-LNS1[1]*S1[3] + S1[1]*LNS1[3]);
-	dydx[4] = m*(LNS1[1]*S1[2] - S1[1]*LNS1[2]);
+	dydx[2] = (LNS1[2]*S1[3] - S1[2]*LNS1[3]); 
+	dydx[3] = (-LNS1[1]*S1[3] + S1[1]*LNS1[3]);
+	dydx[4] = (LNS1[1]*S1[2] - S1[1]*LNS1[2]);
 // Spin2
-        dydx[5] = m*(LNS2[2]*S2[3] - S2[2]*LNS2[3]);
-	dydx[6] = m*(-LNS2[1]*S2[3] + S2[1]*LNS2[3]); 
-	dydx[7] = m*(LNS2[1]*S2[2] - S2[1]*LNS2[2]); 
+        dydx[5] = (LNS2[2]*S2[3] - S2[2]*LNS2[3]);
+	dydx[6] = (-LNS2[1]*S2[3] + S2[1]*LNS2[3]); 
+	dydx[7] = (LNS2[1]*S2[2] - S2[1]*LNS2[2]); 
 // Ln_cap
-        dydx[8] = m*(c20*t5*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]));
-	dydx[9] = m*(c20*t5*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3])); 
-	dydx[10] = m*(c20*t5*( LNS[1]*Ln_cap[2] - Ln_cap[1]*LNS[2]));
+        dydx[8] = (c20*t5*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]));
+	dydx[9] = (c20*t5*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3])); 
+	dydx[10] = (c20*t5*( LNS[1]*Ln_cap[2] - Ln_cap[1]*LNS[2]));
 
         if((Ln_cap[1]==0.0)&&(Ln_cap[2]==0.0))
-            dydx[11] = m*y[1];
+            dydx[11] = y[1];
         else
-            dydx[11] = m*y[1] - m*Ln_cap[3]*(Ln_cap[1]*dydx[9] - Ln_cap[2]*dydx[8])/(Ln_cap[1]*Ln_cap[1] + Ln_cap[2]*Ln_cap[2]);
+            dydx[11] = y[1] - Ln_cap[3]*(Ln_cap[1]*dydx[9] - Ln_cap[2]*dydx[8])/(Ln_cap[1]*Ln_cap[1] + Ln_cap[2]*Ln_cap[2]);
         free_dvector(Ln_cap,1,3);
         free_dvector(S1,1,3);
         free_dvector(S2,1,3);
