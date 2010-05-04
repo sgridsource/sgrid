@@ -54,7 +54,10 @@ void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
 	double yscal[], double *hdid, double *hnext,
 	void (*derivs)(double, double [], double []));
 
-/* Minimization */
+/* 1D Minimization */
 double brent_with_pointer_to_pars(double ax, double bx, double cx,
                                   double (*f)(double, void *ppointer),
                                   double tol, double *xmin, void *parpointer);
+/* Multidim. Minimization */
+void powell(double p[], double **xi, int n, double ftol, int *iter,
+	    double *fret, double (*func)(double []));
