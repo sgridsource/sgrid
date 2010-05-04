@@ -7,6 +7,13 @@
 #define STRLEN 4000
 
 
+/* global vars for func_to_minimize_for_numrec */
+tBox *box__func_to_minimize_for_numrec;
+double **ReNRPsi4mode__func_to_minimize_for_numrec;
+double **ImNRPsi4mode__func_to_minimize_for_numrec;
+int p_format__func_to_minimize_for_numrec;
+
+
 
 /* read modes modes of NR Psi4 */
 void read_sYlmModes_of_NR_Psi4(char *prefix,
@@ -277,6 +284,34 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
 }
 
 
+/* function we minimize with numrec's powell */
+double func_to_minimize_for_numrec(double *p)
+{
+  double t1, t2, dt, tdiff;
+
+  /* set sgrid pars from p array */
+  switch(p_format__func_to_minimize_for_numrec)
+  {
+    case 1:
+      Setd("PN_CircularOrbit_GWs_Phi", p[1]);
+      break;
+    default :
+      errorexit("p_format__func_to_minimize_for_numrec has undefined value");
+  }
+
+  /* set args for PNPsi4_NRPsi4_totaldiff */
+  t1 = Getd("PN_CircularOrbit_GWs_t1");
+  t2 = Getd("PN_CircularOrbit_GWs_t2");
+  dt = Getd("PN_CircularOrbit_GWs_dt");
+
+  tdiff = PNPsi4_NRPsi4_totaldiff(box__func_to_minimize_for_numrec,
+                                  ReNRPsi4mode__func_to_minimize_for_numrec,
+                                  ImNRPsi4mode__func_to_minimize_for_numrec,
+                                  t1,t2,dt);
+  return tdiff;
+}
+
+
 /* minimize PN-NR differnce */
 int minimize_PN_NR_diff(tGrid *grid)
 {
@@ -289,6 +324,15 @@ int minimize_PN_NR_diff(tGrid *grid)
   int Re_sYlmind = Ind("PN_CircularOrbit_GWs_Re_sYlm");
   int Im_sYlmind = Ind("PN_CircularOrbit_GWs_Im_sYlm");
   double tdiff;
+  int nparmax = 20;
+  double *p;   /* array for pars over which we minimize */
+  double **xi; /* matrix with initial directions */
+  int iter;
+  double fret;
+
+  /* allocate pars and matrix for powell */
+  p  = dvector(1,nparmax);
+  xi = dmatrix(1,nparmax, 1,nparmax);
 
   /* Info */
   printf("minimize_PN-NR_diff:\n");
@@ -310,15 +354,51 @@ int minimize_PN_NR_diff(tGrid *grid)
   /* precompute the sYlm */
   ModeComputer_set_sYlm_inbox(box, Re_sYlmind, Im_sYlmind, s, lmax);
 
-  /* ??? pick PN pars */
+  /* initial diff */
+  tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
+  printf("Difference before minimization: tdiff=%g\n", tdiff);
 
-  /* ??? test out diff */
-tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
-printf("tdiff=%g\n", tdiff);
+  /* global vars for func_to_minimize_for_numrec */
+  box__func_to_minimize_for_numrec = box;
+  ReNRPsi4mode__func_to_minimize_for_numrec = ReNRPsi4mode;
+  ImNRPsi4mode__func_to_minimize_for_numrec = ImNRPsi4mode;
+  p_format__func_to_minimize_for_numrec = 1;
+
+  /* call minimizer */
+  /* set initial par guesses for minimizer */
+  /* note p[0] is not used */
+  p[1] = Getd("PN_CircularOrbit_GWs_Phi");
+  p[2] = Getd("PN_CircularOrbit_GWs_omega");
+  p[3] = Getd("PN_CircularOrbit_GWs_D");
+
+  p[4] = Getd("PN_CircularOrbit_GWs_chi1x");
+  p[5] = Getd("PN_CircularOrbit_GWs_chi1y");
+  p[6] = Getd("PN_CircularOrbit_GWs_chi1z");
+  p[7] = Getd("PN_CircularOrbit_GWs_chi2x");
+  p[8] = Getd("PN_CircularOrbit_GWs_chi2y");
+  p[9] = Getd("PN_CircularOrbit_GWs_chi2z");
+
+  p[10] = Getd("PN_CircularOrbit_GWs_Lnx");  // Lnx
+  p[11] = Getd("PN_CircularOrbit_GWs_Lny");  // Lny
+  p[12] = Getd("PN_CircularOrbit_GWs_Lnz");  // Lnz
+
+  p[13] = Getd("PN_CircularOrbit_GWs_m1");
+  p[14] = Getd("PN_CircularOrbit_GWs_m2");
+
+  /* call minimizer */  
+  powell(p, xi, 1, 1e-9, &iter, &fret, func_to_minimize_for_numrec);
+            
+  /* final diff */
+  tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
+  printf("Difference after minimization: tdiff=%g\n", tdiff);
                                                              
   /* free arrays with numerical Psi4 modes */
   free_dmatrix(ReNRPsi4mode, 0,n1, 0,ndata+1);
   free_dmatrix(ImNRPsi4mode, 0,n1, 0,ndata+1);
+
+  /* free pars and matrix for powell */
+  free_dvector(p, 1,nparmax);
+  free_dmatrix(xi, 1,nparmax, 1,nparmax);
 
   return 0;
 }
