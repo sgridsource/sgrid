@@ -44,6 +44,11 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
     in = fopen(name, "r");
     if(in) /* if file exists */
     {
+      /* put 1e300 into ReNRPsi4mode to check later if we got data */
+      double baddata=1e300;
+      for(n=0; n<ndata; n++)
+        ReNRPsi4mode[i][n] = baddata;
+
       /* read from file */
       printf("  reading %s\n", name);
       while(fscanline(in, str)!=EOF)
@@ -58,10 +63,23 @@ void read_sYlmModes_of_NR_Psi4(char *prefix,
           {
             ReNRPsi4mode[i][n] = Re;
             ImNRPsi4mode[i][n] = Im;
+            break;
           }
         }
       } /* end while */
       fclose(in);
+
+      /* check if we got data */
+      for(n=0; n<ndata; n++)
+      {
+        t = t1 + n*dt;
+        if(ReNRPsi4mode[i][n]==baddata && ImNRPsi4mode[i][n]==0.0)
+        {
+          printf("    could not read data at t=%.12g"
+                 " --> setting NRPsi4mode=0.\n", t);
+          ReNRPsi4mode[i][n] = ImNRPsi4mode[i][n] = 0.0;
+        }
+      }
     }
     else /* if file does not exist */
     {
