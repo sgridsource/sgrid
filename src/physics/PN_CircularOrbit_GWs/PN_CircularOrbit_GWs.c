@@ -204,7 +204,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   printf("computing h+, hx at different times:\n");
   for(time=t1; (dt>0)&&(time<=t2) || (dt<0)&&(time>=t2); time+=dt)
   {
-    printf("time = %g\n", time);
+    printf("time = %.15g\n", time);
 
     /* see if we want Psi4 as well */
     if(Getv("PN_CircularOrbit_GWs_computePsi4", "yes"))
