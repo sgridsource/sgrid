@@ -470,18 +470,17 @@ int minimize_PN_NR_diff(tGrid *grid)
   tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
   printf("Difference after first minimization: tdiff=%g\n", tdiff);
 
-  /* try with all pars */
-  p_format__func_to_minimize_for_numrec = 13;
- 
-  /* set npar from p_format__func_to_minimize_for_numrec */
-  npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
-
-Yo(0);
-func_to_minimize_for_numrec(p);
-exit(88);
-  /* call minimizer */  
-  powell(p, xi, npar, 1e-9, &iter, &fret, func_to_minimize_for_numrec);
-
+//  /* try with all pars */
+//  p_format__func_to_minimize_for_numrec = 13;
+// 
+//  /* set npar from p_format__func_to_minimize_for_numrec */
+//  npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
+//
+//Yo(0);
+//func_to_minimize_for_numrec(p);
+//exit(88);
+//  /* call minimizer */  
+//  powell(p, xi, npar, 1e-9, &iter, &fret, func_to_minimize_for_numrec);
 
   /* print info at end */
   for(i=1; i<=npar; i++)  printf(" %.4g", p[i]);
@@ -490,7 +489,29 @@ exit(88);
   /* final diff */
   tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
   printf("Difference after minimization: tdiff=%g\n", tdiff);
-                                                             
+
+  /* tell min pars */
+  printf("Parameters that minimize the difference are:\n");
+  for(i=1; i<=npar; i++)  printf("p[%d] = %g\n", i, p[i]);
+
+  printf("PN_CircularOrbit_GWs_Phi = %g\n", Getd("PN_CircularOrbit_GWs_Phi"));
+  printf("PN_CircularOrbit_GWs_omega = %g\n", Getd("PN_CircularOrbit_GWs_omega"));
+  printf("PN_CircularOrbit_GWs_D = %g\n", Getd("PN_CircularOrbit_GWs_D"));
+
+  printf("PN_CircularOrbit_GWs_chi1x = %g\n", Getd("PN_CircularOrbit_GWs_chi1x"));
+  printf("PN_CircularOrbit_GWs_chi1y = %g\n", Getd("PN_CircularOrbit_GWs_chi1y"));
+  printf("PN_CircularOrbit_GWs_chi1z = %g\n", Getd("PN_CircularOrbit_GWs_chi1z"));
+  printf("PN_CircularOrbit_GWs_chi2x = %g\n", Getd("PN_CircularOrbit_GWs_chi2x"));
+  printf("PN_CircularOrbit_GWs_chi2y = %g\n", Getd("PN_CircularOrbit_GWs_chi2y"));
+  printf("PN_CircularOrbit_GWs_chi2z = %g\n", Getd("PN_CircularOrbit_GWs_chi2z"));
+
+  printf("PN_CircularOrbit_GWs_Lnx = %g\n", Getd("PN_CircularOrbit_GWs_Lnx"));
+  printf("PN_CircularOrbit_GWs_Lny = %g\n", Getd("PN_CircularOrbit_GWs_Lny"));
+  printf("PN_CircularOrbit_GWs_Lnz = %g\n", Getd("PN_CircularOrbit_GWs_Lnz"));
+
+  printf("PN_CircularOrbit_GWs_m1 = %g\n", Getd("PN_CircularOrbit_GWs_m1"));
+  printf("PN_CircularOrbit_GWs_m2 = %g\n", Getd("PN_CircularOrbit_GWs_m2"));
+
   /* free arrays with numerical Psi4 modes */
   free_dmatrix(ReNRPsi4mode, 0,n1, 0,ndata+1);
   free_dmatrix(ImNRPsi4mode, 0,n1, 0,ndata+1);
