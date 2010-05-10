@@ -328,6 +328,14 @@ int set_p_array_from_sgridpars(double *p, int p_format)
 
   switch(p_format)
   {
+    case 5:
+      p[1] = Getd("PN_CircularOrbit_GWs_Phi");
+      p[2] = Getd("PN_CircularOrbit_GWs_omega");
+      p[3] = Getd("PN_CircularOrbit_GWs_D");
+      p[4] = Getd("PN_CircularOrbit_GWs_chi1z");
+      p[5] = Getd("PN_CircularOrbit_GWs_chi2z");
+      npar = 5;
+      break;
     case 109:
       p[1] = Getd("PN_CircularOrbit_GWs_Phi");
       p[2] = Getd("PN_CircularOrbit_GWs_omega");
@@ -403,6 +411,14 @@ double func_to_minimize_for_numrec(double *p)
       Setd("PN_CircularOrbit_GWs_omega", p[2]);
       Setd("PN_CircularOrbit_GWs_D", p[3]);
       npar = 3;
+      break;
+    case 5:
+      Setd("PN_CircularOrbit_GWs_Phi", p[1]);
+      Setd("PN_CircularOrbit_GWs_omega", p[2]);
+      Setd("PN_CircularOrbit_GWs_D", p[3]);
+      Setd("PN_CircularOrbit_GWs_chi1z", p[4]);
+      Setd("PN_CircularOrbit_GWs_chi2z", p[5]);
+      npar = 5;
       break;
     case 9:
       Setd("PN_CircularOrbit_GWs_Phi", p[1]);
