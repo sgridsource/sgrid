@@ -304,29 +304,85 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
 
 /* thetax and phix are angles in speherical coords, 
    but with respect to x-axis (not z-axis) */
-/* get Lnx,Lny,Lnz from thetax and phix*/
-void nx_ny_nz_from_thetax_phix(double *Lnx, double *Lny, double *Lnz,
+/* get nx,ny,nz from thetax and phix*/
+void nx_ny_nz_from_thetax_phix(double *nx, double *ny, double *nz,
                                 double thetax, double phix)
 {
-  *Lnx = cos(thetax);
-  *Lny = sin(thetax)*cos(phix);
-  *Lnz = sin(thetax)*sin(phix);
+  *nx = cos(thetax);
+  *ny = sin(thetax)*cos(phix);
+  *nz = sin(thetax)*sin(phix);
 }
-/* get thetax and phix from Lnx,Lny,Lnz */
+/* get thetax and phix from nx,ny,nz */
 void thetax_phix_from_nx_ny_nz(double *thetax, double *phix,
-                                  double Lnx, double Lny, double Lnz)
+                                  double nx, double ny, double nz)
 {
-  *thetax = acos(Lnx);
-  *phix = Arg(Lny, Lnz);
+  *thetax = acos(nx);
+  *phix = Arg(ny, nz);
 }
 
+/* set pars p[1...n] from sgrid pars */
+int set_p_array_from_sgridpars(double *p, int p_format)
+{
+  double ax,ay,az, a;
+  int npar;
+
+  switch(p_format)
+  {
+    case 109:
+      p[1] = Getd("PN_CircularOrbit_GWs_Phi");
+      p[2] = Getd("PN_CircularOrbit_GWs_omega");
+      p[3] = Getd("PN_CircularOrbit_GWs_D");
+
+      ax = Getd("PN_CircularOrbit_GWs_chi1x");
+      ay = Getd("PN_CircularOrbit_GWs_chi1y");
+      az = Getd("PN_CircularOrbit_GWs_chi1z");
+      a = sqrt(ax*ax + ay*ay + az*az);
+      if(a==0.0) errorexit("p_format=109 does not work with chi1=0");
+      thetax_phix_from_nx_ny_nz(p+4, p+5, ax/a, ay/a, az/a);
+
+      ax = Getd("PN_CircularOrbit_GWs_chi2x");
+      ay = Getd("PN_CircularOrbit_GWs_chi2y");
+      az = Getd("PN_CircularOrbit_GWs_chi2z");
+      a = sqrt(ax*ax + ay*ay + az*az);
+      if(a==0.0) errorexit("p_format=109 does not work with chi2=0");
+      thetax_phix_from_nx_ny_nz(p+6, p+7, ax/a, ay/a, az/a);
+
+      thetax_phix_from_nx_ny_nz( p+8, p+9, 
+                                 Getd("PN_CircularOrbit_GWs_Lnx"),
+                                 Getd("PN_CircularOrbit_GWs_Lny"),
+                                 Getd("PN_CircularOrbit_GWs_Lnz") );
+      npar = 9;
+      break;
+    default :
+      p[1] = Getd("PN_CircularOrbit_GWs_Phi");
+      p[2] = Getd("PN_CircularOrbit_GWs_omega");
+      p[3] = Getd("PN_CircularOrbit_GWs_D");
+
+      p[4] = Getd("PN_CircularOrbit_GWs_chi1x");
+      p[5] = Getd("PN_CircularOrbit_GWs_chi1y");
+      p[6] = Getd("PN_CircularOrbit_GWs_chi1z");
+      p[7] = Getd("PN_CircularOrbit_GWs_chi2x");
+      p[8] = Getd("PN_CircularOrbit_GWs_chi2y");
+      p[9] = Getd("PN_CircularOrbit_GWs_chi2z");
+      /* p[10] = thetax; 
+         p[11] = phix;  */
+      thetax_phix_from_nx_ny_nz( p+10, p+11, 
+                                 Getd("PN_CircularOrbit_GWs_Lnx"),
+                                 Getd("PN_CircularOrbit_GWs_Lny"),
+                                 Getd("PN_CircularOrbit_GWs_Lnz") );
+      p[12] = Getd("PN_CircularOrbit_GWs_m1");
+      p[13] = Getd("PN_CircularOrbit_GWs_m2");
+      npar = 13;
+  }
+  return npar;
+}
 
 /* function we minimize with numrec's powell */
 double func_to_minimize_for_numrec(double *p)
 {
   double t1, t2, dt, tdiff;
   int n, npar;
-  double Lnx,Lny,Lnz;
+  double nx,ny,nz, ax,ay,az, a;
 
   /* set sgrid pars from p array */
   switch(p_format__func_to_minimize_for_numrec)
@@ -364,18 +420,32 @@ double func_to_minimize_for_numrec(double *p)
       Setd("PN_CircularOrbit_GWs_Phi", p[1]);
       Setd("PN_CircularOrbit_GWs_omega", p[2]);
       Setd("PN_CircularOrbit_GWs_D", p[3]);
-      Setd("PN_CircularOrbit_GWs_chi1x", p[4]);
-      Setd("PN_CircularOrbit_GWs_chi1y", p[5]);
-      Setd("PN_CircularOrbit_GWs_chi1z", p[6]);
-      Setd("PN_CircularOrbit_GWs_chi2x", p[7]);
-      Setd("PN_CircularOrbit_GWs_chi2y", p[8]);
-      Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
-      /* p[8] = thetax; 
-         p[9] = phix;  */
-      nx_ny_nz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
-      Setd("PN_CircularOrbit_GWs_Lnx", Lnx);
-      Setd("PN_CircularOrbit_GWs_Lny", Lny);
-      Setd("PN_CircularOrbit_GWs_Lnz", Lnz);
+
+      ax = Getd("PN_CircularOrbit_GWs_chi1x");
+      ay = Getd("PN_CircularOrbit_GWs_chi1y");
+      az = Getd("PN_CircularOrbit_GWs_chi1z");
+      a = sqrt(ax*ax + ay*ay + az*az);
+      /* p[4] = thetax;  p[5] = phix;  */
+      nx_ny_nz_from_thetax_phix(&nx, &ny, &nz, p[4], p[5]);
+      Setd("PN_CircularOrbit_GWs_chi1x", a*nx);
+      Setd("PN_CircularOrbit_GWs_chi1y", a*ny);
+      Setd("PN_CircularOrbit_GWs_chi1z", a*nz);
+
+      ax = Getd("PN_CircularOrbit_GWs_chi2x");
+      ay = Getd("PN_CircularOrbit_GWs_chi2y");
+      az = Getd("PN_CircularOrbit_GWs_chi2z");
+      a = sqrt(ax*ax + ay*ay + az*az);
+      /* p[6] = thetax;  p[7] = phix;  */
+      nx_ny_nz_from_thetax_phix(&nx, &ny, &nz, p[6], p[7]);
+      Setd("PN_CircularOrbit_GWs_chi2x", a*nx);
+      Setd("PN_CircularOrbit_GWs_chi2y", a*ny);
+      Setd("PN_CircularOrbit_GWs_chi2z", a*nz);
+
+      /* p[8] = thetax;  p[9] = phix;  */
+      nx_ny_nz_from_thetax_phix(&nx, &ny, &nz, p[8], p[9]);
+      Setd("PN_CircularOrbit_GWs_Lnx", nx);
+      Setd("PN_CircularOrbit_GWs_Lny", ny);
+      Setd("PN_CircularOrbit_GWs_Lnz", nz);
       npar = 9;
       break;
     case 11:
@@ -390,10 +460,10 @@ double func_to_minimize_for_numrec(double *p)
       Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
       /* p[10] = thetax; 
          p[11] = phix;  */
-      nx_ny_nz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
-      Setd("PN_CircularOrbit_GWs_Lnx", Lnx);
-      Setd("PN_CircularOrbit_GWs_Lny", Lny);
-      Setd("PN_CircularOrbit_GWs_Lnz", Lnz);
+      nx_ny_nz_from_thetax_phix(&nx, &ny, &nz, p[10], p[11]);
+      Setd("PN_CircularOrbit_GWs_Lnx", nx);
+      Setd("PN_CircularOrbit_GWs_Lny", ny);
+      Setd("PN_CircularOrbit_GWs_Lnz", nz);
       npar = 11;
       break;
     case 13:
@@ -408,10 +478,10 @@ double func_to_minimize_for_numrec(double *p)
       Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
       /* p[10] = thetax; 
          p[11] = phix;  */
-      nx_ny_nz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
-      Setd("PN_CircularOrbit_GWs_Lnx", Lnx);
-      Setd("PN_CircularOrbit_GWs_Lny", Lny);
-      Setd("PN_CircularOrbit_GWs_Lnz", Lnz);
+      nx_ny_nz_from_thetax_phix(&nx, &ny, &nz, p[10], p[11]);
+      Setd("PN_CircularOrbit_GWs_Lnx", nx);
+      Setd("PN_CircularOrbit_GWs_Lny", ny);
+      Setd("PN_CircularOrbit_GWs_Lnz", nz);
 
       Setd("PN_CircularOrbit_GWs_m1", p[12]);
       Setd("PN_CircularOrbit_GWs_m2", p[13]);
@@ -490,27 +560,8 @@ int minimize_PN_NR_diff(tGrid *grid)
 
   /* call minimizer */
   /* set initial par guesses for minimizer */
-  /* note p[0] is not used */
-  p[1] = Getd("PN_CircularOrbit_GWs_Phi");
-  p[2] = Getd("PN_CircularOrbit_GWs_omega");
-  p[3] = Getd("PN_CircularOrbit_GWs_D");
-
-  p[4] = Getd("PN_CircularOrbit_GWs_chi1x");
-  p[5] = Getd("PN_CircularOrbit_GWs_chi1y");
-  p[6] = Getd("PN_CircularOrbit_GWs_chi1z");
-  p[7] = Getd("PN_CircularOrbit_GWs_chi2x");
-  p[8] = Getd("PN_CircularOrbit_GWs_chi2y");
-  p[9] = Getd("PN_CircularOrbit_GWs_chi2z");
-
-  /* p[10] = thetax; 
-     p[11] = phix;  */
-  thetax_phix_from_nx_ny_nz( p+10, p+11, 
-                             Getd("PN_CircularOrbit_GWs_Lnx"),
-                             Getd("PN_CircularOrbit_GWs_Lny"),
-                             Getd("PN_CircularOrbit_GWs_Lnz") );
-
-  p[12] = Getd("PN_CircularOrbit_GWs_m1");
-  p[13] = Getd("PN_CircularOrbit_GWs_m2");
+  /* note p[0] is not set here */
+  set_p_array_from_sgridpars(p, p_format);
 
   /* set initial directions for minimizer */
   for(i=1; i<=nparmax; i++)
@@ -528,6 +579,7 @@ int minimize_PN_NR_diff(tGrid *grid)
 
   /* try with 1 par first */
   p_format__func_to_minimize_for_numrec = 1;
+  set_p_array_from_sgridpars(p, p_format__func_to_minimize_for_numrec);
  
   /* set npar from p_format__func_to_minimize_for_numrec */
   func_to_minimize_for_numrec(p); /* get p[0] */
@@ -543,6 +595,7 @@ int minimize_PN_NR_diff(tGrid *grid)
   {
     /* try with 3 pars */
     p_format__func_to_minimize_for_numrec = 3;
+    set_p_array_from_sgridpars(p, p_format__func_to_minimize_for_numrec);
    
     /* set npar from p_format__func_to_minimize_for_numrec */
     func_to_minimize_for_numrec(p); /* get p[0] */
@@ -559,6 +612,7 @@ int minimize_PN_NR_diff(tGrid *grid)
   {
     /* try with all pars */
     p_format__func_to_minimize_for_numrec = p_format;
+    set_p_array_from_sgridpars(p, p_format__func_to_minimize_for_numrec);
    
     /* set npar from p_format__func_to_minimize_for_numrec */
     func_to_minimize_for_numrec(p); /* get p[0] */
