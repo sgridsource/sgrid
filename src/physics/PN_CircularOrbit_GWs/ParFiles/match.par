@@ -1,4 +1,12 @@
-physics = PN_CircularOrbit_GWs
+physics = PN_CircularOrbit_GWs                                           
+
+PN_CircularOrbit_GWs_lmax = 2
+PN_CircularOrbit_GWs_sphere_Lmax = 2
+PN_CircularOrbit_GWs_computePsi4 = yes
+PN_CircularOrbit_GWs_match_NR = yes
+PN_CircularOrbit_GWs_NRPsi4file_prefix = hmodes/psi4_
+PN_CircularOrbit_GWs_mintol = 1e-1 # 1e-3 # 1e-6
+PN_CircularOrbit_GWs_min_p_format = 109 # 11 # 13 # 11
 
 PN_CircularOrbit_GWs_omega = 0.03
 PN_CircularOrbit_GWs_m1 = 0.25
@@ -14,13 +22,6 @@ PN_CircularOrbit_GWs_Lny = 0.4
 PN_CircularOrbit_GWs_Lnz = 0.8
 PN_CircularOrbit_GWs_Phi = 2.05
 PN_CircularOrbit_GWs_t1 = 1
-PN_CircularOrbit_GWs_t2 = 901
+PN_CircularOrbit_GWs_t2 = 801
 PN_CircularOrbit_GWs_dt = 10               
 
-PN_CircularOrbit_GWs_computePsi4 = yes
-
-outputY0_box0 = 1
-outputZ0_box0 = 1
-
-1doutiter = 1
-1doutput = PN_CircularOrbit_GWs_hplus PN_CircularOrbit_GWs_hcross
