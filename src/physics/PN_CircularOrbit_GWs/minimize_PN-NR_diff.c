@@ -348,6 +348,36 @@ double func_to_minimize_for_numrec(double *p)
       Setd("PN_CircularOrbit_GWs_D", p[3]);
       npar = 3;
       break;
+    case 9:
+      Setd("PN_CircularOrbit_GWs_Phi", p[1]);
+      Setd("PN_CircularOrbit_GWs_omega", p[2]);
+      Setd("PN_CircularOrbit_GWs_D", p[3]);
+      Setd("PN_CircularOrbit_GWs_chi1x", p[4]);
+      Setd("PN_CircularOrbit_GWs_chi1y", p[5]);
+      Setd("PN_CircularOrbit_GWs_chi1z", p[6]);
+      Setd("PN_CircularOrbit_GWs_chi2x", p[7]);
+      Setd("PN_CircularOrbit_GWs_chi2y", p[8]);
+      Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
+      npar = 9;
+      break;
+    case 11:
+      Setd("PN_CircularOrbit_GWs_Phi", p[1]);
+      Setd("PN_CircularOrbit_GWs_omega", p[2]);
+      Setd("PN_CircularOrbit_GWs_D", p[3]);
+      Setd("PN_CircularOrbit_GWs_chi1x", p[4]);
+      Setd("PN_CircularOrbit_GWs_chi1y", p[5]);
+      Setd("PN_CircularOrbit_GWs_chi1z", p[6]);
+      Setd("PN_CircularOrbit_GWs_chi2x", p[7]);
+      Setd("PN_CircularOrbit_GWs_chi2y", p[8]);
+      Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
+      /* p[10] = thetax; 
+         p[11] = phix;  */
+      Lnx_Lny_Lnz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
+      Setd("PN_CircularOrbit_GWs_Lnx", Lnx);
+      Setd("PN_CircularOrbit_GWs_Lny", Lny);
+      Setd("PN_CircularOrbit_GWs_Lnz", Lnz);
+      npar = 11;
+      break;
     case 13:
       Setd("PN_CircularOrbit_GWs_Phi", p[1]);
       Setd("PN_CircularOrbit_GWs_omega", p[2]);
@@ -361,14 +391,9 @@ double func_to_minimize_for_numrec(double *p)
       /* p[10] = thetax; 
          p[11] = phix;  */
       Lnx_Lny_Lnz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
-printf("Lnx,Lny,Lnz=%g,%g,%g\n",Lnx,Lny,Lnz);
       Setd("PN_CircularOrbit_GWs_Lnx", Lnx);
       Setd("PN_CircularOrbit_GWs_Lny", Lny);
       Setd("PN_CircularOrbit_GWs_Lnz", Lnz);
-printf("%g,%g,%g\n",
-Getd("PN_CircularOrbit_GWs_Lnx"),
-Getd("PN_CircularOrbit_GWs_Lny"),
-Getd("PN_CircularOrbit_GWs_Lnz") );
 
       Setd("PN_CircularOrbit_GWs_m1", p[12]);
       Setd("PN_CircularOrbit_GWs_m2", p[13]);
@@ -410,6 +435,8 @@ int minimize_PN_NR_diff(tGrid *grid)
   double **xi; /* matrix with initial directions */
   int iter, i,j;
   double fret;
+  double mintol = Getd("PN_CircularOrbit_GWs_mintol");
+  int p_format = Getd("PN_CircularOrbit_GWs_min_p_format");
 
   /* allocate pars and matrix for powell */
   p  = dvector(1,nparmax);
@@ -476,29 +503,47 @@ int minimize_PN_NR_diff(tGrid *grid)
   ReNRPsi4mode__func_to_minimize_for_numrec = ReNRPsi4mode;
   ImNRPsi4mode__func_to_minimize_for_numrec = ImNRPsi4mode;
 
-  /* try with 3 pars */
-  p_format__func_to_minimize_for_numrec = 3;
+
+  /* try with 1 par first */
+  p_format__func_to_minimize_for_numrec = 1;
  
   /* set npar from p_format__func_to_minimize_for_numrec */
   npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
 
   /* call minimizer */  
-  powell(p, xi, npar, 1e-9, &iter, &fret, func_to_minimize_for_numrec);
+  powell(p, xi, npar, mintol, &iter, &fret, func_to_minimize_for_numrec);
 
   tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
   printf("Difference after first minimization: tdiff=%g\n", tdiff);
 
-//  /* try with all pars */
-//  p_format__func_to_minimize_for_numrec = 13;
-// 
-//  /* set npar from p_format__func_to_minimize_for_numrec */
-//  npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
-//
+  if(p_format>=3)
+  {
+    /* try with 3 pars */
+    p_format__func_to_minimize_for_numrec = 3;
+   
+    /* set npar from p_format__func_to_minimize_for_numrec */
+    npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
+
+    /* call minimizer */  
+    powell(p, xi, npar, mintol, &iter, &fret, func_to_minimize_for_numrec);
+
+    tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
+    printf("Difference after second minimization: tdiff=%g\n", tdiff);
+  }
+
+  if(p_format>3)
+  {
+    /* try with all pars */
+    p_format__func_to_minimize_for_numrec = p_format;
+   
+    /* set npar from p_format__func_to_minimize_for_numrec */
+    npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
 //Yo(0);
 //func_to_minimize_for_numrec(p);
 //exit(88);
-//  /* call minimizer */  
-//  powell(p, xi, npar, 1e-9, &iter, &fret, func_to_minimize_for_numrec);
+    /* call minimizer */  
+    powell(p, xi, npar, mintol, &iter, &fret, func_to_minimize_for_numrec);
+  }
 
   /* print info at end */
   for(i=1; i<=npar; i++)  printf(" %.4g", p[i]);
