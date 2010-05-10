@@ -305,7 +305,7 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
 /* thetax and phix are angles in speherical coords, 
    but with respect to x-axis (not z-axis) */
 /* get Lnx,Lny,Lnz from thetax and phix*/
-void Lnx_Lny_Lnz_from_thetax_phix(double *Lnx, double *Lny, double *Lnz,
+void nx_ny_nz_from_thetax_phix(double *Lnx, double *Lny, double *Lnz,
                                 double thetax, double phix)
 {
   *Lnx = cos(thetax);
@@ -313,7 +313,7 @@ void Lnx_Lny_Lnz_from_thetax_phix(double *Lnx, double *Lny, double *Lnz,
   *Lnz = sin(thetax)*sin(phix);
 }
 /* get thetax and phix from Lnx,Lny,Lnz */
-void thetax_phix_from_Lnx_Lny_Lnz(double *thetax, double *phix,
+void thetax_phix_from_nx_ny_nz(double *thetax, double *phix,
                                   double Lnx, double Lny, double Lnz)
 {
   *thetax = acos(Lnx);
@@ -360,6 +360,24 @@ double func_to_minimize_for_numrec(double *p)
       Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
       npar = 9;
       break;
+    case 109:
+      Setd("PN_CircularOrbit_GWs_Phi", p[1]);
+      Setd("PN_CircularOrbit_GWs_omega", p[2]);
+      Setd("PN_CircularOrbit_GWs_D", p[3]);
+      Setd("PN_CircularOrbit_GWs_chi1x", p[4]);
+      Setd("PN_CircularOrbit_GWs_chi1y", p[5]);
+      Setd("PN_CircularOrbit_GWs_chi1z", p[6]);
+      Setd("PN_CircularOrbit_GWs_chi2x", p[7]);
+      Setd("PN_CircularOrbit_GWs_chi2y", p[8]);
+      Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
+      /* p[8] = thetax; 
+         p[9] = phix;  */
+      nx_ny_nz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
+      Setd("PN_CircularOrbit_GWs_Lnx", Lnx);
+      Setd("PN_CircularOrbit_GWs_Lny", Lny);
+      Setd("PN_CircularOrbit_GWs_Lnz", Lnz);
+      npar = 9;
+      break;
     case 11:
       Setd("PN_CircularOrbit_GWs_Phi", p[1]);
       Setd("PN_CircularOrbit_GWs_omega", p[2]);
@@ -372,7 +390,7 @@ double func_to_minimize_for_numrec(double *p)
       Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
       /* p[10] = thetax; 
          p[11] = phix;  */
-      Lnx_Lny_Lnz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
+      nx_ny_nz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
       Setd("PN_CircularOrbit_GWs_Lnx", Lnx);
       Setd("PN_CircularOrbit_GWs_Lny", Lny);
       Setd("PN_CircularOrbit_GWs_Lnz", Lnz);
@@ -390,7 +408,7 @@ double func_to_minimize_for_numrec(double *p)
       Setd("PN_CircularOrbit_GWs_chi2z", p[9]);
       /* p[10] = thetax; 
          p[11] = phix;  */
-      Lnx_Lny_Lnz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
+      nx_ny_nz_from_thetax_phix(&Lnx, &Lny, &Lnz, p[10], p[11]);
       Setd("PN_CircularOrbit_GWs_Lnx", Lnx);
       Setd("PN_CircularOrbit_GWs_Lny", Lny);
       Setd("PN_CircularOrbit_GWs_Lnz", Lnz);
@@ -402,6 +420,10 @@ double func_to_minimize_for_numrec(double *p)
     default :
       errorexit("p_format__func_to_minimize_for_numrec has undefined value");
   }
+  /* store npar in p[0] */
+  p[0] = npar;
+
+  /* print pars */
   for(n=1; n<=npar; n++)  printf(" %.4g", p[n]);
 
   /* set args for PNPsi4_NRPsi4_totaldiff */
@@ -439,7 +461,7 @@ int minimize_PN_NR_diff(tGrid *grid)
   int p_format = Getd("PN_CircularOrbit_GWs_min_p_format");
 
   /* allocate pars and matrix for powell */
-  p  = dvector(1,nparmax);
+  p  = dvector(0,nparmax);  /* Note: p[0] is not used by numrec. I use it to store number of pars */
   xi = dmatrix(1,nparmax, 1,nparmax);
 
   /* Info */
@@ -482,10 +504,10 @@ int minimize_PN_NR_diff(tGrid *grid)
 
   /* p[10] = thetax; 
      p[11] = phix;  */
-  thetax_phix_from_Lnx_Lny_Lnz( p+10, p+11, 
-                                Getd("PN_CircularOrbit_GWs_Lnx"),
-                                Getd("PN_CircularOrbit_GWs_Lny"),
-                                Getd("PN_CircularOrbit_GWs_Lnz") );
+  thetax_phix_from_nx_ny_nz( p+10, p+11, 
+                             Getd("PN_CircularOrbit_GWs_Lnx"),
+                             Getd("PN_CircularOrbit_GWs_Lny"),
+                             Getd("PN_CircularOrbit_GWs_Lnz") );
 
   p[12] = Getd("PN_CircularOrbit_GWs_m1");
   p[13] = Getd("PN_CircularOrbit_GWs_m2");
@@ -508,7 +530,8 @@ int minimize_PN_NR_diff(tGrid *grid)
   p_format__func_to_minimize_for_numrec = 1;
  
   /* set npar from p_format__func_to_minimize_for_numrec */
-  npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
+  func_to_minimize_for_numrec(p); /* get p[0] */
+  npar = p[0];
 
   /* call minimizer */  
   powell(p, xi, npar, mintol, &iter, &fret, func_to_minimize_for_numrec);
@@ -522,7 +545,8 @@ int minimize_PN_NR_diff(tGrid *grid)
     p_format__func_to_minimize_for_numrec = 3;
    
     /* set npar from p_format__func_to_minimize_for_numrec */
-    npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
+    func_to_minimize_for_numrec(p); /* get p[0] */
+    npar = p[0];
 
     /* call minimizer */  
     powell(p, xi, npar, mintol, &iter, &fret, func_to_minimize_for_numrec);
@@ -537,7 +561,8 @@ int minimize_PN_NR_diff(tGrid *grid)
     p_format__func_to_minimize_for_numrec = p_format;
    
     /* set npar from p_format__func_to_minimize_for_numrec */
-    npar = p_format__func_to_minimize_for_numrec; /* FIXME: change this later */ 
+    func_to_minimize_for_numrec(p); /* get p[0] */
+    npar = p[0];
 //Yo(0);
 //func_to_minimize_for_numrec(p);
 //exit(88);
@@ -588,7 +613,7 @@ int minimize_PN_NR_diff(tGrid *grid)
   free_dmatrix(ImNRPsi4mode, 0,n1, 0,ndata+1);
 
   /* free pars and matrix for powell */
-  free_dvector(p, 1,nparmax);
+  free_dvector(p, 0,nparmax);
   free_dmatrix(xi, 1,nparmax, 1,nparmax);
 
   return 0;
