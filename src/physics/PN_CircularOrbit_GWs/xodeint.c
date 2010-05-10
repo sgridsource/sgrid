@@ -110,22 +110,23 @@ void derivs(double x,double y[],double dydx[])
                                   + (c10 + c11 + c12 - c13*log(16.0*t2))*t5 
                                   + c14*t6 );
 // Spin1	 
-	dydx[2] = (LNS1[2]*S1[3] - S1[2]*LNS1[3]); 
-	dydx[3] = (-LNS1[1]*S1[3] + S1[1]*LNS1[3]);
-	dydx[4] = (LNS1[1]*S1[2] - S1[1]*LNS1[2]);
+	dydx[2] = LNS1[2]*S1[3] - S1[2]*LNS1[3]; 
+	dydx[3] = -LNS1[1]*S1[3] + S1[1]*LNS1[3];
+	dydx[4] = LNS1[1]*S1[2] - S1[1]*LNS1[2];
 // Spin2
-        dydx[5] = (LNS2[2]*S2[3] - S2[2]*LNS2[3]);
-	dydx[6] = (-LNS2[1]*S2[3] + S2[1]*LNS2[3]); 
-	dydx[7] = (LNS2[1]*S2[2] - S2[1]*LNS2[2]); 
+        dydx[5] = LNS2[2]*S2[3] - S2[2]*LNS2[3];
+	dydx[6] = -LNS2[1]*S2[3] + S2[1]*LNS2[3]; 
+	dydx[7] = LNS2[1]*S2[2] - S2[1]*LNS2[2]; 
 // Ln_cap
-        dydx[8] = (c20*t5*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]));
-	dydx[9] = (c20*t5*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3])); 
-	dydx[10] = (c20*t5*( LNS[1]*Ln_cap[2] - Ln_cap[1]*LNS[2]));
-
-        if((Ln_cap[1]==0.0)&&(Ln_cap[2]==0.0))
+        dydx[8] = c20*t5*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]);
+	dydx[9] = c20*t5*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3]); 
+	dydx[10] = c20*t5*( LNS[1]*Ln_cap[2] - Ln_cap[1]*LNS[2]);
+ 
+        if((Ln_cap[1]==0.0)&&(Ln_cap[3]==0.0))
             dydx[11] = y[1];
         else
-            dydx[11] = y[1] - Ln_cap[3]*(Ln_cap[1]*dydx[9] - Ln_cap[2]*dydx[8])/(Ln_cap[1]*Ln_cap[1] + Ln_cap[2]*Ln_cap[2]);
+//        dydx(11) = y(1) - Ln_cap(2)*(dydx(8)*Ln_cap(3) - Ln_cap(1)*dydx(10))/(Ln_cap(1)*Ln_cap(1) + Ln_cap(3)*Ln_cap(3))
+          dydx[11] = y[1] - Ln_cap[2]*(Ln_cap[3]*dydx[8] - Ln_cap[1]*dydx[10])/(Ln_cap[1]*Ln_cap[1] + Ln_cap[3]*Ln_cap[3]);
         free_dvector(Ln_cap,1,3);
         free_dvector(S1,1,3);
         free_dvector(S2,1,3);
@@ -157,8 +158,8 @@ void xodeint(double m1_in, double m2_in, double t1, double t2, double ystart_in[
 {
         int status; /* added by WT */
 	int i,nbad,nok;
-	double eps = 1.0e-6,
-               h1 = 0.1,
+	double eps = 1.0e-9,
+               h1 = 0.01,
                hmin = 0.0, 
                x1 = t1,
                x2 = t2,

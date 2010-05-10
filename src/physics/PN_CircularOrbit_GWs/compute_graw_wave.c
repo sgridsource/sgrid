@@ -29,32 +29,38 @@ void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, d
    Tplus  = dmatrix(1,3,1,3);
 
 //printf("%s \n","after allocation");
-   if(y[8]==0.0&&y[9]==0.0)
-   {
+//    es1(1) =  y(10) / dsqrt(y(8)**2 + y(10)**2)
+//    es1(2) =  0.0
+//    es1(3) = -y(8) / dsqrt(y(8)**2 + y(10)**2) 
+//!  
+//    es2(1) =      - y(8)*y(9) / dsqrt(y(8)**2 + y(10)**2)
+//    es2(2) = (1.0 - y(9)**2) / dsqrt(y(8)**2 + y(10)**2)
+//    es2(3) =      -y(9)*y(10) / dsqrt(y(8)**2 + y(10)**2)
+     if(y[8]==0.0&&y[10]==0.0)
+     {
       es1[1] = 1.0;
       es1[2] = 0.0;
       es1[3] = 0.0;
-   }
-   else
-   { 
-       es1[1] = -y[9]/sqrt(y[8]*y[8] + y[9]*y[9]);
-       es1[2] =  y[8]/sqrt(y[8]*y[8] + y[9]*y[9]);
-       es1[3] =  0.0;  
-   }
+     }
+     else
+     { 
+      es1[1] =  y[10]/sqrt(y[8]*y[8] + y[10]*y[10]);
+      es1[2] =  0.0;
+      es1[3] = -y[8]/sqrt(y[8]*y[8] + y[10]*y[10]);
+     }  
 //printf("%s  %10.6e %10.6e %10.6e \n","es1",es1[1],es1[2],es1[3]);
-   if(y[8]==0.0&&y[9]==0.0)
-   {
-       es2[1] = 0.0;
-       es2[2] = 1.0;
-       es2[3] = 0.0;
-   }
-   else
-   {
-       es2[1] = -y[8]*y[10]/sqrt(y[8]*y[8] + y[9]*y[9]);
-       es2[2] = -y[9]*y[10]/sqrt(y[8]*y[8] + y[9]*y[9]);
-       es2[3] = (1.0 - y[10]*y[10])/sqrt(y[8]*y[8] + y[9]*y[9]);
-   }
-
+     if(y[8]==0.0&&y[10]==0.0)
+     {
+      es2[1] = 0.0;
+      es2[2] = 0.0;
+      es2[3] = -y[9]/fabs(y[9]);
+     }
+     else
+     {
+      es2[1] =       -y[8]*y[9]/sqrt(y[8]*y[8] + y[10]*y[10]);
+      es2[2] = (1.0 - y[9]*y[9])/sqrt(y[8]*y[8] + y[10]*y[10]);
+      es2[3] =       -y[9]*y[10]/sqrt(y[8]*y[8] + y[10]*y[10]);
+     }
 //printf("%s  %10.6e %10.6e %10.6e \n","es2",es2[1],es2[2],es2[3]);
    etheta[1] = cos(theta)*cos(phi); 
    etheta[2] = cos(theta)*sin(phi);
