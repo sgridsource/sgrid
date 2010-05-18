@@ -1,7 +1,7 @@
 physics = PN_CircularOrbit_GWs                                           
 
 PN_CircularOrbit_GWs_lmax = 2
-PN_CircularOrbit_GWs_sphere_Lmax = 2
+PN_CircularOrbit_GWs_sphere_Lmax = 4
 PN_CircularOrbit_GWs_computePsi4 = yes
 PN_CircularOrbit_GWs_match_NR = yes
 PN_CircularOrbit_GWs_NRPsi4file_prefix = hmodes/psi4_
