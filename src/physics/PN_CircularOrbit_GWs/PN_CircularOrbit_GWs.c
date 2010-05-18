@@ -35,7 +35,7 @@ int PN_CircularOrbit_GWs_set_boxsize(tGrid *grid)
   /* get lmax from par */
   lmax = Geti("PN_CircularOrbit_GWs_lmax");
   Lmax = Geti("PN_CircularOrbit_GWs_sphere_Lmax");
-  if(Lmax<lmax) printf("WARNING: you probably want Lmax>lmax !\n");
+  if(Lmax<lmax) printf("WARNING: you probably want Lmax>=lmax !\n");
   n3 = 2*Lmax + 2; /* really need 2*Lmax + 1, but lets make it an even number */
   n2 = 2*n3;
 
