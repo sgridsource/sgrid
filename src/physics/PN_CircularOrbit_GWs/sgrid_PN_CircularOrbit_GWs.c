@@ -76,7 +76,8 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_D", "1.26", "distance from source");
   AddPar("PN_CircularOrbit_GWs_t1", "0",    "initial time");
   AddPar("PN_CircularOrbit_GWs_t2", "1000", "final time");
-  AddPar("PN_CircularOrbit_GWs_dt", "10",   "time step");               
+  AddPar("PN_CircularOrbit_GWs_dt", "10",   "time step");
+  AddPar("PN_CircularOrbit_GWs_verbose", "yes", "verbose [yes,no]");
 
   return 0;
 }

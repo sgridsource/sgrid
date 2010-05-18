@@ -401,6 +401,7 @@ double func_to_minimize_for_numrec(double *p)
   double t1, t2, dt, tdiff;
   int n, npar;
   double nx,ny,nz, ax,ay,az, a;
+  int verbose = Getv("PN_CircularOrbit_GWs_verbose", "yes");
 
   /* set sgrid pars from p array */
   switch(p_format__func_to_minimize_for_numrec)
@@ -530,7 +531,8 @@ double func_to_minimize_for_numrec(double *p)
   p[0] = npar;
 
   /* print pars */
-  for(n=1; n<=npar; n++)  printf(" %.4g", p[n]);
+  if(verbose)
+    for(n=1; n<=npar; n++)  printf(" %.4g", p[n]);
 
   /* set args for PNPsi4_NRPsi4_totaldiff */
   t1 = Getd("PN_CircularOrbit_GWs_t1");
@@ -541,7 +543,9 @@ double func_to_minimize_for_numrec(double *p)
                                   ReNRPsi4mode__func_to_minimize_for_numrec,
                                   ImNRPsi4mode__func_to_minimize_for_numrec,
                                   t1,t2,dt);
-  printf(" => %.3g\n", tdiff);
+  if(verbose)
+  { printf(" => %.3g\n", tdiff); fflush(stdout); }
+
   return tdiff;
 }
 
@@ -626,6 +630,7 @@ int minimize_PN_NR_diff(tGrid *grid)
 
   tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
   printf("Difference after first minimization: tdiff=%g\n", tdiff);
+  fflush(stdout);
 
   if(p_format>=3)
   {
@@ -642,6 +647,7 @@ int minimize_PN_NR_diff(tGrid *grid)
 
     tdiff = PNPsi4_NRPsi4_totaldiff(box, ReNRPsi4mode, ImNRPsi4mode, t1,t2,dt);
     printf("Difference after second minimization: tdiff=%g\n", tdiff);
+    fflush(stdout);
   }
 
   if(p_format>3)
@@ -697,6 +703,10 @@ int minimize_PN_NR_diff(tGrid *grid)
   printf("PN_CircularOrbit_GWs_t1 = %s\n", Gets("PN_CircularOrbit_GWs_t1"));
   printf("PN_CircularOrbit_GWs_t2 = %s\n", Gets("PN_CircularOrbit_GWs_t2"));
   printf("PN_CircularOrbit_GWs_dt = %s\n", Gets("PN_CircularOrbit_GWs_dt"));
+  fflush(stdout);
+
+  /* write all pars in file */
+  parameterio_write_current_pars(grid);
 
   /* free arrays with numerical Psi4 modes */
   free_dmatrix(ReNRPsi4mode, 0,n1, 0,ndata+1);
