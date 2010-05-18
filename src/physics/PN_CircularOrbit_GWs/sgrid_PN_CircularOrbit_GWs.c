@@ -56,7 +56,7 @@ int sgrid_PN_CircularOrbit_GWs()
            "prefix for file containing numerical Psi4 modes");
     AddPar("PN_CircularOrbit_GWs_mintol", "1e-6", "tol for powell minimizer");
     AddPar("PN_CircularOrbit_GWs_min_p_format", "3",
-           "parameter format [1,3,5,109,9,11,13] "
+           "parameter format [1,3,5,7,109,9,11,13] "
            "see cases in func_to_minimize_for_numrec(p)");
   }
 
