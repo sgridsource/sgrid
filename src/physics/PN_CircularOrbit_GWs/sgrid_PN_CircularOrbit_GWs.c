@@ -41,6 +41,10 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_spinweight", "-2", "spin weight we use in sYlm");
   AddPar("PN_CircularOrbit_GWs_HmodeOutputFormat", "plus_cross",
          "Output format for Hmodes [plus_cross,Re_Im] (NINJA uses plus_cross)");
+  AddPar("PN_CircularOrbit_GWs_theta_h", "-1", "add h+,hx to orbitfile at "
+         "theta_h,phi_h if theta_h>=0");
+  AddPar("PN_CircularOrbit_GWs_phi_h",   "0", "add h+,hx to orbitfile at "
+         "theta_h,phi_h if theta_h>=0");
 
   AddPar("PN_CircularOrbit_GWs_match_NR", "no", "if we match NR Psi4 [no,yes]");
   if(Getv("PN_CircularOrbit_GWs_match_NR", "yes"))

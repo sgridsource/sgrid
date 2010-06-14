@@ -126,6 +126,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   double t1, t2, dt;   /* initial, final time, time step */
   double ti, tf;       /* initial and final time for integrator */
   int ImHmodesign;
+  double theta_h = Getd("PN_CircularOrbit_GWs_theta_h");
+  double phi_h = Getd("PN_CircularOrbit_GWs_phi_h");
 
   /* flip sign of Im H mode in case of plus_cross format (as for NINJA) */
   if(Getv("PN_CircularOrbit_GWs_HmodeOutputFormat", "plus_cross"))
@@ -203,7 +205,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 
   /* print header in orbit file */
   fprintf(out_orb, "# time  separation  omega  S1x  S1y  S1z  S2x  S2y  S2z"
-                   "  Lnx  Lny  Lnz  Phi\n");
+                   "  Lnx  Lny  Lnz  Phi");
+  if(theta_h>=0.0) fprintf(out_orb, "  {h+,hx}(%g,%g)\n", theta_h, phi_h);
+  else             fprintf(out_orb, "\n");
 
   /* compute h+, hx at different times */
   printf("computing h+, hx at different times:\n");
@@ -246,6 +250,12 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     fprintf(out_orb, "%-.16e", time);
     for(i=0; i<=11; i++)
       fprintf(out_orb, "  %+.16e", yvec[i]);
+    if(theta_h>=0.0)
+    {
+      double hplus, hcross;
+      compute_hcross_hplus(yvec, &hcross, &hplus, D, theta_h, phi_h, m1, m2);
+      fprintf(out_orb, "  %+.16e  %+.16e", hplus, hcross);
+    }
     fprintf(out_orb, "\n");
 
     /* advance orbit to time+dt */
