@@ -1,0 +1,34 @@
+physics = PN_CircularOrbit_GWs
+
+PN_CircularOrbit_GWs_lmax = 3
+PN_CircularOrbit_GWs_sphere_Lmax = 3
+
+# Msun=1.989e30  G=6.672e-11  c=299792458  M=13.4*Msun  m1=1.4Msun  m2=12Msun
+# f=75 
+# (G/c^3) * 2*pi *  f * M = 0.03110102068389056
+PN_CircularOrbit_GWs_omega = 0.03110102068389056
+PN_CircularOrbit_GWs_m1 = 0.1044776119402985
+PN_CircularOrbit_GWs_m2 = 0.8955223880597015
+PN_CircularOrbit_GWs_chi1x = 0
+PN_CircularOrbit_GWs_chi1y = 0
+PN_CircularOrbit_GWs_chi1z = 0.1
+PN_CircularOrbit_GWs_chi2x = 0
+PN_CircularOrbit_GWs_chi2y = 0
+PN_CircularOrbit_GWs_chi2z = 0.5
+PN_CircularOrbit_GWs_Lnx = 0 
+PN_CircularOrbit_GWs_Lny = 0
+PN_CircularOrbit_GWs_Lnz = 1
+PN_CircularOrbit_GWs_Phi = 0
+PN_CircularOrbit_GWs_t1 = 0
+PN_CircularOrbit_GWs_t2 = 1500
+PN_CircularOrbit_GWs_dt = 2
+
+PN_CircularOrbit_GWs_computePsi4 = yes
+PN_CircularOrbit_GWs_theta_h = 1.570796326794897
+PN_CircularOrbit_GWs_phi_h   = 0 # 3.141592653589793 # 1.570796326794897
+
+outputY0_box0 = 1
+outputZ0_box0 = 1
+
+1doutiter = 1
+1doutput = PN_CircularOrbit_GWs_hplus PN_CircularOrbit_GWs_hcross
