@@ -63,9 +63,6 @@ void derivs(double x,double y[],double dydx[])
 
         nrhs++;
 
-        Ln_cap = dvector(1,3); 
-        S1 = dvector(1,3); 
-        S2 = dvector(1,3); 
         LNS1 = dvector(1,3);
         LNS2 = dvector(1,3);
         LNS = dvector(1,3);
@@ -79,11 +76,12 @@ void derivs(double x,double y[],double dydx[])
         t6  = t5*t1;	      // mw^7/3
         t7  = 1.0/t1;         // mw^-1/3
 
-        for(i=1;i<=3;i++){
-            S1[i] = y[i+1];
-            S2[i] = y[i+4];
-            Ln_cap[i] = y[i+7];
-        }
+        /* pointers S1, S2, Ln_cap to correct place inside y */
+        S1 = y+1;
+        S2 = y+4;
+        Ln_cap = y+7;
+
+        /* renormalize Ln_cap and thus (also inside y) */
         Ln_cap_mod = sqrt(Ln_cap[1]*Ln_cap[1]+Ln_cap[2]*Ln_cap[2]+Ln_cap[3]*Ln_cap[3]);
         
         for(i=1;i<=3;i++)
@@ -127,9 +125,6 @@ void derivs(double x,double y[],double dydx[])
         else
 //        dydx(11) = y(1) - Ln_cap(2)*(dydx(8)*Ln_cap(3) - Ln_cap(1)*dydx(10))/(Ln_cap(1)*Ln_cap(1) + Ln_cap(3)*Ln_cap(3))
           dydx[11] = y[1] - Ln_cap[2]*(Ln_cap[3]*dydx[8] - Ln_cap[1]*dydx[10])/(Ln_cap[1]*Ln_cap[1] + Ln_cap[3]*Ln_cap[3]);
-        free_dvector(Ln_cap,1,3);
-        free_dvector(S1,1,3);
-        free_dvector(S2,1,3);
         free_dvector(LNS1,1,3);
         free_dvector(LNS2,1,3);
         free_dvector(LNS,1,3);  		 
