@@ -309,9 +309,36 @@ int ModeComputer(tGrid *grid)
   while(ModeComputer_read_spheredata(grid, in1, gridtype, ntheta, nphi, 
                                      &time1, Re_vind)!=EOF)
   {
-    ModeComputer_read_spheredata(grid, in2, gridtype, ntheta, nphi, 
-                                 &time2, Im_vind);
-    if(time1!=time2) errorexit("times in files for Re and Im part disagree");
+    int ret;
+
+    ret=ModeComputer_read_spheredata(grid, in2, gridtype, ntheta, nphi, 
+                                     &time2, Im_vind);
+    if(ret==EOF) break;
+
+    /* do something reasonable if times disagree */
+    while(time1!=time2) 
+    {
+      printf("WARNING: times in files for Re and Im part disagree:\n"
+             "         time1=%-.16e   time2=%-.16e\n", time1, time2);
+      /* go forward in Im part if time1>time2 */
+      while(time1>time2 && ret!=EOF)
+      {
+        ret=ModeComputer_read_spheredata(grid, in2, gridtype, ntheta, nphi, 
+                                         &time2, Im_vind);
+      }
+      if(ret==EOF) break;
+
+      /* go forward in Re part if time1<time2 */
+      while(time1<time2 && ret!=EOF)
+      {
+        ret=ModeComputer_read_spheredata(grid, in1, gridtype, ntheta, nphi, 
+                                         &time1, Re_vind);
+      }
+      if(ret==EOF) break;
+    }
+    if(ret==EOF) break;
+
+    /* say where we are in time */
     printf("time = %g\n", time1);
 
     /* set integrands */
