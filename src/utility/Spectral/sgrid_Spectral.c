@@ -25,14 +25,19 @@ int sgrid_Spectral(void)
     char str[1000];
 
     /* whether we use FFTs and when we use them */
+    /* default: use NUMREC_FFT if number of points N>=64 and N=2^n */
+    /* NOTE: if FFTW3 is compiled in we should really use:
+        box0_TransformType1 = 25 FFTW3  # if basis1=ChebExtrema
+        box0_TransformType2 = 24 FFTW3  # if basis2=Fourier
+        box0_TransformType3 = 24 FFTW3  # if basis3=Fourier   */
     snprintf(str, 999, "box%d_TransformType1", b);
-    AddPar(str, "512 NUMREC_FFT", "FFT-type in X-direction "
+    AddPar(str, "64 NUMREC_FFT", "FFT-type in X-direction "
                 "[(min # of points to try to use FFT) (FFT-type)]");
     snprintf(str, 999, "box%d_TransformType2", b);
-    AddPar(str, "512 NUMREC_FFT", "FFT-type in Y-direction " 
+    AddPar(str, "64 NUMREC_FFT", "FFT-type in Y-direction " 
                 "[(min # of points to try to use FFT) (FFT-type)]");
     snprintf(str, 999, "box%d_TransformType3", b);
-    AddPar(str, "512 NUMREC_FFT", "FFT-type in Z-direction "
+    AddPar(str, "64 NUMREC_FFT", "FFT-type in Z-direction "
                 "[(min # of points to try to use FFT) (FFT-type)]");
   }
 
