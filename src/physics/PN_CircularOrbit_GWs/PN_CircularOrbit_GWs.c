@@ -475,8 +475,24 @@ void output_sYlmModes_of_PN_H(char *prefix, double time,
     /* open output file */
     sprintf(outname, "%s/%sl%dm%d_s%d.t", Gets("outdir"),
             prefix, l,m,s);
-    out = fopen(outname, "a");
-    if(!out) errorexits("failed opening %s", outname);
+
+    /*check whether file exists, use standard read for portability */
+    out = fopen(outname, "r");
+    /* if it does not exist, start new file and write header line */
+    if(!out)
+    {
+      out = fopen(outname, "w");
+      if(!out) errorexits("failed opening %s", outname);
+      fprintf(out, "# %smode  l=%d  m=%d  s=%d\n", prefix, l,m,s);
+      fprintf(out, "%s\n", "# time                    Re_mode            Im_mode");
+    }
+    /* if it does exist, reopen for append */
+    else
+    {
+      fclose(out);
+      out = fopen(outname, "a");
+      if(!out) errorexits("failed opening %s", outname);
+    }
 
     /* write time Re and Im part of mode */      
     //printf("%.13g  %.13g  %.13g\n", time1, Re_Hmodep[i], Im_Hmodep[i]);
