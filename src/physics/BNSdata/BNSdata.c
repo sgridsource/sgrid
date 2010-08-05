@@ -3988,7 +3988,7 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
 //Xp[Ind_n1n2(b, 0, 0, box->n1,box->n2)],
 //q[Ind_n1n2(b, 0, 0, box->n1,box->n2)],
 //dq[Ind_n1n2(b, 0, 0, box->n1,box->n2)]);
-    if(dq1*dq2<=0)  { *bi = 0;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; /* <--B=0 */ }
+    if(dq1*dq2<=0)  { *bi = 0;  *X=0.5*(box->bbox[1]+box->bbox[0]);  *Y=0.0; /* <--B=0 */ }
     
     if(*bi<0) /* boxindex *bi with dq=0 not yet found */
     {
@@ -3997,7 +3997,7 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
       dq = box->v[Ind("BNSdata_temp1")];
       dq1 = dq[Ind_n1n2(2, box->n2-1, 0,         box->n1,box->n2)];
       dq2 = dq[Ind_n1n2(box->n1-1, box->n2-1, 0, box->n1,box->n2)];
-      if(dq1*dq2<=0)  { *bi = 0;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=1.0; /* <--B=1 */ }
+      if(dq1*dq2<=0)  { *bi = 0;  *X=0.5*(box->bbox[1]+box->bbox[0]);  *Y=1.0; /* <--B=1 */ }
     }
     if(*bi<0) /* boxindex *bi with dq=0 not yet found */
     {
@@ -4006,7 +4006,7 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
       c = box->v[Ind("BNSdata_temp2")];
       dq1 = spec_interpolate(box, c, box->bbox[0],0,0);
       dq2 = spec_interpolate(box, c, box->bbox[1],0,0);
-      if(dq1*dq2<=0)  { *bi = 5;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; }
+      if(dq1*dq2<=0)  { *bi = 5;  *X=0.5*(box->bbox[1]+box->bbox[0]);  *Y=0.0; }
     }
     if(*bi<0) errorexit("could not find max of q in NS1");
   }
@@ -4023,7 +4023,7 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
     dq = box->v[Ind("BNSdata_temp1")];
     dq1 = dq[Ind_n1n2(2, 0, 0,         box->n1,box->n2)];
     dq2 = dq[Ind_n1n2(box->n1-1, 0, 0, box->n1,box->n2)];
-    if(dq1*dq2<=0)  { *bi = 3;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; /* <--B=0 */ }
+    if(dq1*dq2<=0)  { *bi = 3;  *X=0.5*(box->bbox[1]+box->bbox[0]);  *Y=0.0; /* <--B=0 */ }
     
     if(*bi<0) /* boxindex *bi with dq=0 not yet found */
     {
@@ -4032,7 +4032,7 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
       dq = box->v[Ind("BNSdata_temp1")];
       dq1 = dq[Ind_n1n2(2, box->n2-1, 0,         box->n1,box->n2)];
       dq2 = dq[Ind_n1n2(box->n1-1, box->n2-1, 0, box->n1,box->n2)];
-      if(dq1*dq2<=0)  { *bi = 3;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=1.0; /* <--B=1 */ }
+      if(dq1*dq2<=0)  { *bi = 3;  *X=0.5*(box->bbox[1]+box->bbox[0]);  *Y=1.0; /* <--B=1 */ }
     }
     if(*bi<0) /* boxindex *bi with dq=0 not yet found */
     {
@@ -4041,7 +4041,7 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
       c = box->v[Ind("BNSdata_temp2")];
       dq1 = spec_interpolate(box, c, box->bbox[0],0,0);
       dq2 = spec_interpolate(box, c, box->bbox[1],0,0);
-      if(dq1*dq2<=0)  { *bi = 4;  *X=0.5*(box->bbox[1]-box->bbox[0]);  *Y=0.0; }
+      if(dq1*dq2<=0)  { *bi = 4;  *X=0.5*(box->bbox[1]+box->bbox[0]);  *Y=0.0; }
     }
     if(*bi<0) errorexit("could not find max of q in NS2");
   }
