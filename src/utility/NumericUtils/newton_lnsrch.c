@@ -180,15 +180,20 @@ int newton_lnsrch_its(double x[], int n, int *check,
 #undef FREERETURNERROR
 
 /* same as above with error code, but do not use global vars:
-   returns its>=0 if ok, 
-   returns -its<0 if error!!!    its = number of iterations done */
+   returns its>=0   if ok, 
+   returns -its-1<0 if error!!!    its = number of iterations done
+   returns -its-MAXITS-2<0  if f=NAN                               */
 #undef FREERETURN
 #define FREERETURN {free_vector(newton_linesrch_fvec,1,n);free_vector(xold,1,n);\
 	free_vector(p,1,n);free_vector(g,1,n);free_matrix(fjac,1,n,1,n);\
-	free_ivector(indx,1,n);return its;}
+	free_ivector(indx,1,n);\
+	if(!finite(f)) return -its-MAXITS-2;\
+	return its;}
 #define FREERETURNERROR {free_vector(newton_linesrch_fvec,1,n);free_vector(xold,1,n);\
 	free_vector(p,1,n);free_vector(g,1,n);free_matrix(fjac,1,n,1,n);\
-	free_ivector(indx,1,n);return -its;}
+	free_ivector(indx,1,n);\
+	if(!finite(f)) return -its-MAXITS-2;\
+	return -its-1;}
 int newton_linesrch_its(double x[], int n, int *check,
 			void (*vecfunc)(int, double [], double []), 
 			int MAXITS, double TOLF)
