@@ -1393,7 +1393,7 @@ int adjust_Omega_xCM_keep_xmax(tGrid *grid, int it, double tol)
   return 0;
 }
 
-/* for newton_linesrch_its: compute derivs of q in domain 0 and 3 */
+/* for newton_linesrch_its: compute derivs of q in domain 0 and 3, or 4 and 5 */
 /* if n=1 only BNSdata_Omega is adjusted
    if n=2 both BNSdata_Omega & BNSdata_x_CM are adjusted */
 void dqdx_at_Xmax1_2_VectorFunc(int n, double *vec, double *fvec)
@@ -1431,10 +1431,10 @@ void dqdx_at_Xmax1_2_VectorFunc(int n, double *vec, double *fvec)
 
   /* find dq/dx at the locations Xmax1/2 in NS1/2 and store
      them in fvec[1] and fvec[2] */
-  fvec[1] = spec_interpolate(grid->box[0],
-                       grid->box[0]->v[Ind("BNSdata_temp2")], Xmax1,Ymax1,0);
-  if(n>=2) fvec[2] = spec_interpolate(grid->box[3], 
-                       grid->box[3]->v[Ind("BNSdata_temp2")], Xmax2,Ymax2,0);
+  fvec[1] = spec_interpolate(grid->box[bi1],
+                       grid->box[bi1]->v[Ind("BNSdata_temp2")], Xmax1,Ymax1,0);
+  if(n>=2) fvec[2] = spec_interpolate(grid->box[bi2], 
+                       grid->box[bi2]->v[Ind("BNSdata_temp2")], Xmax2,Ymax2,0);
 
   printf("dqdx_at_Xmax1_2_VectorFunc: Omega=%.13g x_CM=%.13g\n"
          "  => dq/dx(xmax1)=%.13g",
