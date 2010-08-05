@@ -1450,6 +1450,7 @@ void dqdx_at_Xmax1_2_VectorFunc(int n, double *vec, double *fvec)
 int adjust_Omega_xCM_keep_dqdxmax_eq_0(tGrid *grid, int it, double tol)
 {
   int check, stat, bi, i;
+  int blist[6];
   double OmxCMvec[3];
   double dqdx_m0[3];
   double dqdx_00[3];
@@ -1478,15 +1479,20 @@ int adjust_Omega_xCM_keep_dqdxmax_eq_0(tGrid *grid, int it, double tol)
 
   /* set global vars */
   dqdx_at_Xmax1_2_VectorFunc__grid  = grid;
-  /* for now we assume that the max are in box0/3 at Y=B=0 */
-  dqdx_at_Xmax1_2_VectorFunc__bi1 = 0; 
+  /* for now we assume that the max are in box0/3 at Y=B=0
+     or in box4/5 at Y=0 */
   dqdx_at_Xmax1_2_VectorFunc__Ymax1 = 0.0;
-  X_of_x_forgiven_YZ(grid->box[0], &dqdx_at_Xmax1_2_VectorFunc__Xmax1,
-                     xmax1, 0.0,0.0);
-  dqdx_at_Xmax1_2_VectorFunc__bi2 = 3;
+  blist[0]=0;  blist[1]=5;
+  bi=b_X_of_x_forgiven_YZ_inboxlist(grid, blist, 2,
+                                    &dqdx_at_Xmax1_2_VectorFunc__Xmax1,
+                                    xmax1, 0.0,0.0);
+  dqdx_at_Xmax1_2_VectorFunc__bi1 = bi;
   dqdx_at_Xmax1_2_VectorFunc__Ymax2 = 0.0;
-  X_of_x_forgiven_YZ(grid->box[3], &dqdx_at_Xmax1_2_VectorFunc__Xmax2,
-                     xmax2, 0.0,0.0);
+  blist[0]=3;  blist[1]=4;
+  bi=b_X_of_x_forgiven_YZ_inboxlist(grid, blist, 2,
+                                    &dqdx_at_Xmax1_2_VectorFunc__Xmax2,
+                                    xmax2, 0.0,0.0);
+  dqdx_at_Xmax1_2_VectorFunc__bi2 = bi;
   printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: xmax1=%g xmax2=%g\n",
          xmax1, xmax2);
   printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: Xmax1=%g Xmax2=%g\n",
