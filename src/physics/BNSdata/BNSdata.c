@@ -1495,6 +1495,15 @@ int adjust_Omega_xCM_keep_dqdxmax_eq_0(tGrid *grid, int it, double tol)
   dqdx_at_Xmax1_2_VectorFunc__bi2 = bi;
   printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: xmax1=%g xmax2=%g\n",
          xmax1, xmax2);
+  if(dqdx_at_Xmax1_2_VectorFunc__bi1<0 || dqdx_at_Xmax1_2_VectorFunc__bi2<0)
+  {
+    printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: failed to find Xmax1 or "
+           "Xmax2\n"
+           " dqdx_at_Xmax1_2_VectorFunc__bi1=%d "
+           " dqdx_at_Xmax1_2_VectorFunc__bi2=%d\n",
+           dqdx_at_Xmax1_2_VectorFunc__bi1, dqdx_at_Xmax1_2_VectorFunc__bi2);
+    return -1;
+  }
   printf("adjust_Omega_xCM_keep_dqdxmax_eq_0: Xmax1=%g Xmax2=%g\n",
          dqdx_at_Xmax1_2_VectorFunc__Xmax2, dqdx_at_Xmax1_2_VectorFunc__Xmax2);
   prdivider(0);
