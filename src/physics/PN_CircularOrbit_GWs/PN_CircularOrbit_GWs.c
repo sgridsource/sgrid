@@ -197,7 +197,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   yvec[9] = Getd("PN_CircularOrbit_GWs_Lny");  // Lny
   yvec[10]= Getd("PN_CircularOrbit_GWs_Lnz");  // Lnz
   yvec[11]= Getd("PN_CircularOrbit_GWs_Phi");  // Phi orbital phase         
-  xodeint(m1, m2, t1, t1, yvec); /* do this to initialize yvec[0] */
+  PN_CircOrbit_xodeint(m1, m2, t1, t1, yvec); /* do this to initialize yvec[0] */
 /*
   for(i=0; i<=11; i++)
     printf("yvec[%d] = %g\n", i, yvec[i]);
@@ -261,7 +261,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     /* advance orbit to time+dt */
     ti=time;
     tf=time+dt;
-    xodeint(m1, m2, ti, tf, yvec);
+    PN_CircOrbit_xodeint(m1, m2, ti, tf, yvec);
   }
   /* set time to last time so that any other output get correct time label */
   grid->time=time-dt;
@@ -346,13 +346,13 @@ void compute_FDpsi4_and_hplus_hcross_on_sphere(tBox *box,
   compute_hplus_hcross_on_sphere(box, hpind, hxind, yvec, D,m1,m2, 1,1, 0);
   
   /* set yvec at -dt */
-  xodeint(m1, m2, t, t-dt, yvec); 
+  PN_CircOrbit_xodeint(m1, m2, t, t-dt, yvec); 
   /* put H(t-dt) = h+ - i hx at i=0 */ 
   compute_hplus_hcross_on_sphere(box, hpind, hxind, yvec, D,m1,m2, 0,0, 0);
 
   /* set yvec at +dt */
   for(i=0; i<12; i++) yvec[i]=yin[i]; 
-  xodeint(m1, m2, t, t+dt, yvec);
+  PN_CircOrbit_xodeint(m1, m2, t, t+dt, yvec);
   /* put H(t+dt) = h+ - i hx at i=2 */ 
   compute_hplus_hcross_on_sphere(box, hpind, hxind, yvec, D,m1,m2, 2,2, 0);
     
