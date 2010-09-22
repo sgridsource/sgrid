@@ -197,7 +197,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   yvec[9] = Getd("PN_CircularOrbit_GWs_Lny");  // Lny
   yvec[10]= Getd("PN_CircularOrbit_GWs_Lnz");  // Lnz
   yvec[11]= Getd("PN_CircularOrbit_GWs_Phi");  // Phi orbital phase         
-  PN_CircOrbit_xodeint(m1, m2, t1, t1, yvec); /* do this to initialize yvec[0] */
+  /* initialize yvec[0] */
+  PN_CircOrbit_compute_constants(m1, m2);
+  yvec[0] = PN_CircOrbit_compute_r(yvec);
 /*
   for(i=0; i<=11; i++)
     printf("yvec[%d] = %g\n", i, yvec[i]);

@@ -238,7 +238,9 @@ double PNPsi4_NRPsi4_totaldiff(tBox *box,
   yvec[9] = Getd("PN_CircularOrbit_GWs_Lny");  // Lny
   yvec[10]= Getd("PN_CircularOrbit_GWs_Lnz");  // Lnz
   yvec[11]= Getd("PN_CircularOrbit_GWs_Phi");  // Phi orbital phase         
-  PN_CircOrbit_xodeint(m1, m2, t1, t1, yvec); /* do this to initialize yvec[0] */
+  /* initialize yvec[0] */
+  PN_CircOrbit_compute_constants(m1, m2);
+  yvec[0] = PN_CircOrbit_compute_r(yvec);
 
   /* allocate array for diff at different times */
   diff = dvector(0,ndata-1);
