@@ -83,5 +83,14 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_dt", "10",   "time step");
   AddPar("PN_CircularOrbit_GWs_verbose", "yes", "verbose [yes,no]");
 
+  /* flags for trajectories: if 1 include this PN term in EOM: */
+  AddPar("PN_CircularOrbit_GWs_OrbitFlag1", "1", "if 1 include O(v)^1 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitFlag2", "1", "if 1 include O(v)^2 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitFlag3", "1", "if 1 include O(v)^3 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitFlag4", "1", "if 1 include O(v)^4 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitFlag5", "1", "if 1 include O(v)^5 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitFlag6", "1", "if 1 include O(v)^6 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitFlag7", "1", "if 1 include O(v)^7 terms in EOM");
+  
   return 0;
 }

@@ -55,13 +55,13 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
   c20 = 0.5/m/m/m;
 
   /* flags (0 or 1) that decide which order of v=om^{1/3} we include */
-  f1 = 1; /* order v */
-  f2 = 1; /* order v^2 */
-  f3 = 1; /* order v^3 */
-  f4 = 1; /* order v^4 */
-  f5 = 1; /* order v^5 */
-  f6 = 1; /* order v^6 */
-  f7 = 1; /* order v^7 */
+  f1 = Geti("PN_CircularOrbit_GWs_OrbitFlag1"); /* order v */
+  f2 = Geti("PN_CircularOrbit_GWs_OrbitFlag2"); /* order v^2 */
+  f3 = Geti("PN_CircularOrbit_GWs_OrbitFlag3"); /* order v^3 */
+  f4 = Geti("PN_CircularOrbit_GWs_OrbitFlag4"); /* order v^4 */
+  f5 = Geti("PN_CircularOrbit_GWs_OrbitFlag5"); /* order v^5 */
+  f6 = Geti("PN_CircularOrbit_GWs_OrbitFlag6"); /* order v^6 */
+  f7 = Geti("PN_CircularOrbit_GWs_OrbitFlag7"); /* order v^7 */
 }
 
 /* function to be passed to odeintegrate */
