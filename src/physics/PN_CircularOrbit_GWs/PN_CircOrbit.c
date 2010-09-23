@@ -31,10 +31,9 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
   nu  = mu/m;
   deltam = m1 - m2;
 
+  /* consts for omega evo */
   c1  = 96.0*nu/5.0;
-//    printf("%s %10.6e \n","c1:", c1);  
   c2  = (743.0 + 924.0*nu)/336.0;
-//    printf("%s %10.6e \n","c2:", c2); 
   c3  = (113.0*m1*m1/m/m + 75*nu)/12.0/m1/m1;
   c4  = (113.0*m2*m2/m/m + 75*nu)/12.0/m2/m2;
   c5  = 4.0*pi;
@@ -47,6 +46,8 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
   c12 = 541.0/896.0*nu*nu - 5605.0/2592.0*nu*nu*nu;
   c13 = 856.0/105.0;
   c14 = (-4415.0/4032.0 + 358675.0/6048.0*nu + 91495.0/1512.0*nu*nu)*pi;
+
+  /* consts for S1, S2, Ln evo */
   c15 = 0.5/m;
   c16 = 4.0 + 3.0*m2/m1;
   c17 = 1.0/m/m;
@@ -107,17 +108,21 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
   for(i=1;i<=3;i++)
       Ln_cap[i] = Ln_cap[i]/Ln_cap_mod;
 
+  /* scalar products */
   Ln_cap_dot_S1 = Ln_cap[1]*S1[1] + Ln_cap[2]*S1[2] + Ln_cap[3]*S1[3];
   Ln_cap_dot_S2 = Ln_cap[1]*S2[1] + Ln_cap[2]*S2[2] + Ln_cap[3]*S2[3];
   S1_dot_S2     = S1[1]*S2[1] + S1[2]*S2[2] + S1[3]*S2[3];
 
+  /* terms in Eqn (2,3,9) of Buonanno et al, PRD 67, 104025 (2003) */
   for(i=1;i<=3;i++)
   {
     LNS1[i] = c15*( nu*c16*oov1*Ln_cap[i] + c17*(S2[i] - 3.0*Ln_cap_dot_S2*Ln_cap[i]) );
     LNS2[i] = c15*( nu*c18*oov1*Ln_cap[i] + c17*(S1[i] - 3.0*Ln_cap_dot_S1*Ln_cap[i]) );
     LNS[i]  = c16*S1[i] + c18*S2[i] - c19*v1*( S1[i]*Ln_cap_dot_S2 + S2[i]*Ln_cap_dot_S1 );
   } 
-// Omega
+
+  /* Evo of Omega */
+  /* Eqn (1) of Erratum in Buonanno et al, PRD 74, 029904(E) (2006) */
   dydx[1] = c1*y[1]*y[1]*v5*(1.0 
                              - c2*V2 
                              - (c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5)*V3 
@@ -127,19 +132,23 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
                              - c9*V5     
                              + (c10 + c11 + c12 - c13*log(16.0*v2))*V6 
                              + c14*V7 );
-// Spin1	 
+
+  /* Evo of Spin1, Eqn (2), Buonanno et al, PRD 67, 104025 (2003) */	 
   dydx[2] = v6*( LNS1[2]*S1[3] - S1[2]*LNS1[3]); 
   dydx[3] = v6*(-LNS1[1]*S1[3] + S1[1]*LNS1[3]);
   dydx[4] = v6*( LNS1[1]*S1[2] - S1[1]*LNS1[2]);
-// Spin2
+
+  /* Evo of Spin2, Eqn (3), Buonanno et al, PRD 67, 104025 (2003) */	 
   dydx[5] = v6*( LNS2[2]*S2[3] - S2[2]*LNS2[3]);
   dydx[6] = v6*(-LNS2[1]*S2[3] + S2[1]*LNS2[3]); 
   dydx[7] = v6*( LNS2[1]*S2[2] - S2[1]*LNS2[2]); 
-// Ln_cap
+
+  /* Evo of \hat{L}_N = Ln_cap, Eqn (9), Buonanno et al, PRD 67, 104025 (2003) */
   dydx[8]  = c20*v6*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]);
   dydx[9]  = c20*v6*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3]); 
   dydx[10] = c20*v6*( LNS[1]*Ln_cap[2] - Ln_cap[1]*LNS[2]);
- 
+
+  /* phase evo with respect to ascending node defined in zx-plane */ 
   if((Ln_cap[1]==0.0)&&(Ln_cap[3]==0.0))
       dydx[11] = y[1];
   else
@@ -171,9 +180,12 @@ double PN_CircOrbit_compute_r(double y[])
   // V6 = v6*f6;
   // V7 = v7*f7;
 
+  /* scalar products */
   LnS1 = (y[8]*y[2] + y[9]*y[3] + y[10]*y[4]);
   LnS2 = (y[8]*y[5] + y[9]*y[6] + y[10]*y[7]);
   SS = (y[2]*y[5] + y[3]*y[6] + y[4]*y[7]);
+
+  /* from Kidder PRD 52, 821 (1995), Eq (4.13). I.e. only up to v^4 */
   r  = m*oov2*( 1.0 
                - (3.0 - nu)*V2/3.0 
                - V3*( LnS1*(2.0*m1*m1/m/m+3.0*nu)/m1/m1 
