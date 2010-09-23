@@ -69,6 +69,7 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
 {
   int i;
   double om, v1, v2, v3, v4, v5, v6, v7, oov1;
+  double V1, V2, V3, V4, V5, V6, V7;  /* powers of v multiplied by flags */
   double *Ln_cap, *S1, *S2, *LNS1, *LNS2, *LNS, Ln_cap_dot_S1, Ln_cap_dot_S2, S1_dot_S2, Ln_cap_mod;
   // nrhs++;
 
@@ -87,13 +88,13 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
   oov1 = 1.0/v1;           // mw^-1/3
 
   /* set some powers of v to zero according to flags */
-  v1 = v1*f1;
-  v2 = v2*f2;
-  v3 = v3*f3;
-  v4 = v4*f4;
-  v5 = v5*f5;
-  v6 = v6*f6;
-  v7 = v7*f7;
+  V1 = v1*f1;
+  V2 = v2*f2;
+  V3 = v3*f3;
+  V4 = v4*f4;
+  V5 = v5*f5;
+  V6 = v6*f6;
+  V7 = v7*f7;
 
   /* pointers S1, S2, Ln_cap to correct place inside y */
   S1 = y+1;
@@ -112,38 +113,38 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
 
   for(i=1;i<=3;i++)
   {
-    LNS1[i] = c15*v6*( nu*c16*oov1*Ln_cap[i] + c17*(S2[i] - 3.0*Ln_cap_dot_S2*Ln_cap[i]) );
-    LNS2[i] = c15*v6*( nu*c18*oov1*Ln_cap[i] + c17*(S1[i] - 3.0*Ln_cap_dot_S1*Ln_cap[i]) );
-    LNS[i]  = c16*S1[i] + c18*S2[i] - c19*v1*( S1[i]*Ln_cap_dot_S2 + S2[i]*Ln_cap_dot_S1 );      
+    LNS1[i] = c15*( nu*c16*oov1*Ln_cap[i] + c17*(S2[i] - 3.0*Ln_cap_dot_S2*Ln_cap[i]) );
+    LNS2[i] = c15*( nu*c18*oov1*Ln_cap[i] + c17*(S1[i] - 3.0*Ln_cap_dot_S1*Ln_cap[i]) );
+    LNS[i]  = c16*S1[i] + c18*S2[i] - c19*v1*( S1[i]*Ln_cap_dot_S2 + S2[i]*Ln_cap_dot_S1 );
   } 
 // Omega
   dydx[1] = c1*y[1]*y[1]*v5*(1.0 
-                            - c2*v2 
-                            - (c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5)*v3 
-                            + c6*v4
-                            - c7*S1_dot_S2*v4 
-                            + c8*Ln_cap_dot_S1*Ln_cap_dot_S2*v4 
-                            - c9*v5     
-                            + (c10 + c11 + c12 - c13*log(16.0*v2))*v6 
-                            + c14*v7 );
+                             - c2*V2 
+                             - (c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5)*V3 
+                             + c6*V4
+                             - c7*S1_dot_S2*V4 
+                             + c8*Ln_cap_dot_S1*Ln_cap_dot_S2*V4 
+                             - c9*V5     
+                             + (c10 + c11 + c12 - c13*log(16.0*v2))*V6 
+                             + c14*V7 );
 // Spin1	 
-  dydx[2] = LNS1[2]*S1[3] - S1[2]*LNS1[3]; 
-  dydx[3] = -LNS1[1]*S1[3] + S1[1]*LNS1[3];
-  dydx[4] = LNS1[1]*S1[2] - S1[1]*LNS1[2];
+  dydx[2] = v6*( LNS1[2]*S1[3] - S1[2]*LNS1[3]); 
+  dydx[3] = v6*(-LNS1[1]*S1[3] + S1[1]*LNS1[3]);
+  dydx[4] = v6*( LNS1[1]*S1[2] - S1[1]*LNS1[2]);
 // Spin2
-  dydx[5] = LNS2[2]*S2[3] - S2[2]*LNS2[3];
-  dydx[6] = -LNS2[1]*S2[3] + S2[1]*LNS2[3]; 
-  dydx[7] = LNS2[1]*S2[2] - S2[1]*LNS2[2]; 
+  dydx[5] = v6*( LNS2[2]*S2[3] - S2[2]*LNS2[3]);
+  dydx[6] = v6*(-LNS2[1]*S2[3] + S2[1]*LNS2[3]); 
+  dydx[7] = v6*( LNS2[1]*S2[2] - S2[1]*LNS2[2]); 
 // Ln_cap
-  dydx[8] = c20*v6*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]);
-  dydx[9] = c20*v6*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3]); 
+  dydx[8]  = c20*v6*( LNS[2]*Ln_cap[3] - Ln_cap[2]*LNS[3]);
+  dydx[9]  = c20*v6*(-LNS[1]*Ln_cap[3] + Ln_cap[1]*LNS[3]); 
   dydx[10] = c20*v6*( LNS[1]*Ln_cap[2] - Ln_cap[1]*LNS[2]);
  
   if((Ln_cap[1]==0.0)&&(Ln_cap[3]==0.0))
       dydx[11] = y[1];
   else
-//        dydx(11) = y(1) - Ln_cap(2)*(dydx(8)*Ln_cap(3) - Ln_cap(1)*dydx(10))/(Ln_cap(1)*Ln_cap(1) + Ln_cap(3)*Ln_cap(3))
     dydx[11] = y[1] - Ln_cap[2]*(Ln_cap[3]*dydx[8] - Ln_cap[1]*dydx[10])/(Ln_cap[1]*Ln_cap[1] + Ln_cap[3]*Ln_cap[3]);
+
   free_dvector(LNS1,1,3);
   free_dvector(LNS2,1,3);
   free_dvector(LNS,1,3);  		 
@@ -154,6 +155,7 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
 double PN_CircOrbit_compute_r(double y[])
 {
   double om, v2, v3, v4, oov2, LnS1, LnS2, SS, r;
+  double V2, V3, V4;  /* powers of v multiplied by flags */
   om = m*y[1];
   v2 = pow(om,(2.0/3.0));
   v3 = om;
@@ -161,23 +163,23 @@ double PN_CircOrbit_compute_r(double y[])
   oov2 = 1.0/v2;
 
   /* set some powers of v to zero according to flags */
-  // v1 = v1*f1;
-  v2 = v2*f2;
-  v3 = v3*f3;
-  v4 = v4*f4;
-  // v5 = v5*f5;
-  // v6 = v6*f6;
-  // v7 = v7*f7;
+  // V1 = v1*f1;
+  V2 = v2*f2;
+  V3 = v3*f3;
+  V4 = v4*f4;
+  // V5 = v5*f5;
+  // V6 = v6*f6;
+  // V7 = v7*f7;
 
   LnS1 = (y[8]*y[2] + y[9]*y[3] + y[10]*y[4]);
   LnS2 = (y[8]*y[5] + y[9]*y[6] + y[10]*y[7]);
   SS = (y[2]*y[5] + y[3]*y[6] + y[4]*y[7]);
   r  = m*oov2*( 1.0 
-               - (3.0 - nu)*v2/3.0 
-               - v3*( LnS1*(2.0*m1*m1/m/m+3.0*nu)/m1/m1 
+               - (3.0 - nu)*V2/3.0 
+               - V3*( LnS1*(2.0*m1*m1/m/m+3.0*nu)/m1/m1 
                      +LnS2*(2.0*m1*m1/m/m+3.0*nu)/m2/m2 )/3.0
                + ( nu*(19.0/4.0 + nu/9.0) 
-                   - 0.5*nu*(SS - 3.0*LnS1*LnS2)/m1/m1/m2/m2 )*v4);
+                   - 0.5*nu*(SS - 3.0*LnS1*LnS2)/m1/m1/m2/m2 )*V4);
   return r;
 }
 
