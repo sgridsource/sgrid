@@ -68,7 +68,7 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
 void PN_CircOrbit_derivs(double x,double y[],double dydx[])
 {
   int i;
-  double om, v1, v2, v4, v5, v6, v7, oov1;
+  double om, v1, v2, v3, v4, v5, v6, v7, oov1;
   double *Ln_cap, *S1, *S2, *LNS1, *LNS2, *LNS, Ln_cap_dot_S1, Ln_cap_dot_S2, S1_dot_S2, Ln_cap_mod;
   // nrhs++;
 
@@ -76,14 +76,24 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
   LNS2 = dvector(1,3);
   LNS = dvector(1,3);
 
-  om  = m*y[1];            // mw^1
+  om  = m*y[1];            // mw^1  /* here w is dimensionful orb. ang. vel. */
   v1  = pow(om,(1.0/3.0)); // mw^1/3
   v2  = v1*v1;             // mw^2/3
+  v3  = om;                // mw
   v4  = v2*v2;             // mw^4/3 
   v5  = v4*v1;             // mw^5/3
-  v6  = om*om;             // mw^2
-  v7  = v6*v1;	         // mw^7/3
+  v6  = v3*v3;             // mw^2
+  v7  = v6*v1;	           // mw^7/3
   oov1 = 1.0/v1;           // mw^-1/3
+
+  /* set some powers of v to zero according to flags */
+  v1 = v1*f1;
+  v2 = v2*f2;
+  v3 = v3*f3;
+  v4 = v4*f4;
+  v5 = v5*f5;
+  v6 = v6*f6;
+  v7 = v7*f7;
 
   /* pointers S1, S2, Ln_cap to correct place inside y */
   S1 = y+1;
@@ -109,7 +119,7 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
 // Omega
   dydx[1] = c1*y[1]*y[1]*v5*(1.0 
                             - c2*v2 
-                            - (c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5)*om 
+                            - (c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5)*v3 
                             + c6*v4
                             - c7*S1_dot_S2*v4 
                             + c8*Ln_cap_dot_S1*Ln_cap_dot_S2*v4 
@@ -143,17 +153,28 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
    has been called before */
 double PN_CircOrbit_compute_r(double y[])
 {
-  double om, v2, v4, oov2, LnS1, LnS2, SS, r;
+  double om, v2, v3, v4, oov2, LnS1, LnS2, SS, r;
   om = m*y[1];
-  v2 = pow(om,(2.0/3.0));	 
+  v2 = pow(om,(2.0/3.0));
+  v3 = om;
   v4 = v2*v2;
   oov2 = 1.0/v2;
+
+  /* set some powers of v to zero according to flags */
+  // v1 = v1*f1;
+  v2 = v2*f2;
+  v3 = v3*f3;
+  v4 = v4*f4;
+  // v5 = v5*f5;
+  // v6 = v6*f6;
+  // v7 = v7*f7;
+
   LnS1 = (y[8]*y[2] + y[9]*y[3] + y[10]*y[4]);
   LnS2 = (y[8]*y[5] + y[9]*y[6] + y[10]*y[7]);
   SS = (y[2]*y[5] + y[3]*y[6] + y[4]*y[7]);
   r  = m*oov2*( 1.0 
                - (3.0 - nu)*v2/3.0 
-               - om*( LnS1*(2.0*m1*m1/m/m+3.0*nu)/m1/m1 
+               - v3*( LnS1*(2.0*m1*m1/m/m+3.0*nu)/m1/m1 
                      +LnS2*(2.0*m1*m1/m/m+3.0*nu)/m2/m2 )/3.0
                + ( nu*(19.0/4.0 + nu/9.0) 
                    - 0.5*nu*(SS - 3.0*LnS1*LnS2)/m1/m1/m2/m2 )*v4);
