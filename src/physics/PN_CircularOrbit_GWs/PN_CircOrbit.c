@@ -177,7 +177,7 @@ double PN_CircOrbit_compute_r(double y[])
   r  = m*oov2*( 1.0 
                - (3.0 - nu)*V2/3.0 
                - V3*( LnS1*(2.0*m1*m1/m/m+3.0*nu)/m1/m1 
-                     +LnS2*(2.0*m1*m1/m/m+3.0*nu)/m2/m2 )/3.0
+                     +LnS2*(2.0*m2*m2/m/m+3.0*nu)/m2/m2 )/3.0
                + ( nu*(19.0/4.0 + nu/9.0) 
                    - 0.5*nu*(SS - 3.0*LnS1*LnS2)/m1/m1/m2/m2 )*V4);
   return r;
