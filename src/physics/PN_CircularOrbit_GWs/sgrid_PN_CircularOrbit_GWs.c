@@ -83,14 +83,22 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_dt", "10",   "time step");
   AddPar("PN_CircularOrbit_GWs_verbose", "yes", "verbose [yes,no]");
 
+  /* pick EOM used */
+  AddPar("PN_CircularOrbit_GWs_OrbitEOMtype", "BuonannoEtAl2003",
+         "[BuonannoEtAl2003,TaylorT4]");
+
   /* flags for trajectories: if 1 include this PN term in EOM: */
-  AddPar("PN_CircularOrbit_GWs_OrbitFlag1", "1", "if 1 include O(v)^1 terms in EOM");
-  AddPar("PN_CircularOrbit_GWs_OrbitFlag2", "1", "if 1 include O(v)^2 terms in EOM");
-  AddPar("PN_CircularOrbit_GWs_OrbitFlag3", "1", "if 1 include O(v)^3 terms in EOM");
-  AddPar("PN_CircularOrbit_GWs_OrbitFlag4", "1", "if 1 include O(v)^4 terms in EOM");
-  AddPar("PN_CircularOrbit_GWs_OrbitFlag5", "1", "if 1 include O(v)^5 terms in EOM");
-  AddPar("PN_CircularOrbit_GWs_OrbitFlag6", "1", "if 1 include O(v)^6 terms in EOM");
-  AddPar("PN_CircularOrbit_GWs_OrbitFlag7", "1", "if 1 include O(v)^7 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOv1", "1", "if 1 include O(v)^1 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOv2", "1", "if 1 include O(v)^2 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOv3", "1", "if 1 include O(v)^3 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOv4", "1", "if 1 include O(v)^4 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOv5", "1", "if 1 include O(v)^5 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOv6", "1", "if 1 include O(v)^6 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOv7", "1", "if 1 include O(v)^7 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOLS1", "1", "if 1 include O(LS)^1 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOLS2", "1", "if 1 include O(LS)^2 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOLS3", "1", "if 1 include O(LS)^3 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_OrbitOSS1", "1", "if 1 include O(SS)^1 terms in EOM");
   
   return 0;
 }
