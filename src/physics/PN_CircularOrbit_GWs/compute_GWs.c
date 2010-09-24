@@ -330,11 +330,13 @@ void compute_P15Qc(double y[], double lambda[], double n[], double theta, double
   n_X_S_p_Delta[2] = S_p_Delta[1]*n[3] - n[1]*S_p_Delta[3];
   n_X_S_p_Delta[3] = n[1]*S_p_Delta[2] - S_p_Delta[1]*n[2];    
 //  call cross_prod(lambda,    S9_p_5Delta, lambda_X_S9_p_5Delta)
-   lambda_X_S9_p_5Delta[1] = lambda[2]*S9_p_5Delta[3] - S9_p_5Delta[2]*lambda[3];     lambda_X_S9_p_5Delta[2] = S9_p_5Delta[1]*lambda[3] - lambda[1]*S9_p_5Delta[3];
-   lambda_X_S9_p_5Delta[3] = lambda[1]*S9_p_5Delta[2] - S9_p_5Delta[1]*lambda[2];
+  lambda_X_S9_p_5Delta[1] = lambda[2]*S9_p_5Delta[3] - S9_p_5Delta[2]*lambda[3];
+  lambda_X_S9_p_5Delta[2] = S9_p_5Delta[1]*lambda[3] - lambda[1]*S9_p_5Delta[3];
+  lambda_X_S9_p_5Delta[3] = lambda[1]*S9_p_5Delta[2] - S9_p_5Delta[1]*lambda[2];
 //  call cross_prod(S_p_Delta, NN,          S_p_Delta_X_NN)
-   S_p_Delta_X_NN[1] = S_p_Delta[2]*NN[3] - NN[2]*S_p_Delta[3];     S_p_Delta_X_NN[2] = NN[1]*S_p_Delta[3] - S_p_Delta[1]*NN[3];
-   S_p_Delta_X_NN[3] = S_p_Delta[1]*NN[2] - NN[1]*S_p_Delta[2];
+  S_p_Delta_X_NN[1] = S_p_Delta[2]*NN[3] - NN[2]*S_p_Delta[3];
+  S_p_Delta_X_NN[2] = NN[1]*S_p_Delta[3] - S_p_Delta[1]*NN[3];
+  S_p_Delta_X_NN[3] = S_p_Delta[1]*NN[2] - NN[1]*S_p_Delta[2];
 
   for(i=1;i<=3;i++){
       for(j=1;j<=3;j++){
@@ -346,7 +348,7 @@ void compute_P15Qc(double y[], double lambda[], double n[], double theta, double
                                                + 7.5*NN_dot_n*pow(NN_dot_lambda,2)*(n[i]*lambda[j]+n[j]*lambda[i])
                                              )
                                 - NN_dot_lambda*(1.0/12.0*(101.0 -12.0*nu)*n[i]*n[j] - 0.5*(19.0-4.0*nu)*lambda[i]*lambda[j])
-                                - 1.0/12.0*(149.0-6.0*nu)*(n[i]*lambda[j]+n[j]*lambda[i]) 
+                                - 1.0/12.0*(149.0-36.0*nu)*(n[i]*lambda[j]+n[j]*lambda[i]) 
                               ) 
                     - 2.0/m/m*(  
                                 lambda[i]*lambda[j]*Ln_cap_dot_S5_p_3Delta
