@@ -134,7 +134,8 @@ void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, d
   {
     for(j=1;j<=3;j++)
     {
-       double Qij = 2.0*(lambda[i]*lambda[j]-n[i]*n[j]);
+       double Qij = 2.0*(lambda[i]*lambda[j]-n[i]*n[j]);  /* Eqn (4.9a) of Kidder, PRD 52, 821 (1995) */
+
        h[i][j] = Qij
                  + P05Q[i][j]*sqrt(m/y[0]) * AOv1
                  + P1Q[i][j]*(m1+m2)/y[0]  * AOv2
@@ -194,6 +195,7 @@ void compute_P05Qc(double lambda[], double n[], double theta, double phi, double
 
   NN = dvector(1,3);
    
+  /* get N_hat */
   NN[1] = sin(theta)*cos(phi);
   NN[2] = sin(theta)*sin(phi);
   NN[3] = cos(theta);
@@ -201,11 +203,13 @@ void compute_P05Qc(double lambda[], double n[], double theta, double phi, double
 //printf("NN");
 //printf("%10.6e %10.6e %10.6e \n", NN[1], NN[2], NN[3]);
 
+  /* set scalar products */
   NN_dot_n = NN[1]*n[1]+NN[2]*n[2]+NN[3]*n[3];
   NN_dot_lambda = NN[1]*lambda[1]+NN[2]*lambda[2]+NN[3]*lambda[3];
 //printf("NN_dot_n, NN_dot_lambda");
 //printf("%10.6e %10.6e \n", NN_dot_n, NN_dot_lambda);
 
+  /* Eqn (4.9b) of Kidder, PRD 52, 821 (1995) */
   for(i=1;i<=3;i++){
       for(j=1;j<=3;j++){
           P05Q[i][j] = deltam/m*(3.0*NN_dot_n*( n[i]*lambda[j]+n[j]*lambda[i])
@@ -231,17 +235,21 @@ void compute_P1Qc(double lambda[], double n[], double theta, double phi, double 
   NN = dvector(1,3);
   Delta_cross_NN = dvector(1,3);
 
+  /* get N_hat */
   NN[1] = sin(theta)*cos(phi);
   NN[2] = sin(theta)*sin(phi);
   NN[3] = cos(theta);
 
+  /* Delta \cross N */
   Delta_cross_NN[1] = Delta[2]*NN[3] - NN[2]*Delta[3];
   Delta_cross_NN[2] = NN[1]*Delta[3] - Delta[1]*NN[3];
   Delta_cross_NN[3] = Delta[1]*NN[2] - NN[1]*Delta[2];
- 
+
+  /* set scalar products */
   NN_dot_n = NN[1]*n[1]+NN[2]*n[2]+NN[3]*n[3];
   NN_dot_lambda = NN[1]*lambda[1]+NN[2]*lambda[2]+NN[3]*lambda[3];
 
+  /* Eqn (4.9c) of Kidder, PRD 52, 821 (1995) */
   for(i=1;i<=3;i++){
       for(j=1;j<=3;j++){
         P1Q[i][j] = 2.0/3.0*(1.0-3.0*nu) 
@@ -290,54 +298,65 @@ void compute_P15Qc(double y[], double lambda[], double n[], double theta, double
   n_X_S_p_Delta = dvector(1,3);
   lambda_X_S9_p_5Delta = dvector(1,3);
   S_p_Delta_X_NN = dvector(1,3);
- 
+
+  /* get mass */ 
   m = m1 + m2;
- 
+
+  /* set Delta, S, Ln_hat */
   for(i=1;i<=3;i++){
     Delta[i] = m*(y[i+4]/m2 - y[i+1]/m1);
     S[i] = y[i+1] + y[i+4];
     Ln_cap[i] = y[i+7];
   }
-  
+
+  /* renormalize Ln_hat */
   for(i=1;i<=3;i++){
       Ln_cap[i] = Ln_cap[i]/sqrt(Ln_cap[1]*Ln_cap[1] + Ln_cap[2]*Ln_cap[2] + Ln_cap[3]*Ln_cap[3]);
   }
 
+  /* get N_hat */
   NN[1] = sin(theta)*cos(phi);
   NN[2] = sin(theta)*sin(phi);
   NN[3] = cos(theta);
-  
+
+  /* set some sums of S and Delta */  
   for(i=1;i<=3;i++){
       S5_p_3Delta[i] = 5.0*S[i] + 3.0*deltam/m*Delta[i];
       S2_p_Delta[i]  = 2.0*S[i] +     deltam/m*Delta[i];
       S_p_Delta[i]   =     S[i] +     deltam/m*Delta[i];
       S9_p_5Delta[i] = 9.0*S[i] + 5.0*deltam/m*Delta[i];
   }
- 
+
+  /* set scalar products */
   NN_dot_n = NN[1]*n[1]+NN[2]*n[2]+NN[3]*n[3];
   NN_dot_lambda = NN[1]*lambda[1]+NN[2]*lambda[2]+NN[3]*lambda[3];
-//  dot_product(Ln_cap, S5_p_3Delta)
+
+  /*  dot_product(Ln_cap, S5_p_3Delta) */
   Ln_cap_dot_S5_p_3Delta = Ln_cap[1]*S5_p_3Delta[1] 
                          + Ln_cap[2]*S5_p_3Delta[2] 
                          + Ln_cap[3]*S5_p_3Delta[3];
-//  dot_product(Ln_cap,S2_p_Delta)
+
+  /* dot_product(Ln_cap,S2_p_Delta) */
   Ln_cap_dot_S2_p_Delta = Ln_cap[1]*S2_p_Delta[1]
                         + Ln_cap[2]*S2_p_Delta[2]
                         + Ln_cap[3]*S2_p_Delta[3];
 
-//  call cross_prod(n,         S_p_Delta,   n_X_S_p_Delta)
+  /* cross_prod(n, S_p_Delta) =  n_X_S_p_Delta */
   n_X_S_p_Delta[1] = n[2]*S_p_Delta[3] - S_p_Delta[2]*n[3];
   n_X_S_p_Delta[2] = S_p_Delta[1]*n[3] - n[1]*S_p_Delta[3];
   n_X_S_p_Delta[3] = n[1]*S_p_Delta[2] - S_p_Delta[1]*n[2];    
-//  call cross_prod(lambda,    S9_p_5Delta, lambda_X_S9_p_5Delta)
+
+  /*  cross_prod(lambda, S9_p_5Delta) =  lambda_X_S9_p_5Delta */
   lambda_X_S9_p_5Delta[1] = lambda[2]*S9_p_5Delta[3] - S9_p_5Delta[2]*lambda[3];
   lambda_X_S9_p_5Delta[2] = S9_p_5Delta[1]*lambda[3] - lambda[1]*S9_p_5Delta[3];
   lambda_X_S9_p_5Delta[3] = lambda[1]*S9_p_5Delta[2] - S9_p_5Delta[1]*lambda[2];
-//  call cross_prod(S_p_Delta, NN,          S_p_Delta_X_NN)
+
+  /* cross_prod(S_p_Delta, NN) = S_p_Delta_X_NN */
   S_p_Delta_X_NN[1] = S_p_Delta[2]*NN[3] - NN[2]*S_p_Delta[3];
   S_p_Delta_X_NN[2] = NN[1]*S_p_Delta[3] - S_p_Delta[1]*NN[3];
   S_p_Delta_X_NN[3] = S_p_Delta[1]*NN[2] - NN[1]*S_p_Delta[2];
 
+  /* Eqn (4.9d) of Kidder, PRD 52, 821 (1995) */
   for(i=1;i<=3;i++){
       for(j=1;j<=3;j++){
         P15Q[i][j] =  deltam/m*( 
