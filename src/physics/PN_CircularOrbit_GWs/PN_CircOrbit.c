@@ -20,6 +20,7 @@ int EOM_type;
 /* types of EOM */
 enum
 {
+  Kidder1995,       /* as in Kidder, PRD 52, 821 (1995) */
   BuonannoEtAl2003, /* Petr's implementation */
   TaylorT4          /* Taylor T4 as used in SpEC */
 };
@@ -67,6 +68,8 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
   /* set EOM_type from pars */
   if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","TaylorT4")) 
     EOM_type=TaylorT4;
+  else if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","Kidder1995"))
+    EOM_type=Kidder1995;
   else
     EOM_type=BuonannoEtAl2003;
 
@@ -248,6 +251,17 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
                       1091*Ln_cap_dot_chis*
                        (2*(deltam/m)*chis_dot_chia + chis_dot_chis))
                    ))/108864.)*V7);
+  }
+  else if(EOM_type==Kidder1995)
+  {
+    /* Evo of Omega */
+    /* Eqn (4.14) Kidder, PRD 52, 821 (1995) */
+    dydx[1] = c1*y[1]*y[1]*v5*(1.0 
+                               - c2*V2 
+                               - (c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5)*V3
+                               + c6*V4 * 0
+                               - c7*S1_dot_S2*V4 
+                               + c8*Ln_cap_dot_S1*Ln_cap_dot_S2*V4 );
   }
   else
   {

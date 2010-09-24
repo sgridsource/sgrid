@@ -85,7 +85,7 @@ int sgrid_PN_CircularOrbit_GWs()
 
   /* pick EOM used */
   AddPar("PN_CircularOrbit_GWs_OrbitEOMtype", "BuonannoEtAl2003",
-         "[BuonannoEtAl2003,TaylorT4]");
+         "[Kidder1995,BuonannoEtAl2003,TaylorT4]");
 
   /* flags for trajectories: if 1 include this PN term in EOM: */
   AddPar("PN_CircularOrbit_GWs_OrbitOv1", "1", "if 1 include O(v)^1 terms in EOM");
