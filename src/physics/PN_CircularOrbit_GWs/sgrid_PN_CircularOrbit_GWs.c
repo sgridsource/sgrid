@@ -84,7 +84,7 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_verbose", "yes", "verbose [yes,no]");
 
   /* pick EOM used */
-  AddPar("PN_CircularOrbit_GWs_OrbitEOMtype", "BuonannoEtAl2003",
+  AddPar("PN_CircularOrbit_GWs_OrbitEOMtype", "Kidder1995",
          "[Kidder1995,BuonannoEtAl2003,TaylorT4]");
 
   /* flags for trajectories: if 1 include this PN term in EOM: */

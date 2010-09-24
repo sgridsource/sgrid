@@ -175,7 +175,7 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
     chia_dot_chia *= OSS1;
     chis_dot_chia *= OSS1;
 
-    /* Taylor T4 from SpEC notebook */
+    /* Taylor T4 from Michael Boyle's SpEC notebook */
     dydx[1] = c1*y[1]*y[1]*v5*
         (1.0 + (-2.2113095238095237 - (11*nu)/4.)*V2 + 
           ((48*PI - 113*(deltam/m)*Ln_cap_dot_chia - 113*Ln_cap_dot_chis)/12. + 
