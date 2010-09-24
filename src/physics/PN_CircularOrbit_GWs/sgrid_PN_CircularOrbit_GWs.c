@@ -100,5 +100,10 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_OrbitOLS3", "1", "if 1 include O(LS)^3 terms in EOM");
   AddPar("PN_CircularOrbit_GWs_OrbitOSS1", "1", "if 1 include O(SS)^1 terms in EOM");
   
+  /* flags for wave amplitudes: if 1 include this PN term in h_ij: */
+  AddPar("PN_CircularOrbit_GWs_AmpOv1", "1", "if 1 include O(v)^1 in Amp");
+  AddPar("PN_CircularOrbit_GWs_AmpOv2", "1", "if 1 include O(v)^2 in Amp");
+  AddPar("PN_CircularOrbit_GWs_AmpOv3", "1", "if 1 include O(v)^3 in Amp");
+
   return 0;
 }
