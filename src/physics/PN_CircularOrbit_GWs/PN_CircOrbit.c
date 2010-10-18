@@ -22,6 +22,7 @@ enum
 {
   Kidder1995,       /* as in Kidder, PRD 52, 821 (1995) */
   BuonannoEtAl2003, /* Petr's implementation */
+  TaylorT4_bug,     /* M. Boyle: this old T4 from SpEC has a bug  */
   TaylorT4          /* Taylor T4 as used in SpEC */
 };
                             
@@ -66,7 +67,9 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
   c20 = 0.5/m/m/m;
 
   /* set EOM_type from pars */
-  if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","TaylorT4")) 
+  if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","TaylorT4_bug")) 
+    EOM_type=TaylorT4_bug;
+  else if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","TaylorT4")) 
     EOM_type=TaylorT4;
   else if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","Kidder1995"))
     EOM_type=Kidder1995;
@@ -138,7 +141,7 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
   S1_dot_S2     = S1[1]*S2[1] + S1[2]*S2[2] + S1[3]*S2[3];
 
   /* decide which eqn we use for freq evo */
-  if(EOM_type==TaylorT4)
+  if(EOM_type==TaylorT4_bug)
   {
     /* stuff needed for Taylor T4 omega evo */
     /* products with 
@@ -175,7 +178,7 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
     chia_dot_chia *= OSS1;
     chis_dot_chia *= OSS1;
 
-    /* Taylor T4 from Michael Boyle's SpEC notebook */
+    /* Taylor T4 from Michael Boyle's SpEC old notebook with bug */
     dydx[1] = c1*y[1]*y[1]*v5*
         (1.0 + (-2.2113095238095237 - (11*nu)/4.)*V2 + 
           ((48*PI - 113*(deltam/m)*Ln_cap_dot_chia - 113*Ln_cap_dot_chis)/12. + 
@@ -251,6 +254,106 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
                       1091*Ln_cap_dot_chis*
                        (2*(deltam/m)*chis_dot_chia + chis_dot_chis))
                    ))/108864.)*V7);
+  }
+  else if(EOM_type==TaylorT4)
+  {
+    /* stuff needed for Taylor T4 omega evo */
+    /* products with 
+       chis = 0.5*(chi1+chi2);  chia = 0.5*(chi1-chi2); */
+    double Ln_cap_dot_chis, Ln_cap_dot_chia, Ln_cap_dot_chis2, 
+           Ln_cap_dot_chis3, Ln_cap_dot_chia2, Ln_cap_dot_chia3, 
+           S1_dot_S1, S2_dot_S2, chi1_dot_chi1, chi2_dot_chi2, 
+           chis_dot_chis, chia_dot_chia, chis_dot_chia;
+
+    Ln_cap_dot_chis = 0.5*(Ln_cap_dot_S1/(m1*m1) + Ln_cap_dot_S2/(m2*m2));
+    Ln_cap_dot_chia = 0.5*(Ln_cap_dot_S1/(m1*m1) - Ln_cap_dot_S2/(m2*m2));
+    Ln_cap_dot_chis2 = Ln_cap_dot_chis*Ln_cap_dot_chis;
+    Ln_cap_dot_chis3 = Ln_cap_dot_chis2*Ln_cap_dot_chis;
+    Ln_cap_dot_chia2 = Ln_cap_dot_chia*Ln_cap_dot_chia;
+    Ln_cap_dot_chia3 = Ln_cap_dot_chia2*Ln_cap_dot_chia;
+    S1_dot_S1     = S1[1]*S1[1] + S1[2]*S1[2] + S1[3]*S1[3];
+    S2_dot_S2     = S2[1]*S2[1] + S2[2]*S2[2] + S2[3]*S2[3];
+    chi1_dot_chi1 = S1_dot_S1/(m1*m1*m1*m1);
+    chi2_dot_chi2 = S2_dot_S2/(m2*m2*m2*m2);
+    chis_dot_chis = 0.25*( chi1_dot_chi1 
+                          + 2*S1_dot_S2/(m1*m1*m2*m2) + chi2_dot_chi2 );
+    chia_dot_chia = 0.25*( chi1_dot_chi1 
+                          - 2*S1_dot_S2/(m1*m1*m2*m2) + chi2_dot_chi2 );
+    chis_dot_chia = 0.25*( chi1_dot_chi1 - chi2_dot_chi2 );
+
+    /* set some terms to zero (according to flags) */
+    Ln_cap_dot_chis *= OLS1;
+    Ln_cap_dot_chia *= OLS1;
+    Ln_cap_dot_chis2 *= OLS2;
+    Ln_cap_dot_chia2 *= OLS2;
+    Ln_cap_dot_chis3 *= OLS3;
+    Ln_cap_dot_chia3 *= OLS3;
+    chis_dot_chis *= OSS1;
+    chia_dot_chia *= OSS1;
+    chis_dot_chia *= OSS1;
+
+    /* Taylor T4 from Michael Boyle's SpEC notebook */
+    dydx[1] = c1*y[1]*y[1]*v5*
+      (1 + (-2.2113095238095237 - (11*nu)/4.)*V2 + 
+        V3*((48*PI - 113*(deltam/m)*Ln_cap_dot_chia - 113*Ln_cap_dot_chis)/
+            12. + (19*nu*Ln_cap_dot_chis)/3.) + 
+        V4*((59*nu*nu)/18. + 
+           nu*(10*chia_dot_chia - 30*Ln_cap_dot_chia2 + 
+              (13661 - 588*chis_dot_chis + 84*Ln_cap_dot_chis2)/2016.)\
+            + (34103 - 44037*chia_dot_chia - 44037*chis_dot_chis + 
+              189*(-466*(deltam/m)*chis_dot_chia + 
+                 719*(Ln_cap_dot_chia2 + 
+                    2*(deltam/m)*Ln_cap_dot_chia*Ln_cap_dot_chis + Ln_cap_dot_chis2)
+                 ))/18144.) +
+        V5*((-12477*PI - 62638*(deltam/m)*Ln_cap_dot_chia - 
+              62638*Ln_cap_dot_chis)/2016. - (79*nu*nu*Ln_cap_dot_chis)/3. + 
+           (nu*(-11907*PI + 24339*(deltam/m)*Ln_cap_dot_chia + 45950*Ln_cap_dot_chis))/
+            504.) +
+        V6*(117.72574285227559 - (1712*GammaE)/105. - 
+           (5605*nu*nu*nu)/2592. + (16*PI*PI)/3. - 
+           (145*chia_dot_chia)/448. - (145*chis_dot_chis)/448. + 
+           nu*nu*(0.6037946428571429 - (89*chia_dot_chia)/6. + 
+              (89*Ln_cap_dot_chia2)/2. - (7*chis_dot_chis)/144. + 
+              (3041*Ln_cap_dot_chis2)/144.) + 
+           (5*((1035 + 50624*(deltam/m)*(deltam/m))*Ln_cap_dot_chia2 - 
+                522*(deltam/m)*chis_dot_chia - 21504*PI*Ln_cap_dot_chis + 
+                51659*Ln_cap_dot_chis2 + 
+                2*(deltam/m)*Ln_cap_dot_chia*(-10752*PI + 51659*Ln_cap_dot_chis)))/4032.\
+            + (nu*(-56198689 + 2045736*PI*PI + 1187190*chia_dot_chia + 
+                714798*chis_dot_chis + 2903040*PI*Ln_cap_dot_chis - 
+                54*(65815*Ln_cap_dot_chia2 - 
+                   30002*(deltam/m)*chis_dot_chia + 
+                   386526*(deltam/m)*Ln_cap_dot_chia*Ln_cap_dot_chis + 
+                   341411*Ln_cap_dot_chis2)))/217728. - 
+           (856*log(16))/105. - (1712*log(v1))/105.) +
+        V7*((2045*nu*nu*nu*Ln_cap_dot_chis)/216. + 
+           (nu*nu*(365980*PI - 291109*(deltam/m)*Ln_cap_dot_chia - 
+                1294272*Ln_cap_dot_chia2*Ln_cap_dot_chis + 
+                3*(-398269 + 143808*chia_dot_chia - 1960*chis_dot_chis)*
+                 Ln_cap_dot_chis + 840*Ln_cap_dot_chis3))/6048. + 
+           nu*((739*(deltam/m)*Ln_cap_dot_chia3)/2. + 
+              chia_dot_chia*(24*PI - (20269*Ln_cap_dot_chis)/144.) + 
+              Ln_cap_dot_chia2*(-72*PI + (60907*Ln_cap_dot_chis)/144.) + 
+              ((deltam/m)*Ln_cap_dot_chia*
+                 (843811 - 744912*chia_dot_chia + 11760*chis_dot_chis + 
+                   645036*Ln_cap_dot_chis2))/6048. + 
+              (3228075*PI + Ln_cap_dot_chis*
+                  (10713953 - 1914948*(deltam/m)*chis_dot_chia - 
+                    851634*chis_dot_chis + 2895102*Ln_cap_dot_chis2))/
+               54432.) + (-119205*PI - 10076804*Ln_cap_dot_chis + 
+              4*(-2512188*(deltam/m)*Ln_cap_dot_chia3 + 
+                 756*Ln_cap_dot_chia2*
+                  (648*PI - 3323*(1 + 2*(deltam/m)*(deltam/m))*Ln_cap_dot_chis) + 
+                 (deltam/m)*Ln_cap_dot_chia*
+                  (-2519201 + 824796*chia_dot_chia + 
+                    1649592*(deltam/m)*chis_dot_chia + 824796*chis_dot_chis + 
+                    2268*(432*PI - 3323*Ln_cap_dot_chis)*Ln_cap_dot_chis) - 
+                 756*(216*PI*(2*(deltam/m)*chis_dot_chia + chis_dot_chis) + 
+                    chia_dot_chia*(216*PI - 1091*Ln_cap_dot_chis) - 
+                    1091*(2*(deltam/m)*chis_dot_chia + chis_dot_chis)*
+                     Ln_cap_dot_chis - 648*PI*Ln_cap_dot_chis2 + 
+                    3323*Ln_cap_dot_chis3)))/108864.) 
+      );
   }
   else if(EOM_type==Kidder1995)
   {
