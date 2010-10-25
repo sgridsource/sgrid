@@ -104,6 +104,7 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_AmpOv1", "1", "if 1 include O(v)^1 in Amp");
   AddPar("PN_CircularOrbit_GWs_AmpOv2", "1", "if 1 include O(v)^2 in Amp");
   AddPar("PN_CircularOrbit_GWs_AmpOv3", "1", "if 1 include O(v)^3 in Amp");
+  AddPar("PN_CircularOrbit_GWs_AmpOv4", "0", "if 1 include O(v)^4 in Amp");
 
   return 0;
 }

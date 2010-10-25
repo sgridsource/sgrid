@@ -5,11 +5,12 @@
 void compute_P05Qc(double lambda[], double n[], double theta, double phi, double **P05Q, double deltam, double m);
 void compute_P1Qc(double lambda[], double n[], double theta, double phi, double **P1Q, double deltam, double m, double Delta[], double nu);
 void compute_P15Qc(double y[], double lambda[], double n[], double theta, double phi, double **P15Q, double deltam, double m1, double m2, double nu);
+void compute_P2QSSc(double y[], double n[], double theta, double phi, double **P2QSSc, double m1, double m2);
 
 void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, double theta, double phi, double m1, double m2)
 {
   int i,j;
-  double deltam, m, nu;   
+  double r, deltam, m, nu;   
   double
     *es1, 
     *es2, 
@@ -23,16 +24,19 @@ void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, d
     **Tplus,
     **P05Q,
     **P1Q,
-    **P15Q;
-  int AOv1, AOv2, AOv3; /* flags for amplitude */
+    **P15Q,
+    **P2QSSc;
+  int AOv1, AOv2, AOv3, AOv4; /* flags for amplitude */
 
   /* set flags for amplitude */
   AOv1 = Geti("PN_CircularOrbit_GWs_AmpOv1");
   AOv2 = Geti("PN_CircularOrbit_GWs_AmpOv2");
   AOv3 = Geti("PN_CircularOrbit_GWs_AmpOv3");
+  AOv4 = Geti("PN_CircularOrbit_GWs_AmpOv4");
 
 //    printf("%s %10.6e %10.6e \n %10.6e %10.6e %10.6e \n %10.6e %10.6e %10.6e \n %10.6e %10.6e %10.6e \n %10.6e\n","y in compute_GW:", 
 //            y[0], y[1], y[2], y[3],y[4],y[5],y[6],y[7],y[8],y[9],y[10], y[11]);
+  r = y[0];
   deltam = m1 - m2;
   m = m1 + m2;
   nu  = m1*m2/m/m;
@@ -49,6 +53,7 @@ void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, d
   P05Q   = dmatrix(1,3,1,3);
   P1Q    = dmatrix(1,3,1,3);
   P15Q   = dmatrix(1,3,1,3);
+  P2QSSc = dmatrix(1,3,1,3);
 
   /* compute Delta from spins */
   Delta[1] = m*(y[5]/m2 - y[2]/m1);
@@ -128,6 +133,7 @@ void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, d
   compute_P05Qc(lambda, n, theta, phi, P05Q, deltam, m);
   compute_P1Qc(lambda, n, theta, phi, P1Q, deltam, m, Delta, nu);
   compute_P15Qc(y, lambda, n, theta, phi, P15Q, deltam, m1, m2, nu);  
+  compute_P2QSSc(y, n, theta,phi, P2QSSc, m1,m2);
 
   /* get h_ij / [2mu/D * m/r] */
   for(i=1;i<=3;i++)
@@ -137,9 +143,10 @@ void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, d
        double Qij = 2.0*(lambda[i]*lambda[j]-n[i]*n[j]);  /* Eqn (4.9a) of Kidder, PRD 52, 821 (1995) */
 
        h[i][j] = Qij
-                 + P05Q[i][j]*sqrt(m/y[0]) * AOv1
-                 + P1Q[i][j]*(m1+m2)/y[0]  * AOv2
-                 + P15Q[i][j]*pow((m1+m2)/y[0],1.5) * AOv3;
+                 + P05Q[i][j]*sqrt(m/r)    * AOv1
+                 + P1Q[i][j]*(m/r)         * AOv2
+                 + P15Q[i][j]*pow(m/r,1.5) * AOv3
+                 + P2QSSc[i][j]*m*m/(r*r)  * AOv4;
     }
   }
 //printf("%s\n", "after h[i][j]"); 
@@ -181,6 +188,7 @@ void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, d
   free_dmatrix(P05Q,1,3,1,3);
   free_dmatrix(P1Q,1,3,1,3);
   free_dmatrix(P15Q,1,3,1,3);
+  free_dmatrix(P2QSSc,1,3,1,3);
   return;
 }
 
@@ -392,4 +400,43 @@ void compute_P15Qc(double y[], double lambda[], double n[], double theta, double
   free_dvector(n_X_S_p_Delta,1,3);
   free_dvector(lambda_X_S9_p_5Delta,1,3);
   free_dvector(S_p_Delta_X_NN,1,3);
+}
+
+/* Spin-Spin term (at 2PN order) */
+void compute_P2QSSc(double y[], double n[], double theta, double phi, double **P2QSSc, double m1, double m2)
+{
+  int i,j;
+  double m, mqube, mu,
+         S1_dot_S2, n_dot_S1, n_dot_S2;
+  double *S1, *S2;
+  double rom3_P2QSS_ij;
+
+  /* spin pointers */
+  S1 = y+1;
+  S2 = y+4;
+
+  /* get mass and mu */
+  m = m1 + m2;
+  mu = m1*m2/m;
+  mqube = m*m*m;
+
+  /* set scalar products */
+  S1_dot_S2 = S1[1]*S2[1]+S1[2]*S2[2]+S1[3]*S2[3];
+  n_dot_S2  =  n[1]*S2[1]+ n[2]*S2[2]+ n[3]*S2[3];
+  n_dot_S1  = S1[1]*n[1] +S1[2]*n[2] +S1[3]*n[3];
+
+  /* Eqn (3.22b) of Kidder, PRD 52, 821 (1995) */
+  for(i=1;i<=3;i++)
+  {
+    for(j=1;j<=3;j++)
+    {
+      /* (r/m)^3 P^2Q_{SS}^ij */
+      rom3_P2QSS_ij = (-6.0/(mu*mqube))*
+                      ( n[i]*n[j]*(S1_dot_S2-5.0*n_dot_S1*n_dot_S2) + 
+                        (n[i]*S1[j]+n[j]*S1[i])*n_dot_S2 +
+                        (n[i]*S2[j]+n[j]*S2[i])*n_dot_S1 
+                      );
+      P2QSSc[i][j] = rom3_P2QSS_ij;
+    }
+  }
 }
