@@ -206,8 +206,13 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 */
 
   /* print header in orbit file */
-  fprintf(out_orb, "# time  separation  omega  S1x  S1y  S1z  S2x  S2y  S2z"
-                   "  Lnx  Lny  Lnz  Phi");
+  if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "S/m^2"))
+    fprintf(out_orb, "# time  separation  omega  S1x/m1^2  S1y/m1^2  S1z/m1^2"
+                     "  S2x/m2^2  S2y/m2^2  S2z/m2^2"
+                     "  Lnx  Lny  Lnz  Phi");
+  else
+    fprintf(out_orb, "# time  separation  omega  S1x  S1y  S1z  S2x  S2y  S2z"
+                     "  Lnx  Lny  Lnz  Phi");
   if(theta_h>=0.0) fprintf(out_orb, "  {h+,hx}(%g,%g)\n", theta_h, phi_h);
   else             fprintf(out_orb, "\n");
 
@@ -250,8 +255,15 @@ int PN_CircularOrbit_GWs(tGrid *grid)
 
     /* output orbit file */
     fprintf(out_orb, "%-.16e", time);
-    for(i=0; i<=11; i++)
-      fprintf(out_orb, "  %+.16e", yvec[i]);
+    if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "S/m^2"))
+    {
+      for(i=0; i<=1; i++)  fprintf(out_orb, "  %+.16e", yvec[i]);
+      for(i=2; i<=4; i++)  fprintf(out_orb, "  %+.16e", yvec[i]/(m1*m1));
+      for(i=5; i<=7; i++)  fprintf(out_orb, "  %+.16e", yvec[i]/(m2*m2));
+      for(i=8; i<=11; i++) fprintf(out_orb, "  %+.16e", yvec[i]);
+    }
+    else
+      for(i=0; i<=11; i++) fprintf(out_orb, "  %+.16e", yvec[i]);
     if(theta_h>=0.0)
     {
       double hplus, hcross;
