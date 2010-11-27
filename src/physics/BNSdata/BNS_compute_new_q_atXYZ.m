@@ -5,10 +5,10 @@
 
 
 (* variables *)
-variables = {BNSPsi, BNSB[a], BNSalphaP, BNSSigma, BNSdSigma[a], BNSvRS[a],
+variables = {BNSPsi, BNSB[a], BNSalphaP, BNSSigma, BNSdSigma[a], BNSwB[a],
              temp4}
 
-constvariables = {Psi, B[a], alphaP, Sigma, dSigma[a], vRS[a], x,y, 
+constvariables = {Psi, B[a], alphaP, Sigma, dSigma[a], wB[a], x,y, 
                   OmegaCrossR[a]}
 
 (* compute in this order *)
@@ -26,7 +26,7 @@ tocompute = {
   Cinstruction == "y = Y;",
   Cinstruction == "}",
 
-  (* Psi, B[a], alphaP, Sigma, dSigma[a], vRS[a] by interpolation *)
+  (* Psi, B[a], alphaP, Sigma, dSigma[a], wB[a] by interpolation *)
   Cinstruction == "spec_Coeffs(box, BNSPsi, temp4);",
   Cinstruction == "Psi = spec_interpolate(box, temp4, X,Y,Z);",
 
@@ -54,14 +54,14 @@ tocompute = {
   Cinstruction == "spec_Coeffs(box, BNSdSigma3, temp4);",
   Cinstruction == "dSigma3 = spec_interpolate(box, temp4, X,Y,Z);",
 
-  Cinstruction == "spec_Coeffs(box, BNSvRS1, temp4);",
-  Cinstruction == "vRS1 = spec_interpolate(box, temp4, X,Y,Z);",
+  Cinstruction == "spec_Coeffs(box, BNSwB1, temp4);",
+  Cinstruction == "wB1 = spec_interpolate(box, temp4, X,Y,Z);",
 
-  Cinstruction == "spec_Coeffs(box, BNSvRS2, temp4);",
-  Cinstruction == "vRS2 = spec_interpolate(box, temp4, X,Y,Z);",
+  Cinstruction == "spec_Coeffs(box, BNSwB2, temp4);",
+  Cinstruction == "wB2 = spec_interpolate(box, temp4, X,Y,Z);",
 
-  Cinstruction == "spec_Coeffs(box, BNSvRS3, temp4);",
-  Cinstruction == "vRS3 = spec_interpolate(box, temp4, X,Y,Z);",
+  Cinstruction == "spec_Coeffs(box, BNSwB3, temp4);",
+  Cinstruction == "wB3 = spec_interpolate(box, temp4, X,Y,Z);",
 
   (**************)
   (* compute q: *)
@@ -84,7 +84,7 @@ tocompute = {
   vRI[a] == dSigma[a],
 
   (* vR[a] is 3-vel. in rotating frame *)
-  vR[a] == vRS[a] + vRI[a],
+  vR[a] == wB[a] + vRI[a],
 
   (* vI[a] is vel in inertial frame *)
   (* vI[a] == vR[a] + OmegaCrossR[a], *)
@@ -173,13 +173,13 @@ variabledeclarations[] := Module[{},
   prdecvarname[{BNSalphaP},    "BNSdata_alphaP"];
   prdecvarname[{BNSB[a]},      "BNSdata_Bx"];
   prdecvarname[{BNSq},         "BNSdata_q"];
-  prdecvarname[{BNSvRS[a]},    "BNSdata_vRSx"];
+  prdecvarname[{BNSwB[a]},    "BNSdata_wBx"];
   prdecvarname[{BNSSigma},     "BNSdata_Sigma"];
   prdecvarname[{BNSdSigma[a]}, "BNSdata_Sigmax"];
   prdecvarname[{temp4},        "BNSdata_temp4"];
 
   pr["double Psi, B1,B2,B3, alphaP;\n"];
-  pr["double Sigma, dSigma1,dSigma2,dSigma3, vRS1,vRS2,vRS3, x,y;\n"];
+  pr["double Sigma, dSigma1,dSigma2,dSigma3, wB1,wB2,wB3, x,y;\n"];
 
   pr["\n"];
 ];    

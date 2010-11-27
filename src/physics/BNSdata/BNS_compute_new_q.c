@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 23.2.2008 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 27.11.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -47,10 +47,10 @@ double *B2 = box->v[index_BNSdata_Bx + 1];
 double *B3 = box->v[index_BNSdata_Bx + 2];
 int index_BNSdata_q = Ind("BNSdata_q");
 double *q = box->v[index_BNSdata_q + 0];
-int index_BNSdata_vRSx = Ind("BNSdata_vRSx");
-double *vRS1 = box->v[index_BNSdata_vRSx + 0];
-double *vRS2 = box->v[index_BNSdata_vRSx + 1];
-double *vRS3 = box->v[index_BNSdata_vRSx + 2];
+int index_BNSdata_wBx = Ind("BNSdata_wBx");
+double *wB1 = box->v[index_BNSdata_wBx + 0];
+double *wB2 = box->v[index_BNSdata_wBx + 1];
+double *wB3 = box->v[index_BNSdata_wBx + 2];
 int index_BNSdata_Sigma = Ind("BNSdata_Sigma");
 double *Sigma = box->v[index_BNSdata_Sigma + 0];
 int index_BNSdata_Sigmax = Ind("BNSdata_Sigmax");
@@ -158,17 +158,17 @@ dSigma3[ijk]
 
 vR1
 =
-vRI1 + vRS1[ijk]
+vRI1 + wB1[ijk]
 ;
 
 vR2
 =
-vRI2 + vRS2[ijk]
+vRI2 + wB2[ijk]
 ;
 
 vR3
 =
-vRI3 + vRS3[ijk]
+vRI3 + wB3[ijk]
 ;
 
 oouzerosqr
@@ -266,4 +266,4 @@ q[ijk]
 }  /* end of function */
 
 /* BNS_compute_new_q.c */
-/* nvars = 15, n* = 64,  n/ = 37,  n+ = 70, n = 171, O = 1 */
+/* nvars = 15, n* = 64,  n/ = 37,  n+ = 71, n = 172, O = 1 */

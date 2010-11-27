@@ -7,7 +7,7 @@
 (* variables *)
 variables = {Psi, B[a], alphaP, Sigma, dB[a,b], dSigma[a],
 	     psi, g[a,b], alpha, beta[a], K[a,b], rho, jdo[a], Sdo[a,b],
-             q, vRS[a], x, y}
+             q, wB[a], x, y}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -53,7 +53,7 @@ tocompute = {
   vRI[a] == dSigma[a],
 
   (* vR[a] is 3-vel. in rotating frame *)
-  vR[a] == vRS[a] + vRI[a],
+  vR[a] == wB[a] + vRI[a],
 
   (* compute square of u^0 in rotating frame *)
   oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
@@ -158,7 +158,7 @@ variabledeclarations[] := Module[{},
   prdecvarname[{alphaP},  "BNSdata_alphaP"];
   prdecvarname[{Sigma},   "BNSdata_Sigma"];
   prdecvarname[{q},      "BNSdata_q"];
-  prdecvarname[{vRS[a]}, "BNSdata_vRSx"];
+  prdecvarname[{wB[a]}, "BNSdata_wBx"];
 
   prdecvarname[{dB[a,b]}, 	"BNSdata_Bxx"];
   prdecvarname[{dSigma[a]},     "BNSdata_Sigmax"];

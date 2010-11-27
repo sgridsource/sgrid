@@ -5,7 +5,7 @@
 
 
 (* variables *)
-variables = {Psi, B[a], alphaP, Sigma, dSigma[a], q, vRS[a], x, y}
+variables = {Psi, B[a], alphaP, Sigma, dSigma[a], q, wB[a], x, y}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -36,7 +36,7 @@ tocompute = {
   vRI[a] == dSigma[a],
 
   (* vR[a] is 3-vel. in rotating frame *)
-  vR[a] == vRS[a] + vRI[a],
+  vR[a] == wB[a] + vRI[a],
 
   (* vI[a] is vel in inertial frame *)
   (* vI[a] == vR[a] + OmegaCrossR[a], *)
@@ -133,7 +133,7 @@ variabledeclarations[] := Module[{},
   prdecvarname[{alphaP},    "BNSdata_alphaP"];
   prdecvarname[{B[a]},      "BNSdata_Bx"];
   prdecvarname[{q},         "BNSdata_q"];
-  prdecvarname[{vRS[a]},    "BNSdata_vRSx"];
+  prdecvarname[{wB[a]},    "BNSdata_wBx"];
   prdecvarname[{Sigma},     "BNSdata_Sigma"];
   prdecvarname[{dSigma[a]}, "BNSdata_Sigmax"];
 

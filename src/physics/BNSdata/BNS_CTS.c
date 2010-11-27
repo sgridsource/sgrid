@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 21.2.2008 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 27.11.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -249,24 +249,24 @@ double *beta2 = box->v[index_betax + 1];
 double *beta3 = box->v[index_betax + 2];
 int index_BNSdata_q = Ind("BNSdata_q");
 double *q = box->v[index_BNSdata_q + 0];
-int index_BNSdata_vRSx = Ind("BNSdata_vRSx");
-double *vRS1 = box->v[index_BNSdata_vRSx + 0];
-double *vRS2 = box->v[index_BNSdata_vRSx + 1];
-double *vRS3 = box->v[index_BNSdata_vRSx + 2];
+int index_BNSdata_wBx = Ind("BNSdata_wBx");
+double *wB1 = box->v[index_BNSdata_wBx + 0];
+double *wB2 = box->v[index_BNSdata_wBx + 1];
+double *wB3 = box->v[index_BNSdata_wBx + 2];
 int index_BNSdata_qx = Ind("BNSdata_qx");
 double *dq1 = box->v[index_BNSdata_qx + 0];
 double *dq2 = box->v[index_BNSdata_qx + 1];
 double *dq3 = box->v[index_BNSdata_qx + 2];
-int index_BNSdata_vRSxx = Ind("BNSdata_vRSxx");
-double *dvRS11 = box->v[index_BNSdata_vRSxx + 0];
-double *dvRS12 = box->v[index_BNSdata_vRSxx + 1];
-double *dvRS13 = box->v[index_BNSdata_vRSxx + 2];
-double *dvRS21 = box->v[index_BNSdata_vRSxx + 3];
-double *dvRS22 = box->v[index_BNSdata_vRSxx + 4];
-double *dvRS23 = box->v[index_BNSdata_vRSxx + 5];
-double *dvRS31 = box->v[index_BNSdata_vRSxx + 6];
-double *dvRS32 = box->v[index_BNSdata_vRSxx + 7];
-double *dvRS33 = box->v[index_BNSdata_vRSxx + 8];
+int index_BNSdata_wBxx = Ind("BNSdata_wBxx");
+double *dwB11 = box->v[index_BNSdata_wBxx + 0];
+double *dwB12 = box->v[index_BNSdata_wBxx + 1];
+double *dwB13 = box->v[index_BNSdata_wBxx + 2];
+double *dwB21 = box->v[index_BNSdata_wBxx + 3];
+double *dwB22 = box->v[index_BNSdata_wBxx + 4];
+double *dwB23 = box->v[index_BNSdata_wBxx + 5];
+double *dwB31 = box->v[index_BNSdata_wBxx + 6];
+double *dwB32 = box->v[index_BNSdata_wBxx + 7];
+double *dwB33 = box->v[index_BNSdata_wBxx + 8];
 
 
 double alpha2;
@@ -443,7 +443,7 @@ FirstAndSecondDerivsOf_S(box, index_lSigma,      index_dlSigma1, index_ddlSigma1
 
 
 
-FirstDerivsOf_Sa(box, Ind("BNSdata_vRSx"),       Ind("BNSdata_vRSxx")); 
+FirstDerivsOf_Sa(box, Ind("BNSdata_wBx"),       Ind("BNSdata_wBxx")); 
 
 
 FirstDerivsOf_S(box,  Ind("BNSdata_q"),                     Ind("BNSdata_qx")); 
@@ -614,17 +614,17 @@ dSigma3[ijk]
 
 vR1
 =
-vRI1 + vRS1[ijk]
+vRI1 + wB1[ijk]
 ;
 
 vR2
 =
-vRI2 + vRS2[ijk]
+vRI2 + wB2[ijk]
 ;
 
 vR3
 =
-vRI3 + vRS3[ijk]
+vRI3 + wB3[ijk]
 ;
 
 oouzerosqr
@@ -776,47 +776,47 @@ dB33[ijk]
 
 dvR11
 =
-ddSigma11[ijk] + dvRS11[ijk]
+ddSigma11[ijk] + dwB11[ijk]
 ;
 
 dvR12
 =
-ddSigma12[ijk] + dvRS12[ijk]
+ddSigma12[ijk] + dwB12[ijk]
 ;
 
 dvR13
 =
-ddSigma13[ijk] + dvRS13[ijk]
+ddSigma13[ijk] + dwB13[ijk]
 ;
 
 dvR21
 =
-ddSigma12[ijk] + dvRS21[ijk]
+ddSigma12[ijk] + dwB21[ijk]
 ;
 
 dvR22
 =
-ddSigma22[ijk] + dvRS22[ijk]
+ddSigma22[ijk] + dwB22[ijk]
 ;
 
 dvR23
 =
-ddSigma23[ijk] + dvRS23[ijk]
+ddSigma23[ijk] + dwB23[ijk]
 ;
 
 dvR31
 =
-ddSigma13[ijk] + dvRS31[ijk]
+ddSigma13[ijk] + dwB31[ijk]
 ;
 
 dvR32
 =
-ddSigma23[ijk] + dvRS32[ijk]
+ddSigma23[ijk] + dwB32[ijk]
 ;
 
 dvR33
 =
-ddSigma33[ijk] + dvRS33[ijk]
+ddSigma33[ijk] + dwB33[ijk]
 ;
 
 doouzerosqr1
@@ -975,11 +975,11 @@ FSigma[ijk]
 =
 ddSigma11[ijk] + ddSigma22[ijk] + ddSigma33[ijk] + 
   (dLnalphaP1 + 5.*dLnPsi1 + dLnrho01 + 0.5*dLnuzerosqr1)*
-   (dSigma1[ijk] + vRS1[ijk]) + 
+   (dSigma1[ijk] + wB1[ijk]) + 
   (dLnalphaP2 + 5.*dLnPsi2 + dLnrho02 + 0.5*dLnuzerosqr2)*
-   (dSigma2[ijk] + vRS2[ijk]) + 
+   (dSigma2[ijk] + wB2[ijk]) + 
   (dLnalphaP3 + 5.*dLnPsi3 + dLnrho03 + 0.5*dLnuzerosqr3)*
-   (dSigma3[ijk] + vRS3[ijk])
+   (dSigma3[ijk] + wB3[ijk])
 ;
 
 
@@ -1382,15 +1382,15 @@ ddlSigma11[ijk] + ddlSigma22[ijk] + ddlSigma33[ijk] +
   (dLnalphaP1 + 5.*dLnPsi1 + dLnrho01 + 0.5*dLnuzerosqr1)*dlSigma1[ijk] + 
   (dLnalphaP2 + 5.*dLnPsi2 + dLnrho02 + 0.5*dLnuzerosqr2)*dlSigma2[ijk] + 
   (dLnalphaP3 + 5.*dLnPsi3 + dLnrho03 + 0.5*dLnuzerosqr3)*dlSigma3[ijk] + 
-  (dSigma1[ijk] + vRS1[ijk])*(dlalphaP1[ijk]/alphaP[ijk] - 
+  (dSigma1[ijk] + wB1[ijk])*(dlalphaP1[ijk]/alphaP[ijk] - 
      (dalphaP1[ijk]*lalphaP[ijk])/alphaP2 - 
      (5.*dPsi1[ijk]*lPsi[ijk])/Psi2 + (5.*dlPsi1[ijk])/Psi[ijk] + 
      0.5*(lduzerosqr1/uzerosqr - duzerosqr1*luzerosqr*pow2inv(uzerosqr))) + 
-  (dSigma2[ijk] + vRS2[ijk])*(dlalphaP2[ijk]/alphaP[ijk] - 
+  (dSigma2[ijk] + wB2[ijk])*(dlalphaP2[ijk]/alphaP[ijk] - 
      (dalphaP2[ijk]*lalphaP[ijk])/alphaP2 - 
      (5.*dPsi2[ijk]*lPsi[ijk])/Psi2 + (5.*dlPsi2[ijk])/Psi[ijk] + 
      0.5*(lduzerosqr2/uzerosqr - duzerosqr2*luzerosqr*pow2inv(uzerosqr))) + 
-  (dSigma3[ijk] + vRS3[ijk])*(dlalphaP3[ijk]/alphaP[ijk] - 
+  (dSigma3[ijk] + wB3[ijk])*(dlalphaP3[ijk]/alphaP[ijk] - 
      (dalphaP3[ijk]*lalphaP[ijk])/alphaP2 - (5.*dPsi3[ijk]*lPsi[ijk])/Psi2 + 
      (5.*dlPsi3[ijk])/Psi[ijk] + 
      0.5*(lduzerosqr3/uzerosqr - duzerosqr3*luzerosqr*pow2inv(uzerosqr)))
@@ -1421,4 +1421,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 166, n* = 700,  n/ = 119,  n+ = 786, n = 1605, O = 1 */
+/* nvars = 166, n* = 700,  n/ = 119,  n+ = 787, n = 1606, O = 1 */

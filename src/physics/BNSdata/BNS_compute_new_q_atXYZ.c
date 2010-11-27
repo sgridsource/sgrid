@@ -1,5 +1,5 @@
 /* BNS_compute_new_q_atXYZ.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 26.2.2008 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 27.11.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -39,10 +39,10 @@ double *BNSB2 = box->v[index_BNSdata_Bx + 1];
 double *BNSB3 = box->v[index_BNSdata_Bx + 2];
 int index_BNSdata_q = Ind("BNSdata_q");
 double *BNSq = box->v[index_BNSdata_q + 0];
-int index_BNSdata_vRSx = Ind("BNSdata_vRSx");
-double *BNSvRS1 = box->v[index_BNSdata_vRSx + 0];
-double *BNSvRS2 = box->v[index_BNSdata_vRSx + 1];
-double *BNSvRS3 = box->v[index_BNSdata_vRSx + 2];
+int index_BNSdata_wBx = Ind("BNSdata_wBx");
+double *BNSwB1 = box->v[index_BNSdata_wBx + 0];
+double *BNSwB2 = box->v[index_BNSdata_wBx + 1];
+double *BNSwB3 = box->v[index_BNSdata_wBx + 2];
 int index_BNSdata_Sigma = Ind("BNSdata_Sigma");
 double *BNSSigma = box->v[index_BNSdata_Sigma + 0];
 int index_BNSdata_Sigmax = Ind("BNSdata_Sigmax");
@@ -52,7 +52,7 @@ double *BNSdSigma3 = box->v[index_BNSdata_Sigmax + 2];
 int index_BNSdata_temp4 = Ind("BNSdata_temp4");
 double *temp4 = box->v[index_BNSdata_temp4 + 0];
 double Psi, B1,B2,B3, alphaP;
-double Sigma, dSigma1,dSigma2,dSigma3, vRS1,vRS2,vRS3, x,y;
+double Sigma, dSigma1,dSigma2,dSigma3, wB1,wB2,wB3, x,y;
 
 
 double alpha;
@@ -161,22 +161,22 @@ spec_Coeffs(box, BNSdSigma3, temp4);
 dSigma3 = spec_interpolate(box, temp4, X,Y,Z); 
 
 
-spec_Coeffs(box, BNSvRS1, temp4); 
+spec_Coeffs(box, BNSwB1, temp4); 
 
 
-vRS1 = spec_interpolate(box, temp4, X,Y,Z); 
+wB1 = spec_interpolate(box, temp4, X,Y,Z); 
 
 
-spec_Coeffs(box, BNSvRS2, temp4); 
+spec_Coeffs(box, BNSwB2, temp4); 
 
 
-vRS2 = spec_interpolate(box, temp4, X,Y,Z); 
+wB2 = spec_interpolate(box, temp4, X,Y,Z); 
 
 
-spec_Coeffs(box, BNSvRS3, temp4); 
+spec_Coeffs(box, BNSwB3, temp4); 
 
 
-vRS3 = spec_interpolate(box, temp4, X,Y,Z); 
+wB3 = spec_interpolate(box, temp4, X,Y,Z); 
 
 OmegaCrossR1
 =
@@ -245,17 +245,17 @@ dSigma3
 
 vR1
 =
-vRI1 + vRS1
+vRI1 + wB1
 ;
 
 vR2
 =
-vRI2 + vRS2
+vRI2 + wB2
 ;
 
 vR3
 =
-vRI3 + vRS3
+vRI3 + wB3
 ;
 
 oouzerosqr
@@ -351,4 +351,4 @@ return q;
 }  /* end of function */
 
 /* BNS_compute_new_q_atXYZ.c */
-/* nvars = 13, n* = 63,  n/ = 35,  n+ = 72, n = 170, O = 1 */
+/* nvars = 13, n* = 63,  n/ = 35,  n+ = 73, n = 171, O = 1 */

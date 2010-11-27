@@ -1,5 +1,5 @@
 /* BNS_set_J_ADM_VolInt_integrand.c */
-/* Copyright (C) 2005 Wolfgang Tichy & Bernd Bruegmann, 11.11.2008 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 27.11.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -46,10 +46,10 @@ int index_BNSdata_Sigma = Ind("BNSdata_Sigma");
 double *Sigma = box->v[index_BNSdata_Sigma + 0];
 int index_BNSdata_q = Ind("BNSdata_q");
 double *q = box->v[index_BNSdata_q + 0];
-int index_BNSdata_vRSx = Ind("BNSdata_vRSx");
-double *vRS1 = box->v[index_BNSdata_vRSx + 0];
-double *vRS2 = box->v[index_BNSdata_vRSx + 1];
-double *vRS3 = box->v[index_BNSdata_vRSx + 2];
+int index_BNSdata_wBx = Ind("BNSdata_wBx");
+double *wB1 = box->v[index_BNSdata_wBx + 0];
+double *wB2 = box->v[index_BNSdata_wBx + 1];
+double *wB3 = box->v[index_BNSdata_wBx + 2];
 int index_BNSdata_Sigmax = Ind("BNSdata_Sigmax");
 double *dSigma1 = box->v[index_BNSdata_Sigmax + 0];
 double *dSigma2 = box->v[index_BNSdata_Sigmax + 1];
@@ -158,17 +158,17 @@ dSigma3[ijk]
 
 vR1
 =
-vRI1 + vRS1[ijk]
+vRI1 + wB1[ijk]
 ;
 
 vR2
 =
-vRI2 + vRS2[ijk]
+vRI2 + wB2[ijk]
 ;
 
 vR3
 =
-vRI3 + vRS3[ijk]
+vRI3 + wB3[ijk]
 ;
 
 oouzerosqr
@@ -240,4 +240,4 @@ Psi2*(jup2*(-xCM + x[ijk]) - jup1*y[ijk])*pow2(Psi4)
 }  /* end of function */
 
 /* BNS_set_J_ADM_VolInt_integrand.c */
-/* nvars = 16, n* = 61,  n/ = 22,  n+ = 61, n = 144, O = 1 */
+/* nvars = 16, n* = 61,  n/ = 22,  n+ = 62, n = 145, O = 1 */

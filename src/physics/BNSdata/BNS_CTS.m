@@ -12,7 +12,7 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
 	     g[a,b], alpha, beta[a], K[a,b], 
-             q, vRS[a], dq[a], dvRS[a,b], x, y}
+             q, wB[a], dq[a], dwB[a,b], x, y}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -39,8 +39,8 @@ tocompute = {
 					index_dlSigma1, index_ddlSigma11);",
   Cif == end,
 
-  Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BNSdata_vRSx\"), \
-					 Ind(\"BNSdata_vRSxx\"));",
+  Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BNSdata_wBx\"), \
+					 Ind(\"BNSdata_wBxx\"));",
   Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
 			                 Ind(\"BNSdata_qx\"));",
   (* loop of all points *)
@@ -75,7 +75,7 @@ tocompute = {
   vRI[a] == dSigma[a],
 
   (* vR[a] is 3-vel. in rotating frame *)
-  vR[a] == vRS[a] + vRI[a],
+  vR[a] == wB[a] + vRI[a],
 
   (* vI[a] is vel in inertial frame *)
   (* vI[a] == vR[a] + OmegaCrossR[a], *)
@@ -104,7 +104,7 @@ tocompute = {
     dLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a],
     dalpha[a] == dalphaP[a]/Psi - alphaP dPsi[a]/Psi2,
     dbeta[a,b] == dB[a,b] + epsmatrix3d[b,a,3] Omega,
-    dvR[a,b] == dvRS[a,b] + ddSigma[a,b],
+    dvR[a,b] == dwB[a,b] + ddSigma[a,b],
     doouzerosqr[a] == 2 alpha dalpha[a] -
                     4 Psi3 dPsi[a] delta[b,c] *
                     (beta[b] + vR[b]) (beta[c] + vR[c]) -
@@ -131,7 +131,7 @@ tocompute = {
 
     Cif == (bi==0 || bi==3 || bi==4 || bi==5), (* ell. eqn. inside stars *)
       FSigma == delta[b,c] ddSigma[b,c] + 
-               (vRS[a] + dSigma[a]) *
+               (wB[a] + dSigma[a]) *
                (dLnrho0[a] + dLnuzerosqr[a]/2 + dLnalphaP[a] + 5 dLnPsi[a]), 
     Cif == else,
       FSigma  == Sigma,  (* set Sigma=0 outside stars *)
@@ -208,7 +208,7 @@ tocompute = {
       FlSigma  == delta[b,c] ddlSigma[b,c] + 
                dlSigma[a] * ( 
                 dLnrho0[a] + dLnuzerosqr[a]/2 + dLnalphaP[a] + 5 dLnPsi[a] )+
-               (vRS[a] + dSigma[a]) * (
+               (wB[a] + dSigma[a]) * (
                 lduzerosqr[a]/(2 uzerosqr) - 
                 duzerosqr[a] luzerosqr /(2 uzerosqr*uzerosqr) +
                 dlalphaP[a]/alphaP - dalphaP[a] lalphaP/alphaP2 +
@@ -322,9 +322,9 @@ variabledeclarations[] := Module[{},
   prdecvarname[{alpha},   "alpha"];
   prdecvarname[{beta[a]}, "betax"];
   prdecvarname[{q},       "BNSdata_q"];
-  prdecvarname[{vRS[a]},  "BNSdata_vRSx"];
+  prdecvarname[{wB[a]},  "BNSdata_wBx"];
   prdecvarname[{dq[a]},    "BNSdata_qx"];
-  prdecvarname[{dvRS[a,b]},"BNSdata_vRSxx"];
+  prdecvarname[{dwB[a,b]},"BNSdata_wBxx"];
 
   pr["\n"];
 ];    

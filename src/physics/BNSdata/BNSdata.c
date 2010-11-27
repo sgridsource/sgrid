@@ -190,9 +190,9 @@ int BNSdata_startup(tGrid *grid)
   enablevar(grid, Ind("BNSdata_Sigma"));
   enablevar(grid, Ind("BNSdata_Sigmax"));
   enablevar(grid, Ind("BNSdata_Sigmaxx"));
-  enablevar(grid, Ind("BNSdata_vRSx"));
+  enablevar(grid, Ind("BNSdata_wBx"));
   enablevar(grid, Ind("BNSdata_q"));
-  enablevar(grid, Ind("BNSdata_vRSxx"));
+  enablevar(grid, Ind("BNSdata_wBxx"));
   enablevar(grid, Ind("BNSdata_qx"));
   enablevar(grid, Ind("BNSdata_temp1"));
   enablevar(grid, Ind("BNSdata_temp2"));
@@ -3808,9 +3808,9 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSx"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSy"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSz"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"));
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
 //  forallboxes(grid2, b)
@@ -3873,9 +3873,9 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSx"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSy"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_vRSz"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"));
   BNS_compute_new_q(grid2);
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
