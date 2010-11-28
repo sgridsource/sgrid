@@ -48,6 +48,8 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   int ind,j,b;
   tVarList *vlu;
   tVarList *vlc;
+  int corot1 = Getv("BNSdata_rotationstate1","corotation");
+  int corot2 = Getv("BNSdata_rotationstate2","corotation");
 
   if(GetsLax("BNSdata_Interpolate_pointsfile")==0) return 0;
   prdivider(0);
@@ -161,10 +163,19 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
                strcmp(VarName(vlu->index[j]),"gxz")==0 ||
                strcmp(VarName(vlu->index[j]),"gyz")==0   )
         val=0.0;
+      else if( strcmp(VarName(vlu->index[j]),"BNSdata_q")==0 )
+      {
+        if(b==1 || b==2) val=0.0;
+        else             val=spec_interpolate(box, c, X,Y,Z);
+      }
       else if( strcmp(VarName(vlu->index[j]),"BNSdata_VRx")==0 ||
                strcmp(VarName(vlu->index[j]),"BNSdata_VRy")==0 ||
                strcmp(VarName(vlu->index[j]),"BNSdata_VRz")==0   )
-        val=0.0; /* <-- true in corotating case */
+      {
+        if(b==1 || b==2) val=0.0;
+        else if((b==0 || b==5) && corot1 || (b==3 || b==4) && corot2) val=0.0;
+        else val=spec_interpolate(box, c, X,Y,Z);
+      }
       else val = spec_interpolate(box, c, X,Y,Z);
       /* if we always interpolate we need:
       val = spec_interpolate(box, c, X,Y,Z); */
