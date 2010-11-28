@@ -167,7 +167,15 @@ tocompute = {
 
 
 (* symmetries *)
-g[a_,b_] :=  g[b,a] /; !OrderedQ[{a,b}]
+ddPsi[a_,b_]     := ddPsi[b,a]    /; !OrderedQ[{a,b}]
+ddB[a_,b_,c_]    := ddB[a,c,b]    /; !OrderedQ[{b,c}]
+ddalphaP[a_,b_]  := ddalphaP[b,a] /; !OrderedQ[{a,b}]
+ddSigma[a_,b_]   := ddSigma[b,a]  /; !OrderedQ[{a,b}]
+
+ddlPsi[a_,b_]     := ddlPsi[b,a]    /; !OrderedQ[{a,b}]
+ddlB[a_,b_,c_]    := ddlB[a,c,b]    /; !OrderedQ[{b,c}]
+ddlalphaP[a_,b_]  := ddlalphaP[b,a] /; !OrderedQ[{a,b}]
+ddlSigma[a_,b_]   := ddlSigma[b,a]  /; !OrderedQ[{a,b}]
 
 (************************************************************************)
 (* information for C output *)
