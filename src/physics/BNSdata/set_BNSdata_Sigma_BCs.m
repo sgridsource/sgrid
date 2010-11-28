@@ -1,0 +1,274 @@
+(* BNS_CTS.m 
+   Wolfgang Tichy  12/2007       *)
+
+(* compute residuals of BNS ham, mom, alphaP and Sigma eqns *)
+
+
+(* variables *)
+variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
+             dSigma[a],
+	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
+              dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
+             ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
+             q, wB[a], dq[a], x, y}
+
+constvariables = {OmegaCrossR[a]}
+
+(* compute in this order *)
+tocompute = {
+
+  (* do nothing in boxes 4 and 5 inside stars *)
+  Cif == (bi>=4),
+    Cinstruction == "continue;",
+  Cif == end,
+
+  (* Use Sigma=0 as BC outside stars or if corot *)
+  Cif == ( (bi==1 || bi==2) || (bi==0 && corot1) || (bi==3 && corot2) ),
+
+    Cif == nonlin, (* non-linear case *)
+      (* go over A=0 plane *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+        FSigma  == Sigma,  (* set Sigma=0 outside stars *)
+      Cinstruction == "} /* end forplane1 */",
+      (* go over A=1 plane *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
+        FSigma  == Sigma,  (* set Sigma=0 outside stars *)
+      Cinstruction == "} /* end forplane1 */",
+
+    Cif == else,   (* linear case *)
+      (* go over A=0 plane *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+        FlSigma  == lSigma,
+      Cinstruction == "} /* end forplane1 */",
+      (* go over A=1 plane *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
+        FlSigma  == lSigma,  (* set Sigma=0 outside stars *)
+      Cinstruction == "} /* end forplane1 */",
+
+    Cif == end,
+
+    Cinstruction == "continue; /* we are done with this box */",
+  Cif == end,
+  (* if we get here bi=0 or 3 and there is no corot in this box *)
+
+  Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
+			                 Ind(\"BNSdata_qx\"));",
+
+  (* non-linear case: *)
+  Cif == nonlin,
+    Cinstruction == "FirstDerivsOf_S(box, index_Sigma, \
+                                     Ind(\"BNSdata_Sigmax\"));",
+    (* go over A=0 plane *)
+    Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+
+      (* Omega \times r term *)
+      OmegaCrossR1 == - Omega y,
+      OmegaCrossR2 == + Omega (x-xCM),
+      OmegaCrossR3 == 0,
+
+      (* shift in rotating frame (in the inertial frame beta^i = B^i) *)
+      beta[a] == B[a] + OmegaCrossR[a],
+
+      (* some abbreviations *)
+      Psi2  == Psi*Psi,
+      Psi4  == Psi2*Psi2,
+      Psim2 == 1/Psi2,
+      Psim4 == Psim2*Psim2,
+      Psim6 == Psim4*Psim2,
+      alpha == alphaP/Psi,
+      alpha2 == alpha alpha,
+      (* terms needed *)
+      h == (n+1) q + 1,
+      h2 == h h,
+      DSigmaUp[a] == Psim4 dSigma[a],
+      dSigmaUp[a] == dSigma[a],
+      w[a] == Psim6 wB[a],
+      wBDown[a] == wB[a],
+      wDown[a] == Psim2 wBDown[a],
+      L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
+      uzerosqr == L2/(alpha2 h2),
+      uzero == sqrt[uzerosqr],
+
+      FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
+
+    Cinstruction == "} /* end forplane1 */",
+  
+  (* linear case: *)
+  Cif == else,
+    Cinstruction == "FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);",
+
+    (* go over A=0 plane *)
+    Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+
+      (* Omega \times r term *)
+      OmegaCrossR1 == - Omega y,
+      OmegaCrossR2 == + Omega (x-xCM),
+      OmegaCrossR3 == 0,
+
+      (* shift in rotating frame (in the inertial frame beta^i = B^i) *)
+      beta[a] == B[a] + OmegaCrossR[a],
+
+      (* some abbreviations *)
+      Psi2  == Psi*Psi,
+      Psi4  == Psi2*Psi2,
+      Psim2 == 1/Psi2,
+      Psim4 == Psim2*Psim2,
+      Psim6 == Psim4*Psim2,
+      Psim8 == Psim4*Psim4,
+      Psim5 == Psim6*Psi,
+      Psim7 == Psim5*Psim2,
+      Psim9 == Psim7*Psim2,
+      (* non-linear terms needed *)
+      h == (n+1) q + 1,
+      h2 == h h,
+      DSigmaUp[a] == Psim4 dSigma[a],
+      dSigmaUp[a] == dSigma[a],
+      w[a] == Psim6 wB[a],
+      wBDown[a] == wB[a],
+      wDown[a] == Psim2 wBDown[a],
+      L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
+      uzerosqr == L2/(alpha2 h2),
+      uzero == sqrt[uzerosqr],
+      alpha == alphaP/Psi,
+      alpha2 == alpha alpha,
+
+      (* linearized terms *)
+      lq     == 0,
+      dlq[a] == 0,
+      lh   == 0,
+      lLnh == 0,
+      (* wB remains const under linearization *)
+      lwB[a] == 0,
+      dlwB[a,b] == 0,
+      lalpha == lalphaP/Psi - alphaP lPsi/Psi2,   
+      lL2 == 2*(Psim8 wBDown[c] lwB[c] +
+                   Psim6 (lwB[c] dSigma[c] + wB[c] dlSigma[c]) +
+                   Psim4 dSigmaUp[c] dlSigma[c]  - 
+                (8 Psim9 wBDown[c] wB[c] + 12 Psim7 wB[c] dSigma[c] +
+                 4 Psim5 dSigma[c] dSigmaUp[c]) lPsi + 2 h2 lLnh),
+      luzerosqr == (lL2 - 2 L2 (lalpha/alpha + lLnh))/(alpha2 h2),
+      luzero == luzerosqr/(2 uzero),
+      
+      FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c],
+
+    Cinstruction == "} /* end forplane1 */",
+
+  Cif == end,
+
+  Cinstruction == "/* end linear case */\n"
+}
+
+
+(* symmetries *)
+g[a_,b_] :=  g[b,a] /; !OrderedQ[{a,b}]
+
+(************************************************************************)
+(* information for C output *)
+
+(* information about the function 
+   the C file will be in Cfunctionfile 
+*)
+
+CFunctionFile = "set_BNSdata_Sigma_BCs.c"
+
+(* the head of the function *)
+BeginCFunction[] := Module[{},
+
+  pr["#include \"sgrid.h\"\n"];
+  pr["#include \"BNSdata.h\"\n"];
+  pr["\n"];
+  pr["#define Power(x,y) (pow((double) (x), (double) (y)))\n"];
+  pr["#define Log(x)     (log((double) (x)))\n"];
+  pr["#define pow2(x)    ((x)*(x))\n"];
+  pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
+  pr["#define Cal(x,y,z) ((x)?(y):(z))\n\n"];
+
+  pr["\n\n\n"];
+
+  pr["void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu, \ 
+		   tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs, \
+		   int nonlin)\n"];
+  pr["{\n"];
+
+  pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
+  pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
+  pr["double n = Getd(\"BNSdata_n\");\n"];
+  pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
+  pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
+  pr["double xCM = Getd(\"BNSdata_x_CM\");\n"];
+  pr["\n"];
+
+  pr["tGrid *grid = vlu->grid;\n"];
+  pr["int bi;\n"];
+  pr["\n"];
+
+  pr["forallboxes(grid,bi)\n"];
+  pr["{\n"];
+  pr["tBox *box = grid->box[bi];\n"];
+  pr["int ijk;\n\n"];
+  pr["int n1 = box->n1;\n"];
+  pr["int n2 = box->n2;\n"];
+  pr["int n3 = box->n3;\n"];
+  pr["int i,j,k;\n\n"];
+
+  pr["\n"];
+  pr["\n"];
+];
+
+(* custom variable declaration
+   we have to translate between the tensor names and the C variables  
+   we may need special variables, for example for parameters
+*)
+variabledeclarations[] := Module[{},
+
+  prdecvl[{FPsi, FB[a], FalphaP ,FSigma}, "vlFu"];
+  prdecvl[{ Psi,  B[a],  alphaP,  Sigma}, "vlu"];
+
+  prdecvl[{FlPsi, FlB[a], FlalphaP ,FlSigma}, "vlJdu"];
+  prdecvl[{ lPsi, lB[a], lalphaP, lSigma}, "vldu"];
+  prdecvl[{dlPsi[a],ddlPsi[a,b], dlB[a,b],ddlB[a,b,c], dlalphaP[a],ddlalphaP[a,b], dlSigma[a],ddlSigma[a,b]}, "vlduDerivs"];
+
+  prdecvlindices[{ Psi,  B[a],  alphaP,  Sigma}, "vlu"];
+  prdecvlindices[{lPsi, lB[a], lalphaP, lSigma}, "vldu"];
+  prdecvlindices[{dlPsi[a],ddlPsi[a,b], dlB[a,b],ddlB[a,b,c], dlalphaP[a],ddlalphaP[a,b], dlSigma[a],ddlSigma[a,b]}, "vlduDerivs"];
+
+  prdecvarname[{dSigma[a]},     "BNSdata_Sigmax"];
+
+  prdecvarname[{x},      "x"];
+  prdecvarname[{y},      "y"];
+
+  (* prdecvarname[{g[a,b]}, "gxx"]; prdecvarname[{K[a,b]}, "Kxx"]; *)
+  prdecvarname[{q},       "BNSdata_q"];
+  prdecvarname[{wB[a]},   "BNSdata_wBx"];
+  prdecvarname[{dq[a]},   "BNSdata_qx"];
+
+  pr["\n"];
+];    
+(* auxillary variables are automatically inserted here *)
+
+(* custom C-code which is placed directly after the variable declarations *)
+InitializationCommands[] := Module[{},
+
+  pr["/* Jetzt geht's los! */\n"];
+
+];
+
+(* the end or tail of the function (we need at least a }) *)
+EndCFunction[] := Module[{},
+
+  pr["} /* end of boxes */\n"];
+  pr["\n\n"];
+  pr["}  /* end of function */\n\n"];
+];
+
+
+(* to turn off optimization for development set optimizeflag = False *)
+optimizeflag = True;
+
+(* use 3d tensors the default is 3 *)
+TensorEquationsDim = 3;
+
+(************************************************************************)
+(* now we are ready to go *)
+
+<< "../../Math/MathToC/TensorEquationsToC.m"
