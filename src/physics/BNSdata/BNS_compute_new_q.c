@@ -17,6 +17,8 @@
 
 void BNS_compute_new_q(tGrid *grid)
 {
+int corot1 = Getv("BNSdata_rotationstate1","corotation");
+int corot2 = Getv("BNSdata_rotationstate2","corotation");
 double n = Getd("BNSdata_n");
 double C1 = Getd("BNSdata_C1");
 double C2 = Getd("BNSdata_C2");
@@ -61,23 +63,34 @@ double *dSigma3 = box->v[index_BNSdata_Sigmax + 2];
 
 double alpha;
 double alpha2;
+double bb;
 double beta1;
 double beta2;
 double beta3;
+double betadSigmaMinusCC;
+double CC;
+double dSigmaUp1;
+double dSigmaUp2;
+double dSigmaUp3;
 double F;
+double h;
+double L2;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
 double oouzerosqr;
 double Psi2;
 double Psi4;
+double Psim4;
+double Psim6;
+double twoalphasqrwdSigma;
 double uzero;
 double vR1;
 double vR2;
 double vR3;
-double vRI1;
-double vRI2;
-double vRI3;
+double w1;
+double w2;
+double w3;
 double xi1;
 double xi2;
 double xi3;
@@ -141,34 +154,24 @@ Psi4
 pow2(Psi2)
 ;
 
-vRI1
-=
-dSigma1[ijk]
-;
 
-vRI2
-=
-dSigma2[ijk]
-;
 
-vRI3
-=
-dSigma3[ijk]
-;
+/* conditional */
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 vR1
 =
-vRI1 + wB1[ijk]
+0
 ;
 
 vR2
 =
-vRI2 + wB2[ijk]
+0
 ;
 
 vR3
 =
-vRI3 + wB3[ijk]
+0
 ;
 
 oouzerosqr
@@ -258,6 +261,106 @@ q[ijk]
 
 
 
+} else { /* if (!bi == 0 || bi == 1 || bi == 5) */
+
+
+
+/* conditional */
+if (bi <= 1 || bi == 5) {
+
+CC
+=
+C1
+;
+
+
+} else { /* if (!bi <= 1 || bi == 5) */
+
+CC
+=
+C2
+;
+
+}
+/* if (bi <= 1 || bi == 5) */
+
+
+Psim4
+=
+1/Psi4
+;
+
+Psim6
+=
+Psim4/Psi2
+;
+
+dSigmaUp1
+=
+Psim4*dSigma1[ijk]
+;
+
+dSigmaUp2
+=
+Psim4*dSigma2[ijk]
+;
+
+dSigmaUp3
+=
+Psim4*dSigma3[ijk]
+;
+
+w1
+=
+Psim6*wB1[ijk]
+;
+
+w2
+=
+Psim6*wB2[ijk]
+;
+
+w3
+=
+Psim6*wB3[ijk]
+;
+
+twoalphasqrwdSigma
+=
+2.*alpha2*(w1*dSigma1[ijk] + w2*dSigma2[ijk] + w3*dSigma3[ijk])
+;
+
+betadSigmaMinusCC
+=
+-CC + beta1*dSigma1[ijk] + beta2*dSigma2[ijk] + beta3*dSigma3[ijk]
+;
+
+bb
+=
+-twoalphasqrwdSigma + pow2(betadSigmaMinusCC)
+;
+
+L2
+=
+(0.5*(bb + sqrt(-2.*alpha2*twoalphasqrwdSigma + pow2(bb))))/alpha2
+;
+
+h
+=
+sqrt(L2 - dSigmaUp1*dSigma1[ijk] - dSigmaUp2*dSigma2[ijk] - 
+   dSigmaUp3*dSigma3[ijk])
+;
+
+q[ijk]
+=
+(-1. + h)/(1. + n)
+;
+
+}
+/* if (bi <= 1 || bi == 5) */
+
+
+
 } /* end of points loop */ 
 
 } /* end of boxes */
@@ -266,4 +369,4 @@ q[ijk]
 }  /* end of function */
 
 /* BNS_compute_new_q.c */
-/* nvars = 15, n* = 64,  n/ = 37,  n+ = 71, n = 172, O = 1 */
+/* nvars = 15, n* = 96,  n/ = 53,  n+ = 85, n = 234, O = 1 */

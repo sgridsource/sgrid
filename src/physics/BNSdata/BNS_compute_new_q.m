@@ -32,38 +32,61 @@ tocompute = {
   Psi2   == Psi*Psi,
   Psi4   == Psi2*Psi2,
 
-  (* irrotational part of 3-vel in rotating frame*)
-  vRI[a] == dSigma[a],
+  (**************)
+  (* corotation *)
+  (**************)
+  Cif == ( ((bi<=1 || bi==5) && corot1) || ((bi>=2 && bi<=4) && corot2) ),
+    (* vR[a] is zero for corotation *)
+    vR[a] == 0,
 
-  (* vR[a] is 3-vel. in rotating frame *)
-  vR[a] == wB[a] + vRI[a],
+    (* compute u^0 in rotating frame *)
+    oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
+    Cif == (oouzerosqr==0),
+      oouzerosqr == -1,
+    Cif == end,
+    Cif == (oouzerosqr<0),
+      uzero == -1, (* -Sqrt[-1/oouzerosqr], *)
+    Cif == else,
+      uzero == Sqrt[1/oouzerosqr],
+    Cif == end,
 
-  (* vI[a] is vel in inertial frame *)
-  (* vI[a] == vR[a] + OmegaCrossR[a], *)
+    (* killing vec xi^i in rotating frame, xi^a = (xi^0, xi^i) *)
+    xi[a] == 0,
 
-  (* compute u^0 in rotating frame *)
-  oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
-  Cif == (oouzerosqr==0),
-    oouzerosqr == -1,
-  Cif == end,
-  Cif == (oouzerosqr<0),
-    uzero == -1, (* -Sqrt[-1/oouzerosqr], *)
-  Cif == else,
-    uzero == Sqrt[1/oouzerosqr],
-  Cif == end,
-
-  (* killing vec xi^i in rotating frame, xi^a = (xi^0, xi^i) *)
-  xi[a] == 0,
-
-  (* constant F *)
-  F == -(alpha2 - Psi4 delta[b,c] (beta[b] + xi[b]) (beta[c] + vR[c]) ) *
+    (* constant F *)
+    F == -(alpha2 - Psi4 delta[b,c] (beta[b] + xi[b]) (beta[c] + vR[c]) ) *
 	uzero,
 
-  (* set q *)
-  Cif == ((bi==0) || (bi==1) || (bi==5)),  
-    q == (C1/F - 1.0)/(n+1.0),
+    (* set q *)
+    Cif == ((bi==0) || (bi==1) || (bi==5)),  
+      q == (C1/F - 1.0)/(n+1.0),
+    Cif == else,
+      q == (C2/F - 1.0)/(n+1.0),
+    Cif == end,
+
+  (****************)
+  (* general case *)
+  (****************)
   Cif == else,
-    q == (C2/F - 1.0)/(n+1.0),
+    (* which const to use ? *)
+    Cif == ((bi<=1) || (bi==5)),  
+      CC == C1,
+    Cif == else,
+      CC == C2,
+    Cif == end,
+
+    Psim4 == 1/Psi4,
+    Psim6 == Psim4/Psi2,
+    dSigmaUp[a] == Psim4 dSigma[a],
+    w[a] == Psim6 wB[a],
+    twoalphasqrwdSigma == 2 alpha2 w[c] dSigma[c],
+    betadSigmaMinusCC == beta[c] dSigma[c] - CC, 
+    bb == betadSigmaMinusCC^2 - twoalphasqrwdSigma,
+    L2 == (bb + sqrt[bb*bb - 2 alpha2 twoalphasqrwdSigma])/(2 alpha2),
+    h == sqrt[L2 - dSigma[a] dSigmaUp[a]],
+
+    (* h == (n+1) q + 1, *)
+    q == (h - 1.0)/(n + 1.0),
   Cif == end,
 
   Cinstruction == "} /* end of points loop */\n"
@@ -100,6 +123,8 @@ BeginCFunction[] := Module[{},
   pr["void BNS_compute_new_q(tGrid *grid)\n"];
   pr["{\n"];
 
+  pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
+  pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double C1 = Getd(\"BNSdata_C1\");\n"];
   pr["double C2 = Getd(\"BNSdata_C2\");\n"];
