@@ -1,5 +1,5 @@
 /* BNS_set_restmassintegrand.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 27.11.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 28.11.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -68,9 +68,9 @@ double alpha2;
 double beta1;
 double beta2;
 double beta3;
-double dSigmaUp1;
-double dSigmaUp2;
-double dSigmaUp3;
+double DSigmaUp1;
+double DSigmaUp2;
+double DSigmaUp3;
 double h;
 double h2;
 double OmegaCrossR1;
@@ -237,17 +237,17 @@ Psim6
 Psim2*Psim4
 ;
 
-dSigmaUp1
+DSigmaUp1
 =
 Psim4*dSigma1[ijk]
 ;
 
-dSigmaUp2
+DSigmaUp2
 =
 Psim4*dSigma2[ijk]
 ;
 
-dSigmaUp3
+DSigmaUp3
 =
 Psim4*dSigma3[ijk]
 ;
@@ -309,9 +309,9 @@ pow2(h)
 
 uzerosqr
 =
-1/alpha2 + ((dSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) + 
-     (dSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) + 
-     (dSigmaUp3 + w3)*(wDown3 + dSigma3[ijk]))/(alpha2*h2)
+1/alpha2 + ((DSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) + 
+     (DSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) + 
+     (DSigmaUp3 + w3)*(wDown3 + dSigma3[ijk]))/(alpha2*h2)
 ;
 
 uzero

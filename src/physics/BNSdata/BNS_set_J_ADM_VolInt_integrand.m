@@ -49,13 +49,13 @@ tocompute = {
     Psim2 == 1/Psi2,
     Psim4 == Psim2*Psim2,
     Psim6 == Psim4*Psim2,
-    dSigmaUp[a] == Psim4 dSigma[a],
+    DSigmaUp[a] == Psim4 dSigma[a],
     w[a] == Psim6 wB[a],
     wBDown[a] == wB[a],
     wDown[a] == Psim2 wBDown[a],
     h == (n+1) q + 1,
     h2 == h*h,
-    uzerosqr == (1 + (wDown[a] + dSigma[a]) (w[a] + dSigmaUp[a])/h2)/alpha2,
+    uzerosqr == (1 + (wDown[a] + dSigma[a]) (w[a] + DSigmaUp[a])/h2)/alpha2,
   Cif == end,
 
   (* rest mass density, pressure, and total energy density *)

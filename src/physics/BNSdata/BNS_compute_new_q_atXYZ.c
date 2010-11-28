@@ -1,5 +1,5 @@
 /* BNS_compute_new_q_atXYZ.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 27.11.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 28.11.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -65,9 +65,9 @@ double beta2;
 double beta3;
 double betadSigmaMinusCC;
 double CC;
-double dSigmaUp1;
-double dSigmaUp2;
-double dSigmaUp3;
+double DSigmaUp1;
+double DSigmaUp2;
+double DSigmaUp3;
 double F;
 double h;
 double L2;
@@ -382,17 +382,17 @@ Psim6
 Psim4/Psi2
 ;
 
-dSigmaUp1
+DSigmaUp1
 =
 dSigma1*Psim4
 ;
 
-dSigmaUp2
+DSigmaUp2
 =
 dSigma2*Psim4
 ;
 
-dSigmaUp3
+DSigmaUp3
 =
 dSigma3*Psim4
 ;
@@ -434,7 +434,7 @@ L2
 
 h
 =
-sqrt(-(dSigma1*dSigmaUp1) - dSigma2*dSigmaUp2 - dSigma3*dSigmaUp3 + L2)
+sqrt(-(dSigma1*DSigmaUp1) - dSigma2*DSigmaUp2 - dSigma3*DSigmaUp3 + L2)
 ;
 
 q

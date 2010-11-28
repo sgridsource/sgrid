@@ -77,13 +77,13 @@ tocompute = {
 
     Psim4 == 1/Psi4,
     Psim6 == Psim4/Psi2,
-    dSigmaUp[a] == Psim4 dSigma[a],
+    DSigmaUp[a] == Psim4 dSigma[a],
     w[a] == Psim6 wB[a],
     twoalphasqrwdSigma == 2 alpha2 w[c] dSigma[c],
     betadSigmaMinusCC == beta[c] dSigma[c] - CC, 
     bb == betadSigmaMinusCC^2 - twoalphasqrwdSigma,
     L2 == (bb + sqrt[bb*bb - 2 alpha2 twoalphasqrwdSigma])/(2 alpha2),
-    h == sqrt[L2 - dSigma[a] dSigmaUp[a]],
+    h == sqrt[L2 - dSigma[a] DSigmaUp[a]],
 
     (* h == (n+1) q + 1, *)
     q == (h - 1.0)/(n + 1.0),
