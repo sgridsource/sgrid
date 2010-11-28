@@ -251,7 +251,7 @@ tocompute = {
         (* wB remains const under linearization *)
         lwB[a] == 0,
         dlwB[a,b] == 0,
-        (* L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + dSigmaUp[c]), *)
+        (* L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]), *)
         lL2 == 2*(Psim8 wBDown[c] lwB[c] +
                      Psim6 (lwB[c] dSigma[c] + wB[c] dlSigma[c]) +
                      Psim4 dSigmaUp[c] dlSigma[c]  - 
