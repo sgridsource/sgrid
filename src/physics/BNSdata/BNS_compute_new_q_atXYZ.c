@@ -17,6 +17,8 @@
 
 double BNS_compute_new_q_atXYZ(tGrid *grid, int bi, double X, double Y, double Z)
 {
+int corot1 = Getv("BNSdata_rotationstate1","corotation");
+int corot2 = Getv("BNSdata_rotationstate2","corotation");
 double n = Getd("BNSdata_n");
 double C1 = Getd("BNSdata_C1");
 double C2 = Getd("BNSdata_C2");
@@ -57,24 +59,35 @@ double Sigma, dSigma1,dSigma2,dSigma3, wB1,wB2,wB3, x,y;
 
 double alpha;
 double alpha2;
+double bb;
 double beta1;
 double beta2;
 double beta3;
+double betadSigmaMinusCC;
+double CC;
+double dSigmaUp1;
+double dSigmaUp2;
+double dSigmaUp3;
 double F;
+double h;
+double L2;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
 double oouzerosqr;
 double Psi2;
 double Psi4;
+double Psim4;
+double Psim6;
 double q;
+double twoalphasqrwdSigma;
 double uzero;
 double vR1;
 double vR2;
 double vR3;
-double vRI1;
-double vRI2;
-double vRI3;
+double w1;
+double w2;
+double w3;
 double xi1;
 double xi2;
 double xi3;
@@ -228,34 +241,24 @@ Psi4
 pow2(Psi2)
 ;
 
-vRI1
-=
-dSigma1
-;
 
-vRI2
-=
-dSigma2
-;
 
-vRI3
-=
-dSigma3
-;
+/* conditional */
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 vR1
 =
-vRI1 + wB1
+0
 ;
 
 vR2
 =
-vRI2 + wB2
+0
 ;
 
 vR3
 =
-vRI3 + wB3
+0
 ;
 
 oouzerosqr
@@ -345,10 +348,109 @@ q
 
 
 
+} else { /* if (!bi == 0 || bi == 1 || bi == 5) */
+
+
+
+/* conditional */
+if (bi <= 1 || bi == 5) {
+
+CC
+=
+C1
+;
+
+
+} else { /* if (!bi <= 1 || bi == 5) */
+
+CC
+=
+C2
+;
+
+}
+/* if (bi <= 1 || bi == 5) */
+
+
+Psim4
+=
+1/Psi4
+;
+
+Psim6
+=
+Psim4/Psi2
+;
+
+dSigmaUp1
+=
+dSigma1*Psim4
+;
+
+dSigmaUp2
+=
+dSigma2*Psim4
+;
+
+dSigmaUp3
+=
+dSigma3*Psim4
+;
+
+w1
+=
+Psim6*wB1
+;
+
+w2
+=
+Psim6*wB2
+;
+
+w3
+=
+Psim6*wB3
+;
+
+twoalphasqrwdSigma
+=
+2.*alpha2*(dSigma1*w1 + dSigma2*w2 + dSigma3*w3)
+;
+
+betadSigmaMinusCC
+=
+-CC + beta1*dSigma1 + beta2*dSigma2 + beta3*dSigma3
+;
+
+bb
+=
+-twoalphasqrwdSigma + pow2(betadSigmaMinusCC)
+;
+
+L2
+=
+(0.5*(bb + sqrt(-2.*alpha2*twoalphasqrwdSigma + pow2(bb))))/alpha2
+;
+
+h
+=
+sqrt(-(dSigma1*dSigmaUp1) - dSigma2*dSigmaUp2 - dSigma3*dSigmaUp3 + L2)
+;
+
+q
+=
+(-1. + h)/(1. + n)
+;
+
+}
+/* if (bi <= 1 || bi == 5) */
+
+
+
 /* end of computation */ 
 
 return q;
 }  /* end of function */
 
 /* BNS_compute_new_q_atXYZ.c */
-/* nvars = 13, n* = 63,  n/ = 35,  n+ = 73, n = 171, O = 1 */
+/* nvars = 13, n* = 95,  n/ = 51,  n+ = 88, n = 234, O = 1 */
