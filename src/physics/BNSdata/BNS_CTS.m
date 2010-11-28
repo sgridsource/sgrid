@@ -90,6 +90,7 @@ tocompute = {
     Cif == else,
       Psim1 == 1/Psi,
       Psim2 == Psim1*Psim1,
+      Psim3 == Psim2*Psim1,
       Psim4 == Psim2*Psim2,
       Psim8 == Psim4*Psim4,
       Psim6 == Psi2*Psim8,
@@ -138,6 +139,9 @@ tocompute = {
   Cif == end,
   (* END: inside/outside stars *)
   (*****************************)
+
+  (* V^i =: VR[a] = vR[a] *)
+  VR[a] == vR[a],  (* set VR on grid equal to local vR *)
 
   (* rest mass density, pressure, and total energy density *)
   rho0 == Power[q/kappa, n],
@@ -222,7 +226,7 @@ tocompute = {
         (* Since vR[a] == 0, *)
         lvR[a] == 0, 
         (* linearized oouzerosqr, recall:
-           oouzerosqr = alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c])*)
+           oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c])*)
         loouzerosqr == 2alpha lalpha - 
                        4 Psi3 lPsi delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]) -
                        Psi4 delta[b,c] 2 (lB[b] + lvR[b]) (beta[c] + vR[c]),
@@ -242,6 +246,7 @@ tocompute = {
         lLnh == 0,
         dlh[a] == 0,
         ldLnh[a] == 0,
+
         (* wB remains const under linearization *)
         lwB[a] == 0,
         dlwB[a,b] == 0,
@@ -281,40 +286,20 @@ tocompute = {
         lvR[a] == (lwB[a] + dlSigma[a])/(uzero*h) - lB[a] +
                   (wB[a] + dSigma[a]) (-luzero/(uzerosqr*h) - lh/(uzero*h2)),
 
+        divlwB == delta [b,c] dlwB[b,c],
+        divlbeta == delta [b,c] dlB[b,c],
+        (* ldLnalpha[a] == dlalpha[a]/alpha - lalpha dalpha[a]/alpha2, *)
+        (* rho0 == Power[q/kappa, n], *)
+        (* dLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a], *)
+        (* ldLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dlq[a] +
+                       (n(n-1)/(kappa*kappa)) Power[q/kappa, n-2] lq dq[a], *)
 
-(*
-        dLnrhozalphaPsi2oh[a] == dLnrho0[a] + dLnalphaP[a] + dLnPsi[a] - dLnh[a],
-        dLnrhozalphaPsi6uz[a] == dLnrho0[a] + dLnalphaP[a] + 5 dLnPsi[a] +
-                                 duzero[a]/uzero,
-        divwB == delta [b,c] dwB[b,c],
-        divbeta == delta [b,c] dbeta[b,c],
+        ldLnrho0[a] == 0, (* since lq == 0 *)
+        ldLnalphaP[a] == dlalphaP[a]/alphaP - lalphaP dalphaP[a]/alphaP2,
+        ldLnPsi[a] == dlPsi[a] Psim1 - lPsi dPsi[a] Psim2,
 
-
-        uzerosqr == L2/(alpha2 h2),
-        uzero == sqrt[uzerosqr],
-        vR[a] == (wB[a] + dSigma[a])/(uzero*h) - beta[a],
-
-        dLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a],
-        dLnPsi[a] == dPsi[a]/Psi,
-        dLnh[a] == (n+1) dq[a] / h,
-        dLnalphaP[a] == dalphaP[a]/alphaP,
-        dalpha[a] == dalphaP[a]/Psi - alphaP dPsi[a]/Psi2,
-        dLnalpha[a] == dalpha[a]/alpha,
-        dL2[a] == 2*(Psim8 wBDown[c] dwB[c,a] +
-                     Psim6 (dwB[c,a] dSigma[c] + wB[c] ddSigma[a,c]) +
-                     Psim4 dSigmaUp[c] ddSigma[a,c]  - 
-                  (8 Psim9 wBDown[c] wB[c] + 12 Psim7 wB[c] dSigma[c] +
-                   4 Psim5 dSigma[c] dSigmaUp[c]) dSigma[a] + 2 h2 dLnh[a]),
-        duzerosqr[a] == (dL2[a] - 2 L2 (dalpha[a]/alpha + dLnh[a]))/(alpha2 h2),
-        duzero[a] == duzerosqr[a]/(2 uzero),
-        dbeta[a,b] == dB[a,b] + epsmatrix3d[b,a,3] Omega,
-       
-        dLnrhozalphaPsi2oh[a] == dLnrho0[a] + dLnalphaP[a] + dLnPsi[a] - dLnh[a],
-        dLnrhozalphaPsi6uz[a] == dLnrho0[a] + dLnalphaP[a] + 5 dLnPsi[a] +
-                                 duzero[a]/uzero,
-        divwB == delta [b,c] dwB[b,c],
-        divbeta == delta [b,c] dbeta[b,c],
-*)
+        ldLnuzero[a] == lduzerosqr[a]/(2 uzero) -
+                        luzerosqr duzerosqr[a] / (4 uzero uzerosqr),
       Cif == end,
     (*****************)
     (* outside stars *)
@@ -402,7 +387,19 @@ tocompute = {
         *)
       (* genral case (not corot.) *)
       Cif == else,
-        FlSigma  == 00000,
+        lhuzeroPsi6 == lh uzero Psi6 + h luzero Psi6 + 6 h uzero Psi5 lPsi, 
+        dlLnrhozalphaPsi2oh[a] ==  ldLnrho0[a] + ldLnalphaP[a] + ldLnPsi[a] +
+                                   ldLnh[a],
+        ldLnrhozalphaPsi6uz[a] == ldLnrho0[a] + ldLnalphaP[a] + ldLnuzero[a] +
+                                  5 ldLnPsi[a],
+        FlSigma == delta[b,c] ddlSigma[b,c] + 
+                  (dlSigmaUp[c] + lwB[c]) dLnrhozalphaPsi2oh[c] -
+                  2 lwB[c] dLnPsi[c] + Psim2 divlwB -
+                  h uzero Psi4 (divlbeta + lB[c] dLnrhozalphaPsi6uz[c]) +
+                  (dSigmaUp[c] + wB[c]) dlLnrhozalphaPsi2oh[c] -
+                  2 wB[c] ldLnPsi[c] - 2 Psim3 lPsi divwB -
+                  lhuzeroPsi6 (divbeta + beta[c] dLnrhozalphaPsi6uz[c]) -
+                  h uzero Psi4 beta[c] ldLnrhozalphaPsi6uz[c],
       Cif == end,
 
     (* Sigma outside stars *)

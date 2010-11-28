@@ -291,6 +291,8 @@ double dbeta31;
 double dbeta32;
 double dbeta33;
 double divbeta;
+double divlbeta;
+double divlwB;
 double divwB;
 double dL21;
 double dL22;
@@ -301,6 +303,9 @@ double dlalpha3;
 double dlh1;
 double dlh2;
 double dlh3;
+double dlLnrhozalphaPsi2oh1;
+double dlLnrhozalphaPsi2oh2;
+double dlLnrhozalphaPsi2oh3;
 double dLnalpha1;
 double dLnalpha2;
 double dLnalpha3;
@@ -377,16 +382,32 @@ double ldL23;
 double ldLnalpha1;
 double ldLnalpha2;
 double ldLnalpha3;
+double ldLnalphaP1;
+double ldLnalphaP2;
+double ldLnalphaP3;
 double ldLnalphaPsim61;
 double ldLnalphaPsim62;
 double ldLnalphaPsim63;
 double ldLnh1;
 double ldLnh2;
 double ldLnh3;
+double ldLnPsi1;
+double ldLnPsi2;
+double ldLnPsi3;
+double ldLnrho01;
+double ldLnrho02;
+double ldLnrho03;
+double ldLnrhozalphaPsi6uz1;
+double ldLnrhozalphaPsi6uz2;
+double ldLnrhozalphaPsi6uz3;
+double ldLnuzero1;
+double ldLnuzero2;
+double ldLnuzero3;
 double lduzerosqr1;
 double lduzerosqr2;
 double lduzerosqr3;
 double lh;
+double lhuzeroPsi6;
 double lj1;
 double lj2;
 double lj3;
@@ -437,6 +458,7 @@ double Psi7;
 double Psim1;
 double Psim10;
 double Psim2;
+double Psim3;
 double Psim4;
 double Psim5;
 double Psim6;
@@ -710,6 +732,11 @@ Psim1
 Psim2
 =
 pow2(Psim1)
+;
+
+Psim3
+=
+Psim1*Psim2
 ;
 
 Psim4
@@ -1133,6 +1160,21 @@ uzerosqr
 }
 /* if ((bi == 0 || bi == 5) && corot1 || (bi == 3 || bi == 4) && corot2) */
 
+
+VR1[ijk]
+=
+vR1
+;
+
+VR2[ijk]
+=
+vR2
+;
+
+VR3[ijk]
+=
+vR3
+;
 
 rho0
 =
@@ -1850,6 +1892,76 @@ lvR3
      (luzero*(dSigma3[ijk] + wB3[ijk]))/uzerosqr)/h
 ;
 
+divlwB
+=
+dlwB11 + dlwB22 + dlwB33
+;
+
+divlbeta
+=
+dlB11[ijk] + dlB22[ijk] + dlB33[ijk]
+;
+
+ldLnrho01
+=
+0
+;
+
+ldLnrho02
+=
+0
+;
+
+ldLnrho03
+=
+0
+;
+
+ldLnalphaP1
+=
+dlalphaP1[ijk]/alphaP[ijk] - (dalphaP1[ijk]*lalphaP[ijk])/alphaP2
+;
+
+ldLnalphaP2
+=
+dlalphaP2[ijk]/alphaP[ijk] - (dalphaP2[ijk]*lalphaP[ijk])/alphaP2
+;
+
+ldLnalphaP3
+=
+dlalphaP3[ijk]/alphaP[ijk] - (dalphaP3[ijk]*lalphaP[ijk])/alphaP2
+;
+
+ldLnPsi1
+=
+Psim1*dlPsi1[ijk] - Psim2*dPsi1[ijk]*lPsi[ijk]
+;
+
+ldLnPsi2
+=
+Psim1*dlPsi2[ijk] - Psim2*dPsi2[ijk]*lPsi[ijk]
+;
+
+ldLnPsi3
+=
+Psim1*dlPsi3[ijk] - Psim2*dPsi3[ijk]*lPsi[ijk]
+;
+
+ldLnuzero1
+=
+(0.5*lduzerosqr1 - (0.25*duzerosqr1*luzerosqr)/uzerosqr)/uzero
+;
+
+ldLnuzero2
+=
+(0.5*lduzerosqr2 - (0.25*duzerosqr2*luzerosqr)/uzerosqr)/uzero
+;
+
+ldLnuzero3
+=
+(0.5*lduzerosqr3 - (0.25*duzerosqr3*luzerosqr)/uzerosqr)/uzero
+;
+
 }
 /* if ((bi == 0 || bi == 5) && corot1 || (bi == 3 || bi == 4) && corot2) */
 
@@ -2011,9 +2123,58 @@ lSigma[ijk]
 
 } else { /* if (!(bi == 0 || bi == 5) && corot1 || (bi == 3 || bi == 4) && corot2) */
 
+lhuzeroPsi6
+=
+Psi6*(h*luzero + lh*uzero) + 6.*h*Psi5*uzero*lPsi[ijk]
+;
+
+dlLnrhozalphaPsi2oh1
+=
+ldLnalphaP1 + ldLnh1 + ldLnPsi1 + ldLnrho01
+;
+
+dlLnrhozalphaPsi2oh2
+=
+ldLnalphaP2 + ldLnh2 + ldLnPsi2 + ldLnrho02
+;
+
+dlLnrhozalphaPsi2oh3
+=
+ldLnalphaP3 + ldLnh3 + ldLnPsi3 + ldLnrho03
+;
+
+ldLnrhozalphaPsi6uz1
+=
+ldLnalphaP1 + 5.*ldLnPsi1 + ldLnrho01 + ldLnuzero1
+;
+
+ldLnrhozalphaPsi6uz2
+=
+ldLnalphaP2 + 5.*ldLnPsi2 + ldLnrho02 + ldLnuzero2
+;
+
+ldLnrhozalphaPsi6uz3
+=
+ldLnalphaP3 + 5.*ldLnPsi3 + ldLnrho03 + ldLnuzero3
+;
+
 FlSigma[ijk]
 =
-0
+dLnrhozalphaPsi2oh1*(dlSigmaUp1 + lwB1) + 
+  dLnrhozalphaPsi2oh2*(dlSigmaUp2 + lwB2) + 
+  dLnrhozalphaPsi2oh3*(dlSigmaUp3 + lwB3) + divlwB*Psim2 - 
+  lhuzeroPsi6*(divbeta + dLnrhozalphaPsi6uz1*beta1[ijk] + 
+     dLnrhozalphaPsi6uz2*beta2[ijk] + dLnrhozalphaPsi6uz3*beta3[ijk]) + 
+  ddlSigma11[ijk] + ddlSigma22[ijk] + ddlSigma33[ijk] - 
+  h*Psi4*uzero*(divlbeta + ldLnrhozalphaPsi6uz1*beta1[ijk] + 
+     ldLnrhozalphaPsi6uz2*beta2[ijk] + ldLnrhozalphaPsi6uz3*beta3[ijk] + 
+     dLnrhozalphaPsi6uz1*lB1[ijk] + dLnrhozalphaPsi6uz2*lB2[ijk] + 
+     dLnrhozalphaPsi6uz3*lB3[ijk]) + 
+  dlLnrhozalphaPsi2oh1*(dSigmaUp1 + wB1[ijk]) + 
+  dlLnrhozalphaPsi2oh2*(dSigmaUp2 + wB2[ijk]) + 
+  dlLnrhozalphaPsi2oh3*(dSigmaUp3 + wB3[ijk]) - 
+  2.*(dLnPsi1*lwB1 + dLnPsi2*lwB2 + dLnPsi3*lwB3 + divwB*Psim3*lPsi[ijk] + 
+     ldLnPsi1*wB1[ijk] + ldLnPsi2*wB2[ijk] + ldLnPsi3*wB3[ijk])
 ;
 
 }
@@ -2045,4 +2206,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 169, n* = 1190,  n/ = 182,  n+ = 918, n = 2290, O = 1 */
+/* nvars = 169, n* = 1251,  n/ = 194,  n+ = 984, n = 2429, O = 1 */
