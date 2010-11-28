@@ -981,51 +981,53 @@ dalpha3/alpha[ijk]
 
 dL21
 =
-4.*dLnh1*h2 - dSigma1[ijk]*((16.*Psim9*wBDown2 + 24.*Psim7*dSigma2[ijk])*
-      wB2[ijk] + (16.*Psim9*wBDown3 + 24.*Psim7*dSigma3[ijk])*wB3[ijk]) + 
+4.*dLnh1*h2 - dPsi1[ijk]*(8.*Psim5*
+      (dSigmaUp1*dSigma1[ijk] + dSigmaUp2*dSigma2[ijk] + 
+        dSigmaUp3*dSigma3[ijk]) + 
+     (16.*Psim9*wBDown1 + 24.*Psim7*dSigma1[ijk])*wB1[ijk] + 
+     (16.*Psim9*wBDown2 + 24.*Psim7*dSigma2[ijk])*wB2[ijk] + 
+     (16.*Psim9*wBDown3 + 24.*Psim7*dSigma3[ijk])*wB3[ijk]) + 
   2.*(Psim4*(dSigmaUp1*ddSigma11[ijk] + dSigmaUp2*ddSigma12[ijk] + 
         dSigmaUp3*ddSigma13[ijk]) + 
      (Psim8*wBDown1 + Psim6*dSigma1[ijk])*dwB11[ijk] + 
      (Psim8*wBDown2 + Psim6*dSigma2[ijk])*dwB21[ijk] + 
      (Psim8*wBDown3 + Psim6*dSigma3[ijk])*dwB31[ijk] + 
      Psim6*(ddSigma11[ijk]*wB1[ijk] + ddSigma12[ijk]*wB2[ijk] + 
-        ddSigma13[ijk]*wB3[ijk])) - 
-  8.*Psim5*(dSigma1[ijk]*(dSigmaUp2*dSigma2[ijk] + 
-        dSigmaUp3*dSigma3[ijk]) + dSigmaUp1*pow2(dSigma1[ijk])) - 
-  wB1[ijk]*(16.*Psim9*wBDown1*dSigma1[ijk] + 24.*Psim7*pow2(dSigma1[ijk]))
+        ddSigma13[ijk]*wB3[ijk]))
 ;
 
 dL22
 =
-4.*dLnh2*h2 - dSigma2[ijk]*((16.*Psim9*wBDown1 + 24.*Psim7*dSigma1[ijk])*
-      wB1[ijk] + 16.*Psim9*(wBDown2*wB2[ijk] + wBDown3*wB3[ijk])) + 
+4.*dLnh2*h2 - dPsi2[ijk]*(8.*Psim5*
+      (dSigmaUp1*dSigma1[ijk] + dSigmaUp2*dSigma2[ijk] + 
+        dSigmaUp3*dSigma3[ijk]) + 
+     (16.*Psim9*wBDown1 + 24.*Psim7*dSigma1[ijk])*wB1[ijk] + 
+     (16.*Psim9*wBDown2 + 24.*Psim7*dSigma2[ijk])*wB2[ijk] + 
+     (16.*Psim9*wBDown3 + 24.*Psim7*dSigma3[ijk])*wB3[ijk]) + 
   2.*(Psim4*(dSigmaUp1*ddSigma12[ijk] + dSigmaUp2*ddSigma22[ijk] + 
         dSigmaUp3*ddSigma23[ijk]) + 
      (Psim8*wBDown1 + Psim6*dSigma1[ijk])*dwB12[ijk] + 
      (Psim8*wBDown2 + Psim6*dSigma2[ijk])*dwB22[ijk] + 
      (Psim8*wBDown3 + Psim6*dSigma3[ijk])*dwB32[ijk] + 
      Psim6*(ddSigma12[ijk]*wB1[ijk] + ddSigma22[ijk]*wB2[ijk] + 
-        ddSigma23[ijk]*wB3[ijk])) - 
-  8.*Psim5*(dSigma2[ijk]*(dSigmaUp1*dSigma1[ijk] + 
-        dSigmaUp3*dSigma3[ijk]) + dSigmaUp2*pow2(dSigma2[ijk])) - 
-  24.*Psim7*(dSigma2[ijk]*dSigma3[ijk]*wB3[ijk] + 
-     wB2[ijk]*pow2(dSigma2[ijk]))
+        ddSigma23[ijk]*wB3[ijk]))
 ;
 
 dL23
 =
-4.*dLnh3*h2 - dSigma3[ijk]*((16.*Psim9*wBDown1 + 24.*Psim7*dSigma1[ijk])*
-      wB1[ijk] + (16.*Psim9*wBDown2 + 24.*Psim7*dSigma2[ijk])*wB2[ijk] + 
-     16.*Psim9*wBDown3*wB3[ijk]) + 
+4.*dLnh3*h2 - dPsi3[ijk]*(8.*Psim5*
+      (dSigmaUp1*dSigma1[ijk] + dSigmaUp2*dSigma2[ijk] + 
+        dSigmaUp3*dSigma3[ijk]) + 
+     (16.*Psim9*wBDown1 + 24.*Psim7*dSigma1[ijk])*wB1[ijk] + 
+     (16.*Psim9*wBDown2 + 24.*Psim7*dSigma2[ijk])*wB2[ijk] + 
+     (16.*Psim9*wBDown3 + 24.*Psim7*dSigma3[ijk])*wB3[ijk]) + 
   2.*(Psim4*(dSigmaUp1*ddSigma13[ijk] + dSigmaUp2*ddSigma23[ijk] + 
         dSigmaUp3*ddSigma33[ijk]) + 
      (Psim8*wBDown1 + Psim6*dSigma1[ijk])*dwB13[ijk] + 
      (Psim8*wBDown2 + Psim6*dSigma2[ijk])*dwB23[ijk] + 
      (Psim8*wBDown3 + Psim6*dSigma3[ijk])*dwB33[ijk] + 
      Psim6*(ddSigma13[ijk]*wB1[ijk] + ddSigma23[ijk]*wB2[ijk] + 
-        ddSigma33[ijk]*wB3[ijk])) - 24.*Psim7*wB3[ijk]*pow2(dSigma3[ijk]) - 
-  8.*Psim5*((dSigmaUp1*dSigma1[ijk] + dSigmaUp2*dSigma2[ijk])*dSigma3[ijk] + 
-     dSigmaUp3*pow2(dSigma3[ijk]))
+        ddSigma33[ijk]*wB3[ijk]))
 ;
 
 duzerosqr1
@@ -1665,7 +1667,7 @@ dlwB33
 
 lL2
 =
-4.*h2*lLnh - lSigma[ijk]*(8.*Psim5*
+4.*h2*lLnh - lPsi[ijk]*(8.*Psim5*
       (dSigmaUp1*dSigma1[ijk] + dSigmaUp2*dSigma2[ijk] + 
         dSigmaUp3*dSigma3[ijk]) + 
      (16.*Psim9*wBDown1 + 24.*Psim7*dSigma1[ijk])*wB1[ijk] + 
@@ -2209,4 +2211,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 169, n* = 1251,  n/ = 194,  n+ = 981, n = 2426, O = 1 */
+/* nvars = 169, n* = 1247,  n/ = 194,  n+ = 981, n = 2422, O = 1 */
