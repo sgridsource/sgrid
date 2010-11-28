@@ -32,26 +32,41 @@ tocompute = {
   Psi2   == Psi*Psi,
   Psi4   == Psi2*Psi2,
 
-  (* irrotational part of 3-vel in rotating frame*)
-  vRI[a] == dSigma[a],
+  (**************)
+  (* corotation *)
+  (**************)
+  Cif == ( ((bi<=1 || bi==5) && corot1) || ((bi>=2 && bi<=4) && corot2) ),
+    (* vR[a] is zero for corotation *)
+    vR[a] == 0,
+    (* compute u^0 in rotating frame *)
+    oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
+    Cif == (oouzerosqr==0),
+      oouzerosqr == -1,
+    Cif == end,
+    Cif == (oouzerosqr<0),
+      uzero == -1, (* -Sqrt[-1/oouzerosqr], *)
+    Cif == else,
+      uzero == Sqrt[1/oouzerosqr],
+    Cif == end,
 
-  (* vR[a] is 3-vel. in rotating frame *)
-  vR[a] == wB[a] + vRI[a],
-
-  (* vI[a] is vel in inertial frame *)
-  (* vI[a] == vR[a] + OmegaCrossR[a], *)
-
-  (* compute u^0 in rotating frame *)
-  oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
-  Cif == (oouzerosqr==0),
-    oouzerosqr == -1,
-  Cif == end,
-  Cif == (oouzerosqr<0),
-    uzero == -1, (* -Sqrt[-1/oouzerosqr], *)
+  (****************)
+  (* general case *)
+  (****************)
   Cif == else,
-    uzero == Sqrt[1/oouzerosqr],
+    Psim2 == 1/Psi2,
+    Psim4 == Psim2*Psim2,
+    Psim6 == Psim4*Psim2,
+    dSigmaUp[a] == Psim4 dSigma[a],
+    w[a] == Psim6 wB[a],
+    wBDown[a] == wB[a],
+    wDown[a] == Psim2 wBDown[a],
+    h == (n+1) q + 1,
+    h2 == h*h,
+    uzerosqr == (1 + (wDown[a] + dSigma[a]) (w[a] + dSigmaUp[a])/h2)/alpha2,
+    uzero == Sqrt[uzerosqr],
   Cif == end,
 
+  (* deal with q<0 *)
   Cif == (q >=0.0),
     rho0 == (q/kappa)^n,
   Cif == else,
@@ -97,6 +112,8 @@ BeginCFunction[] := Module[{},
   pr["void BNS_set_restmassintegrand(tGrid *grid, int iInteg)\n"];
   pr["{\n"];
 
+  pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
+  pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double C1 = Getd(\"BNSdata_C1\");\n"];
   pr["double C2 = Getd(\"BNSdata_C2\");\n"];

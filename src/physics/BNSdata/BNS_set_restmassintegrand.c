@@ -18,6 +18,8 @@
 
 void BNS_set_restmassintegrand(tGrid *grid, int iInteg)
 {
+int corot1 = Getv("BNSdata_rotationstate1","corotation");
+int corot2 = Getv("BNSdata_rotationstate2","corotation");
 double n = Getd("BNSdata_n");
 double C1 = Getd("BNSdata_C1");
 double C2 = Getd("BNSdata_C2");
@@ -66,20 +68,35 @@ double alpha2;
 double beta1;
 double beta2;
 double beta3;
+double dSigmaUp1;
+double dSigmaUp2;
+double dSigmaUp3;
+double h;
+double h2;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
 double oouzerosqr;
 double Psi2;
 double Psi4;
+double Psim2;
+double Psim4;
+double Psim6;
 double rho0;
 double uzero;
+double uzerosqr;
 double vR1;
 double vR2;
 double vR3;
-double vRI1;
-double vRI2;
-double vRI3;
+double w1;
+double w2;
+double w3;
+double wBDown1;
+double wBDown2;
+double wBDown3;
+double wDown1;
+double wDown2;
+double wDown3;
 
 
 
@@ -140,34 +157,24 @@ Psi4
 pow2(Psi2)
 ;
 
-vRI1
-=
-dSigma1[ijk]
-;
 
-vRI2
-=
-dSigma2[ijk]
-;
 
-vRI3
-=
-dSigma3[ijk]
-;
+/* conditional */
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 vR1
 =
-vRI1 + wB1[ijk]
+0
 ;
 
 vR2
 =
-vRI2 + wB2[ijk]
+0
 ;
 
 vR3
 =
-vRI3 + wB3[ijk]
+0
 ;
 
 oouzerosqr
@@ -213,6 +220,110 @@ Sqrt(1/oouzerosqr)
 
 
 
+} else { /* if (!oouzerosqr < 0) */
+
+Psim2
+=
+1/Psi2
+;
+
+Psim4
+=
+pow2(Psim2)
+;
+
+Psim6
+=
+Psim2*Psim4
+;
+
+dSigmaUp1
+=
+Psim4*dSigma1[ijk]
+;
+
+dSigmaUp2
+=
+Psim4*dSigma2[ijk]
+;
+
+dSigmaUp3
+=
+Psim4*dSigma3[ijk]
+;
+
+w1
+=
+Psim6*wB1[ijk]
+;
+
+w2
+=
+Psim6*wB2[ijk]
+;
+
+w3
+=
+Psim6*wB3[ijk]
+;
+
+wBDown1
+=
+wB1[ijk]
+;
+
+wBDown2
+=
+wB2[ijk]
+;
+
+wBDown3
+=
+wB3[ijk]
+;
+
+wDown1
+=
+Psim2*wBDown1
+;
+
+wDown2
+=
+Psim2*wBDown2
+;
+
+wDown3
+=
+Psim2*wBDown3
+;
+
+h
+=
+1. + q[ijk] + n*q[ijk]
+;
+
+h2
+=
+pow2(h)
+;
+
+uzerosqr
+=
+1/alpha2 + ((dSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) + 
+     (dSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) + 
+     (dSigmaUp3 + w3)*(wDown3 + dSigma3[ijk]))/(alpha2*h2)
+;
+
+uzero
+=
+Sqrt(uzerosqr)
+;
+
+}
+/* if (oouzerosqr < 0) */
+
+
+
 
 /* conditional */
 if (q[ijk] >= 0.) {
@@ -248,4 +359,4 @@ alpha*Psi2*Psi4*rho0*uzero
 }  /* end of function */
 
 /* BNS_set_restmassintegrand.c */
-/* nvars = 16, n* = 61,  n/ = 35,  n+ = 55, n = 151, O = 1 */
+/* nvars = 16, n* = 82,  n/ = 44,  n+ = 63, n = 189, O = 1 */
