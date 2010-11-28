@@ -76,7 +76,8 @@ tocompute = {
     vR[a] == (w[a] + DSigmaUp[a])/(uzero*h) - beta[a],
   Cif == end,
 
-  (* set VR on grid equal to local vR *)
+  (* set VR on grid equal to local vR, so when setADMvars is called in the
+     end BNSdata_VR is set correctly! *)
   VR[a] == vR[a],
 
   (* rest mass density, pressure, and total energy density *)

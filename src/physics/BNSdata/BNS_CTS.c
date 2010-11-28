@@ -797,6 +797,21 @@ DSigmaUp3
 Psim4*dSigma3[ijk]
 ;
 
+dSigmaUp1
+=
+dSigma1[ijk]
+;
+
+dSigmaUp2
+=
+dSigma2[ijk]
+;
+
+dSigmaUp3
+=
+dSigma3[ijk]
+;
+
 w1
 =
 Psim6*wB1[ijk]
@@ -844,9 +859,9 @@ Psim2*wBDown3
 
 L2
 =
-h2 + (dSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) + 
-  (dSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) + 
-  (dSigmaUp3 + w3)*(wDown3 + dSigma3[ijk])
+h2 + (DSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) + 
+  (DSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) + 
+  (DSigmaUp3 + w3)*(wDown3 + dSigma3[ijk])
 ;
 
 uzerosqr
@@ -1687,21 +1702,6 @@ lwB2
 lwBDown3
 =
 lwB3
-;
-
-dSigmaUp1
-=
-dSigma1[ijk]
-;
-
-dSigmaUp2
-=
-dSigma2[ijk]
-;
-
-dSigmaUp3
-=
-dSigma3[ijk]
 ;
 
 dlSigmaUp1

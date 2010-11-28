@@ -100,10 +100,11 @@ tocompute = {
       h == (n+1) q + 1,
       h2 == h h,
       DSigmaUp[a] == Psim4 dSigma[a],
+      dSigmaUp[a] == dSigma[a],
       w[a] == Psim6 wB[a],
       wBDown[a] == wB[a],
       wDown[a] == Psim2 wBDown[a],
-      L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + dSigmaUp[c]),
+      L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
       uzerosqr == L2/(alpha2 h2),
       (* oouzerosqr == 1.0/uzerosqr, *)
       uzero == sqrt[uzerosqr],
@@ -259,8 +260,8 @@ tocompute = {
         luzerosqr == (lL2 - 2 L2 (lalpha/alpha + lLnh))/(alpha2 h2),
         luzero == luzerosqr/(2 uzero),
         lwBDown[a] == lwB[a],
-        dSigmaUp[c] == dSigma[c],
-        dlSigmaUp[c] == dlSigma[c],
+        (* dSigmaUp[a] == dSigma[a], *)
+        dlSigmaUp[a] == dlSigma[a],
         Psim10 == Psim9*Psim1,
         ldL2[a] == 2*(Psim8 (lwBDown[c] dwB[c,a] + wBDown[c] dlwB[c,a]) +
                       Psim6 (dlwB[c,a] dSigma[c] + dwB[c,a] dlSigma[c] +
