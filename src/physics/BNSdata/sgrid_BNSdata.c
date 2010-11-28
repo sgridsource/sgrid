@@ -29,16 +29,17 @@ int sgrid_BNSdata()
   AddVar("BNSdata_alphaP",  "",     "lapse times Psi");
   AddVar("BNSdata_alphaP",  "i",    "1st deriv of alphaP");
   AddVar("BNSdata_alphaP",  "(ij)", "2nd deriv of alphaP");
-  AddVar("BNSdata_Sigma",   "",     "Sigma");
+  AddVar("BNSdata_Sigma",   "",     "Sigma is potential for irrot. part of h*u^i");
   AddVar("BNSdata_Sigma",   "i",    "1st deriv of Sigma");
   AddVar("BNSdata_Sigma",   "(ij)", "2nd deriv of Sigma");
 
   AddVar("BNSdata_VR",  "I", "velocity in rotating frame: "
                              "V^i = u^i/u^0 - l^i,  l^i = HKV");
-  AddVar("BNSdata_wB", "I", "solenoidal velocity in rotating frame. "
+  AddVar("BNSdata_wB",  "I", "rotational part of h*u^i: "
+                             "h u^i = wB^i + dSigma^i - h u^0 beta^i, "
                              "Note: v^i = u^i/u^0, i.e. it is not u^i/(alpha u^0)");
   AddVar("BNSdata_q",   "",  "q := P/rho0");
-  AddVar("BNSdata_wB", "Ij","1st deriv of wB");
+  AddVar("BNSdata_wB",  "Ij","1st deriv of wB");
   AddVar("BNSdata_q",   "i", "1st deriv of q");
 
   /* sometimes we save the old vars before the ell. solve */
@@ -58,6 +59,10 @@ int sgrid_BNSdata()
   AddVar("BNSdata_temp4", "", "temporary variable(e.g. to store derivs)");
      
   /* parameters */
+  AddPar("BNSdata_rotationstate1", "corotation",
+         "rotation state of NS1 [corotation,irrotation");
+  AddPar("BNSdata_rotationstate2", "corotation",
+         "rotation state of NS2 [corotation,irrotation");
   AddPar("BNSdata_m01",   "0.141202", "rest mass of NS1");
   AddPar("BNSdata_m02",   "0.141202", "rest mass of NS2");
   AddPar("BNSdata_iterate_m0", "no", "whether we iterate rest masses [no,yes]");

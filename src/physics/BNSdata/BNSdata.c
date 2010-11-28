@@ -194,6 +194,7 @@ int BNSdata_startup(tGrid *grid)
   enablevar(grid, Ind("BNSdata_q"));
   enablevar(grid, Ind("BNSdata_wBxx"));
   enablevar(grid, Ind("BNSdata_qx"));
+  enablevar(grid, Ind("BNSdata_VRx"));
   enablevar(grid, Ind("BNSdata_temp1"));
   enablevar(grid, Ind("BNSdata_temp2"));
   enablevar(grid, Ind("BNSdata_temp3"));
