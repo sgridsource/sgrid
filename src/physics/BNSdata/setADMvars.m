@@ -49,15 +49,30 @@ tocompute = {
   g[a,b] == Psi4 delta[a,b],
   K[a,b] == Psi4 LBdo[a,b] / (2 alpha),
 
-  (* irrotational part of 3-vel in rotating frame*)
-  vRI[a] == dSigma[a],
-
-  (* vR[a] is 3-vel. in rotating frame *)
-  vR[a] == wB[a] + vRI[a],
-
-  (* compute square of u^0 in rotating frame *)
-  oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
-  uzerosqr == 1.0/oouzerosqr,
+  (**************)
+  (* corotation *)
+  (**************)
+  Cif == ( ((bi<=1 || bi==5) && corot1) || ((bi>=2 && bi<=4) && corot2) ),
+    (* vR[a] is zero for corotation *)
+    vR[a] == 0,
+    (* compute square of u^0 in rotating frame *)
+    oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),
+    uzerosqr == 1.0/oouzerosqr,
+  (****************)
+  (* general case *)
+  (****************)
+  Cif == else,
+    Psim2 == 1/Psi2,
+    Psim4 == Psim2*Psim2,
+    Psim6 == Psim4*Psim2,
+    dSigmaUp[a] == Psim4 dSigma[a],
+    w[a] == Psim6 wB[a],
+    wBDown[a] == wB[a],
+    wDown[a] == Psim2 wBDown[a],
+    h == (n+1) q + 1,
+    h2 == h*h,
+    uzerosqr == (1 + (wDown[a] + dSigma[a]) (w[a] + dSigmaUp[a])/h2)/alpha2,
+  Cif == end,
 
   (* rest mass density, pressure, and total energy density *)
   rho0 == Power[q/kappa, n],
@@ -130,6 +145,8 @@ BeginCFunction[] := Module[{},
   pr["void setADMvars(tGrid *grid)\n"];
   pr["{\n"];
 
+  pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
+  pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
