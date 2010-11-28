@@ -2253,6 +2253,7 @@ void F_BNSdata(tVarList *vlFu, tVarList *vlu,
                    /* ^----^----^--------not used by BNS_CTS if nonlin=1 */
   /* BCs */
   set_BNSdata_BCs(vlFu, vlu, vluDerivs, 1);
+  set_BNSdata_Sigma_BC(vlFu,vlu,  vlc2,vlc2,vluDerivs, 1);
 }
 
 /* evaluate linearized BNSdata eqns */
@@ -2263,6 +2264,7 @@ void J_BNSdata(tVarList *vlJdu, tVarList *vldu,
         /* ^--not used by BNS_CTS if nonlin=0 */
   /* BCs */
   set_BNSdata_BCs(vlJdu, vldu, vlduDerivs, 0);
+  set_BNSdata_Sigma_BC(vlJdu,vlu,  vlJdu,vldu,vlduDerivs, 0);
 }
 
 
@@ -2275,6 +2277,7 @@ void F_oneComp(tVarList *vlFw, tVarList *vlw,
                    /* ^-----^----^--------not used by BNS_CTS if nonlin=1 */
   /* BCs */
   set_BNSdata_BCs(vlFw, vlw, vlwDerivs, 1);
+  set_BNSdata_Sigma_BC(vlFu,vlu,  vlJdu,vldu,vlduDerivs, 1);
 }
 
 /* evaluate linearized eqn for a SINGLE one comp. var for vldw */
@@ -2286,6 +2289,7 @@ void J_oneComp(tVarList *vlJdw, tVarList *vldw,
         /* ^--not used by BNS_CTS if nonlin=0 */
   /* BCs */
   set_BNSdata_BCs(vlJdw, vldw, vldwDerivs, 0);
+  set_BNSdata_Sigma_BC(vlFu,vlu,  vlJdu,vldu,vlduDerivs, 0);
 }
 
 
