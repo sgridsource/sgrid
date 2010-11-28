@@ -110,6 +110,7 @@ tocompute = {
 
       (* some abbreviations *)
       Psi2  == Psi*Psi,
+      Psi3  == Psi2*Psi,
       Psi4  == Psi2*Psi2,
       Psim2 == 1/Psi2,
       Psim4 == Psim2*Psim2,
@@ -141,6 +142,8 @@ tocompute = {
       lwB[a] == 0,
       dlwB[a,b] == 0,
       lalpha == lalphaP/Psi - alphaP lPsi/Psi2,   
+      (* dSigmaUp[a] == dSigma[a], *)
+      dlSigmaUp[a] == dlSigma[a],
       lL2 == 2*(Psim8 wBDown[c] lwB[c] +
                    Psim6 (lwB[c] dSigma[c] + wB[c] dlSigma[c]) +
                    Psim4 dSigmaUp[c] dlSigma[c]  - 
@@ -148,8 +151,12 @@ tocompute = {
                  4 Psim5 dSigma[c] dSigmaUp[c]) lPsi + 2 h2 lLnh),
       luzerosqr == (lL2 - 2 L2 (lalpha/alpha + lLnh))/(alpha2 h2),
       luzero == luzerosqr/(2 uzero),
+      lhuzeroPsi4beta[a] == h (luzero Psi4 beta[a] +
+                               4 uzero Psi3 lPsi beta[a] +
+                               uzero Psi4 lB[a]) + lh uzero Psi4 beta[a],
       
-      FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c],
+      FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c] +
+                  dSigmaUp[c] dlq[c] - h uzero Psi4 beta[c] dlq[c],
 
     Cinstruction == "} /* end forplane1 */",
 

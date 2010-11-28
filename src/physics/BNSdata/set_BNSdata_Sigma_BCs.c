@@ -246,6 +246,9 @@ double beta3;
 double dlq1;
 double dlq2;
 double dlq3;
+double dlSigmaUp1;
+double dlSigmaUp2;
+double dlSigmaUp3;
 double dlwB11;
 double dlwB12;
 double dlwB13;
@@ -266,6 +269,9 @@ double h2;
 double L2;
 double lalpha;
 double lh;
+double lhuzeroPsi4beta1;
+double lhuzeroPsi4beta2;
+double lhuzeroPsi4beta3;
 double lL2;
 double lLnh;
 double lq;
@@ -278,6 +284,7 @@ double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
 double Psi2;
+double Psi3;
 double Psi4;
 double Psim2;
 double Psim4;
@@ -616,6 +623,11 @@ Psi2
 pow2(Psi[ijk])
 ;
 
+Psi3
+=
+Psi2*Psi[ijk]
+;
+
 Psi4
 =
 pow2(Psi2)
@@ -863,6 +875,21 @@ lalpha
 -((alphaP[ijk]*lPsi[ijk])/Psi2) + lalphaP[ijk]/Psi[ijk]
 ;
 
+dlSigmaUp1
+=
+dlSigma1[ijk]
+;
+
+dlSigmaUp2
+=
+dlSigma2[ijk]
+;
+
+dlSigmaUp3
+=
+dlSigma3[ijk]
+;
+
 lL2
 =
 4.*h2*lLnh - lPsi[ijk]*(8.*Psim5*
@@ -889,11 +916,32 @@ luzero
 (0.5*luzerosqr)/uzero
 ;
 
+lhuzeroPsi4beta1
+=
+h*Psi4*uzero*lB1[ijk] + beta1*(Psi4*(h*luzero + lh*uzero) + 
+     4.*h*Psi3*uzero*lPsi[ijk])
+;
+
+lhuzeroPsi4beta2
+=
+h*Psi4*uzero*lB2[ijk] + beta2*(Psi4*(h*luzero + lh*uzero) + 
+     4.*h*Psi3*uzero*lPsi[ijk])
+;
+
+lhuzeroPsi4beta3
+=
+h*Psi4*uzero*lB3[ijk] + beta3*(Psi4*(h*luzero + lh*uzero) + 
+     4.*h*Psi3*uzero*lPsi[ijk])
+;
+
 FlSigma[ijk]
 =
-(dlSigmaUp(1.) - lhuzeroPsi4beta(1.))*dq1[ijk] + 
-  (dlSigmaUp(2.) - lhuzeroPsi4beta(2.))*dq2[ijk] + 
-  (dlSigmaUp(3.) - lhuzeroPsi4beta(3.))*dq3[ijk]
+dlq1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
+  dlq2*(dSigmaUp2 - beta2*h*Psi4*uzero) + 
+  dlq3*(dSigmaUp3 - beta3*h*Psi4*uzero) + 
+  (dlSigmaUp1 - lhuzeroPsi4beta1)*dq1[ijk] + 
+  (dlSigmaUp2 - lhuzeroPsi4beta2)*dq2[ijk] + 
+  (dlSigmaUp3 - lhuzeroPsi4beta3)*dq3[ijk]
 ;
 
 
@@ -912,4 +960,4 @@ FlSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 108, n* = 261,  n/ = 60,  n+ = 185, n = 506, O = 1 */
+/* nvars = 108, n* = 307,  n/ = 60,  n+ = 200, n = 567, O = 1 */
