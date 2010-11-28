@@ -63,9 +63,10 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   vlpush(vlu, Ind("gxx"));
   vlpush(vlu, Ind("Kxx"));
   vlpush(vlu, Ind("BNSdata_q"));
-  vlpush(vlu, Ind("BNSdata_wBx"));
-  vlpush(vlu, Ind("BNSdata_Sigmax"));
+  vlpush(vlu, Ind("BNSdata_VRx"));
   /* Those we do not need:
+    vlpush(vlu, Ind("BNSdata_Sigmax"));
+    vlpush(vlu, Ind("BNSdata_wBx"));
     vlpush(vlu, Ind("rho"));
     vlpush(vlu, Ind("jx"));
     vlpush(vlu, Ind("Sxx"));
@@ -160,12 +161,9 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
                strcmp(VarName(vlu->index[j]),"gxz")==0 ||
                strcmp(VarName(vlu->index[j]),"gyz")==0   )
         val=0.0;
-      else if( strcmp(VarName(vlu->index[j]),"BNSdata_wBx")==0 ||
-               strcmp(VarName(vlu->index[j]),"BNSdata_wBy")==0 ||
-               strcmp(VarName(vlu->index[j]),"BNSdata_wBz")==0 ||
-               strcmp(VarName(vlu->index[j]),"BNSdata_Sigmax")==0 ||
-               strcmp(VarName(vlu->index[j]),"BNSdata_Sigmay")==0 ||
-               strcmp(VarName(vlu->index[j]),"BNSdata_Sigmaz")==0   )
+      else if( strcmp(VarName(vlu->index[j]),"BNSdata_VRx")==0 ||
+               strcmp(VarName(vlu->index[j]),"BNSdata_VRy")==0 ||
+               strcmp(VarName(vlu->index[j]),"BNSdata_VRz")==0   )
         val=0.0; /* <-- true in corotating case */
       else val = spec_interpolate(box, c, X,Y,Z);
       /* if we always interpolate we need:
