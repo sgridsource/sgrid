@@ -99,7 +99,7 @@ tocompute = {
       Psim9 == Psim8*Psim1,
       h == (n+1) q + 1,
       h2 == h h,
-      dSigmaUp[a] == Psim4 dSigma[a],
+      DSigmaUp[a] == Psim4 dSigma[a],
       w[a] == Psim6 wB[a],
       wBDown[a] == wB[a],
       wDown[a] == Psim2 wBDown[a],
@@ -107,7 +107,7 @@ tocompute = {
       uzerosqr == L2/(alpha2 h2),
       (* oouzerosqr == 1.0/uzerosqr, *)
       uzero == sqrt[uzerosqr],
-      vR[a] == (wB[a] + dSigma[a])/(uzero*h) - beta[a],
+      vR[a] == (w[a] + DSigmaUp[a])/(uzero*h) - beta[a],
 
       (* more terms which we need inside the stars *)
       dLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a],

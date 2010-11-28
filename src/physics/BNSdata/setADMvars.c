@@ -1,5 +1,5 @@
 /* setADMvars.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 27.11.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 28.11.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -48,6 +48,10 @@ int index_BNSdata_wBx = Ind("BNSdata_wBx");
 double *wB1 = box->v[index_BNSdata_wBx + 0];
 double *wB2 = box->v[index_BNSdata_wBx + 1];
 double *wB3 = box->v[index_BNSdata_wBx + 2];
+int index_BNSdata_VRx = Ind("BNSdata_VRx");
+double *VR1 = box->v[index_BNSdata_VRx + 0];
+double *VR2 = box->v[index_BNSdata_VRx + 1];
+double *VR3 = box->v[index_BNSdata_VRx + 2];
 int index_BNSdata_Bxx = Ind("BNSdata_Bxx");
 double *dB11 = box->v[index_BNSdata_Bxx + 0];
 double *dB12 = box->v[index_BNSdata_Bxx + 1];
@@ -104,9 +108,9 @@ double *Sdo33 = box->v[index_Sxx + 5];
 
 
 double alpha2;
-double dSigmaUp1;
-double dSigmaUp2;
-double dSigmaUp3;
+double DSigmaUp1;
+double DSigmaUp2;
+double DSigmaUp3;
 double gdB;
 double h;
 double h2;
@@ -140,6 +144,7 @@ double Psim4;
 double Psim6;
 double rho0;
 double rhoE;
+double uzero;
 double uzerosqr;
 double vR1;
 double vR2;
@@ -429,17 +434,17 @@ Psim6
 Psim2*Psim4
 ;
 
-dSigmaUp1
+DSigmaUp1
 =
 Psim4*dSigma1[ijk]
 ;
 
-dSigmaUp2
+DSigmaUp2
 =
 Psim4*dSigma2[ijk]
 ;
 
-dSigmaUp3
+DSigmaUp3
 =
 Psim4*dSigma3[ijk]
 ;
@@ -501,14 +506,49 @@ pow2(h)
 
 uzerosqr
 =
-1/alpha2 + ((dSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) + 
-     (dSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) + 
-     (dSigmaUp3 + w3)*(wDown3 + dSigma3[ijk]))/(alpha2*h2)
+1/alpha2 + ((DSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) + 
+     (DSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) + 
+     (DSigmaUp3 + w3)*(wDown3 + dSigma3[ijk]))/(alpha2*h2)
+;
+
+uzero
+=
+sqrt(uzerosqr)
+;
+
+vR1
+=
+(DSigmaUp1 + w1)/(h*uzero) - beta1[ijk]
+;
+
+vR2
+=
+(DSigmaUp2 + w2)/(h*uzero) - beta2[ijk]
+;
+
+vR3
+=
+(DSigmaUp3 + w3)/(h*uzero) - beta3[ijk]
 ;
 
 }
 /* if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) */
 
+
+VR1[ijk]
+=
+vR1
+;
+
+VR2[ijk]
+=
+vR2
+;
+
+VR3[ijk]
+=
+vR3
+;
 
 rho0
 =
@@ -631,4 +671,4 @@ P*g33[ijk] + (P + rhoE)*uzerosqr*pow2(vRplusbetado3)
 }  /* end of function */
 
 /* setADMvars.c */
-/* nvars = 51, n* = 180,  n/ = 40,  n+ = 184, n = 404, O = 1 */
+/* nvars = 54, n* = 186,  n/ = 43,  n+ = 196, n = 425, O = 1 */

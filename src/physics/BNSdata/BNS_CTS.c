@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 27.11.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 28.11.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -343,8 +343,11 @@ double dlwB31;
 double dlwB32;
 double dlwB33;
 double dSigmaUp1;
+double DSigmaUp1;
 double dSigmaUp2;
+double DSigmaUp2;
 double dSigmaUp3;
+double DSigmaUp3;
 double duzero1;
 double duzero2;
 double duzero3;
@@ -779,17 +782,17 @@ h2
 pow2(h)
 ;
 
-dSigmaUp1
+DSigmaUp1
 =
 Psim4*dSigma1[ijk]
 ;
 
-dSigmaUp2
+DSigmaUp2
 =
 Psim4*dSigma2[ijk]
 ;
 
-dSigmaUp3
+DSigmaUp3
 =
 Psim4*dSigma3[ijk]
 ;
@@ -858,17 +861,17 @@ sqrt(uzerosqr)
 
 vR1
 =
--beta1[ijk] + (dSigma1[ijk] + wB1[ijk])/(h*uzero)
+(DSigmaUp1 + w1)/(h*uzero) - beta1[ijk]
 ;
 
 vR2
 =
--beta2[ijk] + (dSigma2[ijk] + wB2[ijk])/(h*uzero)
+(DSigmaUp2 + w2)/(h*uzero) - beta2[ijk]
 ;
 
 vR3
 =
--beta3[ijk] + (dSigma3[ijk] + wB3[ijk])/(h*uzero)
+(DSigmaUp3 + w3)/(h*uzero) - beta3[ijk]
 ;
 
 dLnrho01
@@ -2206,4 +2209,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 169, n* = 1251,  n/ = 194,  n+ = 984, n = 2429, O = 1 */
+/* nvars = 169, n* = 1251,  n/ = 194,  n+ = 981, n = 2426, O = 1 */

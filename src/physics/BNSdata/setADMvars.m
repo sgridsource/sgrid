@@ -7,7 +7,7 @@
 (* variables *)
 variables = {Psi, B[a], alphaP, Sigma, dB[a,b], dSigma[a],
 	     psi, g[a,b], alpha, beta[a], K[a,b], rho, jdo[a], Sdo[a,b],
-             q, wB[a], x, y}
+             q, wB[a], VR[a], x, y}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -65,14 +65,19 @@ tocompute = {
     Psim2 == 1/Psi2,
     Psim4 == Psim2*Psim2,
     Psim6 == Psim4*Psim2,
-    dSigmaUp[a] == Psim4 dSigma[a],
+    DSigmaUp[a] == Psim4 dSigma[a],
     w[a] == Psim6 wB[a],
     wBDown[a] == wB[a],
     wDown[a] == Psim2 wBDown[a],
     h == (n+1) q + 1,
     h2 == h*h,
-    uzerosqr == (1 + (wDown[a] + dSigma[a]) (w[a] + dSigmaUp[a])/h2)/alpha2,
+    uzerosqr == (1 + (wDown[a] + dSigma[a]) (w[a] + DSigmaUp[a])/h2)/alpha2,
+    uzero == sqrt[uzerosqr],
+    vR[a] == (w[a] + DSigmaUp[a])/(uzero*h) - beta[a],
   Cif == end,
+
+  (* set VR on grid equal to local vR *)
+  VR[a] == vR[a],
 
   (* rest mass density, pressure, and total energy density *)
   rho0 == Power[q/kappa, n],
@@ -174,8 +179,9 @@ variabledeclarations[] := Module[{},
   prdecvarname[{B[a]},    "BNSdata_Bx"];
   prdecvarname[{alphaP},  "BNSdata_alphaP"];
   prdecvarname[{Sigma},   "BNSdata_Sigma"];
-  prdecvarname[{q},      "BNSdata_q"];
-  prdecvarname[{wB[a]}, "BNSdata_wBx"];
+  prdecvarname[{q},       "BNSdata_q"];
+  prdecvarname[{wB[a]},   "BNSdata_wBx"];
+  prdecvarname[{VR[a]},   "BNSdata_VRx"];
 
   prdecvarname[{dB[a,b]}, 	"BNSdata_Bxx"];
   prdecvarname[{dSigma[a]},     "BNSdata_Sigmax"];
