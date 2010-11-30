@@ -154,6 +154,8 @@ void BNSdata_initial_shift(int star, double fac,
 /* initialize BNSdata */
 int BNSdata_startup(tGrid *grid)
 {
+  int corot1 = Getv("BNSdata_rotationstate1","corotation");
+  int corot2 = Getv("BNSdata_rotationstate2","corotation");
   int b;
   int TOVav        = Getv("BNSdata_guess", "TOVaverage");
   int TOVprod      = Getv("BNSdata_guess", "TOVproduct");
@@ -245,6 +247,7 @@ int BNSdata_startup(tGrid *grid)
     double *BNSdata_Bx     = box->v[Ind("BNSdata_Bx")];
     double *BNSdata_By     = box->v[Ind("BNSdata_Bx")+1];
     double *BNSdata_Bz     = box->v[Ind("BNSdata_Bx")+2];
+    double *BNSdata_Sigma  = box->v[Ind("BNSdata_Sigma")];
     double r1, m1_r, P1, Phi1, Psi1, m01_r, q1;
     double r2, m2_r, P2, Phi2, Psi2, m02_r, q2;
     double Bx1,By1,Bz1;
@@ -318,11 +321,21 @@ int BNSdata_startup(tGrid *grid)
         BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
         BNSdata_q[i]     = q1 + q2;
       }
+      /* set inertial shift B^i if wanted */
       if(initShift)
       {
         BNSdata_Bx[i] = Bx1 + Bx2;
         BNSdata_By[i] = By1 + By2;
         BNSdata_Bz[i] = Bz1 + Bz2;
+      }
+      /* set Sigma if needed */
+      if( (b==0 || b==5) && (!corot1) )
+      {
+        BNSdata_Sigma[i] = y;
+      }
+      if( (b==3 || b==4) && (!corot2) )
+      {
+        BNSdata_Sigma[i] = -y;
       }
     }
   }
