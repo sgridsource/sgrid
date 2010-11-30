@@ -119,9 +119,9 @@ tocompute = {
       dLnalpha[a] == dalpha[a]/alpha,
       dL2[a] == 2*(Psim8 wBDown[c] dwB[c,a] +
                    Psim6 (dwB[c,a] dSigma[c] + wB[c] ddSigma[a,c]) +
-                   Psim4 dSigmaUp[c] ddSigma[a,c]  - 
+                   Psim4 dSigmaUp[c] ddSigma[a,c])  - 
                 (8 Psim9 wBDown[c] wB[c] + 12 Psim7 wB[c] dSigma[c] +
-                 4 Psim5 dSigma[c] dSigmaUp[c]) dPsi[a] + 2 h2 dLnh[a]),
+                 4 Psim5 dSigma[c] dSigmaUp[c]) dPsi[a] + 2 h2 dLnh[a],
       duzerosqr[a] == (dL2[a] - 2 L2 (dalpha[a]/alpha + dLnh[a]))/(alpha2 h2),
       duzero[a] == duzerosqr[a]/(2 uzero),
       dbeta[a,b] == dB[a,b] + epsmatrix3d[b,a,3] Omega,
@@ -254,9 +254,9 @@ tocompute = {
         (* L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]), *)
         lL2 == 2*(Psim8 wBDown[c] lwB[c] +
                      Psim6 (lwB[c] dSigma[c] + wB[c] dlSigma[c]) +
-                     Psim4 dSigmaUp[c] dlSigma[c]  - 
+                     Psim4 dSigmaUp[c] dlSigma[c])  - 
                   (8 Psim9 wBDown[c] wB[c] + 12 Psim7 wB[c] dSigma[c] +
-                   4 Psim5 dSigma[c] dSigmaUp[c]) lPsi + 2 h2 lLnh),
+                   4 Psim5 dSigma[c] dSigmaUp[c]) lPsi + 2 h2 lLnh,
         luzerosqr == (lL2 - 2 L2 (lalpha/alpha + lLnh))/(alpha2 h2),
         luzero == luzerosqr/(2 uzero),
         lwBDown[a] == lwB[a],
