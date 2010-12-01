@@ -90,8 +90,18 @@ tocompute = {
       uzero == sqrt[uzerosqr],
 
       FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
-
+(*
+FSigma == Sigma - 10,
+FSigma == dSigmaUp[c] dq[c] - 100 dq2,
+FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
+*)
     Cinstruction == "} /* end forplane1 */",
+
+    (* set Sigma and to zero at A=0, B=0 (one point at xout1/2) *)
+    Cinstruction == "i=0;  j=0;",
+    Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
+      FSigma == Sigma,
+    Cinstruction == "} /* end for k  */",
   
   (* linear case: *)
   Cif == else,
@@ -157,8 +167,21 @@ tocompute = {
       
       FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c] +
                   dSigmaUp[c] dlq[c] - h uzero Psi4 beta[c] dlq[c],
-
+(*
+lL2 == 2*(dlSigma[c] (w[c] + DSigmaUp[c])),
+luzerosqr == (lL2)/(alpha2 h2),
+luzero == luzerosqr/(2 uzero), 
+FlSigma  == lSigma,
+FlSigma == dlSigmaUp[c] dq[c],
+FlSigma == dlSigmaUp[c] dq[c] - h luzero Psi4 beta[c] dq[c],
+*)
     Cinstruction == "} /* end forplane1 */",
+
+    (* set Sigma and to zero at A=0, B=0 (one point at xout1/2) *)
+    Cinstruction == "i=0;  j=0;",
+    Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
+      FlSigma == lSigma,
+    Cinstruction == "} /* end for k  */",
 
   Cif == end,
 
