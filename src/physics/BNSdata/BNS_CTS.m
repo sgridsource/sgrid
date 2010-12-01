@@ -71,6 +71,9 @@ tocompute = {
   Psi4   == Psi2*Psi2,
   Psi5   == Psi*Psi4,
 
+  (* rest mass density *)
+  rho0 == Power[q/kappa, n],
+
   (*******************************)
   (* BEGIN: inside/outside stars *)
   (* inside stars *)
@@ -111,7 +114,7 @@ tocompute = {
       vR[a] == (w[a] + DSigmaUp[a])/(uzero*h) - beta[a],
 
       (* more terms which we need inside the stars *)
-      dLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a],
+      drho0[a] == (n/kappa) Power[Abs[q/kappa], n-1] dq[a],
       dLnPsi[a] == dPsi[a]/Psi,
       dLnh[a] == (n+1) dq[a] / h,
       dLnalphaP[a] == dalphaP[a]/alphaP,
@@ -126,9 +129,14 @@ tocompute = {
       duzero[a] == duzerosqr[a]/(2 uzero),
       dbeta[a,b] == dB[a,b] + epsmatrix3d[b,a,3] Omega,
      
-      dLnrhozalphaPsi2oh[a] == dLnrho0[a] + dLnalphaP[a] + dLnPsi[a] - dLnh[a],
-      dLnrhozalphaPsi6uz[a] == dLnrho0[a] + dLnalphaP[a] + 5 dLnPsi[a] +
-                               duzero[a]/uzero,
+      (* dLnrhozalphaPsi2oh[a] == dLnrho0[a] + dLnalphaP[a] + dLnPsi[a] - dLnh[a],
+         dLnrhozalphaPsi6uz[a] == dLnrho0[a] + dLnalphaP[a] + 5 dLnPsi[a] +
+                                  duzero[a]/uzero, *)
+      dLnalphaPsi2oh[a] == dLnalphaP[a] + dLnPsi[a] - dLnh[a],
+      dLnalphaPsi6uz[a] == dLnalphaP[a] + 5 dLnPsi[a] + duzero[a]/uzero,
+      drho0PLUSrho0dLnalphaPsi2oh[a] == drho0[a] + rho0 dLnalphaPsi2oh[a],
+      drho0PLUSrho0dLnalphaPsi6uz[a] == drho0[a] + rho0 dLnalphaPsi6uz[a],
+
       divwB == delta [b,c] dwB[b,c],
       divbeta == delta [b,c] dbeta[b,c],
     Cif == end,
@@ -145,7 +153,7 @@ tocompute = {
   VR[a] == vR[a],  (* set VR on grid equal to local vR *)
 
   (* rest mass density, pressure, and total energy density *)
-  rho0 == Power[q/kappa, n],
+  (* rho0 == Power[q/kappa, n], *)
   P    == q rho0,
   rhoE == rho0 (1 + n q),
 
@@ -187,10 +195,14 @@ tocompute = {
                    (dLnrho0[a] + dLnuzerosqr[a]/2 + dLnalphaP[a] + 5 dLnPsi[a]),
         *)
       Cif == else,
-        FSigma == delta[b,c] ddSigma[b,c] + 
-                  (dSigmaUp[c] + wB[c]) dLnrhozalphaPsi2oh[c] -
-                  2 wB[c] dLnPsi[c] + Psim2 divwB -
-                  h uzero Psi4 (divbeta + beta[c] dLnrhozalphaPsi6uz[c]),
+        FSigma == rho0 delta[b,c] ddSigma[b,c] + 
+                  (dSigmaUp[c] + wB[c]) drho0PLUSrho0dLnalphaPsi2oh[c] -
+                  rho0 (2 wB[c] dLnPsi[c] + Psim2 divwB) -
+                  h uzero Psi4 (rho0 divbeta +
+                                beta[c] drho0PLUSrho0dLnalphaPsi6uz[c]),
+(*
+FSigma == delta[b,c] ddSigma[b,c],
+*)
       Cif == end,
 
     (* Sigma outside stars *)
@@ -291,11 +303,11 @@ tocompute = {
         divlbeta == delta [b,c] dlB[b,c],
         (* ldLnalpha[a] == dlalpha[a]/alpha - lalpha dalpha[a]/alpha2, *)
         (* rho0 == Power[q/kappa, n], *)
-        (* dLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a], *)
-        (* ldLnrho0[a] == (n/kappa) Power[q/kappa, n-1] dlq[a] +
+        (* drho0[a] == (n/kappa) Power[q/kappa, n-1] dq[a], *)
+        (* ldrho0[a] == (n/kappa) Power[q/kappa, n-1] dlq[a] +
                        (n(n-1)/(kappa*kappa)) Power[q/kappa, n-2] lq dq[a], *)
-
-        ldLnrho0[a] == 0, (* since lq == 0 *)
+        lrho0 == 0,
+        ldrho0[a] == 0, (* since lq == 0 *)
         ldLnalphaP[a] == dlalphaP[a]/alphaP - lalphaP dalphaP[a]/alphaP2,
         ldLnPsi[a] == dlPsi[a] Psim1 - lPsi dPsi[a] Psim2,
 
@@ -389,18 +401,25 @@ tocompute = {
       (* genral case (not corot.) *)
       Cif == else,
         lhuzeroPsi6 == lh uzero Psi6 + h luzero Psi6 + 6 h uzero Psi5 lPsi, 
-        dlLnrhozalphaPsi2oh[a] ==  ldLnrho0[a] + ldLnalphaP[a] + ldLnPsi[a] +
-                                   ldLnh[a],
-        ldLnrhozalphaPsi6uz[a] == ldLnrho0[a] + ldLnalphaP[a] + ldLnuzero[a] +
-                                  5 ldLnPsi[a],
-        FlSigma == delta[b,c] ddlSigma[b,c] + 
-                  (dlSigmaUp[c] + lwB[c]) dLnrhozalphaPsi2oh[c] -
-                  2 lwB[c] dLnPsi[c] + Psim2 divlwB -
-                  h uzero Psi4 (divlbeta + lB[c] dLnrhozalphaPsi6uz[c]) +
-                  (dSigmaUp[c] + wB[c]) dlLnrhozalphaPsi2oh[c] -
-                  2 wB[c] ldLnPsi[c] - 2 Psim3 lPsi divwB -
-                  lhuzeroPsi6 (divbeta + beta[c] dLnrhozalphaPsi6uz[c]) -
-                  h uzero Psi4 beta[c] ldLnrhozalphaPsi6uz[c],
+        ldLnalphaPsi2oh[a] == ldLnalphaP[a] + ldLnPsi[a] + ldLnh[a],
+        ldLnalphaPsi6uz[a] == ldLnalphaP[a] + ldLnuzero[a] + 5 ldLnPsi[a],
+        ldrho0PLUSrho0dLnalphaPsi2oh[a] == ldrho0[a] + rho0 ldLnalphaPsi2oh[a]+
+                                           lrho0 dLnalphaPsi2oh[a],
+        ldrho0PLUSrho0dLnalphaPsi6uz[a] == ldrho0[a] + rho0 ldLnalphaPsi6uz[a]+
+                                           lrho0 dLnalphaPsi6uz[a],
+        FlSigma == rho0 delta[b,c] ddlSigma[b,c] + 
+                  (dlSigmaUp[c] + lwB[c]) drho0PLUSrho0dLnalphaPsi2oh[c] -
+                  rho0 (2 lwB[c] dLnPsi[c] + Psim2 divlwB) -
+                  h uzero Psi4 (rho0 divlbeta +
+                                lB[c] drho0PLUSrho0dLnalphaPsi6uz[c]) +
+                  (dSigmaUp[c] + wB[c]) ldrho0PLUSrho0dLnalphaPsi2oh[c] -
+                  rho0 (2 wB[c] ldLnPsi[c] - 2 Psim3 lPsi divwB) -
+                  lhuzeroPsi6 (rho0 divbeta +
+                               beta[c] drho0PLUSrho0dLnalphaPsi6uz[c]) -
+                  h uzero Psi4 beta[c] ldrho0PLUSrho0dLnalphaPsi6uz[c],
+(*
+FlSigma == delta[b,c] ddlSigma[b,c],
+*)
       Cif == end,
 
     (* Sigma outside stars *)
@@ -450,6 +469,7 @@ BeginCFunction[] := Module[{},
   pr["#include \"BNSdata.h\"\n"];
   pr["\n"];
   pr["#define Power(x,y) (pow((double) (x), (double) (y)))\n"];
+  pr["#define Abs(x)     (fabs((double) (x)))\n"];
   pr["#define Log(x)     (log((double) (x)))\n"];
   pr["#define pow2(x)    ((x)*(x))\n"];
   pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
