@@ -161,6 +161,7 @@ int BNSdata_startup(tGrid *grid)
   int TOVprod      = Getv("BNSdata_guess", "TOVproduct");
   int initShift    = Getv("BNSdata_guess", "TaniguchiShift");
   double Omega     = Getd("BNSdata_Omega");
+  double xCM       = Getd("BNSdata_x_CM");
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_b = Getd("BNSdata_b");
   double BNSdata_n = Getd("BNSdata_n");
@@ -331,11 +332,11 @@ int BNSdata_startup(tGrid *grid)
       /* set Sigma if needed */
       if( (b==0 || b==5) && (!corot1) )
       {
-        BNSdata_Sigma[i] = y;
+        BNSdata_Sigma[i] = Omega*(xc1-xCM) * y;
       }
       if( (b==3 || b==4) && (!corot2) )
       {
-        BNSdata_Sigma[i] = -y;
+        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y;
       }
     }
   }
