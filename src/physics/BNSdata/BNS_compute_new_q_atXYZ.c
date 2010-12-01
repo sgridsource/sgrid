@@ -1,5 +1,5 @@
 /* BNS_compute_new_q_atXYZ.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 28.11.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 1.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -80,7 +80,7 @@ double Psi4;
 double Psim4;
 double Psim6;
 double q;
-double twoalphasqrwdSigma;
+double twoalpha2wdSigma;
 double uzero;
 double vR1;
 double vR2;
@@ -96,8 +96,8 @@ double xi3;
 
 /* Jetzt geht's los! */
 
-FirstDerivsOf_S(box,index_BNSdata_Sigma,                                    Ind("BNSdata_Sigmax")); 
-
+FirstDerivsOf_S(box,index_BNSdata_Sigma,                   
+                                   Ind("BNSdata_Sigmax"));
 
 if(box->x_of_X[1] != NULL) { 
 
@@ -244,7 +244,7 @@ pow2(Psi2)
 
 
 /* conditional */
-if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
+if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
 
 vR1
 =
@@ -412,7 +412,7 @@ w3
 Psim6*wB3
 ;
 
-twoalphasqrwdSigma
+twoalpha2wdSigma
 =
 2.*alpha2*(dSigma1*w1 + dSigma2*w2 + dSigma3*w3)
 ;
@@ -424,12 +424,12 @@ betadSigmaMinusCC
 
 bb
 =
--twoalphasqrwdSigma + pow2(betadSigmaMinusCC)
+-twoalpha2wdSigma + pow2(betadSigmaMinusCC)
 ;
 
 L2
 =
-(0.5*(bb + sqrt(-2.*alpha2*twoalphasqrwdSigma + pow2(bb))))/alpha2
+(0.5*(bb + sqrt(pow2(bb) - pow2(twoalpha2wdSigma))))/alpha2
 ;
 
 h
@@ -453,4 +453,4 @@ return q;
 }  /* end of function */
 
 /* BNS_compute_new_q_atXYZ.c */
-/* nvars = 13, n* = 95,  n/ = 51,  n+ = 88, n = 234, O = 1 */
+/* nvars = 13, n* = 93,  n/ = 51,  n+ = 87, n = 231, O = 1 */
