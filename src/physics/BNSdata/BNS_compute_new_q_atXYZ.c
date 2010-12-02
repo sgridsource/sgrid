@@ -7,6 +7,7 @@
 
 #define Power(x,y) (pow((double) (x), (double) (y)))
 #define Sqrt(x)    (sqrt((double) (x)))
+#define Abs(x)     (fabs((double) (x)))
 #define Log(x)     (log((double) (x)))
 #define pow2(x)    ((x)*(x))
 #define pow2inv(x) (1.0/((x)*(x)))
@@ -429,12 +430,12 @@ bb
 
 L2
 =
-(0.5*(bb + sqrt(pow2(bb) - pow2(twoalpha2wdSigma))))/alpha2
+(0.5*(bb + Sqrt(Abs(pow2(bb) - pow2(twoalpha2wdSigma)))))/alpha2
 ;
 
 h
 =
-sqrt(-(dSigma1*DSigmaUp1) - dSigma2*DSigmaUp2 - dSigma3*DSigmaUp3 + L2)
+Sqrt(Abs(-(dSigma1*DSigmaUp1) - dSigma2*DSigmaUp2 - dSigma3*DSigmaUp3 + L2))
 ;
 
 q

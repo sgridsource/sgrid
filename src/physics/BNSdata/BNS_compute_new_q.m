@@ -82,8 +82,8 @@ tocompute = {
     twoalpha2wdSigma == 2 alpha2 w[c] dSigma[c],
     betadSigmaMinusCC == beta[c] dSigma[c] - CC, 
     bb == betadSigmaMinusCC^2 - twoalpha2wdSigma,
-    L2 == (bb + sqrt[bb*bb - twoalpha2wdSigma^2])/(2 alpha2),
-    h == sqrt[L2 - dSigma[a] DSigmaUp[a]],
+    L2 == (bb + Sqrt[Abs[bb*bb - twoalpha2wdSigma^2]])/(2 alpha2),
+    h == Sqrt[Abs[L2 - dSigma[a] DSigmaUp[a]]],
 
     (* h == (n+1) q + 1, *)
     q == (h - 1.0)/(n + 1.0),
@@ -113,6 +113,7 @@ BeginCFunction[] := Module[{},
   pr["\n"];
   pr["#define Power(x,y) (pow((double) (x), (double) (y)))\n"];
   pr["#define Sqrt(x)    (sqrt((double) (x)))\n"];
+  pr["#define Abs(x)     (fabs((double) (x)))\n"];
   pr["#define Log(x)     (log((double) (x)))\n"];
   pr["#define pow2(x)    ((x)*(x))\n"];
   pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
