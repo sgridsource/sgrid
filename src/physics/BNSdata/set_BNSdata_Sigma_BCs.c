@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 30.11.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 2.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -14,8 +14,7 @@
 
 
 
-void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,  
-		   tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs, 		   int nonlin)
+void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs,      int nonlin)
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
@@ -288,7 +287,50 @@ continue;
 
 
 /* conditional */
-if (bi == 1 || bi == 2 || (bi == 0 && corot1) || (bi == 3 && corot2)) {
+if (bi == 1 || bi == 2) {
+
+
+
+/* conditional */
+if (nonlin) {
+
+
+forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k); 
+
+FSigma[ijk]
+=
+Sigma[ijk]
+;
+
+
+} /* end forplane1 */ 
+
+
+} else { /* if (!nonlin) */
+
+
+forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k); 
+
+FlSigma[ijk]
+=
+lSigma[ijk]
+;
+
+
+} /* end forplane1 */ 
+
+}
+/* if (nonlin) */
+
+
+}
+/* if (nonlin) */
+
+
+
+
+/* conditional */
+if ((bi == 0 || bi == 1) && corot1 || (bi == 2 || bi == 3) && corot2) {
 
 
 
@@ -347,14 +389,14 @@ lSigma[ijk]
 
 
 
-continue; /* we are done with this box */ 
+continue; /* for corot we are done with this box */ 
 
 }
 /* if (nonlin) */
 
 
 
-FirstDerivsOf_S(box,  Ind("BNSdata_q"), 			                 Ind("BNSdata_qx")); 
+FirstDerivsOf_S(box,  Ind("BNSdata_q"),                     Ind("BNSdata_qx")); 
 
 
 
@@ -953,4 +995,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 90, n* = 293,  n/ = 64,  n+ = 186, n = 543, O = 1 */
+/* nvars = 90, n* = 307,  n/ = 78,  n+ = 188, n = 573, O = 1 */

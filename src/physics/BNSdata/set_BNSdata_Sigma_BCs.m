@@ -22,17 +22,30 @@ tocompute = {
     Cinstruction == "continue;",
   Cif == end,
 
-  (* Use Sigma=0 as BC outside stars or if corot *)
-  Cif == ( (bi==1 || bi==2) || (bi==0 && corot1) || (bi==3 && corot2) ),
+  (* Use Sigma=0 as BC on A=1 if (bi==1 || bi==2) for corot and general cases *)
+  Cif == ( bi==1 || bi==2 ),
+    Cif == nonlin, (* non-linear case *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
+        FSigma  == Sigma,  (* set Sigma=0 *)
+      Cinstruction == "} /* end forplane1 */",
+    Cif == else,   (* linear case *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
+        FlSigma  == lSigma,  (* set Sigma=0 *)
+      Cinstruction == "} /* end forplane1 */",
+    Cif == end,
+  Cif == end,
+
+  (* Use Sigma=0 as BC if corot *)
+  Cif == ( ((bi==0 || bi==1) && corot1) || ((bi==2 ||bi==3) && corot2) ),
 
     Cif == nonlin, (* non-linear case *)
       (* go over A=0 plane *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
-        FSigma  == Sigma,  (* set Sigma=0 outside stars *)
+        FSigma  == Sigma,  (* set Sigma=0 *)
       Cinstruction == "} /* end forplane1 */",
       (* go over A=1 plane *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
-        FSigma  == Sigma,  (* set Sigma=0 outside stars *)
+        FSigma  == Sigma,  (* set Sigma=0 *)
       Cinstruction == "} /* end forplane1 */",
 
     Cif == else,   (* linear case *)
@@ -42,12 +55,12 @@ tocompute = {
       Cinstruction == "} /* end forplane1 */",
       (* go over A=1 plane *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
-        FlSigma  == lSigma,  (* set Sigma=0 outside stars *)
+        FlSigma  == lSigma,  (* set Sigma=0 *)
       Cinstruction == "} /* end forplane1 */",
 
     Cif == end,
 
-    Cinstruction == "continue; /* we are done with this box */",
+    Cinstruction == "continue; /* for corot we are done with this box */",
   Cif == end,
   (* if we get here bi=0 or 3 and there is no corot in this box *)
 
