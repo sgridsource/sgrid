@@ -330,14 +330,33 @@ int BNSdata_startup(tGrid *grid)
         BNSdata_Bz[i] = Bz1 + Bz2;
       }
       /* set Sigma if needed */
-      if( (b==0 || b==5) && (!corot1) )
+      if( (b==0 || b==1 || b==5) && (!corot1) )
       {
-        BNSdata_Sigma[i] = Omega*(xc1-xCM) * y;
+        double A = pX[i];
+        BNSdata_Sigma[i] = Omega*(xc1-xCM) * y *
+                           (1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5));
       }
-      if( (b==3 || b==4) && (!corot2) )
+      if( (b==3 || b==2 || b==4) && (!corot2) )
       {
-        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y;
+        double A = pX[i];
+        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y *
+                           (1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5));
       }
+/*
+      if( (b==0 || b==1 || b==5) && (!corot1) )
+      {
+        double r1 = sqrt((x-xc1)*(x-xc1) + y*y +z*z);
+        BNSdata_Sigma[i] = Omega*(xc1-xCM) * y *
+                           (1.0-Attenuation01((r1-rs1)/xin1, 2.0, 0.5));
+      }
+      if( (b==3 || b==2 || b==4) && (!corot2) )
+      {
+        double r2 = sqrt((x-xc2)*(x-xc2) + y*y +z*z);
+        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y *
+                           (1.0-Attenuation01(-(r2-rs2)/xin2, 2.0, 0.5));
+      }
+*/
+
     }
   }
 
@@ -1791,6 +1810,28 @@ int BNSdata_solve(tGrid *grid)
   vlduDerivs = AddDuplicateEnable(vluDerivs, "_l");
 
 // remove this later:
+/*
+Setd("BNSdata_C1", -0.832301);
+Setd("BNSdata_C2", -0.8);
+grid->time  = -100;
+write_grid(grid);
+
+grid->time  = -99;
+BNS_compute_new_q(grid);
+write_grid(grid);
+
+grid->time  = -98;
+compute_new_q_and_adjust_domainshapes(grid, 0);
+compute_new_q_and_adjust_domainshapes(grid, 3);
+write_grid(grid);
+
+grid->time  = -97;
+BNS_compute_new_q(grid);
+write_grid(grid);
+
+exit(11);
+*/
+
 //grid->time  = -100;
 //F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
 //BNSdata_verify_solution(grid);
