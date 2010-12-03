@@ -22,18 +22,6 @@ tocompute = {
     Cinstruction == "continue;",
   Cif == end,
 
-  (* Use Sigma=0 as BC on A=1 if (bi==1 || bi==2) for corot and general cases *)
-  Cif == ( bi==1 || bi==2 ),
-    Cif == nonlin, (* non-linear case *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
-        FSigma  == Sigma,  (* set Sigma=0 *)
-      Cinstruction == "} /* end forplane1 */",
-    Cif == else,   (* linear case *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
-        FlSigma  == lSigma,  (* set Sigma=0 *)
-      Cinstruction == "} /* end forplane1 */",
-    Cif == end,
-  Cif == end,
 
   (* Use Sigma=0 as BC if corot *)
   Cif == ( ((bi==0 || bi==1) && corot1) || ((bi==2 ||bi==3) && corot2) ),
@@ -62,124 +50,138 @@ tocompute = {
 
     Cinstruction == "continue; /* for corot we are done with this box */",
   Cif == end,
-  (* if we get here bi=0 or 3 and there is no corot in this box *)
 
-  Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
+  (* Use Sigma=0 as BC on A=1 if (bi==1 || bi==2) for corot and general cases *)
+  Cif == ( bi==1 || bi==2 ),
+    Cif == nonlin, (* non-linear case *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
+        FSigma  == Sigma,  (* set Sigma=0 *)
+      Cinstruction == "} /* end forplane1 */",
+    Cif == else,   (* linear case *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
+        FlSigma  == lSigma,  (* set Sigma=0 *)
+      Cinstruction == "} /* end forplane1 */",
+    Cif == end,
+
+  (* if not b=1 or 2, i.e. bi==0 || bi==3 *)
+  Cif == else,
+    (* if we get here bi=0 or 3 and there is no corot in this box *)
+    Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
 			                 Ind(\"BNSdata_qx\"));",
+    (* non-linear case: *)
+    Cif == nonlin,
+      Cinstruction == "FirstDerivsOf_S(box, index_Sigma, \
+                                       Ind(\"BNSdata_Sigmax\"));",
+      (* go over A=0 plane *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
 
-  (* non-linear case: *)
-  Cif == nonlin,
-    Cinstruction == "FirstDerivsOf_S(box, index_Sigma, \
-                                     Ind(\"BNSdata_Sigmax\"));",
-    (* go over A=0 plane *)
-    Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+        (* Omega \times r term *)
+        OmegaCrossR1 == - Omega y,
+        OmegaCrossR2 == + Omega (x-xCM),
+        OmegaCrossR3 == 0,
 
-      (* Omega \times r term *)
-      OmegaCrossR1 == - Omega y,
-      OmegaCrossR2 == + Omega (x-xCM),
-      OmegaCrossR3 == 0,
+        (* shift in rotating frame (in the inertial frame beta^i = B^i) *)
+        beta[a] == B[a] + OmegaCrossR[a],
 
-      (* shift in rotating frame (in the inertial frame beta^i = B^i) *)
-      beta[a] == B[a] + OmegaCrossR[a],
+        (* some abbreviations *)
+        Psi2  == Psi*Psi,
+        Psi4  == Psi2*Psi2,
+        Psim2 == 1/Psi2,
+        Psim4 == Psim2*Psim2,
+        Psim6 == Psim4*Psim2,
+        alpha == alphaP/Psi,
+        alpha2 == alpha alpha,
+        (* terms needed *)
+        h == (n+1) q + 1,
+        h2 == h h,
+        DSigmaUp[a] == Psim4 dSigma[a],
+        dSigmaUp[a] == dSigma[a],
+        w[a] == Psim6 wB[a],
+        wBDown[a] == wB[a],
+        wDown[a] == Psim2 wBDown[a],
+        L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
+        uzerosqr == L2/(alpha2 h2),
+        uzero == sqrt[uzerosqr],
 
-      (* some abbreviations *)
-      Psi2  == Psi*Psi,
-      Psi4  == Psi2*Psi2,
-      Psim2 == 1/Psi2,
-      Psim4 == Psim2*Psim2,
-      Psim6 == Psim4*Psim2,
-      alpha == alphaP/Psi,
-      alpha2 == alpha alpha,
-      (* terms needed *)
-      h == (n+1) q + 1,
-      h2 == h h,
-      DSigmaUp[a] == Psim4 dSigma[a],
-      dSigmaUp[a] == dSigma[a],
-      w[a] == Psim6 wB[a],
-      wBDown[a] == wB[a],
-      wDown[a] == Psim2 wBDown[a],
-      L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
-      uzerosqr == L2/(alpha2 h2),
-      uzero == sqrt[uzerosqr],
-
-      FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
+        FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
 (*
 FSigma == Sigma - 10,
 FSigma == dSigmaUp[c] dq[c] - 100 dq2,
 FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
 *)
-    Cinstruction == "} /* end forplane1 */",
 
-    (* set Sigma and to zero at A=0, B=0 (one point at xout1/2) *)
-    Cinstruction == "i=0;  j=0;",
-    Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
-      FSigma == Sigma,
-    Cinstruction == "} /* end for k  */",
-  
-  (* linear case: *)
-  Cif == else,
-    Cinstruction == "FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);",
+      Cinstruction == "} /* end forplane1 */",
 
-    (* go over A=0 plane *)
-    Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+      (* set Sigma and to zero at A=0, B=0 (one point at xout1/2) *)
+      Cinstruction == "i=0;  j=0;",
+      Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
+        FSigma == Sigma,
+      Cinstruction == "} /* end for k  */",
+    
+    (* linear case: *)
+    Cif == else,
+      Cinstruction == "FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);",
 
-      (* Omega \times r term *)
-      OmegaCrossR1 == - Omega y,
-      OmegaCrossR2 == + Omega (x-xCM),
-      OmegaCrossR3 == 0,
+      (* go over A=0 plane *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
 
-      (* shift in rotating frame (in the inertial frame beta^i = B^i) *)
-      beta[a] == B[a] + OmegaCrossR[a],
+        (* Omega \times r term *)
+        OmegaCrossR1 == - Omega y,
+        OmegaCrossR2 == + Omega (x-xCM),
+        OmegaCrossR3 == 0,
 
-      (* some abbreviations *)
-      Psi2  == Psi*Psi,
-      Psi3  == Psi2*Psi,
-      Psi4  == Psi2*Psi2,
-      Psim2 == 1/Psi2,
-      Psim4 == Psim2*Psim2,
-      Psim6 == Psim4*Psim2,
-      Psim8 == Psim4*Psim4,
-      Psim5 == Psim6*Psi,
-      Psim7 == Psim5*Psim2,
-      Psim9 == Psim7*Psim2,
-      (* non-linear terms needed *)
-      h == (n+1) q + 1,
-      h2 == h h,
-      DSigmaUp[a] == Psim4 dSigma[a],
-      dSigmaUp[a] == dSigma[a],
-      w[a] == Psim6 wB[a],
-      wBDown[a] == wB[a],
-      wDown[a] == Psim2 wBDown[a],
-      L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
-      uzerosqr == L2/(alpha2 h2),
-      uzero == sqrt[uzerosqr],
-      alpha == alphaP/Psi,
-      alpha2 == alpha alpha,
+        (* shift in rotating frame (in the inertial frame beta^i = B^i) *)
+        beta[a] == B[a] + OmegaCrossR[a],
 
-      (* linearized terms *)
-      lq     == 0,
-      dlq[a] == 0,
-      lh   == 0,
-      lLnh == 0,
-      (* wB remains const under linearization *)
-      lwB[a] == 0,
-      dlwB[a,b] == 0,
-      lalpha == lalphaP/Psi - alphaP lPsi/Psi2,   
-      (* dSigmaUp[a] == dSigma[a], *)
-      dlSigmaUp[a] == dlSigma[a],
-      lL2 == 2*(Psim8 wBDown[c] lwB[c] +
-                   Psim6 (lwB[c] dSigma[c] + wB[c] dlSigma[c]) +
-                   Psim4 dSigmaUp[c] dlSigma[c]  - 
-                (8 Psim9 wBDown[c] wB[c] + 12 Psim7 wB[c] dSigma[c] +
-                 4 Psim5 dSigma[c] dSigmaUp[c]) lPsi + 2 h2 lLnh),
-      luzerosqr == (lL2 - 2 L2 (lalpha/alpha + lLnh))/(alpha2 h2),
-      luzero == luzerosqr/(2 uzero),
-      lhuzeroPsi4beta[a] == h (luzero Psi4 beta[a] +
-                               4 uzero Psi3 lPsi beta[a] +
-                               uzero Psi4 lB[a]) + lh uzero Psi4 beta[a],
-      
-      FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c] +
-                  dSigmaUp[c] dlq[c] - h uzero Psi4 beta[c] dlq[c],
+        (* some abbreviations *)
+        Psi2  == Psi*Psi,
+        Psi3  == Psi2*Psi,
+        Psi4  == Psi2*Psi2,
+        Psim2 == 1/Psi2,
+        Psim4 == Psim2*Psim2,
+        Psim6 == Psim4*Psim2,
+        Psim8 == Psim4*Psim4,
+        Psim5 == Psim6*Psi,
+        Psim7 == Psim5*Psim2,
+        Psim9 == Psim7*Psim2,
+        (* non-linear terms needed *)
+        h == (n+1) q + 1,
+        h2 == h h,
+        DSigmaUp[a] == Psim4 dSigma[a],
+        dSigmaUp[a] == dSigma[a],
+        w[a] == Psim6 wB[a],
+        wBDown[a] == wB[a],
+        wDown[a] == Psim2 wBDown[a],
+        L2 == h2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
+        uzerosqr == L2/(alpha2 h2),
+        uzero == sqrt[uzerosqr],
+        alpha == alphaP/Psi,
+        alpha2 == alpha alpha,
+
+        (* linearized terms *)
+        lq     == 0,
+        dlq[a] == 0,
+        lh   == 0,
+        lLnh == 0,
+        (* wB remains const under linearization *)
+        lwB[a] == 0,
+        dlwB[a,b] == 0,
+        lalpha == lalphaP/Psi - alphaP lPsi/Psi2,   
+        (* dSigmaUp[a] == dSigma[a], *)
+        dlSigmaUp[a] == dlSigma[a],
+        lL2 == 2*(Psim8 wBDown[c] lwB[c] +
+                     Psim6 (lwB[c] dSigma[c] + wB[c] dlSigma[c]) +
+                     Psim4 dSigmaUp[c] dlSigma[c]  - 
+                  (8 Psim9 wBDown[c] wB[c] + 12 Psim7 wB[c] dSigma[c] +
+                   4 Psim5 dSigma[c] dSigmaUp[c]) lPsi + 2 h2 lLnh),
+        luzerosqr == (lL2 - 2 L2 (lalpha/alpha + lLnh))/(alpha2 h2),
+        luzero == luzerosqr/(2 uzero),
+        lhuzeroPsi4beta[a] == h (luzero Psi4 beta[a] +
+                                 4 uzero Psi3 lPsi beta[a] +
+                                 uzero Psi4 lB[a]) + lh uzero Psi4 beta[a],
+        
+        FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c] +
+                    dSigmaUp[c] dlq[c] - h uzero Psi4 beta[c] dlq[c],
 (*
 lL2 == 2*(dlSigma[c] (w[c] + DSigmaUp[c])),
 luzerosqr == (lL2)/(alpha2 h2),
@@ -188,17 +190,20 @@ FlSigma  == lSigma,
 FlSigma == dlSigmaUp[c] dq[c],
 FlSigma == dlSigmaUp[c] dq[c] - h luzero Psi4 beta[c] dq[c],
 *)
-    Cinstruction == "} /* end forplane1 */",
 
-    (* set Sigma and to zero at A=0, B=0 (one point at xout1/2) *)
-    Cinstruction == "i=0;  j=0;",
-    Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
-      FlSigma == lSigma,
-    Cinstruction == "} /* end for k  */",
+      Cinstruction == "} /* end forplane1 */",
+
+      (* set Sigma and to zero at A=0, B=0 (one point at xout1/2) *)
+      Cinstruction == "i=0;  j=0;",
+      Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
+        FlSigma == lSigma,
+      Cinstruction == "} /* end for k  */",
+
+    Cif == end, (* end of nonlin/linear case *)
 
   Cif == end,
 
-  Cinstruction == "/* end linear case */\n"
+  Cinstruction == "/* end all */\n"
 }
 
 

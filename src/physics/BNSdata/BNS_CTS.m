@@ -192,14 +192,16 @@ tocompute = {
     (* genral case *)
     (***************)
     Cif == else,
-      FSigma == rho0 delta[b,c] ddSigma[b,c] + 
-                (dSigmaUp[c] + wB[c]) drho0PLUSrho0dLnalphaPsi2oh[c] -
-                rho0 (2 wB[c] dLnPsi[c] + Psim2 divwB) -
-                h uzero Psi4 (rho0 divbeta +
-                              beta[c] drho0PLUSrho0dLnalphaPsi6uz[c]),
-(*
-FSigma == delta[b,c] ddSigma[b,c],
-*)
+      Cif == (bi==0 || bi==3 || bi==4 || bi==5), (* inside stars *)
+        FSigma == rho0 delta[b,c] ddSigma[b,c] + 
+                  (dSigmaUp[c] + wB[c]) drho0PLUSrho0dLnalphaPsi2oh[c] -
+                  rho0 (2 wB[c] dLnPsi[c] + Psim2 divwB) -
+                  h uzero Psi4 (rho0 divbeta +
+                                beta[c] drho0PLUSrho0dLnalphaPsi6uz[c]),
+       Cif == else, (* outside stars *)
+         FSigma == delta[b,c] ddSigma[b,c],
+       Cif == end,
+
     Cif == end, (* END: corot/general case *)
 
   (************************************************)
@@ -412,7 +414,7 @@ FSigma == delta[b,c] ddSigma[b,c],
                   lhuzeroPsi6 (rho0 divbeta +
                                beta[c] drho0PLUSrho0dLnalphaPsi6uz[c]) -
                   h uzero Psi4 beta[c] ldrho0PLUSrho0dLnalphaPsi6uz[c],
-      Cif == else, (* otside stars *)
+      Cif == else, (* outside stars *)
         FlSigma == delta[b,c] ddlSigma[b,c],
       Cif == end,
 

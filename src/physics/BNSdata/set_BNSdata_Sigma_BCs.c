@@ -14,7 +14,8 @@
 
 
 
-void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs,      int nonlin)
+void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,  
+		   tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs, 		   int nonlin)
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
@@ -287,50 +288,7 @@ continue;
 
 
 /* conditional */
-if (bi == 1 || bi == 2) {
-
-
-
-/* conditional */
-if (nonlin) {
-
-
-forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k); 
-
-FSigma[ijk]
-=
-Sigma[ijk]
-;
-
-
-} /* end forplane1 */ 
-
-
-} else { /* if (!nonlin) */
-
-
-forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k); 
-
-FlSigma[ijk]
-=
-lSigma[ijk]
-;
-
-
-} /* end forplane1 */ 
-
-}
-/* if (nonlin) */
-
-
-}
-/* if (nonlin) */
-
-
-
-
-/* conditional */
-if ((bi == 0 || bi == 1) && corot1 || (bi == 2 || bi == 3) && corot2) {
+if (((bi == 0 || bi == 1) && corot1) || ((bi == 2 || bi == 3) && corot2)) {
 
 
 
@@ -396,7 +354,9 @@ continue; /* for corot we are done with this box */
 
 
 
-FirstDerivsOf_S(box,  Ind("BNSdata_q"),                     Ind("BNSdata_qx")); 
+
+/* conditional */
+if (bi == 1 || bi == 2) {
 
 
 
@@ -404,7 +364,47 @@ FirstDerivsOf_S(box,  Ind("BNSdata_q"),                     Ind("BNSdata_qx"));
 if (nonlin) {
 
 
-FirstDerivsOf_S(box, index_Sigma,                                      Ind("BNSdata_Sigmax")); 
+forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k); 
+
+FSigma[ijk]
+=
+Sigma[ijk]
+;
+
+
+} /* end forplane1 */ 
+
+
+} else { /* if (!nonlin) */
+
+
+forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k); 
+
+FlSigma[ijk]
+=
+lSigma[ijk]
+;
+
+
+} /* end forplane1 */ 
+
+}
+/* if (nonlin) */
+
+
+
+} else { /* if (!nonlin) */
+
+
+FirstDerivsOf_S(box,  Ind("BNSdata_q"), 			                 Ind("BNSdata_qx")); 
+
+
+
+/* conditional */
+if (nonlin) {
+
+
+FirstDerivsOf_S(box, index_Sigma,                                        Ind("BNSdata_Sigmax")); 
 
 
 forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k); 
@@ -986,8 +986,12 @@ lSigma[ijk]
 /* if (nonlin) */
 
 
+}
+/* if (nonlin) */
 
-/* end linear case */ 
+
+
+/* end all */ 
 
 } /* end of boxes */
 
@@ -995,4 +999,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 90, n* = 307,  n/ = 78,  n+ = 188, n = 573, O = 1 */
+/* nvars = 90, n* = 309,  n/ = 80,  n+ = 188, n = 577, O = 1 */
