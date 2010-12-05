@@ -99,6 +99,15 @@ num = 0.0;
         messageflag=0;
       }
     }
+    if(messageflag>1)
+    {
+      printf("NAN/INF: %s=%g til    %d: x=%g y=%g z=%g "
+             "box%d grid=%p X=%g Y=%g Z=%g\n",
+             VarName(ivar), var[ijk_old], ijk_old,
+             x[ijk_old], y[ijk_old], z[ijk_old],
+             b_old, grid_old, X[ijk_old], Y[ijk_old], Z[ijk_old]);
+      messageflag=0;
+    }
   }
   if(num>0)
   {
