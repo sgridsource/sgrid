@@ -2208,6 +2208,29 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
   }
 }
 
+/* copy variable at i=0 from Box1 with index b1 to Box2 with index b2 */
+/* This can be used to make a var continues across inner and outer domains. */
+void copy_Var_at_i0_from_Box1_Box2(tGrid *grid, int vind, int b1, int b2)
+{
+  int i,j,k, ijk1, ijk2; 
+  int n1_1 = grid->box[b1]->n1;
+  int n2_1 = grid->box[b1]->n2;
+  int n3_1 = grid->box[b1]->n3;
+  int n1_2 = grid->box[b2]->n1;
+  int n2_2 = grid->box[b2]->n2;
+  int n3_2 = grid->box[b2]->n3;
+  double *v1 = grid->box[b1]->v[vind];
+  double *v2 = grid->box[b2]->v[vind];
+  if(n2_2!=n2_1 || n3_2!=n3_1)
+    errorexit("(n2,n3) has to be equal in both boxes");
+  forplane1(i,j,k, n1_2,n2_2,n3_2, 0)
+  {
+    ijk1 = Ind_n1n2(0,j,k,n1_1,n2_1);
+    ijk2 = Ind_n1n2(0,j,k,n1_2,n2_2);
+    v2[ijk2] = v1[ijk1];
+  }
+}
+
 
 /* compute weighted average of the new q2 on grid2 and the old q1 on grid1 
    at a point X2,Y2,Z2 in grid2 coords */
