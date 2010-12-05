@@ -4015,6 +4015,11 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   /* initialize coords on grid2 */
   BNSgrid_init_Coords(grid2);
 
+  /* NOTE: Interp_Var_From_Grid1_To_Grid2_pm did not work as expected when 
+           called from compute_new_q_and_adjust_domainshapes
+           MAYBE IT HAS A BUG???. But it seems to work if we call
+           Interpolate_Var_From_Grid1_To_Grid2, which calls
+           Interp_Var_From_Grid1_To_Grid2_pm for both inner domains. */
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
   //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"));
@@ -4023,10 +4028,14 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"));
+  if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
+      (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
+  {
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"));
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"));
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"));
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"));
+  }
   BNS_compute_new_q(grid2);
 
 //  /* set q to zero if q<0 or in region 1 and 2 */

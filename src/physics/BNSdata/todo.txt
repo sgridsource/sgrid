@@ -4,3 +4,6 @@
  choose w<1, so that q does not change too much (currently we have w=1)
  [this only works if iterations overshoot]
 *maybe adjust Omega as Pedro did, and also maybe xCM
+
+*in all .m files check if we need to call Ind("name"), maybe it's already
+ defined as index_name by a math module
