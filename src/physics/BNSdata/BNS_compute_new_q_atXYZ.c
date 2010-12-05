@@ -1,5 +1,5 @@
 /* BNS_compute_new_q_atXYZ.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 1.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 5.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -97,8 +97,34 @@ double xi3;
 
 /* Jetzt geht's los! */
 
-FirstDerivsOf_S(box,index_BNSdata_Sigma,                   
-                                   Ind("BNSdata_Sigmax"));
+FirstDerivsOf_S(box,index_BNSdata_Sigma,                                    Ind("BNSdata_Sigmax")); 
+
+
+
+/* conditional */
+if (bi == 1) {
+
+
+                                                                      
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 0,1);}
+/* if (bi == 1) */
+
+
+
+
+/* conditional */
+if (bi == 2) {
+
+
+                                                                      
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 3,2);}
+/* if (bi == 2) */
+
+
 
 if(box->x_of_X[1] != NULL) { 
 
@@ -245,7 +271,7 @@ pow2(Psi2)
 
 
 /* conditional */
-if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 vR1
 =
@@ -454,4 +480,4 @@ return q;
 }  /* end of function */
 
 /* BNS_compute_new_q_atXYZ.c */
-/* nvars = 13, n* = 93,  n/ = 51,  n+ = 87, n = 231, O = 1 */
+/* nvars = 13, n* = 101,  n/ = 59,  n+ = 87, n = 247, O = 1 */

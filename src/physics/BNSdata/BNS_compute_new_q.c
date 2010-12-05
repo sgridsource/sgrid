@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 1.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 5.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -100,8 +100,34 @@ double xi3;
 
 /* Jetzt geht's los! */
 
-FirstDerivsOf_S(box,index_BNSdata_Sigma,                   
-                                   Ind("BNSdata_Sigmax"));
+FirstDerivsOf_S(box,index_BNSdata_Sigma,                                    Ind("BNSdata_Sigmax")); 
+
+
+
+/* conditional */
+if (bi == 1) {
+
+
+                                                                      
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 0,1);}
+/* if (bi == 1) */
+
+
+
+
+/* conditional */
+if (bi == 2) {
+
+
+                                                                      
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 3,2);}
+/* if (bi == 2) */
+
+
 
 forallpoints(box, ijk) { 
 
@@ -158,7 +184,7 @@ pow2(Psi2)
 
 
 /* conditional */
-if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 vR1
 =
@@ -370,4 +396,4 @@ q[ijk]
 }  /* end of function */
 
 /* BNS_compute_new_q.c */
-/* nvars = 15, n* = 94,  n/ = 53,  n+ = 84, n = 231, O = 1 */
+/* nvars = 15, n* = 102,  n/ = 61,  n+ = 84, n = 247, O = 1 */

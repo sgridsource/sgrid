@@ -17,6 +17,19 @@ tocompute = {
   (* deriv of Sigma *)
   Cinstruction == "FirstDerivsOf_S(box,index_BNSdata_Sigma,
                                    Ind(\"BNSdata_Sigmax\"));",
+  Cif == (bi==1),
+    Cinstruction == "\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmax\"), 0,1);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmay\"), 0,1);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmaz\"), 0,1);",
+  Cif == end,
+  Cif == (bi==2),
+    Cinstruction == "\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmax\"), 3,2);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmay\"), 3,2);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmaz\"), 3,2);",
+  Cif == end,
+
   (* x,y *)
   Cinstruction == "if(box->x_of_X[1] != NULL) {",
   Cinstruction == "x = box->x_of_X[1]((void *) box, -1, X,Y,Z);",
@@ -62,6 +75,7 @@ tocompute = {
 
   Cinstruction == "spec_Coeffs(box, BNSwB3, temp4);",
   Cinstruction == "wB3 = spec_interpolate(box, temp4, X,Y,Z);",
+
 
   (**************)
   (* compute q: *)
