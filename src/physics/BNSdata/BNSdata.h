@@ -61,6 +61,8 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
                                     double *X1, double *Y1, double *Z1,
                                     int b, double x, double y, double z);
 void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind);
+void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
+                                       int innerdom);
 double BNS_update_q_atXYZ(tGrid *grid2, 
                           int b2, double X2, double Y2, double Z2,
                           double w, tGrid *grid1);

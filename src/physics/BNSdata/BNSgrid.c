@@ -2115,9 +2115,21 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
   return b1;
 }
 
-
 /* Interpolate Var with index vind from grid1 to grid2 */
 void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
+{
+  Interp_Var_From_Grid1_To_Grid2_pm(grid1, grid2, vind, 0);
+  Interp_Var_From_Grid1_To_Grid2_pm(grid1, grid2, vind, 3);
+}
+/* Interpolate Var with index vind from grid1 to grid2 
+   for domains centered on innerdom */
+/* NOTE: Interp_Var_From_Grid1_To_Grid2_pm did not work as expected when 
+         called from compute_new_q_and_adjust_domainshapes
+         MAYBE IT HAS A BUG???. But it seems to work if we call
+         Interpolate_Var_From_Grid1_To_Grid2, which calls
+         Interp_Var_From_Grid1_To_Grid2_pm for both inner domains. */
+void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
+                                       int innerdom)
 {
   int cind = Ind("temp1");
   int Xind = Ind("X");
@@ -2132,6 +2144,10 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
   forallboxes(grid1, b)
   {
     tBox *box = grid1->box[b];
+    /* do nothing if we are on wrong side of grid */
+    if( (innerdom==0 && (b>=2 && b<=4)) || (innerdom==3 && (b<=1 || b>=5)) )
+      continue;
+
     spec_Coeffs(box, box->v[vind], box->v[cind]);
   }
 
@@ -2146,6 +2162,10 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
     double *py = box->v[yind];
     double *pz = box->v[zind];
     double *pv = box->v[vind];
+
+    /* do nothing if we are on wrong side of grid */
+    if( (innerdom==0 && (b>=2 && b<=4)) || (innerdom==3 && (b<=1 || b>=5)) )
+      continue;
 
     forallpoints(box,i)
     {
