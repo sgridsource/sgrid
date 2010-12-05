@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 2.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 4.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -14,8 +14,7 @@
 
 
 
-void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,  
-		   tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs, 		   int nonlin)
+void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs,      int nonlin)
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
@@ -288,7 +287,7 @@ continue;
 
 
 /* conditional */
-if (((bi == 0 || bi == 1) && corot1) || ((bi == 2 || bi == 3) && corot2)) {
+if ((bi == 0 || bi == 1) && corot1 || (bi == 2 || bi == 3) && corot2) {
 
 
 
@@ -392,11 +391,81 @@ lSigma[ijk]
 /* if (nonlin) */
 
 
+}
+/* if (nonlin) */
+
+
+
+
+/* conditional */
+if (bi == 1 || bi == 2) {
+
+
+int    ind, indin, biin, n1in,n2in,n3in; 
+
+
+double Sig, Sigin; 
+
+
+double *Sigmain; 
+
+
+double *lSigmain; 
+
+
+if(bi==1) biin=0; else biin=3; 
+
+
+n1in = grid->box[biin]->n1;                      n2in = grid->box[biin]->n2;                      n3in = grid->box[biin]->n3;       
+                      Sigmain  = grid->box[biin]->v[index_Sigma];                      lSigmain = grid->box[biin]->v[index_lSigma];
+
+if(n2in!=n2 || n3in!=n3) errorexit("we need n2in=n2 and n3in=n3"); 
+
+
+
+/* conditional */
+if (nonlin) {
+
+
+forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
+
+
+ind   = Ind_n1n2(0,j,k,n1,n2);                        indin = Ind_n1n2(0,j,k,n1in,n2in);                        Sig   = Sigma[ind];                        Sigin = Sigmain[indin]; 
+
+FSigma[ijk]
+=
+Sig - Sigin
+;
+
+
+} /* end forplane1 */ 
+
 
 } else { /* if (!nonlin) */
 
 
-FirstDerivsOf_S(box,  Ind("BNSdata_q"), 			                 Ind("BNSdata_qx")); 
+forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
+
+
+ind   = Ind_n1n2(0,j,k,n1,n2);                        indin = Ind_n1n2(0,j,k,n1in,n2in);                        Sig   = lSigma[ind];                        Sigin = lSigmain[indin]; 
+
+FlSigma[ijk]
+=
+Sig - Sigin
+;
+
+
+} /* end forplane1 */ 
+
+}
+/* if (nonlin) */
+
+
+
+} else { /* if (!nonlin) */
+
+
+FirstDerivsOf_S(box,  Ind("BNSdata_q"),                     Ind("BNSdata_qx")); 
 
 
 
@@ -999,4 +1068,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 90, n* = 309,  n/ = 80,  n+ = 188, n = 577, O = 1 */
+/* nvars = 90, n* = 325,  n/ = 94,  n+ = 200, n = 619, O = 1 */
