@@ -65,7 +65,7 @@ double varBoxL2Norm(tBox *box, int iu)
 {
   double res;
   tVarList *vlu = vlalloc(box->grid);
-  vlpush(vlu, iu);
+  vlpushone(vlu, iu);
   res = BoxL2Norm(box->b, vlu);
   vlfree(vlu);
   return res;
