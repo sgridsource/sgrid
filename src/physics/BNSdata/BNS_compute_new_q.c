@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 5.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 6.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -111,7 +111,10 @@ if (bi == 1) {
                                                                       
      copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 0,1);
      copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 0,1);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 0,1);}
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 0,1);}
 /* if (bi == 1) */
 
 
@@ -124,7 +127,10 @@ if (bi == 2) {
                                                                       
      copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 3,2);
      copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 3,2);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 3,2);}
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 3,2);}
 /* if (bi == 2) */
 
 
