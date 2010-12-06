@@ -2198,11 +2198,16 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
 //if(!finite(pv[i]))
 //{
 //double x,y,z;
-//double *sigpm = box->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
-//printf("b1=%d grid2: b=%d i=%d X=%g Y=%g Z=%g "
-//       "sigpm[i]=%g sigpm[box->n1*(box->n1-1)]=%g\n",
-//       b1, b,i,X,Y,Z, sigpm[i], sigpm[box->n1*(box->n1-1)]);
+// //double *sigpm = box->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+// //printf("b1=%d grid2: b=%d i=%d X=%g Y=%g Z=%g "
+// //       "sigpm[i]=%g sigpm[box->n1*(box->n1-1)]=%g\n",
+// //       b1, b,i,X,Y,Z, sigpm[i], sigpm[box->n1*(box->n1-1)]);
+//printf("VarName(vind)=%s VarName(cind)=%s\n", VarName(vind), VarName(cind));
+//printf("b1=%d grid2: b=%d i=%d X=%g Y=%g Z=%g\n", b1, b,i,X,Y,Z);
 //printf("b1=%d grid2: b=%d      x=%g y=%g z=%g\n", b1, b,px[i],py[i],pz[i]);
+//CheckIfFinite(grid2, VarName(vind));
+//CheckIfFinite(grid2, VarName(cind));
+//exit(77);
 //}
     }
   }
