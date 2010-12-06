@@ -332,15 +332,19 @@ int BNSdata_startup(tGrid *grid)
       /* set Sigma if needed */
       if( (b==0 || b==1 || b==5) && (!corot1) )
       {
+        double Att;
         double A = pX[i];
-        BNSdata_Sigma[i] = Omega*(xc1-xCM) * y *
-                           (1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5));
+        if(b==1) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
+        else     Att = 1.0;
+        BNSdata_Sigma[i] = Omega*(xc1-xCM) * y * Att;
       }
       if( (b==3 || b==2 || b==4) && (!corot2) )
       {
+        double Att;
         double A = pX[i];
-        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y *
-                           (1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5));
+        if(b==2) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
+        else     Att = 1.0;
+        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y * Att;
       }
 /*
       if( (b==0 || b==1 || b==5) && (!corot1) )
