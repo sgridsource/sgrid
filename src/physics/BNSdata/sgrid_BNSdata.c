@@ -63,6 +63,12 @@ int sgrid_BNSdata()
          "rotation state of NS1 [corotation,irrotation");
   AddPar("BNSdata_rotationstate2", "corotation",
          "rotation state of NS2 [corotation,irrotation");
+  AddPar("BNSdata_omegax1", "0", "x-comp of angular velocity of NS1");
+  AddPar("BNSdata_omegay1", "0", "y-comp of angular velocity of NS1");
+  AddPar("BNSdata_omegaz1", "0", "z-comp of angular velocity of NS1");
+  AddPar("BNSdata_omegax2", "0", "x-comp of angular velocity of NS2");
+  AddPar("BNSdata_omegay2", "0", "y-comp of angular velocity of NS2");
+  AddPar("BNSdata_omegaz2", "0", "z-comp of angular velocity of NS2");
   AddPar("BNSdata_m01",   "0.141202", "rest mass of NS1");
   AddPar("BNSdata_m02",   "0.141202", "rest mass of NS2");
   AddPar("BNSdata_iterate_m0", "no", "whether we iterate rest masses [no,yes]");

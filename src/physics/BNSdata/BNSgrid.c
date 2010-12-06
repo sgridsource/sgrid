@@ -2023,6 +2023,8 @@ void adjust_box4_5_pars(tGrid *grid)
 /* find the box and the coords of the point at the cartesian x,y,z */
 /* initially b, *X,*Y,*Z contain the boxindex and the coords of the
    point on the other grid */
+/* NOTE: Interp_Var_From_Grid1_To_Grid2_pm has certain smoothing 
+         because of BNSgrid_Get_BoxAndCoords_of_xyz (see below). */
 int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
                                     double *X1, double *Y1, double *Z1,
                                     int b, double x, double y, double z)
@@ -2132,11 +2134,11 @@ void Interpolate_Var_From_Grid1_To_Grid2(tGrid *grid1, tGrid *grid2, int vind)
 }
 /* Interpolate Var with index vind from grid1 to grid2 
    for domains centered on innerdom */
-/* NOTE: Interp_Var_From_Grid1_To_Grid2_pm did not work as expected when 
-         called from compute_new_q_and_adjust_domainshapes
-         MAYBE IT HAS A BUG???. But it seems to work if we call
-         Interpolate_Var_From_Grid1_To_Grid2, which calls
-         Interp_Var_From_Grid1_To_Grid2_pm for both inner domains. */
+/* NOTE: Interp_Var_From_Grid1_To_Grid2_pm has certain smoothing properties
+         since BNSgrid_Get_BoxAndCoords_of_xyz preferably returns coords
+         in boxes 5/4 (when possible) where the solution is smoother.
+         Thus we interpolate from 5/4 into 0/3, 
+         which smooths in box 0/3. */
 void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
                                        int innerdom)
 {

@@ -161,6 +161,12 @@ int BNSdata_startup(tGrid *grid)
   int TOVprod      = Getv("BNSdata_guess", "TOVproduct");
   int initShift    = Getv("BNSdata_guess", "TaniguchiShift");
   double Omega     = Getd("BNSdata_Omega");
+  double omegax1   = Getd("BNSdata_omegax1");
+  double omegay1   = Getd("BNSdata_omegay1");
+  double omegaz1   = Getd("BNSdata_omegaz1");
+  double omegax2   = Getd("BNSdata_omegax2");
+  double omegay2   = Getd("BNSdata_omegay2");
+  double omegaz2   = Getd("BNSdata_omegaz2");
   double xCM       = Getd("BNSdata_x_CM");
   double kappa     = Getd("BNSdata_kappa");
   double BNSdata_b = Getd("BNSdata_b");
@@ -249,6 +255,9 @@ int BNSdata_startup(tGrid *grid)
     double *BNSdata_By     = box->v[Ind("BNSdata_Bx")+1];
     double *BNSdata_Bz     = box->v[Ind("BNSdata_Bx")+2];
     double *BNSdata_Sigma  = box->v[Ind("BNSdata_Sigma")];
+    double *BNSdata_wBx    = box->v[Ind("BNSdata_wBx")];
+    double *BNSdata_wBy    = box->v[Ind("BNSdata_wBx")+1];
+    double *BNSdata_wBz    = box->v[Ind("BNSdata_wBx")+2];
     double r1, m1_r, P1, Phi1, Psi1, m01_r, q1;
     double r2, m2_r, P2, Phi2, Psi2, m02_r, q2;
     double Bx1,By1,Bz1;
@@ -329,39 +338,52 @@ int BNSdata_startup(tGrid *grid)
         BNSdata_By[i] = By1 + By2;
         BNSdata_Bz[i] = Bz1 + Bz2;
       }
-      /* set Sigma if needed */
+      /* set Sigma and wB if needed */
       if( (b==0 || b==1 || b==5) && (!corot1) )
       {
-        double Att;
+        double vx,vy,vz;
+        double u0, Att, wBfac;
+        double Psito4 = Psi1*Psi1*Psi1*Psi1;
+        double h = (BNSdata_n+1) *q1 + 1; /* h = (n+1) q + 1 */
         double A = pX[i];
         if(b==1) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
         else     Att = 1.0;
+
         BNSdata_Sigma[i] = Omega*(xc1-xCM) * y * Att;
+
+        vx = ( omegay1* (z)     - omegaz1* (y) ) * Att;
+        vy = ( omegaz1* (x-xc1) - omegax1* (z) ) * Att;
+        vz = ( omegax1* (y)     - omegay1* (x-xc1) ) * Att;
+        /* 1/u0^2 = alpha2 - Psito4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),*/
+        u0 = 1.0/sqrt(fabs(exp(2*Phi1) - Psito4*(vx*vx + vy*vy + vz*vz)));
+        wBfac = h*u0 * (Psito4 * Psi1*Psi1);
+        BNSdata_wBx[i] = vx * wBfac; 
+        BNSdata_wBy[i] = vy * wBfac;
+        BNSdata_wBz[i] = vz * wBfac;
       }
       if( (b==3 || b==2 || b==4) && (!corot2) )
       {
-        double Att;
+        double vx,vy,vz;
+        double u0, Att, wBfac;
+        double Psito4 = Psi2*Psi2*Psi2*Psi2;
+        double h = (BNSdata_n+1) *q2 + 1;
         double A = pX[i];
         if(b==2) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
         else     Att = 1.0;
-        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y * Att;
-      }
-/*
-      if( (b==0 || b==1 || b==5) && (!corot1) )
-      {
-        double r1 = sqrt((x-xc1)*(x-xc1) + y*y +z*z);
-        BNSdata_Sigma[i] = Omega*(xc1-xCM) * y *
-                           (1.0-Attenuation01((r1-rs1)/xin1, 2.0, 0.5));
-      }
-      if( (b==3 || b==2 || b==4) && (!corot2) )
-      {
-        double r2 = sqrt((x-xc2)*(x-xc2) + y*y +z*z);
-        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y *
-                           (1.0-Attenuation01(-(r2-rs2)/xin2, 2.0, 0.5));
-      }
-*/
 
-    }
+        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y * Att;
+
+        vx = ( omegay2* (z)     - omegaz2* (y) ) * Att;
+        vy = ( omegaz2* (x-xc2) - omegax2* (z) ) * Att;
+        vz = ( omegax2* (y)     - omegay2* (x-xc2) ) * Att;
+        /* 1/u0^2 = alpha2 - Psito4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),*/
+        u0 = 1.0/sqrt(fabs(exp(2*Phi2) - Psito4*(vx*vx + vy*vy + vz*vz)));
+        wBfac = h*u0 * (Psito4 * Psi2*Psi2);
+        BNSdata_wBx[i] = vx * wBfac; 
+        BNSdata_wBy[i] = vy * wBfac;
+        BNSdata_wBz[i] = vz * wBfac;
+      }
+    } /* end forallpoints */
   }
 
   /* if NS1 is shifted in y-direc. (for testing) adjust grid on right side */

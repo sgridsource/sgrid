@@ -21,13 +21,19 @@ tocompute = {
     Cinstruction == "\n
     copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmax\"), 0,1);\n
     copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmay\"), 0,1);\n
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmaz\"), 0,1);",
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmaz\"), 0,1);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_wBx\"), 0,1);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_wBy\"), 0,1);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_wBz\"), 0,1);",
   Cif == end,
   Cif == (bi==2),
     Cinstruction == "\n
     copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmax\"), 3,2);\n
     copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmay\"), 3,2);\n
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmaz\"), 3,2);",
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_Sigmaz\"), 3,2);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_wBx\"), 3,2);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_wBy\"), 3,2);\n
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind(\"BNSdata_wBz\"), 3,2);",
   Cif == end,
 
   (* x,y *)
