@@ -1642,6 +1642,39 @@ int adjust_Omega_xCM_keep_dqdxmax_eq_0(tGrid *grid, int it, double tol)
 }
 
 
+/* try to smoothen data after ell. solve by interpolation */
+void smooth_BNSdata_by_Interpolation(tGrid *grid, int nsmooth)
+{
+  tGrid *grid2;
+  int n;
+
+  /* make new grid2, which is an exact copy of grid */
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid2, 0);
+
+  /* initialize coords on grid2 */
+  BNSgrid_init_Coords(grid2);
+
+  /* do it a couple of times */
+  for(n=1; n<=nsmooth; n++)
+  {
+    /* interpolate some vars from grid onto new grid2 */
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"));
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"));
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"));
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"));
+    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"));
+    //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"));
+    //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"));
+    //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"));
+  
+    /* copy grid2 back into grid */
+    copy_grid(grid2, grid, 0);
+  }
+  /* free grid2 */
+  free_grid(grid2);
+}
 
 /* adjust m01 and m02 to let them e.g. grow during iterations */
 void adjust_BNSdata_m01_m02(void)
@@ -1953,6 +1986,15 @@ exit(11);
     }
     else
       errorexit("BNSdata_solve: unknown BNSdata_EllSolver_method");
+
+    /* if we smoothen data by Interpolation*/
+    if(Geti("BNSdata_Interpolation_smooths")>0)
+    {
+      int n = Geti("BNSdata_Interpolation_smooths");
+      printf("calling smooth_BNSdata_by_Interpolation %d times...\n", n);
+      fflush(stdout);
+      smooth_BNSdata_by_Interpolation(grid, n);
+    }
 
     /* if we iterate rest masses */
     if(Getv("BNSdata_iterate_m0", "yes")) adjust_BNSdata_m01_m02();
@@ -4015,28 +4057,9 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   /* initialize coords on grid2 */
   BNSgrid_init_Coords(grid2);
 
-  /* NOTE: Interp_Var_From_Grid1_To_Grid2_pm did not work as expected when 
-           called from compute_new_q_and_adjust_domainshapes
-           MAYBE IT HAS A BUG???. But it seems to work if we call
-           Interpolate_Var_From_Grid1_To_Grid2, which calls
-           Interp_Var_From_Grid1_To_Grid2_pm for both inner domains. */
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
   //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"));
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"));
-  if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
-      (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
-  {
-    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"));
-    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"));
-    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"));
-    Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"));
-  }
-/*
   Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_Psi"),innerdom);
   Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
   Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_Bx"),innerdom);
@@ -4050,7 +4073,7 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
     Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_wBy"),innerdom);
     Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_wBz"),innerdom);
   }
-*/
+
   BNS_compute_new_q(grid2);
 
 //  /* set q to zero if q<0 or in region 1 and 2 */

@@ -107,6 +107,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_tol",   "1e-6", "tolerance for BNSdata_solve");
   AddPar("BNSdata_Newton_tolFac", "0.1", "tol for Newton is "
          "Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac)");
+  AddPar("BNSdata_Interpolation_smooths", "3",
+         "number of smooths by Interpolate_Var_From_Grid1_To_Grid2");
   AddPar("BNSdata_esw",   "1", "ell. solve weight: after ell. solve new "
          "and old values are averaged according to: "
          "new = esw*new + (1-esw)*old");

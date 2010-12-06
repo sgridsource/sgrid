@@ -1354,6 +1354,7 @@ double ADMmass_fromPsi_inbox1_at_A1B0(tGrid *grid, int iADMmass)
 }
 
 
+/* NOTE: do not use this anymore: */
 /* compute volume integral of var with index vind in domain0+5 (if b=0)
    or domain3+4 (if b=3). Note, this version, adds a Psi^6 vol. el. factor. */
 double InnerVolumeIntegral_withPsito6(tGrid *grid, int b, int vind)
@@ -1389,6 +1390,8 @@ double InnerVolumeIntegral_withPsito6(tGrid *grid, int b, int vind)
   double Xmax;
   double VolInt;
   int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
+
+  errorexit("use InnerVolumeIntegral instead of InnerVolumeIntegral_withPsito6");
 
   /* compute volume integral by making a new grid, where domain b
      covers the entire inside of the star */
@@ -1571,6 +1574,8 @@ double InnerVolumeIntegral(tGrid *grid, int b, int vind)
   double *cv;
   double box0_max1, box3_max1;  
   int box0_n1, box3_n1;
+  char *box0_max1_sav = cmalloc( strlen(Gets("box0_max1"))+10 );
+  char *box3_max1_sav = cmalloc( strlen(Gets("box3_max1"))+10 );
   char *box0_n1_sav = cmalloc( strlen(Gets("box0_n1"))+10 );
   char *box3_n1_sav = cmalloc( strlen(Gets("box3_n1"))+10 );
   int ib;
@@ -1585,14 +1590,16 @@ double InnerVolumeIntegral(tGrid *grid, int b, int vind)
   /* adjust box0 to cover the entire iside of star1 */
   box0_max1 = Getd("box0_max1");
   box0_n1   = Geti("box0_n1");
-  strcpy(box0_n1_sav, Gets("box0_n1")); /* save box0_n1 */
+  strcpy(box0_max1_sav, Gets("box0_max1")); /* save box0_max1 */
+  strcpy(box0_n1_sav, Gets("box0_n1"));     /* save box0_n1 */
   Sets("box0_max1", "1");
   Seti("box0_n1", box0_n1+Geti("box5_n1")/2);
 
   /* adjust box3 to cover the entire iside of star2 */
   box3_max1 = Getd("box3_max1");
   box3_n1   = Geti("box3_n1");
-  strcpy(box3_n1_sav, Gets("box3_n1")); /* save box3_n1 */
+  strcpy(box3_max1_sav, Gets("box3_max1")); /* save box3_max1 */
+  strcpy(box3_n1_sav, Gets("box3_n1"));     /* save box3_n1 */
   Sets("box3_max1", "1");
   Seti("box3_n1", box3_n1+Geti("box4_n1")/2);
 
@@ -1709,11 +1716,13 @@ double InnerVolumeIntegral(tGrid *grid, int b, int vind)
   free_grid(grid2);
 
   /* reset box0/3 pars */
-  Setd("box0_max1", box0_max1);
+  Sets("box0_max1", box0_max1_sav);
   Sets("box0_n1", box0_n1_sav);
-  Setd("box3_max1", box3_max1);
+  Sets("box3_max1", box3_max1_sav);
   Sets("box3_n1", box3_n1_sav);
 
+  free(box0_max1_sav);
+  free(box3_max1_sav);
   free(box0_n1_sav);
   free(box3_n1_sav);
 
