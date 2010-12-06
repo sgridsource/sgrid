@@ -238,6 +238,7 @@ double cheb_basisfunc(void *aux, double a, double b, int n, int n1, double X)
   double y;
   if(n==0) return 0.5;  /* in numrec T_0 / 2 is used as basisfunc # 0 */
 
-  y=(2.0*X-a-b)/(a-b);
+  /* y=(2.0*X-a-b)/(a-b); */
+  y=((X-a)+(X-b))/(a-b);
   return cos(n*acos(y));
 }
