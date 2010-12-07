@@ -35,8 +35,9 @@ int sgrid_BNSdata()
 
   AddVar("BNSdata_VR",  "I", "velocity in rotating frame: "
                              "V^i = u^i/u^0 - l^i,  l^i = HKV");
-  AddVar("BNSdata_wB",  "I", "rotational part of h*u^i: "
-                             "h u^i = wB^i + dSigma^i - h u^0 beta^i, "
+  AddVar("BNSdata_wB",  "I", "conformal rotational part of h*u^i: "
+                             "h u^i = w^i + D^i Sigma - h u^0 beta^i, "
+                             "w^i = Psi^{-6} wB^i, D^i Sigma = g^{ij} d_i Sigma. "
                              "Note: v^i = u^i/u^0, i.e. it is not u^i/(alpha u^0)");
   AddVar("BNSdata_q",   "",  "q := P/rho0");
   AddVar("BNSdata_wB",  "Ij","1st deriv of wB");
