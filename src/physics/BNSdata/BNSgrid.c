@@ -2223,6 +2223,13 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
     }
   }
 }
+/* wrapper for Interpolate_Var_From_Grid1_To_Grid2 with extra dummy argument */
+void Interpolate_Var_From_Grid1_To_Grid2_wrapper(tGrid *grid1, tGrid *grid2,
+                                                 int vind, int dummy)
+{
+  Interpolate_Var_From_Grid1_To_Grid2(grid1, grid2, vind);
+}
+
 
 /* copy variable at i=0 from Box1 with index b1 to Box2 with index b2 */
 /* This can be used to make a var continues across inner and outer domains. */

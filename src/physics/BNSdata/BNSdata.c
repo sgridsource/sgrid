@@ -4064,6 +4064,8 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
 {
   tGrid *grid2;
   int outerdom;
+  void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
+                                     int innerdom);
 
   if(innerdom==0)      outerdom=1;
   else if(innerdom==3) outerdom=2;  
@@ -4084,20 +4086,25 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   BNSgrid_init_Coords(grid2);
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
-  //  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"));
-  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_Psi"),innerdom);
-  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
-  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_Bx"),innerdom);
-  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_By"),innerdom);
-  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_Bz"),innerdom);
+  if(Getv("BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator",
+          "Interpolate_Var_From_Grid1_To_Grid2_wrapper"))
+    Interp_From_Grid1_To_Grid2 = Interpolate_Var_From_Grid1_To_Grid2_wrapper;
+  else
+    Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"),innerdom);
   if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
       (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
   {
-    Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
-    Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_wBx"),innerdom);
-    Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_wBy"),innerdom);
-    Interp_Var_From_Grid1_To_Grid2_pm(grid, grid2, Ind("BNSdata_wBz"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
   }
 
   BNS_compute_new_q(grid2);

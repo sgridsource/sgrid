@@ -114,8 +114,6 @@ int sgrid_BNSdata()
   AddPar("BNSdata_tol",   "1e-6", "tolerance for BNSdata_solve");
   AddPar("BNSdata_Newton_tolFac", "0.1", "tol for Newton is "
          "Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac)");
-  AddPar("BNSdata_Interpolation_smooths", "3",
-         "number of smooths by Interpolate_Var_From_Grid1_To_Grid2");
   AddPar("BNSdata_esw",   "1", "ell. solve weight: after ell. solve new "
          "and old values are averaged according to: "
          "new = esw*new + (1-esw)*old");
@@ -151,6 +149,19 @@ int sgrid_BNSdata()
   AddPar("BNSdata_linSolver_tol","0", "tol for linSolver is "
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("BNSdata_guess", "test", "initial guess [test]");
+
+  /* The next 2 pars affect how the overall iteration proceeds. E.g. they
+     affect how close x_CM is to zero for equal masses. Set:
+     BNSdata_Interpolation_smooths = 0 
+     BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator = Interpolate_Var_From_Grid1_To_Grid2_wrapper
+     to get the old behavior for corotation */
+  AddPar("BNSdata_Interpolation_smooths", "3",
+         "number of smooths by Interpolate_Var_From_Grid1_To_Grid2");
+  AddPar("BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator",
+         "Interp_Var_From_Grid1_To_Grid2_pm",
+         "how we interpolate from Grid1 to Grid2 in "
+         "compute_new_q_and_adjust_domainshapes "
+         "[Interp_Var_From_Grid1_To_Grid2_pm,Interpolate_Var_From_Grid1_To_Grid2_wrapper]");
          
   AddPar("BNSdata_grid", "4ABphi_2xyz",
          "what grid we use [SphericalDF, AnsorgNS, 4ABphi_2xyz]");
