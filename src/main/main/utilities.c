@@ -42,6 +42,92 @@ double max3(double x, double y, double z)
 }
 
 
+/* find min in a 1d array f, return min and set imin to index of min */
+double min_in_1d_array(double *f, int n, int *imin)
+{
+  int i;   
+  double fmin=f[0];
+
+  for(i=1; i<n; i++)
+    if(f[i]<fmin) 
+    {
+      fmin = f[i];
+      *imin= i;
+    }
+  return fmin;
+}
+/* find max in a 1d array f, return max and set imax to index of max */
+double max_in_1d_array(double *f, int n, int *imax)
+{
+  int i;   
+  double fmax=f[0];
+
+  for(i=1; i<n; i++)
+    if(f[i]>fmax) 
+    {
+      fmax = f[i];
+      *imax= i;
+    }
+  return fmax;
+}
+/* find min in two 1d arrays f0, f1, 
+   return min, set ai to 0 or 1 depending on which array the min is in,
+   set imin to index of min in array ai */
+double min2_in_1d_array(double *f0, int n0, double *f1, int n1, 
+                        int *ai, int *imin)
+{
+  int imin0, imin1;   
+  double fmin0, fmin1, fmin;
+  
+  fmin0 = min_in_1d_array(f0, n0, &imin0);
+  fmin1 = min_in_1d_array(f1, n1, &imin1);
+
+  if(fmin1<fmin0) { *ai=1;  fmin=fmin1;  *imin=imin1; }
+  else            { *ai=0;  fmin=fmin0;  *imin=imin0; }  
+  return fmin;
+}
+/* find max in two 1d arrays f0, f1, 
+   return max, set ai to 0 or 1 depending on which array the max is in,
+   set imax to index of max in array ai */
+double max2_in_1d_array(double *f0, int n0, double *f1, int n1, 
+                        int *ai, int *imax)
+{
+  int imax0, imax1;   
+  double fmax0, fmax1, fmax;
+  
+  fmax0 = max_in_1d_array(f0, n0, &imax0);
+  fmax1 = max_in_1d_array(f1, n1, &imax1);
+
+  if(fmax1>fmax0) { *ai=1;  fmax=fmax1;  *imax=imax1; }
+  else            { *ai=0;  fmax=fmax0;  *imax=imax0; }  
+  return fmax;
+}
+/* find min in three 1d arrays f0, f1, f2, 
+   return min, set ai to 0,1,2 depending on which array the min is in,
+   set imin to index of min in array ai */
+double min3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int n2,
+                        int *ai, int *imin)
+{
+  double fmin;
+
+  min2_in_1d_array(f1,n1, f2,n2, ai, imin);
+  if(*ai==1) { fmin = min2_in_1d_array(f0,n0, f2,n2, ai, imin); *ai = (*ai)*2; }
+  else       { fmin = min2_in_1d_array(f0,n0, f1,n1, ai, imin); }
+  return fmin;
+}
+/* find max in three 1d arrays f0, f1, f2, 
+   return max, set ai to 0,1,2 depending on which array the max is in,
+   set imax to index of max in array ai */
+double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int n2,
+                        int *ai, int *imax)
+{
+  double fmax;
+
+  max2_in_1d_array(f1,n1, f2,n2, ai, imax);
+  if(*ai==1) { fmax = max2_in_1d_array(f0,n0, f2,n2, ai, imax); *ai = (*ai)*2; }
+  else       { fmax = max2_in_1d_array(f0,n0, f1,n1, ai, imax); }
+  return fmax;
+}
 
 
 /* ugh, but how universal are those built in functions? */

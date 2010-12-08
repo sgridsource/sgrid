@@ -88,6 +88,16 @@ double min2(double x, double y);
 double min3(double x, double y, double z);
 double max2(double x, double y);
 double max3(double x, double y, double z);
+double min_in_1d_array(double *f, int n, int *imin);
+double max_in_1d_array(double *f, int n, int *imax);
+double min2_in_1d_array(double *f0, int n0, double *f1, int n1, 
+                        int *ai, int *imin);
+double max2_in_1d_array(double *f0, int n0, double *f1, int n1, 
+                        int *ai, int *imax);
+double min3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int n2,
+                        int *ai, int *imin);
+double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int n2,
+                        int *ai, int *imax);
 int system2(char *s1, char *s2);
 int system3(char *s1, char *s2, char *s3);
 double *dmalloc(int n);
