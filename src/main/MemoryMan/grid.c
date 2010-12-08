@@ -144,9 +144,14 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
           /* compute coordinate values */
 	  snprintf(str, 999, "box%d_basis%d", b, basis);
 	  if( Getv(str, "ChebExtrema") )
-	    box->v[varb][ijk] 
-	      = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])*cos(m*PI/(nb-1)) 
-	             +(box->bbox[bbi] + box->bbox[bbi+1]));
+	  {
+	    if(m==0)          box->v[varb][ijk] = box->bbox[bbi];
+	    else if(m==nb-1)  box->v[varb][ijk] = box->bbox[bbi+1];
+	    else
+	      box->v[varb][ijk] 
+	        = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])*cos(m*PI/(nb-1)) 
+	               +(box->bbox[bbi] + box->bbox[bbi+1]));
+	  }
 	  else if( Getv(str, "ChebZeros") )
 	    box->v[varb][ijk] 
 	      = 0.5*( (box->bbox[bbi] - box->bbox[bbi+1])
