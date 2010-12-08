@@ -4190,6 +4190,154 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
 {
   int b;
   int bi_guess = *bi;
+  double Xvec[2];
+  int stat, check;
+  int i, ai, imax;
+  double *qa0, *qa1, *qa2;
+  int bq0, bq2;
+  tBox *box;
+  double *q, *dq, *c;
+  double *Xp, *c0;
+
+  /* get deriv dq of q in all boxes in BNSdata_temp1
+     and dq's coeffs c in BNSdata_temp2, plus q's coeffs c0 in BNSdata_temp3 */
+  forallboxes(grid, b)
+  {
+    box = grid->box[b];
+    q = box->v[Ind("BNSdata_q")];
+    dq= box->v[Ind("BNSdata_temp1")];
+    c = box->v[Ind("BNSdata_temp2")];
+    c0= box->v[Ind("BNSdata_temp3")];
+    spec_Deriv1(box, 1, q, dq);
+    spec_Coeffs(box, dq, c);
+    spec_Coeffs(box,  q, c0);
+  }
+
+  *bi = -1; /* boxindex with dq=0 not yet found */
+
+  /* look at NS1 */
+  if(bi_guess==0)
+  {
+    /* index of the 2 boxes where we look */
+    bq0 = 0;
+    bq2 = 5;
+  }
+  /* look at NS2 */
+  else if(bi_guess==3)
+  {
+    /* index of the 2 boxes where we look */
+    bq0 = 3;
+    bq2 = 4;
+  }
+  else errorexit("bi_guess has to be 0 or 3");
+
+  /* make 3 arrays (qa0, qa1, qa2) with q values along x-axis 
+     in box0/3 at B=0 and B=1 and in box5/4 at y=z=0 */
+  qa0 = dmalloc(grid->box[bq0]->n1);
+  qa1 = dmalloc(grid->box[bq0]->n1);
+  for(i=0; i<grid->box[bq0]->n1; i++)
+  {
+    box = grid->box[bq0];
+    q = box->v[Ind("BNSdata_q")];
+    qa0[i] = q[Ind_n1n2(i, 0,         0, box->n1,box->n2)];
+    qa1[i] = q[Ind_n1n2(i, box->n2-1, 0, box->n1,box->n2)];
+  }
+  qa2 = dmalloc(grid->box[bq2]->n1);
+  for(i=0; i<grid->box[bq2]->n1; i++)
+  {
+    box = grid->box[bq2];
+    Xp = box->v[Ind("X")];
+    c0 = box->v[Ind("BNSdata_temp3")];
+    qa2[i] = spec_interpolate(box, c0, Xp[i],0,0);
+  }
+
+  /* find max in the 3 arrays */
+  max3_in_1d_array(qa0,grid->box[bq0]->n1, qa1,grid->box[bq0]->n1,
+                   qa2,grid->box[bq2]->n1, &ai, &imax);
+
+  /* initial guess for max location in q (we need *bi, *X, *Y) */
+  if(ai==0)  /* max at B=0 */
+  {
+    *bi = bq0;
+    box = grid->box[*bi];
+    Xp  = box->v[Ind("X")];
+    /* if we are at the box boundary move one point in */
+    if(imax==0)         imax++; 
+    if(imax==box->n1-1) imax--;
+    *X = Xp[Ind_n1n2(imax, 0, 0, box->n1,box->n2)]; 
+    *Y = 0.0; /* <--B=0 */
+  }
+  else if(ai==1) /* max at B=1 */
+  {
+    *bi = bq0;
+    box = grid->box[*bi];
+    Xp  = box->v[Ind("X")];
+    /* if we are at the box boundary move one point in */
+    if(imax==0)         imax++; 
+    if(imax==box->n1-1) imax--;
+    *X = Xp[Ind_n1n2(imax, box->n2-1, 0, box->n1,box->n2)]; 
+    *Y = 1.0; /* <--B=1 */
+  }
+  else if(ai==2) /* max in box5/4 */
+  {
+    *bi = bq2;
+    box = grid->box[*bi];
+    Xp  = box->v[Ind("X")];
+    /* if we are at the box boundary move one point in */
+    if(imax==0)         imax++; 
+    if(imax==box->n1-1) imax--;
+    *X = Xp[Ind_n1n2(imax, 0, 0, box->n1,box->n2)]; 
+    *Y = 0.0; /* <--y=0 */
+  }
+  else errorexit("could not find max of q along x-axis");
+//printf("bq0=%d  bq2=%d:   ai=%d  imax=%d\n", bq0,bq2, ai,imax);
+//printf("  bi_guess=%d -> qmax is near: *bi=%d *X=%g *Y=%g\n",
+//         bi_guess, *bi, *X, *Y);
+//for(i=0; i<grid->box[bq0]->n1; i++)
+//printf("B=0: i=%d  qa0[i]=%g\n", i,qa0[i]);
+//for(i=0; i<grid->box[bq0]->n1; i++)
+//printf("B=1: i=%d  qa1[i]=%g\n", i,qa1[i]);
+//for(i=0; i<grid->box[bq2]->n1; i++)
+//printf("y=0: i=%d  qa2[i]=%g\n", i,qa2[i]);
+
+  /* free 3 arrays (qa0, qa1, qa2) with q values along x-axis */
+  free(qa0);
+  free(qa1);
+  free(qa2);
+//double *q = box->v[Ind("BNSdata_q")];
+//double *Xp = box->v[Ind("X")];
+//for(b=0;b<box->n1;b++)
+//printf("X=%g q=%g dq=%g\n",
+//Xp[Ind_n1n2(b, 0, 0, box->n1,box->n2)],
+//q[Ind_n1n2(b, 0, 0, box->n1,box->n2)],
+//dq[Ind_n1n2(b, 0, 0, box->n1,box->n2)]);
+
+//  /* print guesses */
+//  printf("  bi_guess=%d -> guesses: *bi=%d *X=%g *Y=%g\n",
+//         bi_guess, *bi, *X, *Y);
+
+  /* save *bi, *X, *Y in BNSdata_temp3 */
+  grid->box[0]->v[Ind("BNSdata_temp3")][0] = *bi;
+  grid->box[0]->v[Ind("BNSdata_temp3")][1] = *X;
+  grid->box[0]->v[Ind("BNSdata_temp3")][2] = *Y;
+  
+  /* use newton_linesrch_its to find xmax1 */
+  central_q_errors_VectorFunc__grid = grid;
+  Xvec[1] = *X;
+  stat = newton_linesrch_its(Xvec, 1, &check,
+                             dq_dx_along_x_axis_VectorFunc, 1000, dequaleps);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  *X = Xvec[1];
+  printf("  bi_guess=%d -> qmax is at: *bi=%d *X=%g *Y=%g\n",
+         bi_guess, *bi, *X, *Y);
+}
+
+/* find max q along x-axis, old version that looks only at dq/dx 
+   at endpoints to get initial guess, which is fragile */
+void find_qmax1_along_x_axis_old(tGrid *grid, int *bi, double *X, double *Y)
+{
+  int b;
+  int bi_guess = *bi;
   double *dqin, *dqout;
   double dq1,dq2;
   double Xvec[2];
@@ -4305,6 +4453,7 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
   printf("  bi_guess=%d -> qmax is at: *bi=%d *X=%g *Y=%g\n",
          bi_guess, *bi, *X, *Y);
 }
+
 
 /* compute deviation in desired central q value and location */
 void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
