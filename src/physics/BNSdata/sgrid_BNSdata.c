@@ -122,6 +122,9 @@ int sgrid_BNSdata()
          "will be tried and allowed if better [#,-1]. -1 means never");
   AddPar("BNSdata_reset_qmax_xmax_pars_at", "-1", "list of its when we "
          "reset BNSdata_qmax1/2, BNSdata_xmax1/2");
+  AddPar("BNSdata_analyze_xmax", "set_BNSdata_xmax",
+         "what we do with BNSdata_xmax1/2 inside BNSdata_analyze "
+         "[set_BNSdata_xmax,print_xmax]");
   AddPar("BNSdata_adjust", "nothing", "what we adjust (apart from C1/2) "
          "after ell. solve. E.g. \"keep_xout keep_one_xout\" adjusts Omega "
          "and x_CM to keep either xout1 or xout2 in place. "

@@ -2310,13 +2310,22 @@ int BNSdata_analyze(tGrid *grid)
   /* set qmax1/2 */
   Setd("BNSdata_qmax1", qmax1);
   Setd("BNSdata_qmax2", qmax2);
-  /* set cart positions of qmax1/2 */
-  Setd("BNSdata_xmax1", xmax1);
-  Setd("BNSdata_xmax2", xmax2);
-  printf("BNSdata_analyze: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
-         "                 BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
-         Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
-         Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
+  printf("BNSdata_analyze: BNSdata_qmax1 = %.10g  BNSdata_qmax2=%.10g\n"
+         "  at:                    xmax1 = %.10g          xmax2=%.10g\n",
+         Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"), xmax1, xmax2);
+  /* set cart positions xmax1/2 of qmax1/2 ? */
+  if(Getv("BNSdata_analyze_xmax", "set_BNSdata_xmax"))
+  {
+    Setd("BNSdata_xmax1", xmax1);
+    Setd("BNSdata_xmax2", xmax2);
+    printf("  setting:       BNSdata_xmax1 = %.10g  BNSdata_xmax2=%.10g\n",
+           Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
+  }
+  else
+  {
+    printf("  keeping:       BNSdata_xmax1 = %.10g  BNSdata_xmax2=%.10g\n",
+           Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
+  }
 
   /* compute TOV */
   TOV_init(P_core1, kappa, Gamma, 0,
