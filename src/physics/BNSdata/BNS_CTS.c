@@ -347,15 +347,15 @@ double dlwB33;
 double drho01;
 double drho02;
 double drho03;
-double drho0PLUSdLnalphaoh1;
-double drho0PLUSdLnalphaoh2;
-double drho0PLUSdLnalphaoh3;
-double drho0PLUSdLnalphaPsi2oh1;
-double drho0PLUSdLnalphaPsi2oh2;
-double drho0PLUSdLnalphaPsi2oh3;
-double drho0PLUSdLnalphaPsi6uz1;
-double drho0PLUSdLnalphaPsi6uz2;
-double drho0PLUSdLnalphaPsi6uz3;
+double drho0PLUSrho0dLnalphaoh1;
+double drho0PLUSrho0dLnalphaoh2;
+double drho0PLUSrho0dLnalphaoh3;
+double drho0PLUSrho0dLnalphaPsi2oh1;
+double drho0PLUSrho0dLnalphaPsi2oh2;
+double drho0PLUSrho0dLnalphaPsi2oh3;
+double drho0PLUSrho0dLnalphaPsi6uz1;
+double drho0PLUSrho0dLnalphaPsi6uz2;
+double drho0PLUSrho0dLnalphaPsi6uz3;
 double dSigmaUp1;
 double DSigmaUp1;
 double dSigmaUp2;
@@ -426,15 +426,15 @@ double ldLnuzero3;
 double ldrho01;
 double ldrho02;
 double ldrho03;
-double ldrho0PLUSdLnalphaoh1;
-double ldrho0PLUSdLnalphaoh2;
-double ldrho0PLUSdLnalphaoh3;
-double ldrho0PLUSdLnalphaPsi2oh1;
-double ldrho0PLUSdLnalphaPsi2oh2;
-double ldrho0PLUSdLnalphaPsi2oh3;
-double ldrho0PLUSdLnalphaPsi6uz1;
-double ldrho0PLUSdLnalphaPsi6uz2;
-double ldrho0PLUSdLnalphaPsi6uz3;
+double ldrho0PLUSrho0dLnalphaoh1;
+double ldrho0PLUSrho0dLnalphaoh2;
+double ldrho0PLUSrho0dLnalphaoh3;
+double ldrho0PLUSrho0dLnalphaPsi2oh1;
+double ldrho0PLUSrho0dLnalphaPsi2oh2;
+double ldrho0PLUSrho0dLnalphaPsi2oh3;
+double ldrho0PLUSrho0dLnalphaPsi6uz1;
+double ldrho0PLUSrho0dLnalphaPsi6uz2;
+double ldrho0PLUSrho0dLnalphaPsi6uz3;
 double lduzero1;
 double lduzero2;
 double lduzero3;
@@ -1181,49 +1181,49 @@ dLnalphaPsi6uz3
 dLnalphaP3 + 5.*dLnPsi3 + duzero3/uzero
 ;
 
-drho0PLUSdLnalphaPsi2oh1
+drho0PLUSrho0dLnalphaPsi2oh1
 =
-dLnalphaPsi2oh1 + drho01
+drho01 + dLnalphaPsi2oh1*rho0
 ;
 
-drho0PLUSdLnalphaPsi2oh2
+drho0PLUSrho0dLnalphaPsi2oh2
 =
-dLnalphaPsi2oh2 + drho02
+drho02 + dLnalphaPsi2oh2*rho0
 ;
 
-drho0PLUSdLnalphaPsi2oh3
+drho0PLUSrho0dLnalphaPsi2oh3
 =
-dLnalphaPsi2oh3 + drho03
+drho03 + dLnalphaPsi2oh3*rho0
 ;
 
-drho0PLUSdLnalphaoh1
+drho0PLUSrho0dLnalphaoh1
 =
-dLnalphaoh1 + drho01
+drho01 + dLnalphaoh1*rho0
 ;
 
-drho0PLUSdLnalphaoh2
+drho0PLUSrho0dLnalphaoh2
 =
-dLnalphaoh2 + drho02
+drho02 + dLnalphaoh2*rho0
 ;
 
-drho0PLUSdLnalphaoh3
+drho0PLUSrho0dLnalphaoh3
 =
-dLnalphaoh3 + drho03
+drho03 + dLnalphaoh3*rho0
 ;
 
-drho0PLUSdLnalphaPsi6uz1
+drho0PLUSrho0dLnalphaPsi6uz1
 =
-dLnalphaPsi6uz1 + drho01
+drho01 + dLnalphaPsi6uz1*rho0
 ;
 
-drho0PLUSdLnalphaPsi6uz2
+drho0PLUSrho0dLnalphaPsi6uz2
 =
-dLnalphaPsi6uz2 + drho02
+drho02 + dLnalphaPsi6uz2*rho0
 ;
 
-drho0PLUSdLnalphaPsi6uz3
+drho0PLUSrho0dLnalphaPsi6uz3
 =
-dLnalphaPsi6uz3 + drho03
+drho03 + dLnalphaPsi6uz3*rho0
 ;
 
 divwB
@@ -1378,15 +1378,16 @@ if (bi == 0 || bi == 3 || bi == 4 || bi == 5) {
 
 FSigma[ijk]
 =
-drho0PLUSdLnalphaPsi2oh1*dSigmaUp1 + drho0PLUSdLnalphaPsi2oh2*dSigmaUp2 + 
-  drho0PLUSdLnalphaPsi2oh3*dSigmaUp3 - 
-  h*Psi4*uzero*(drho0PLUSdLnalphaPsi6uz1*beta1[ijk] + 
-     drho0PLUSdLnalphaPsi6uz2*beta2[ijk] + 
-     drho0PLUSdLnalphaPsi6uz3*beta3[ijk]) + 
+drho0PLUSrho0dLnalphaPsi2oh1*dSigmaUp1 + 
+  drho0PLUSrho0dLnalphaPsi2oh2*dSigmaUp2 + 
+  drho0PLUSrho0dLnalphaPsi2oh3*dSigmaUp3 - 
+  h*Psi4*uzero*(drho0PLUSrho0dLnalphaPsi6uz1*beta1[ijk] + 
+     drho0PLUSrho0dLnalphaPsi6uz2*beta2[ijk] + 
+     drho0PLUSrho0dLnalphaPsi6uz3*beta3[ijk]) + 
   rho0*(divwB*Psim2 - divbeta*h*Psi4*uzero + ddSigma11[ijk] + 
      ddSigma22[ijk] + ddSigma33[ijk]) + 
-  Psim2*(drho0PLUSdLnalphaoh1*wB1[ijk] + drho0PLUSdLnalphaoh2*wB2[ijk] + 
-     drho0PLUSdLnalphaoh3*wB3[ijk])
+  Psim2*(drho0PLUSrho0dLnalphaoh1*wB1[ijk] + 
+     drho0PLUSrho0dLnalphaoh2*wB2[ijk] + drho0PLUSrho0dLnalphaoh3*wB3[ijk])
 ;
 
 
@@ -2236,76 +2237,78 @@ ldLnalphaPsi6uz3
 ldLnalphaP3 + 5.*ldLnPsi3 + ldLnuzero3
 ;
 
-ldrho0PLUSdLnalphaPsi2oh1
+ldrho0PLUSrho0dLnalphaPsi2oh1
 =
-ldLnalphaPsi2oh1 + ldrho01
+ldrho01 + dLnalphaPsi2oh1*lrho0 + ldLnalphaPsi2oh1*rho0
 ;
 
-ldrho0PLUSdLnalphaPsi2oh2
+ldrho0PLUSrho0dLnalphaPsi2oh2
 =
-ldLnalphaPsi2oh2 + ldrho02
+ldrho02 + dLnalphaPsi2oh2*lrho0 + ldLnalphaPsi2oh2*rho0
 ;
 
-ldrho0PLUSdLnalphaPsi2oh3
+ldrho0PLUSrho0dLnalphaPsi2oh3
 =
-ldLnalphaPsi2oh3 + ldrho03
+ldrho03 + dLnalphaPsi2oh3*lrho0 + ldLnalphaPsi2oh3*rho0
 ;
 
-ldrho0PLUSdLnalphaoh1
+ldrho0PLUSrho0dLnalphaoh1
 =
-ldLnalphaoh1 + ldrho01
+ldrho01 + dLnalphaoh1*lrho0 + ldLnalphaoh1*rho0
 ;
 
-ldrho0PLUSdLnalphaoh2
+ldrho0PLUSrho0dLnalphaoh2
 =
-ldLnalphaoh2 + ldrho02
+ldrho02 + dLnalphaoh2*lrho0 + ldLnalphaoh2*rho0
 ;
 
-ldrho0PLUSdLnalphaoh3
+ldrho0PLUSrho0dLnalphaoh3
 =
-ldLnalphaoh3 + ldrho03
+ldrho03 + dLnalphaoh3*lrho0 + ldLnalphaoh3*rho0
 ;
 
-ldrho0PLUSdLnalphaPsi6uz1
+ldrho0PLUSrho0dLnalphaPsi6uz1
 =
-ldLnalphaPsi6uz1 + ldrho01
+ldrho01 + dLnalphaPsi6uz1*lrho0 + ldLnalphaPsi6uz1*rho0
 ;
 
-ldrho0PLUSdLnalphaPsi6uz2
+ldrho0PLUSrho0dLnalphaPsi6uz2
 =
-ldLnalphaPsi6uz2 + ldrho02
+ldrho02 + dLnalphaPsi6uz2*lrho0 + ldLnalphaPsi6uz2*rho0
 ;
 
-ldrho0PLUSdLnalphaPsi6uz3
+ldrho0PLUSrho0dLnalphaPsi6uz3
 =
-ldLnalphaPsi6uz3 + ldrho03
+ldrho03 + dLnalphaPsi6uz3*lrho0 + ldLnalphaPsi6uz3*rho0
 ;
 
 FlSigma[ijk]
 =
-dlSigmaUp1*drho0PLUSdLnalphaPsi2oh1 + dlSigmaUp2*drho0PLUSdLnalphaPsi2oh2 + 
-  dlSigmaUp3*drho0PLUSdLnalphaPsi2oh3 + 
-  dSigmaUp1*ldrho0PLUSdLnalphaPsi2oh1 + 
-  dSigmaUp2*ldrho0PLUSdLnalphaPsi2oh2 + 
-  dSigmaUp3*ldrho0PLUSdLnalphaPsi2oh3 - 
+dlSigmaUp1*drho0PLUSrho0dLnalphaPsi2oh1 + 
+  dlSigmaUp2*drho0PLUSrho0dLnalphaPsi2oh2 + 
+  dlSigmaUp3*drho0PLUSrho0dLnalphaPsi2oh3 + 
+  dSigmaUp1*ldrho0PLUSrho0dLnalphaPsi2oh1 + 
+  dSigmaUp2*ldrho0PLUSrho0dLnalphaPsi2oh2 + 
+  dSigmaUp3*ldrho0PLUSrho0dLnalphaPsi2oh3 - 
   divbeta*(lhuzeroPsi4*rho0 + h*lrho0*Psi4*uzero) - 
-  lhuzeroPsi4*(drho0PLUSdLnalphaPsi6uz1*beta1[ijk] + 
-     drho0PLUSdLnalphaPsi6uz2*beta2[ijk] + 
-     drho0PLUSdLnalphaPsi6uz3*beta3[ijk]) + 
+  lhuzeroPsi4*(drho0PLUSrho0dLnalphaPsi6uz1*beta1[ijk] + 
+     drho0PLUSrho0dLnalphaPsi6uz2*beta2[ijk] + 
+     drho0PLUSrho0dLnalphaPsi6uz3*beta3[ijk]) + 
   lrho0*(ddSigma11[ijk] + ddSigma22[ijk] + ddSigma33[ijk]) - 
-  h*Psi4*uzero*(divlbeta*rho0 + ldrho0PLUSdLnalphaPsi6uz1*beta1[ijk] + 
-     ldrho0PLUSdLnalphaPsi6uz2*beta2[ijk] + 
-     ldrho0PLUSdLnalphaPsi6uz3*beta3[ijk] + 
-     drho0PLUSdLnalphaPsi6uz1*lB1[ijk] + 
-     drho0PLUSdLnalphaPsi6uz2*lB2[ijk] + drho0PLUSdLnalphaPsi6uz3*lB3[ijk]) \
-+ rho0*(ddlSigma11[ijk] + ddlSigma22[ijk] + ddlSigma33[ijk] - 
+  h*Psi4*uzero*(divlbeta*rho0 + ldrho0PLUSrho0dLnalphaPsi6uz1*beta1[ijk] + 
+     ldrho0PLUSrho0dLnalphaPsi6uz2*beta2[ijk] + 
+     ldrho0PLUSrho0dLnalphaPsi6uz3*beta3[ijk] + 
+     drho0PLUSrho0dLnalphaPsi6uz1*lB1[ijk] + 
+     drho0PLUSrho0dLnalphaPsi6uz2*lB2[ijk] + 
+     drho0PLUSrho0dLnalphaPsi6uz3*lB3[ijk]) + 
+  rho0*(ddlSigma11[ijk] + ddlSigma22[ijk] + ddlSigma33[ijk] - 
      2.*divwB*Psim3*lPsi[ijk]) - 
-  2.*Psim3*lPsi[ijk]*(drho0PLUSdLnalphaoh1*wB1[ijk] + 
-     drho0PLUSdLnalphaoh2*wB2[ijk] + drho0PLUSdLnalphaoh3*wB3[ijk]) + 
-  Psim2*(divwB*lrho0 + drho0PLUSdLnalphaoh1*lwB1 + 
-     drho0PLUSdLnalphaoh2*lwB2 + drho0PLUSdLnalphaoh3*lwB3 + divlwB*rho0 + 
-     ldrho0PLUSdLnalphaoh1*wB1[ijk] + ldrho0PLUSdLnalphaoh2*wB2[ijk] + 
-     ldrho0PLUSdLnalphaoh3*wB3[ijk])
+  2.*Psim3*lPsi[ijk]*(drho0PLUSrho0dLnalphaoh1*wB1[ijk] + 
+     drho0PLUSrho0dLnalphaoh2*wB2[ijk] + drho0PLUSrho0dLnalphaoh3*wB3[ijk]) \
++ Psim2*(divwB*lrho0 + drho0PLUSrho0dLnalphaoh1*lwB1 + 
+     drho0PLUSrho0dLnalphaoh2*lwB2 + drho0PLUSrho0dLnalphaoh3*lwB3 + 
+     divlwB*rho0 + ldrho0PLUSrho0dLnalphaoh1*wB1[ijk] + 
+     ldrho0PLUSrho0dLnalphaoh2*wB2[ijk] + ldrho0PLUSrho0dLnalphaoh3*wB3[ijk])
 ;
 
 
@@ -2337,4 +2340,4 @@ ddlSigma11[ijk] + ddlSigma22[ijk] + ddlSigma33[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 169, n* = 1257,  n/ = 188,  n+ = 1012, n = 2457, O = 1 */
+/* nvars = 169, n* = 1284,  n/ = 188,  n+ = 1021, n = 2493, O = 1 */
