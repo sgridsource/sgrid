@@ -141,6 +141,8 @@ tocompute = {
         uzero == sqrt[uzerosqr],
 
         FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
+        (* add extra term with wB *)
+        FSigma == FSigma + Psim2 wB[c] dq[c],
 (*
 FSigma == Sigma - 10,
 FSigma == dSigmaUp[c] dq[c] - 100 dq2,
@@ -175,6 +177,7 @@ FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
         Psi3  == Psi2*Psi,
         Psi4  == Psi2*Psi2,
         Psim2 == 1/Psi2,
+        Psim3 == 1/Psi3,
         Psim4 == Psim2*Psim2,
         Psim6 == Psim4*Psim2,
         Psim8 == Psim4*Psim4,
@@ -219,6 +222,9 @@ FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
         
         FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c] +
                     dSigmaUp[c] dlq[c] - h uzero Psi4 beta[c] dlq[c],
+        (* add extra term with wB *)
+        FlSigma == FlSigma + Psim2 lwB[c] dq[c] - 2 Psim3 lPsi wB[c] dq[c] +
+                             Psim2 wB[c] dlq[c],
 (*
 lL2 == 2*(dlSigma[c] (w[c] + DSigmaUp[c])),
 luzerosqr == (lL2)/(alpha2 h2),
