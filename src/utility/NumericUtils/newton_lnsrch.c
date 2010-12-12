@@ -279,7 +279,12 @@ int newton_linesrch_its(double x[], int n, int *check,
    argument par for parameters (a pointer to void):
    returns its>=0   if ok, 
    returns -its-1<0 if error!!!    its = number of iterations done
-   returns -its-MAXITS*10<0  if f=NAN                               */
+   returns -its-MAXITS*10<0  if f=NAN.
+   The funtion vecfuncP has to be of the form:
+    void vecfuncP(int n, double *x, double *fvec, void *par)
+                  here x[1...n], fvec[1...n], par can point to something
+                  that contains parameters.
+   Then newton_linesrch_itsP will find x s.t. vecfuncP = 0.               */
 #undef FREERETURN
 #define FREERETURN {free_vector(newton_linesrch_fvec,1,n);free_vector(xold,1,n);\
 	free_vector(p,1,n);free_vector(g,1,n);free_matrix(fjac,1,n,1,n);\
