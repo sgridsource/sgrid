@@ -4705,6 +4705,6 @@ double BNSdata_find_position_of_qmax(tGrid *grid, int *bi,
   c0= box->v[Ind("BNSdata_temp4")];
   qmax = spec_interpolate(box, c0, *X,*Y,*Z);
   printf(" global qmax is at: *bi=%d *X=%.11g *Y=%.11g *Z=%.11g\n",
-         bi_guess, *bi, *X, *Y, *Z);
+         *bi, *X, *Y, *Z);
   return qmax;
 }
