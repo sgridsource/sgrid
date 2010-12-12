@@ -19,6 +19,9 @@ int newton_lnsrch_its(double x[], int n, int *check,
 int newton_linesrch_its(double x[], int n, int *check,
 			void (*vecfunc)(int, double [], double []), 
 			int MAXITS, double TOLF);
+int newton_linesrch_itsP(double x[], int n, int *check,
+			 void (*vecfuncP)(int, double [], double [], void *par),
+			 void *par, int MAXITS, double TOLF);
   	  	               	   
 /* 1D and 3D integrals */
 double integral(double (*func)(double), double a, double b, double s, int max);

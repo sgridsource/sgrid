@@ -30,4 +30,19 @@ double f_to_minimize_in_linesrch(double x[], int n,
 	  sum += SQR(newton_linesrch_fvec[i]);
 	return 0.5*sum;
 }
+
+/* same as above, but pass on void *par */
+double f_to_minimize_in_linesrchP(double x[], int n, 
+	                          double *newton_linesrch_fvec,
+	                          void (*vecfunc)(int, double [], double [], void *par),
+	                          void *par)
+{
+	int i;
+	double sum;
+
+	(*vecfunc)(n,x,newton_linesrch_fvec, par);
+	for (sum=0.0,i=1;i<=n;i++) 
+	  sum += SQR(newton_linesrch_fvec[i]);
+	return 0.5*sum;
+}
 #undef NRANSI
