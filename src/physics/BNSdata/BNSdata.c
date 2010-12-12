@@ -98,6 +98,8 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec);
 void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y);
 void central_q_errors_VectorFunc(int n, double *vec, double *fvec);
 void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec);
+double BNSdata_find_position_of_qmax(tGrid *grid, int *bi, 
+                                     double *X, double *Y, double *Z);
 
 
 
@@ -2248,6 +2250,8 @@ int BNSdata_analyze(tGrid *grid)
   double xmax1, qmax1, xmax2, qmax2;
   int bi1, bi2;
   double Xmax1,Ymax1, Xmax2,Ymax2;
+  double Zmax1,Zmax2;
+  double global_qmax1, global_qmax2;
   double TOV_rf_surf1, TOV_m1, TOV_Phic1, TOV_Psic1, TOV_m01;  /* for TOV */
   double TOV_rf_surf2, TOV_m2, TOV_Phic2, TOV_Psic2, TOV_m02;  /* for TOV */
   double TOV_r_surf1, TOV_r_surf2, TOV_Psis1, TOV_Psis2;
@@ -2326,6 +2330,17 @@ int BNSdata_analyze(tGrid *grid)
     printf("  keeping:       BNSdata_xmax1 = %.10g  BNSdata_xmax2=%.10g\n",
            Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
   }
+
+  /* find global max of in NS1/2 */
+  Zmax1=Zmax2=0.0;
+  global_qmax1 = BNSdata_find_position_of_qmax(grid, &bi1, &Xmax1, &Ymax1, &Zmax1);
+  global_qmax2 = BNSdata_find_position_of_qmax(grid, &bi2, &Xmax2, &Ymax2, &Zmax2);
+  printf("BNSdata_analyze: global qmax1=%g in box%d\n"
+         "                 at (%.11g,%.11g,%.11g)\n",
+         global_qmax1, bi1, Xmax1,Ymax1,Zmax1);
+  printf("BNSdata_analyze: global qmax2=%g in box%d\n"
+         "                 at (%.11g,%.11g,%.11g)\n",
+         global_qmax2, bi2, Xmax2,Ymax2,Zmax2);
 
   /* compute TOV */
   TOV_init(P_core1, kappa, Gamma, 0,
@@ -4584,4 +4599,112 @@ void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec)
   fflush(stdout);
 //grid->time=-100;
 //write_grid(grid);
+}
+
+
+/* find derivative (fvec[1],fvec[2],fvec[3]) of dq 
+   at (X,Y,Z)=(vec[1],vec[2],vec[3]) by interpolation if n=3
+   otherwise just find dq/dx, dq/dy */
+/* Note: before we can use this, we have to set par and "BNSdata_temp2" */
+void gradient_q_VectorFuncP(int n, double *vec, double *fvec, void *p)
+{
+  tBox *box = (tBox *) p;
+  double *cx= box->v[Ind("BNSdata_temp1")]; /* coeffs of dq_dx */
+  double *cy= box->v[Ind("BNSdata_temp2")];
+  double *cz= box->v[Ind("BNSdata_temp3")];
+  double X = vec[1];
+  double Y = vec[2];
+  double Z = 0;
+
+  if(n==3)
+  {
+    Z = vec[3];
+    fvec[3] = spec_interpolate(box, cz, X,Y,Z);
+  }
+  fvec[1] = spec_interpolate(box, cx, X,Y,Z);
+  fvec[2] = spec_interpolate(box, cy, X,Y,Z);
+//  printf("   at (bi=%d X=%g Y=%g Z=%g)\n"
+//         "   dq_dx=%.12g dq_dy=%.12g dq_dz=%.12g\n",
+//         box->b, X,Y,Z, fvec[1],fvec[2],fvec[3]);
+}
+
+/* find max q in or near box *bi, *bi has to be 0 or 3, return qmax */
+double BNSdata_find_position_of_qmax(tGrid *grid, int *bi, 
+                                     double *X, double *Y, double *Z)
+{
+  int b;
+  int bi_guess = *bi;
+  double Xvec[4];
+  int stat, check;
+  tBox *box;
+  double *q, *cx,*cy,*cz, *c0;
+  double qmax;
+
+  /* get derivs of q in all boxes in BNSdata_qx/y/z
+     and coeffs od derivs in cx/y/z in BNSdata_temp1/2/3, 
+     plus q's coeffs c0 in BNSdata_temp4 */
+  forallboxes(grid, b)
+  {
+    box = grid->box[b];
+    q = box->v[Ind("BNSdata_q")];
+    cx= box->v[Ind("BNSdata_temp1")];
+    cy= box->v[Ind("BNSdata_temp2")];
+    cz= box->v[Ind("BNSdata_temp3")];
+    c0= box->v[Ind("BNSdata_temp4")];
+    /* set coeffs of dq in BNSdata_temp1/2/3 */
+    FirstDerivsOf_S(box, Ind("BNSdata_q"), Ind("BNSdata_qx"));
+    spec_Coeffs(box, box->v[Ind("BNSdata_qx")], cx);
+    spec_Coeffs(box, box->v[Ind("BNSdata_qy")], cy);
+    spec_Coeffs(box, box->v[Ind("BNSdata_qz")], cz);
+    /* set coeffs of q in BNSdata_temp4 */
+    spec_Coeffs(box, q, c0);
+  }
+
+//  /* print guesses */
+//  printf("  bi_guess=%d -> guesses: *bi=%d *X=%.15g *Y=%.15g *Z=%.15g\n",
+//         bi_guess, *bi, *X, *Y, *Z);
+
+  /* use newton_linesrch_itsP to find Xmax,Ymax, for Z=0
+     use var box as parameters */
+/*
+  Xvec[1] = *X;
+  Xvec[2] = *Y;
+  box = grid->box[*bi];
+  stat = newton_linesrch_itsP(Xvec, 2, &check,
+                              gradient_q_VectorFuncP, (void *) box,
+                              1000, dequaleps);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  *X = Xvec[1];
+  *Y = Xvec[2];
+  if(check || stat<0) printf("  --> X=%.15g *Y=%.15g\n", *X, *Y);
+*/
+//  /* print estimates */
+//  printf("  bi_guess=%d -> estimates: *bi=%d *X=%.15g *Y=%.15g *Z=%.15g\n",
+//         bi_guess, *bi, *X, *Y, *Z);
+
+
+  /* set Xvec */
+  Xvec[1] = *X;
+  Xvec[2] = *Y;
+  Xvec[3] = *Z;
+
+  /* move Y away from boundary in case we are in box0/3 */
+  box = grid->box[*bi];
+  if(dlesseq(Xvec[2],box->bbox[2]))    Xvec[2] += dequaleps*1000.0;
+  if(dgreatereq(Xvec[2],box->bbox[3])) Xvec[2] -= dequaleps*1000.0;
+
+  /* use newton_linesrch_itsP to find max, use var box as parameters */
+  stat = newton_linesrch_itsP(Xvec, 3, &check,
+                              gradient_q_VectorFuncP, (void *) box,
+                              1000, dequaleps);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  *X = Xvec[1];
+  *Y = Xvec[2];
+  *Z = Xvec[3];
+  if(check || stat<0) printf("  --> X=%.15g *Y=%.15g *Z=%.15g\n", *X, *Y, *Z);
+  c0= box->v[Ind("BNSdata_temp4")];
+  qmax = spec_interpolate(box, c0, *X,*Y,*Z);
+  printf(" global qmax is at: *bi=%d *X=%.11g *Y=%.11g *Z=%.11g\n",
+         bi_guess, *bi, *X, *Y, *Z);
+  return qmax;
 }
