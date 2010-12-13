@@ -453,14 +453,15 @@ void BNS_compute_new_centered_q(tGrid *grid)
 {
   int iq = Ind("BNSdata_q");
   BNS_compute_new_q(grid, iq);
-  if(!Getv("BNSdata_center_new_q", "no"))
+  if(Getv("BNSdata_center_new_q_flag", "yes"))
   {
     int iqx= Ind("BNSdata_qx");
     int b, i;
     int bi1, bi2;
     double dx,dy,dz, x1,y1,z1, x2,y2,z2;
+    double fac = Getd("BNSdata_center_new_q_fac");
     double xmax1 = Getd("BNSdata_xmax1");
-    double xmax2 = Getd("BNSdata_xmax2");;
+    double xmax2 = Getd("BNSdata_xmax2");
 
     /* get global max of q in NS1/2 */
     x1 = Getd("BNSdata_actual_xmax1");
@@ -484,8 +485,10 @@ void BNS_compute_new_centered_q(tGrid *grid)
       /* q_centered(x) = q(x+dx) ~ q(x) + [dq(x)/dx] dx */
       if(b<=1 || b==5) { dx = x1-xmax1; dy = y1; dz = z1; }
       else             { dx = x2-xmax2; dy = y2; dz = z2; }
+      //printf("b=%d: dx=%g dy=%g dz=%g\n", b, dx,dy,dz);
       forallpoints(box, i)
-        BNSdata_q[i] = BNSdata_q[i] + dqdx[i]*dx + dqdy[i]*dy + dqdz[i]*dz;
+        BNSdata_q[i] = BNSdata_q[i] + 
+                       fac*(dqdx[i]*dx + dqdy[i]*dy + dqdz[i]*dz);
     }
   }
 }
@@ -494,7 +497,7 @@ double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
 {
   double q;
   q = BNS_compute_new_q_atXYZ(grid,bi, X,Y,Z);
-  if(!Getv("BNSdata_center_new_q", "no"))
+  if(Getv("BNSdata_center_new_q_flag", "yes"))
   {
     int iq = Ind("BNSdata_temp4");
     int iqx= Ind("BNSdata_qx");
@@ -504,6 +507,7 @@ double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
     double *cz= box->v[Ind("BNSdata_temp3")];
     double dx,dy,dz, xm,ym,zm;
     double dqdx, dqdy, dqdz;
+    double fac = Getd("BNSdata_center_new_q_fac");
     double xmax;
 
     if(bi<=1 || bi==5)
@@ -542,7 +546,8 @@ double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
     dx = xm-xmax;
     dy = ym;
     dz = zm;
-    q = q + dqdx*dx + dqdy*dy + dqdz*dz;
+//printf("bi=%d: dx=%g dy=%g dz=%g\n", bi, dx,dy,dz);
+    q = q + fac*(dqdx*dx + dqdy*dy + dqdz*dz);
   }
   return q;
 }
@@ -882,9 +887,6 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   m0_error = sqrt(m0_error)/(Getd("BNSdata_m01")+Getd("BNSdata_m02"));
   printf(" rest mass error = %.4e "
          "(before adjusting C1/2)\n", m0_error);
-
-  /* set actual positions of maxima */
-  set_BNSdata_actual_xyzmax_pars(grid);
 
   /* set desired masses for this iteration */
   m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
@@ -1982,13 +1984,22 @@ int BNSdata_solve(tGrid *grid)
 // remove this later:
 /*
 Setd("BNSdata_C1", -0.832301);
-Setd("BNSdata_C2", -0.8);
-grid->time  = -100;
+Setd("BNSdata_C2", -0.832301);
+
+Sets("BNSdata_center_new_q", "no");
+grid->time  = -1000;
+BNS_compute_new_centered_q(grid);
+compute_new_q_and_adjust_domainshapes(grid, 0);
+//compute_new_q_and_adjust_domainshapes(grid, 3);
 write_grid(grid);
 
-grid->time  = -99;
+Sets("BNSdata_center_new_q", "yes");
+grid->time  = -990;
 BNS_compute_new_centered_q(grid);
+compute_new_q_and_adjust_domainshapes(grid, 0);
+//compute_new_q_and_adjust_domainshapes(grid, 3);
 write_grid(grid);
+exit(12);
 
 grid->time  = -98;
 compute_new_q_and_adjust_domainshapes(grid, 0);
@@ -2249,6 +2260,35 @@ if(0) /* not working */
     else
     { /* adjust C1/2, q while keeping restmasses, Omega and xCM */
       adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
+    }
+
+    /* compute actual max pos of q and center q if BNSdata_center_new_q
+       is not "no": */
+    /* set actual positions of maxima */
+    set_BNSdata_actual_xyzmax_pars(grid);
+    if(!Getv("BNSdata_center_new_q", "no"))
+    {
+      int b,i;
+      double m01, m02;
+
+      printf("Centering q:\n");
+      Sets("BNSdata_center_new_q_flag", "yes");  /* activate centering of q */
+      compute_new_q_and_adjust_domainshapes(grid, 0);
+      compute_new_q_and_adjust_domainshapes(grid, 3);
+      Sets("BNSdata_center_new_q_flag", "no");  /* deactivate centering of q */
+      /* set q to zero if q<0 or in region 1 and 2 */
+      forallboxes(grid, b)
+      {
+        double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
+        forallpoints(grid->box[b], i)
+          if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
+      }
+      set_BNSdata_actual_xyzmax_pars(grid);
+
+      /* print new masses */
+      m01 = GetInnerRestMass(grid, 0);
+      m02 = GetInnerRestMass(grid, 3);
+      printf("     => m01=%.19g m02=%.19g\n", m01, m02);
     }
 
     /* compute diagnostics like ham and mom */
@@ -4494,8 +4534,8 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
                              dq_dx_along_x_axis_VectorFunc, 1000, dequaleps);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   *X = Xvec[1];
-  printf("  bi_guess=%d -> qmax is at: *bi=%d *X=%g *Y=%g\n",
-         bi_guess, *bi, *X, *Y);
+  //printf("  bi_guess=%d -> qmax is at: *bi=%d *X=%g *Y=%g\n",
+  //       bi_guess, *bi, *X, *Y);
 }
 
 /* find max q along x-axis, old version that looks only at dq/dx 
@@ -4833,14 +4873,30 @@ double BNSdata_find_position_of_qmax(tGrid *grid, int *bi,
                               gradient_q_VectorFuncP, (void *) box,
                               1000, dequaleps);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-  *X = Xvec[1];
-  *Y = Xvec[2];
-  *Z = Xvec[3];
-  if(check || stat<0) printf("  --> X=%.15g *Y=%.15g *Z=%.15g\n", *X, *Y, *Z);
+  if(check || stat<0) printf("  --> Xvec=(%.15g,%.15g,%.15g)\n",
+                             Xvec[1],Xvec[2],Xvec[3]);
+
+  /* make sure Y is inside bounding box */
+  if( Xvec[1]<box->bbox[0] ||
+      Xvec[1]>box->bbox[1] ||
+      Xvec[2]<box->bbox[2] ||
+      Xvec[2]>box->bbox[3] )
+  {
+    printf("BNSdata_find_position_of_qmax: Xvec=(%.15g,%.15g)\nis outside box%d. "
+           "Left *X,*Y,*Z unchanged.\n", Xvec[1],Xvec[2], *bi);
+    return -1.0;
+  }        
+  else
+  {     
+    *X = Xvec[1];
+    *Y = Xvec[2];
+    *Z = Xvec[3];
+  }
+
   c0= box->v[Ind("BNSdata_temp4")];
   qmax = spec_interpolate(box, c0, *X,*Y,*Z);
-  printf(" global qmax is at: *bi=%d *X=%.11g *Y=%.11g *Z=%.11g\n",
-         *bi, *X, *Y, *Z);
+  //printf(" global qmax is at: *bi=%d *X=%.11g *Y=%.11g *Z=%.11g\n",
+  //       *bi, *X, *Y, *Z);
   return qmax;
 }
 
@@ -4852,8 +4908,19 @@ double BNSdata_find_xyz_of_qmax(tGrid *grid, int *bi,
 
   /* find global max of q in NS1/2 */
   find_qmax1_along_x_axis(grid, bi, &Xmax, &Ymax);
+  //printf("Ymax=%g\n",Ymax);
   Zmax=0.0;
   qmax = BNSdata_find_position_of_qmax(grid, bi, &Xmax, &Ymax, &Zmax);
+  if(qmax<0.0)
+  {
+    if(*bi<=1 || *bi==5)
+      *x = Getd("BNSdata_xmax1");
+    else
+      *x = Getd("BNSdata_xmax2");
+    *y = *z = 0.0;
+    return qmax;
+  }
+  
   if(grid->box[*bi]->x_of_X[1] != NULL)
   {
     *x = grid->box[*bi]->x_of_X[1]((void *) grid->box[*bi], -1, Xmax,Ymax,Zmax);
@@ -4875,6 +4942,7 @@ void set_BNSdata_actual_xyzmax_pars(tGrid *grid)
   int bi1, bi2;
   double x1,y1,z1, x2,y2,z2;
 
+  printf("set_BNSdata_actual_xyzmax_pars:\n");
   bi1=0;
   bi2=3;
   BNSdata_find_xyz_of_qmax(grid, &bi1, &x1,&y1,&z1);
@@ -4885,11 +4953,10 @@ void set_BNSdata_actual_xyzmax_pars(tGrid *grid)
   Setd("BNSdata_actual_xmax2", x2);
   Setd("BNSdata_actual_ymax2", y2);
   Setd("BNSdata_actual_zmax2", z2);
-  printf("set_BNSdata_actual_xyzmax_pars:\n");
-  printf(" BNSdata_actual_xmax1 = %.13g\n", x1);
-  printf(" BNSdata_actual_ymax1 = %.13g\n", y1);
-  printf(" BNSdata_actual_zmax1 = %.13g\n", z1);
-  printf(" BNSdata_actual_xmax2 = %.13g\n", x2);
-  printf(" BNSdata_actual_ymax2 = %.13g\n", y2);
-  printf( "BNSdata_actual_zmax2 = %.13g\n", z2);
+  printf(" BNSdata_actual_xmax1 = %.13g\n", Getd("BNSdata_actual_xmax1"));
+  printf(" BNSdata_actual_ymax1 = %.13g\n", Getd("BNSdata_actual_ymax1"));
+  printf(" BNSdata_actual_zmax1 = %.13g\n", Getd("BNSdata_actual_zmax1"));
+  printf(" BNSdata_actual_xmax2 = %.13g\n", Getd("BNSdata_actual_xmax2"));
+  printf(" BNSdata_actual_ymax2 = %.13g\n", Getd("BNSdata_actual_ymax2"));
+  printf(" BNSdata_actual_zmax2 = %.13g\n", Getd("BNSdata_actual_zmax2"));
 }

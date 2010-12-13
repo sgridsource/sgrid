@@ -99,6 +99,10 @@ int sgrid_BNSdata()
   AddPar("BNSdata_center_new_q", "no",
          "if and how we center new q on (BNSdata_xmax1/2,0,0) "
          "[no,center_xyz]");
+  AddPar("BNSdata_center_new_q_flag", "no",
+         "set automatically in main iteration [no,yes]");
+  AddPar("BNSdata_center_new_q_fac", "0.1",
+         "by how much we try to move the the qmax location");
   AddPar("BNSdata_Omega", "estimate",  "orbital angular velocity");
   AddPar("BNSdata_b",     "1",  "separation parameter (distance~2b)");
   AddPar("BNSdata_n",     "1",  "polytropic index n, Gamma = 1 + 1/n");
