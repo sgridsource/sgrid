@@ -153,8 +153,8 @@ int sgrid_BNSdata()
          "how we solve for Psi,B^i,alphaP,Sigma "
          "[allatonce, BNS_Eqn_Iterator, BNS_ordered_Eqn_Iterator,"
          " sequence1, sequence2, sequence3]");
-  AddPar("BNSdata_Eqn_Iterator_order", 
-         "BNSdata_Psi BNSdata_Bx BNSdata_By BNSdata_Bz BNSdata_alphaP BNSdata_Sigma",
+  AddPar("BNSdata_CTS_Eqs_Iteration_order", 
+         "BNSdata_Psi BNSdata_Bx BNSdata_By BNSdata_Bz BNSdata_alphaP",
          "Order we use in function BNS_ordered_Eqn_Iterator. "
          "This par has to contain all we solve for!");
   AddPar("BNSdata_linSolver", "UMFPACK", 
