@@ -49,6 +49,14 @@ void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
 void free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(
      tVarList *vlw,  tVarList *vlwDerivs,  tVarList *vlFw,
      tVarList *vldw, tVarList *vldwDerivs, tVarList *vlJdw);
+int BNS_Eqn_Iterator_for_vars_in_string(tGrid *grid, int itmax, 
+  double tol, double *normres, 
+  int (*linear_solver)(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
+  int pr, char *str);
 int BNS_ordered_Eqn_Iterator(tGrid *grid, int itmax, 
   double tol, double *normres, 
   int (*linear_solver)(tVarList *x, tVarList *b, 
@@ -2105,6 +2113,9 @@ exit(11);
     }
     else if(Getv("BNSdata_EllSolver_method", "BNS_ordered_Eqn_Iterator"))
     { /* solve the coupled ell. eqns one after an other */
+      BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+             &normresnonlin, linear_solver, 1,
+             "BNSdata_Psi BNSdata_Sigma BNSdata_Bx");
       BNS_ordered_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
                                linear_solver, 1);
     }
@@ -3578,6 +3589,115 @@ void free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(
   vlfree(vlJdw);
 }          
 
+/* find residual of vars listed in string */
+/* this works only it the string contains at most
+   "BNSdata_Psi BNSdata_Bx BNSdata_By BNSdata_Bz BNSdata_alphaP BNSdata_Sigma" 
+   */
+double GridL2Norm_of_vars_in_string(tGrid *grid, char *str)
+{
+  int pos;
+  char *word;
+  double norm;
+  double sum=0.0;
+    
+  word = cmalloc(strlen(str) + 10);
+  pos=0;
+  while( (pos=sscan_word_at_p(str, pos, word)) != EOF)
+  {
+    tVarList *vlw, *vlwDerivs, *vlFw, *vldw, *vldwDerivs, *vlJdw;
+
+    /* make new vlw, ... for var in string word */
+    make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+             &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw,  word);
+      
+    F_oneComp(vlFw, vlw, vlwDerivs, NULL);
+    norm = GridL2Norm(vlFw);
+    sum += norm;
+    printf("%s: residual = %g\n", word, norm);
+     
+    free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                           vldw, vldwDerivs, vlJdw);
+  }
+  printf(" => total residual = %g\n", sum);
+  free(word);
+  return sum;
+}
+
+/* solve some ell. eqns one after an other in the order given in a string */
+int BNS_Eqn_Iterator_for_vars_in_string(tGrid *grid, int itmax, 
+  double tol, double *normres, 
+  int (*linear_solver)(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
+  int pr, char *str)
+{
+  int    Newton_itmax = itmax;    /* Geti("BNSdata_Newton_itmax"); */
+  double Newton_tol   = tol*0.1;  /* Getd("BNSdata_Newton_tol"); */
+  int    linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
+  double linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
+  double linSolver_tol    = Getd("BNSdata_linSolver_tol");
+  double normresnonlin;
+  int it, pos;
+  int prN=pr;
+  char *word;
+
+  if(pr) printf("BNS_Eqn_Iterator_for_vars_in_string:\n  starting iterations, itmax=%d tol=%g\n",
+                itmax, tol); 
+  for (it = 0; it < itmax; it++)
+  {
+    tVarList *vlw, *vlwDerivs, *vlFw, *vldw, *vldwDerivs, *vlJdw;
+
+    /* compute error */
+    *normres = GridL2Norm_of_vars_in_string(grid, str);
+
+    if(pr)
+    {
+      prdivider(1);
+      printf("BNS_Eqn_Iterator_for_vars_in_string step %d residual = %.4e\n", it, *normres);
+      fflush(stdout);
+    }
+    if (*normres <= tol) break;
+
+    /* set Newton_tol */
+    Newton_tol = (*normres)*0.05;
+
+    /* go through BNSdata_Eqn_Iterator_order and solve for all vars in there */
+    printf("Vars we solve for: %s\n", str);
+    word = cmalloc(strlen(str) + 10);
+    pos=0;
+    while( (pos=sscan_word_at_p(str, pos, word)) != EOF)
+    {
+      /* make new vlw, ... for var in string word */
+      make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+               &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw,  word);
+      /* call Newton solver for Psi */
+      prdivider(1);
+      printf("Solving elliptic Eqn for %s:\n", word);
+      Newton(F_oneComp, J_oneComp, vlw, vlFw, vlwDerivs, NULL,
+             Newton_itmax, Newton_tol, &normresnonlin, prN,
+             linear_solver, Preconditioner_I, vldw, vlJdw, vldwDerivs, vlw,
+             linSolver_itmax, linSolver_tolFac, linSolver_tol);
+      free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                             vldw, vldwDerivs, vlJdw);
+    }
+  }
+  /* warn if we didn't converge */
+  if (it >= itmax)
+  {
+    *normres = GridL2Norm_of_vars_in_string(grid, str);
+    prdivider(1);
+    printf("BNS_Eqn_Iterator_for_vars_in_string:\n  *** Too many steps! ");
+    if(*normres <= tol) printf("*** \n");
+    else		printf("Tolerance goal not reached! *** \n");
+    printf("BNS_Eqn_Iterator_for_vars_in_string:\n  Residual after %d steps:"
+           "  residual = %e\n", it, *normres);
+  }
+  free(word);
+  return it;
+}
+
 /* solve the coupled ell. eqns one after an other (in particular order), 
    and iterate */
 int BNS_ordered_Eqn_Iterator(tGrid *grid, int itmax, 
@@ -3646,10 +3766,10 @@ int BNS_ordered_Eqn_Iterator(tGrid *grid, int itmax,
     F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
     *normres = GridL2Norm(vlFu);
     prdivider(1);
-    printf("BNS_Eqn_Iterator: *** Too many steps! ");
+    printf("BNS_ordered_Eqn_Iterator: *** Too many steps! ");
     if(*normres <= tol) printf("*** \n");
     else		printf("Tolerance goal not reached! *** \n");
-    printf("BNS_Eqn_Iterator: Residual after %d steps:"
+    printf("BNS_ordered_Eqn_Iterator: Residual after %d steps:"
            "  residual = %e\n", it, *normres);
   }
   free(word);
