@@ -139,7 +139,7 @@ BeginCFunction[] := Module[{},
 
   pr["\n\n\n"];
 
-  pr["void BNS_compute_new_q(tGrid *grid)\n"];
+  pr["void BNS_compute_new_q(tGrid *grid, int iq)\n"];
   pr["{\n"];
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
@@ -169,6 +169,8 @@ BeginCFunction[] := Module[{},
 *)
 variabledeclarations[] := Module[{},
 
+  prdecvar[{q}, "iq"];
+
   prdecvarname[{x},      "x"];
   prdecvarname[{y},      "y"];
 
@@ -176,10 +178,10 @@ variabledeclarations[] := Module[{},
   prdecvarname[{Psi},       "BNSdata_Psi"];
   prdecvarname[{alphaP},    "BNSdata_alphaP"];
   prdecvarname[{B[a]},      "BNSdata_Bx"];
-  prdecvarname[{q},         "BNSdata_q"];
-  prdecvarname[{wB[a]},    "BNSdata_wBx"];
+  prdecvarname[{wB[a]},     "BNSdata_wBx"];
   prdecvarname[{Sigma},     "BNSdata_Sigma"];
   prdecvarname[{dSigma[a]}, "BNSdata_Sigmax"];
+
 
   pr["\n"];
 ];    

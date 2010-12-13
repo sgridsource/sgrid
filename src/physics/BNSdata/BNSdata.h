@@ -19,7 +19,7 @@ void set_BNSdata_ABphi(tGrid *grid);
 /* funtions from mathematica */
 void BNS_CTS(tVarList *vlFu, tVarList *vlu, tVarList *vlJdu, 
              tVarList *vldu, tVarList *vlduDerivs, int nonlin);
-void BNS_compute_new_q(tGrid *grid);
+void BNS_compute_new_q(tGrid *grid, int iq);
 double BNS_compute_new_q_atXYZ(tGrid *grid, int bi,
                                double X, double Y, double Z);
 void BNS_set_restmassintegrand(tGrid *grid, int iInteg);

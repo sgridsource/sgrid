@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 6.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 13.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -16,7 +16,7 @@
 
 
 
-void BNS_compute_new_q(tGrid *grid)
+void BNS_compute_new_q(tGrid *grid, int iq)
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
@@ -36,6 +36,7 @@ int ijk;
 
 
 
+double *q = box->v[iq+0];
 int index_x = Ind("x");
 double *x = box->v[index_x + 0];
 int index_y = Ind("y");
@@ -48,8 +49,6 @@ int index_BNSdata_Bx = Ind("BNSdata_Bx");
 double *B1 = box->v[index_BNSdata_Bx + 0];
 double *B2 = box->v[index_BNSdata_Bx + 1];
 double *B3 = box->v[index_BNSdata_Bx + 2];
-int index_BNSdata_q = Ind("BNSdata_q");
-double *q = box->v[index_BNSdata_q + 0];
 int index_BNSdata_wBx = Ind("BNSdata_wBx");
 double *wB1 = box->v[index_BNSdata_wBx + 0];
 double *wB2 = box->v[index_BNSdata_wBx + 1];

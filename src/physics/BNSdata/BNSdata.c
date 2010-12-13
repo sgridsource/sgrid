@@ -451,10 +451,10 @@ int BNSdata_startup(tGrid *grid)
    that the max in q is centered where we want it on the x-axis */
 void BNS_compute_new_centered_q(tGrid *grid)
 {
-  BNS_compute_new_q(grid);
+  int iq = Ind("BNSdata_q");
+  BNS_compute_new_q(grid, iq);
   if(!Getv("BNSdata_center_new_q", "no"))
   {
-    int iq = Ind("BNSdata_q");
     int iqx= Ind("BNSdata_qx");
     int b, i;
     int bi1, bi2;
@@ -496,7 +496,7 @@ double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
   q = BNS_compute_new_q_atXYZ(grid,bi, X,Y,Z);
   if(!Getv("BNSdata_center_new_q", "no"))
   {
-    int iq = Ind("BNSdata_q");
+    int iq = Ind("BNSdata_temp4");
     int iqx= Ind("BNSdata_qx");
     tBox *box = grid->box[bi];
     double *cx= box->v[Ind("BNSdata_temp1")];
@@ -527,6 +527,7 @@ double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
 
     /* get gradient of q and its coeffs, set coeffs of dq in 
        BNSdata_temp1/2/3 */
+    BNS_compute_new_q(grid, iq);
     FirstDerivsOf_S(box, iq, iqx);
     spec_Coeffs(box, box->v[iqx], cx);
     spec_Coeffs(box, box->v[iqx+1], cy);
