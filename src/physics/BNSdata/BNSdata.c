@@ -442,6 +442,21 @@ int BNSdata_startup(tGrid *grid)
 }
 
 
+/* functions to compute new q from fields, and to also shift them so
+   that the max in q is centered where we want it on the x-axis */
+void BNS_compute_new_centered_q(tGrid *grid)
+{
+  BNS_compute_new_q(grid);
+}
+double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
+                                        double X, double Y, double Z)
+{
+  double q;
+  q = BNS_compute_new_q_atXYZ(grid,bi, X,Y,Z);
+  return q;
+}
+
+
 /* find both qmax and reset BNSdata_qmax1/2, BNSdata_xmax1/2 accordingly */
 void find_qmaxs_along_x_axis_and_reset_qmaxs_xmaxs_pars(tGrid *grid)
 {
@@ -454,8 +469,8 @@ void find_qmaxs_along_x_axis_and_reset_qmaxs_xmaxs_pars(tGrid *grid)
   find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
   find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
   /* compute qmax1 and qmax2 */
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
   if(grid->box[bi1]->x_of_X[1] != NULL)
     xmax1 = grid->box[bi1]->x_of_X[1]((void *) grid->box[bi1], -1, Xmax1,Ymax1,0.0);
   else
@@ -496,7 +511,7 @@ int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
          "   m01=%g  m02=%g\n", m01, m02);
 
 //    /* set new q on grid */
-//    BNS_compute_new_q(grid);
+//    BNS_compute_new_centered_q(grid);
 //
 //    /* compute masses after computing new q */
 //    m01 = GetInnerRestMass(grid, 0);
@@ -531,21 +546,21 @@ int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
 
   /* compute L2-diff between new q and qold for Omega - dOmega */
   Setd("BNSdata_Omega", Omega - dOmega);
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
              1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
   L2norm3 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
 
   /* compute L2-diff between new q and qold for Omega + dOmega */
   Setd("BNSdata_Omega", Omega + dOmega);
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
              1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
   L2norm2 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
 
   /* compute L2-diff between new q and qold for Omega */
   Setd("BNSdata_Omega", Omega);
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
              1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
   L2norm1 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
@@ -561,7 +576,7 @@ int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
     Setd("BNSdata_Omega", Omega-dOmega);
   printf("BNSdata_solve step %d: new Omega = %.4e  dOmega = %.4e\n",
          it, Getd("BNSdata_Omega"), dOmega);
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
   
 /*
 {
@@ -595,7 +610,7 @@ int b;
     double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
     double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
 
-    BNS_compute_new_q(grid);
+    BNS_compute_new_centered_q(grid);
     m01 = GetInnerRestMass(grid, 0);
     m02 = GetInnerRestMass(grid, 3);
 
@@ -794,7 +809,7 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
     double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
     double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
 
-    BNS_compute_new_q(grid);
+    BNS_compute_new_centered_q(grid);
     m01 = GetInnerRestMass(grid, 0);
     m02 = GetInnerRestMass(grid, 3);
 
@@ -894,8 +909,8 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol,
   find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
   find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
   /* compute qmax1 and qmax2 */
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
 
   /* save both qmax */
   qmax1sav = qmax1;
@@ -909,8 +924,8 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol,
   bi1=0;  bi2=3;
   find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
   find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
   diff1_m = qmax1 - qmax1sav;
   diff2_m = qmax2 - qmax2sav;
   dif_m = sqrt(diff1_m*diff1_m + diff2_m*diff2_m);
@@ -923,8 +938,8 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol,
   bi1=0;  bi2=3;
   find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
   find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
   diff1_p = qmax1 - qmax1sav;
   diff2_p = qmax2 - qmax2sav;
   dif_p = sqrt(diff1_p*diff1_p + diff2_p*diff2_p);
@@ -937,8 +952,8 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol,
   bi1=0;  bi2=3;
   find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
   find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
   diff1_0 = qmax1 - qmax1sav;
   diff2_0 = qmax2 - qmax2sav;
   dif_0 = sqrt(diff1_0*diff1_0 + diff2_0*diff2_0);
@@ -982,7 +997,7 @@ int adjust_C1_C2_Omega_xCM_q_WT_L2(tGrid *grid, int it, double tol,
   Setd("BNSdata_Omega", Omega - *dOmega);
   printf("BNSdata_solve step %d: get q L2-diff. for Omega = %g\n",
          it, Getd("BNSdata_Omega"));
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
              1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
   dif_m = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
@@ -992,7 +1007,7 @@ int adjust_C1_C2_Omega_xCM_q_WT_L2(tGrid *grid, int it, double tol,
   Setd("BNSdata_Omega", Omega + *dOmega);
   printf("BNSdata_solve step %d: get q L2-diff. for Omega = %g\n",
          it, Getd("BNSdata_Omega"));
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
              1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
   dif_p = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
@@ -1002,7 +1017,7 @@ int adjust_C1_C2_Omega_xCM_q_WT_L2(tGrid *grid, int it, double tol,
   Setd("BNSdata_Omega", Omega);
   printf("BNSdata_solve step %d: get q L2-diff. for Omega = %g\n",
          it, Getd("BNSdata_Omega"));
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
              1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
   dif_0 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
@@ -1284,7 +1299,7 @@ void xmaxs_error_VectorFunc(int n, double *vec, double *fvec)
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
 
   /* compute new q */
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
 
   /* find max q locations xmax1/2 in NS1/2 */
   bi1=0;  bi2=3;
@@ -1299,8 +1314,8 @@ void xmaxs_error_VectorFunc(int n, double *vec, double *fvec)
   else
     xmax2 = Xmax2;
 //  /* compute qmax1 and qmax2 */
-//  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-//  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+//  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+//  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
 
   printf("xmaxs_error_VectorFunc: Omega=%g x_CM=%g xmax1=%g xmax2=%g\n",
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"),
@@ -1485,7 +1500,7 @@ void dqdx_at_Xmax1_2_VectorFunc(int n, double *vec, double *fvec)
   if(n>=2) Setd("BNSdata_x_CM",  vec[2]);
 
   /* compute new q */
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
 
   /* get deriv dq of q in box bi1 and bi2 in BNSdata_temp1
      and dq's coeffs c in BNSdata_temp2 */
@@ -1772,7 +1787,7 @@ double average_current_and_old(double weight, tGrid *grid,
 
   /* compute error in q */
   varcopy(grid, Ind("BNSdata_temp2"), Ind("BNSdata_q")); /* set temp2 = qold */
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
   /* set temp1 = q - temp2 = qnew - qold */
   varadd(grid, Ind("BNSdata_temp1"),
                1,Ind("BNSdata_q"), -1,Ind("BNSdata_temp2"));
@@ -1878,7 +1893,7 @@ grid->time  = -100;
 write_grid(grid);
 
 grid->time  = -99;
-BNS_compute_new_q(grid);
+BNS_compute_new_centered_q(grid);
 write_grid(grid);
 
 grid->time  = -98;
@@ -1887,7 +1902,7 @@ compute_new_q_and_adjust_domainshapes(grid, 3);
 write_grid(grid);
 
 grid->time  = -97;
-BNS_compute_new_q(grid);
+BNS_compute_new_centered_q(grid);
 write_grid(grid);
 
 exit(11);
@@ -1899,7 +1914,7 @@ exit(11);
 //printf("calling write_grid(grid)\n");
 //write_grid(grid);
 ////
-//BNS_compute_new_q(grid);
+//BNS_compute_new_centered_q(grid);
 //grid->time  = -99;
 //F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
 //BNSdata_verify_solution(grid);
@@ -2089,8 +2104,8 @@ if(0) /* HYBRID <-- not working... */
   find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
 //  find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
   /* compute qmax1 and qmax2 */
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-//  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+//  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
 
   /* make both max densities the same */
   Setd("BNSdata_qmax1", qmax1);
@@ -2303,8 +2318,8 @@ int BNSdata_analyze(tGrid *grid)
   find_qmax1_along_x_axis(grid, &bi1, &Xmax1, &Ymax1);
   find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
   /* compute qmax1 and qmax2 */
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
   if(grid->box[bi1]->x_of_X[1] != NULL)
     xmax1 = grid->box[bi1]->x_of_X[1]((void *) grid->box[bi1], -1, Xmax1,Ymax1,0.0);
   else
@@ -4018,7 +4033,7 @@ void m01_guesserror_VectorFunc(int n, double *vec, double *fvec)
   double m01;
 
   Setd("BNSdata_C1", vec[1]);
-  BNS_compute_new_q(m0_errors_VectorFunc__grid);
+  BNS_compute_new_centered_q(m0_errors_VectorFunc__grid);
   m01 = GetInnerRestMass(m0_errors_VectorFunc__grid, 0);
   fvec[1] = m01 - m0_errors_VectorFunc__m01;
 }
@@ -4030,7 +4045,7 @@ void m02_guesserror_VectorFunc(int n, double *vec, double *fvec)
   double m02;
 
   Setd("BNSdata_C2", vec[1]);
-  BNS_compute_new_q(m0_errors_VectorFunc__grid);
+  BNS_compute_new_centered_q(m0_errors_VectorFunc__grid);
   m02 = GetInnerRestMass(m0_errors_VectorFunc__grid, 3);
   fvec[1] = m02 - m0_errors_VectorFunc__m02;
 }
@@ -4054,7 +4069,7 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   Setd("BNSdata_C2", vec[2]);
 
   /* compute new q */
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
 
   /* make new grid2, which is an exact copy of grid */
   grid2 = make_empty_grid(grid->nvariables, 0);
@@ -4123,7 +4138,7 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
                  "innerdom is not 0 or 3");
 
   /* compute new q */
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
 
   /* make new grid2, which is an exact copy of grid */
   grid2 = make_empty_grid(grid->nvariables, 0);
@@ -4157,7 +4172,7 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
   }
 
-  BNS_compute_new_q(grid2);
+  BNS_compute_new_centered_q(grid2);
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
 //  forallboxes(grid2, b)
@@ -4529,7 +4544,7 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
          vec[1], vec[2], vec[3], vec[4]);
 
   /* compute new q */
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
 
   /* find max q locations xmax1/2 in NS1/2 */
   bi1=0;  bi2=3;
@@ -4537,8 +4552,8 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec)
   find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
 
   /* compute qmax1 and qmax2 */
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
 
   /* compute Cartesian xmax1 */
   if(bi1==0)
@@ -4586,7 +4601,7 @@ void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec)
   printf("estimate_q_errors_VectorFunc: C1=%.6g C2=%.6g\n", vec[1], vec[2]);
 
   /* compute new q */
-  BNS_compute_new_q(grid);
+  BNS_compute_new_centered_q(grid);
 
   /* find max q locations xmax1/2 in NS1/2 */
   bi1=0;  bi2=3;
@@ -4594,8 +4609,8 @@ void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec)
   find_qmax1_along_x_axis(grid, &bi2, &Xmax2, &Ymax2);
 
   /* compute qmax1 and qmax2 */
-  qmax1 = BNS_compute_new_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
-  qmax2 = BNS_compute_new_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
+  qmax1 = BNS_compute_new_centered_q_atXYZ(grid, bi1, Xmax1,Ymax1,0);
+  qmax2 = BNS_compute_new_centered_q_atXYZ(grid, bi2, Xmax2,Ymax2,0);
 
   /* compute Cartesian xmax1 */
   if(bi1==0)

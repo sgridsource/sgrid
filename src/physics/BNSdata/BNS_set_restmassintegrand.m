@@ -1,7 +1,7 @@
-(* BNS_compute_new_q.m 
+(* BNS_set_restmassintegrand.m 
    Wolfgang Tichy  2/2008       *)
 
-(* compute the updated q *)
+(* compute the the integrand for the rest mass integral *)
 
 
 (* variables *)

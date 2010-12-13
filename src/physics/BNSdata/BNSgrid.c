@@ -1012,7 +1012,7 @@ void BNSdata_q_VectorFunc(int n, double *vec, double *fvec)
   double A = vec[1];  
 
   /* compute q */
-  fvec[1] = BNS_compute_new_q_atXYZ(grid,b, A,B,phi);
+  fvec[1] = BNS_compute_new_centered_q_atXYZ(grid,b, A,B,phi);
 }
 
 /* WE NEED to find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
@@ -1122,7 +1122,7 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
   else
     /* obtain q at Ac,Bc,phi by direct computation */
     /* grid->box[dom]->v[icoeffs]  contains coeffs of q in box */
-    q = BNS_compute_new_q_atXYZ(grid,dom, Ac,Bc,phi);
+    q = BNS_compute_new_centered_q_atXYZ(grid,dom, Ac,Bc,phi);
   qvec[1] = q;
 }
 
@@ -2267,7 +2267,7 @@ double BNS_update_q_atXYZ(tGrid *grid2,
   double q2, q1;
 
   /* get q on grid 2 at X2,Y2,Z2 */
-  q2 = BNS_compute_new_q_atXYZ(grid2,b2, X2,Y2,Z2);
+  q2 = BNS_compute_new_centered_q_atXYZ(grid2,b2, X2,Y2,Z2);
 
   /* get q on grid 1 at the same point */
   if(b2<4)
@@ -2276,7 +2276,7 @@ double BNS_update_q_atXYZ(tGrid *grid2,
     { x=X2;  y=Y2;  z=Z2; }
   X1 = X2;  Y1 = Y2;  Z1 = Z2;
   b1 = BNSgrid_Get_BoxAndCoords_of_xyz(grid1, &X1,&Y1,&Z1, b2,x,y,z);
-  q1 = BNS_compute_new_q_atXYZ(grid1,b1, X1,Y1,Z1);
+  q1 = BNS_compute_new_centered_q_atXYZ(grid1,b1, X1,Y1,Z1);
 
   /* return weighted average */
   return w*q2 + (1.0-w)*q1;

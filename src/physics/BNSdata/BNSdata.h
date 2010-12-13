@@ -5,6 +5,9 @@
 /* main functions */
 int BNSdata_setup_boxsizes(tGrid *grid);
 int BNSdata_startup(tGrid *grid);
+void   BNS_compute_new_centered_q(tGrid *grid);
+double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
+                                        double X, double Y, double Z);
 int BNSdata_verify_solution(tGrid *grid);
 int BNSdata_analyze(tGrid *grid);
 int BNSdata_solve(tGrid *grid);
