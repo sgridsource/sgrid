@@ -2251,6 +2251,8 @@ int BNSdata_analyze(tGrid *grid)
   int bi1, bi2;
   double Xmax1,Ymax1, Xmax2,Ymax2;
   double Zmax1,Zmax2;
+  double glob_xmax1, glob_ymax1, glob_zmax1;
+  double glob_xmax2, glob_ymax2, glob_zmax2;
   double global_qmax1, global_qmax2;
   double TOV_rf_surf1, TOV_m1, TOV_Phic1, TOV_Psic1, TOV_m01;  /* for TOV */
   double TOV_rf_surf2, TOV_m2, TOV_Phic2, TOV_Psic2, TOV_m02;  /* for TOV */
@@ -2335,12 +2337,36 @@ int BNSdata_analyze(tGrid *grid)
   Zmax1=Zmax2=0.0;
   global_qmax1 = BNSdata_find_position_of_qmax(grid, &bi1, &Xmax1, &Ymax1, &Zmax1);
   global_qmax2 = BNSdata_find_position_of_qmax(grid, &bi2, &Xmax2, &Ymax2, &Zmax2);
+  if(grid->box[bi1]->x_of_X[1] != NULL)
+  {
+    glob_xmax1 = grid->box[bi1]->x_of_X[1]((void *) grid->box[bi1], -1, Xmax1,Ymax1,Zmax1);
+    glob_ymax1 = grid->box[bi1]->x_of_X[2]((void *) grid->box[bi1], -1, Xmax1,Ymax1,Zmax1);
+    glob_zmax1 = grid->box[bi1]->x_of_X[3]((void *) grid->box[bi1], -1, Xmax1,Ymax1,Zmax1);
+  }
+  else
+  {
+    glob_xmax1 = Xmax1;
+    glob_ymax1 = Ymax1;
+    glob_zmax1 = Zmax1;
+  }
+  if(grid->box[bi2]->x_of_X[1] != NULL)
+  {
+    glob_xmax2 = grid->box[bi2]->x_of_X[1]((void *) grid->box[bi2], -1, Xmax2,Ymax2,Zmax2);
+    glob_ymax2 = grid->box[bi2]->x_of_X[2]((void *) grid->box[bi2], -1, Xmax2,Ymax2,Zmax2);
+    glob_zmax2 = grid->box[bi2]->x_of_X[3]((void *) grid->box[bi2], -1, Xmax2,Ymax2,Zmax2);
+  }
+  else
+  {
+    glob_xmax2 = Xmax2;
+    glob_ymax2 = Ymax2;
+    glob_zmax2 = Zmax2;
+  }
   printf("BNSdata_analyze: global qmax1=%g in box%d\n"
-         "                 at (%.11g,%.11g,%.11g)\n",
-         global_qmax1, bi1, Xmax1,Ymax1,Zmax1);
+         "                 at (x,y,z)=(%.11g,%.11g,%.11g)\n",
+         global_qmax1, bi1, glob_xmax1,glob_ymax1,glob_zmax1);
   printf("BNSdata_analyze: global qmax2=%g in box%d\n"
-         "                 at (%.11g,%.11g,%.11g)\n",
-         global_qmax2, bi2, Xmax2,Ymax2,Zmax2);
+         "                 at (x,y,z)=(%.11g,%.11g,%.11g)\n",
+         global_qmax2, bi2, glob_xmax2,glob_ymax2,glob_zmax2);
 
   /* compute TOV */
   TOV_init(P_core1, kappa, Gamma, 0,
