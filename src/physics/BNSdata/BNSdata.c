@@ -100,6 +100,9 @@ void central_q_errors_VectorFunc(int n, double *vec, double *fvec);
 void estimate_q_errors_VectorFunc(int n, double *vec, double *fvec);
 double BNSdata_find_position_of_qmax(tGrid *grid, int *bi, 
                                      double *X, double *Y, double *Z);
+double BNSdata_find_xyz_of_qmax(tGrid *grid, int *bi, 
+                                double *x, double *y, double *z);
+void set_BNSdata_actual_xyzmax_pars(tGrid *grid);
 
 
 
@@ -438,6 +441,8 @@ int BNSdata_startup(tGrid *grid)
     }
   }
 
+  /* set BNSdata_actual_xyzmax pars */
+  set_BNSdata_actual_xyzmax_pars(grid);
   return 0;
 }
 
@@ -447,12 +452,97 @@ int BNSdata_startup(tGrid *grid)
 void BNS_compute_new_centered_q(tGrid *grid)
 {
   BNS_compute_new_q(grid);
+  if(!Getv("BNSdata_center_new_q", "no"))
+  {
+    int iq = Ind("BNSdata_q");
+    int iqx= Ind("BNSdata_qx");
+    int b, i;
+    int bi1, bi2;
+    double dx,dy,dz, x1,y1,z1, x2,y2,z2;
+    double xmax1 = Getd("BNSdata_xmax1");
+    double xmax2 = Getd("BNSdata_xmax2");;
+
+    /* get global max of q in NS1/2 */
+    x1 = Getd("BNSdata_actual_xmax1");
+    y1 = Getd("BNSdata_actual_ymax1"); 
+    z1 = Getd("BNSdata_actual_zmax1");
+    x2 = Getd("BNSdata_actual_xmax2");
+    y2 = Getd("BNSdata_actual_ymax2");
+    z2 = Getd("BNSdata_actual_zmax2");
+           
+    forallboxes(grid, b)
+    {
+      tBox *box = grid->box[b];
+      double *BNSdata_q = box->v[iq];
+      double *dqdx = box->v[iqx];
+      double *dqdy = box->v[iqx+1];
+      double *dqdz = box->v[iqx+2];
+      
+      /* get gradient of q */
+      FirstDerivsOf_S(box, iq, iqx);
+      
+      /* q_centered(x) = q(x+dx) ~ q(x) + [dq(x)/dx] dx */
+      if(b<=1 || b==5) { dx = x1-xmax1; dy = y1; dz = z1; }
+      else             { dx = x2-xmax2; dy = y2; dz = z2; }
+      forallpoints(box, i)
+        BNSdata_q[i] = BNSdata_q[i] + dqdx[i]*dx + dqdy[i]*dy + dqdz[i]*dz;
+    }
+  }
 }
 double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
                                         double X, double Y, double Z)
 {
   double q;
   q = BNS_compute_new_q_atXYZ(grid,bi, X,Y,Z);
+  if(!Getv("BNSdata_center_new_q", "no"))
+  {
+    int iq = Ind("BNSdata_q");
+    int iqx= Ind("BNSdata_qx");
+    tBox *box = grid->box[bi];
+    double *cx= box->v[Ind("BNSdata_temp1")];
+    double *cy= box->v[Ind("BNSdata_temp2")];
+    double *cz= box->v[Ind("BNSdata_temp3")];
+    double dx,dy,dz, xm,ym,zm;
+    double dqdx, dqdy, dqdz;
+    double xmax;
+
+    if(bi<=1 || bi==5)
+    {
+      /* desired xmax1 */
+      xmax = Getd("BNSdata_xmax1");
+      /* get global max of q in NS1/2 */
+      xm = Getd("BNSdata_actual_xmax1");
+      ym = Getd("BNSdata_actual_ymax1"); 
+      zm = Getd("BNSdata_actual_zmax1");
+    }
+    else
+    {
+      /* desired xmax1 */
+      xmax = Getd("BNSdata_xmax2");
+      /* get global max of q in NS1/2 */
+      xm = Getd("BNSdata_actual_xmax2");
+      ym = Getd("BNSdata_actual_ymax2");
+      zm = Getd("BNSdata_actual_zmax2");
+    }
+
+    /* get gradient of q and its coeffs, set coeffs of dq in 
+       BNSdata_temp1/2/3 */
+    FirstDerivsOf_S(box, iq, iqx);
+    spec_Coeffs(box, box->v[iqx], cx);
+    spec_Coeffs(box, box->v[iqx+1], cy);
+    spec_Coeffs(box, box->v[iqx+2], cz);
+
+    /* find dqdx, dqdy, dqdz by interpolation */
+    dqdx = spec_interpolate(box, cx, X,Y,Z);
+    dqdy = spec_interpolate(box, cy, X,Y,Z);
+    dqdz = spec_interpolate(box, cz, X,Y,Z);
+
+    /* q_centered(x) = q(x+dx) ~ q(x) + [dq(x)/dx] dx */
+    dx = xm-xmax;
+    dy = ym;
+    dz = zm;
+    q = q + dqdx*dx + dqdy*dy + dqdz*dz;
+  }
   return q;
 }
 
@@ -791,6 +881,9 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   m0_error = sqrt(m0_error)/(Getd("BNSdata_m01")+Getd("BNSdata_m02"));
   printf(" rest mass error = %.4e "
          "(before adjusting C1/2)\n", m0_error);
+
+  /* set actual positions of maxima */
+  set_BNSdata_actual_xyzmax_pars(grid);
 
   /* set desired masses for this iteration */
   m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
@@ -2348,7 +2441,7 @@ int BNSdata_analyze(tGrid *grid)
            Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
   }
 
-  /* find global max of in NS1/2 */
+  /* find global max of q in NS1/2 */
   Zmax1=Zmax2=0.0;
   global_qmax1 = BNSdata_find_position_of_qmax(grid, &bi1, &Xmax1, &Ymax1, &Zmax1);
   global_qmax2 = BNSdata_find_position_of_qmax(grid, &bi2, &Xmax2, &Ymax2, &Zmax2);
@@ -4288,20 +4381,20 @@ void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y)
   *bi = -1; /* boxindex with dq=0 not yet found */
 
   /* look at NS1 */
-  if(bi_guess==0)
+  if(bi_guess<=1 || bi_guess==5)
   {
     /* index of the 2 boxes where we look */
     bq0 = 0;
     bq2 = 5;
   }
   /* look at NS2 */
-  else if(bi_guess==3)
+  else if(bi_guess>=2 && bi_guess<=4)
   {
     /* index of the 2 boxes where we look */
     bq0 = 3;
     bq2 = 4;
   }
-  else errorexit("bi_guess has to be 0 or 3");
+  else errorexit("bi_guess is wrong!!!");
 
   /* make 3 arrays (qa0, qa1, qa2) with q values along x-axis 
      in box0/3 at B=0 and B=1 and in box5/4 at y=z=0 */
@@ -4748,4 +4841,54 @@ double BNSdata_find_position_of_qmax(tGrid *grid, int *bi,
   printf(" global qmax is at: *bi=%d *X=%.11g *Y=%.11g *Z=%.11g\n",
          *bi, *X, *Y, *Z);
   return qmax;
+}
+
+/* find cart coords of max of q */
+double BNSdata_find_xyz_of_qmax(tGrid *grid, int *bi, 
+                                double *x, double *y, double *z)
+{
+  double qmax, Xmax,Ymax,Zmax;
+
+  /* find global max of q in NS1/2 */
+  find_qmax1_along_x_axis(grid, bi, &Xmax, &Ymax);
+  Zmax=0.0;
+  qmax = BNSdata_find_position_of_qmax(grid, bi, &Xmax, &Ymax, &Zmax);
+  if(grid->box[*bi]->x_of_X[1] != NULL)
+  {
+    *x = grid->box[*bi]->x_of_X[1]((void *) grid->box[*bi], -1, Xmax,Ymax,Zmax);
+    *y = grid->box[*bi]->x_of_X[2]((void *) grid->box[*bi], -1, Xmax,Ymax,Zmax);
+    *z = grid->box[*bi]->x_of_X[3]((void *) grid->box[*bi], -1, Xmax,Ymax,Zmax);
+  }
+  else
+  {
+    *x = Xmax;
+    *y = Ymax;
+    *z = Zmax;
+  }
+  return qmax;
+}
+
+/* set BNSdata_actual_x/y/z/max1/2 pars */
+void set_BNSdata_actual_xyzmax_pars(tGrid *grid)
+{
+  int bi1, bi2;
+  double x1,y1,z1, x2,y2,z2;
+
+  bi1=0;
+  bi2=3;
+  BNSdata_find_xyz_of_qmax(grid, &bi1, &x1,&y1,&z1);
+  BNSdata_find_xyz_of_qmax(grid, &bi2, &x2,&y2,&z2);
+  Setd("BNSdata_actual_xmax1", x1);
+  Setd("BNSdata_actual_ymax1", y1);
+  Setd("BNSdata_actual_zmax1", z1);
+  Setd("BNSdata_actual_xmax2", x2);
+  Setd("BNSdata_actual_ymax2", y2);
+  Setd("BNSdata_actual_zmax2", z2);
+  printf("set_BNSdata_actual_xyzmax_pars:\n");
+  printf(" BNSdata_actual_xmax1 = %.13g\n", x1);
+  printf(" BNSdata_actual_ymax1 = %.13g\n", y1);
+  printf(" BNSdata_actual_zmax1 = %.13g\n", z1);
+  printf(" BNSdata_actual_xmax2 = %.13g\n", x2);
+  printf(" BNSdata_actual_ymax2 = %.13g\n", y2);
+  printf( "BNSdata_actual_zmax2 = %.13g\n", z2);
 }

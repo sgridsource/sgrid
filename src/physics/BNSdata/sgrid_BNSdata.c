@@ -90,6 +90,15 @@ int sgrid_BNSdata()
   AddPar("BNSdata_qmax2", "0", "max q of NS2 along x-axis");
   AddPar("BNSdata_xmax1", "0", "pos. of max q of NS1 along x-axis");
   AddPar("BNSdata_xmax2", "0", "pos. of max q of NS2 along x-axis");
+  AddPar("BNSdata_actual_xmax1", "0", "x-pos. of actual global max of q in NS1");
+  AddPar("BNSdata_actual_ymax1", "0", "y-pos. of actual global max of q in NS1");
+  AddPar("BNSdata_actual_zmax1", "0", "z-pos. of actual global max of q in NS1");
+  AddPar("BNSdata_actual_xmax2", "0", "x-pos. of actual global max of q in NS2");
+  AddPar("BNSdata_actual_ymax2", "0", "y-pos. of actual global max of q in NS2");
+  AddPar("BNSdata_actual_zmax2", "0", "z-pos. of actual global max of q in NS2");
+  AddPar("BNSdata_center_new_q", "no",
+         "if and how we center new q on (BNSdata_xmax1/2,0,0) "
+         "[no,center_xyz]");
   AddPar("BNSdata_Omega", "estimate",  "orbital angular velocity");
   AddPar("BNSdata_b",     "1",  "separation parameter (distance~2b)");
   AddPar("BNSdata_n",     "1",  "polytropic index n, Gamma = 1 + 1/n");
