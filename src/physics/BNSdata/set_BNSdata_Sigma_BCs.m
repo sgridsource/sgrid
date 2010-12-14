@@ -22,7 +22,6 @@ tocompute = {
     Cinstruction == "continue;",
   Cif == end,
 
-
   (* Use Sigma=0 as BC if corot *)
   Cif == ( ((bi==0 || bi==1) && corot1) || ((bi==2 ||bi==3) && corot2) ),
 
@@ -295,7 +294,8 @@ BeginCFunction[] := Module[{},
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
-  pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_BCs\",\"zero_at_A=B=0\");\n"];
+  pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"zero_at_A=B=0\");\n"];
+  pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
@@ -305,6 +305,10 @@ BeginCFunction[] := Module[{},
   pr["tGrid *grid = vlu->grid;\n"];
   pr["int bi;\n"];
   pr["\n"];
+  pr["\n"];
+
+  pr["/* do nothing if noBCs, i.e. BNSdata_Sigma_surface_BCs = none */\n"];
+  pr["if(noBCs) return;\n\n\n"];
 
   pr["forallboxes(grid,bi)\n"];
   pr["{\n"];
