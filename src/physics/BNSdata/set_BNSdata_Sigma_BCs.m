@@ -152,11 +152,13 @@ FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
       Cinstruction == "} /* end forplane1 */",
 
       (* set Sigma and to zero at A=0, B=0 (one point at xout1/2) *)
-      Cinstruction == "i=0;  j=0;",
-      Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
-        FSigma == Sigma,
-      Cinstruction == "} /* end for k  */",
-    
+      Cif == SigmaZeroAtA0B0,
+        Cinstruction == "i=0;  j=0;",
+        Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
+          FSigma == Sigma,
+        Cinstruction == "} /* end for k  */",
+      Cif == end,
+
     (* linear case: *)
     Cif == else,
       Cinstruction == "FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);",
@@ -237,10 +239,12 @@ FlSigma == dlSigmaUp[c] dq[c] - h luzero Psi4 beta[c] dq[c],
       Cinstruction == "} /* end forplane1 */",
 
       (* set Sigma and to zero at A=0, B=0 (one point at xout1/2) *)
-      Cinstruction == "i=0;  j=0;",
-      Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
-        FlSigma == lSigma,
-      Cinstruction == "} /* end for k  */",
+      Cif == SigmaZeroAtA0B0,
+        Cinstruction == "i=0;  j=0;",
+        Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
+          FlSigma == lSigma,
+        Cinstruction == "} /* end for k  */",
+      Cif == end,
 
     Cif == end, (* end of nonlin/linear case *)
 
@@ -291,6 +295,7 @@ BeginCFunction[] := Module[{},
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
+  pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_BCs\",\"zero_at_A=B=0\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
