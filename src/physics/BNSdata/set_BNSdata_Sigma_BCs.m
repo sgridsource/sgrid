@@ -83,19 +83,27 @@ tocompute = {
     Cinstruction == "if(n2in!=n2 || n3in!=n3) errorexit(\"we need n2in=n2 and n3in=n3\");",
     Cif == nonlin, (* non-linear case *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
-      Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
-                       indin = Ind_n1n2(0,j,k,n1in,n2in);
-                       Sig   = Sigma[ind];
-                       Sigin = Sigmain[indin];",
-        FSigma  == Sig-Sigin,  (* set Sigma equal A=0*)
+        Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
+                         indin = Ind_n1n2(0,j,k,n1in,n2in);
+                         Sig   = Sigma[ind];
+                         Sigin = Sigmain[indin];",
+        Cif == (SigmaZeroInOutBoxAtA0B0 && j==0),
+          FSigma  == Sig,        (* set Sigma=0 at A=B=0 in outer box *)
+        Cif == else,
+          FSigma  == Sig-Sigin,  (* set Sigmas equal at A=0*)
+        Cif == end,
       Cinstruction == "} /* end forplane1 */",
     Cif == else,   (* linear case *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
-      Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
-                       indin = Ind_n1n2(0,j,k,n1in,n2in);
-                       Sig   = lSigma[ind];
-                       Sigin = lSigmain[indin];",
-        FlSigma  == Sig-Sigin,  (* set Sigma equal A=0*)
+        Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
+                         indin = Ind_n1n2(0,j,k,n1in,n2in);
+                         Sig   = lSigma[ind];
+                         Sigin = lSigmain[indin];",
+        Cif == (SigmaZeroInOutBoxAtA0B0 && j==0),
+          FlSigma  == Sig,        (* set Sigma=0 at A=B=0 in outer box *)
+        Cif == else,
+          FlSigma  == Sig-Sigin,  (* set Sigmas equal at A=0*)
+        Cif == end,
       Cinstruction == "} /* end forplane1 */",
     Cif == end,
 
@@ -294,7 +302,8 @@ BeginCFunction[] := Module[{},
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
-  pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"zero_at_A=B=0\");\n"];
+  pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAt00\");\n"];
+  pr["int SigmaZeroInOutBoxAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxAt00\");\n"];
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
