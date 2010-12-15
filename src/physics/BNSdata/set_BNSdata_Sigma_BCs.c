@@ -20,12 +20,14 @@ void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
 int SigmaZeroAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroAt00");
+int AddInnerVolIntToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
 int SigmaZeroInOuterBoxAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxAt00");
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
 double xCM = Getd("BNSdata_x_CM");
+double VolIntSigma, VolIntlSigma;
 
 tGrid *grid = vlu->grid;
 int bi;
@@ -517,6 +519,18 @@ if (nonlin) {
 FirstDerivsOf_S(box, index_Sigma,                                        Ind("BNSdata_Sigmax")); 
 
 
+
+/* conditional */
+if (AddInnerVolIntToBC) {
+
+
+VolIntSigma =                                                 
+          VolumeIntegral_inBNSgridBox(grid, bi, index_Sigma);
+}
+/* if (AddInnerVolIntToBC) */
+
+
+
 forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k); 
 
 OmegaCrossR1
@@ -700,6 +714,20 @@ FSigma[ijk] + Psim2*(dq1[ijk]*wB1[ijk] + dq2[ijk]*wB2[ijk] +
 ;
 
 
+
+/* conditional */
+if (AddInnerVolIntToBC) {
+
+FSigma[ijk]
+=
+VolIntSigma + FSigma[ijk]
+;
+
+}
+/* if (AddInnerVolIntToBC) */
+
+
+
 } /* end forplane1 */ 
 
 
@@ -730,6 +758,18 @@ Sigma[ijk]
 
 
 FirstDerivsOf_S(box, index_lSigma, index_dlSigma1); 
+
+
+
+/* conditional */
+if (AddInnerVolIntToBC) {
+
+
+VolIntlSigma =                                                 
+          VolumeIntegral_inBNSgridBox(grid, bi, index_lSigma);
+}
+/* if (AddInnerVolIntToBC) */
+
 
 
 forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k); 
@@ -1104,6 +1144,20 @@ FlSigma[ijk] + Psim2*(lwB1*dq1[ijk] + lwB2*dq2[ijk] + lwB3*dq3[ijk] +
 ;
 
 
+
+/* conditional */
+if (AddInnerVolIntToBC) {
+
+FlSigma[ijk]
+=
+VolIntlSigma + FlSigma[ijk]
+;
+
+}
+/* if (AddInnerVolIntToBC) */
+
+
+
 } /* end forplane1 */ 
 
 
@@ -1146,4 +1200,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 90, n* = 364,  n/ = 115,  n+ = 214, n = 693, O = 1 */
+/* nvars = 90, n* = 380,  n/ = 131,  n+ = 216, n = 727, O = 1 */

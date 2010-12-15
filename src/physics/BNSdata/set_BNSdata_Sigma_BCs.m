@@ -112,6 +112,11 @@ tocompute = {
     Cif == nonlin,
       Cinstruction == "FirstDerivsOf_S(box, index_Sigma, \
                                        Ind(\"BNSdata_Sigmax\"));",
+      Cif == AddInnerVolIntToBC,
+        Cinstruction == "VolIntSigma =
+          VolumeIntegral_inBNSgridBox(grid, bi, index_Sigma);",
+      Cif == end,
+
       (* go over A=0 plane *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
 
@@ -151,6 +156,10 @@ FSigma == Sigma - 10,
 FSigma == dSigmaUp[c] dq[c] - 100 dq2,
 FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
 *)
+        (* add VolIntSigma=0 to BC *)
+        Cif == AddInnerVolIntToBC,
+          FSigma == FSigma + VolIntSigma,
+        Cif == end,
 
       Cinstruction == "} /* end forplane1 */",
 
@@ -166,6 +175,11 @@ FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
     (* linear case: *)
     Cif == else,
       Cinstruction == "FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);",
+
+      Cif == AddInnerVolIntToBC,
+        Cinstruction == "VolIntlSigma =
+          VolumeIntegral_inBNSgridBox(grid, bi, index_lSigma);",
+      Cif == end,
 
       (* go over A=0 plane *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
@@ -231,14 +245,11 @@ FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
         (* add extra term with wB *)
         FlSigma == FlSigma + Psim2 lwB[c] dq[c] - 2 Psim3 lPsi wB[c] dq[c] +
                              Psim2 wB[c] dlq[c],
-(*
-lL2 == 2*(dlSigma[c] (w[c] + DSigmaUp[c])),
-luzerosqr == (lL2)/(alpha2 h2),
-luzero == luzerosqr/(2 uzero), 
-FlSigma  == lSigma,
-FlSigma == dlSigmaUp[c] dq[c],
-FlSigma == dlSigmaUp[c] dq[c] - h luzero Psi4 beta[c] dq[c],
-*)
+
+        (* add VolIntlSigma=0 to BC *)
+        Cif == AddInnerVolIntToBC,
+          FlSigma == FlSigma + VolIntlSigma,
+        Cif == end,
 
       Cinstruction == "} /* end forplane1 */",
 
@@ -303,12 +314,14 @@ BeginCFunction[] := Module[{},
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
   pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAt00\");\n"];
+  pr["int AddInnerVolIntToBC = Getv(\"BNSdata_Sigma_surface_BCs\",\"AddInnerVolIntToBC\");\n"];
   pr["int SigmaZeroInOuterBoxAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxAt00\");\n"];
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
   pr["double xCM = Getd(\"BNSdata_x_CM\");\n"];
+  pr["double VolIntSigma, VolIntlSigma;\n"];
   pr["\n"];
 
   pr["tGrid *grid = vlu->grid;\n"];
