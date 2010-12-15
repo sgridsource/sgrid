@@ -71,7 +71,7 @@ tocompute = {
            are equal. *)
   Cif == ( bi==1 || bi==2 ),
     Cinstruction == "int    ind, indin, biin, n1in,n2in,n3in;",
-    Cinstruction == "double Sig, Sigin;",
+    Cinstruction == "double Sig, Sigin, lSig, lSigin;",
     Cinstruction == "double *Sigmain;",
     Cinstruction == "double *lSigmain;",
     Cinstruction == "if(bi==1) biin=0; else biin=3;",
@@ -81,31 +81,27 @@ tocompute = {
                      Sigmain  = grid->box[biin]->v[index_Sigma];
                      lSigmain = grid->box[biin]->v[index_lSigma];",
     Cinstruction == "if(n2in!=n2 || n3in!=n3) errorexit(\"we need n2in=n2 and n3in=n3\");",
-    Cif == nonlin, (* non-linear case *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
-        Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
-                         indin = Ind_n1n2(0,j,k,n1in,n2in);
-                         Sig   = Sigma[ind];
-                         Sigin = Sigmain[indin];",
-        Cif == (SigmaZeroInOutBoxAtA0B0 && j==0),
-          FSigma  == Sig,        (* set Sigma=0 at A=B=0 in outer box *)
+    Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
+      Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
+                       indin = Ind_n1n2(0,j,k,n1in,n2in);
+                       Sig   = Sigma[ind];
+                       Sigin = Sigmain[indin];
+                       lSig  = lSigma[ind];
+                       lSigin= lSigmain[indin];",
+      Cif == nonlin, (* non-linear case *)
+        Cif == (SigmaZeroInOuterBoxAtA0B0 && j==0),
+          FSigma  == (Sig-Sigin) + Sig, (* set both Sigmas=0 at A=B=0 *)
         Cif == else,
           FSigma  == Sig-Sigin,  (* set Sigmas equal at A=0*)
         Cif == end,
-      Cinstruction == "} /* end forplane1 */",
-    Cif == else,   (* linear case *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
-        Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
-                         indin = Ind_n1n2(0,j,k,n1in,n2in);
-                         Sig   = lSigma[ind];
-                         Sigin = lSigmain[indin];",
-        Cif == (SigmaZeroInOutBoxAtA0B0 && j==0),
-          FlSigma  == Sig,        (* set Sigma=0 at A=B=0 in outer box *)
+      Cif == else,   (* linear case *)
+        Cif == (SigmaZeroInOuterBoxAtA0B0 && j==0),
+          FlSigma  == (lSig-lSigin) + lSig,  (* set both Sigmas=0 at A=B=0 *)
         Cif == else,
-          FlSigma  == Sig-Sigin,  (* set Sigmas equal at A=0*)
+          FlSigma  == lSig-lSigin,  (* set Sigmas equal at A=0*)
         Cif == end,
-      Cinstruction == "} /* end forplane1 */",
-    Cif == end,
+      Cif == end,
+    Cinstruction == "} /* end forplane1 */",
 
   (* if not b=1 or 2, i.e. bi==0 || bi==3 *)
   Cif == else,
@@ -162,6 +158,7 @@ FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
       Cif == SigmaZeroAtA0B0,
         Cinstruction == "i=0;  j=0;",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
+          (* FSigma == FSigma^2 + Sigma^2, *)
           FSigma == Sigma,
         Cinstruction == "} /* end for k  */",
       Cif == end,
@@ -249,6 +246,9 @@ FlSigma == dlSigmaUp[c] dq[c] - h luzero Psi4 beta[c] dq[c],
       Cif == SigmaZeroAtA0B0,
         Cinstruction == "i=0;  j=0;",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
+          (* FSig == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
+             FSig == FSig + Psim2 wB[c] dq[c],
+             FlSigma == 2 FSig FlSigma + 2 Sigma lSigma, *)
           FlSigma == lSigma,
         Cinstruction == "} /* end for k  */",
       Cif == end,
@@ -303,7 +303,7 @@ BeginCFunction[] := Module[{},
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
   pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAt00\");\n"];
-  pr["int SigmaZeroInOutBoxAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxAt00\");\n"];
+  pr["int SigmaZeroInOuterBoxAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxAt00\");\n"];
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];

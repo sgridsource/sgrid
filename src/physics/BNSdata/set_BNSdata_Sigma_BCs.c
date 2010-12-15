@@ -20,7 +20,7 @@ void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
 int SigmaZeroAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroAt00");
-int SigmaZeroInOutBoxAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxAt00");
+int SigmaZeroInOuterBoxAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxAt00");
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
@@ -414,7 +414,7 @@ if (bi == 1 || bi == 2) {
 int    ind, indin, biin, n1in,n2in,n3in; 
 
 
-double Sig, Sigin; 
+double Sig, Sigin, lSig, lSigin; 
 
 
 double *Sigmain; 
@@ -435,29 +435,31 @@ n1in = grid->box[biin]->n1;
 if(n2in!=n2 || n3in!=n3) errorexit("we need n2in=n2 and n3in=n3"); 
 
 
+forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
+
+
+ind   = Ind_n1n2(0,j,k,n1,n2);                            
+                       indin = Ind_n1n2(0,j,k,n1in,n2in);
+                       Sig   = Sigma[ind];
+                       Sigin = Sigmain[indin];
+                       lSig  = lSigma[ind];
+                       lSigin= lSigmain[indin];
 
 /* conditional */
 if (nonlin) {
 
 
-forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
-
-
-ind   = Ind_n1n2(0,j,k,n1,n2);                              
-                         indin = Ind_n1n2(0,j,k,n1in,n2in);
-                         Sig   = Sigma[ind];
-                         Sigin = Sigmain[indin];
 
 /* conditional */
-if (SigmaZeroInOutBoxAtA0B0 && j == 0) {
+if (SigmaZeroInOuterBoxAtA0B0 && j == 0) {
 
 FSigma[ijk]
 =
-Sig
+2.*Sig - Sigin
 ;
 
 
-} else { /* if (!SigmaZeroInOutBoxAtA0B0 && j == 0) */
+} else { /* if (!SigmaZeroInOuterBoxAtA0B0 && j == 0) */
 
 FSigma[ijk]
 =
@@ -465,53 +467,43 @@ Sig - Sigin
 ;
 
 }
-/* if (SigmaZeroInOutBoxAtA0B0 && j == 0) */
+/* if (SigmaZeroInOuterBoxAtA0B0 && j == 0) */
 
 
 
-} /* end forplane1 */ 
+} else { /* if (!SigmaZeroInOuterBoxAtA0B0 && j == 0) */
 
 
-} else { /* if (!SigmaZeroInOutBoxAtA0B0 && j == 0) */
-
-
-forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
-
-
-ind   = Ind_n1n2(0,j,k,n1,n2);                              
-                         indin = Ind_n1n2(0,j,k,n1in,n2in);
-                         Sig   = lSigma[ind];
-                         Sigin = lSigmain[indin];
 
 /* conditional */
-if (SigmaZeroInOutBoxAtA0B0 && j == 0) {
+if (SigmaZeroInOuterBoxAtA0B0 && j == 0) {
 
 FlSigma[ijk]
 =
-Sig
+2.*lSig - lSigin
 ;
 
 
-} else { /* if (!SigmaZeroInOutBoxAtA0B0 && j == 0) */
+} else { /* if (!SigmaZeroInOuterBoxAtA0B0 && j == 0) */
 
 FlSigma[ijk]
 =
-Sig - Sigin
+lSig - lSigin
 ;
 
 }
-/* if (SigmaZeroInOutBoxAtA0B0 && j == 0) */
+/* if (SigmaZeroInOuterBoxAtA0B0 && j == 0) */
+
+
+}
+/* if (SigmaZeroInOuterBoxAtA0B0 && j == 0) */
 
 
 
 } /* end forplane1 */ 
 
-}
-/* if (SigmaZeroInOutBoxAtA0B0 && j == 0) */
 
-
-
-} else { /* if (!SigmaZeroInOutBoxAtA0B0 && j == 0) */
+} else { /* if (!SigmaZeroInOuterBoxAtA0B0 && j == 0) */
 
 
 FirstDerivsOf_S(box,  Ind("BNSdata_q"), 			                 Ind("BNSdata_qx")); 
@@ -1154,4 +1146,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 90, n* = 364,  n/ = 117,  n+ = 212, n = 693, O = 1 */
+/* nvars = 90, n* = 364,  n/ = 115,  n+ = 214, n = 693, O = 1 */
