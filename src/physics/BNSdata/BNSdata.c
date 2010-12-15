@@ -2672,6 +2672,14 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
   {
     int ncomp = VarNComponents(vlu->index[vind]);
     double PsiFarLimit = VarFarLimit(vlu->index[vind])*nonlin;
+    int BCs_atInf = 1;
+    int BCs_box1_2 = 1;
+    //int BCs_box0_1 = 1;
+    //int BCs_box3_2 = 1;
+    char *varname = VarName(vlu->index[vind]);
+
+    if(strstr(varname, "BNSdata_Sigma"))
+    { BCs_atInf = 0; BCs_box1_2 = 0;  /* printf("varname=%s\n", varname); */ }
 
     forallboxes(grid, b)
     {
@@ -3191,10 +3199,12 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
         else if(b==1)  /* in box1 */
         {
           /* normal derivs (d/dx) at A=1 are equal in box1 and box2 */
-          dP[1] = grid->box[2]->v[vluDerivs->index[vindDerivs]];
-          forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=1 */
-            FPsi[Index(i,j,k)] = Psix[Index(i,j,k)] - dP[1][Index(i,j,k)];
-
+          if(BCs_box1_2)
+          {
+            dP[1] = grid->box[2]->v[vluDerivs->index[vindDerivs]];
+            forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=1 */
+              FPsi[Index(i,j,k)] = Psix[Index(i,j,k)] - dP[1][Index(i,j,k)];
+          }
           /* normal derivs (~d/dA) at A=0 are equal in box1 and box0 */
           /* Below we use the approximate normal vec 
              ( cos(PI*B), sin(PI*B)*cos(phi), sin(PI*B)*sin(phi) ) */
@@ -3213,36 +3223,41 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
           }
           
           /* Psi=0 at infinity */
-          if(Getv("box1_basis2", "ChebExtrema"))
-            for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
-              FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)]-PsiFarLimit;
-          else // B=0 is not on grid for ChebZeros!!!
+          if(BCs_atInf)
           {
-            int l;
-            double U0;
-            double *BM = (double *) calloc(n2, sizeof(double));
-            double *line = (double *) calloc(n2, sizeof(double));
-
-            /* obtain BM vector for interpolation along B */
-            spec_Basis_times_CoeffMatrix_direc(box, 2, BM, 0.0);
-            for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+            if(Getv("box1_basis2", "ChebExtrema"))
+              for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+                FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)]-PsiFarLimit;
+            else // B=0 is not on grid for ChebZeros!!!
             {
-              /* find value of Psi at A=1, B=0 */
-              get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
-              for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
-              FPsi[Index(n1-1,0,k)] = U0-PsiFarLimit;
+              int l;
+              double U0;
+              double *BM = (double *) calloc(n2, sizeof(double));
+              double *line = (double *) calloc(n2, sizeof(double));
+
+              /* obtain BM vector for interpolation along B */
+              spec_Basis_times_CoeffMatrix_direc(box, 2, BM, 0.0);
+              for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+              {
+                /* find value of Psi at A=1, B=0 */
+                get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
+                FPsi[Index(n1-1,0,k)] = U0-PsiFarLimit;
+              }
+              free(line);
+              free(BM);
             }
-            free(line);
-            free(BM);
           }
         }
         else if(b==2)  /* in box2 */
         {
           /* values at A=1 are equal in box1 and box2 */
-          P  = grid->box[1]->v[vlu->index[vind]]; /* values in box1 */
-          forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=1 */
-            FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
-
+          if(BCs_box1_2)
+          {
+            P  = grid->box[1]->v[vlu->index[vind]]; /* values in box1 */
+            forplane1(i,j,k, n1,n2,n3, n1-1) /* <-- A=1 */
+              FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
+          }
           /* normal derivs (d/d?) at A=0 are equal in box2 and box3 */
           /* Below we use the approximate normal vec 
              ( cos(PI*B), sin(PI*B)*cos(phi), sin(PI*B)*sin(phi) ) */
@@ -3261,27 +3276,31 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
           }
 
           /* Psi=0 at infinity */
-          if(Getv("box2_basis2", "ChebExtrema"))
-            for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
-              FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)]-PsiFarLimit;
-          else // B=0 is not on grid for ChebZeros!!!
+          if(BCs_atInf)
           {
-            int l;
-            double U0;
-            double *BM = (double *) calloc(n2, sizeof(double));
-            double *line = (double *) calloc(n2, sizeof(double));
-
-            /* obtain BM vector for interpolation along B */
-            spec_Basis_times_CoeffMatrix_direc(box, 2, BM, 0.0);
-            for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)~(1,0) */
+            /* Psi=0 at infinity */
+            if(Getv("box2_basis2", "ChebExtrema"))
+              for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)=(1,0) */
+                FPsi[Index(n1-1,0,k)] = Psi[Index(n1-1,0,k)]-PsiFarLimit;
+            else // B=0 is not on grid for ChebZeros!!!
             {
-              /* find value of Psi at A=1, B=0 */
-              get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
-              for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
-              FPsi[Index(n1-1,0,k)] = U0-PsiFarLimit;
+              int l;
+              double U0;
+              double *BM = (double *) calloc(n2, sizeof(double));
+              double *line = (double *) calloc(n2, sizeof(double));
+
+              /* obtain BM vector for interpolation along B */
+              spec_Basis_times_CoeffMatrix_direc(box, 2, BM, 0.0);
+              for(k=0;k<n3;k++)  /* <--loop over all phi with (A,B)~(1,0) */
+              {
+                /* find value of Psi at A=1, B=0 */
+                get_memline(Psi, line, 2, n1-1,k, n1,n2,n3);
+                for(U0=0.0, l=0; l<n2; l++)  U0 += BM[l]*line[l];
+                FPsi[Index(n1-1,0,k)] = U0-PsiFarLimit;
+              }
+              free(line);
+              free(BM);
             }
-            free(line);
-            free(BM);
           }
         }
         else if(b==5)  /* in box5 */
