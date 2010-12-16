@@ -188,10 +188,11 @@ FSigma == dSigmaUp[c] dq[c] - beta[c] dq[c],
         FSigma == VolIntSigma,
       Cif == end,
 
-      (* make sure all Sigma agree at A=0 and B=0,1 for all phi,
+      (* make sure all Sigma agree at A=0,Amax and B=0,1 for all phi,
          impose this for k>0 *)
       Cif == 1,
-        Cinstruction == "i=0;",
+        (* Cinstruction == "i=0;", *)
+        Cinstruction == "for(i=0; i<n1; i=i+n1-1)",
         Cinstruction == "for(j=0; j<n2; j=j+n2-1)",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
           Cif == (k==0),
@@ -310,10 +311,11 @@ FlSigma  == dlSigmaUp[c] dq[c],
           FlSigma == VolIntlSigma,
       Cif == end,
 
-      (* make sure all Sigma agree at A=0 and B=0,1 for all phi,
+      (* make sure all Sigma agree at A=0,Amax and B=0,1 for all phi,
          impose this for k>0 *)
       Cif == 1,
-        Cinstruction == "i=0;",
+        (* Cinstruction == "i=0;", *)
+        Cinstruction == "for(i=0; i<n1; i=i+n1-1)",
         Cinstruction == "for(j=0; j<n2; j=j+n2-1)",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
           Cif == (k==0),
