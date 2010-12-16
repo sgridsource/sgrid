@@ -183,15 +183,19 @@ FSigma == dSigmaUp[c] dq[c] - beta[c] dq[c],
 
       (* set InnerVolIntZero to zero, impose it at i=j=k=0 *)
       Cif == InnerVolIntZero,
-        Cinstruction == "i=0;  j=0;",
+        Cinstruction == "i=0;  j=0;  k=0;",
+        Cinstruction == "ijk=Index(i,j,k);",
+        FSigma == VolIntSigma,
+      Cif == end,
+
+      (* make sure all Sigma agree at A=0 and B=0,1 for all phi,
+         impose this for k>0 *)
+      Cif == 1,
+        Cinstruction == "i=0;",
         Cinstruction == "for(j=0; j<n2; j=j+n2-1)",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
           Cif == (k==0),
             Sig0 == Sigma, (* Sigma at k=0 *)
-            Cif == (j==0),
-              FSigma == VolIntSigma,
-              (* FSigma == Sigma, *)
-            Cif == end,
           Cif == else,
             FSigma == Sigma - Sig0,
           Cif == end,
@@ -299,22 +303,27 @@ FlSigma  == dlSigmaUp[c] dq[c],
         Cinstruction == "} /* end for k  */",
       Cif == end,
 
-      (* set InnerVolIntZero to zero, impose it at i=j=0 *)
+      (* set InnerVolIntZero to zero, impose it at i=j=k=0 *)
       Cif == InnerVolIntZero,
-        Cinstruction == "i=0;  j=0;",
+        Cinstruction == "i=0;  j=0;  k=0;",
+        Cinstruction == "ijk=Index(i,j,k);",
+          FlSigma == VolIntlSigma,
+      Cif == end,
+
+      (* make sure all Sigma agree at A=0 and B=0,1 for all phi,
+         impose this for k>0 *)
+      Cif == 1,
+        Cinstruction == "i=0;",
         Cinstruction == "for(j=0; j<n2; j=j+n2-1)",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
           Cif == (k==0),
             lSig0 == lSigma,  (* lSigma at k=0 *)
-            Cif == (j==0),
-              FlSigma == VolIntlSigma,
-              (* FlSigma == lSigma, *)
-            Cif == end,
           Cif == else,
             FlSigma == lSigma - lSig0,
           Cif == end,
         Cinstruction == "} /* end for k  */",
       Cif == end,
+
 
     Cif == end, (* end of nonlin/linear case *)
 
