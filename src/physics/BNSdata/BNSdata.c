@@ -2165,6 +2165,11 @@ exit(11);
       smooth_BNSdata_by_Interpolation(grid, n);
     }
 
+    /* enforce uniqueness on axis:
+       set vars equal to val at phi=0 for all phi>0 */
+    if(Getv("BNSdata_uniqueness_on_axis", "yes"))
+      BNS_enforce_uniqueness_on_axis(vlu);
+
     /* if we iterate rest masses */
     if(Getv("BNSdata_iterate_m0", "yes")) adjust_BNSdata_m01_m02();
 
@@ -2283,6 +2288,11 @@ if(0) /* not working */
       adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
     }
 
+    /* enforce uniqueness on axis:
+       set vars equal to val at phi=0 for all phi>0 */
+    if(Getv("BNSdata_uniqueness_on_axis", "yes"))
+      BNS_enforce_uniqueness_on_axis(vlu);
+
     /* compute actual max pos of q and center q if BNSdata_center_new_q
        is not "no": */
     /* set actual positions of maxima */
@@ -2304,6 +2314,12 @@ if(0) /* not working */
         forallpoints(grid->box[b], i)
           if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
       }
+      /* enforce uniqueness on axis:
+         set vars equal to val at phi=0 for all phi>0 */
+      if(Getv("BNSdata_uniqueness_on_axis", "yes"))
+        BNS_enforce_uniqueness_on_axis(vlu);
+
+      /* set actual positions of maxima again */
       set_BNSdata_actual_xyzmax_pars(grid);
 
       /* print new masses */

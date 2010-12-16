@@ -192,6 +192,8 @@ int sgrid_BNSdata()
          "options for 4ABphi_2xyz and AnsorgNS " 
          "[regularity_on_axis,regularity_on_axis_at_interfaces,"
          "regularity_on_axis_at_center]");
-	     	   	   	 
+  AddPar("BNSdata_uniqueness_on_axis", "no",
+         "set vars equal to val at phi=0 for all phi>0 [no,yes]");
+
   return 0;
 }
