@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 14.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 16.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -22,6 +22,7 @@ int corot2 = Getv("BNSdata_rotationstate2","corotation");
 int SigmaZeroAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroAt00");
 int AddInnerVolIntToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
 int SigmaZeroInOuterBoxAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxAt00");
+int SigmaZeroInOuterBoxes = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxes");
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
@@ -1192,6 +1193,49 @@ lSigma[ijk]
 
 
 
+
+/* conditional */
+if ((bi == 1 || bi == 2) && SigmaZeroInOuterBoxes) {
+
+
+
+/* conditional */
+if (nonlin) {
+
+
+forallpoints(box, ijk) { 
+
+FSigma[ijk]
+=
+Sigma[ijk]
+;
+
+
+} /* endfor */ 
+
+
+} else { /* if (!nonlin) */
+
+
+forallpoints(box, ijk) { 
+
+FlSigma[ijk]
+=
+lSigma[ijk]
+;
+
+
+} /* endfor */ 
+
+}
+/* if (nonlin) */
+
+
+}
+/* if (nonlin) */
+
+
+
 /* end all */ 
 
 } /* end of boxes */
@@ -1200,4 +1244,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 90, n* = 380,  n/ = 131,  n+ = 216, n = 727, O = 1 */
+/* nvars = 90, n* = 394,  n/ = 145,  n+ = 216, n = 755, O = 1 */

@@ -124,7 +124,7 @@ int sgrid_BNSdata()
   AddPar("BNSdata_Sigma_surface_BCs", "ZeroAt00",
          "BCs for Sigma on star surfaces "
          "[ZeroAt00,AddInnerVolIntToBC,ZeroInOuterBoxAt00,OnlyOnNormalDeriv,"
-         "none]");
+         "none,ZeroInOuterBoxes]");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "max. number of iterations in BNSdata_solve");

@@ -268,6 +268,21 @@ FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
 
   Cif == end,
 
+
+  (* for testing: set Sigma zero everywhere on outside *)
+  Cif == ( (bi==1 || bi==2) && SigmaZeroInOuterBoxes),
+    Cif == nonlin, (* non-linear case *)
+      Cinstruction == "forallpoints(box, ijk) {",
+        FSigma  == Sigma,  (* set Sigma=0 *)
+      Cinstruction == "} /* endfor */",
+    Cif == else,   (* linear case *)
+      Cinstruction == "forallpoints(box, ijk) {",
+        FlSigma  == lSigma,  (* set Sigma=0 *)
+      Cinstruction == "} /* endfor */",
+    Cif == end,
+  Cif == end,
+
+
   Cinstruction == "/* end all */\n"
 }
 
@@ -316,6 +331,7 @@ BeginCFunction[] := Module[{},
   pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAt00\");\n"];
   pr["int AddInnerVolIntToBC = Getv(\"BNSdata_Sigma_surface_BCs\",\"AddInnerVolIntToBC\");\n"];
   pr["int SigmaZeroInOuterBoxAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxAt00\");\n"];
+  pr["int SigmaZeroInOuterBoxes = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxes\");\n"];
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
