@@ -51,7 +51,7 @@ tocompute = {
   Cif == end,
 
   (* Use Sigma=0 as BC on A=1 if (bi==1 || bi==2) for corot and general cases *)
-  Cif == ( bi==1 || bi==2 ),
+  Cif == ( (bi==1 || bi==2) && 1 ),
     Cif == nonlin, (* non-linear case *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
         FSigma  == Sigma,  (* set Sigma=0 *)
@@ -63,45 +63,47 @@ tocompute = {
     Cif == end,
   Cif == end,
 
-  (* Put the condition that 
-     Sigma(A=0) in box 1/2 equals Sigma(A=0) in box 0/3
-     in FSigma and FlSigma at position with i=1.
-     Note: FSigma and FlSigma at position with i=0 are already set by 
-           set_BNSdata_BCs such that the normal derivs in adjacent boxes
-           are equal. *)
   Cif == ( bi==1 || bi==2 ),
-    Cinstruction == "int    ind, indin, biin, n1in,n2in,n3in;",
-    Cinstruction == "double Sig, Sigin, lSig, lSigin;",
-    Cinstruction == "double *Sigmain;",
-    Cinstruction == "double *lSigmain;",
-    Cinstruction == "if(bi==1) biin=0; else biin=3;",
-    Cinstruction == "n1in = grid->box[biin]->n1;
-                     n2in = grid->box[biin]->n2;
-                     n3in = grid->box[biin]->n3;\n
-                     Sigmain  = grid->box[biin]->v[index_Sigma];
-                     lSigmain = grid->box[biin]->v[index_lSigma];",
-    Cinstruction == "if(n2in!=n2 || n3in!=n3) errorexit(\"we need n2in=n2 and n3in=n3\");",
-    Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
-      Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
-                       indin = Ind_n1n2(0,j,k,n1in,n2in);
-                       Sig   = Sigma[ind];
-                       Sigin = Sigmain[indin];
-                       lSig  = lSigma[ind];
-                       lSigin= lSigmain[indin];",
-      Cif == nonlin, (* non-linear case *)
-        Cif == (SigmaZeroInOuterBoxAtA0B0 && j==0),
-          FSigma  == (Sig-Sigin) + Sig, (* set both Sigmas=0 at A=B=0 *)
-        Cif == else,
-          FSigma  == Sig-Sigin,  (* set Sigmas equal at A=0*)
+    (* Put the condition that 
+       Sigma(A=0) in box 1/2 equals Sigma(A=0) in box 0/3
+       in FSigma and FlSigma at position with i=1.
+       Note: FSigma and FlSigma at position with i=0 are already set by 
+             set_BNSdata_BCs such that the normal derivs in adjacent boxes
+             are equal. *)
+    Cif == 0,
+      Cinstruction == "int    ind, indin, biin, n1in,n2in,n3in;",
+      Cinstruction == "double Sig, Sigin, lSig, lSigin;",
+      Cinstruction == "double *Sigmain;",
+      Cinstruction == "double *lSigmain;",
+      Cinstruction == "if(bi==1) biin=0; else biin=3;",
+      Cinstruction == "n1in = grid->box[biin]->n1;
+                       n2in = grid->box[biin]->n2;
+                       n3in = grid->box[biin]->n3;\n
+                       Sigmain  = grid->box[biin]->v[index_Sigma];
+                       lSigmain = grid->box[biin]->v[index_lSigma];",
+      Cinstruction == "if(n2in!=n2 || n3in!=n3) errorexit(\"we need n2in=n2 and n3in=n3\");",
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
+        Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
+                         indin = Ind_n1n2(0,j,k,n1in,n2in);
+                         Sig   = Sigma[ind];
+                         Sigin = Sigmain[indin];
+                         lSig  = lSigma[ind];
+                         lSigin= lSigmain[indin];",
+        Cif == nonlin, (* non-linear case *)
+          Cif == (SigmaZeroInOuterBoxAtA0B0 && j==0),
+            FSigma  == (Sig-Sigin) + Sig, (* set both Sigmas=0 at A=B=0 *)
+          Cif == else,
+            FSigma  == Sig-Sigin,  (* set Sigmas equal at A=0*)
+          Cif == end,
+        Cif == else,   (* linear case *)
+          Cif == (SigmaZeroInOuterBoxAtA0B0 && j==0),
+            FlSigma  == (lSig-lSigin) + lSig,  (* set both Sigmas=0 at A=B=0 *)
+          Cif == else,
+            FlSigma  == lSig-lSigin,  (* set Sigmas equal at A=0*)
+          Cif == end,
         Cif == end,
-      Cif == else,   (* linear case *)
-        Cif == (SigmaZeroInOuterBoxAtA0B0 && j==0),
-          FlSigma  == (lSig-lSigin) + lSig,  (* set both Sigmas=0 at A=B=0 *)
-        Cif == else,
-          FlSigma  == lSig-lSigin,  (* set Sigmas equal at A=0*)
-        Cif == end,
-      Cif == end,
-    Cinstruction == "} /* end forplane1 */",
+      Cinstruction == "} /* end forplane1 */",
+    Cif == end, 
 
   (* if not b=1 or 2, i.e. bi==0 || bi==3 *)
   Cif == else,
