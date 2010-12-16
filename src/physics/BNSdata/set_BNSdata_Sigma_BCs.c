@@ -21,6 +21,7 @@ int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
 int SigmaZeroAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroAt00");
 int AddInnerVolIntToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
+int InnerVolIntZero = Getv("BNSdata_Sigma_surface_BCs","InnerVolIntZero");
 int SigmaZeroInOuterBoxAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxAt00");
 int SigmaZeroInOuterBoxes = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxes");
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
@@ -251,6 +252,7 @@ double lhuzeroPsi4beta3;
 double lL2;
 double lLnh;
 double lq;
+double lSig0;
 double luzero;
 double luzerosqr;
 double lwB1;
@@ -270,6 +272,7 @@ double Psim6;
 double Psim7;
 double Psim8;
 double Psim9;
+double Sig0;
 double uzero;
 double uzerosqr;
 double w1;
@@ -522,13 +525,16 @@ FirstDerivsOf_S(box, index_Sigma,                                        Ind("BN
 
 
 /* conditional */
-if (AddInnerVolIntToBC) {
+if (AddInnerVolIntToBC || InnerVolIntZero) {
 
 
 VolIntSigma =                                                 
           VolumeIntegral_inBNSgridBox(grid, bi, index_Sigma);
+
+//printf("VolIntSigma=%g\n",VolIntSigma); 
+
 }
-/* if (AddInnerVolIntToBC) */
+/* if (AddInnerVolIntToBC || InnerVolIntZero) */
 
 
 
@@ -755,7 +761,64 @@ Sigma[ijk]
 
 
 
-} else { /* if (!SigmaZeroAtA0B0) */
+
+/* conditional */
+if (InnerVolIntZero) {
+
+
+i=0;  j=0; 
+
+
+for(j=0; j<n2; j=j+n2-1) 
+
+
+for(k=0; k<n3; k++){ ijk=Index(i,j,k); 
+
+
+
+/* conditional */
+if (k == 0) {
+
+Sig0
+=
+Sigma[ijk]
+;
+
+
+
+/* conditional */
+if (j == 0) {
+
+FSigma[ijk]
+=
+VolIntSigma
+;
+
+}
+/* if (j == 0) */
+
+
+
+} else { /* if (!j == 0) */
+
+FSigma[ijk]
+=
+-Sig0 + Sigma[ijk]
+;
+
+}
+/* if (j == 0) */
+
+
+
+} /* end for k  */ 
+
+}
+/* if (j == 0) */
+
+
+
+} else { /* if (!j == 0) */
 
 
 FirstDerivsOf_S(box, index_lSigma, index_dlSigma1); 
@@ -763,13 +826,16 @@ FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);
 
 
 /* conditional */
-if (AddInnerVolIntToBC) {
+if (AddInnerVolIntToBC || InnerVolIntZero) {
 
 
 VolIntlSigma =                                                 
           VolumeIntegral_inBNSgridBox(grid, bi, index_lSigma);
+
+//printf("VolIntlSigma=%g\n",VolIntlSigma); 
+
 }
-/* if (AddInnerVolIntToBC) */
+/* if (AddInnerVolIntToBC || InnerVolIntZero) */
 
 
 
@@ -1184,12 +1250,69 @@ lSigma[ijk]
 /* if (SigmaZeroAtA0B0) */
 
 
+
+
+/* conditional */
+if (InnerVolIntZero) {
+
+
+i=0;  j=0; 
+
+
+for(j=0; j<n2; j=j+n2-1) 
+
+
+for(k=0; k<n3; k++){ ijk=Index(i,j,k); 
+
+
+
+/* conditional */
+if (k == 0) {
+
+lSig0
+=
+lSigma[ijk]
+;
+
+
+
+/* conditional */
+if (j == 0) {
+
+FlSigma[ijk]
+=
+VolIntlSigma
+;
+
 }
-/* if (SigmaZeroAtA0B0) */
+/* if (j == 0) */
+
+
+
+} else { /* if (!j == 0) */
+
+FlSigma[ijk]
+=
+-lSig0 + lSigma[ijk]
+;
+
+}
+/* if (j == 0) */
+
+
+
+} /* end for k  */ 
+
+}
+/* if (j == 0) */
 
 
 }
-/* if (SigmaZeroAtA0B0) */
+/* if (j == 0) */
+
+
+}
+/* if (j == 0) */
 
 
 
@@ -1244,4 +1367,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 90, n* = 394,  n/ = 145,  n+ = 216, n = 755, O = 1 */
+/* nvars = 90, n* = 426,  n/ = 181,  n+ = 228, n = 835, O = 1 */
