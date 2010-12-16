@@ -2255,6 +2255,41 @@ void copy_Var_at_i0_from_Box1_Box2(tGrid *grid, int vind, int b1, int b2)
 }
 
 
+/* enforce uniqueness on axis by copying from phi=0 to all other phi values
+   on the axis */
+void BNS_enforce_uniqueness_on_axis(tVarList *vlu)
+{
+  tGrid *grid = vlu->grid;
+  int b, i;
+  int vind;
+
+  for(vind=0; vind<vlu->n; vind++)
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int i,j,k;
+    double *var  = box->v[vlu->index[vind]];
+ 
+    if(b<=3) 
+    {
+      char str[1000];
+      snprintf(str, 999, "box%d_basis2", b);
+      if(Getv(str, "ChebExtrema"))  /* treat rho=0 case */
+      {
+        /* loop over rho=0 boundary */
+        for(k=1; k<n3; k++)       /* <-- all phi>0 */
+        for(j=0; j<n2; j=j+n2-1)  /* <-- B=0 and B=1 */
+        for(i=0; i<n1; i++)       /* <-- all A */
+          var[Index(i,j,k)] = var[Index(i,j,0)];
+      }
+    }
+  } /* end forallboxes */
+}
+
+
 /* compute weighted average of the new q2 on grid2 and the old q1 on grid1 
    at a point X2,Y2,Z2 in grid2 coords */
 double BNS_update_q_atXYZ(tGrid *grid2, 
