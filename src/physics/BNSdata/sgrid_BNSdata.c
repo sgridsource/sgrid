@@ -190,7 +190,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_2xyz_n", "6", "if 4ABphi_2xyz: use n*n*n points in box4/5");
   AddPar("BNSdata_regularization", "none",
          "options for 4ABphi_2xyz and AnsorgNS " 
-         "[regularity_on_axis,regularity_on_axis_at_center]");
+         "[regularity_on_axis,regularity_on_axis_at_interfaces,"
+         "regularity_on_axis_at_center]");
 	     	   	   	 
   return 0;
 }

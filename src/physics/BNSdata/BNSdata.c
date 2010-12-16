@@ -3442,6 +3442,38 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
           }
         }
         else errorexiti("b=%d should be impossible!", b);
+
+        /* special rho=0 case again at A=0 and A=1 ???  */
+        if( (b==0 || b==1 || b==2 || b==3) && 
+            Getv("BNSdata_regularization",
+                 "regularity_on_axis_at_interfaces") )
+        {
+          char str[1000];
+          snprintf(str, 999, "box%d_basis2", b);
+          if(Getv(str, "ChebExtrema"))  /* treat rho=0 case */
+          {
+            /* loop over rho=0, A=0,1 boundary */
+            for(k=1; k<n3; k++)       /* <-- all phi>0 */
+            for(j=0; j<n2; j=j+n2-1)  /* <-- B=0 and B=1 */
+            for(i=0; i<n1; i=i+n1-1)  /* <-- A=0 and A=1 */
+            {
+              /* do nothing at infinity? */
+              /* if( (b==0 || b==1) && i==n1-1 && j==0) continue; */
+              /* impose u_ijk = u_ij0 (not u_phi_phi=0) */
+              FPsi[Index(i,j,k)] = Psi[Index(i,j,k)]-Psi[Index(i,j,0)];
+            }
+          }
+          /* same as before, but also interpolate to rho=0 ??? How??? */
+          else
+          {
+            /* not sure what to do ... ??? */
+            errorexit("not sure how to do\n"
+            " BNSdata_regularization=regularity_on_axis_at_interfaces\n"
+            "for non ChebExtrema...");
+            /* NOTE: look at "special rho=0 case???" after "4ABphi_2xyz" */
+          }
+        } /* end: special rho=0 case again ??? */
+
       } /* end: else if (Getv("BNSdata_grid", "4ABphi_2xyz")) */
 
     } /* end forallboxes */
