@@ -175,8 +175,8 @@ tocompute = {
         FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
         (* add extra term with wB *)
         FSigma == FSigma + Psim2 wB[c] dq[c],
-        (* add VolAvSigma=0 to BC *)
-        Cif == (AddInnerVolIntToBC || AddInnerSumToBC),
+        (* add VolAvSigma=0 to BC for 0<B<1 *)
+        Cif == ( (AddInnerVolIntToBC || AddInnerSumToBC) ),
           FSigma == FSigma + VolAvSigma,
         Cif == end,
 
@@ -200,7 +200,7 @@ tocompute = {
 
       (* make sure all Sigma agree at A=0,Amax and B=0,1 for all phi,
          impose this for k>0 *)
-      Cif == 1,
+      Cif == UniqueSigmaAtPoles,
         (* Cinstruction == "i=0;", *)
         Cinstruction == "for(i=0; i<n1; i=i+n1-1)",
         Cinstruction == "for(j=0; j<n2; j=j+n2-1)",
@@ -296,7 +296,7 @@ tocompute = {
                              Psim2 wB[c] dlq[c],
 
         (* add VolAvlSigma=0 to BC *)
-        Cif == (AddInnerVolIntToBC || AddInnerSumToBC),
+        Cif == ( (AddInnerVolIntToBC || AddInnerSumToBC) ),
           FlSigma == FlSigma + VolAvlSigma,
         Cif == end,
 
@@ -322,7 +322,7 @@ tocompute = {
 
       (* make sure all Sigma agree at A=0,Amax and B=0,1 for all phi,
          impose this for k>0 *)
-      Cif == 1,
+      Cif == UniqueSigmaAtPoles,
         (* Cinstruction == "i=0;", *)
         Cinstruction == "for(i=0; i<n1; i=i+n1-1)",
         Cinstruction == "for(j=0; j<n2; j=j+n2-1)",
@@ -408,6 +408,7 @@ BeginCFunction[] := Module[{},
   pr["int SigmaZeroInOuterBoxAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxAt00\");\n"];
   pr["int SigmaZeroInOuterBoxes = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxes\");\n"];
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
+  pr["int UniqueSigmaAtPoles = 0; //Getv(\"BNSdata_Sigma_surface_BCs\",\"UniqueSigmaAtPoles\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
