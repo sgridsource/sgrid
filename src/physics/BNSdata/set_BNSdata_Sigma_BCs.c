@@ -213,10 +213,6 @@ int index_BNSdata_qx = Ind("BNSdata_qx");
 double *dq1 = box->v[index_BNSdata_qx + 0];
 double *dq2 = box->v[index_BNSdata_qx + 1];
 double *dq3 = box->v[index_BNSdata_qx + 2];
-int index_BNSdata_temp1 = Ind("BNSdata_temp1");
-double *dSigmadA = box->v[index_BNSdata_temp1 + 0];
-int index_BNSdata_temp2 = Ind("BNSdata_temp2");
-double *dlSigmadA = box->v[index_BNSdata_temp2 + 0];
 int index_BNSdata_temp3 = Ind("BNSdata_temp3");
 double *ddSigmadA2 = box->v[index_BNSdata_temp3 + 0];
 int index_BNSdata_temp4 = Ind("BNSdata_temp4");
@@ -388,32 +384,21 @@ int    ind0, ind0in, biin, n1in,n2in,n3in;
 double Sig, Sigin, lSig, lSigin; 
 
 
-double dSig, dSigin, dlSig, dlSigin; 
-
-
 double *Sigmain; 
-
-
-double *dSigmadAin; 
 
 
 double *lSigmain; 
 
 
-double *dlSigmadAin; 
-
-
 if(bi==1) biin=0; else biin=3; 
 
 
-n1in = grid->box[biin]->n1;                                                 
+n1in = grid->box[biin]->n1;                                          
                      n2in = grid->box[biin]->n2;
                      n3in = grid->box[biin]->n3;
 
                      Sigmain     = grid->box[biin]->v[index_Sigma];
-                     dSigmadAin  = grid->box[biin]->v[index_BNSdata_temp1];
                      lSigmain    = grid->box[biin]->v[index_lSigma];
-                     dlSigmadAin = grid->box[biin]->v[index_BNSdata_temp2];
 if(n2in!=n2 || n3in!=n3) errorexit("we need n2in=n2 and n3in=n3"); 
 
 
@@ -422,20 +407,16 @@ if(n2in!=n2 || n3in!=n3) errorexit("we need n2in=n2 and n3in=n3");
 if (nonlin) {
 
 
-spec_Deriv1(box, 1, Sigma, dSigmadA); 
-
-
-if(bi==1)                                                                   
-                         spec_Deriv1(grid->box[0], 1, Sigmain, dSigmadAin);
-                       else
-                         spec_Deriv1(grid->box[3], 1, Sigmain, dSigmadAin);
 spec_Deriv2(box, 1, Sigma, ddSigmadA2); 
 
 
-for(pln=0; pln<n2-1; pln=pln+n2-1) 
+for(j=0; j<n2-1; j=j+n2-1) 
 
 
-forplane2(i,j,k, n1,n2,n3, pln){ ijk=Index(i,j,k); 
+for(k=0; k<n3; k++) 
+
+
+for(i=1; i<n1; i++){ ijk=Index(i,j,k); 
 
 FSigma[ijk]
 =
@@ -446,7 +427,7 @@ ddSigmadA2[ijk]
 } /* endfor */ 
 
 
-forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k); 
+forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
 
 
 ind0   = Ind_n1n2(0,j,k,n1,n2);                            
@@ -461,38 +442,19 @@ Sig - Sigin
 } /* endfor */ 
 
 
-forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
-
-
-ind0   = Ind_n1n2(0,j,k,n1,n2);                            
-                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
-                       dSig   = dSigmadA[ind0];
-                       dSigin = dSigmadAin[ind0in];FSigma[ijk]
-=
-dSig + dSigin
-;
-
-
-} /* endfor */ 
-
-
 } else { /* if (!nonlin) */
 
 
-spec_Deriv1(box, 1, lSigma, dlSigmadA); 
-
-
-if(bi==1)                                                                     
-                         spec_Deriv1(grid->box[0], 1, lSigmain, dlSigmadAin);
-                       else
-                         spec_Deriv1(grid->box[3], 1, lSigmain, dlSigmadAin);
 spec_Deriv2(box, 1, lSigma, ddlSigmadA2); 
 
 
-for(pln=0; pln<n2-1; pln=pln+n2-1) 
+for(j=0; j<n2-1; j=j+n2-1) 
 
 
-forplane2(i,j,k, n1,n2,n3, pln){ ijk=Index(i,j,k); 
+for(k=0; k<n3; k++) 
+
+
+for(i=1; i<n1; i++){ ijk=Index(i,j,k); 
 
 FlSigma[ijk]
 =
@@ -503,7 +465,7 @@ ddlSigmadA2[ijk]
 } /* endfor */ 
 
 
-forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k); 
+forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
 
 
 ind0   = Ind_n1n2(0,j,k,n1,n2);                            
@@ -512,21 +474,6 @@ ind0   = Ind_n1n2(0,j,k,n1,n2);
                        lSigin = lSigmain[ind0in];FlSigma[ijk]
 =
 lSig - lSigin
-;
-
-
-} /* endfor */ 
-
-
-forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
-
-
-ind0   = Ind_n1n2(0,j,k,n1,n2);                            
-                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
-                       dlSig  = dlSigmadA[ind0];
-                       dlSigin= dlSigmadAin[ind0in];FlSigma[ijk]
-=
-dlSig + dlSigin
 ;
 
 
@@ -1413,4 +1360,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 94, n* = 416,  n/ = 167,  n+ = 252, n = 835, O = 1 */
+/* nvars = 92, n* = 408,  n/ = 163,  n+ = 246, n = 817, O = 1 */
