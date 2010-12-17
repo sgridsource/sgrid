@@ -129,16 +129,17 @@ tocompute = {
       Cinstruction == "FirstDerivsOf_S(box, index_Sigma, \
                                        Ind(\"BNSdata_Sigmax\"));",
       Cif == (AddInnerVolIntToBC || InnerVolIntZero),
-        Cinstruction == "VolIntSigma =
+        Cinstruction == "VolAvSigma =
           VolumeIntegral_inBNSgridBox(grid, bi, index_Sigma);",
-(*
-        Cinstruction == "VolIntSigma = 0.0;",
-        Cinstruction == "forallpoints(box, ijk) {",
-        Cinstruction == "VolIntSigma += Sigma[ijk];",
-        Cinstruction == "} /* endfor */",
-*)
-        Cinstruction == "//printf(\"VolIntSigma=%g\\n\",VolIntSigma);",
       Cif == end,
+
+      Cif == (AddInnerSumToBC || InnerSumZero),
+        Cinstruction == "VolAvSigma = 0.0;",
+        Cinstruction == "forallpoints(box, ijk) {",
+        Cinstruction == "VolAvSigma += Sigma[ijk];",
+        Cinstruction == "} /* endfor */",
+      Cif == end,
+      Cinstruction == "//printf(\"VolAvSigma=%g\\n\",VolAvSigma);",
 
       (* go over A=0 plane *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
@@ -174,9 +175,9 @@ tocompute = {
         FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
         (* add extra term with wB *)
         FSigma == FSigma + Psim2 wB[c] dq[c],
-        (* add VolIntSigma=0 to BC *)
-        Cif == AddInnerVolIntToBC,
-          FSigma == FSigma + VolIntSigma,
+        (* add VolAvSigma=0 to BC *)
+        Cif == (AddInnerVolIntToBC || AddInnerSumToBC),
+          FSigma == FSigma + VolAvSigma,
         Cif == end,
 
       Cinstruction == "} /* end forplane1 */",
@@ -190,11 +191,11 @@ tocompute = {
         Cinstruction == "} /* end for k  */",
       Cif == end,
 
-      (* set InnerVolIntZero to zero, impose it at i=j=k=0 *)
-      Cif == InnerVolIntZero,
+      (* set VolAvSigma to zero, impose it at i=j=k=0 *)
+      Cif == (InnerVolIntZero || InnerSumZero),
         Cinstruction == "i=0;  j=0;  k=0;",
         Cinstruction == "ijk=Index(i,j,k);",
-        FSigma == VolIntSigma,
+        FSigma == VolAvSigma,
       Cif == end,
 
       (* make sure all Sigma agree at A=0,Amax and B=0,1 for all phi,
@@ -217,16 +218,17 @@ tocompute = {
       Cinstruction == "FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);",
 
       Cif == (AddInnerVolIntToBC || InnerVolIntZero),
-        Cinstruction == "VolIntlSigma =
+        Cinstruction == "VolAvlSigma =
           VolumeIntegral_inBNSgridBox(grid, bi, index_lSigma);",
-(*
-        Cinstruction == "VolIntlSigma = 0.0;",
-        Cinstruction == "forallpoints(box, ijk) {",
-        Cinstruction == "VolIntlSigma += lSigma[ijk];",
-        Cinstruction == "} /* endfor */",
-*)
-        Cinstruction == "//printf(\"VolIntlSigma=%g\\n\",VolIntlSigma);",
       Cif == end,
+
+      Cif == (AddInnerSumToBC || InnerSumZero),
+        Cinstruction == "VolAvlSigma = 0.0;",
+        Cinstruction == "forallpoints(box, ijk) {",
+        Cinstruction == "VolAvlSigma += lSigma[ijk];",
+        Cinstruction == "} /* endfor */",
+      Cif == end,
+      Cinstruction == "//printf(\"VolAvlSigma=%g\\n\",VolAvlSigma);",
 
       (* go over A=0 plane *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
@@ -293,9 +295,9 @@ tocompute = {
         FlSigma == FlSigma + Psim2 lwB[c] dq[c] - 2 Psim3 lPsi wB[c] dq[c] +
                              Psim2 wB[c] dlq[c],
 
-        (* add VolIntlSigma=0 to BC *)
-        Cif == AddInnerVolIntToBC,
-          FlSigma == FlSigma + VolIntlSigma,
+        (* add VolAvlSigma=0 to BC *)
+        Cif == (AddInnerVolIntToBC || AddInnerSumToBC),
+          FlSigma == FlSigma + VolAvlSigma,
         Cif == end,
 
       Cinstruction == "} /* end forplane1 */",
@@ -311,11 +313,11 @@ tocompute = {
         Cinstruction == "} /* end for k  */",
       Cif == end,
 
-      (* set InnerVolIntZero to zero, impose it at i=j=k=0 *)
-      Cif == InnerVolIntZero,
+      (* set VolAvSigma to zero, impose it at i=j=k=0 *)
+      Cif == (InnerVolIntZero || InnerSumZero),
         Cinstruction == "i=0;  j=0;  k=0;",
         Cinstruction == "ijk=Index(i,j,k);",
-          FlSigma == VolIntlSigma,
+          FlSigma == VolAvlSigma,
       Cif == end,
 
       (* make sure all Sigma agree at A=0,Amax and B=0,1 for all phi,
@@ -401,6 +403,8 @@ BeginCFunction[] := Module[{},
   pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAt00\");\n"];
   pr["int AddInnerVolIntToBC = Getv(\"BNSdata_Sigma_surface_BCs\",\"AddInnerVolIntToBC\");\n"];
   pr["int InnerVolIntZero = Getv(\"BNSdata_Sigma_surface_BCs\",\"InnerVolIntZero\");\n"];
+  pr["int AddInnerSumToBC = Getv(\"BNSdata_Sigma_surface_BCs\",\"AddInnerSumToBC\");\n"];
+  pr["int InnerSumZero = Getv(\"BNSdata_Sigma_surface_BCs\",\"InnerSumZero\");\n"];
   pr["int SigmaZeroInOuterBoxAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxAt00\");\n"];
   pr["int SigmaZeroInOuterBoxes = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxes\");\n"];
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
@@ -408,7 +412,7 @@ BeginCFunction[] := Module[{},
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
   pr["double xCM = Getd(\"BNSdata_x_CM\");\n"];
-  pr["double VolIntSigma, VolIntlSigma;\n"];
+  pr["double VolAvSigma, VolAvlSigma;\n"];
   pr["\n"];
 
   pr["tGrid *grid = vlu->grid;\n"];

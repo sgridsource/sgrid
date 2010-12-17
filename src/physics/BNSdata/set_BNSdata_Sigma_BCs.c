@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 16.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 17.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -22,6 +22,8 @@ int corot2 = Getv("BNSdata_rotationstate2","corotation");
 int SigmaZeroAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroAt00");
 int AddInnerVolIntToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
 int InnerVolIntZero = Getv("BNSdata_Sigma_surface_BCs","InnerVolIntZero");
+int AddInnerSumToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerSumToBC");
+int InnerSumZero = Getv("BNSdata_Sigma_surface_BCs","InnerSumZero");
 int SigmaZeroInOuterBoxAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxAt00");
 int SigmaZeroInOuterBoxes = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxes");
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
@@ -29,7 +31,7 @@ double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
 double xCM = Getd("BNSdata_x_CM");
-double VolIntSigma, VolIntlSigma;
+double VolAvSigma, VolAvlSigma;
 
 tGrid *grid = vlu->grid;
 int bi;
@@ -509,14 +511,35 @@ FirstDerivsOf_S(box, index_Sigma,                                        Ind("BN
 if (AddInnerVolIntToBC || InnerVolIntZero) {
 
 
-VolIntSigma =                                                 
+VolAvSigma =                                                  
           VolumeIntegral_inBNSgridBox(grid, bi, index_Sigma);
-
-//printf("VolIntSigma=%g\n",VolIntSigma); 
-
 }
 /* if (AddInnerVolIntToBC || InnerVolIntZero) */
 
+
+
+
+/* conditional */
+if (AddInnerSumToBC || InnerSumZero) {
+
+
+VolAvSigma = 0.0; 
+
+
+forallpoints(box, ijk) { 
+
+
+VolAvSigma += Sigma[ijk]; 
+
+
+} /* endfor */ 
+
+}
+/* if (AddInnerSumToBC || InnerSumZero) */
+
+
+
+//printf("VolAvSigma=%g\n",VolAvSigma); 
 
 
 forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k); 
@@ -704,15 +727,15 @@ FSigma[ijk] + Psim2*(dq1[ijk]*wB1[ijk] + dq2[ijk]*wB2[ijk] +
 
 
 /* conditional */
-if (AddInnerVolIntToBC) {
+if (AddInnerVolIntToBC || AddInnerSumToBC) {
 
 FSigma[ijk]
 =
-VolIntSigma + FSigma[ijk]
+VolAvSigma + FSigma[ijk]
 ;
 
 }
-/* if (AddInnerVolIntToBC) */
+/* if (AddInnerVolIntToBC || AddInnerSumToBC) */
 
 
 
@@ -744,7 +767,7 @@ Sigma[ijk]
 
 
 /* conditional */
-if (InnerVolIntZero) {
+if (InnerVolIntZero || InnerSumZero) {
 
 
 i=0;  j=0;  k=0; 
@@ -754,11 +777,11 @@ ijk=Index(i,j,k);
 
 FSigma[ijk]
 =
-VolIntSigma
+VolAvSigma
 ;
 
 }
-/* if (InnerVolIntZero) */
+/* if (InnerVolIntZero || InnerSumZero) */
 
 
 
@@ -816,14 +839,35 @@ FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);
 if (AddInnerVolIntToBC || InnerVolIntZero) {
 
 
-VolIntlSigma =                                                 
+VolAvlSigma =                                                  
           VolumeIntegral_inBNSgridBox(grid, bi, index_lSigma);
-
-//printf("VolIntlSigma=%g\n",VolIntlSigma); 
-
 }
 /* if (AddInnerVolIntToBC || InnerVolIntZero) */
 
+
+
+
+/* conditional */
+if (AddInnerSumToBC || InnerSumZero) {
+
+
+VolAvlSigma = 0.0; 
+
+
+forallpoints(box, ijk) { 
+
+
+VolAvlSigma += lSigma[ijk]; 
+
+
+} /* endfor */ 
+
+}
+/* if (AddInnerSumToBC || InnerSumZero) */
+
+
+
+//printf("VolAvlSigma=%g\n",VolAvlSigma); 
 
 
 forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k); 
@@ -1200,15 +1244,15 @@ FlSigma[ijk] + Psim2*(lwB1*dq1[ijk] + lwB2*dq2[ijk] + lwB3*dq3[ijk] +
 
 
 /* conditional */
-if (AddInnerVolIntToBC) {
+if (AddInnerVolIntToBC || AddInnerSumToBC) {
 
 FlSigma[ijk]
 =
-VolIntlSigma + FlSigma[ijk]
+VolAvlSigma + FlSigma[ijk]
 ;
 
 }
-/* if (AddInnerVolIntToBC) */
+/* if (AddInnerVolIntToBC || AddInnerSumToBC) */
 
 
 
@@ -1240,7 +1284,7 @@ lSigma[ijk]
 
 
 /* conditional */
-if (InnerVolIntZero) {
+if (InnerVolIntZero || InnerSumZero) {
 
 
 i=0;  j=0;  k=0; 
@@ -1250,11 +1294,11 @@ ijk=Index(i,j,k);
 
 FlSigma[ijk]
 =
-VolIntlSigma
+VolAvlSigma
 ;
 
 }
-/* if (InnerVolIntZero) */
+/* if (InnerVolIntZero || InnerSumZero) */
 
 
 
@@ -1360,4 +1404,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 92, n* = 408,  n/ = 163,  n+ = 246, n = 817, O = 1 */
+/* nvars = 92, n* = 420,  n/ = 175,  n+ = 248, n = 843, O = 1 */
