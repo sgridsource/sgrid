@@ -10,7 +10,8 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
 	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
-             q, wB[a], dq[a], x, y}
+             q, wB[a], dq[a], x, y,
+             dSigmadA,dlSigmadA, ddSigmadA2,ddlSigmadA2}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -50,63 +51,106 @@ tocompute = {
     Cinstruction == "continue; /* for corot we are done with this box */",
   Cif == end,
 
-  (* Use Sigma=0 as BC on A=1 if (bi==1 || bi==2) for corot and general cases *)
-  Cif == ( (bi==1 || bi==2) && 1 ),
-    Cif == nonlin, (* non-linear case *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
-        FSigma  == Sigma,  (* set Sigma=0 *)
-      Cinstruction == "} /* end forplane1 */",
-    Cif == else,   (* linear case *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, n1-1){ ijk=Index(i,j,k);",
-        FlSigma  == lSigma,  (* set Sigma=0 *)
-      Cinstruction == "} /* end forplane1 */",
-    Cif == end,
-  Cif == end,
+  (**********************)
+  (* Start general case *)
+  (**********************)
 
-  Cif == ( bi==1 || bi==2 ),
-    (* Put the condition that 
-       Sigma(A=0) in box 1/2 equals Sigma(A=0) in box 0/3
-       in FSigma and FlSigma at position with i=1.
-       Note: FSigma and FlSigma at position with i=0 are already set by 
-             set_BNSdata_BCs such that the normal derivs in adjacent boxes
-             are equal. *)
-    Cif == 0,
-      Cinstruction == "int    ind, indin, biin, n1in,n2in,n3in;",
-      Cinstruction == "double Sig, Sigin, lSig, lSigin;",
-      Cinstruction == "double *Sigmain;",
-      Cinstruction == "double *lSigmain;",
-      Cinstruction == "if(bi==1) biin=0; else biin=3;",
-      Cinstruction == "n1in = grid->box[biin]->n1;
-                       n2in = grid->box[biin]->n2;
-                       n3in = grid->box[biin]->n3;\n
-                       Sigmain  = grid->box[biin]->v[index_Sigma];
-                       lSigmain = grid->box[biin]->v[index_lSigma];",
-      Cinstruction == "if(n2in!=n2 || n3in!=n3) errorexit(\"we need n2in=n2 and n3in=n3\");",
+  (* in box 1 or 2 for general case *)
+  Cif == ( (bi==1 || bi==2) && 1 ),
+
+    Cinstruction == "int    ind0, ind0in, biin, n1in,n2in,n3in;",
+    Cinstruction == "double Sig, Sigin, lSig, lSigin;",
+    Cinstruction == "double dSig, dSigin, dlSig, dlSigin;",
+    Cinstruction == "double *Sigmain;",
+    Cinstruction == "double *dSigmadAin;",
+    Cinstruction == "double *lSigmain;",
+    Cinstruction == "double *dlSigmadAin;",
+    Cinstruction == "if(bi==1) biin=0; else biin=3;",
+    Cinstruction == "n1in = grid->box[biin]->n1;
+                     n2in = grid->box[biin]->n2;
+                     n3in = grid->box[biin]->n3;\n
+                     Sigmain     = grid->box[biin]->v[index_Sigma];
+                     dSigmadAin  = grid->box[biin]->v[index_BNSdata_temp1];
+                     lSigmain    = grid->box[biin]->v[index_lSigma];
+                     dlSigmadAin = grid->box[biin]->v[index_BNSdata_temp2];",
+    Cinstruction == "if(n2in!=n2 || n3in!=n3) errorexit(\"we need n2in=n2 and n3in=n3\");",
+
+    Cif == nonlin, (* non-linear case *)
+ 
+     (* take derivs needed *)
+      Cinstruction == "spec_Deriv1(box, 1, Sigma, dSigmadA);",
+      Cinstruction == "if(bi==1) 
+                         spec_Deriv1(grid->box[0], 1, Sigmain, dSigmadAin);
+                       else
+                         spec_Deriv1(grid->box[3], 1, Sigmain, dSigmadAin);",
+      Cinstruction == "spec_Deriv2(box, 1, Sigma, ddSigmadA2);",
+
+      (* loop over axis and set EOM again, in case it's been overwritten *)
+      Cinstruction == "for(pln=0; pln<n2-1; pln=pln+n2-1)",
+      Cinstruction == "forplane2(i,j,k, n1,n2,n3, pln){ ijk=Index(i,j,k);",
+        FSigma == ddSigmadA2,
+      Cinstruction == "} /* endfor */",
+
+      (* set Sigma's equal at star surfaces *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+      Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
+                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
+                       Sig    = Sigma[ind0];
+                       Sigin  = Sigmain[ind0in];",
+        FSigma == Sig - Sigin,
+      Cinstruction == "} /* endfor */",
+
+      (* set d/dA of Sigma's equal at star surfaces, impose it at i=1 *)
+      (* a -1 is needed because d/dA_in = -d/dA_out *)
       Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
-        Cinstruction == "ind   = Ind_n1n2(0,j,k,n1,n2);
-                         indin = Ind_n1n2(0,j,k,n1in,n2in);
-                         Sig   = Sigma[ind];
-                         Sigin = Sigmain[indin];
-                         lSig  = lSigma[ind];
-                         lSigin= lSigmain[indin];",
-        Cif == nonlin, (* non-linear case *)
-          Cif == (SigmaZeroInOuterBoxAtA0B0 && j==0),
-            FSigma  == (Sig-Sigin) + Sig, (* set both Sigmas=0 at A=B=0 *)
-          Cif == else,
-            FSigma  == Sig-Sigin,  (* set Sigmas equal at A=0*)
-          Cif == end,
-        Cif == else,   (* linear case *)
-          Cif == (SigmaZeroInOuterBoxAtA0B0 && j==0),
-            FlSigma  == (lSig-lSigin) + lSig,  (* set both Sigmas=0 at A=B=0 *)
-          Cif == else,
-            FlSigma  == lSig-lSigin,  (* set Sigmas equal at A=0*)
-          Cif == end,
-        Cif == end,
-      Cinstruction == "} /* end forplane1 */",
-    Cif == end, 
+      Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
+                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
+                       dSig   = dSigmadA[ind0];
+                       dSigin = dSigmadAin[ind0in];",
+        FSigma == dSig - dSigin * (-1),
+      Cinstruction == "} /* endfor */",
+
+    Cif == else,   (* linear case *)
+      (* take derivs needed *)
+      Cinstruction == "spec_Deriv1(box, 1, lSigma, dlSigmadA);",
+      Cinstruction == "if(bi==1) 
+                         spec_Deriv1(grid->box[0], 1, lSigmain, dlSigmadAin);
+                       else
+                         spec_Deriv1(grid->box[3], 1, lSigmain, dlSigmadAin);",
+      Cinstruction == "spec_Deriv2(box, 1, lSigma, ddlSigmadA2);",
+
+      (* loop over axis and set EOM again, in case it's been overwritten *)
+      Cinstruction == "for(pln=0; pln<n2-1; pln=pln+n2-1)",
+      Cinstruction == "forplane2(i,j,k, n1,n2,n3, pln){ ijk=Index(i,j,k);",
+        FlSigma == ddlSigmadA2,
+      Cinstruction == "} /* endfor */",
+
+      (* set Sigma's equal at star surfaces *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+      Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
+                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
+                       lSig   = lSigma[ind0];
+                       lSigin = lSigmain[ind0in];",
+        FlSigma == lSig - lSigin,
+      Cinstruction == "} /* endfor */",
+
+      (* set d/dA of Sigma's equal at star surfaces. impose it a i=1 *)
+      (* a -1 is needed because d/dA_in = -d/dA_out *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
+      Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
+                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
+                       dlSig  = dlSigmadA[ind0];
+                       dlSigin= dlSigmadAin[ind0in];",
+        FlSigma == dlSig - dlSigin * (-1),
+      Cinstruction == "} /* endfor */",
+
+    Cif == end, (* end linear case *)
+
+  Cif == end, (* end box 1 or 2 *)
+
 
   (* if not b=1 or 2, i.e. bi==0 || bi==3 *)
-  Cif == else,
+  Cif == ( bi==0 || bi==3 ),
     (* if we get here bi=0 or 3 and there is no corot in this box *)
     Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
 			                 Ind(\"BNSdata_qx\"));",
@@ -160,18 +204,11 @@ tocompute = {
         FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
         (* add extra term with wB *)
         FSigma == FSigma + Psim2 wB[c] dq[c],
-(*
-FSigma == Sigma - 10,
-FSigma == dSigmaUp[c] dq[c] - 100 dq2,
-FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
-*)
         (* add VolIntSigma=0 to BC *)
         Cif == AddInnerVolIntToBC,
           FSigma == FSigma + VolIntSigma,
         Cif == end,
-(* TEST
-FSigma == dSigmaUp[c] dq[c] - beta[c] dq[c],
-*)
+
       Cinstruction == "} /* end forplane1 */",
 
       (* set Sigma to zero at A=0, B=0 (one point at xout1/2) *)
@@ -290,9 +327,7 @@ FSigma == dSigmaUp[c] dq[c] - beta[c] dq[c],
         Cif == AddInnerVolIntToBC,
           FlSigma == FlSigma + VolIntlSigma,
         Cif == end,
-(* TEST
-FlSigma  == dlSigmaUp[c] dq[c],
-*)
+
       Cinstruction == "} /* end forplane1 */",
 
       (* set Sigma to zero at A=0, B=0 (one point at xout1/2) *)
@@ -421,7 +456,7 @@ BeginCFunction[] := Module[{},
   pr["int n1 = box->n1;\n"];
   pr["int n2 = box->n2;\n"];
   pr["int n3 = box->n3;\n"];
-  pr["int i,j,k;\n\n"];
+  pr["int i,j,k, pln;\n\n"];
 
   pr["\n"];
   pr["\n"];
@@ -453,6 +488,11 @@ variabledeclarations[] := Module[{},
   prdecvarname[{q},       "BNSdata_q"];
   prdecvarname[{wB[a]},   "BNSdata_wBx"];
   prdecvarname[{dq[a]},   "BNSdata_qx"];
+
+  prdecvarname[{dSigmadA},   "BNSdata_temp1"];
+  prdecvarname[{dlSigmadA},  "BNSdata_temp2"];
+  prdecvarname[{ddSigmadA2},   "BNSdata_temp3"];
+  prdecvarname[{ddlSigmadA2},  "BNSdata_temp4"];
 
   pr["\n"];
 ];    

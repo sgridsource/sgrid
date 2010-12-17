@@ -12,7 +12,7 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
 	     g[a,b], alpha, beta[a], K[a,b], 
-             q, wB[a], dq[a], dwB[a,b], VR[a], x, y}
+             q, wB[a], dq[a], dwB[a,b], VR[a], x, y, ddSigmadA2,ddlSigmadA2}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -28,6 +28,7 @@ tocompute = {
 			Ind(\"BNSdata_alphaPx\"), Ind(\"BNSdata_alphaPxx\"));",
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_Sigma, \
 			Ind(\"BNSdata_Sigmax\"), Ind(\"BNSdata_Sigmaxx\"));",
+    Cinstruction == "spec_Deriv2(box, 1, Sigma, ddSigmadA2);",
   Cif == else,
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_lPsi, \ 
 					index_dlPsi1, index_ddlPsi11);",
@@ -37,6 +38,7 @@ tocompute = {
 					index_dlalphaP1, index_ddlalphaP11);",
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_lSigma, \
 					index_dlSigma1, index_ddlSigma11);",
+    Cinstruction == "spec_Deriv2(box, 1, lSigma, ddlSigmadA2);",
   Cif == end,
 
   Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BNSdata_wBx\"), \
@@ -200,9 +202,10 @@ tocompute = {
                   Psim2 (wB[c] drho0PLUSrho0dLnalphaoh[c] + rho0 divwB) -
                   h uzero Psi4 (rho0 divbeta +
                                 beta[c] drho0PLUSrho0dLnalphaPsi6uz[c]),
-       Cif == else, (* outside stars *)
-         FSigma == delta[b,c] ddSigma[b,c],
-       Cif == end,
+      Cif == else, (* outside stars *)
+        (* FSigma == delta[b,c] ddSigma[b,c], *)
+        FSigma == ddSigmadA2,
+      Cif == end,
 
     Cif == end, (* END: corot/general case *)
 
@@ -442,7 +445,8 @@ FlSigma == rho0 delta[b,c] ddlSigma[b,c] +
            h uzero Psi4 beta[c] (ldLnuzero[c]),
 *)
       Cif == else, (* outside stars *)
-        FlSigma == delta[b,c] ddlSigma[b,c],
+        (* FlSigma == delta[b,c] ddlSigma[b,c], *)
+        FlSigma == ddlSigmadA2,
       Cif == end,
 
     Cif == end, (* END: corot/general case *)
@@ -558,6 +562,9 @@ variabledeclarations[] := Module[{},
   prdecvarname[{dq[a]},   "BNSdata_qx"];
   prdecvarname[{dwB[a,b]},"BNSdata_wBxx"];
   prdecvarname[{VR[a]},   "BNSdata_VRx"];
+
+  prdecvarname[{ddSigmadA2},   "BNSdata_temp3"];
+  prdecvarname[{ddlSigmadA2},  "BNSdata_temp4"];
 
   pr["\n"];
 ];    

@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 10.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 16.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -275,6 +275,10 @@ int index_BNSdata_VRx = Ind("BNSdata_VRx");
 double *VR1 = box->v[index_BNSdata_VRx + 0];
 double *VR2 = box->v[index_BNSdata_VRx + 1];
 double *VR3 = box->v[index_BNSdata_VRx + 2];
+int index_BNSdata_temp3 = Ind("BNSdata_temp3");
+double *ddSigmadA2 = box->v[index_BNSdata_temp3 + 0];
+int index_BNSdata_temp4 = Ind("BNSdata_temp4");
+double *ddlSigmadA2 = box->v[index_BNSdata_temp4 + 0];
 
 
 double alpha2;
@@ -548,6 +552,9 @@ FirstAndSecondDerivsOf_S(box, index_alphaP, 			Ind("BNSdata_alphaPx"), Ind("BNSd
 FirstAndSecondDerivsOf_S(box, index_Sigma, 			Ind("BNSdata_Sigmax"), Ind("BNSdata_Sigmaxx")); 
 
 
+spec_Deriv2(box, 1, Sigma, ddSigmadA2); 
+
+
 } else { /* if (!nonlin) */
 
 
@@ -561,6 +568,9 @@ FirstAndSecondDerivsOf_S(box, index_lalphaP, 					index_dlalphaP1, index_ddlalph
 
 
 FirstAndSecondDerivsOf_S(box, index_lSigma, 					index_dlSigma1, index_ddlSigma11); 
+
+
+spec_Deriv2(box, 1, lSigma, ddlSigmadA2); 
 
 }
 /* if (nonlin) */
@@ -1395,7 +1405,7 @@ drho0PLUSrho0dLnalphaPsi2oh1*dSigmaUp1 +
 
 FSigma[ijk]
 =
-ddSigma11[ijk] + ddSigma22[ijk] + ddSigma33[ijk]
+ddSigmadA2[ijk]
 ;
 
 }
@@ -2316,7 +2326,7 @@ dlSigmaUp1*drho0PLUSrho0dLnalphaPsi2oh1 +
 
 FlSigma[ijk]
 =
-ddlSigma11[ijk] + ddlSigma22[ijk] + ddlSigma33[ijk]
+ddlSigmadA2[ijk]
 ;
 
 }
@@ -2340,4 +2350,4 @@ ddlSigma11[ijk] + ddlSigma22[ijk] + ddlSigma33[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 169, n* = 1284,  n/ = 188,  n+ = 1021, n = 2493, O = 1 */
+/* nvars = 171, n* = 1286,  n/ = 188,  n+ = 1021, n = 2495, O = 1 */
