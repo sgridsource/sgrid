@@ -2146,9 +2146,11 @@ exit(11);
       /* solve the ell. eqn for Sigma alone */
       BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+/*
 grid->time  = -777; 
 write_grid(grid);
 exit(77);
+*/
       /* now solve the coupled CTS ell. eqns one after an other */
       BNS_ordered_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
                                linear_solver, 1);
