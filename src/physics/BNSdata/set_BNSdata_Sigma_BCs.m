@@ -86,13 +86,16 @@ tocompute = {
       Cinstruction == "spec_Deriv2(box, 1, Sigma, ddSigmadA2);",
 
       (* loop over axis and set EOM again, in case it's been overwritten *)
-      Cinstruction == "for(pln=0; pln<n2-1; pln=pln+n2-1)",
-      Cinstruction == "forplane2(i,j,k, n1,n2,n3, pln){ ijk=Index(i,j,k);",
+      (* BUT do not touch A=0 where we might like the BC from
+         set_BNSdata_BCs *)
+      Cinstruction == "for(j=0; j<n2-1; j=j+n2-1)",
+      Cinstruction == "for(k=0; k<n3; k++)",
+      Cinstruction == "for(i=1; i<n1; i++){ ijk=Index(i,j,k);",
         FSigma == ddSigmadA2,
       Cinstruction == "} /* endfor */",
 
-      (* set Sigma's equal at star surfaces *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+      (* set Sigma's equal at star surfaces, impose it at i=1 *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
       Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
                        ind0in = Ind_n1n2(0,j,k,n1in,n2in);
                        Sig    = Sigma[ind0];
@@ -100,15 +103,15 @@ tocompute = {
         FSigma == Sig - Sigin,
       Cinstruction == "} /* endfor */",
 
-      (* set d/dA of Sigma's equal at star surfaces, impose it at i=1 *)
+      (* set d/dA of Sigma's equal at star surfaces, impose it at i=0 *)
       (* a -1 is needed because d/dA_in = -d/dA_out *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
+      Cinstruction == "/* forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
       Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
                        ind0in = Ind_n1n2(0,j,k,n1in,n2in);
                        dSig   = dSigmadA[ind0];
                        dSigin = dSigmadAin[ind0in];",
         FSigma == dSig - dSigin * (-1),
-      Cinstruction == "} /* endfor */",
+      Cinstruction == "} */ /* endfor */",
 
     Cif == else,   (* linear case *)
       (* take derivs needed *)
@@ -120,13 +123,16 @@ tocompute = {
       Cinstruction == "spec_Deriv2(box, 1, lSigma, ddlSigmadA2);",
 
       (* loop over axis and set EOM again, in case it's been overwritten *)
-      Cinstruction == "for(pln=0; pln<n2-1; pln=pln+n2-1)",
-      Cinstruction == "forplane2(i,j,k, n1,n2,n3, pln){ ijk=Index(i,j,k);",
+      (* BUT do not touch A=0 where we might like the BC from
+         set_BNSdata_BCs *)
+      Cinstruction == "for(j=0; j<n2-1; j=j+n2-1)",
+      Cinstruction == "for(k=0; k<n3; k++)",
+      Cinstruction == "for(i=1; i<n1; i++){ ijk=Index(i,j,k);",
         FlSigma == ddlSigmadA2,
       Cinstruction == "} /* endfor */",
 
-      (* set Sigma's equal at star surfaces *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
+      (* set Sigma's equal at star surfaces, impose it at i=1 *)
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
       Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
                        ind0in = Ind_n1n2(0,j,k,n1in,n2in);
                        lSig   = lSigma[ind0];
@@ -134,15 +140,15 @@ tocompute = {
         FlSigma == lSig - lSigin,
       Cinstruction == "} /* endfor */",
 
-      (* set d/dA of Sigma's equal at star surfaces. impose it a i=1 *)
+      (* set d/dA of Sigma's equal at star surfaces, impose it a i=0 *)
       (* a -1 is needed because d/dA_in = -d/dA_out *)
-      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k);",
+      Cinstruction == "/* forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
       Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
                        ind0in = Ind_n1n2(0,j,k,n1in,n2in);
                        dlSig  = dlSigmadA[ind0];
                        dlSigin= dlSigmadAin[ind0in];",
         FlSigma == dlSig - dlSigin * (-1),
-      Cinstruction == "} /* endfor */",
+      Cinstruction == "} */  /* endfor */",
 
     Cif == end, (* end linear case *)
 
