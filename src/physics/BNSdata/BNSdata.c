@@ -2690,12 +2690,18 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
     double PsiFarLimit = VarFarLimit(vlu->index[vind])*nonlin;
     int BCs_atInf = 1;
     int BCs_box1_2 = 1;
+    int BCs_AxisAtOuterInterfaces = 1;
     //int BCs_box0_1 = 1;
     //int BCs_box3_2 = 1;
     char *varname = VarName(vlu->index[vind]);
 
     if(strstr(varname, "BNSdata_Sigma"))
-    { BCs_atInf = 0; BCs_box1_2 = 0;  /* printf("varname=%s\n", varname); */ }
+    { 
+      BCs_atInf = 0;
+      BCs_box1_2 = 0;
+      BCs_AxisAtOuterInterfaces = 0;
+      /* printf("varname=%s\n", varname); */
+    }
 
     forallboxes(grid, b)
     {
@@ -3460,7 +3466,8 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
         else errorexiti("b=%d should be impossible!", b);
 
         /* special rho=0 case again at A=0 and A=1 ???  */
-        if( (b==0 || b==1 || b==2 || b==3) && 
+        if( ( (b==0 || b==3) || 
+              (b==1 || b==2) && BCs_AxisAtOuterInterfaces ) && 
             Getv("BNSdata_regularization",
                  "regularity_on_axis_at_interfaces") )
         {
