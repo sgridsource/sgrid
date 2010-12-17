@@ -5,7 +5,7 @@ OBJS := sgrid_$(NAME).o BNSdata.o BNS_CTS.o setADMvars.o TOVstar.o \
 	BNSgrid.o BNS_compute_new_q.o BNS_compute_new_q_atXYZ.o \
  	BNS_set_restmassintegrand.o BNS_set_J_ADM_VolInt_integrand.o \
 	BNS_set_M_ADM_VolInt_integrand.o BNS_Interpolate_ADMvars.o \
-	set_BNSdata_Sigma_BCs.o
+	set_BNSdata_Sigma_BCs.o BNS_BCs.o
 
 include $(TOP)/Makefile.subdirs
 

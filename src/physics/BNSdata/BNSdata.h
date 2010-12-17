@@ -81,3 +81,6 @@ void BNSgrid_set_allVars_onLeft_equalmasses(tGrid *grid);
 
 /* from BNS_Interpolate_ADMvars.c */
 int BNS_Interpolate_ADMvars(tGrid *grid);
+
+/* from BNS_BCs.c */
+void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);

@@ -27,6 +27,7 @@ int InnerSumZero = Getv("BNSdata_Sigma_surface_BCs","InnerSumZero");
 int SigmaZeroInOuterBoxAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxAt00");
 int SigmaZeroInOuterBoxes = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxes");
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
+int UniqueSigmaAtPoles = 0; //Getv("BNSdata_Sigma_surface_BCs","UniqueSigmaAtPoles");
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
@@ -787,7 +788,7 @@ VolAvSigma
 
 
 /* conditional */
-if (1) {
+if (UniqueSigmaAtPoles) {
 
 
 for(i=0; i<n1; i=i+n1-1) 
@@ -1304,7 +1305,7 @@ VolAvlSigma
 
 
 /* conditional */
-if (1) {
+if (UniqueSigmaAtPoles) {
 
 
 for(i=0; i<n1; i=i+n1-1) 
@@ -1404,4 +1405,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 92, n* = 420,  n/ = 175,  n+ = 248, n = 843, O = 1 */
+/* nvars = 92, n* = 420,  n/ = 177,  n+ = 248, n = 845, O = 1 */

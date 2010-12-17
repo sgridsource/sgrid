@@ -40,7 +40,6 @@ tVarList *vldu, *vlJdu, *vlduDerivs;
 
 
 /* functions in this file */
-void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);
 void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
                             double x, double y, double z);
 void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
@@ -200,7 +199,36 @@ int BNSdata_startup(tGrid *grid)
   double ysh1;
 
   printf("Initializing BNSdata:\n");
-
+/*
+{
+double A,B, x,y,z, Xp,Rp;
+int dom;
+for(A=0; A<=1; A++)
+for(B=0; B<=1; B++)
+for(dom=0; dom<=3; dom++)
+{
+xyz_of_AnsorgNS(grid->box[dom], -1, dom, A,B,1, &x,&y,&z, &Xp,&Rp);
+printf("dom=%d (A,B)=(%g,%g): (x,y,z)=(%g,%.9e,%.9e)\n"
+       "                      (Xp,Rp)=(%.9e,%.9e)\n\n", dom,A,B, x,y,z, Xp,Rp);
+}
+printf("================================\n");
+printf("\n");
+for(dom=0; dom<=3; dom++)
+{
+for(A=0; A<=1; A+=0.5)
+for(B=0; B<=1; B+=0.5)
+{
+xyz_of_AnsorgNS(grid->box[dom], -1, dom, A,B,1, &x,&y,&z, &Xp,&Rp);
+printf("dom=%d (A,B)=(%g,%g): (x,y,z)=(%g,%.9e,%.9e)\n"
+       "                      (Xp,Rp)=(%.9e,%.9e)\n\n", dom,A,B, x,y,z, Xp,Rp);
+}
+printf("\n");
+}
+grid->time  = -777; 
+write_grid(grid);
+exit(77);
+}
+*/
   /* set boundary information: farlimit, falloff, propagation speed */
   VarNameSetBoundaryInfo("BNSdata_Psi",   1, 1, 1.0);
   VarNameSetBoundaryInfo("BNSdata_Bx",    0, 1, 1.0);
@@ -2118,6 +2146,9 @@ exit(11);
       /* solve the ell. eqn for Sigma alone */
       BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+grid->time  = -777; 
+write_grid(grid);
+exit(77);
       /* now solve the coupled CTS ell. eqns one after an other */
       BNS_ordered_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
                                linear_solver, 1);
@@ -2669,7 +2700,7 @@ void J_oneComp(tVarList *vlJdw, tVarList *vldw,
 /* NOTE: this works only for a varlist made up of scalars!!!
          because to compute the varlist index of the derivs we
          use stuff like vind*9 */
-void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
+void set_BNSdata_BCs_old(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin)
 {
   tGrid *grid = vlu->grid;
   int b;
