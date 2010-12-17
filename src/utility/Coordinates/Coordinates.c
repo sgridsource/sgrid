@@ -1956,6 +1956,10 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
         B*cos((1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin((1.0-Ap)*ArgCp_1phi);
+
+    /* special cases in domain0 */
+    if(B  == 0.0) R = 0.0;
+    if(Ap == 1.0) { X = 1.0;   R = 0.0; }
   }
   if(domain==1 || domain==2) /* use Eq. (22) */
   {
@@ -1973,6 +1977,10 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
         B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
+
+    /* special cases in domain1/2 */
+    if(B  == 0.0) { if(domain==1) R = 0.0;  else X = 0.0; }
+    /* if(Ap == 1.0) { R = X = B/sqrt(2.0); } */ /* <--more exact without this!!! */
   }
   if(domain==3) /* use Eq. (23) */
   {
@@ -1990,6 +1998,10 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
         B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
+
+    /* special cases in domain3 */
+    if(B  == 0.0) X = 0.0;
+    if(Ap == 1.0) { X = 0.0;   R = 1.0; }
   }
 
   /* set Xp and Rp to X,R */
@@ -2237,6 +2249,10 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
         B*cos((1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin((1.0-Ap)*ArgCp_1phi);
+
+    /* special cases in domain0 */
+    if(B  == 0.0) R = 0.0;
+    if(Ap == 1.0) { X = 1.0;   R = 0.0; }
   }
 
   if(domain==1 || domain==2) /* use Eq. (22) */
@@ -2376,6 +2392,10 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
         B*cos(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIq*Ap + (1.0-Ap)*ArgCp_1phi);
+
+    /* special cases in domain1/2 */
+    if(B  == 0.0) { if(domain==1) R = 0.0;  else X = 0.0; }
+    /* if(Ap == 1.0) { R = X = B/sqrt(2.0); } */ /* <--more exact without this!!! */
   }
   if(domain==3) /* use Eq. (23) */
   {
@@ -2494,6 +2514,10 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
         B*cos(PIh*Ap + (1.0-Ap)*ArgCp_1phi);
     R = (1.0-Ap)*(ImCp_Bphi - B*ImCp_1phi) + 
         B*sin(PIh*Ap + (1.0-Ap)*ArgCp_1phi) + Ap*(1.0-B);
+
+    /* special cases in domain3 */
+    if(B  == 0.0) X = 0.0;
+    if(Ap == 1.0) { X = 0.0;   R = 1.0; }
   }
 
 
