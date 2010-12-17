@@ -10,8 +10,7 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
 	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
-             q, wB[a], dq[a], x, y,
-             dSigmadA,dlSigmadA, ddSigmadA2,ddlSigmadA2}
+             q, wB[a], dq[a], x, y, ddSigmadA2,ddlSigmadA2}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -60,29 +59,19 @@ tocompute = {
 
     Cinstruction == "int    ind0, ind0in, biin, n1in,n2in,n3in;",
     Cinstruction == "double Sig, Sigin, lSig, lSigin;",
-    Cinstruction == "double dSig, dSigin, dlSig, dlSigin;",
     Cinstruction == "double *Sigmain;",
-    Cinstruction == "double *dSigmadAin;",
     Cinstruction == "double *lSigmain;",
-    Cinstruction == "double *dlSigmadAin;",
     Cinstruction == "if(bi==1) biin=0; else biin=3;",
     Cinstruction == "n1in = grid->box[biin]->n1;
                      n2in = grid->box[biin]->n2;
                      n3in = grid->box[biin]->n3;\n
                      Sigmain     = grid->box[biin]->v[index_Sigma];
-                     dSigmadAin  = grid->box[biin]->v[index_BNSdata_temp1];
-                     lSigmain    = grid->box[biin]->v[index_lSigma];
-                     dlSigmadAin = grid->box[biin]->v[index_BNSdata_temp2];",
+                     lSigmain    = grid->box[biin]->v[index_lSigma];",
     Cinstruction == "if(n2in!=n2 || n3in!=n3) errorexit(\"we need n2in=n2 and n3in=n3\");",
 
     Cif == nonlin, (* non-linear case *)
  
      (* take derivs needed *)
-      Cinstruction == "spec_Deriv1(box, 1, Sigma, dSigmadA);",
-      Cinstruction == "if(bi==1) 
-                         spec_Deriv1(grid->box[0], 1, Sigmain, dSigmadAin);
-                       else
-                         spec_Deriv1(grid->box[3], 1, Sigmain, dSigmadAin);",
       Cinstruction == "spec_Deriv2(box, 1, Sigma, ddSigmadA2);",
 
       (* loop over axis and set EOM again, in case it's been overwritten *)
@@ -103,23 +92,8 @@ tocompute = {
         FSigma == Sig - Sigin,
       Cinstruction == "} /* endfor */",
 
-      (* set d/dA of Sigma's equal at star surfaces, impose it at i=0 *)
-      (* a -1 is needed because d/dA_in = -d/dA_out *)
-      Cinstruction == "/* forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
-      Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
-                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
-                       dSig   = dSigmadA[ind0];
-                       dSigin = dSigmadAin[ind0in];",
-        FSigma == dSig - dSigin * (-1),
-      Cinstruction == "} */ /* endfor */",
-
     Cif == else,   (* linear case *)
       (* take derivs needed *)
-      Cinstruction == "spec_Deriv1(box, 1, lSigma, dlSigmadA);",
-      Cinstruction == "if(bi==1) 
-                         spec_Deriv1(grid->box[0], 1, lSigmain, dlSigmadAin);
-                       else
-                         spec_Deriv1(grid->box[3], 1, lSigmain, dlSigmadAin);",
       Cinstruction == "spec_Deriv2(box, 1, lSigma, ddlSigmadA2);",
 
       (* loop over axis and set EOM again, in case it's been overwritten *)
@@ -139,16 +113,6 @@ tocompute = {
                        lSigin = lSigmain[ind0in];",
         FlSigma == lSig - lSigin,
       Cinstruction == "} /* endfor */",
-
-      (* set d/dA of Sigma's equal at star surfaces, impose it a i=0 *)
-      (* a -1 is needed because d/dA_in = -d/dA_out *)
-      Cinstruction == "/* forplane1(i,j,k, n1,n2,n3, 0){ ijk=Index(i,j,k);",
-      Cinstruction == "ind0   = Ind_n1n2(0,j,k,n1,n2);
-                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
-                       dlSig  = dlSigmadA[ind0];
-                       dlSigin= dlSigmadAin[ind0in];",
-        FlSigma == dlSig - dlSigin * (-1),
-      Cinstruction == "} */  /* endfor */",
 
     Cif == end, (* end linear case *)
 
@@ -495,8 +459,8 @@ variabledeclarations[] := Module[{},
   prdecvarname[{wB[a]},   "BNSdata_wBx"];
   prdecvarname[{dq[a]},   "BNSdata_qx"];
 
-  prdecvarname[{dSigmadA},   "BNSdata_temp1"];
-  prdecvarname[{dlSigmadA},  "BNSdata_temp2"];
+  (* prdecvarname[{dSigmadA},   "BNSdata_temp1"];
+     prdecvarname[{dlSigmadA},  "BNSdata_temp2"]; *)
   prdecvarname[{ddSigmadA2},   "BNSdata_temp3"];
   prdecvarname[{ddlSigmadA2},  "BNSdata_temp4"];
 
