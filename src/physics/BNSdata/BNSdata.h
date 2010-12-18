@@ -84,3 +84,5 @@ int BNS_Interpolate_ADMvars(tGrid *grid);
 
 /* from BNS_BCs.c */
 void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);
+void BNSdata_RegularityConditions_for_Var_at_rho_eq_0(tBox *box, double *FPsi,
+                        double *Psi, double *Psix, double *Psiy, double *Psiz);

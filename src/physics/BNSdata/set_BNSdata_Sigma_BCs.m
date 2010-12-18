@@ -182,6 +182,17 @@ tocompute = {
 
       Cinstruction == "} /* end forplane1 */",
 
+      (* The physical BC above does not work on axis, because 
+         d/dy and d/dz are ill defined *)
+      (* Impose regularity on the entire axis in this box instead *)
+      Cif == RegularityOnAxis,
+        Cinstruction == "
+        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 which 
+	   also contain A-derivs of Sigma and lSigma for box1/2 */
+        BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FSigma,
+                        Sigma, dSigma1,dSigma2,dSigma3);",
+      Cif == end,
+
       (* set Sigma to zero at A=0, B=0 (one point at xout1/2) *)
       Cif == SigmaZeroAtA0B0,
         Cinstruction == "i=0;  j=0;",
@@ -302,6 +313,17 @@ tocompute = {
 
       Cinstruction == "} /* end forplane1 */",
 
+      (* The physical BC above does not work on axis, because 
+         d/dy and d/dz are ill defined *)
+      (* Impose regularity on the entire axis in this box instead *)
+      Cif == RegularityOnAxis,
+        Cinstruction == "
+        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 which 
+	   also contain A-derivs of Sigma and lSigma for box1/2 */
+        BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FlSigma,
+                        lSigma, dlSigma1,dlSigma2,dlSigma3);",
+      Cif == end,
+
       (* set Sigma to zero at A=0, B=0 (one point at xout1/2) *)
       Cif == SigmaZeroAtA0B0,
         Cinstruction == "i=0;  j=0;",
@@ -400,6 +422,7 @@ BeginCFunction[] := Module[{},
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
+  pr["int RegularityOnAxis = Getv(\"BNSdata_Sigma_surface_BCs\",\"RegularityOnAxis\");\n"];
   pr["int SigmaZeroAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAt00\");\n"];
   pr["int AddInnerVolIntToBC = Getv(\"BNSdata_Sigma_surface_BCs\",\"AddInnerVolIntToBC\");\n"];
   pr["int InnerVolIntZero = Getv(\"BNSdata_Sigma_surface_BCs\",\"InnerVolIntZero\");\n"];

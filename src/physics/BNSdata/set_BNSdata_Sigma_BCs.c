@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 17.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 18.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -19,6 +19,7 @@ void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
+int RegularityOnAxis = Getv("BNSdata_Sigma_surface_BCs","RegularityOnAxis");
 int SigmaZeroAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroAt00");
 int AddInnerVolIntToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
 int InnerVolIntZero = Getv("BNSdata_Sigma_surface_BCs","InnerVolIntZero");
@@ -745,6 +746,20 @@ VolAvSigma + FSigma[ijk]
 
 
 /* conditional */
+if (RegularityOnAxis) {
+
+
+                                                                       
+        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 which 
+	   also contain A-derivs of Sigma and lSigma for box1/2 */
+        BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FSigma,
+                        Sigma, dSigma1,dSigma2,dSigma3);}
+/* if (RegularityOnAxis) */
+
+
+
+
+/* conditional */
 if (SigmaZeroAtA0B0) {
 
 
@@ -1262,6 +1277,20 @@ VolAvlSigma + FlSigma[ijk]
 
 
 /* conditional */
+if (RegularityOnAxis) {
+
+
+                                                                       
+        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 which 
+	   also contain A-derivs of Sigma and lSigma for box1/2 */
+        BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FlSigma,
+                        lSigma, dlSigma1,dlSigma2,dlSigma3);}
+/* if (RegularityOnAxis) */
+
+
+
+
+/* conditional */
 if (SigmaZeroAtA0B0) {
 
 
@@ -1405,4 +1434,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 92, n* = 420,  n/ = 177,  n+ = 248, n = 845, O = 1 */
+/* nvars = 92, n* = 432,  n/ = 197,  n+ = 250, n = 879, O = 1 */

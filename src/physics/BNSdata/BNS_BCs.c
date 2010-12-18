@@ -9,10 +9,7 @@
 
 
 /* functions in this file */
-void BNSdata_RegularityConditions_for_Var_at_rho_eq_0(tBox *box, double *FPsi,
-                        double *Psi, double *Psix, double *Psiy, double *Psiz);
-
-
+/* ... */
 
 
 /* standard BCs for all fields */
