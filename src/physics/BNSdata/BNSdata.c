@@ -1949,6 +1949,7 @@ int BNSdata_solve(tGrid *grid)
   double esw          = Getd("BNSdata_esw");
   double esw1         = Getd("BNSdata_esw1");
   int    allow_esw1_it= Geti("BNSdata_allow_esw1_first_at");
+  double Sigma_esw    = Getd("BNSdata_Sigma_esw");
   int    Newton_itmax = itmax;
   double NewtTolFac   = Getd("BNSdata_Newton_tolFac");
   double Newton_tol   = tol*NewtTolFac;
@@ -2106,6 +2107,7 @@ exit(11);
       esw          = Getd("BNSdata_esw");
       esw1         = Getd("BNSdata_esw1");
       allow_esw1_it= Geti("BNSdata_allow_esw1_first_at");
+      Sigma_esw    = Getd("BNSdata_Sigma_esw");
       Newton_itmax = itmax;
       NewtTolFac   = Getd("BNSdata_Newton_tolFac");
       linSolver_itmax  = Geti("BNSdata_linSolver_itmax");
@@ -2146,6 +2148,9 @@ exit(11);
       /* solve the ell. eqn for Sigma alone */
       BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+      totalerr1 = average_current_and_old(Sigma_esw, 
+                                          grid,vlFu,vlu,vluDerivs, vlJdu);
+      varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
 /*
 grid->time  = -777; 
 write_grid(grid);
