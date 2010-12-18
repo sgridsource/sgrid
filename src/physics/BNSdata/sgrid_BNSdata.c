@@ -123,7 +123,7 @@ int sgrid_BNSdata()
   }
   AddPar("BNSdata_Sigma_surface_BCs", "ZeroAtPoint",
          "BCs for Sigma on star surfaces "
-         "[ZeroAtPoint,AddInnerVolIntToBC,ZeroInOuterBoxAt00,"
+         "[ZeroAtPoint,AddInnerVolIntToBC,ZeroInOuterBoxAt00,AtA0B0,AtA0B1"
          "none,ZeroInOuterBoxes,InnerVolIntZero,AddInnerSumToBC,InnerSumZero,"
          "RegularityOnAxis]");
   AddPar("BNSdata_useDD", "no",

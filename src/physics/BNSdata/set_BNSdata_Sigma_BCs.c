@@ -21,6 +21,8 @@ int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
 int RegularityOnAxis = Getv("BNSdata_Sigma_surface_BCs","RegularityOnAxis");
 int SigmaZeroAtPoint = Getv("BNSdata_Sigma_surface_BCs","ZeroAtPoint");
+int AtA0B0 = Getv("BNSdata_Sigma_surface_BCs","AtA0B0");
+int AtA0B1 = Getv("BNSdata_Sigma_surface_BCs","AtA0B1");
 int AddInnerVolIntToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
 int InnerVolIntZero = Getv("BNSdata_Sigma_surface_BCs","InnerVolIntZero");
 int AddInnerSumToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerSumToBC");
@@ -763,7 +765,7 @@ if (RegularityOnAxis) {
 if (SigmaZeroAtPoint) {
 
 
-i=0;  j=0; 
+i=0;  if(AtA0B0) j=0; else j=n2-1; 
 
 
 for(k=0; k<n3; k++){ ijk=Index(i,j,k); 
@@ -786,7 +788,7 @@ Sigma[ijk]
 if (InnerVolIntZero || InnerSumZero) {
 
 
-i=0;  j=0;  k=0; 
+i=0;  k=0;  if(AtA0B0) j=0; else j=n2-1; 
 
 
 ijk=Index(i,j,k); 
@@ -1294,7 +1296,7 @@ if (RegularityOnAxis) {
 if (SigmaZeroAtPoint) {
 
 
-i=0;  j=0; 
+i=0;  if(AtA0B0) j=0; else j=n2-1; 
 
 
 for(k=0; k<n3; k++){ ijk=Index(i,j,k); 
@@ -1317,7 +1319,7 @@ lSigma[ijk]
 if (InnerVolIntZero || InnerSumZero) {
 
 
-i=0;  j=0;  k=0; 
+i=0;  k=0;  if(AtA0B0) j=0; else j=n2-1; 
 
 
 ijk=Index(i,j,k); 
@@ -1434,4 +1436,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 92, n* = 432,  n/ = 197,  n+ = 250, n = 879, O = 1 */
+/* nvars = 92, n* = 432,  n/ = 197,  n+ = 254, n = 883, O = 1 */

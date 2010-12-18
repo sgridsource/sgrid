@@ -195,16 +195,16 @@ tocompute = {
 
       (* set Sigma to zero at A=0, B=0 (one point at xout1/2) *)
       Cif == SigmaZeroAtPoint,
-        Cinstruction == "i=0;  j=0;",
+        Cinstruction == "i=0;  if(AtA0B0) j=0; else j=n2-1;",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
           (* FSigma == FSigma^2 + Sigma^2, *)
           FSigma == Sigma,
         Cinstruction == "} /* end for k  */",
       Cif == end,
 
-      (* set VolAvSigma to zero, impose it at i=j=k=0 *)
+      (* set VolAvSigma to zero, impose it at i=k=0 and B=0 or 1 *)
       Cif == (InnerVolIntZero || InnerSumZero),
-        Cinstruction == "i=0;  j=0;  k=0;",
+        Cinstruction == "i=0;  k=0;  if(AtA0B0) j=0; else j=n2-1;",
         Cinstruction == "ijk=Index(i,j,k);",
         FSigma == VolAvSigma,
       Cif == end,
@@ -326,7 +326,7 @@ tocompute = {
 
       (* set Sigma to zero at A=0, B=0 (one point at xout1/2) *)
       Cif == SigmaZeroAtPoint,
-        Cinstruction == "i=0;  j=0;",
+        Cinstruction == "i=0;  if(AtA0B0) j=0; else j=n2-1;",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
           (* FSig == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
              FSig == FSig + Psim2 wB[c] dq[c],
@@ -335,9 +335,9 @@ tocompute = {
         Cinstruction == "} /* end for k  */",
       Cif == end,
 
-      (* set VolAvSigma to zero, impose it at i=j=k=0 *)
+      (* set VolAvSigma to zero, impose it at i=k=0 and B=0 or 1 *)
       Cif == (InnerVolIntZero || InnerSumZero),
-        Cinstruction == "i=0;  j=0;  k=0;",
+        Cinstruction == "i=0;  k=0;  if(AtA0B0) j=0; else j=n2-1;",
         Cinstruction == "ijk=Index(i,j,k);",
           FlSigma == VolAvlSigma,
       Cif == end,
@@ -424,6 +424,8 @@ BeginCFunction[] := Module[{},
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
   pr["int RegularityOnAxis = Getv(\"BNSdata_Sigma_surface_BCs\",\"RegularityOnAxis\");\n"];
   pr["int SigmaZeroAtPoint = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAtPoint\");\n"];
+  pr["int AtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"AtA0B0\");\n"];
+  pr["int AtA0B1 = Getv(\"BNSdata_Sigma_surface_BCs\",\"AtA0B1\");\n"];
   pr["int AddInnerVolIntToBC = Getv(\"BNSdata_Sigma_surface_BCs\",\"AddInnerVolIntToBC\");\n"];
   pr["int InnerVolIntZero = Getv(\"BNSdata_Sigma_surface_BCs\",\"InnerVolIntZero\");\n"];
   pr["int AddInnerSumToBC = Getv(\"BNSdata_Sigma_surface_BCs\",\"AddInnerSumToBC\");\n"];
