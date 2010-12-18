@@ -1877,16 +1877,17 @@ void adjust_BNSdata_m01_m02(void)
   printf("    BNSdata_desired_m01=%.13g BNSdata_desired_m01=%.13g\n", tm01, tm02);
 }
 
-/* compute weighted average of current and old values,
+
+/* compute weighted average of current and old, but keep q,
    and return total error */
-double average_current_and_old(double weight, tGrid *grid,
-                               tVarList *vlFu, tVarList *vlu,
-                               tVarList *vluDerivs, tVarList *vlJdu)
+double average_current_and_old_BUT_keep_q(double weight, tGrid *grid,
+                                          tVarList *vlFu, tVarList *vlu,
+                                          tVarList *vluDerivs, tVarList *vlJdu)
 {
   double tm01 = Getd("BNSdata_m01");
   double tm02 = Getd("BNSdata_m02");
   double m01, m02;
-  double normresnonlin, L2qdiff, dm01, dm02, m0err, error;
+  double normresnonlin, dm01, dm02, m0err, error;
 
   /* if we iterate over the rest masses the true mass goals are different */
   if(Getv("BNSdata_iterate_m0", "yes"))
@@ -1919,6 +1920,25 @@ double average_current_and_old(double weight, tGrid *grid,
   printf("average_current_and_old:  weight=%g\n", weight);
   printf(" => m01=%.19g m02=%.19g\n", m01, m02);
 
+  /* compute total error */
+  error = normresnonlin + m0err;
+  printf(" => residual=%.4e m0err=%.3e => error=%.4e\n",
+         normresnonlin, m0err, error);
+
+  return error;
+}
+
+/* compute weighted average of current and old values,
+   and return total error */
+double average_current_and_old(double weight, tGrid *grid,
+                               tVarList *vlFu, tVarList *vlu,
+                               tVarList *vluDerivs, tVarList *vlJdu)
+{
+  double errsum1, L2qdiff, totalerror;
+
+  /* get error due to residual and masses */ 
+  errsum1 = average_current_and_old_BUT_keep_q(weight, grid,   
+                                               vlFu, vlu, vluDerivs, vlJdu);
   /* compute error in q */
   varcopy(grid, Ind("BNSdata_temp2"), Ind("BNSdata_q")); /* set temp2 = qold */
   BNS_compute_new_centered_q(grid);
@@ -1932,11 +1952,11 @@ double average_current_and_old(double weight, tGrid *grid,
             varBoxL2Norm(grid->box[5], Ind("BNSdata_temp1"));
   
   /* compute total error */
-  error = normresnonlin + L2qdiff + m0err;
-  printf(" => residual=%.4e L2qdiff=%.4e m0err=%.3e => error=%.4e\n",
-         normresnonlin, L2qdiff, m0err, error);
+  totalerror = errsum1 + L2qdiff;
+  printf(" => residual+m0err=%.4e L2qdiff=%.4e => totalerror=%.4e\n",
+         errsum1, L2qdiff, totalerror);
 
-  return error;
+  return totalerror;
 }
 
 
@@ -2148,8 +2168,8 @@ exit(11);
       /* solve the ell. eqn for Sigma alone */
       BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
-      totalerr1 = average_current_and_old(Sigma_esw, 
-                                          grid,vlFu,vlu,vluDerivs, vlJdu);
+      totalerr1 = average_current_and_old_BUT_keep_q(Sigma_esw, grid, 
+                                                     vlFu,vlu,vluDerivs, vlJdu);
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
 /*
 grid->time  = -777; 
