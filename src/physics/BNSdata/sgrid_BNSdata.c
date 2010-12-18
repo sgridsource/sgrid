@@ -121,9 +121,9 @@ int sgrid_BNSdata()
     AddPar("BNSdata_adjustdomain01", "yes", "if we adjust domainshapes "
            "after shift [yes,no]");
   }
-  AddPar("BNSdata_Sigma_surface_BCs", "ZeroAt00",
+  AddPar("BNSdata_Sigma_surface_BCs", "ZeroAtPoint",
          "BCs for Sigma on star surfaces "
-         "[ZeroAt00,AddInnerVolIntToBC,ZeroInOuterBoxAt00,OnlyOnNormalDeriv,"
+         "[ZeroAtPoint,AddInnerVolIntToBC,ZeroInOuterBoxAt00,"
          "none,ZeroInOuterBoxes,InnerVolIntZero,AddInnerSumToBC,InnerSumZero,"
          "RegularityOnAxis]");
   AddPar("BNSdata_useDD", "no",
