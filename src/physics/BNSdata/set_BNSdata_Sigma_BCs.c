@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 18.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 19.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -219,10 +219,10 @@ int index_BNSdata_qx = Ind("BNSdata_qx");
 double *dq1 = box->v[index_BNSdata_qx + 0];
 double *dq2 = box->v[index_BNSdata_qx + 1];
 double *dq3 = box->v[index_BNSdata_qx + 2];
-int index_BNSdata_temp3 = Ind("BNSdata_temp3");
-double *ddSigmadA2 = box->v[index_BNSdata_temp3 + 0];
-int index_BNSdata_temp4 = Ind("BNSdata_temp4");
-double *ddlSigmadA2 = box->v[index_BNSdata_temp4 + 0];
+int index_BNSdata_SigmaXX = Ind("BNSdata_SigmaXX");
+double *ddSigmadA2 = box->v[index_BNSdata_SigmaXX + 0];
+int index_BNSdata_lSigmaXX = Ind("BNSdata_lSigmaXX");
+double *ddlSigmadA2 = box->v[index_BNSdata_lSigmaXX + 0];
 
 
 double alpha;
@@ -751,9 +751,8 @@ VolAvSigma + FSigma[ijk]
 if (RegularityOnAxis) {
 
 
-                                                                       
-        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 which 
-	   also contain A-derivs of Sigma and lSigma for box1/2 */
+                                                                      
+        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 */ 
         BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FSigma,
                         Sigma, dSigma1,dSigma2,dSigma3);}
 /* if (RegularityOnAxis) */
@@ -1283,8 +1282,7 @@ if (RegularityOnAxis) {
 
 
                                                                        
-        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 which 
-	   also contain A-derivs of Sigma and lSigma for box1/2 */
+        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 */
         BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FlSigma,
                         lSigma, dlSigma1,dlSigma2,dlSigma3);}
 /* if (RegularityOnAxis) */
@@ -1436,4 +1434,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 92, n* = 432,  n/ = 197,  n+ = 254, n = 883, O = 1 */
+/* nvars = 92, n* = 432,  n/ = 195,  n+ = 252, n = 879, O = 1 */

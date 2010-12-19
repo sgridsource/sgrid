@@ -187,8 +187,7 @@ tocompute = {
       (* Impose regularity on the entire axis in this box instead *)
       Cif == RegularityOnAxis,
         Cinstruction == "
-        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 which 
-	   also contain A-derivs of Sigma and lSigma for box1/2 */
+        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 */ 
         BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FSigma,
                         Sigma, dSigma1,dSigma2,dSigma3);",
       Cif == end,
@@ -318,8 +317,7 @@ tocompute = {
       (* Impose regularity on the entire axis in this box instead *)
       Cif == RegularityOnAxis,
         Cinstruction == "
-        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 which 
-	   also contain A-derivs of Sigma and lSigma for box1/2 */
+        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 */
         BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FlSigma,
                         lSigma, dlSigma1,dlSigma2,dlSigma3);",
       Cif == end,
@@ -491,8 +489,8 @@ variabledeclarations[] := Module[{},
 
   (* prdecvarname[{dSigmadA},   "BNSdata_temp1"];
      prdecvarname[{dlSigmadA},  "BNSdata_temp2"]; *)
-  prdecvarname[{ddSigmadA2},   "BNSdata_temp3"];
-  prdecvarname[{ddlSigmadA2},  "BNSdata_temp4"];
+  prdecvarname[{ddSigmadA2},   "BNSdata_SigmaXX"];
+  prdecvarname[{ddlSigmadA2},  "BNSdata_lSigmaXX"];
 
   pr["\n"];
 ];    

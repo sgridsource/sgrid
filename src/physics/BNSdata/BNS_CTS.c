@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 16.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 19.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -275,10 +275,10 @@ int index_BNSdata_VRx = Ind("BNSdata_VRx");
 double *VR1 = box->v[index_BNSdata_VRx + 0];
 double *VR2 = box->v[index_BNSdata_VRx + 1];
 double *VR3 = box->v[index_BNSdata_VRx + 2];
-int index_BNSdata_temp3 = Ind("BNSdata_temp3");
-double *ddSigmadA2 = box->v[index_BNSdata_temp3 + 0];
-int index_BNSdata_temp4 = Ind("BNSdata_temp4");
-double *ddlSigmadA2 = box->v[index_BNSdata_temp4 + 0];
+int index_BNSdata_SigmaXX = Ind("BNSdata_SigmaXX");
+double *ddSigmadA2 = box->v[index_BNSdata_SigmaXX + 0];
+int index_BNSdata_lSigmaXX = Ind("BNSdata_lSigmaXX");
+double *ddlSigmadA2 = box->v[index_BNSdata_lSigmaXX + 0];
 
 
 double alpha2;

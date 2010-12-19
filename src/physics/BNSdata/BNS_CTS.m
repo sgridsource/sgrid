@@ -563,8 +563,8 @@ variabledeclarations[] := Module[{},
   prdecvarname[{dwB[a,b]},"BNSdata_wBxx"];
   prdecvarname[{VR[a]},   "BNSdata_VRx"];
 
-  prdecvarname[{ddSigmadA2},   "BNSdata_temp3"];
-  prdecvarname[{ddlSigmadA2},  "BNSdata_temp4"];
+  prdecvarname[{ddSigmadA2},   "BNSdata_SigmaXX"];
+  prdecvarname[{ddlSigmadA2},  "BNSdata_lSigmaXX"];
 
   pr["\n"];
 ];    

@@ -250,6 +250,8 @@ exit(77);
   enablevar(grid, Ind("BNSdata_Sigma"));
   enablevar(grid, Ind("BNSdata_Sigmax"));
   enablevar(grid, Ind("BNSdata_Sigmaxx"));
+  enablevar(grid, Ind("BNSdata_SigmaXX"));
+  enablevar(grid, Ind("BNSdata_lSigmaXX"));
   enablevar(grid, Ind("BNSdata_wBx"));
   enablevar(grid, Ind("BNSdata_q"));
   enablevar(grid, Ind("BNSdata_wBxx"));
