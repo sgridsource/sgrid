@@ -32,8 +32,10 @@ int sgrid_BNSdata()
   AddVar("BNSdata_Sigma",   "",     "Sigma is potential for irrot. part of h*u^i");
   AddVar("BNSdata_Sigma",   "i",    "1st deriv of Sigma");
   AddVar("BNSdata_Sigma",   "(ij)", "2nd deriv of Sigma");
+  AddVar("BNSdata_SigmaX",    "",     "1st A-deriv of Sigma");
   AddVar("BNSdata_SigmaXX",   "",     "2nd A-deriv of Sigma");
   AddVar("BNSdata_SigmaXXX",  "",     "3rd A-deriv of Sigma");
+  AddVar("BNSdata_lSigmaX",   "",     "1st A-deriv of Sigma");
   AddVar("BNSdata_lSigmaXX",  "",     "2nd A-deriv of linearized Sigma");
   AddVar("BNSdata_lSigmaXXX", "",     "3rd A-deriv of linearized Sigma");
 

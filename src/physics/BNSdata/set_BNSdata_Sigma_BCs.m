@@ -10,7 +10,7 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP, FSigma,
 	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
-             q, wB[a], dq[a], x, y, z, 
+             q, wB[a], dq[a], x, y, z, dSigmadA,dlSigmadA,
              ddSigmadA2,ddlSigmadA2, dddSigmadA3,dddlSigmadA3,
              dSigmain[a], dlSigmain[a], ddSigmain[a,b], ddlSigmain[a,b]}
 
@@ -100,6 +100,7 @@ tocompute = {
      (* take derivs needed *)
       Cinstruction == "spec_Deriv2(box, 1, Sigma, ddSigmadA2);",
       Cinstruction == "spec_Deriv1(box, 1, ddSigmadA2, dddSigmadA3);",
+      Cinstruction == "spec_Deriv1(box, 1, Sigma, dSigmadA);",
 
       (* loop over axis and set EOM again, in case it's been overwritten *)
       (* BUT do not touch A=0 where we might like the BC from
@@ -107,7 +108,7 @@ tocompute = {
       Cinstruction == "for(j=0; j<n2-1; j=j+n2-1)",
       Cinstruction == "for(k=0; k<n3; k++)",
       Cinstruction == "for(i=1; i<n1; i++){ ijk=Index(i,j,k);",
-        FSigma == dddSigmadA3 + ddSigmadA2,
+        FSigma == dddSigmadA3 + 2 ddSigmadA2 + dSigmadA,
       Cinstruction == "} /* endfor */",
 
       (* set Sigma's equal at star surfaces, impose it at i=1 *)
@@ -165,6 +166,7 @@ tocompute = {
       (* take derivs needed *)
       Cinstruction == "spec_Deriv2(box, 1, lSigma, ddlSigmadA2);",
       Cinstruction == "spec_Deriv1(box, 1, ddlSigmadA2, dddlSigmadA3);",
+      Cinstruction == "spec_Deriv1(box, 1, lSigma, dlSigmadA);",
 
       (* loop over axis and set EOM again, in case it's been overwritten *)
       (* BUT do not touch A=0 where we might like the BC from
@@ -172,7 +174,7 @@ tocompute = {
       Cinstruction == "for(j=0; j<n2-1; j=j+n2-1)",
       Cinstruction == "for(k=0; k<n3; k++)",
       Cinstruction == "for(i=1; i<n1; i++){ ijk=Index(i,j,k);",
-        FlSigma == dddlSigmadA3 + ddlSigmadA2,
+        FlSigma == dddlSigmadA3 + 2 ddlSigmadA2 + dlSigmadA,
       Cinstruction == "} /* endfor */",
 
       (* set Sigma's equal at star surfaces, impose it at i=1 *)
@@ -606,10 +608,10 @@ variabledeclarations[] := Module[{},
   prdecvarname[{wB[a]},   "BNSdata_wBx"];
   prdecvarname[{dq[a]},   "BNSdata_qx"];
 
-  (* prdecvarname[{dSigmadA},   "BNSdata_temp1"];
-     prdecvarname[{dlSigmadA},  "BNSdata_temp2"]; *)
+  prdecvarname[{dSigmadA},     "BNSdata_SigmaX"];
   prdecvarname[{ddSigmadA2},   "BNSdata_SigmaXX"];
   prdecvarname[{dddSigmadA3},  "BNSdata_SigmaXXX"];
+  prdecvarname[{dlSigmadA},    "BNSdata_lSigmaX"];
   prdecvarname[{ddlSigmadA2},  "BNSdata_lSigmaXX"];
   prdecvarname[{dddlSigmadA3}, "BNSdata_lSigmaXXX"];
 

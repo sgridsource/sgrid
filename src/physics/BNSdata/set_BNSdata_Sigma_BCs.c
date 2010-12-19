@@ -231,10 +231,14 @@ int index_BNSdata_qx = Ind("BNSdata_qx");
 double *dq1 = box->v[index_BNSdata_qx + 0];
 double *dq2 = box->v[index_BNSdata_qx + 1];
 double *dq3 = box->v[index_BNSdata_qx + 2];
+int index_BNSdata_SigmaX = Ind("BNSdata_SigmaX");
+double *dSigmadA = box->v[index_BNSdata_SigmaX + 0];
 int index_BNSdata_SigmaXX = Ind("BNSdata_SigmaXX");
 double *ddSigmadA2 = box->v[index_BNSdata_SigmaXX + 0];
 int index_BNSdata_SigmaXXX = Ind("BNSdata_SigmaXXX");
 double *dddSigmadA3 = box->v[index_BNSdata_SigmaXXX + 0];
+int index_BNSdata_lSigmaX = Ind("BNSdata_lSigmaX");
+double *dlSigmadA = box->v[index_BNSdata_lSigmaX + 0];
 int index_BNSdata_lSigmaXX = Ind("BNSdata_lSigmaXX");
 double *ddlSigmadA2 = box->v[index_BNSdata_lSigmaXX + 0];
 int index_BNSdata_lSigmaXXX = Ind("BNSdata_lSigmaXXX");
@@ -518,6 +522,9 @@ spec_Deriv2(box, 1, Sigma, ddSigmadA2);
 spec_Deriv1(box, 1, ddSigmadA2, dddSigmadA3); 
 
 
+spec_Deriv1(box, 1, Sigma, dSigmadA); 
+
+
 for(j=0; j<n2-1; j=j+n2-1) 
 
 
@@ -528,7 +535,7 @@ for(i=1; i<n1; i++){ ijk=Index(i,j,k);
 
 FSigma[ijk]
 =
-dddSigmadA3[ijk] + ddSigmadA2[ijk]
+dddSigmadA3[ijk] + 2.*ddSigmadA2[ijk] + dSigmadA[ijk]
 ;
 
 
@@ -840,6 +847,9 @@ spec_Deriv2(box, 1, lSigma, ddlSigmadA2);
 spec_Deriv1(box, 1, ddlSigmadA2, dddlSigmadA3); 
 
 
+spec_Deriv1(box, 1, lSigma, dlSigmadA); 
+
+
 for(j=0; j<n2-1; j=j+n2-1) 
 
 
@@ -850,7 +860,7 @@ for(i=1; i<n1; i++){ ijk=Index(i,j,k);
 
 FlSigma[ijk]
 =
-dddlSigmadA3[ijk] + ddlSigmadA2[ijk]
+dddlSigmadA3[ijk] + 2.*ddlSigmadA2[ijk] + dlSigmadA[ijk]
 ;
 
 
@@ -2101,4 +2111,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 119, n* = 547,  n/ = 263,  n+ = 377, n = 1187, O = 1 */
+/* nvars = 121, n* = 551,  n/ = 263,  n+ = 383, n = 1197, O = 1 */
