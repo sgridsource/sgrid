@@ -277,8 +277,12 @@ double *VR2 = box->v[index_BNSdata_VRx + 1];
 double *VR3 = box->v[index_BNSdata_VRx + 2];
 int index_BNSdata_SigmaXX = Ind("BNSdata_SigmaXX");
 double *ddSigmadA2 = box->v[index_BNSdata_SigmaXX + 0];
+int index_BNSdata_SigmaXXX = Ind("BNSdata_SigmaXXX");
+double *dddSigmadA3 = box->v[index_BNSdata_SigmaXXX + 0];
 int index_BNSdata_lSigmaXX = Ind("BNSdata_lSigmaXX");
 double *ddlSigmadA2 = box->v[index_BNSdata_lSigmaXX + 0];
+int index_BNSdata_lSigmaXXX = Ind("BNSdata_lSigmaXXX");
+double *dddlSigmadA3 = box->v[index_BNSdata_lSigmaXXX + 0];
 
 
 double alpha2;
@@ -555,6 +559,9 @@ FirstAndSecondDerivsOf_S(box, index_Sigma, 			Ind("BNSdata_Sigmax"), Ind("BNSdat
 spec_Deriv2(box, 1, Sigma, ddSigmadA2); 
 
 
+spec_Deriv1(box, 1, ddSigmadA2, dddSigmadA3); 
+
+
 } else { /* if (!nonlin) */
 
 
@@ -571,6 +578,9 @@ FirstAndSecondDerivsOf_S(box, index_lSigma, 					index_dlSigma1, index_ddlSigma1
 
 
 spec_Deriv2(box, 1, lSigma, ddlSigmadA2); 
+
+
+spec_Deriv1(box, 1, ddlSigmadA2, dddlSigmadA3); 
 
 }
 /* if (nonlin) */
@@ -1405,7 +1415,7 @@ drho0PLUSrho0dLnalphaPsi2oh1*dSigmaUp1 +
 
 FSigma[ijk]
 =
-ddSigmadA2[ijk]
+dddSigmadA3[ijk] + ddSigmadA2[ijk]
 ;
 
 }
@@ -2326,7 +2336,7 @@ dlSigmaUp1*drho0PLUSrho0dLnalphaPsi2oh1 +
 
 FlSigma[ijk]
 =
-ddlSigmadA2[ijk]
+dddlSigmadA3[ijk] + ddlSigmadA2[ijk]
 ;
 
 }
@@ -2350,4 +2360,4 @@ ddlSigmadA2[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 171, n* = 1286,  n/ = 188,  n+ = 1021, n = 2495, O = 1 */
+/* nvars = 173, n* = 1288,  n/ = 188,  n+ = 1027, n = 2503, O = 1 */

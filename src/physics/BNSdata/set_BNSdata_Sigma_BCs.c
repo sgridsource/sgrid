@@ -7,6 +7,7 @@
 
 #define Power(x,y) (pow((double) (x), (double) (y)))
 #define Log(x)     (log((double) (x)))
+#define Sqrt(x)    (sqrt((double) (x)))
 #define pow2(x)    ((x)*(x))
 #define pow2inv(x) (1.0/((x)*(x)))
 #define Cal(x,y,z) ((x)?(y):(z))
@@ -35,6 +36,8 @@ double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
 double xCM = Getd("BNSdata_x_CM");
+double xmax1 = Getd("BNSdata_xmax1");
+double xmax2 = Getd("BNSdata_xmax2");
 double VolAvSigma, VolAvlSigma;
 
 tGrid *grid = vlu->grid;
@@ -205,10 +208,19 @@ int index_BNSdata_Sigmax = Ind("BNSdata_Sigmax");
 double *dSigma1 = box->v[index_BNSdata_Sigmax + 0];
 double *dSigma2 = box->v[index_BNSdata_Sigmax + 1];
 double *dSigma3 = box->v[index_BNSdata_Sigmax + 2];
+int index_BNSdata_Sigmaxx = Ind("BNSdata_Sigmaxx");
+double *ddSigma11 = box->v[index_BNSdata_Sigmaxx + 0];
+double *ddSigma12 = box->v[index_BNSdata_Sigmaxx + 1];
+double *ddSigma13 = box->v[index_BNSdata_Sigmaxx + 2];
+double *ddSigma22 = box->v[index_BNSdata_Sigmaxx + 3];
+double *ddSigma23 = box->v[index_BNSdata_Sigmaxx + 4];
+double *ddSigma33 = box->v[index_BNSdata_Sigmaxx + 5];
 int index_x = Ind("x");
 double *x = box->v[index_x + 0];
 int index_y = Ind("y");
 double *y = box->v[index_y + 0];
+int index_z = Ind("z");
+double *z = box->v[index_z + 0];
 int index_BNSdata_q = Ind("BNSdata_q");
 double *q = box->v[index_BNSdata_q + 0];
 int index_BNSdata_wBx = Ind("BNSdata_wBx");
@@ -221,8 +233,12 @@ double *dq2 = box->v[index_BNSdata_qx + 1];
 double *dq3 = box->v[index_BNSdata_qx + 2];
 int index_BNSdata_SigmaXX = Ind("BNSdata_SigmaXX");
 double *ddSigmadA2 = box->v[index_BNSdata_SigmaXX + 0];
+int index_BNSdata_SigmaXXX = Ind("BNSdata_SigmaXXX");
+double *dddSigmadA3 = box->v[index_BNSdata_SigmaXXX + 0];
 int index_BNSdata_lSigmaXX = Ind("BNSdata_lSigmaXX");
 double *ddlSigmadA2 = box->v[index_BNSdata_lSigmaXX + 0];
+int index_BNSdata_lSigmaXXX = Ind("BNSdata_lSigmaXXX");
+double *dddlSigmadA3 = box->v[index_BNSdata_lSigmaXXX + 0];
 
 
 double alpha;
@@ -230,9 +246,51 @@ double alpha2;
 double beta1;
 double beta2;
 double beta3;
+double ddlSig11;
+double ddlSig12;
+double ddlSig13;
+double ddlSig21;
+double ddlSig22;
+double ddlSig23;
+double ddlSig31;
+double ddlSig32;
+double ddlSig33;
+double ddlSigin11;
+double ddlSigin12;
+double ddlSigin13;
+double ddlSigin21;
+double ddlSigin22;
+double ddlSigin23;
+double ddlSigin31;
+double ddlSigin32;
+double ddlSigin33;
+double ddSig11;
+double ddSig12;
+double ddSig13;
+double ddSig21;
+double ddSig22;
+double ddSig23;
+double ddSig31;
+double ddSig32;
+double ddSig33;
+double ddSigin11;
+double ddSigin12;
+double ddSigin13;
+double ddSigin21;
+double ddSigin22;
+double ddSigin23;
+double ddSigin31;
+double ddSigin32;
+double ddSigin33;
 double dlq1;
 double dlq2;
 double dlq3;
+double dlSig1;
+double dlSig2;
+double dlSig3;
+double dlSigin1;
+double dlSigin2;
+double dlSigin3;
 double dlSigmaUp1;
 double dlSigmaUp2;
 double dlSigmaUp3;
@@ -245,6 +303,12 @@ double dlwB23;
 double dlwB31;
 double dlwB32;
 double dlwB33;
+double dSig1;
+double dSig2;
+double dSig3;
+double dSigin1;
+double dSigin2;
+double dSigin3;
 double dSigmaUp1;
 double DSigmaUp1;
 double dSigmaUp2;
@@ -268,6 +332,10 @@ double luzerosqr;
 double lwB1;
 double lwB2;
 double lwB3;
+double nv1;
+double nv2;
+double nv3;
+double nvm;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
@@ -294,6 +362,7 @@ double wBDown3;
 double wDown1;
 double wDown2;
 double wDown3;
+double xc;
 
 
 
@@ -396,15 +465,45 @@ double *Sigmain;
 double *lSigmain; 
 
 
+double *dSigmain1, *dSigmain2, *dSigmain3; 
+
+
+double *dlSigmain1, *dlSigmain2, *dlSigmain3; 
+
+
+double *ddSigmain11, *ddSigmain12, *ddSigmain13,                      
+                            *ddSigmain22, *ddSigmain23, *ddSigmain33;
+
+double *ddlSigmain11, *ddlSigmain12, *ddlSigmain13,                      
+                            *ddlSigmain22, *ddlSigmain23, *ddlSigmain33;
+
 if(bi==1) biin=0; else biin=3; 
 
 
-n1in = grid->box[biin]->n1;                                          
+n1in = grid->box[biin]->n1;                                              
                      n2in = grid->box[biin]->n2;
                      n3in = grid->box[biin]->n3;
 
-                     Sigmain     = grid->box[biin]->v[index_Sigma];
-                     lSigmain    = grid->box[biin]->v[index_lSigma];
+               Sigmain    = grid->box[biin]->v[index_Sigma];
+               lSigmain   = grid->box[biin]->v[index_lSigma];
+               dSigmain1  = grid->box[biin]->v[index_BNSdata_Sigmax+0];
+               dSigmain2  = grid->box[biin]->v[index_BNSdata_Sigmax+1];
+               dSigmain3  = grid->box[biin]->v[index_BNSdata_Sigmax+2];
+              dlSigmain1  = grid->box[biin]->v[index_dlSigma1];
+              dlSigmain2  = grid->box[biin]->v[index_dlSigma2];
+              dlSigmain3  = grid->box[biin]->v[index_dlSigma3];
+              ddSigmain11 = grid->box[biin]->v[index_BNSdata_Sigmaxx+0];
+              ddSigmain12 = grid->box[biin]->v[index_BNSdata_Sigmaxx+1];
+              ddSigmain13 = grid->box[biin]->v[index_BNSdata_Sigmaxx+2];
+              ddSigmain22 = grid->box[biin]->v[index_BNSdata_Sigmaxx+3];
+              ddSigmain23 = grid->box[biin]->v[index_BNSdata_Sigmaxx+4];
+              ddSigmain33 = grid->box[biin]->v[index_BNSdata_Sigmaxx+5];
+             ddlSigmain11 = grid->box[biin]->v[index_ddlSigma11];
+             ddlSigmain12 = grid->box[biin]->v[index_ddlSigma12];
+             ddlSigmain13 = grid->box[biin]->v[index_ddlSigma13];
+             ddlSigmain22 = grid->box[biin]->v[index_ddlSigma22];
+             ddlSigmain23 = grid->box[biin]->v[index_ddlSigma23];
+             ddlSigmain33 = grid->box[biin]->v[index_ddlSigma33];
 if(n2in!=n2 || n3in!=n3) errorexit("we need n2in=n2 and n3in=n3"); 
 
 
@@ -414,6 +513,9 @@ if (nonlin) {
 
 
 spec_Deriv2(box, 1, Sigma, ddSigmadA2); 
+
+
+spec_Deriv1(box, 1, ddSigmadA2, dddSigmadA3); 
 
 
 for(j=0; j<n2-1; j=j+n2-1) 
@@ -426,7 +528,7 @@ for(i=1; i<n1; i++){ ijk=Index(i,j,k);
 
 FSigma[ijk]
 =
-ddSigmadA2[ijk]
+dddSigmadA3[ijk] + ddSigmadA2[ijk]
 ;
 
 
@@ -448,10 +550,294 @@ Sig - Sigin
 } /* endfor */ 
 
 
-} else { /* if (!nonlin) */
+
+/* conditional */
+if (0) {
+
+
+
+/* conditional */
+if (bi == 1) {
+
+xc
+=
+xmax1
+;
+
+
+} else { /* if (!bi == 1) */
+
+xc
+=
+xmax2
+;
+
+}
+/* if (bi == 1) */
+
+
+
+forplane1(i,j,k, n1,n2,n3, 0){ 
+
+
+ijk=Index(0,j,k); /* set index to i=0 */ 
+
+nv1
+=
+-xc + x[ijk]
+;
+
+nv2
+=
+y[ijk]
+;
+
+nv3
+=
+z[ijk]
+;
+
+nvm
+=
+Sqrt(pow2(nv1) + pow2(nv2) + pow2(nv3))
+;
+
+nv1
+=
+nv1/nvm
+;
+
+nv2
+=
+nv2/nvm
+;
+
+nv3
+=
+nv3/nvm
+;
+
+dSig1
+=
+dSigma1[ijk]
+;
+
+dSig2
+=
+dSigma2[ijk]
+;
+
+dSig3
+=
+dSigma3[ijk]
+;
+
+dSigin1
+=
+dSigmain1[ijk]
+;
+
+dSigin2
+=
+dSigmain2[ijk]
+;
+
+dSigin3
+=
+dSigmain3[ijk]
+;
+
+
+ijk=Index(0,j,k); /* set index to i=0 */ 
+
+FSigma[ijk]
+=
+(dSig1 - dSigin1)*nv1 + (dSig2 - dSigin2)*nv2 + (dSig3 - dSigin3)*nv3
+;
+
+
+} /* endfor */ 
+
+}
+/* if (bi == 1) */
+
+
+
+
+/* conditional */
+if (bi == 1) {
+
+xc
+=
+xmax1
+;
+
+
+} else { /* if (!bi == 1) */
+
+xc
+=
+xmax2
+;
+
+}
+/* if (bi == 1) */
+
+
+
+forplane1(i,j,k, n1,n2,n3, 2){ 
+
+
+ijk=Index(0,j,k); /* set index to i=0 */ 
+
+nv1
+=
+-xc + x[ijk]
+;
+
+nv2
+=
+y[ijk]
+;
+
+nv3
+=
+z[ijk]
+;
+
+nvm
+=
+Sqrt(pow2(nv1) + pow2(nv2) + pow2(nv3))
+;
+
+nv1
+=
+nv1/nvm
+;
+
+nv2
+=
+nv2/nvm
+;
+
+nv3
+=
+nv3/nvm
+;
+
+ddSig11
+=
+ddSigma11[ijk]
+;
+
+ddSig12
+=
+ddSigma12[ijk]
+;
+
+ddSig13
+=
+ddSigma13[ijk]
+;
+
+ddSig21
+=
+ddSigma12[ijk]
+;
+
+ddSig22
+=
+ddSigma22[ijk]
+;
+
+ddSig23
+=
+ddSigma23[ijk]
+;
+
+ddSig31
+=
+ddSigma13[ijk]
+;
+
+ddSig32
+=
+ddSigma23[ijk]
+;
+
+ddSig33
+=
+ddSigma33[ijk]
+;
+
+ddSigin11
+=
+ddSigmain11[ijk]
+;
+
+ddSigin12
+=
+ddSigmain12[ijk]
+;
+
+ddSigin13
+=
+ddSigmain13[ijk]
+;
+
+ddSigin21
+=
+ddSigmain12[ijk]
+;
+
+ddSigin22
+=
+ddSigmain22[ijk]
+;
+
+ddSigin23
+=
+ddSigmain23[ijk]
+;
+
+ddSigin31
+=
+ddSigmain13[ijk]
+;
+
+ddSigin32
+=
+ddSigmain23[ijk]
+;
+
+ddSigin33
+=
+ddSigmain33[ijk]
+;
+
+
+ijk=Index(2,j,k); /* set index to i=2 */ 
+
+FSigma[ijk]
+=
+(ddSig23 + ddSig32)*nv2*nv3 - (ddSigin23 + ddSigin32)*nv2*nv3 - 
+  nv1*((ddSigin12 + ddSigin21)*nv2 + ddSigin13*nv3) + 
+  nv1*((ddSig12 + ddSig21)*nv2 + (ddSig13 + ddSig31 - ddSigin31)*nv3) + 
+  (ddSig11 - ddSigin11)*pow2(nv1) + (ddSig22 - ddSigin22)*pow2(nv2) + 
+  (ddSig33 - ddSigin33)*pow2(nv3)
+;
+
+
+} /* endfor */ 
+
+
+} else { /* if (!bi == 1) */
 
 
 spec_Deriv2(box, 1, lSigma, ddlSigmadA2); 
+
+
+spec_Deriv1(box, 1, ddlSigmadA2, dddlSigmadA3); 
 
 
 for(j=0; j<n2-1; j=j+n2-1) 
@@ -464,7 +850,7 @@ for(i=1; i<n1; i++){ ijk=Index(i,j,k);
 
 FlSigma[ijk]
 =
-ddlSigmadA2[ijk]
+dddlSigmadA3[ijk] + ddlSigmadA2[ijk]
 ;
 
 
@@ -485,12 +871,293 @@ lSig - lSigin
 
 } /* endfor */ 
 
+
+
+/* conditional */
+if (0) {
+
+
+
+/* conditional */
+if (bi == 1) {
+
+xc
+=
+xmax1
+;
+
+
+} else { /* if (!bi == 1) */
+
+xc
+=
+xmax2
+;
+
 }
-/* if (nonlin) */
+/* if (bi == 1) */
+
+
+
+forplane1(i,j,k, n1,n2,n3, 0){ 
+
+
+ijk=Index(0,j,k); /* set index to i=0 */ 
+
+nv1
+=
+-xc + x[ijk]
+;
+
+nv2
+=
+y[ijk]
+;
+
+nv3
+=
+z[ijk]
+;
+
+nvm
+=
+Sqrt(pow2(nv1) + pow2(nv2) + pow2(nv3))
+;
+
+nv1
+=
+nv1/nvm
+;
+
+nv2
+=
+nv2/nvm
+;
+
+nv3
+=
+nv3/nvm
+;
+
+dlSig1
+=
+dlSigma1[ijk]
+;
+
+dlSig2
+=
+dlSigma2[ijk]
+;
+
+dlSig3
+=
+dlSigma3[ijk]
+;
+
+dlSigin1
+=
+dlSigmain1[ijk]
+;
+
+dlSigin2
+=
+dlSigmain2[ijk]
+;
+
+dlSigin3
+=
+dlSigmain3[ijk]
+;
+
+
+ijk=Index(0,j,k); /* set index to i=0 */ 
+
+FlSigma[ijk]
+=
+(dlSig1 - dlSigin1)*nv1 + (dlSig2 - dlSigin2)*nv2 + (dlSig3 - dlSigin3)*nv3
+;
+
+
+} /* endfor */ 
+
+}
+/* if (bi == 1) */
+
+
+
+
+/* conditional */
+if (bi == 1) {
+
+xc
+=
+xmax1
+;
+
+
+} else { /* if (!bi == 1) */
+
+xc
+=
+xmax2
+;
+
+}
+/* if (bi == 1) */
+
+
+
+forplane1(i,j,k, n1,n2,n3, 2){ 
+
+
+ijk=Index(0,j,k); /* set index to i=0 */ 
+
+nv1
+=
+-xc + x[ijk]
+;
+
+nv2
+=
+y[ijk]
+;
+
+nv3
+=
+z[ijk]
+;
+
+nvm
+=
+Sqrt(pow2(nv1) + pow2(nv2) + pow2(nv3))
+;
+
+nv1
+=
+nv1/nvm
+;
+
+nv2
+=
+nv2/nvm
+;
+
+nv3
+=
+nv3/nvm
+;
+
+ddlSig11
+=
+ddlSigma11[ijk]
+;
+
+ddlSig12
+=
+ddlSigma12[ijk]
+;
+
+ddlSig13
+=
+ddlSigma13[ijk]
+;
+
+ddlSig21
+=
+ddlSigma12[ijk]
+;
+
+ddlSig22
+=
+ddlSigma22[ijk]
+;
+
+ddlSig23
+=
+ddlSigma23[ijk]
+;
+
+ddlSig31
+=
+ddlSigma13[ijk]
+;
+
+ddlSig32
+=
+ddlSigma23[ijk]
+;
+
+ddlSig33
+=
+ddlSigma33[ijk]
+;
+
+ddlSigin11
+=
+ddlSigmain11[ijk]
+;
+
+ddlSigin12
+=
+ddlSigmain12[ijk]
+;
+
+ddlSigin13
+=
+ddlSigmain13[ijk]
+;
+
+ddlSigin21
+=
+ddlSigmain12[ijk]
+;
+
+ddlSigin22
+=
+ddlSigmain22[ijk]
+;
+
+ddlSigin23
+=
+ddlSigmain23[ijk]
+;
+
+ddlSigin31
+=
+ddlSigmain13[ijk]
+;
+
+ddlSigin32
+=
+ddlSigmain23[ijk]
+;
+
+ddlSigin33
+=
+ddlSigmain33[ijk]
+;
+
+
+ijk=Index(2,j,k); /* set index to i=2 */ 
+
+FlSigma[ijk]
+=
+(ddlSig23 + ddlSig32)*nv2*nv3 - (ddlSigin23 + ddlSigin32)*nv2*nv3 - 
+  nv1*((ddlSigin12 + ddlSigin21)*nv2 + ddlSigin13*nv3) + 
+  nv1*((ddlSig12 + ddlSig21)*nv2 + (ddlSig13 + ddlSig31 - ddlSigin31)*nv3) + 
+  (ddlSig11 - ddlSigin11)*pow2(nv1) + (ddlSig22 - ddlSigin22)*pow2(nv2) + 
+  (ddlSig33 - ddlSigin33)*pow2(nv3)
+;
+
+
+} /* endfor */ 
+
+}
+/* if (bi == 1) */
 
 
 }
-/* if (nonlin) */
+/* if (bi == 1) */
 
 
 
@@ -1434,4 +2101,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 92, n* = 432,  n/ = 195,  n+ = 252, n = 879, O = 1 */
+/* nvars = 119, n* = 547,  n/ = 263,  n+ = 377, n = 1187, O = 1 */

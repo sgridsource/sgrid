@@ -5,12 +5,14 @@
 
 
 (* variables *)
-variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
-             dSigma[a],
+variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP, FSigma,
+             dSigma[a], ddSigma[a,b],
 	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
-             q, wB[a], dq[a], x, y, ddSigmadA2,ddlSigmadA2}
+             q, wB[a], dq[a], x, y, z, 
+             ddSigmadA2,ddlSigmadA2, dddSigmadA3,dddlSigmadA3,
+             dSigmain[a], dlSigmain[a], ddSigmain[a,b], ddlSigmain[a,b]}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -61,18 +63,43 @@ tocompute = {
     Cinstruction == "double Sig, Sigin, lSig, lSigin;",
     Cinstruction == "double *Sigmain;",
     Cinstruction == "double *lSigmain;",
+    Cinstruction == "double *dSigmain1, *dSigmain2, *dSigmain3;",
+    Cinstruction == "double *dlSigmain1, *dlSigmain2, *dlSigmain3;",
+    Cinstruction == "double *ddSigmain11, *ddSigmain12, *ddSigmain13,
+                            *ddSigmain22, *ddSigmain23, *ddSigmain33;",
+    Cinstruction == "double *ddlSigmain11, *ddlSigmain12, *ddlSigmain13,
+                            *ddlSigmain22, *ddlSigmain23, *ddlSigmain33;",
     Cinstruction == "if(bi==1) biin=0; else biin=3;",
     Cinstruction == "n1in = grid->box[biin]->n1;
                      n2in = grid->box[biin]->n2;
                      n3in = grid->box[biin]->n3;\n
-                     Sigmain     = grid->box[biin]->v[index_Sigma];
-                     lSigmain    = grid->box[biin]->v[index_lSigma];",
+               Sigmain    = grid->box[biin]->v[index_Sigma];
+               lSigmain   = grid->box[biin]->v[index_lSigma];
+               dSigmain1  = grid->box[biin]->v[index_BNSdata_Sigmax+0];
+               dSigmain2  = grid->box[biin]->v[index_BNSdata_Sigmax+1];
+               dSigmain3  = grid->box[biin]->v[index_BNSdata_Sigmax+2];
+              dlSigmain1  = grid->box[biin]->v[index_dlSigma1];
+              dlSigmain2  = grid->box[biin]->v[index_dlSigma2];
+              dlSigmain3  = grid->box[biin]->v[index_dlSigma3];
+              ddSigmain11 = grid->box[biin]->v[index_BNSdata_Sigmaxx+0];
+              ddSigmain12 = grid->box[biin]->v[index_BNSdata_Sigmaxx+1];
+              ddSigmain13 = grid->box[biin]->v[index_BNSdata_Sigmaxx+2];
+              ddSigmain22 = grid->box[biin]->v[index_BNSdata_Sigmaxx+3];
+              ddSigmain23 = grid->box[biin]->v[index_BNSdata_Sigmaxx+4];
+              ddSigmain33 = grid->box[biin]->v[index_BNSdata_Sigmaxx+5];
+             ddlSigmain11 = grid->box[biin]->v[index_ddlSigma11];
+             ddlSigmain12 = grid->box[biin]->v[index_ddlSigma12];
+             ddlSigmain13 = grid->box[biin]->v[index_ddlSigma13];
+             ddlSigmain22 = grid->box[biin]->v[index_ddlSigma22];
+             ddlSigmain23 = grid->box[biin]->v[index_ddlSigma23];
+             ddlSigmain33 = grid->box[biin]->v[index_ddlSigma33];",
     Cinstruction == "if(n2in!=n2 || n3in!=n3) errorexit(\"we need n2in=n2 and n3in=n3\");",
 
     Cif == nonlin, (* non-linear case *)
  
      (* take derivs needed *)
       Cinstruction == "spec_Deriv2(box, 1, Sigma, ddSigmadA2);",
+      Cinstruction == "spec_Deriv1(box, 1, ddSigmadA2, dddSigmadA3);",
 
       (* loop over axis and set EOM again, in case it's been overwritten *)
       (* BUT do not touch A=0 where we might like the BC from
@@ -80,7 +107,7 @@ tocompute = {
       Cinstruction == "for(j=0; j<n2-1; j=j+n2-1)",
       Cinstruction == "for(k=0; k<n3; k++)",
       Cinstruction == "for(i=1; i<n1; i++){ ijk=Index(i,j,k);",
-        FSigma == ddSigmadA2,
+        FSigma == dddSigmadA3 + ddSigmadA2,
       Cinstruction == "} /* endfor */",
 
       (* set Sigma's equal at star surfaces, impose it at i=1 *)
@@ -92,9 +119,52 @@ tocompute = {
         FSigma == Sig - Sigin,
       Cinstruction == "} /* endfor */",
 
+      (* set n^i dSigma/dx^i equal at star surfaces, 
+         impose it at i=0. The n^i is the normal vec. *)
+      Cif == 0,  (* we do not need this since set_BNSdata_BCs sets this already *)
+        Cif == (bi == 1),
+          xc == xmax1,
+        Cif == else,
+          xc == xmax2,
+        Cif == end,
+        Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){",
+        Cinstruction == "ijk=Index(0,j,k); /* set index to i=0 */",
+        nv1 == x-xc, (* get normal vec n[a] *)
+        nv2 == y,
+        nv3 == z,
+        nvm == Sqrt[nv1*nv1 + nv2*nv2 + nv3*nv3],
+        nv[a] == nv[a]/nvm,
+        dSig[a] == dSigma[a],
+        dSigin[a] == dSigmain[a],
+        Cinstruction == "ijk=Index(0,j,k); /* set index to i=0 */",        
+        FSigma == nv[a] (dSig[a] - dSigin[a]),
+        Cinstruction == "} /* endfor */",
+      Cif == end,
+
+      (* set n^i n^j d^2Sigma/(dx^i dx^j) equal at star surfaces, 
+         impose it at i=2. The n^i is the normal vec. *)
+      Cif == (bi == 1),
+        xc == xmax1,
+      Cif == else,
+        xc == xmax2,
+      Cif == end,
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 2){",
+      Cinstruction == "ijk=Index(0,j,k); /* set index to i=0 */",
+      nv1 == x-xc, (* get normal vec n[a] *)
+      nv2 == y,
+      nv3 == z,
+      nvm == Sqrt[nv1*nv1 + nv2*nv2 + nv3*nv3],
+      nv[a] == nv[a]/nvm,
+      ddSig[a,b] == ddSigma[a,b],
+      ddSigin[a,b] == ddSigmain[a,b],
+      Cinstruction == "ijk=Index(2,j,k); /* set index to i=2 */",        
+      FSigma == nv[a] nv[b] (ddSig[a,b] - ddSigin[a,b]),
+      Cinstruction == "} /* endfor */",
+
     Cif == else,   (* linear case *)
       (* take derivs needed *)
       Cinstruction == "spec_Deriv2(box, 1, lSigma, ddlSigmadA2);",
+      Cinstruction == "spec_Deriv1(box, 1, ddlSigmadA2, dddlSigmadA3);",
 
       (* loop over axis and set EOM again, in case it's been overwritten *)
       (* BUT do not touch A=0 where we might like the BC from
@@ -102,7 +172,7 @@ tocompute = {
       Cinstruction == "for(j=0; j<n2-1; j=j+n2-1)",
       Cinstruction == "for(k=0; k<n3; k++)",
       Cinstruction == "for(i=1; i<n1; i++){ ijk=Index(i,j,k);",
-        FlSigma == ddlSigmadA2,
+        FlSigma == dddlSigmadA3 + ddlSigmadA2,
       Cinstruction == "} /* endfor */",
 
       (* set Sigma's equal at star surfaces, impose it at i=1 *)
@@ -112,6 +182,48 @@ tocompute = {
                        lSig   = lSigma[ind0];
                        lSigin = lSigmain[ind0in];",
         FlSigma == lSig - lSigin,
+      Cinstruction == "} /* endfor */",
+
+      (* set n^i dSigma/dx^i equal at star surfaces, 
+         impose it at i=0. The n^i is the normal vec. *)
+      Cif == 0,  (* we do not need this since set_BNSdata_BCs sets this already *)
+        Cif == (bi == 1),
+          xc == xmax1,
+        Cif == else,
+          xc == xmax2,
+        Cif == end,
+        Cinstruction == "forplane1(i,j,k, n1,n2,n3, 0){",
+        Cinstruction == "ijk=Index(0,j,k); /* set index to i=0 */",
+        nv1 == x-xc, (* get normal vec n[a] *)
+        nv2 == y,
+        nv3 == z,
+        nvm == Sqrt[nv1*nv1 + nv2*nv2 + nv3*nv3],
+        nv[a] == nv[a]/nvm,
+        dlSig[a] == dlSigma[a],
+        dlSigin[a] == dlSigmain[a],
+        Cinstruction == "ijk=Index(0,j,k); /* set index to i=0 */",        
+        FlSigma == nv[a] (dlSig[a] - dlSigin[a]),
+        Cinstruction == "} /* endfor */",
+      Cif == end,   
+
+      (* set n^i n^j d^2Sigma/(dx^i dx^j) equal at star surfaces, 
+         impose it at i=2. The n^i is the normal vec. *)
+      Cif == (bi == 1),
+        xc == xmax1,
+      Cif == else,
+        xc == xmax2,
+      Cif == end,
+      Cinstruction == "forplane1(i,j,k, n1,n2,n3, 2){",
+      Cinstruction == "ijk=Index(0,j,k); /* set index to i=0 */",
+      nv1 == x-xc, (* get normal vec n[a] *)
+      nv2 == y,
+      nv3 == z,
+      nvm == Sqrt[nv1*nv1 + nv2*nv2 + nv3*nv3],
+      nv[a] == nv[a]/nvm,
+      ddlSig[a,b] == ddlSigma[a,b],
+      ddlSigin[a,b] == ddlSigmain[a,b],
+      Cinstruction == "ijk=Index(2,j,k); /* set index to i=2 */",        
+      FlSigma == nv[a] nv[b] (ddlSig[a,b] - ddlSigin[a,b]),
       Cinstruction == "} /* endfor */",
 
     Cif == end, (* end linear case *)
@@ -384,11 +496,13 @@ ddPsi[a_,b_]     := ddPsi[b,a]    /; !OrderedQ[{a,b}]
 ddB[a_,b_,c_]    := ddB[a,c,b]    /; !OrderedQ[{b,c}]
 ddalphaP[a_,b_]  := ddalphaP[b,a] /; !OrderedQ[{a,b}]
 ddSigma[a_,b_]   := ddSigma[b,a]  /; !OrderedQ[{a,b}]
+ddSigmain[a_,b_] := ddSigmain[b,a]  /; !OrderedQ[{a,b}]
 
 ddlPsi[a_,b_]     := ddlPsi[b,a]    /; !OrderedQ[{a,b}]
 ddlB[a_,b_,c_]    := ddlB[a,c,b]    /; !OrderedQ[{b,c}]
 ddlalphaP[a_,b_]  := ddlalphaP[b,a] /; !OrderedQ[{a,b}]
 ddlSigma[a_,b_]   := ddlSigma[b,a]  /; !OrderedQ[{a,b}]
+ddlSigmain[a_,b_] := ddlSigmain[b,a]  /; !OrderedQ[{a,b}]
 
 (************************************************************************)
 (* information for C output *)
@@ -407,6 +521,7 @@ BeginCFunction[] := Module[{},
   pr["\n"];
   pr["#define Power(x,y) (pow((double) (x), (double) (y)))\n"];
   pr["#define Log(x)     (log((double) (x)))\n"];
+  pr["#define Sqrt(x)    (sqrt((double) (x)))\n"];
   pr["#define pow2(x)    ((x)*(x))\n"];
   pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
   pr["#define Cal(x,y,z) ((x)?(y):(z))\n\n"];
@@ -436,6 +551,8 @@ BeginCFunction[] := Module[{},
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];
   pr["double xCM = Getd(\"BNSdata_x_CM\");\n"];
+  pr["double xmax1 = Getd(\"BNSdata_xmax1\");\n"];
+  pr["double xmax2 = Getd(\"BNSdata_xmax2\");\n"];
   pr["double VolAvSigma, VolAvlSigma;\n"];
   pr["\n"];
 
@@ -478,9 +595,11 @@ variabledeclarations[] := Module[{},
   prdecvlindices[{dlPsi[a],ddlPsi[a,b], dlB[a,b],ddlB[a,b,c], dlalphaP[a],ddlalphaP[a,b], dlSigma[a],ddlSigma[a,b]}, "vlduDerivs"];
 
   prdecvarname[{dSigma[a]},     "BNSdata_Sigmax"];
+  prdecvarname[{ddSigma[a,b]},  "BNSdata_Sigmaxx"];
 
   prdecvarname[{x},      "x"];
   prdecvarname[{y},      "y"];
+  prdecvarname[{z},      "z"];
 
   (* prdecvarname[{g[a,b]}, "gxx"]; prdecvarname[{K[a,b]}, "Kxx"]; *)
   prdecvarname[{q},       "BNSdata_q"];
@@ -490,7 +609,9 @@ variabledeclarations[] := Module[{},
   (* prdecvarname[{dSigmadA},   "BNSdata_temp1"];
      prdecvarname[{dlSigmadA},  "BNSdata_temp2"]; *)
   prdecvarname[{ddSigmadA2},   "BNSdata_SigmaXX"];
+  prdecvarname[{dddSigmadA3},  "BNSdata_SigmaXXX"];
   prdecvarname[{ddlSigmadA2},  "BNSdata_lSigmaXX"];
+  prdecvarname[{dddlSigmadA3}, "BNSdata_lSigmaXXX"];
 
   pr["\n"];
 ];    
