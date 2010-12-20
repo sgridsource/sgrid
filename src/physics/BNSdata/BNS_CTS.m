@@ -12,7 +12,7 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP ,FSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
 	     g[a,b], alpha, beta[a], K[a,b], 
-             q, wB[a], dq[a], dwB[a,b], VR[a], x, y,
+             q, wB[a], dq[a], dwB[a,b], VR[a], x, y, dSigmadA,dlSigmadA, 
              ddSigmadA2,ddlSigmadA2, dddSigmadA3,dddlSigmadA3}
 
 constvariables = {OmegaCrossR[a]}
@@ -31,6 +31,7 @@ tocompute = {
 			Ind(\"BNSdata_Sigmax\"), Ind(\"BNSdata_Sigmaxx\"));",
     Cinstruction == "spec_Deriv2(box, 1, Sigma, ddSigmadA2);",
     Cinstruction == "spec_Deriv1(box, 1, ddSigmadA2, dddSigmadA3);",
+    Cinstruction == "spec_Deriv1(box, 1, Sigma, dSigmadA);",
   Cif == else,
     Cinstruction == "FirstAndSecondDerivsOf_S(box, index_lPsi, \ 
 					index_dlPsi1, index_ddlPsi11);",
@@ -42,6 +43,7 @@ tocompute = {
 					index_dlSigma1, index_ddlSigma11);",
     Cinstruction == "spec_Deriv2(box, 1, lSigma, ddlSigmadA2);",
     Cinstruction == "spec_Deriv1(box, 1, ddlSigmadA2, dddlSigmadA3);",
+    Cinstruction == "spec_Deriv1(box, 1, lSigma, dlSigmadA);",
   Cif == end,
 
   Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BNSdata_wBx\"), \
@@ -207,7 +209,7 @@ tocompute = {
                                 beta[c] drho0PLUSrho0dLnalphaPsi6uz[c]),
       Cif == else, (* outside stars *)
         (* FSigma == delta[b,c] ddSigma[b,c], *)
-        FSigma == dddSigmadA3 + ddSigmadA2,
+        FSigma == dddSigmadA3 + 2 ddSigmadA2 + dSigmadA,
       Cif == end,
 
     Cif == end, (* END: corot/general case *)
@@ -449,7 +451,7 @@ FlSigma == rho0 delta[b,c] ddlSigma[b,c] +
 *)
       Cif == else, (* outside stars *)
         (* FlSigma == delta[b,c] ddlSigma[b,c], *)
-        FlSigma == dddlSigmadA3 + ddlSigmadA2,
+        FlSigma == dddlSigmadA3 + 2 ddlSigmadA2 + dlSigmadA,
       Cif == end,
 
     Cif == end, (* END: corot/general case *)
@@ -566,8 +568,10 @@ variabledeclarations[] := Module[{},
   prdecvarname[{dwB[a,b]},"BNSdata_wBxx"];
   prdecvarname[{VR[a]},   "BNSdata_VRx"];
 
+  prdecvarname[{dSigmadA},     "BNSdata_SigmaX"];
   prdecvarname[{ddSigmadA2},   "BNSdata_SigmaXX"];
   prdecvarname[{dddSigmadA3},  "BNSdata_SigmaXXX"];
+  prdecvarname[{dlSigmadA},    "BNSdata_lSigmaX"];
   prdecvarname[{ddlSigmadA2},  "BNSdata_lSigmaXX"];
   prdecvarname[{dddlSigmadA3}, "BNSdata_lSigmaXXX"];
 
