@@ -48,6 +48,7 @@ void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
 void free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(
      tVarList *vlw,  tVarList *vlwDerivs,  tVarList *vlFw,
      tVarList *vldw, tVarList *vldwDerivs, tVarList *vlJdw);
+double GridL2Norm_of_vars_in_string(tGrid *grid, char *str);
 int BNS_Eqn_Iterator_for_vars_in_string(tGrid *grid, int itmax, 
   double tol, double *normres, 
   int (*linear_solver)(tVarList *x, tVarList *b, 
@@ -2156,7 +2157,19 @@ exit(11);
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
       totalerr1 = average_current_and_old(Sigma_esw, 
                                           grid,vlFu,vlu,vluDerivs, vlJdu);
+      /* complete step */
+      totalerr = average_current_and_old(1.0/Sigma_esw,
+                                         grid,vlFu,vlu,vluDerivs,vlJdu);
+      /* but go back to Sigma_esw if totalerr is larger */
+      if(totalerr>=totalerr1)
+        totalerr = average_current_and_old(Sigma_esw/1.0, 
+                                           grid,vlFu,vlu,vluDerivs,vlJdu);
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+
+      /* reset Newton_tol */
+      normresnonlin = GridL2Norm_of_vars_in_string(grid, 
+                                      Gets("BNSdata_CTS_Eqs_Iteration_order"));
+      Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
 /*
 grid->time  = -777; 
 write_grid(grid);
