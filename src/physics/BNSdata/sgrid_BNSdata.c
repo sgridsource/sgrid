@@ -104,7 +104,7 @@ int sgrid_BNSdata()
   AddPar("BNSdata_actual_zmax2", "0", "z-pos. of actual global max of q in NS2");
   AddPar("BNSdata_center_new_q", "no",
          "if and how we center new q on (BNSdata_xmax1/2,0,0) "
-         "[no,center_xyz]");
+         "[no,center_yz,center_xyz]");
   AddPar("BNSdata_center_new_q_flag", "no",
          "set automatically in main iteration [no,yes]");
   AddPar("BNSdata_center_new_q_fac", "0.1",

@@ -507,6 +507,10 @@ void BNS_compute_new_centered_q(tGrid *grid)
     double fac = Getd("BNSdata_center_new_q_fac");
     double xmax1 = Getd("BNSdata_xmax1");
     double xmax2 = Getd("BNSdata_xmax2");
+    int xon=1;
+    int yon=1;
+    int zon=1;
+    if(Getv("BNSdata_center_new_q", "center_yz"))  xon=0;
 
     /* get global max of q in NS1/2 */
     x1 = Getd("BNSdata_actual_xmax1");
@@ -530,6 +534,9 @@ void BNS_compute_new_centered_q(tGrid *grid)
       /* q_centered(x) = q(x+dx) ~ q(x) + [dq(x)/dx] dx */
       if(b<=1 || b==5) { dx = x1-xmax1; dy = y1; dz = z1; }
       else             { dx = x2-xmax2; dy = y2; dz = z2; }
+      dx = dx*xon;  /* <-- switch centering on/off */
+      dy = dy*yon;
+      dz = dz*zon;
       //printf("b=%d: dx=%g dy=%g dz=%g\n", b, dx,dy,dz);
       forallpoints(box, i)
         BNSdata_q[i] = BNSdata_q[i] + 
@@ -554,6 +561,10 @@ double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
     double dqdx, dqdy, dqdz;
     double fac = Getd("BNSdata_center_new_q_fac");
     double xmax;
+    int xon=1;
+    int yon=1;
+    int zon=1;
+    if(Getv("BNSdata_center_new_q", "center_yz"))  xon=0;
 
     if(bi<=1 || bi==5)
     {
@@ -591,6 +602,9 @@ double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
     dx = xm-xmax;
     dy = ym;
     dz = zm;
+    dx = dx*xon;  /* <-- switch centering on/off */
+    dy = dy*yon;
+    dz = dz*zon;
 //printf("bi=%d: dx=%g dy=%g dz=%g\n", bi, dx,dy,dz);
     q = q + fac*(dqdx*dx + dqdy*dy + dqdz*dz);
   }
