@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 19.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 21.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -28,7 +28,6 @@ int AddInnerVolIntToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
 int InnerVolIntZero = Getv("BNSdata_Sigma_surface_BCs","InnerVolIntZero");
 int AddInnerSumToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerSumToBC");
 int InnerSumZero = Getv("BNSdata_Sigma_surface_BCs","InnerSumZero");
-int SigmaZeroInOuterBoxAtA0B0 = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxAt00");
 int SigmaZeroInOuterBoxes = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxes");
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
 int UniqueSigmaAtPoles = 0; //Getv("BNSdata_Sigma_surface_BCs","UniqueSigmaAtPoles");

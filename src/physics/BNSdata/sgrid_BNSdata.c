@@ -127,11 +127,11 @@ int sgrid_BNSdata()
     AddPar("BNSdata_adjustdomain01", "yes", "if we adjust domainshapes "
            "after shift [yes,no]");
   }
-  AddPar("BNSdata_Sigma_surface_BCs", "ZeroAtPoint",
+  AddPar("BNSdata_Sigma_surface_BCs", "AddInnerVolIntToBC RegularityOnAxis",
          "BCs for Sigma on star surfaces "
-         "[ZeroAtPoint,AddInnerVolIntToBC,ZeroInOuterBoxAt00,AtA0B0,AtA0B1"
-         "none,ZeroInOuterBoxes,InnerVolIntZero,AddInnerSumToBC,InnerSumZero,"
-         "RegularityOnAxis]");
+         "[AddInnerVolIntToBC,AddInnerSumToBC,RegularityOnAxis,"
+         "ZeroAtPoint,InnerVolIntZero,InnerSumZero,AtA0B0,AtA0B1,"
+         "none,ZeroInOuterBoxes]");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "max. number of iterations in BNSdata_solve");

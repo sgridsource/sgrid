@@ -545,7 +545,6 @@ BeginCFunction[] := Module[{},
   pr["int InnerVolIntZero = Getv(\"BNSdata_Sigma_surface_BCs\",\"InnerVolIntZero\");\n"];
   pr["int AddInnerSumToBC = Getv(\"BNSdata_Sigma_surface_BCs\",\"AddInnerSumToBC\");\n"];
   pr["int InnerSumZero = Getv(\"BNSdata_Sigma_surface_BCs\",\"InnerSumZero\");\n"];
-  pr["int SigmaZeroInOuterBoxAtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxAt00\");\n"];
   pr["int SigmaZeroInOuterBoxes = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxes\");\n"];
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
   pr["int UniqueSigmaAtPoles = 0; //Getv(\"BNSdata_Sigma_surface_BCs\",\"UniqueSigmaAtPoles\");\n"];
