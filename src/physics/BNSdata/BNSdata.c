@@ -2161,7 +2161,7 @@ exit(11);
       totalerr = average_current_and_old(1.0/Sigma_esw,
                                          grid,vlFu,vlu,vluDerivs,vlJdu);
       /* but go back to Sigma_esw if totalerr is larger */
-      if(totalerr>=totalerr1)
+      if(totalerr>totalerr1)
         totalerr = average_current_and_old(Sigma_esw/1.0, 
                                            grid,vlFu,vlu,vluDerivs,vlJdu);
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
@@ -2238,7 +2238,7 @@ exit(77);
       /* complete step */
       totalerr = average_current_and_old(esw1/esw, grid,vlFu,vlu,vluDerivs,vlJdu);
       /* but go back to esw if totalerr is larger */
-      if(totalerr>=totalerr1)
+      if(totalerr>totalerr1)
         totalerr = average_current_and_old(esw/esw1, grid,vlFu,vlu,vluDerivs,vlJdu);
     }
     else
