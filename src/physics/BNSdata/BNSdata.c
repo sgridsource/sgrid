@@ -2166,29 +2166,32 @@ exit(11);
     }
     else if(Getv("BNSdata_EllSolver_method", "BNS_ordered_Eqn_Iterator"))
     {
+      /* reset Newton_tol, so that we always solve for Sigma */
+      normresnonlin = GridL2Norm_of_vars_in_string(grid, "BNSdata_Sigma");
+      Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+
       /* solve the ell. eqn for Sigma alone */
       BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
       totalerr1 = average_current_and_old(Sigma_esw, 
                                           grid,vlFu,vlu,vluDerivs, vlJdu);
-      /* complete step */
-      totalerr = average_current_and_old(1.0/Sigma_esw,
-                                         grid,vlFu,vlu,vluDerivs,vlJdu);
-      /* but go back to Sigma_esw if totalerr is larger */
-      if(totalerr>totalerr1)
-        totalerr = average_current_and_old(Sigma_esw/1.0, 
+      if(grid->time == 1.0-itmax) /* solve completely at first iteration */
+      {
+        /* complete step */
+        totalerr = average_current_and_old(1.0/Sigma_esw,
                                            grid,vlFu,vlu,vluDerivs,vlJdu);
+        /* but go back to Sigma_esw if totalerr is larger */
+        if(totalerr>totalerr1)
+          totalerr = average_current_and_old(Sigma_esw/1.0, 
+                                             grid,vlFu,vlu,vluDerivs,vlJdu);
+      }
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
 
       /* reset Newton_tol */
       normresnonlin = GridL2Norm_of_vars_in_string(grid, 
                                       Gets("BNSdata_CTS_Eqs_Iteration_order"));
       Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
-/*
-grid->time  = -777; 
-write_grid(grid);
-exit(77);
-*/
+
       /* now solve the coupled CTS ell. eqns one after an other */
       BNS_ordered_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
                                linear_solver, 1);
