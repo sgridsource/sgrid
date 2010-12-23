@@ -94,7 +94,7 @@ int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,
     *X=X1; *Y=Y1; *Z=Z1;
     return bi; /* return box index if success */
   }
-  return -bi;
+  return -bi-10000;  /* make sure it's never 0 */
 }
 
 /* find X,Y,Z from x,y,z (Note: X,Y,Z also contains initial guess)
@@ -129,7 +129,7 @@ int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
     *X=X1; *Y=Y1; *Z=Z1;
     return bi; /* return box index if success */
   }
-  return -bi;
+  return -bi-10000;  /* make sure it's never 0 */
 }
 
 /* find nearest X,Y,Z in box from x,y,z */
@@ -352,7 +352,7 @@ int b_X_of_x_forgiven_YZ(tGrid *grid, double *X, double x, double Y, double Z)
     *X=X1;
     return bi; /* return box index if success */
   }
-  return -bi;
+  return -bi-10000;  /* make sure it's never 0 */
 }
 
 /* find X from x for a given Y,Z (Note: X also contains initial guess)
@@ -384,5 +384,5 @@ int b_X_of_x_forgiven_YZ_inboxlist(tGrid *grid, int *blist, int nb,
     *X=X1;
     return bi; /* return box index if success */
   }
-  return -bi;
+  return -bi-10000;  /* make sure it's never 0 */
 }
