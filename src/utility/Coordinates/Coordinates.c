@@ -1867,7 +1867,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   static double xsav, ysav, zsav, Xsav, Rsav;
   static int BBshift=-1;
   double X,R;
-  double Rsqr, Xsqr, Rsqr_p_Xsqr;
+  double Rsqr=-1, Xsqr=-1, Rsqr_p_Xsqr=-1;
   double b, lep;
   double sigp_Bphi, sigp_1phi;
   double Ap;
@@ -1960,6 +1960,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     /* special cases in domain0 */
     if(B  == 0.0) R = 0.0;
     if(Ap == 1.0) { X = 1.0;   R = 0.0; }
+    if(B  == 1.0) { Rsqr = R*R;  Xsqr = 1.0-Rsqr;  Rsqr_p_Xsqr = 1.0; }
   }
   if(domain==1 || domain==2) /* use Eq. (22) */
   {
@@ -1980,7 +1981,8 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
 
     /* special cases in domain1/2 */
     if(B  == 0.0) { if(domain==1) R = 0.0;  else X = 0.0; }
-    /* if(Ap == 1.0) { R = X = B/sqrt(2.0); } */ /* <--more exact without this!!! */
+    if(B  == 1.0) { Rsqr = R*R;  Xsqr=1.0-Rsqr;  Rsqr_p_Xsqr = 1.0; }
+    if(Ap == 1.0) { R = X = sqrt(0.5)*B; Rsqr = Xsqr = 0.5*B*B; Rsqr_p_Xsqr = B*B; }
   }
   if(domain==3) /* use Eq. (23) */
   {
@@ -2002,15 +2004,16 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     /* special cases in domain3 */
     if(B  == 0.0) X = 0.0;
     if(Ap == 1.0) { X = 0.0;   R = 1.0; }
+    if(B  == 1.0) { Xsqr = X*X;  Rsqr = 1.0-Xsqr;  Rsqr_p_Xsqr = 1.0; }
   }
 
   /* set Xp and Rp to X,R */
   *Xp = X;  *Rp = R;
 
   /* compute x,y,z */
-  Rsqr = R*R;
-  Xsqr = X*X;
-  Rsqr_p_Xsqr = (Rsqr + Xsqr);
+  if(Rsqr<0.0) Rsqr = R*R;
+  if(Xsqr<0.0) Xsqr = X*X;
+  if(Rsqr_p_Xsqr<0.0) Rsqr_p_Xsqr = (Rsqr + Xsqr);
   if(Rsqr_p_Xsqr>0.0) /* if not at infinity */
   {
     double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
@@ -2051,7 +2054,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   double dBdx, dBdy, dBdz;
   static int BBshift=-1;
   double X,R;
-  double Rsqr, Xsqr, Rsqr_p_Xsqr;
+  double Rsqr=-1, Xsqr=-1, Rsqr_p_Xsqr=-1;
   double dABphi_dXRphi[4][4]; /* dABphi_dXRphi[k][l] = dA^k/dX^l */
   double dXRphi_dxyz[4][4];   /* dXRphi_dxyz[l][m]   = dX^l/dx^m */
   int l;
@@ -2253,6 +2256,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     /* special cases in domain0 */
     if(B  == 0.0) R = 0.0;
     if(Ap == 1.0) { X = 1.0;   R = 0.0; }
+    if(B  == 1.0) { Rsqr = R*R;  Xsqr = 1.0-Rsqr;  Rsqr_p_Xsqr = 1.0; }
   }
 
   if(domain==1 || domain==2) /* use Eq. (22) */
@@ -2395,7 +2399,8 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 
     /* special cases in domain1/2 */
     if(B  == 0.0) { if(domain==1) R = 0.0;  else X = 0.0; }
-    /* if(Ap == 1.0) { R = X = B/sqrt(2.0); } */ /* <--more exact without this!!! */
+    if(B  == 1.0) { Rsqr = R*R;  Xsqr=1.0-Rsqr;  Rsqr_p_Xsqr = 1.0; }
+    if(Ap == 1.0) { R = X = sqrt(0.5)*B; Rsqr = Xsqr = 0.5*B*B; Rsqr_p_Xsqr = B*B; }
   }
   if(domain==3) /* use Eq. (23) */
   {
@@ -2518,6 +2523,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     /* special cases in domain3 */
     if(B  == 0.0) X = 0.0;
     if(Ap == 1.0) { X = 0.0;   R = 1.0; }
+    if(B  == 1.0) { Xsqr = X*X;  Rsqr = 1.0-Xsqr;  Rsqr_p_Xsqr = 1.0; }
   }
 
 
@@ -2533,9 +2539,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 /* End HACK1 */
 
   /* compute output vars from X,R,phi */
-  Rsqr = R*R;
-  Xsqr = X*X;
-  Rsqr_p_Xsqr = (Rsqr + Xsqr);
+  if(Rsqr<0.0) Rsqr = R*R;
+  if(Xsqr<0.0) Xsqr = X*X;
+  if(Rsqr_p_Xsqr<0.0) Rsqr_p_Xsqr = (Rsqr + Xsqr);
   if(Rsqr_p_Xsqr>0.0) /* if not at infinity */
   {
     double ooRsqr_p_Xsqr_sqr = 1.0/(Rsqr_p_Xsqr*Rsqr_p_Xsqr);
