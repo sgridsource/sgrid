@@ -3668,7 +3668,10 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   BNSgrid_init_Coords(grid2);
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  if(Getv("BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator",
+  /* NOTE: so far we have to use Interpolate_Var_From_Grid1_To_Grid2_wrapper
+     We have to interpolate on both sides of the grid since 
+     BNSgrid_init_Coords changes box4/5 on both sides!!! */
+  if(1 || Getv("BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator",
           "Interpolate_Var_From_Grid1_To_Grid2_wrapper"))
     Interp_From_Grid1_To_Grid2 = Interpolate_Var_From_Grid1_To_Grid2_wrapper;
   else
