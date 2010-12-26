@@ -474,6 +474,23 @@ tocompute = {
 
   Cif == end,
 
+  (* set FSigma and FlSigma such that Sigma remains unchanged in box0/3 *)
+  Cif == ( (bi==0 || bi==3) && KeepInnerSigma),
+    Cinstruction == "tBox *bo[2];    int bb;",
+    Cinstruction == "bo[0] = grid->box[bi];",
+    Cinstruction == "bo[1] = grid->box[(bi==0)+4]; /* box4/5 */",
+    Cinstruction == "for(bb=0; bb<=1; bb++) {",
+      Cif == nonlin, (* non-linear case *)
+        Cinstruction == "forallpoints(bo[bb], ijk) {",
+          FSigma  == 0,  (* Zero error ==> do not touch Sigma  *)
+        Cinstruction == "} /* endfor */",
+      Cif == else,   (* linear case *)
+        Cinstruction == "forallpoints(bo[bb], ijk) {",
+          FlSigma  == lSigma,  (* make lin. matrix diagonal ==> no correction *)
+        Cinstruction == "} /* endfor */",
+      Cif == end,
+    Cinstruction == "} /* endfor bb */",
+  Cif == end,
 
   (* for testing: set Sigma zero everywhere on outside *)
   Cif == ( (bi==1 || bi==2) && SigmaZeroInOuterBoxes),
@@ -547,6 +564,7 @@ BeginCFunction[] := Module[{},
   pr["int InnerSumZero = Getv(\"BNSdata_Sigma_surface_BCs\",\"InnerSumZero\");\n"];
   pr["int SigmaZeroInOuterBoxes = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroInOuterBoxes\");\n"];
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
+  pr["int KeepInnerSigma = Getv(\"BNSdata_KeepInnerSigma\",\"yes\");\n"];
   pr["int UniqueSigmaAtPoles = 0; //Getv(\"BNSdata_Sigma_surface_BCs\",\"UniqueSigmaAtPoles\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];

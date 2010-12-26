@@ -132,6 +132,7 @@ int sgrid_BNSdata()
          "[AddInnerVolIntToBC,AddInnerSumToBC,RegularityOnAxis,"
          "ZeroAtPoint,InnerVolIntZero,InnerSumZero,AtA0B0,AtA0B1,"
          "none,ZeroInOuterBoxes]");
+  AddPar("BNSdata_KeepInnerSigma", "no", "keep Sigma in inner boxes [no,yes]");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "max. number of iterations in BNSdata_solve");

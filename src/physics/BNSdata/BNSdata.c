@@ -2166,25 +2166,29 @@ exit(11);
     }
     else if(Getv("BNSdata_EllSolver_method", "BNS_ordered_Eqn_Iterator"))
     {
-      /* reset Newton_tol, so that we always solve for Sigma */
-      normresnonlin = GridL2Norm_of_vars_in_string(grid, "BNSdata_Sigma");
-      Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+      // /* reset Newton_tol, so that we always solve for Sigma */
+      // normresnonlin = GridL2Norm_of_vars_in_string(grid, "BNSdata_Sigma");
+      // Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
 
+      /* solve completely in outer boxes at first iteration */
+      if(grid->time == 1.0-itmax) /* solve completely at first iteration */
+      {
+        /* do not touch Sigma in inner boxes, but solve in outer */
+        Sets("BNSdata_KeepInnerSigma", "yes");
+        BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+               &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+        Sets("BNSdata_KeepInnerSigma", "no");
+        totalerr1 = average_current_and_old(1, grid,vlFu,vlu,vluDerivs, vlJdu);
+        varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+        /* reset Newton_tol, so that we always solve for Sigma */
+        F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+        normresnonlin = GridL2Norm(vlFu);
+        Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+      }
       /* solve the ell. eqn for Sigma alone */
       BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
-      totalerr1 = average_current_and_old(Sigma_esw, 
-                                          grid,vlFu,vlu,vluDerivs, vlJdu);
-      if(grid->time == 1.0-itmax) /* solve completely at first iteration */
-      {
-        /* complete step */
-        totalerr = average_current_and_old(1.0/Sigma_esw,
-                                           grid,vlFu,vlu,vluDerivs,vlJdu);
-        /* but go back to Sigma_esw if totalerr is larger */
-        if(totalerr>totalerr1)
-          totalerr = average_current_and_old(Sigma_esw/1.0, 
-                                             grid,vlFu,vlu,vluDerivs,vlJdu);
-      }
+      totalerr1 = average_current_and_old(Sigma_esw, grid,vlFu,vlu,vluDerivs, vlJdu);
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
 
       /* reset Newton_tol */

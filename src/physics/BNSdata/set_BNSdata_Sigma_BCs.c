@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 21.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 26.12.2010 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -30,6 +30,7 @@ int AddInnerSumToBC = Getv("BNSdata_Sigma_surface_BCs","AddInnerSumToBC");
 int InnerSumZero = Getv("BNSdata_Sigma_surface_BCs","InnerSumZero");
 int SigmaZeroInOuterBoxes = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxes");
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
+int KeepInnerSigma = Getv("BNSdata_KeepInnerSigma","yes");
 int UniqueSigmaAtPoles = 0; //Getv("BNSdata_Sigma_surface_BCs","UniqueSigmaAtPoles");
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
@@ -2061,6 +2062,64 @@ FlSigma[ijk]
 
 
 /* conditional */
+if ((bi == 0 || bi == 3) && KeepInnerSigma) {
+
+
+tBox *bo[2];    int bb; 
+
+
+bo[0] = grid->box[bi]; 
+
+
+bo[1] = grid->box[(bi==0)+4]; /* box4/5 */ 
+
+
+for(bb=0; bb<=1; bb++) { 
+
+
+
+/* conditional */
+if (nonlin) {
+
+
+forallpoints(bo[bb], ijk) { 
+
+FSigma[ijk]
+=
+0
+;
+
+
+} /* endfor */ 
+
+
+} else { /* if (!nonlin) */
+
+
+forallpoints(bo[bb], ijk) { 
+
+FlSigma[ijk]
+=
+lSigma[ijk]
+;
+
+
+} /* endfor */ 
+
+}
+/* if (nonlin) */
+
+
+
+} /* endfor bb */ 
+
+}
+/* if (nonlin) */
+
+
+
+
+/* conditional */
 if ((bi == 1 || bi == 2) && SigmaZeroInOuterBoxes) {
 
 
@@ -2110,4 +2169,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 121, n* = 551,  n/ = 263,  n+ = 383, n = 1197, O = 1 */
+/* nvars = 121, n* = 570,  n/ = 282,  n+ = 388, n = 1240, O = 1 */
