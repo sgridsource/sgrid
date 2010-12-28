@@ -2195,13 +2195,16 @@ exit(11);
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
       totalerr1 = average_current_and_old(Sigma_esw, 
                                           grid,vlFu,vlu,vluDerivs, vlJdu);
-      /* complete step */
-      totalerr = average_current_and_old(Sigma_esw1/Sigma_esw,
-                                         grid,vlFu,vlu,vluDerivs,vlJdu);
-      /* but go back to Sigma_esw if totalerr is larger */
-      if(totalerr>totalerr1)
-        totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
+      if(Sigma_esw<1.0 && it>=allow_Sigma_esw1_it && allow_Sigma_esw1_it>=0)
+      {
+        /* complete step */
+        totalerr = average_current_and_old(Sigma_esw1/Sigma_esw,
                                            grid,vlFu,vlu,vluDerivs,vlJdu);
+        /* but go back to Sigma_esw if totalerr is larger */
+        if(totalerr>totalerr1)
+          totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
+                                             grid,vlFu,vlu,vluDerivs,vlJdu);
+      }
       /* reset Sigmaold so that Sigma does not change when we average later */
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
 
