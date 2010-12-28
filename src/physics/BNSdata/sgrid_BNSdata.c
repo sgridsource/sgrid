@@ -146,6 +146,10 @@ int sgrid_BNSdata()
   AddPar("BNSdata_allow_esw1_first_at", "-1", "first iteration when esw=esw1 "
          "will be tried and allowed if better [#,-1]. -1 means never");
   AddPar("BNSdata_Sigma_esw", "0.2", "ell. solve weight for Sigma");
+  AddPar("BNSdata_Sigma_esw1",  "1", "second Sigma weight is used if better");
+  AddPar("BNSdata_allow_Sigma_esw1_first_at", "-1",
+         "first iteration when Sigma_esw=Sigma_esw1 "
+         "will be tried and allowed if better [#,-1]. -1 means never");
   AddPar("BNSdata_reset_qmax_xmax_pars_at", "-1", "list of its when we "
          "reset BNSdata_qmax1/2, BNSdata_xmax1/2");
   AddPar("BNSdata_analyze_xmax", "set_BNSdata_xmax",
