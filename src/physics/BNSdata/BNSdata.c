@@ -2392,7 +2392,9 @@ if(0) /* not working */
        is not "no": */
     /* set actual positions of maxima */
     set_BNSdata_actual_xyzmax_pars(grid);
-    if(!Getv("BNSdata_center_new_q", "no"))
+    if(    !Getv("BNSdata_center_new_q", "no")    &&
+       it>=Geti("BNSdata_center_new_q_first_at")  && 
+           Geti("BNSdata_center_new_q_first_at")>=0 )
     {
       int b,i;
       double m01, m02;
