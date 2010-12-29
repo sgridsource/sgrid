@@ -56,6 +56,8 @@ tocompute = {
     h == (n+1) q + 1,
     h2 == h*h,
     uzerosqr == (1 + (wDown[a] + dSigma[a]) (w[a] + DSigmaUp[a])/h2)/alpha2,
+    uzero == sqrt[uzerosqr],
+    vR[a] == (w[a] + DSigmaUp[a])/(uzero*h) - beta[a],
   Cif == end,
 
   (* rest mass density, pressure, and total energy density *)
