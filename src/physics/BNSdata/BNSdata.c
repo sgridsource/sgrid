@@ -2173,6 +2173,7 @@ int adjust_Omega_xCM_keep_dFuncdxfm_eq_0(tGrid *grid, int it, double tol)
   printf("adjust_Omega_xCM_keep_dFuncdxfm_eq_0: Xfm1=%g Xfm2=%g\n",
          pars->X1, pars->X2);
   prdivider(0);
+  /* adjust C1/2 so that masses are correct */
   adjust_C1_C2_q_keep_restmasses(grid, it, tol*100.0);
   prdivider(0);
 
