@@ -1468,12 +1468,14 @@ void q_at_xout1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
   blist[0]=0;  blist[1]=1;
   bi = b_X_of_x_forgiven_YZ_inboxlist(pars->grid, blist,2, &X, pars->xout1, Y,Z);
   q1 = BNS_compute_new_centered_q_atXYZ(pars->grid, bi, X,Y,Z);
+  // printf("  xout1=%g is at bi=%d (X,Y,Z)=(%g,%g,%g)\n", pars->xout1, bi,X,Y,Z);
 
   /* compute q at xout2 */
   X=0.001;     Y=Z=0;
   blist[0]=3;  blist[1]=2;
   bi = b_X_of_x_forgiven_YZ_inboxlist(pars->grid, blist,2, &X, pars->xout2, Y,Z);
   q2 = BNS_compute_new_centered_q_atXYZ(pars->grid, bi, X,Y,Z);
+  // printf("  xout2=%g is at bi=%d (X,Y,Z)=(%g,%g,%g)\n", pars->xout2, bi,X,Y,Z);
 
   printf("q_at_xout1_2_VectorFuncP: q(xout1)=%g q(xout2)=%g\n", q1, q2);
   fflush(stdout);
