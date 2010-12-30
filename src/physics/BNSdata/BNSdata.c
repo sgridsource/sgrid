@@ -1475,9 +1475,8 @@ void q_at_xout1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
   bi = b_X_of_x_forgiven_YZ_inboxlist(pars->grid, blist,2, &X, pars->xout2, Y,Z);
   q2 = BNS_compute_new_centered_q_atXYZ(pars->grid, bi, X,Y,Z);
 
-  printf("q_at_xout1_2_VectorFuncP: Omega=%g x_CM=%g q(xout1)=%g q(xout2)=%g\n",
-         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"),
-         q1, q2);  fflush(stdout);
+  printf("q_at_xout1_2_VectorFuncP: q(xout1)=%g q(xout2)=%g\n", q1, q2);
+  fflush(stdout);
   prdivider(0);
 
   /* return errors */
