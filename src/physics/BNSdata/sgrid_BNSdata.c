@@ -55,6 +55,8 @@ int sgrid_BNSdata()
   AddVar("BNSdata_alphaPold", "",  "old alphaP");
   AddVar("BNSdata_Sigmaold",  "",  "old Sigma");
   AddVar("BNSdata_qold",      "",  "old q");
+  /* q we get with corotating formula */
+  AddVar("BNSdata_qcorot",    "",  "q we get with corotating formula");
 
   AddVar("BNSdata_A", "", "store value of A in box4/5");
   AddVar("BNSdata_B", "", "store value of B in box4/5");

@@ -293,6 +293,7 @@ exit(77);
   enablevar(grid, Ind("BNSdata_alphaPold"));
   enablevar(grid, Ind("BNSdata_Sigmaold"));
   enablevar(grid, Ind("BNSdata_qold"));
+  enablevar(grid, Ind("BNSdata_qcorot"));
 
   /* enable some lapse and shift of ADMvars */
   enablevar(grid, Ind("alpha"));
@@ -2043,6 +2044,20 @@ int adjust_Omega_xCM_keep_dqdxmax_eq_0(tGrid *grid, int it, double tol)
   return 0;
 }
 
+/* compute q but with formula used for corotation case */
+void compute_qcorot_with_corotation_formula(tGrid *grid, int qcor)
+{
+  char rotationstate1sav[1024], rotationstate2sav[1024];
+
+  /* compute Func=(q we would have for corot) in var with ind qcor */
+  snprintf(rotationstate1sav, 1024, "%s", Gets("BNSdata_rotationstate1"));
+  snprintf(rotationstate2sav, 1024, "%s", Gets("BNSdata_rotationstate2"));
+  Sets("BNSdata_rotationstate1", "corotation");
+  Sets("BNSdata_rotationstate2", "corotation");
+  BNS_compute_new_q(grid, qcor);
+  Sets("BNSdata_rotationstate1", rotationstate1sav);
+  Sets("BNSdata_rotationstate2", rotationstate2sav);
+}
 
 /* for newton_linesrch_itsP: compute derivs of Func in domain 0 and 3,
    or 4 and 5 */
@@ -2050,7 +2065,6 @@ int adjust_Omega_xCM_keep_dqdxmax_eq_0(tGrid *grid, int it, double tol)
    if n=2 both BNSdata_Omega & BNSdata_x_CM are adjusted */
 void dFuncdx_at_Xfm1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
 {
-  char rotationstate1sav[1024], rotationstate2sav[1024];
   tGrid *grid;
   int b, bi1, bi2;
   double Xfm1,Yfm1, Xfm2,Yfm2;
@@ -2071,13 +2085,7 @@ void dFuncdx_at_Xfm1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
   if(n>=2) Setd("BNSdata_x_CM",  vec[2]);
 
   /* compute Func=(q we would have for corot) in BNSdata_temp4 */
-  snprintf(rotationstate1sav, 1024, "%s", Gets("BNSdata_rotationstate1"));
-  snprintf(rotationstate2sav, 1024, "%s", Gets("BNSdata_rotationstate2"));
-  Sets("BNSdata_rotationstate1", "corotation");
-  Sets("BNSdata_rotationstate2", "corotation");
-  BNS_compute_new_q(grid, Ind("BNSdata_temp4"));
-  Sets("BNSdata_rotationstate1", rotationstate1sav);
-  Sets("BNSdata_rotationstate2", rotationstate2sav);
+  compute_qcorot_with_corotation_formula(grid, Ind("BNSdata_temp4"));
 
   /* get deriv dFunc of Func in box bi1 and bi2 in BNSdata_temp1
      and dFunc's coeffs c in BNSdata_temp2 */
@@ -2099,10 +2107,10 @@ void dFuncdx_at_Xfm1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
                        grid->box[bi2]->v[Ind("BNSdata_temp2")], Xfm2,Yfm2,0);
 
   printf("dFuncdx_at_Xfm1_2_VectorFuncP: Omega=%.13g x_CM=%.13g\n"
-         "  => dFunc/dx(xfm1)=%.13g",
+         "  => dFunc/dX(Xfm1)=%.13g",
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"), fvec[1]);
 
-  if(n>=2) printf("  dFunc/dx(xfm2)=%.13g\n", fvec[2]);
+  if(n>=2) printf("  dFunc/dX(Xfm2)=%.13g\n", fvec[2]);
   else	   printf("\n");
   fflush(stdout);
   prdivider(0);
@@ -2111,7 +2119,6 @@ void dFuncdx_at_Xfm1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
 /* Adjust Omega and x_CM so that point with max Func, xfm1/2 stay put */
 int adjust_Omega_xCM_keep_dFuncdxfm_eq_0(tGrid *grid, int it, double tol)
 {
-  char rotationstate1sav[1024], rotationstate2sav[1024];
   int check, stat, bi, bi1,bi2, i;
   double OmxCMvec[3];
   double dqdx_m0[3];
@@ -2132,23 +2139,13 @@ int adjust_Omega_xCM_keep_dFuncdxfm_eq_0(tGrid *grid, int it, double tol)
   dx_CM = Getd("BNSdata_b") * Getd("BNSdata_dx_CM_fac");
   prdivider(0);
   printf("adjust_Omega_xCM_keep_dFuncdxfm_eq_0: in BNSdata_solve step %d\n"
-         "adjust_Omega_xCM_keep_dFuncdxfm_eq_0: old Omega=%g x_CM=%g tol=%g\n",
-         it, Omega, x_CM, tol);
+         "  old Omega=%g x_CM=%g tol=%g\n", it, Omega, x_CM, tol);
 
-  /* set Xfm1 and Xfm2: */
-  /* compute Func=(q we would have for corot) in BNSdata_temp4 */
-  snprintf(rotationstate1sav, 1024, "%s", Gets("BNSdata_rotationstate1"));
-  snprintf(rotationstate2sav, 1024, "%s", Gets("BNSdata_rotationstate2"));
-  Sets("BNSdata_rotationstate1", "corotation");
-  Sets("BNSdata_rotationstate2", "corotation");
-  BNS_compute_new_q(grid, Ind("BNSdata_temp4"));
-  Sets("BNSdata_rotationstate1", rotationstate1sav);
-  Sets("BNSdata_rotationstate2", rotationstate2sav);
-  /* find max in Func */
+  /* set Xfm1 and Xfm2, i.e. find max in Func = BNSdata_qcorot */
   bi1=0;  bi2=3;
-  find_Varmax_along_x_axis_usingBNSdata_temp123(grid, Ind("BNSdata_temp4"),
+  find_Varmax_along_x_axis_usingBNSdata_temp123(grid, Ind("BNSdata_qcorot"),
                                                 &bi1, &Xfm1, &Yfm1);
-  find_Varmax_along_x_axis_usingBNSdata_temp123(grid, Ind("BNSdata_temp4"),
+  find_Varmax_along_x_axis_usingBNSdata_temp123(grid, Ind("BNSdata_qcorot"),
                                                 &bi2, &Xfm2, &Yfm2);
   /* set global vars */
   pars->grid  = grid;
@@ -2577,6 +2574,9 @@ exit(11);
     varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
     varcopy(grid, Ind("BNSdata_qold"),      Ind("BNSdata_q"));
 
+    /* BNSdata_qcorot before ell solve */
+    compute_qcorot_with_corotation_formula(grid, Ind("BNSdata_qcorot"));
+  
     /* How we solve the coupled ell. eqns */
     if(Getv("BNSdata_EllSolver_method", "allatonce"))
     { /* solve the coupled ell. eqns all together */
