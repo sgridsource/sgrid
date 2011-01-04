@@ -1209,6 +1209,16 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
     for(i=0; i<n1; i++)   if(q_out[Index(i,j,k)]<=0.0) break;
     inz_out=i;
 
+    /* if q<=0 already at i=n1-1 in innerdom, we quit! */
+    if(inz_in==n1-1)
+    {
+      printf("reset_Coordinates_AnsorgNS_sigma_pm: innerdom=%d  B=%g phi=%g  "
+             "inz_in=%d inz_out=%d\n", innerdom, B,phi, inz_in,inz_out);
+      printf("q_in[Index(n1-1,j,k)]=%g\n", q_in[Index(n1-1,j,k)]);
+      errorexit("reset_Coordinates_AnsorgNS_sigma_pm: q<=0 at i=n1-1 in "
+                "inner domain???");
+    }
+
     /* if inz_in=>0, q has zero in inner domain */
     /* if inz_out<n1, q is negative in outer domain */
     if(inz_in>=0)                   { i1=inz_in;   i2=inz_in+1; dom=innerdom;}
