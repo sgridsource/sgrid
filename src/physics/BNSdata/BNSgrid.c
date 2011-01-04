@@ -1071,73 +1071,91 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
   double Ac,Bc, Acin,Bcin, Acout,Bcout, Acmax, q;
   double vec[3];
   int i, check, stat,statin,statout, dom;
+  int guessmode;
 
   /* use Eq. (22), (23) or (24) at A=0 to compute X,R */
   X = ReCp_Bphi - B*ReCp_1phi + B*cos(ArgCp_1phi);
   R = ImCp_Bphi - B*ImCp_1phi + B*sin(ArgCp_1phi);
 
-  /* set Acin,Bcin, Acout,Bcout, statin,statout to invalid values */
-  statin=statout=-1;
-  Acin=Acout=Bcin=Bcout=-1.0;
-
-  /* find domain and Ac,Bc on current grid, corresponding to X,R */
-  dom = innerdom;
-  for(i=1; i<=2; i++)
+  /* try 2 ways of finding an initial guess for Ac,Bc */
+  for(guessmode=0; guessmode<=1; guessmode++)
   {
-    DelXR_of_AB_VectorFunc__phi = phi;
-    DelXR_of_AB_VectorFunc__box = grid->box[dom];
-    DelXR_of_AB_VectorFunc__X = X;
-    DelXR_of_AB_VectorFunc__R = R;
-    Acmax  = grid->box[dom]->bbox[1];
-
-    /* get initial guess for Ac,Bc */
-    find_nearest_A_B_given_X_R_phi(grid->box[dom], X,R,phi, &Ac,&Bc);
-    if(dlesseq(Ac,0.0)) Ac=1e-7;
-    if(dequal(Bc,0.0) || dequal(Bc,1.0)) Bc=B;
-    if(dequal(B,0.0))   Bc=0.0;
-    vec[1] = Ac;
-    vec[2] = Bc;
-    if(dequal(B,0.0))
-      stat = newton_linesrch_its(vec, 1, &check,
-                                 DelXR_of_A_forB0_VectorFunc, 1000, 1e-10);
-    else
-      stat = newton_linesrch_its(vec, 2, &check, 
-                                 DelXR_of_AB_VectorFunc, 1000, 1e-10);
-    if(check) printf("q_of_sigp_forgiven_Bphi: check=%d\n", check);  
-    Ac = vec[1];
-    Bc = vec[2];
-
-    /* save vals for later */
-    if(dom == innerdom) {  Acin=Ac;  Bcin=Bc;  statin=stat; }
-    else                { Acout=Ac; Bcout=Bc; statout=stat; }
-//printf("  sigp_Bphi=%g sigp_1phi=%g:\n"
-//"       X=%g R=%g: stat=%d dom=%d Ac=%g Bc=%g\n",
-//sigp_Bphi,sigp_1phi, X,R, stat,dom, Ac,Bc);
-    /* if(stat>=0 && Ac>=0.0 && Ac<=Acmax && Bc>=0.0 && Bc<=1.0) break; */
-    if(stat>=0 && dlesseq(0.0,Ac) && dlesseq(Ac,1.0) &&
-                  dlesseq(0.0,Bc) && dlesseq(Bc,1.0)   ) break;
-    dom = outerdom;
-  }
-  /* decide which results to use */
-  if(dom == outerdom && statin>=0)
-  {
-    double dA=fabs(Acout)-fabs(Acin);
-    double dB=fabs(Bcout)-fabs(Bcin);
-    /* switch back to innerdom in some cases */
-    if(Ac<0.0)
-      if( dA>0.0 && dlesseq(0.0,Bcin) && dlesseq(Bcin,1.0) )
-      {dom=innerdom; Ac=0.0; Bc=Bcin; stat=statin;}
-    if(Bc<0.0)
-      if( dB>0.0 && dlesseq(0.0,Acin) && dlesseq(Acin,1.0) )
-      {dom=innerdom; Ac=Acin; Bc=0.0; stat=statin;}
-    if(Bc>1.0)
-      if(fabs(Bcin)<fabs(Bcout) && dlesseq(0.0,Acin) && dlesseq(Acin,1.0))
-      {dom=innerdom; Ac=Acin; Bc=1.0; stat=statin;}
+    /* set Acin,Bcin, Acout,Bcout, statin,statout to invalid values */
+    statin=statout=-1;
+    Acin=Acout=Bcin=Bcout=-1.0;
+  
+    /* find domain and Ac,Bc on current grid, corresponding to X,R */
+    dom = innerdom;
+    for(i=1; i<=2; i++)
+    {
+      DelXR_of_AB_VectorFunc__phi = phi;
+      DelXR_of_AB_VectorFunc__box = grid->box[dom];
+      DelXR_of_AB_VectorFunc__X = X;
+      DelXR_of_AB_VectorFunc__R = R;
+      Acmax  = grid->box[dom]->bbox[1];
+  
+      /* get initial guess for Ac,Bc in vec[1],vec[2] */
+      if(guessmode==0)
+      {
+        vec[1] = 1e-7; /* initial guess is that Ac,Bc = 0,B */
+        vec[2] = B;
+      }
+      else
+      {
+        find_nearest_A_B_given_X_R_phi(grid->box[dom], X,R,phi, &Ac,&Bc);
+        if(dlesseq(Ac,0.0)) Ac=1e-7;
+        if(dequal(Bc,0.0) || dequal(Bc,1.0)) Bc=B;
+        if(dequal(B,0.0))   Bc=0.0;
+        vec[1] = Ac;
+        vec[2] = Bc;
+      }
+      /* do newton line searches */
+      if(dequal(B,0.0))
+        stat = newton_linesrch_its(vec, 1, &check,
+                                   DelXR_of_A_forB0_VectorFunc, 1000, 1e-10);
+      else
+        stat = newton_linesrch_its(vec, 2, &check, 
+                                   DelXR_of_AB_VectorFunc, 1000, 1e-10);
+      if(check) printf("q_of_sigp_forgiven_Bphi: check=%d\n", check);  
+      Ac = vec[1];
+      Bc = vec[2];
+  
+      /* save vals for later */
+      if(dom == innerdom) {  Acin=Ac;  Bcin=Bc;  statin=stat; }
+      else                { Acout=Ac; Bcout=Bc; statout=stat; }
+  //printf("  sigp_Bphi=%g sigp_1phi=%g:\n"
+  //"       X=%g R=%g: stat=%d dom=%d Ac=%g Bc=%g\n",
+  //sigp_Bphi,sigp_1phi, X,R, stat,dom, Ac,Bc);
+      /* if(stat>=0 && Ac>=0.0 && Ac<=Acmax && Bc>=0.0 && Bc<=1.0) break; */
+      if(stat>=0 && dlesseq(0.0,Ac) && dlesseq(Ac,1.0) &&
+                    dlesseq(0.0,Bc) && dlesseq(Bc,1.0)   ) break;
+      dom = outerdom;
+    }
+    /* decide which results to use */
+    if(dom == outerdom && statin>=0)
+    {
+      double dA=fabs(Acout)-fabs(Acin);
+      double dB=fabs(Bcout)-fabs(Bcin);
+      /* switch back to innerdom in some cases */
+      if(Ac<0.0)
+        if( dA>0.0 && dlesseq(0.0,Bcin) && dlesseq(Bcin,1.0) )
+        {dom=innerdom; Ac=0.0; Bc=Bcin; stat=statin;}
+      if(Bc<0.0)
+        if( dB>0.0 && dlesseq(0.0,Acin) && dlesseq(Acin,1.0) )
+        {dom=innerdom; Ac=Acin; Bc=0.0; stat=statin;}
+      if(Bc>1.0)
+        if(fabs(Bcin)<fabs(Bcout) && dlesseq(0.0,Acin) && dlesseq(Acin,1.0))
+        {dom=innerdom; Ac=Acin; Bc=1.0; stat=statin;}
+    }
+    /* leave guessmode loop if we found a resonable result */
+    if(stat>=0 && dgreatereq(Ac,0.0) && dgreatereq(1.0,Ac) &&
+                  dgreatereq(Bc,0.0) && dgreatereq(1.0,Bc)   )  break;
   }
   /* check for failure */
   if(stat<0 || dless(Ac,0.0) || dless(1.0,Ac) ||
                dless(Bc,0.0) || dless(1.0,Bc)   )
   {
+    printf("q_of_sigp_forgiven_Bphi: guessmode=%d\n", guessmode);
     printf("q_of_sigp_forgiven_Bphi: stat=%d dom=%d Ac=%g Bc=%g\n",
            stat,dom, Ac,Bc);
     printf("statin=%d Acin=%g Bcin=%g  statout=%d Acout=%g Bcout=%g\n",
