@@ -1015,6 +1015,39 @@ void BNSdata_q_VectorFunc(int n, double *vec, double *fvec)
   fvec[1] = BNS_compute_new_centered_q_atXYZ(grid,b, A,B,phi);
 }
 
+/* go over box and find (A,B) that is closest to (X,R) */
+double find_nearest_A_B_given_X_R_phi(tBox *box,
+                                      double X, double R, double phi,
+                                      double *A, double *B)
+{
+  int Xind = Ind("X");
+  int Yind = Ind("Y");
+  int i,j,k, pl;
+  double min, dist;
+  double vec[3], fvec[3];
+
+  if(box->b>3) errorexit("find_nearest_A_B_given_X_R_phi: "
+                         "box->b must be between 0 and 3.");
+
+  DelXR_of_AB_VectorFunc__phi = phi;
+  DelXR_of_AB_VectorFunc__box = box;
+  DelXR_of_AB_VectorFunc__X = X;
+  DelXR_of_AB_VectorFunc__R = R;
+  pl = find_ind_closest_to_Z0(box, phi);
+
+  min = 1e300;
+  forplane3(i,j,k,  box->n1,box->n2,box->n3, pl)
+  {
+    vec[1] = box->v[Xind][i];
+    vec[2] = box->v[Yind][i];
+    DelXR_of_AB_VectorFunc(2, vec, fvec);
+    dist = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2]);
+    if(dist<min) 
+    { dist = min;   *A=vec[1];   *B=vec[2]; }
+  }
+  return dist;
+}
+
 /* WE NEED to find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
 /* q as a func of sigp for a given A=0, B, phi */
 void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
@@ -1056,8 +1089,14 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
     DelXR_of_AB_VectorFunc__X = X;
     DelXR_of_AB_VectorFunc__R = R;
     Acmax  = grid->box[dom]->bbox[1];
-    vec[1] = 1e-7; /* initial guess is that Ac,Bc = 0,B*/
-    vec[2] = B;
+
+    /* get initial guess for Ac,Bc */
+    find_nearest_A_B_given_X_R_phi(grid->box[dom], X,R,phi, &Ac,&Bc);
+    if(dlesseq(Ac,0.0)) Ac=1e-7;
+    if(dequal(Bc,0.0) || dequal(Bc,1.0)) Bc=B;
+    if(dequal(B,0.0))   Bc=0.0;
+    vec[1] = Ac;
+    vec[2] = Bc;
     if(dequal(B,0.0))
       stat = newton_linesrch_its(vec, 1, &check,
                                  DelXR_of_A_forB0_VectorFunc, 1000, 1e-10);
