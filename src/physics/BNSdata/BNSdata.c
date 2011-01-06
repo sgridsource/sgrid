@@ -136,6 +136,102 @@ void set_BNSdata_actual_xyzmax_pars(tGrid *grid);
 
 
 
+
+
+/* set conformal rotational velocity for one star */
+void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
+{
+  int corot1 = Getv("BNSdata_rotationstate1","corotation");
+  int corot2 = Getv("BNSdata_rotationstate2","corotation");
+  int b;
+  double omegax1   = Getd("BNSdata_omegax1");
+  double omegay1   = Getd("BNSdata_omegay1");
+  double omegaz1   = Getd("BNSdata_omegaz1");
+  double omegax2   = Getd("BNSdata_omegax2");
+  double omegay2   = Getd("BNSdata_omegay2");
+  double omegaz2   = Getd("BNSdata_omegaz2");
+  int corot;
+  double omegax, omegay, omegaz;
+
+  if(star==1)
+  {
+    corot=corot1;
+    omegax=omegax1;  omegay=omegay1;  omegaz=omegaz1;
+  }
+  else if(star==2)
+  {
+    corot=corot2;
+    omegax=omegax2;  omegay=omegay2;  omegaz=omegaz2;
+  }
+  else
+    errorexit("BNS_set_wB: star must be 1 or 2.");
+
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int i;
+    double *pX = box->v[Ind("X")];
+    double *pY = box->v[Ind("Y")];
+    double *pZ = box->v[Ind("Z")];
+    double *px = box->v[Ind("x")];
+    double *py = box->v[Ind("y")];
+    double *pz = box->v[Ind("z")];
+    double *BNSdata_wBx = box->v[Ind("BNSdata_wBx")];
+    double *BNSdata_wBy = box->v[Ind("BNSdata_wBx")+1];
+    double *BNSdata_wBz = box->v[Ind("BNSdata_wBx")+2];
+
+    if( star==2 && (b==0 || b==1 || b==5) ) continue;
+    if( star==1 && (b==3 || b==2 || b==4) ) continue;
+    
+    forallpoints(box,i)
+    {
+      double x = pX[i];
+      double y = pY[i];
+      double z = pZ[i];
+
+      if(px!=NULL) 
+      {
+        x = px[i];
+        y = py[i];
+        z = pz[i];
+      }
+
+      /* set wB */
+      if(!corot)
+      {
+        // double u0;
+        // double Psito4 = Psi1*Psi1*Psi1*Psi1;
+        // double h = (BNSdata_n+1) *q1 + 1; /* h = (n+1) q + 1 */
+        double vx,vy,vz;
+        double Att1, wBfac;
+        double A = pX[i];
+
+        if(b==1 || b==2)  Att1 = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
+        else              Att1 = 1.0;
+
+        /* omega cross r-rc */
+        vx = ( omegay1* (z-zc) - omegaz1* (y-yc) )*Att1;
+        vy = ( omegaz1* (x-xc) - omegax1* (z-zc) )*Att1;
+        vz = ( omegax1* (y-yc) - omegay1* (x-xc) )*Att1;
+        /* 1/u0^2 ~ alpha2 - Psito4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),*/
+        /* u0 = 1.0/sqrt(fabs(exp(2*Phi1) - Psito4*(vx*vx + vy*vy + vz*vz)));
+           wBfac = h*u0 * (Psito4 * Psi1*Psi1);  ???  */
+        wBfac = 1.0;
+        BNSdata_wBx[i] = vx * wBfac;
+        BNSdata_wBy[i] = vy * wBfac;
+        BNSdata_wBz[i] = vz * wBfac;
+      }
+      else
+      {
+        BNSdata_wBx[i] = 0.0; 
+        BNSdata_wBy[i] = 0.0;
+        BNSdata_wBz[i] = 0.0;
+      }
+    } /* end forallpoints */
+  }
+}
+
+
 /* initial shift as in gr-qc/0007028v2*/
 void BNSdata_initial_shift(int star, double fac, 
                            double m1, double m2, double Omega, double r12,
@@ -414,51 +510,29 @@ exit(77);
       /* set Sigma and wB if needed */
       if( (b==0 || b==1 || b==5) && (!corot1) )
       {
-        double vx,vy,vz;
-        double u0, Att, wBfac;
-        double Psito4 = Psi1*Psi1*Psi1*Psi1;
-        double h = (BNSdata_n+1) *q1 + 1; /* h = (n+1) q + 1 */
+        double Att;
         double A = pX[i];
         if(b==1) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
         else     Att = 1.0;
 
         BNSdata_Sigma[i] = Omega*(xc1-xCM) * y * Att;
-
-        vx = ( omegay1* (z)     - omegaz1* (y) ) * Att;
-        vy = ( omegaz1* (x-xc1) - omegax1* (z) ) * Att;
-        vz = ( omegax1* (y)     - omegay1* (x-xc1) ) * Att;
-        /* 1/u0^2 = alpha2 - Psito4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),*/
-        u0 = 1.0/sqrt(fabs(exp(2*Phi1) - Psito4*(vx*vx + vy*vy + vz*vz)));
-        wBfac = h*u0 * (Psito4 * Psi1*Psi1);
-        BNSdata_wBx[i] = vx * wBfac; 
-        BNSdata_wBy[i] = vy * wBfac;
-        BNSdata_wBz[i] = vz * wBfac;
       }
       if( (b==3 || b==2 || b==4) && (!corot2) )
       {
-        double vx,vy,vz;
-        double u0, Att, wBfac;
-        double Psito4 = Psi2*Psi2*Psi2*Psi2;
-        double h = (BNSdata_n+1) *q2 + 1;
+        double Att;
         double A = pX[i];
         if(b==2) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
         else     Att = 1.0;
 
         BNSdata_Sigma[i] = Omega*(xc2-xCM) * y * Att;
-
-        vx = ( omegay2* (z)     - omegaz2* (y) ) * Att;
-        vy = ( omegaz2* (x-xc2) - omegax2* (z) ) * Att;
-        vz = ( omegax2* (y)     - omegay2* (x-xc2) ) * Att;
-        /* 1/u0^2 = alpha2 - Psito4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),*/
-        u0 = 1.0/sqrt(fabs(exp(2*Phi2) - Psito4*(vx*vx + vy*vy + vz*vz)));
-        wBfac = h*u0 * (Psito4 * Psi2*Psi2);
-        BNSdata_wBx[i] = vx * wBfac; 
-        BNSdata_wBy[i] = vy * wBfac;
-        BNSdata_wBz[i] = vz * wBfac;
       }
     } /* end forallpoints */
   }
 
+  /* set wB in both stars */
+  BNS_set_wB(grid, 1, xc1,0.0,0.0);
+  BNS_set_wB(grid, 2, xc2,0.0,0.0);
+  
   /* if NS1 is shifted in y-direc. (for testing) adjust grid on right side */
   if(ysh1 != 0.0 && Getv("BNSdata_adjustdomain01","yes"))
   {
