@@ -2648,9 +2648,13 @@ exit(11);
     varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
     varcopy(grid, Ind("BNSdata_qold"),      Ind("BNSdata_q"));
 
-    /* BNSdata_qcorot before ell solve */
+    /* set BNSdata_qcorot before ell solve */
     compute_qcorot_with_corotation_formula(grid, Ind("BNSdata_qcorot"));
-  
+
+    /* set wB before we solve */
+    BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0); 
+    BNS_set_wB(grid, 2, Getd("BNSdata_actual_xmax2"),0.0,0.0); 
+
     /* How we solve the coupled ell. eqns */
     if(Getv("BNSdata_EllSolver_method", "allatonce"))
     { /* solve the coupled ell. eqns all together */
