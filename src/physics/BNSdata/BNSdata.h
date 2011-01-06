@@ -23,7 +23,7 @@ void BNS_compute_new_q(tGrid *grid, int iq);
 double BNS_compute_new_q_atXYZ(tGrid *grid, int bi,
                                double X, double Y, double Z);
 void BNS_set_restmassintegrand(tGrid *grid, int iInteg);
-void BNS_set_J_ADM_VolInt_integrand(tGrid *grid, int iInteg);
+void BNS_set_J_ADM_VolInt_integrand(tGrid *grid, int iIntegx, int iIntegy, int iIntegz);
 void BNS_set_M_ADM_VolInt_integrand(tGrid *grid, int iInteg);
 void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,
                           tVarList *vlJdu, tVarList *vldu,

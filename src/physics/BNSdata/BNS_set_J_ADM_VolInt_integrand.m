@@ -1,11 +1,12 @@
 (* BNS_set_J_ADM_VolInt_integrand.m 
    Wolfgang Tichy  11/2008       *)
 
-(* set integrand for inner volume integrals of J_ADM *)
+(* set integrand for inner volume integrals of J_ADM components *)
 
 
 (* variables *)
-variables = {Psi, B[a], alphaP, Sigma, dSigma[a], q, wB[a], x, y, Integ}
+variables = {Psi, B[a], alphaP, Sigma, dSigma[a], q, wB[a], x,y,z,
+            Integx,Integy,Integz}
 
 
 constvariables = {OmegaCrossR[a]}
@@ -74,7 +75,9 @@ tocompute = {
   jup[a] == alpha (rhoE + P) uzerosqr (vR[a]+beta[a]),
 
  (* Integrand for rest mass with 3-volume element factor Psi^6 *)
-  Integ == Psi4 ( (x-xCM)*jup2 - y*jup1 ) * Psi4*Psi2,
+  Integx == Psi4 (  y * jup3    -  z * jup2 ) * Psi4*Psi2,
+  Integy == Psi4 (  z * jup1    - (x-xCM)*jup3 ) * Psi4*Psi2,
+  Integz == Psi4 ( (x-xCM)*jup2 - y*jup1 ) * Psi4*Psi2,
 
   Cinstruction == "} /* end of points loop */\n"
 }
@@ -106,7 +109,7 @@ BeginCFunction[] := Module[{},
 
   pr["\n\n\n"];
 
-  pr["void BNS_set_J_ADM_VolInt_integrand(tGrid *grid, int iInteg)\n"];
+  pr["void BNS_set_J_ADM_VolInt_integrand(tGrid *grid, int iIntegx, int iIntegy, int iIntegz)\n"];
   pr["{\n"];
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
@@ -136,6 +139,7 @@ variabledeclarations[] := Module[{},
 
   prdecvarname[{x},      "x"];
   prdecvarname[{y},      "y"];
+  prdecvarname[{z},      "z"];
 
   prdecvarname[{Psi},     "BNSdata_Psi"];
   prdecvarname[{B[a]},    "BNSdata_Bx"];
@@ -145,7 +149,9 @@ variabledeclarations[] := Module[{},
   prdecvarname[{wB[a]}, "BNSdata_wBx"];
   prdecvarname[{dSigma[a]},     "BNSdata_Sigmax"];
 
-  prdecvar[{Integ}, "iInteg"];
+  prdecvar[{Integx}, "iIntegx"];
+  prdecvar[{Integy}, "iIntegy"];
+  prdecvar[{Integz}, "iIntegz"];
 
   pr["\n"];
 ];    

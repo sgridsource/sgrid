@@ -2943,7 +2943,8 @@ int BNSdata_analyze(tGrid *grid)
   double Omega = Getd("BNSdata_Omega");
   double x_CM  = Getd("BNSdata_x_CM");
   double xout1, xin1, xin2, xout2;
-  double M_ADM, J_ADM, m01, m02;
+  double M_ADM, J_ADM, Jx_ADM,Jy_ADM,Jz_ADM, m01, m02;
+  double Jx_ADM1,Jy_ADM1,Jz_ADM1, Jx_ADM2,Jy_ADM2,Jz_ADM2;
   double *M_ADM_ofA;
   double M_ADM_in0, M_ADM_in3, M_ADM_in1, M_ADM_in2; 
   int iX = Ind("X");
@@ -2958,6 +2959,8 @@ int BNSdata_analyze(tGrid *grid)
   double sigm_00 = grid->box[2]->v[isigma][0]; /* sigma_m at B=phi=0 */
   double sigm_10 = grid->box[2]->v[isigma][Ind_n1n2(0,b2n2-1,0, b2n1,b2n2)]; /* sigma_m at B=1, phi=0 */
   int itemp1 = Ind("BNSdata_temp1");
+  int itemp2 = Ind("BNSdata_temp2");
+  int itemp3 = Ind("BNSdata_temp3");
   double *temp1 = grid->box[1]->v[itemp1];
   double xmax1, qmax1, xmax2, qmax2;
   int bi1, bi2;
@@ -2989,9 +2992,20 @@ int BNSdata_analyze(tGrid *grid)
   m02 = GetInnerRestMass(grid, 3);
 
   /* compute ADM ang. mom. */
-  BNS_set_J_ADM_VolInt_integrand(grid, itemp1);
-  J_ADM = InnerVolumeIntegral(grid, 0, itemp1) +
-          InnerVolumeIntegral(grid, 3, itemp1);
+  BNS_set_J_ADM_VolInt_integrand(grid, itemp1,itemp2,itemp3);
+  Jx_ADM1 = InnerVolumeIntegral(grid, 0, itemp1);
+  Jy_ADM1 = InnerVolumeIntegral(grid, 0, itemp2);
+  Jz_ADM1 = InnerVolumeIntegral(grid, 0, itemp3);
+  Jx_ADM2 = InnerVolumeIntegral(grid, 3, itemp1);
+  Jy_ADM2 = InnerVolumeIntegral(grid, 3, itemp2);
+  Jz_ADM2 = InnerVolumeIntegral(grid, 3, itemp3);
+  Jx_ADM = Jx_ADM1 + Jx_ADM2;
+  Jy_ADM = Jy_ADM1 + Jy_ADM2;
+  Jz_ADM = Jz_ADM1 + Jz_ADM2;
+  J_ADM = sqrt(Jx_ADM*Jx_ADM + Jy_ADM*Jy_ADM + Jz_ADM*Jz_ADM);
+  printf("Jx_ADM1=%.9g Jy_ADM1=%.9g Jz_ADM1=%.9g "
+         "Jx_ADM2=%.9g Jy_ADM2=%.9g Jz_ADM2=%.9g\n",
+         Jx_ADM1,Jy_ADM1,Jz_ADM1, Jx_ADM2,Jy_ADM2,Jz_ADM2);
 
   /* compute ADM mass from second deriv of Psi */
   M_ADM = ADMmass_fromPsi_inbox1_at_A1B0(grid, itemp1);

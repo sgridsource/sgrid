@@ -1,5 +1,5 @@
 /* BNS_set_J_ADM_VolInt_integrand.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 29.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 6.1.2011 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -14,7 +14,7 @@
 
 
 
-void BNS_set_J_ADM_VolInt_integrand(tGrid *grid, int iInteg)
+void BNS_set_J_ADM_VolInt_integrand(tGrid *grid, int iIntegx, int iIntegy, int iIntegz)
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
@@ -36,6 +36,8 @@ int index_x = Ind("x");
 double *x = box->v[index_x + 0];
 int index_y = Ind("y");
 double *y = box->v[index_y + 0];
+int index_z = Ind("z");
+double *z = box->v[index_z + 0];
 int index_BNSdata_Psi = Ind("BNSdata_Psi");
 double *Psi = box->v[index_BNSdata_Psi + 0];
 int index_BNSdata_Bx = Ind("BNSdata_Bx");
@@ -56,7 +58,9 @@ int index_BNSdata_Sigmax = Ind("BNSdata_Sigmax");
 double *dSigma1 = box->v[index_BNSdata_Sigmax + 0];
 double *dSigma2 = box->v[index_BNSdata_Sigmax + 1];
 double *dSigma3 = box->v[index_BNSdata_Sigmax + 2];
-double *Integ = box->v[iInteg+0];
+double *Integx = box->v[iIntegx+0];
+double *Integy = box->v[iIntegy+0];
+double *Integz = box->v[iIntegz+0];
 
 
 double alpha;
@@ -352,7 +356,17 @@ jup3
 alpha*(P + rhoE)*uzerosqr*(beta3 + vR3)
 ;
 
-Integ[ijk]
+Integx[ijk]
+=
+Psi2*(jup3*y[ijk] - jup2*z[ijk])*pow2(Psi4)
+;
+
+Integy[ijk]
+=
+Psi2*(jup3*(xCM - x[ijk]) + jup1*z[ijk])*pow2(Psi4)
+;
+
+Integz[ijk]
 =
 Psi2*(jup2*(-xCM + x[ijk]) - jup1*y[ijk])*pow2(Psi4)
 ;
@@ -366,4 +380,4 @@ Psi2*(jup2*(-xCM + x[ijk]) - jup1*y[ijk])*pow2(Psi4)
 }  /* end of function */
 
 /* BNS_set_J_ADM_VolInt_integrand.c */
-/* nvars = 16, n* = 85,  n/ = 34,  n+ = 79, n = 198, O = 1 */
+/* nvars = 19, n* = 96,  n/ = 34,  n+ = 88, n = 218, O = 1 */
