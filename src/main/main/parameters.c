@@ -18,13 +18,8 @@
 
 
 
-/* parameter data base */
-typedef struct {
-  char *name;
-  char *value;
-  char *description;
-} tParameter;
-
+/* global vars for parameter data base
+   (tParameter is defined in src/main/main/sgrid_main.h) */
 tParameter *pdb;
 int npdb, npdbmax = 1000;
 
@@ -531,6 +526,10 @@ int iterate_parameters(void)
   return 0;
 }
 
+
+/**********************************************/
+/* functions to copy the entire par data base */
+/**********************************************/
 
 /* Create a copy of parameter database pdb1 in pdb2. 
    This allocates all memory needed for pdb2.

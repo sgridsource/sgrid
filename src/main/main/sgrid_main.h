@@ -31,6 +31,12 @@
 
 
 /* parameters.c */
+/* parameter data base structure */
+typedef struct {
+  char *name;
+  char *value;
+  char *description;
+} tParameter;
 void AddPar(char *name, char *value, char *description);
 void AddOrModifyPar(char *name, char *value, char *description);
 void Sets(char *name, char *value);
@@ -47,6 +53,9 @@ void Appends(char *name, char *value);
 char *GetsInd(int i);
 char *GetnameInd(int i);
 int GetnParameters();
+void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
+                                 tParameter *pdb2);
+void free_pdb(tParameter *pdb1, int npdb1);
 
 /* skeleton.c */
 enum
