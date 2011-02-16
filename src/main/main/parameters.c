@@ -534,24 +534,30 @@ int iterate_parameters(void)
 /* Create a copy of parameter database pdb1 in pdb2. 
    This allocates all memory needed for pdb2.
    The caller has to free pdb2 later on its own, e.g. with free_pdb */
+/* if we have: tParameter *pdb2;
+   call like:  create_copy_of_pdb1_in_pdb2(pdb,npdb,npdbmax, &pdb2); */
 void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
-                                 tParameter *pdb2)
+                                 tParameter **pdb2)
 {
   int i;
+  tParameter *p2;
+  p2 = *pdb2;
 
-  /* allocate array for pdb2 */
-  pdb2 = (tParameter *) calloc(sizeof(tParameter), npdb1max);
-  if(!pdb2) errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
+  /* allocate array for p2 */
+  p2 = (tParameter *) calloc(sizeof(tParameter), npdb1max);
+  if(!p2) errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
 
-  /* go over pars in pdb1 and use strdup to create copies in pdb2 */
+  /* go over pars in pdb1 and use strdup to create copies in p2 */
   for(i=0; i<npdb1; i++)
   {
-    pdb2[i].name  = strdup(pdb1[i].name);
-    pdb2[i].value = strdup(pdb1[i].value);
-    pdb2[i].description = strdup(pdb1[i].description);
-    if(!pdb2[i].name || !pdb2[i].value || !pdb2[i].description)
+    p2[i].name  = strdup(pdb1[i].name);
+    p2[i].value = strdup(pdb1[i].value);
+    p2[i].description = strdup(pdb1[i].description);
+    if(!p2[i].name || !p2[i].value || !p2[i].description)
       errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
   }
+  /* set pdb2 */
+  *pdb2=p2;
 }
 
 /* free the parameter database in pdb1 */
