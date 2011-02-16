@@ -541,7 +541,6 @@ void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
 {
   int i;
   tParameter *p2;
-  p2 = *pdb2;
 
   /* allocate array for p2 */
   p2 = (tParameter *) calloc(sizeof(tParameter), npdb1max);
