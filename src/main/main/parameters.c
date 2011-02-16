@@ -530,3 +530,42 @@ int iterate_parameters(void)
   prdivider(0);
   return 0;
 }
+
+
+/* Create a copy of parameter database pdb1 in pdb2. 
+   This allocates all memory needed for pdb2.
+   The caller has to free pdb2 later on its own, e.g. with free_pdb */
+void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
+                                 tParameter *pdb2)
+{
+  int i;
+
+  /* allocate array for pdb2 */
+  pdb2 = (tParameter *) calloc(sizeof(tParameter), npdb1max);
+  if(!pdb2) errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
+
+  /* go over pars in pdb1 and use strdup to create copies in pdb2 */
+  for(i=0; i<npdb1; i++)
+  {
+    pdb2[i].name  = strdup(pdb1[i].name);
+    pdb2[i].value = strdup(pdb1[i].value);
+    pdb2[i].description = strdup(pdb1[i].description);
+    if(!pdb2[i].name || !pdb2[i].value || !pdb2[i].description)
+      errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
+  }
+}
+
+/* free the parameter database in pdb1 */
+void free_pdb(tParameter *pdb1, int npdb1)
+{
+  int i;
+
+  /* go over pars in pdb1 and free them */
+  for(i=0; i<npdb1; i++)
+  {
+    free(pdb1[i].name);
+    free(pdb1[i].value);
+    free(pdb1[i].description);
+  }
+  free(pdb1);
+}
