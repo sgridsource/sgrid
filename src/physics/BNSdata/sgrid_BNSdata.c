@@ -49,6 +49,11 @@ int sgrid_BNSdata()
   AddVar("BNSdata_wB",  "Ij","1st deriv of wB");
   AddVar("BNSdata_q",   "i", "1st deriv of q");
 
+  /* star surfaces at current and previous iterations */
+  AddVar("BNSdata_surface_sigma_pm", "",
+         "previous Coordinates_AnsorgNS_sigma_pm. We save only in box0/3 and "
+         "keep previous surfaces at indices i=1,2,... current surf is at i=0");
+
   /* sometimes we save the old vars before the ell. solve */
   AddVar("BNSdata_Psiold",    "",  "old Psi");
   AddVar("BNSdata_Bold",      "I", "old B");

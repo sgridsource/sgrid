@@ -63,6 +63,8 @@ tVarList *vldu, *vlJdu, *vlduDerivs;
 
 
 /* functions in this file */
+void save_surfacepos_in_BNSdata_surface_sigma_pm(int star, tGrid *grid,
+                                                 tGrid *grid_bak);
 void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
                             double x, double y, double z);
 void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
@@ -393,6 +395,7 @@ exit(77);
   enablevar(grid, Ind("BNSdata_Sigmaold"));
   enablevar(grid, Ind("BNSdata_qold"));
   enablevar(grid, Ind("BNSdata_qcorot"));
+  enablevar(grid, Ind("BNSdata_surface_sigma_pm"));
 
   /* enable some lapse and shift of ADMvars */
   enablevar(grid, Ind("alpha"));
@@ -585,6 +588,10 @@ exit(77);
         if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
     }
   }
+
+  /* save initial surface positions in BNSdata_surface_sigma_pm */
+  save_surfacepos_in_BNSdata_surface_sigma_pm(1, grid, grid);
+  save_surfacepos_in_BNSdata_surface_sigma_pm(2, grid, grid);
 
   /* set BNSdata_actual_xyzmax pars */
   set_BNSdata_actual_xyzmax_pars(grid);
@@ -1039,6 +1046,49 @@ void backup_grid_pdb(tGrid *grid, tParameter *pdb,
   copy_pdb(pdb, npdb, pdb_bak);
 }
 
+/* save star surfaces (given by sigma_pm) in BNSdata_surface_sigma_pm on
+   both grids. */
+void save_surfacepos_in_BNSdata_surface_sigma_pm(int star, tGrid *grid,
+                                                 tGrid *grid_bak)
+{
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int surfi  = Ind("BNSdata_surface_sigma_pm");
+  int b, i,j,k, n1,n2,n3, ijk,ijk1;
+  double *surf_sig;
+  double *surf;
+  double *surf_bak;
+
+  /* compute diff between grid_bak and grid */
+  if(star==1) b=0;
+  else if(star==2) b=3;
+  else 
+    errorexit("save_surfacepos_in_BNSdata_surface_sigma_pm: star must be 1 or 2.");
+  n1=(grid)->box[b]->n1;
+  n2=(grid)->box[b]->n2;
+  n3=(grid)->box[b]->n3;
+  surf_sig = (grid)->box[b]->v[sigpmi];
+  surf     = (grid)->box[b]->v[surfi];
+  surf_bak = (grid_bak)->box[b]->v[surfi];
+
+  /* save previous surfaces on both grids */
+  for (k = 0; k < n3; k++)
+  for (j = 0; j < n2; j++)
+  for (i = n1-1; i > 0; i--)
+  {
+    ijk = Index(i,j,k);
+    ijk1= Index(i-1,j,k);
+    surf[ijk]    = surf[ijk1];
+    if(surf_bak) surf_bak[ijk]= surf_bak[ijk1];
+  }
+  /* set current surface on both grids */
+  forplane1(i,j,k, n1,n2,n3, 0)
+  {
+    ijk = Index(i,j,k);
+    surf[ijk] = surf_sig[ijk];
+    if(surf_bak) surf_bak[ijk] = surf_sig[ijk];
+  }
+}
+
 /* compare grid,pdb to grid_bak,pdb_bak for one star and keep grid,pdb
    if the surface difference is small, otherwise restore grid,pdb
    to grid_bak,pdb_bak
@@ -1049,11 +1099,15 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
                                       tGrid *grid, tParameter *pdb,
                                       tGrid *grid_bak, tParameter *pdb_bak)
 {
-  int surfi = Ind("Coordinates_AnsorgNS_sigma_pm");
-  int b, i,j,k, n1,n2,n3, ijk, n;
-  double *surf1;
-  double *surf2;
-  double diff;
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int surfi  = Ind("BNSdata_surface_sigma_pm");
+  int b, i,j,k, n1,n2,n3, ijk,ijk1, n;
+  double *surf_sig_bak;
+  double *surf;
+  double diff_new_old, diff_new_sig;
+
+  /* save current and previous surfaces in BNSdata_surface_sigma_pm  */
+  save_surfacepos_in_BNSdata_surface_sigma_pm(star, grid, grid_bak);
 
   /* do nothing if we tolerate large differences */  
   if(Getd("BNSdata_domainshape_diff")>=1e30) return;
@@ -1066,22 +1120,26 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   n1=(grid)->box[b]->n1;
   n2=(grid)->box[b]->n2;
   n3=(grid)->box[b]->n3;
-  surf1= (grid_bak)->box[b]->v[surfi];
-  surf2= (grid)->box[b]->v[surfi];
+  surf_sig_bak = grid_bak->box[b]->v[sigpmi];
+  surf         = grid->box[b]->v[surfi];
 
-  /* L2-norm diff between surf1 and surf2 */
-  diff=0.0; n=0;
+  /* L2-norm diff between surf_sig and surf_new */
+  diff_new_old = diff_new_sig = 0.0; n=0;
   forplane1(i,j,k, n1,n2,n3, 0)
   {
     ijk = Index(i,j,k);
-    diff += (surf1[ijk]-surf2[ijk])*(surf1[ijk]-surf2[ijk]);
+    diff_new_sig += (surf[ijk]-surf_sig_bak[ijk])*(surf[ijk]-surf_sig_bak[ijk]);
+    ijk1 = Index(i+1,j,k); /* index of previous surface */
+    diff_new_old += (surf[ijk]-surf[ijk1])*(surf[ijk]-surf[ijk1]);
     n++;
   }
-  diff=sqrt(diff/n);
-  printf("restore_grid_pdb_if_change_in_star_is_large: diff=%g\n",diff);
+  diff_new_sig = sqrt(diff_new_sig/n);
+  diff_new_old = sqrt(diff_new_old/n);
+  printf("restore_grid_pdb_if_change_in_star_is_large: "
+         "diff_new_old=%g diff_new_sig=%g\n", diff_new_old, diff_new_sig);
 
   /* if diff is small */
-  if(diff<=Getd("BNSdata_domainshape_diff"))
+  if(diff_new_old < Getd("BNSdata_domainshape_diff")*diff_new_sig)
   {
     printf(" adjusted domain shape of star%d.\n", star);
     return;
