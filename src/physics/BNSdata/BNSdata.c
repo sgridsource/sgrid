@@ -1033,13 +1033,13 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
 
 
 /* backup grid,pdb to grid_bak,pdb_bak.
-   But do it only if BNSdata_domainshape_diff<1e30. 
+   But do it only if BNSdata_domainshape_diff_tol<1e30. 
    Call as:    backup_grid_pdb(grid,pdb, grid_bak,pdb_bak); */
 void backup_grid_pdb(tGrid *grid, tParameter *pdb,
                      tGrid *grid_bak, tParameter *pdb_bak)
 {
   /* do nothing if we tolerate large differences */ 
-  if(Getd("BNSdata_domainshape_diff")>=1e30) return;
+  if(Getd("BNSdata_domainshape_diff_tol")>=1e30) return;
 
   /* make exact copies of grid and pdb */
   copy_grid(grid, grid_bak, 0);
@@ -1110,7 +1110,7 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   save_surfacepos_in_BNSdata_surface_sigma_pm(star, grid, grid_bak);
 
   /* do nothing if we tolerate large differences */  
-  if(Getd("BNSdata_domainshape_diff")>=1e30) return;
+  if(Getd("BNSdata_domainshape_diff_tol")>=1e30) return;
 
   /* compute diff between grid_bak and grid */
   if(star==1) b=0;
@@ -1141,7 +1141,7 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   /* Check if diff_new_old is small. 
      Compare arXiv:0804.3787, III C. Algorithm point 3. */
   /* if diff_new_old is small, keep new grid */
-  if(diff_new_old < Getd("BNSdata_domainshape_diff")*diff_new_sig)
+  if(diff_new_old < Getd("BNSdata_domainshape_diff_tol")*diff_new_sig)
   { 
     printf(" adjusted domain shape of star%d.\n", star);
     return;
