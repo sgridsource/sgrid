@@ -152,7 +152,7 @@ void makeparameter(char *name, char *value, char *description)
 
   if (firstcall) {
     firstcall = 0;
-    pdb = (tParameter *) calloc(sizeof(tParameter), npdbmax);
+    pdb = (tParameter *) calloc(npdbmax, sizeof(tParameter));
     if (!pdb) errorexit("makeparameter: out of memory");
     npdb = 0;
   }
@@ -161,15 +161,15 @@ void makeparameter(char *name, char *value, char *description)
 
   if (!p) {
     p = &pdb[npdb++];
-    p->name = (char *) calloc(sizeof(char), strlen(name)+1);
-    p->value = (char *) calloc(sizeof(char), strlen(value)+1);
+    p->name = (char *) calloc(strlen(name)+1, sizeof(char));
+    p->value = (char *) calloc(strlen(value)+1, sizeof(char));
     strcpy(p->name, name);
     strcpy(p->value, value);
     translatevalue(&p->value);
   } else {
     free(p->description);
   }
-  p->description = (char *) calloc(sizeof(char), strlen(description)+1);
+  p->description = (char *) calloc(strlen(description)+1, sizeof(char));
   strcpy(p->description, description);
 
   if (npdb >= npdbmax) 
@@ -511,7 +511,7 @@ int iterate_parameters(void)
   if (newvalue) {
     printf("Starting iteration %d\n", ncall);
     if (1) printf("  outdir = %s\n", Gets("outdir"));
-    outdirp = (char *) calloc(sizeof(char), strlen(newoutdir)+40);
+    outdirp = (char *) calloc(strlen(newoutdir)+40, sizeof(char));
     strcpy(outdirp, newoutdir);
     strcat(outdirp, "_previous");
     system2("rm -rf", outdirp);
@@ -560,7 +560,7 @@ void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
   tParameter *p2;
 
   /* allocate array for p2 */
-  p2 = (tParameter *) calloc(sizeof(tParameter), npdb1max);
+  p2 = (tParameter *) calloc(npdb1max, sizeof(tParameter));
   if(!p2) errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
 
   /* go over pars in pdb1 and use strdup to create copies in p2 */
@@ -576,8 +576,54 @@ void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
   *pdb2=p2;
 }
 
-/* free the parameter database in pdb1 */
-void free_pdb(tParameter *pdb1, int npdb1)
+/* Make an empty par database of max length npdb1max.
+   Usage: pdb2 = make_empty_pdb(npdbmax); */
+tParameter *make_empty_pdb(int npdb1max)
+{
+  int i;
+  tParameter *pdb1;
+  /* allocate array for pdb1 */
+  pdb1 = (tParameter *) calloc(npdb1max, sizeof(tParameter));
+  if(!pdb1) errorexit("make_empty_pdb: out of memory");
+
+  /* set all entries to NULL */
+  for(i=0; i<npdb1max; i++)
+  {
+    pdb1[i].name  = NULL;
+    pdb1[i].value = NULL;
+    pdb1[i].description = NULL;
+  }
+
+  return pdb1;
+}
+
+/* copy pdb1 into pdb2 */
+void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2)
+{
+  int i;
+
+  /* Go over pars in pdb1. Use realloc and strcpy to create copies in pdb2 */
+  for(i=0; i<npdb1; i++)
+  {
+    pdb2[i].name = 
+     (char *) realloc(pdb2[i].name, 
+                      sizeof(char)*(strlen(pdb1[i].name)+1));
+    pdb2[i].value = 
+     (char *) realloc(pdb2[i].value, 
+                      sizeof(char)*(strlen(pdb1[i].value)+1));
+    pdb2[i].description = 
+     (char *) realloc(pdb2[i].description, 
+                      sizeof(char)*(strlen(pdb1[i].description)+1));
+    if(!pdb2[i].name || !pdb2[i].value || !pdb2[i].description)
+      errorexit("copy_pdb: out of memory");
+    strcpy(pdb2[i].name, pdb1[i].name);
+    strcpy(pdb2[i].value, pdb1[i].value);
+    strcpy(pdb2[i].description, pdb1[i].description);
+  }
+}
+
+/* free the parameter database content in pdb1 */
+void free_pdb_contents(tParameter *pdb1, int npdb1)
 {
   int i;
 
@@ -588,5 +634,11 @@ void free_pdb(tParameter *pdb1, int npdb1)
     free(pdb1[i].value);
     free(pdb1[i].description);
   }
+}
+
+/* free the parameter database pdb1 */
+void free_pdb(tParameter *pdb1, int npdb1)
+{
+  free_pdb_contents(pdb1, npdb1);
   free(pdb1);
 }

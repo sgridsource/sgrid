@@ -57,6 +57,8 @@ void print_pdb_i1_i2(tParameter *pdb, int i1, int i2);
 void print_parameter_database();
 void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
                                  tParameter **pdb2);
+tParameter *make_empty_pdb(int npdb1max);
+void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2);
 void free_pdb(tParameter *pdb1, int npdb1);
 
 /* skeleton.c */
