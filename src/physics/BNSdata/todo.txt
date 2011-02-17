@@ -7,3 +7,8 @@
 
 *in all .m files check if we need to call Ind("name"), maybe it's already
  defined as index_name by a math module
+
+*newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc, 1000, tol*0.01);
+ also changes things on star2 in box4. Probably it just changes the size of
+ box4 and interpolates onto it correctly, but that is unnecesary and may be
+ even harmful for the overall iteration.
