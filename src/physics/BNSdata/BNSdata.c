@@ -1123,7 +1123,7 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   surf_sig_bak = grid_bak->box[b]->v[sigpmi];
   surf         = grid->box[b]->v[surfi];
 
-  /* L2-norm diff between surf_sig and surf_new */
+  /* L2-norm diffs: surf^n - surf_sig_bak, surf^n - surf^{n-1} */
   diff_new_old = diff_new_sig = 0.0; n=0;
   forplane1(i,j,k, n1,n2,n3, 0)
   {
@@ -1138,13 +1138,15 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   printf("restore_grid_pdb_if_change_in_star_is_large: "
          "diff_new_old=%g diff_new_sig=%g\n", diff_new_old, diff_new_sig);
 
-  /* if diff is small */
+  /* Check if diff_new_old is small. 
+     Compare arXiv:0804.3787, III C. Algorithm point 3. */
+  /* if diff_new_old is small, keep new grid */
   if(diff_new_old < Getd("BNSdata_domainshape_diff")*diff_new_sig)
-  {
+  { 
     printf(" adjusted domain shape of star%d.\n", star);
     return;
   }
-  else
+  else /* otherwise restore old grid */
   {
     copy_grid(grid_bak, grid, 0);
     copy_pdb(pdb_bak, npdb, pdb);
