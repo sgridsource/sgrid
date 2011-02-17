@@ -32,6 +32,9 @@ extern double rf_surf1; /* radius of star1 */
 extern double rf_surf2; /* radius of star2 */
 extern double P_core1;  /* core pressure of star1 */
 extern double P_core2;  /* core pressure of star2 */
+extern tParameter *pdb;
+extern int npdb;
+extern int npdbmax;
 tGrid *m0_errors_VectorFunc__grid; /* grid var for m0_errors_VectorFunc */
 double m0_errors_VectorFunc__m01;  /* m01 we currently try to achieve */
 double m0_errors_VectorFunc__m02;  /* m02 we currently try to achieve */
@@ -1021,6 +1024,78 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
   return 0;
 }
 
+
+/* backup grid,pdb to grid_bak,pdb_bak.
+   But do it only if BNSdata_domainshape_diff<1e30. 
+   Call as:    backup_grid_pdb(grid,pdb, grid_bak,pdb_bak); */
+void backup_grid_pdb(tGrid *grid, tParameter *pdb,
+                     tGrid *grid_bak, tParameter *pdb_bak)
+{
+  /* do nothing if we tolerate large differences */ 
+  if(Getd("BNSdata_domainshape_diff")>=1e30) return;
+
+  /* make exact copies of grid and pdb */
+  copy_grid(grid, grid_bak, 0);
+  copy_pdb(pdb, npdb, pdb_bak);
+}
+
+/* compare grid,pdb to grid_bak,pdb_bak for one star and keep grid,pdb
+   if the surface difference is small, otherwise restore grid,pdb
+   to grid_bak,pdb_bak
+   Call as:
+    restore_grid_pdb_if_change_in_star_is_large(1/2, grid,pdb, grid_bak,pdb_bak);
+*/
+void restore_grid_pdb_if_change_in_star_is_large(int star,
+                                      tGrid *grid, tParameter *pdb,
+                                      tGrid *grid_bak, tParameter *pdb_bak)
+{
+  int surfi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int b, i,j,k, n1,n2,n3, ijk, n;
+  double *surf1;
+  double *surf2;
+  double diff;
+
+  /* do nothing if we tolerate large differences */  
+  if(Getd("BNSdata_domainshape_diff")>=1e30) return;
+
+  /* compute diff between grid_bak and grid */
+  if(star==1) b=0;
+  else if(star==2) b=3;
+  else 
+    errorexit("restore_grid_pdb_if_change_in_star_is_large: star must be 1 or 2.");
+  n1=(grid)->box[b]->n1;
+  n2=(grid)->box[b]->n2;
+  n3=(grid)->box[b]->n3;
+  surf1= (grid_bak)->box[b]->v[surfi];
+  surf2= (grid)->box[b]->v[surfi];
+
+  /* L2-norm diff between surf1 and surf2 */
+  diff=0.0; n=0;
+  forplane1(i,j,k, n1,n2,n3, 0)
+  {
+    ijk = Index(i,j,k);
+    diff += (surf1[ijk]-surf2[ijk])*(surf1[ijk]-surf2[ijk]);
+    n++;
+  }
+  diff=sqrt(diff/n);
+  printf("restore_grid_pdb_if_change_in_star_is_large: diff=%g\n",diff);
+
+  /* if diff is small */
+  if(diff<=Getd("BNSdata_domainshape_diff"))
+  {
+    printf(" adjusted domain shape of star%d.\n", star);
+    return;
+  }
+  else
+  {
+    copy_grid(grid_bak, grid, 0);
+    copy_pdb(pdb_bak, npdb, pdb);
+    printf(" keeping domain shape of star%d.\n", star);
+    printf(" with: BNSdata_C1=%g BNSdata_C2=%g\n",
+           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+  }
+}
+
 /* Adjust C1/2 and thus by demanding that m01 and m02 stay the same. */
 int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
 {
@@ -1028,6 +1103,12 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   double m0errorvec[3];
   double m01, m02, m0_error, dm01, dm02;
   int check, stat, bi, i;
+  tGrid *grid_bak;
+  tParameter *pdb_bak;
+
+  /* grid and pdb for backups */
+  grid_bak = make_empty_grid(grid->nvariables, 0);
+  pdb_bak  = make_empty_pdb(npdbmax);
 
   /* rest masses before adjusting q */
   m01 = GetInnerRestMass(grid, 0);
@@ -1102,13 +1183,23 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   /**********************************************************************/
   /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
   /**********************************************************************/
+  /* backup grid,pdb */
+  backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
   m0_errors_VectorFunc__grid = grid;
+
   /* adjust C1 and thus m01 */
   Cvec[1] = Getd("BNSdata_C1");
   stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
                              1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C1", Cvec[1]);
+  
+  /* see if we keep the new domain shape and C1 */
+  restore_grid_pdb_if_change_in_star_is_large(1,grid,pdb, grid_bak,pdb_bak);
+
+  /* backup grid,pdb */
+  backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
+  m0_errors_VectorFunc__grid = grid;
 
   /* adjust C2 and thus m02 */
   Cvec[1] = Getd("BNSdata_C2");
@@ -1117,6 +1208,10 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
                                1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C2", Cvec[1]);
+
+  /* see if we keep the new domain shape and C2 */
+  restore_grid_pdb_if_change_in_star_is_large(2, grid,pdb, grid_bak,pdb_bak);
+
   printf("adjust_C1_C2_q_keep_restmasses:\n");
   printf(" new: BNSdata_C1=%g BNSdata_C2=%g\n",
          Getd("BNSdata_C1"), Getd("BNSdata_C2"));
@@ -1134,6 +1229,10 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   m02 = GetInnerRestMass(grid, 3);
   printf("     => m01=%.19g m02=%.19g\n", m01, m02);
 
+  /* free grid and pdb for backups */
+  free_pdb(pdb_bak, npdb);
+  free_grid(grid_bak);
+        
   return 0;
 }
 

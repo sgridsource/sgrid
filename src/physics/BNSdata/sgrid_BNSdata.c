@@ -171,6 +171,9 @@ int sgrid_BNSdata()
          "e.g. when BNSdata_adjust=keep_xout");
   AddPar("BNSdata_dOmega_fac", "0.1", "dOmega = Omega*dOmega_Fac");
   AddPar("BNSdata_dx_CM_fac",  "0.1", "dx_CM = b*dx_CM_fac");
+  AddPar("BNSdata_domainshape_diff", "3e30", 
+         "adjust domain if difference in shape is less than this number."
+         " >=1e30 means adjust always.");
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",
          "how we solve for Psi,B^i,alphaP,Sigma "
          "[allatonce, BNS_Eqn_Iterator, BNS_ordered_Eqn_Iterator,"
