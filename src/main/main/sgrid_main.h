@@ -53,6 +53,8 @@ void Appends(char *name, char *value);
 char *GetsInd(int i);
 char *GetnameInd(int i);
 int GetnParameters();
+void print_pdb_i1_i2(tParameter *pdb, int i1, int i2);
+void print_parameter_database();
 void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
                                  tParameter **pdb2);
 void free_pdb(tParameter *pdb1, int npdb1);

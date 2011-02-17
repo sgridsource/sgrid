@@ -526,6 +526,23 @@ int iterate_parameters(void)
   return 0;
 }
 
+/* print pars with index i1 to i2 in pdb */
+void print_pdb_i1_i2(tParameter *pdb, int i1, int i2)
+{
+  int i;
+
+  printf("print_pdb_i2_i2: pdb=%p i1=%d i2=%d\n", pdb, i1,i2);
+  for(i=i1; i<=i2; i++)
+  {
+    printf("%s:\n", pdb[i].description);
+    printf("%s = %s\n", pdb[i].name, pdb[i].value);
+  }
+}
+/* print entire parameter database */
+void print_parameter_database()
+{
+  print_pdb_i1_i2(pdb, 0, npdb-1);
+}
 
 /**********************************************/
 /* functions to copy the entire par data base */
