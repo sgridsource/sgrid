@@ -65,7 +65,10 @@ int timeforoutput_index(tGrid *grid, int index)
   char *name, s[32];
   int d, n;
 
-  if (firstcall) {
+  /* set firstcall=1 so that we always read from pars (in case they change). */
+  firstcall = 1;
+  if(firstcall)
+  {
     char *dstring[4] = {"D", "X", "Y", "Z"};
     char *ddstring[6] = {"XY", "XZ", "YZ", "XD", "YD", "ZD"};
     char *rstring[6] = {"max", "min", "rms", "meanAbs", "mean", "VolInt"};
@@ -232,7 +235,10 @@ int write_grid(tGrid *grid)
   char *ddstring[6] = {"XY", "XZ", "YZ", "XD", "YD", "ZD"};
   char *rstring[6]  = {"max", "min", "rms", "meanAbs", "mean", "VolInt"};
 
-  if (firstcall) {
+  /* set firstcall=1 so that we always read from pars (in case they change). */
+  firstcall = 1;
+  if(firstcall)
+  {
     firstcall = 0;
 
     /* cache */
