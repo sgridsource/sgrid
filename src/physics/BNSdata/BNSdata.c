@@ -64,7 +64,7 @@ tVarList *vldu, *vlJdu, *vlduDerivs;
 
 /* functions in this file */
 void save_surfacepos_in_BNSdata_surface_sigma_pm(int star, tGrid *grid,
-                                                 tGrid *grid_bak);
+                                                 tGrid *grid_bak, double t);
 void compute_ABphi_from_xyz(tBox *box, double *A, double *B, double *phi,
                             double x, double y, double z);
 void make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(tGrid *grid,
@@ -590,8 +590,8 @@ exit(77);
   }
 
   /* save initial surface positions in BNSdata_surface_sigma_pm */
-  save_surfacepos_in_BNSdata_surface_sigma_pm(1, grid, grid);
-  save_surfacepos_in_BNSdata_surface_sigma_pm(2, grid, grid);
+  save_surfacepos_in_BNSdata_surface_sigma_pm(1, grid, grid, 99999.0);
+  save_surfacepos_in_BNSdata_surface_sigma_pm(2, grid, grid, 99999.0);
 
   /* set BNSdata_actual_xyzmax pars */
   set_BNSdata_actual_xyzmax_pars(grid);
@@ -1049,8 +1049,11 @@ void backup_grid_pdb(tGrid *grid, tParameter *pdb,
 /* save star surfaces (given by sigma_pm) in BNSdata_surface_sigma_pm on
    both grids. */
 void save_surfacepos_in_BNSdata_surface_sigma_pm(int star, tGrid *grid,
-                                                 tGrid *grid_bak)
+                                                 tGrid *grid_bak, double t)
 {
+  static double latest_saved_t1 = 1e30;
+  static double latest_saved_t2 = 1e30;
+  double latest_saved_t;
   int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
   int surfi  = Ind("BNSdata_surface_sigma_pm");
   int b, i,j,k, n1,n2,n3, ijk,ijk1;
@@ -1058,9 +1061,9 @@ void save_surfacepos_in_BNSdata_surface_sigma_pm(int star, tGrid *grid,
   double *surf;
   double *surf_bak;
 
-  /* compute diff between grid_bak and grid */
-  if(star==1) b=0;
-  else if(star==2) b=3;
+  /* save surface for one star */
+  if(star==1)      { b=0; latest_saved_t=latest_saved_t1; }
+  else if(star==2) { b=3; latest_saved_t=latest_saved_t2; }
   else 
     errorexit("save_surfacepos_in_BNSdata_surface_sigma_pm: star must be 1 or 2.");
   n1=(grid)->box[b]->n1;
@@ -1070,16 +1073,24 @@ void save_surfacepos_in_BNSdata_surface_sigma_pm(int star, tGrid *grid,
   surf     = (grid)->box[b]->v[surfi];
   surf_bak = (grid_bak)->box[b]->v[surfi];
 
-  /* save previous surfaces on both grids */
-  for (k = 0; k < n3; k++)
-  for (j = 0; j < n2; j++)
-  for (i = n1-1; i > 0; i--)
+  /* save previous surfaces only if t!=latest_saved_t */
+  if(!dequal(t,latest_saved_t))
   {
-    ijk = Index(i,j,k);
-    ijk1= Index(i-1,j,k);
-    surf[ijk]    = surf[ijk1];
-    if(surf_bak) surf_bak[ijk]= surf_bak[ijk1];
+    /* save previous surfaces on both grids */
+    for (k = 0; k < n3; k++)
+    for (j = 0; j < n2; j++)
+    for (i = n1-1; i > 0; i--)
+    {
+      ijk = Index(i,j,k);
+      ijk1= Index(i-1,j,k);
+      surf[ijk]    = surf[ijk1];
+      if(surf_bak) surf_bak[ijk]= surf_bak[ijk1];
+    }
+    /* store t at which we saved surfaces for the last time */
+    if(star==1)      latest_saved_t1 = t;
+    else if(star==2) latest_saved_t2 = t;
   }
+
   /* set current surface on both grids */
   forplane1(i,j,k, n1,n2,n3, 0)
   {
@@ -1107,7 +1118,7 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   double diff_new_old, diff_new_sig;
 
   /* save current and previous surfaces in BNSdata_surface_sigma_pm  */
-  save_surfacepos_in_BNSdata_surface_sigma_pm(star, grid, grid_bak);
+  save_surfacepos_in_BNSdata_surface_sigma_pm(star, grid, grid_bak, grid->time);
 
   /* do nothing if we tolerate large differences */  
   if(Getd("BNSdata_domainshape_diff_tol")>=1e30) return;
@@ -1143,14 +1154,14 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   /* if diff_new_old is small, keep new grid */
   if(diff_new_old < Getd("BNSdata_domainshape_diff_tol")*diff_new_sig)
   { 
-    printf(" adjusted domain shape of star%d.\n", star);
+    printf(" adjusted domain shape around star%d.\n", star);
     return;
   }
   else /* otherwise restore old grid */
   {
     copy_grid(grid_bak, grid, 0);
     copy_pdb(pdb_bak, npdb, pdb);
-    printf(" keeping domain shape of star%d.\n", star);
+    printf(" keeping domain shape around star%d\n", star);
     printf(" with: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
   }
