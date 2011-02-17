@@ -531,7 +531,7 @@ void print_pdb_i1_i2(tParameter *pdb, int i1, int i2)
 {
   int i;
 
-  printf("print_pdb_i2_i2: pdb=%p i1=%d i2=%d\n", pdb, i1,i2);
+  printf("print_pdb_i1_i2: pdb=%p i1=%d i2=%d\n", pdb, i1,i2);
   for(i=i1; i<=i2; i++)
   {
     printf("%s:\n", pdb[i].description);
