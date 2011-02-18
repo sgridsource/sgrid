@@ -3076,10 +3076,19 @@ if(0) /* not working */
       int b,i;
       double m01, m02;
 
-      printf("Centering q:\n");
+      printf("Centering q:  BNSdata_center_new_q_fac = %s\n"
+             " BNSdata_center_new_q = %s\n",
+             Gets("BNSdata_center_new_q_fac"), Gets("BNSdata_center_new_q"));
       Sets("BNSdata_center_new_q_flag", "yes");  /* activate centering of q */
-      compute_new_q_and_adjust_domainshapes(grid, 0);
-      compute_new_q_and_adjust_domainshapes(grid, 3);
+      if(Getv("BNSdata_center_new_q", "adjust_domainshapes"))
+      {
+        compute_new_q_and_adjust_domainshapes(grid, 0);
+        compute_new_q_and_adjust_domainshapes(grid, 3);
+      }
+      else 
+      {
+        BNS_compute_new_centered_q(grid);
+      }
       Sets("BNSdata_center_new_q_flag", "no");  /* deactivate centering of q */
       /* set q to zero if q<0 or in region 1 and 2 */
       forallboxes(grid, b)
