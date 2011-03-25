@@ -94,7 +94,8 @@ tocompute = {
     Cif == end,
 
     Psim4 == 1/Psi4,
-    Psim6 == Psim4/Psi2,
+    Psim2 == Psim4 Psi2,
+    Psim6 == Psim4 Psim2,
     DSigmaUp[a] == Psim4 dSigma[a],
     w[a] == Psim6 wB[a],
     wBDown[a] == wB[a],

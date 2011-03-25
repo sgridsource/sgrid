@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 13.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 25.3.2011 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -81,9 +81,10 @@ double OmegaCrossR3;
 double oouzerosqr;
 double Psi2;
 double Psi4;
+double Psim2;
 double Psim4;
 double Psim6;
-double twoalpha2wdSigma;
+double twoalpha2wdSigmapw;
 double uzero;
 double vR1;
 double vR2;
@@ -91,6 +92,12 @@ double vR3;
 double w1;
 double w2;
 double w3;
+double wBDown1;
+double wBDown2;
+double wBDown3;
+double wDown1;
+double wDown2;
+double wDown3;
 double xi1;
 double xi2;
 double xi3;
@@ -99,21 +106,27 @@ double xi3;
 
 /* Jetzt geht's los! */
 
-FirstDerivsOf_S(box,index_BNSdata_Sigma,                                    Ind("BNSdata_Sigmax")); 
-
+FirstDerivsOf_S(box,index_BNSdata_Sigma,                   
+                                   Ind("BNSdata_Sigmax"));
 
 
 /* conditional */
 if (bi == 1) {
 
 
-                                                                      
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 0,1);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 0,1);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 0,1);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 0,1);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 0,1);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 0,1);}
+                                                                     
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 0,1);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 0,1);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 0,1);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 0,1);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 0,1);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 0,1);}
 /* if (bi == 1) */
 
 
@@ -123,13 +136,19 @@ if (bi == 1) {
 if (bi == 2) {
 
 
-                                                                      
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 3,2);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 3,2);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 3,2);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 3,2);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 3,2);
-     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 3,2);}
+                                                                     
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 3,2);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 3,2);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 3,2);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 3,2);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 3,2);
+
+    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 3,2);}
 /* if (bi == 2) */
 
 
@@ -189,7 +208,7 @@ pow2(Psi2)
 
 
 /* conditional */
-if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
+if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
 
 vR1
 =
@@ -322,9 +341,14 @@ Psim4
 1/Psi4
 ;
 
+Psim2
+=
+Psi2*Psim4
+;
+
 Psim6
 =
-Psim4/Psi2
+Psim2*Psim4
 ;
 
 DSigmaUp1
@@ -357,9 +381,40 @@ w3
 Psim6*wB3[ijk]
 ;
 
-twoalpha2wdSigma
+wBDown1
 =
-2.*alpha2*(w1*dSigma1[ijk] + w2*dSigma2[ijk] + w3*dSigma3[ijk])
+wB1[ijk]
+;
+
+wBDown2
+=
+wB2[ijk]
+;
+
+wBDown3
+=
+wB3[ijk]
+;
+
+wDown1
+=
+Psim2*wBDown1
+;
+
+wDown2
+=
+Psim2*wBDown2
+;
+
+wDown3
+=
+Psim2*wBDown3
+;
+
+twoalpha2wdSigmapw
+=
+2.*alpha2*(w1*(wDown1 + dSigma1[ijk]) + w2*(wDown2 + dSigma2[ijk]) + 
+    w3*(wDown3 + dSigma3[ijk]))
 ;
 
 betadSigmaMinusCC
@@ -369,18 +424,19 @@ betadSigmaMinusCC
 
 bb
 =
--twoalpha2wdSigma + pow2(betadSigmaMinusCC)
+twoalpha2wdSigmapw + pow2(betadSigmaMinusCC)
 ;
 
 L2
 =
-(0.5*(bb + Sqrt(Abs(pow2(bb) - pow2(twoalpha2wdSigma)))))/alpha2
+(0.5*(bb + Sqrt(Abs(pow2(bb) + pow2(twoalpha2wdSigmapw)))))/alpha2
 ;
 
 h
 =
-Sqrt(Abs(L2 - DSigmaUp1*dSigma1[ijk] - DSigmaUp2*dSigma2[ijk] - 
-    DSigmaUp3*dSigma3[ijk]))
+Sqrt(Abs(L2 - (DSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) - 
+    (DSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) - 
+    (DSigmaUp3 + w3)*(wDown3 + dSigma3[ijk])))
 ;
 
 q[ijk]
@@ -401,4 +457,4 @@ q[ijk]
 }  /* end of function */
 
 /* BNS_compute_new_q.c */
-/* nvars = 15, n* = 102,  n/ = 61,  n+ = 84, n = 247, O = 1 */
+/* nvars = 15, n* = 107,  n/ = 60,  n+ = 92, n = 259, O = 1 */
