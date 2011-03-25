@@ -146,11 +146,13 @@ tocompute = {
     Psim6 == Psim4/Psi2,
     DSigmaUp[a] == Psim4 dSigma[a],
     w[a] == Psim6 wB[a],
-    twoalpha2wdSigma == 2 alpha2 w[c] dSigma[c],
+    wBDown[a] == wB[a],
+    wDown[a] == Psim2 wBDown[a],
+    twoalpha2wdSigmapw == 2 alpha2 w[c] (dSigma[c]+wDown[c]),
     betadSigmaMinusCC == beta[c] dSigma[c] - CC, 
-    bb == betadSigmaMinusCC^2 - twoalpha2wdSigma,
-    L2 == (bb + Sqrt[Abs[bb*bb - twoalpha2wdSigma^2]])/(2 alpha2),
-    h == Sqrt[Abs[L2 - dSigma[a] DSigmaUp[a]]],
+    bb == betadSigmaMinusCC^2 + twoalpha2wdSigmapw,
+    L2 == (bb + Sqrt[Abs[bb*bb + twoalpha2wdSigmapw^2]])/(2 alpha2),
+    h == Sqrt[Abs[L2 - (dSigma[a]+wDown[a]) (DSigmaUp[a]+w[a])]],
 
     (* h == (n+1) q + 1, *)
     q == (h - 1.0)/(n + 1.0),
