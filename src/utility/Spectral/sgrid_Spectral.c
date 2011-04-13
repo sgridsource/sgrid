@@ -11,7 +11,7 @@ int sgrid_Spectral(void)
   printf("Adding Spectral\n");
 
   /* functions */
-  AddFun(POST_GRID, init_FFTW3_plans, 
+  AddFun(PRE_GRID, init_FFTW3_plans, 
          "initialize global FFTW3 plans in FFTs_for_sgrid.c");
   AddFun(POST_FINALIZE_GRID, free_FFTW3_plans, 
          "free the global FFTW3 plans in FFTs_for_sgrid.c");

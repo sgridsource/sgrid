@@ -118,6 +118,7 @@ void cheb_eval_onExtrema_numrecFFT(double c[], double u[], int N);
 void four_coeffs_FFTW3(double *c, double *u, int n);
 void four_eval_FFTW3(double *c, double *u, int n);
 int init_FFTW3_plans(tGrid* grid);
+int reinit_FFTW3_plans(tGrid* grid);
 int free_FFTW3_plans(tGrid* grid);
 void cheb_coeffs_fromZeros_FFTW3(double *c, double *u, int n);
 void cheb_coeffs_fromExtrema_FFTW3(double *c, double *u, int N);

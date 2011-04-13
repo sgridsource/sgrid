@@ -549,6 +549,7 @@ void four_FFTW3_error(void)
             "SPECIALLIBS += -lfftw3");
 }
 int init_FFTW3_plans(tGrid* grid) {return 0;}
+int reinit_FFTW3_plans(tGrid* grid) {return 0;}
 int free_FFTW3_plans(tGrid* grid) {return 0;}
 void four_coeffs_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
 void four_eval_FFTW3(double *c, double *u, int n) {four_FFTW3_error();}
