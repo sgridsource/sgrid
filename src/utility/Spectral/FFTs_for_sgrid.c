@@ -345,8 +345,19 @@ void numrec_cosft2(double y[], int n, int isign)
 /* FFTW3 transforms                                                  */
 /*********************************************************************/
 #ifdef FFTW3
-/* initialize global plan arrays */
+/* initialize global plan arrays for the first time */
 int init_FFTW3_plans(tGrid* grid)
+{
+  FFTW3_Nmax_of_plan_array = 0;
+  FFTW3_dft_r2c_1d_plan = NULL;
+  FFTW3_dft_c2r_1d_plan = NULL;
+  FFTW_REDFT00_1d_plan = NULL;
+  FFTW_REDFT10_1d_plan = NULL;
+  FFTW_REDFT01_1d_plan = NULL;
+  return reinit_FFTW3_plans(grid);
+}
+/* re-initialize global plan arrays */
+int reinit_FFTW3_plans(tGrid* grid)
 {
   int b;
   int N, Nmax=1;
@@ -365,11 +376,22 @@ int init_FFTW3_plans(tGrid* grid)
   }
 
   /* allocate arrays of plans for all cases */
-  FFTW3_dft_r2c_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
-  FFTW3_dft_c2r_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
-  FFTW_REDFT00_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
-  FFTW_REDFT10_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
-  FFTW_REDFT01_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+  if(FFTW3_Nmax_of_plan_array==0)
+  {
+    FFTW3_dft_r2c_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+    FFTW3_dft_c2r_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+    FFTW_REDFT00_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+    FFTW_REDFT10_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+    FFTW_REDFT01_1d_plan = (fftw_plan *) malloc(sizeof(fftw_plan) * (Nmax+1));
+  }
+  else
+  {
+    FFTW3_dft_r2c_1d_plan = (fftw_plan *) realloc(FFTW3_dft_r2c_1d_plan, sizeof(fftw_plan) * (Nmax+1));
+    FFTW3_dft_c2r_1d_plan = (fftw_plan *) realloc(FFTW3_dft_c2r_1d_plan, sizeof(fftw_plan) * (Nmax+1));
+    FFTW_REDFT00_1d_plan = (fftw_plan *) realloc(FFTW_REDFT00_1d_plan, sizeof(fftw_plan) * (Nmax+1));
+    FFTW_REDFT10_1d_plan = (fftw_plan *) realloc(FFTW_REDFT10_1d_plan, sizeof(fftw_plan) * (Nmax+1));
+    FFTW_REDFT01_1d_plan = (fftw_plan *) realloc(FFTW_REDFT01_1d_plan, sizeof(fftw_plan) * (Nmax+1));
+  }
 
   /* make plans */
   printf("init_FFTW3_plans: planning for N=1,...,%d\n", Nmax);
