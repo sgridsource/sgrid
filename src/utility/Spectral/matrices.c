@@ -3,15 +3,41 @@
 
 #include "sgrid.h"
 #include "Spectral.h"
+#ifdef CBLAS
+#include <cblas.h>
+#endif
 
 
-
+/* do we use BLAS??? */
+#ifdef CBLAS
+/* this is just a matrix multiplication Mu = M u */
+void matrix_times_vector(double *M, double *u, double *Mu, int n)
+{
+  /* call dgemv (matrix times vector) from CBLAS: */
+  /* Note: we need something like this in MyConfig if we use CBLAS from ATLAS:
+     DFLAGS += -DCBLAS 
+     CBLASDIR = /home/wolf/Packages/ATLAS3.8.3/my_build_dir/
+     #SPECIALINCS += -I$(CBLASDIR)/include
+     SPECIALLIBS += -L$(CBLASDIR)/lib -lcblas -latlas   */  
+  cblas_dgemv(CblasRowMajor, CblasNoTrans, n, n, 1.0, M, n,
+              u, 1, 0.0, Mu, 1);
+/* this is what we need if we call the Fortran DGEMV from original
+   Fortan BLAS: */
+/*
+  char trans[] = "T";
+  double done = 1.0;
+  double dzero= 0.0;
+  int one = 1;
+  dgemv_(trans, &n, &n, &done, M, &n, u, &one, &dzero, Mu, &one);
+*/
+}
+#else
 /* this is just a matrix multiplication Mu = M u */
 void matrix_times_vector(double *M, double *u, double *Mu, int n)
 {
   int i,j;
   double sum;
-  
+
   for(i=0; i<n; i++)
   {
     double *M_i = M + n*i; /* matrix M_i[j] = M_{ij} */
@@ -21,6 +47,7 @@ void matrix_times_vector(double *M, double *u, double *Mu, int n)
     Mu[i] = sum;
   }
 }
+#endif
 
 /* multiply two matricies M and D: MD = M D ,   MD_ik = M_ij D_jk */
 void matrix_times_matrix(double *M, double *D, double *MD, int n)
