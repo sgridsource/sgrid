@@ -1,0 +1,51 @@
+compiling:
+----------
+to make sgrid_noBLAS compile only with:
+DFLAGS += -DFFTW3
+FFTW3DIR = /opt/fftw-3.1.3
+SPECIALINCS += -I$(FFTW3DIR)/include
+SPECIALLIBS += -L$(FFTW3DIR)/lib -lfftw3
+
+to make sgrid_BLAS add also in MyConfig:
+DFLAGS += -DCBLAS
+CBLASDIR = /home/wolf/Packages/ATLAS3.8.3/my_build_dir/
+#SPECIALINCS += -I$(CBLASDIR)/include
+SPECIALLIBS += -L$(CBLASDIR)/lib -lcblas -latlas
+
+runs on titan:
+--------------
+time ./sgrid_noBLAS KS_FFT2.par
+real	4m55.912s
+user	4m54.798s
+sys	0m0.888s
+
+time ./sgrid_BLAS KS_FFT2.par
+real	4m52.635s
+user	4m51.454s
+sys	0m0.944s
+
+time ./sgrid_noBLAS KS2.par
+real	13m1.609s
+user	12m59.829s
+sys	0m1.424s
+
+time ./sgrid_BLAS KS2.par
+real	11m16.827s
+user	11m15.206s
+sys	0m1.308s
+
+Results:
+--------
+sgrid benchmark results (on titan) with KS2.par and KS_FFT2.par
+grid: n1 x n2 x n3 = 193 x 16 x 12
+-------------------------------------------------------------------------------
+                   | only Matrix mult.  | FFT in X-dir Matrix mult in Y-,Z-dir
+-------------------------------------------------------------------------------
+sgrid's old        | real    13m1.609s  | real    4m55.912s
+matrix_times_vector| user    12m59.829s | user    4m54.798s
+                   | sys     0m1.424s   | sys     0m0.888s
+-------------------------------------------------------------------------------
+cblas_dgemv in     | real    11m16.827s | real    4m52.635s
+matrix_times_vector| user    11m15.206s | user    4m51.454s
+                   | sys     0m1.308s   | sys     0m0.944s
+-------------------------------------------------------------------------------

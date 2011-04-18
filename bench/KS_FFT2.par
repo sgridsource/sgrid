@@ -1,0 +1,122 @@
+#===========================================================================
+# physics
+physics = ADMvars SingleBH BSSN
+
+#===========================================================================
+# Grid setup
+
+ParManipulator_dt_scaling       = 1/n1^2
+ParManipulator_dtfac            = 0.5
+ParManipulator_ds_min_coeff     = 2682
+ParManipulator_requiredtime     = 1
+
+#dt        = 0.03125 # 0.025 # 0.01 #  0.03125 # 0.01 # 0.0025 # 0.001
+finaltime = 4
+
+checkpoint	= no # yes
+checkpoint_dt	= 4
+
+nboxes = 1
+n1=193
+n2=16
+n3=12
+
+iterate_parameters = no # yes
+iterate_parameter1 = n1  97 129 161 193 225 257
+
+box0_Coordinates = SphericalDF
+
+box0_filter1 = 0 # 8
+box0_min1 = 1.85
+box0_max1 = 480
+
+box0_basis2 = Fourier
+box0_filter2 = 0 # 3 # 15
+box0_min2 = 0
+box0_max2 = 2*pi
+
+box0_basis3 = Fourier
+box0_filter3 = 0 # 2 # 10
+box0_min3 = 0
+box0_max3 = 2*pi
+
+box0_TransformType1 = 25 FFTW3 # 512 NUMREC_FFT
+box0_TransformType2 = 24 FFTW3 # 512 NUMREC_FFT
+box0_TransformType3 = 24 FFTW3 # 512 NUMREC_FFT
+
+#===========================================================================
+# initial data
+BHmass1 		 = 1
+SingleBH_type 		 = KerrSchild
+SingleBH_ConformalFactor = no
+SingleBH_initial_lapse	 = donothing
+SingleBH_initial_shift	 = donothing
+
+#===========================================================================
+# BCs
+boundary = radiative_analytic # constant # radiative # simpleExcision
+boundary_radconstant = BSSN_Gx BSSN_Gy BSSN_Gz
+
+#===========================================================================
+# evolution
+evolution_method        = rk # icn
+
+BSSN_enforce_AlgConstr	= yes
+BSSN_subtractA          = yes
+BSSN_normalizedetg	= no # yes
+BSSN_YoTermFactor	= 1.3333333333333333333333333333333333 # xi=2/3
+BSSN_GReplacedBydg	= no
+
+BSSN_lapse              = harmonic addliealpha addalphaRHSterm # 1+log withshift
+BSSN_lapseharmonicf	= 1 # <- is this right or should it be 2 
+BSSN_lapsepsipower      = 0
+BSSN_densitizedLapse	= no
+BSSN_alphaDensityWeight	= 1.0
+BSSN_subtractK0		= no
+BSSN_add_alphaRHSterm	= yes
+
+# don't evolve shift
+BSSN_shift_stop_time	= 0
+BSSN_shift              = gamma0
+BSSN_shiftpsipower      = 2.0
+BSSN_shiftalphapower    = 1.0
+BSSN_shiftdriver        = 2.0
+
+BSSN_useDD  = yes
+
+BSSN_filter_vars = all
+BSSN_filter_type = Ylm_lmshift X2/3
+BSSN_filter_time = afterRHS afterBC
+
+evolve_Dissipation = no
+evolve_DissipationFactor = 1000.0
+evolve_Dissipation_dt_Order = 2
+
+#===========================================================================
+# output
+outputX0_box0 = 0
+outputY0_box0 = 1.57 # 3.141592653589793
+outputZ0_box0 = 0
+
+outputReplaceXby_box0 = x
+outputReplaceYby_box0 = z
+outputReplaceZby_box0 = y
+
+evolve_compute_change = alpha betax betay betaz gxx gxy gxz gyy gyz gzz Kxx Kxy Kxz Kyy Kyz Kzz BSSN_alphaDensity BSSN_gxx BSSN_gxy BSSN_gxz BSSN_gyy BSSN_gyz BSSN_gzz BSSN_phi BSSN_Gx BSSN_Gy BSSN_Gz BSSN_K BSSN_Axx BSSN_Axy BSSN_Axz BSSN_Ayy BSSN_Ayz BSSN_Azz
+ADMvars_normalizedConstraints = yes
+ADMvars_useDD = yes
+
+#0doutiter = 1
+0douttime = 2
+0doutput = ham momx normham normmomx E_ADM 
+0doutputall = yes
+
+#1doutiter = 1
+1douttime = 2
+1doutput = E_ADM alpha betax gxx Kxx psi dpsiopsix ddpsiopsixx BSSN_alphaDensity BSSN_gxx BSSN_phi BSSN_Gx BSSN_K BSSN_Axx ham momx normham normmomx x y z  alpha_change betax_change gxx_change Kxx_change BSSN_alphaDensity_change BSSN_gxx_change BSSN_phi_change BSSN_Gx_change BSSN_K_change BSSN_Axx_change BSSN_alphaRHSterm
+1doutputall = yes
+
+#2doutiter = 1
+2douttime = 8
+2doutput = alpha betax gxx Kxx psi dpsiopsix ddpsiopsixx BSSN_alphaDensity BSSN_gxx BSSN_phi BSSN_Gx BSSN_K BSSN_Axx ham momx normham normmomx x y z  alpha_change betax_change gxx_change Kxx_change BSSN_alphaDensity_change BSSN_gxx_change BSSN_phi_change BSSN_Gx_change BSSN_K_change BSSN_Axx_change 
+2doutputall = yes
