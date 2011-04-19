@@ -1,5 +1,5 @@
-compiling:
-----------
+compiling with icc -O3:
+-----------------------
 to make sgrid_noBLAS compile only with:
 DFLAGS += -DFFTW3
 FFTW3DIR = /opt/fftw-3.1.3
@@ -49,3 +49,15 @@ cblas_dgemv in     | real    11m16.827s | real    4m52.635s
 matrix_times_vector| user    11m15.206s | user    4m51.454s
                    | sys     0m1.308s   | sys     0m0.944s
 -------------------------------------------------------------------------------
+
+Note: if we compile without CBLAS with gcc -O3:
+time ./sgrid KS2.par
+real	16m13.338s
+user	16m11.285s
+sys	0m1.620s
+
+Note: if we compile without CBLAS with gcc -O3 -ffast-math:
+time ./sgrid KS2.par
+real	13m53.455s
+user	13m51.632s
+sys	0m1.452s
