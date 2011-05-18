@@ -718,6 +718,53 @@ double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
   return q;
 }
 
+/* center q if needed, depending on how pars are set */
+int BNSdata_center_q_if_desired(tGrid *grid, int it)
+{
+  if(    !Getv("BNSdata_center_new_q", "no")    &&
+     it>=Geti("BNSdata_center_new_q_first_at")  && 
+         Geti("BNSdata_center_new_q_first_at")>=0 )
+  {
+    int b,i;
+    double m01, m02;
+
+    printf("Centering q:  BNSdata_center_new_q_fac = %s\n"
+           " BNSdata_center_new_q = %s\n",
+           Gets("BNSdata_center_new_q_fac"), Gets("BNSdata_center_new_q"));
+    Sets("BNSdata_center_new_q_flag", "yes");  /* activate centering of q */
+    if(Getv("BNSdata_center_new_q", "adjust_domainshapes"))
+    {
+      compute_new_q_and_adjust_domainshapes(grid, 0);
+      compute_new_q_and_adjust_domainshapes(grid, 3);
+    }
+    else 
+    {
+      BNS_compute_new_centered_q(grid);
+    }
+    Sets("BNSdata_center_new_q_flag", "no");  /* deactivate centering of q */
+    /* set q to zero if q<0 or in region 1 and 2 */
+    forallboxes(grid, b)
+    {
+      double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
+      forallpoints(grid->box[b], i)
+        if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
+    }
+    /* enforce uniqueness on axis:
+       set vars equal to val at phi=0 for all phi>0 */
+    if(Getv("BNSdata_uniqueness_on_axis", "yes"))
+      BNS_enforce_uniqueness_on_axis(vlu);
+
+    /* set actual positions of maxima again */
+    set_BNSdata_actual_xyzmax_pars(grid);
+
+    /* print new masses */
+    m01 = GetInnerRestMass(grid, 0);
+    m02 = GetInnerRestMass(grid, 3);
+    printf("     => m01=%.19g m02=%.19g\n", m01, m02);
+  }
+  return 0;
+}
+
 
 /* find both qmax and reset BNSdata_qmax1/2, BNSdata_xmax1/2 accordingly */
 void find_qmaxs_along_x_axis_and_reset_qmaxs_xmaxs_pars(tGrid *grid)
@@ -3069,47 +3116,7 @@ if(0) /* not working */
        is not "no": */
     /* set actual positions of maxima */
     set_BNSdata_actual_xyzmax_pars(grid);
-    if(    !Getv("BNSdata_center_new_q", "no")    &&
-       it>=Geti("BNSdata_center_new_q_first_at")  && 
-           Geti("BNSdata_center_new_q_first_at")>=0 )
-    {
-      int b,i;
-      double m01, m02;
-
-      printf("Centering q:  BNSdata_center_new_q_fac = %s\n"
-             " BNSdata_center_new_q = %s\n",
-             Gets("BNSdata_center_new_q_fac"), Gets("BNSdata_center_new_q"));
-      Sets("BNSdata_center_new_q_flag", "yes");  /* activate centering of q */
-      if(Getv("BNSdata_center_new_q", "adjust_domainshapes"))
-      {
-        compute_new_q_and_adjust_domainshapes(grid, 0);
-        compute_new_q_and_adjust_domainshapes(grid, 3);
-      }
-      else 
-      {
-        BNS_compute_new_centered_q(grid);
-      }
-      Sets("BNSdata_center_new_q_flag", "no");  /* deactivate centering of q */
-      /* set q to zero if q<0 or in region 1 and 2 */
-      forallboxes(grid, b)
-      {
-        double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
-        forallpoints(grid->box[b], i)
-          if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
-      }
-      /* enforce uniqueness on axis:
-         set vars equal to val at phi=0 for all phi>0 */
-      if(Getv("BNSdata_uniqueness_on_axis", "yes"))
-        BNS_enforce_uniqueness_on_axis(vlu);
-
-      /* set actual positions of maxima again */
-      set_BNSdata_actual_xyzmax_pars(grid);
-
-      /* print new masses */
-      m01 = GetInnerRestMass(grid, 0);
-      m02 = GetInnerRestMass(grid, 3);
-      printf("     => m01=%.19g m02=%.19g\n", m01, m02);
-    }
+    BNSdata_center_q_if_desired(grid, it);
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
