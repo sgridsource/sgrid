@@ -2856,6 +2856,14 @@ exit(11);
        that has $time = 0, do not solve again! */
     if(grid->time==0.0 && restart == 1) break;
 
+    /* center q first, then solve and adjust C1/2, Omega, xCM. */
+    if(Getv("BNSdata_center_new_q_timebin", "before_ell_solve"))
+    {
+      /* set actual positions of maxima */
+      set_BNSdata_actual_xyzmax_pars(grid);
+      BNSdata_center_q_if_desired(grid, it);
+    }
+
     /* save old values before ell. solve */
     varcopy(grid, Ind("BNSdata_Psiold"),    Ind("BNSdata_Psi"));
     varcopy(grid, Ind("BNSdata_alphaPold"), Ind("BNSdata_alphaP"));
@@ -3114,9 +3122,12 @@ if(0) /* not working */
 
     /* compute actual max pos of q and center q if BNSdata_center_new_q
        is not "no": */
-    /* set actual positions of maxima */
-    set_BNSdata_actual_xyzmax_pars(grid);
-    BNSdata_center_q_if_desired(grid, it);
+    if(Getv("BNSdata_center_new_q_timebin", "after_adjusting_Omega_xCM"))
+    {
+      /* set actual positions of maxima */
+      set_BNSdata_actual_xyzmax_pars(grid);
+      BNSdata_center_q_if_desired(grid, it);
+    }
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
