@@ -112,9 +112,9 @@ int sgrid_BNSdata()
   AddPar("BNSdata_center_new_q", "no",
          "if and how we center new q on (BNSdata_xmax1/2,0,0) "
          "[no,center_yz,center_xyz,adjust_domainshapes]");
-  AddPar("BNSdata_center_new_q_timebin", "after_adjusting_Omega_xCM", 
+  AddPar("BNSdata_center_new_q_timebin", "before_ell_solve", 
          "when we center q "
-         "[after_adjusting_Omega_xCM,before_ell_solve]");
+         "[before_ell_solve,after_adjusting_Omega_xCM]");
   AddPar("BNSdata_center_new_q_first_at", "0", "first iteration when we "
          "center q [#,-1]. -1 means never");
   AddPar("BNSdata_center_new_q_flag", "no",
