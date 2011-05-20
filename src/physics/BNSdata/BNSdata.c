@@ -3004,7 +3004,8 @@ exit(11);
     BNSdata_verify_solution(grid);
 
     /* break if total error is small enough */
-    if(totalerr<tol) break;
+    if(totalerr<tol &&
+       Getv("BNSdata_break_if_err_below_tol","after_ell_solve")) break;
 
     /* write after elliptic solve, but before adjusting q */
     grid->time -= 0.5;
@@ -3131,7 +3132,8 @@ if(0) /* not working */
     normresnonlin = GridL2Norm(vlFu);
     printf("BNSdata_solve step %d: residual = %.4e\n", it, normresnonlin);
     prdivider(1);  fflush(stdout);
-    if(normresnonlin<tol) break;
+    if(normresnonlin<tol && 
+       Getv("BNSdata_break_if_err_below_tol","at_iterationend")) break;
 
     /* set new tol for Newton */
     Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);

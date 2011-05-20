@@ -148,6 +148,9 @@ int sgrid_BNSdata()
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "max. number of iterations in BNSdata_solve");
+  AddPar("BNSdata_break_if_err_below_tol", "at_iterationend after_ell_solve",
+         "which if clauses we use to break out of main iteration loop "
+         "[at_iterationend,after_ell_solve]");
   AddPar("BNSdata_tol",   "1e-6", "tolerance for BNSdata_solve");
   AddPar("BNSdata_Newton_tolFac", "0.1", "tol for Newton is "
          "Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac)");
