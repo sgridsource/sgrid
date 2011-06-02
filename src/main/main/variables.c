@@ -575,7 +575,55 @@ void varcopy(tGrid *grid, int iv, int iu)
   vlfree(u);
   vlfree(v);
 }
+
+
+/* swap v and u */   
+void vlswap(tVarList *v, tVarList *u)
+{
+  tGrid *grid = v->grid;
+  double *pu, *pv;
+  int i, n;
+  int b;
+  double temp;
+
+  /* swap time */
+  temp = v->time;
+  v->time = u->time;
+  u->time = temp;
+
+  for (b = 0; b < grid->nboxes; b++)
+  {
+    tBox *box = grid->box[b];
+    int nnodes = box->nnodes;
+
+    for (n = 0; n < v->n; n++)
+    {
+      pu = box->v[u->index[n]];
+      pv = box->v[v->index[n]];
+
+      #pragma omp parallel for
+      for (i = 0; i < nnodes; i++)
+      {
+        temp  = pv[i];
+        pv[i] = pu[i];
+        pu[i] = temp;
+      }
+    }
+  }
+}
             
+/* wrapper for single variable: swap u and v (iv/u is index of v/u) */
+void varswap(tGrid *grid, int iv, int iu)
+{
+  tVarList *v = vlalloc(grid);
+  tVarList *u = vlalloc(grid);
+  vlpushone(v, iv);
+  vlpushone(u, iu);
+  vlswap(v, u);
+  vlfree(u);
+  vlfree(v);
+}
+
 
 /* average: r=(a+b)/2 */   
 void vlaverage(tVarList *r, tVarList *a, tVarList *b)

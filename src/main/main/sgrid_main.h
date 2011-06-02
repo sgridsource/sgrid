@@ -162,6 +162,8 @@ void vlsetconstant(tVarList *u, const double c);
 void vlcopy(tVarList *v, tVarList *u);
 void vlcopygrid(tGrid *grid, tVarList *v, tVarList *u);
 void varcopy(tGrid *grid, int iv, int iu);
+void vlswap(tVarList *v, tVarList *u);
+void varswap(tGrid *grid, int iv, int iu);
 void vlaverage(tVarList *r, tVarList *a, tVarList *b);
 void vlsubtract(tVarList *r, tVarList *a, tVarList *b);
 void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList*b);
