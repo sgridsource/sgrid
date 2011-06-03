@@ -395,6 +395,7 @@ exit(77);
   enablevar(grid, Ind("BNSdata_Sigmaold"));
   enablevar(grid, Ind("BNSdata_qold"));
   enablevar(grid, Ind("BNSdata_qcorot"));
+  enablevar(grid, Ind("BNSdata_qnocent"));
   enablevar(grid, Ind("BNSdata_surface_sigma_pm"));
 
   /* enable some lapse and shift of ADMvars */
@@ -2647,13 +2648,13 @@ double average_current_and_old(double weight, tGrid *grid,
   printf("average_current_and_old:  weight=%g\n", weight);
   printf(" => m01=%.19g m02=%.19g\n", m01, m02);
 
-  /* compute error in q */
-  varcopy(grid, Ind("BNSdata_temp2"), Ind("BNSdata_q")); /* set temp2 = qold */
-  BNS_compute_new_centered_q(grid);
-  /* set temp1 = q - temp2 = qnew - qold */
+  /* compute error in q. Do it like this: */
+  /* compute error in new uncentered q, i.e. the diff between saved 
+     BNSdata_qnocent and current uncentered q */
+  BNS_compute_new_q(grid, Ind("BNSdata_temp2")); /* set temp2 = new unc. q */
+  /* set temp1 = temp2 - qnocent = qnocent_new - qnocent_old */
   varadd(grid, Ind("BNSdata_temp1"),
-               1,Ind("BNSdata_q"), -1,Ind("BNSdata_temp2"));
-  varcopy(grid, Ind("BNSdata_q"), Ind("BNSdata_temp2")); /* set q = temp2 */
+               1,Ind("BNSdata_temp2"), -1,Ind("BNSdata_qnocent"));
   L2qdiff = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
             varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1")) +
             varBoxL2Norm(grid->box[4], Ind("BNSdata_temp1")) +
@@ -2871,6 +2872,9 @@ exit(11);
 
     /* set BNSdata_qcorot before ell solve */
     compute_qcorot_with_corotation_formula(grid, Ind("BNSdata_qcorot"));
+    
+    /* set BNSdata_qnocent before ell solve */
+    BNS_compute_new_q(grid, Ind("BNSdata_qnocent"));
 
     /* set wB before we solve */
     BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0); 

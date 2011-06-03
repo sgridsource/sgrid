@@ -62,6 +62,7 @@ int sgrid_BNSdata()
   AddVar("BNSdata_qold",      "",  "old q");
   /* q we get with corotating formula */
   AddVar("BNSdata_qcorot",    "",  "q we get with corotating formula");
+  AddVar("BNSdata_qnocent",   "",  "q we get without centering");
 
   AddVar("BNSdata_A", "", "store value of A in box4/5");
   AddVar("BNSdata_B", "", "store value of B in box4/5");
