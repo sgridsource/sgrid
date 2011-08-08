@@ -122,7 +122,8 @@ int sgrid_BNSdata()
          "set automatically in main iteration [no,yes]");
   AddPar("BNSdata_center_new_q_fac", "0.1",
          "by how much we try to move the the qmax location");
-  AddPar("BNSdata_Omega", "estimate",  "orbital angular velocity");
+  AddPar("BNSdata_Omega", "estimate",  "orbital angular velocity "
+         "[#,estimate,estimate_from_desired_m0]");
   AddPar("BNSdata_b",     "1",  "separation parameter (distance~2b)");
   AddPar("BNSdata_n",     "1",  "polytropic index n, Gamma = 1 + 1/n");
   AddPar("BNSdata_kappa", "1",  "kappa in EOS: P = kappa rho0^Gamma");
