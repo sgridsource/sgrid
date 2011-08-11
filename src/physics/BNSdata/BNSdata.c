@@ -148,6 +148,7 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
 {
   int corot1 = Getv("BNSdata_rotationstate1","corotation");
   int corot2 = Getv("BNSdata_rotationstate2","corotation");
+  int wBfac_Psi6 = Getv("BNSdata_wB_factor","Psi6");
   int b;
   double omegax1   = Getd("BNSdata_omegax1");
   double omegay1   = Getd("BNSdata_omegay1");
@@ -184,6 +185,7 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
     double *BNSdata_wBx = box->v[Ind("BNSdata_wBx")];
     double *BNSdata_wBy = box->v[Ind("BNSdata_wBx")+1];
     double *BNSdata_wBz = box->v[Ind("BNSdata_wBx")+2];
+    double *BNSdata_Psi = box->v[Ind("BNSdata_Psi")];
 
     if( star==2 && (b==0 || b==1 || b==5) ) continue;
     if( star==1 && (b==3 || b==2 || b==4) ) continue;
@@ -204,8 +206,10 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
       /* set wB */
       if(!corot)
       {
+        double Psi1 = BNSdata_Psi[i];
+        double Psi4 = Psi1*Psi1*Psi1*Psi1;
+        double Psi6 = Psi1*Psi1*Psi4;
         // double u0;
-        // double Psito4 = Psi1*Psi1*Psi1*Psi1;
         // double h = (BNSdata_n+1) *q1 + 1; /* h = (n+1) q + 1 */
         double vx,vy,vz;
         double Att1, wBfac;
@@ -218,10 +222,14 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
         vx = ( omegay1* (z-zc) - omegaz1* (y-yc) )*Att1;
         vy = ( omegaz1* (x-xc) - omegax1* (z-zc) )*Att1;
         vz = ( omegax1* (y-yc) - omegay1* (x-xc) )*Att1;
-        /* 1/u0^2 ~ alpha2 - Psito4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),*/
-        /* u0 = 1.0/sqrt(fabs(exp(2*Phi1) - Psito4*(vx*vx + vy*vy + vz*vz)));
-           wBfac = h*u0 * (Psito4 * Psi1*Psi1);  ???  */
+        /* 1/u0^2 ~ alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),*/
+        /* u0 = 1.0/sqrt(fabs(exp(2*Phi1) - Psi4*(vx*vx + vy*vy + vz*vz))); */
+
+        /* set wBfac */
+        /* wBfac = h*u0 * (Psi4 * Psi1*Psi1);  ???  */
         wBfac = 1.0;
+        if(wBfac_Psi6) wBfac = wBfac * Psi6;
+
         BNSdata_wBx[i] = vx * wBfac;
         BNSdata_wBy[i] = vy * wBfac;
         BNSdata_wBz[i] = vz * wBfac;

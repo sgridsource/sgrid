@@ -78,6 +78,8 @@ int sgrid_BNSdata()
          "rotation state of NS1 [corotation,irrotation");
   AddPar("BNSdata_rotationstate2", "corotation",
          "rotation state of NS2 [corotation,irrotation");
+  AddPar("BNSdata_wB_factor", "1", "wB = BNSdata_omega cross (r-r_c) * factor"
+         " [1,Psi6]");
   AddPar("BNSdata_omegax1", "0", "x-comp of angular velocity of NS1");
   AddPar("BNSdata_omegay1", "0", "y-comp of angular velocity of NS1");
   AddPar("BNSdata_omegaz1", "0", "z-comp of angular velocity of NS1");
