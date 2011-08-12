@@ -148,8 +148,11 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
 {
   int corot1 = Getv("BNSdata_rotationstate1","corotation");
   int corot2 = Getv("BNSdata_rotationstate2","corotation");
-  int wBfac_Psi6 = Getv("BNSdata_wB_factor","Psi6");
+  int wBfac_Psi6    = Getv("BNSdata_wB_factor","Psi6");
+  int wBfac_h       = Getv("BNSdata_wB_factor","h");
+  int wBfac_ooalpha = Getv("BNSdata_wB_factor","1/alpha");
   int b;
+  double BNSdata_n = Getd("BNSdata_n");
   double omegax1   = Getd("BNSdata_omegax1");
   double omegay1   = Getd("BNSdata_omegay1");
   double omegaz1   = Getd("BNSdata_omegaz1");
@@ -186,6 +189,8 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
     double *BNSdata_wBy = box->v[Ind("BNSdata_wBx")+1];
     double *BNSdata_wBz = box->v[Ind("BNSdata_wBx")+2];
     double *BNSdata_Psi = box->v[Ind("BNSdata_Psi")];
+    double *alpha = box->v[Ind("alpha")];
+    double *BNSdata_q = box->v[Ind("BNSdata_q")];
 
     if( star==2 && (b==0 || b==1 || b==5) ) continue;
     if( star==1 && (b==3 || b==2 || b==4) ) continue;
@@ -209,8 +214,9 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
         double Psi1 = BNSdata_Psi[i];
         double Psi4 = Psi1*Psi1*Psi1*Psi1;
         double Psi6 = Psi1*Psi1*Psi4;
+        double ooalpha = 1.0/alpha[i];
+        double h = (BNSdata_n+1.0)*BNSdata_q[i] + 1.0; /* h = (n+1) q + 1 */
         // double u0;
-        // double h = (BNSdata_n+1) *q1 + 1; /* h = (n+1) q + 1 */
         double vx,vy,vz;
         double Att1, wBfac;
         double A = pX[i];
@@ -226,9 +232,11 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
         /* u0 = 1.0/sqrt(fabs(exp(2*Phi1) - Psi4*(vx*vx + vy*vy + vz*vz))); */
 
         /* set wBfac */
-        /* wBfac = h*u0 * (Psi4 * Psi1*Psi1);  ???  */
+        /* wBfac = h*u0 * Psi^6  ???  */
         wBfac = 1.0;
-        if(wBfac_Psi6) wBfac = wBfac * Psi6;
+        if(wBfac_Psi6)    wBfac = wBfac * Psi6;
+        if(wBfac_h)       wBfac = wBfac * h;
+        if(wBfac_ooalpha) wBfac = wBfac * ooalpha; /* u0 ~ 1/alpha */
 
         BNSdata_wBx[i] = vx * wBfac;
         BNSdata_wBy[i] = vy * wBfac;
