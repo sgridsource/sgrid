@@ -189,7 +189,7 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
     double *BNSdata_wBy = box->v[Ind("BNSdata_wBx")+1];
     double *BNSdata_wBz = box->v[Ind("BNSdata_wBx")+2];
     double *BNSdata_Psi = box->v[Ind("BNSdata_Psi")];
-    double *alpha = box->v[Ind("alpha")];
+    double *BNSdata_alphaP = box->v[Ind("BNSdata_alphaP")];
     double *BNSdata_q = box->v[Ind("BNSdata_q")];
 
     if( star==2 && (b==0 || b==1 || b==5) ) continue;
@@ -214,7 +214,7 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
         double Psi1 = BNSdata_Psi[i];
         double Psi4 = Psi1*Psi1*Psi1*Psi1;
         double Psi6 = Psi1*Psi1*Psi4;
-        double ooalpha = 1.0/alpha[i];
+        double ooalpha = Psi1/BNSdata_alphaP[i]; /* 1/alpha */
         double h = (BNSdata_n+1.0)*BNSdata_q[i] + 1.0; /* h = (n+1) q + 1 */
         // double u0;
         double vx,vy,vz;
