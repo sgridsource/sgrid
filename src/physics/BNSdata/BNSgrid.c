@@ -96,8 +96,10 @@ int set_boxsizes(tGrid *grid)
     /* set BNSdata_desired_m01/2 if needed */
     if(Getd("BNSdata_desired_m01")<0.0) Setd("BNSdata_desired_m01", m01);
     if(Getd("BNSdata_desired_m02")<0.0) Setd("BNSdata_desired_m02", m02);
+    if(Getd("BNSdata_desired_kappa")<0.0) Setd("BNSdata_desired_kappa", kappa);
     printf("   BNSdata_desired_m01 = %g\n", Getd("BNSdata_desired_m01"));
     printf("   BNSdata_desired_m02 = %g\n", Getd("BNSdata_desired_m02"));
+    printf("   BNSdata_desired_kappa = %g\n", Getd("BNSdata_desired_kappa"));
     /* set initial BNSdata_m01/2 */
     m01 = Getd("BNSdata_init_m01");
     m02 = Getd("BNSdata_init_m02");
@@ -106,6 +108,16 @@ int set_boxsizes(tGrid *grid)
     printf("   BNSdata_m01 = BNSdata_init_m01 = m01 = %g\n", m01);
     printf("   BNSdata_m02 = BNSdata_init_m02 = m02 = %g\n", m02);
     printf("   BNSdata_m0change = %g\n", Getd("BNSdata_m0change"));
+    /* set initial kappa */
+    if(Getv("BNSdata_adjustkappa", "kappa^(-n/2)*m0_EQ_desired_kappa^(-n/2)*m0"))
+    {
+      double tm01 = Getd("BNSdata_desired_m01");
+      double tm02 = Getd("BNSdata_desired_m02");
+      kappa = Getd("BNSdata_desired_kappa") *
+              pow((tm01+tm02)/(m01+m02), -2/BNSdata_n);
+      Setd("BNSdata_kappa", kappa);
+      printf("   BNSdata_kappa = %g\n", kappa);
+    }
   }
 
   /* set Coordinates_AnsorgNS_sigmap/m funcs, .s.t. it works with sigma1/2 */

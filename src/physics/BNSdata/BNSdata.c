@@ -2620,6 +2620,17 @@ void adjust_BNSdata_m01_m02(void)
          Getd("BNSdata_m0change"), mCh1, mCh2);
   printf(" => BNSdata_m01=%.13g BNSdata_m02=%.13g\n", cm01, cm02);
   printf("    BNSdata_desired_m01=%.13g BNSdata_desired_m01=%.13g\n", tm01, tm02);
+  /* kappa adjustment ? */
+  if(Getv("BNSdata_adjustkappa", "kappa^(-n/2)*m0_EQ_desired_kappa^(-n/2)*m0"))
+  {
+    double BNSdata_n = Getd("BNSdata_n");
+    double kappa;
+    kappa = Getd("BNSdata_desired_kappa") *
+            pow((tm01+tm02)/(cm01+cm02), -2/BNSdata_n);
+    Setd("BNSdata_kappa", kappa);
+    printf("    BNSdata_kappa = %g\n", kappa);
+    printf("    BNSdata_desired_kappa = %g\n", Getd("BNSdata_desired_kappa"));
+  }
 }
 
 /* compute weighted average of current and old values,

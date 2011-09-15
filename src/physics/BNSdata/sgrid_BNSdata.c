@@ -101,6 +101,9 @@ int sgrid_BNSdata()
            "during iterations");
     AddPar("BNSdata_desired_m01", "-1", "desired rest mass1 if we iterate it");
     AddPar("BNSdata_desired_m02", "-1", "desired rest mass2 if we iterate it");
+    AddPar("BNSdata_desired_kappa", "-1", "desired kappa in EOS");
+    AddPar("BNSdata_adjustkappa", "no", 
+           "how we adjust kappa [kappa^(-n/2)*m0_EQ_desired_kappa^(-n/2)*m0,no]");
   }
   AddPar("BNSdata_qmax1", "0", "max q of NS1 along x-axis");
   AddPar("BNSdata_qmax2", "0", "max q of NS2 along x-axis");
