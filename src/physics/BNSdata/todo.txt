@@ -12,3 +12,6 @@
  also changes things on star2 in box4. Probably it just changes the size of
  box4 and interpolates onto it correctly, but that is unnecesary and may be
  even harmful for the overall iteration.
+
+*use spinning NS from RNS code instead TOV as initial guess
+ RNS code: http://www.gravity.phys.uwm.edu/rns/
