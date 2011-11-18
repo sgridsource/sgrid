@@ -127,6 +127,10 @@ int sgrid_BNSdata()
          "set automatically in main iteration [no,yes]");
   AddPar("BNSdata_center_new_q_fac", "0.1",
          "by how much we try to move the the qmax location");
+  AddPar("BNSdata_Omega_init", "BNSdata_Omega", "ini. orbital angular velocity "
+         "[#,estimate,estimate_from_desired_m0,BNSdata_Omega]");
+  AddPar("BNSdata_x_CM_init", "BNSdata_x_CM",
+         "initial center of mass in x-direction [#,estimate,BNSdata_x_CM]");
   AddPar("BNSdata_Omega", "estimate",  "orbital angular velocity "
          "[#,estimate,estimate_from_desired_m0]");
   AddPar("BNSdata_b",     "1",  "separation parameter (distance~2b)");

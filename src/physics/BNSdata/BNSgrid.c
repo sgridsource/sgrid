@@ -270,6 +270,18 @@ int set_boxsizes(tGrid *grid)
   DoM5 = DoM4*DoM;
   nu = (m01*m02)/pow(m01+m02, 2.0);
 
+  /* set: BNSdata_x_CM  = BNSdata_x_CM_init 
+          BNSdata_Omega = BNSdata_Omega_init
+     (unless: BNSdata_x_CM_init  = BNSdata_x_CM
+              BNSdata_Omega_init = BNSdata_Omega) */
+  if(!Getv("BNSdata_x_CM_init", "BNSdata_x_CM"))
+    Sets("BNSdata_x_CM", Gets("BNSdata_x_CM_init"));
+  if(!Getv("BNSdata_Omega_init", "BNSdata_Omega"))
+    Sets("BNSdata_Omega", Gets("BNSdata_Omega_init"));
+  printf(" initializing BNSdata_x_CM and BNSdata_Omega using:\n");
+  printf(" BNSdata_x_CM  = %s\n", Gets("BNSdata_x_CM"));
+  printf(" BNSdata_Omega = %s\n", Gets("BNSdata_Omega"));
+
   /* set CM and Omega (taken from PN_ADM_2.m) */
   if(Getv("BNSdata_x_CM", "estimate"))
     xCM = (m01*xc1 + m02*xc2)/(m01+m02);
@@ -295,6 +307,7 @@ int set_boxsizes(tGrid *grid)
   if(nu<=0.0) Omega=0.0;
   Setd("BNSdata_x_CM", xCM);
   Setd("BNSdata_Omega", Omega);
+  printf(" BNSdata_x_CM and BNSdata_Omega are now set to:\n");
   printf(" BNSdata_x_CM = %g\n", Getd("BNSdata_x_CM"));
   printf(" BNSdata_Omega = %g,  (m01+m02)*BNSdata_Omega = %g\n",
          Getd("BNSdata_Omega"), Getd("BNSdata_Omega")*(m01+m02));
