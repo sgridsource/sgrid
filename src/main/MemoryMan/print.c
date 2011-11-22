@@ -86,7 +86,7 @@ void printvar_inbox(tBox *box, char *name)
   int n2=box->n2;
   int n3=box->n3;
 
-  printf("%s, %p: \n", name, v);
+  printf("%s, %p, Ind=%d:\n", name, v, Ind(name));
   if(v)
   {
     forallijk(i,j,k)
