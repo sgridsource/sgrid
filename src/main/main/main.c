@@ -40,6 +40,8 @@ int main(int argc, char **argv)
     evolve_grid(g);
     finalize_grid(g);
     RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
+    makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
+    Sets("outdir_previous_iteration", Gets("outdir"));
   }
   return 0;
 }

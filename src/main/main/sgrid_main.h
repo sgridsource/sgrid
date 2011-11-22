@@ -37,6 +37,7 @@ typedef struct {
   char *value;
   char *description;
 } tParameter;
+void makeparameter(char *name, char *value, char *description);
 void AddPar(char *name, char *value, char *description);
 void AddOrModifyPar(char *name, char *value, char *description);
 void Sets(char *name, char *value);
