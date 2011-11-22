@@ -171,7 +171,8 @@ void spec_interpolate_Var_from_grid2_to_grid1(tGrid *grid1, tGrid *grid2,
   forallboxes(grid2, b)
   {
     tBox *box = grid2->box[b];
-    spec_Coeffs(box, box->v[vind], box->v[cind]);
+    if(box->v[vind]!=NULL)
+      spec_Coeffs(box, box->v[vind], box->v[cind]);
   }
 
   /* loop over grid1 and interpolate vind from grid2 */
@@ -185,7 +186,7 @@ void spec_interpolate_Var_from_grid2_to_grid1(tGrid *grid1, tGrid *grid2,
     double *pv = box->v[vind];
 
     /* loop over points on grid1 */
-    forallpoints(box, i)
+    if(pv!=NULL) forallpoints(box, i)
     {
       double X = pX[i];
       double Y = pY[i];

@@ -107,6 +107,7 @@ void checkpoint_interpolate_Vars_get_Pars(char *filename,
   for(j = 0; j < varlist->n; j++)
   {
     printf(" %s ... ", VarName(varlist->index[j]));
+    fflush(stdout);
     spec_interpolate_Var_from_grid2_to_grid1(grid, grid2, 
                                              varlist->index[j], tempind);
     printf("done.\n");
