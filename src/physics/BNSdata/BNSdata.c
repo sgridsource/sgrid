@@ -427,9 +427,6 @@ exit(77);
   TOV_init(P_core2, kappa, Gamma, 1, &rs2, &m2, &Phic2, &Psic2, &m02);
 
   /* load data from some old checkpoint file */
-printf("outdir_previous_iteration = %s\n", 
-GetsLax("outdir_previous_iteration"));
-printf("initFromChkp=%d\n", initFromChkp);
   if(initFromChkp && GetsLax("outdir_previous_iteration")!=NULL)
   {
     char filename[10000];
