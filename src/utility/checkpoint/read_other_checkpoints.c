@@ -41,6 +41,8 @@ void checkpoint_interpolate_Vars_get_Pars(char *filename,
   int b, j;
   int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
 
+//printVarList(varlist);         
+
   /* read the file into grid2, pdb2 */
   printf("Reading parameters and variables from file %s into "
          "pdb2 and grid2:\n", filename);
@@ -87,6 +89,9 @@ void checkpoint_interpolate_Vars_get_Pars(char *filename,
     Sets(par, val);  /* set par value in pdb */
     fflush(stdout);
   }
+  printf(" Note: Here we added box?_min? and box?_max?, because "
+         " we can only interpolate\n"
+         " if the box boundaries are in the same place.\n");
 
   /* we can only interpolate if the box boundaries are in the same place
      on both grids => Adjust grid1. */
@@ -101,8 +106,9 @@ void checkpoint_interpolate_Vars_get_Pars(char *filename,
   printf("Interpolating from grid2 to grid:\n");
   for(j = 0; j < varlist->n; j++)
   {
-    printf(" %s ... ", VarName(j));
-    spec_interpolate_Var_from_grid2_to_grid1(grid, grid2, j, tempind);
+    printf(" %s ... ", VarName(varlist->index[j]));
+    spec_interpolate_Var_from_grid2_to_grid1(grid, grid2, 
+                                             varlist->index[j], tempind);
     printf("done.\n");
     fflush(stdout);
   }
