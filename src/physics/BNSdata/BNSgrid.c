@@ -2444,6 +2444,45 @@ void BNS_update_q(tGrid *grid2, double w, tGrid *grid1)
   }
 }
 
+
+/************************************************************************/
+/* utilities to load checkpoints with different resolution and pars */
+/************************************************************************/
+/* load data from a previous result in a checkpoint file 
+   (with e.g. lower res) */
+void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
+{
+  tVarList *vl;
+  char *parlist;
+
+  /* make list of pars we want to read */  
+  parlist = "BNSdata_Omega BNSdata_x_CM BNSdata_C1 BNSdata_C2 "
+            "BNSdata_qmax1 BNSdata_qmax2 BNSdata_xmax1 BNSdata_xmax2 "
+            "BNSdata_actual_xmax1 BNSdata_actual_xmax2";
+
+  /* make list of vars we want to read */
+  vl = vlalloc(grid);
+  vlpush(vl, Ind("BNSdata_Psi"));
+  vlpush(vl, Ind("BNSdata_Bx"));
+  vlpush(vl, Ind("BNSdata_alphaP"));
+  vlpush(vl, Ind("BNSdata_Sigma"));
+  vlpush(vl, Ind("BNSdata_q"));
+  vlpush(vl, Ind("Coordinates_AnsorgNS_sigma_pm"));
+
+  /* read vars in vl and pars in parlist*/
+  checkpoint_interpolate_Vars_get_Pars(filename, vl, parlist);
+
+  /* set values of A,B,phi in box4/5 */
+  set_BNSdata_ABphi(grid);
+
+  /* set wB */
+  BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0);
+  BNS_set_wB(grid, 2, Getd("BNSdata_actual_xmax2"),0.0,0.0); 
+
+  /* free varlist */
+  vlfree(vl);  
+}
+
 /************************************************************************/
 /* utilities to manipulate the grid */
 /************************************************************************/

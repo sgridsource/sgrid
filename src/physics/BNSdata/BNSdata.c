@@ -312,6 +312,7 @@ int BNSdata_startup(tGrid *grid)
   int TOVav        = Getv("BNSdata_guess", "TOVaverage");
   int TOVprod      = Getv("BNSdata_guess", "TOVproduct");
   int initShift    = Getv("BNSdata_guess", "TaniguchiShift");
+  int initFromChkp = Getv("BNSdata_guess", "initialize_from_checkpoint");
   double Omega     = Getd("BNSdata_Omega");
   double omegax1   = Getd("BNSdata_omegax1");
   double omegay1   = Getd("BNSdata_omegay1");
@@ -425,35 +426,50 @@ exit(77);
   TOV_init(P_core1, kappa, Gamma, 1, &rs1, &m1, &Phic1, &Psic1, &m01);
   TOV_init(P_core2, kappa, Gamma, 1, &rs2, &m2, &Phic2, &Psic2, &m02);
 
-  /* get yshift1 (for testing) */
-  if(m02==0.0) ysh1 = Getd("BNSdata_yshift1");
-  else         ysh1 = 0.0;
+  /* load data from some old checkpoint file */
+printf("outdir_previous_iteration = %s\n", 
+GetsLax("outdir_previous_iteration"));
+printf("initFromChkp=%d\n", initFromChkp);
+  if(initFromChkp && GetsLax("outdir_previous_iteration")!=NULL)
+  {
+    char filename[10000];
+    snprintf(filename, 9999, "%s/%s", 
+             Gets("outdir_previous_iteration"), "checkpoint.0");
+    prdivider(1);
+    printf("loading initial guess from %s\n", filename);
+    BNSgrid_load_initial_guess_from_checkpoint(grid, filename);
+  }
+  else /* use some TOV data */
+  {
+    /* get yshift1 (for testing) */
+    if(m02==0.0) ysh1 = Getd("BNSdata_yshift1");
+    else         ysh1 = 0.0;
 
-  /* set initial values in all in boxes */
-  forallboxes(grid,b)
-  {  
-    tBox *box = grid->box[b];
-    int i;
-    double *pX = box->v[Ind("X")];
-    double *pY = box->v[Ind("Y")];
-    double *pZ = box->v[Ind("Z")];
-    double *px = box->v[Ind("x")];
-    double *py = box->v[Ind("y")];
-    double *pz = box->v[Ind("z")];
-    double *BNSdata_Psi    = box->v[Ind("BNSdata_Psi")];
-    double *BNSdata_alphaP = box->v[Ind("BNSdata_alphaP")];
-    double *BNSdata_q      = box->v[Ind("BNSdata_q")];
-    double *BNSdata_Bx     = box->v[Ind("BNSdata_Bx")];
-    double *BNSdata_By     = box->v[Ind("BNSdata_Bx")+1];
-    double *BNSdata_Bz     = box->v[Ind("BNSdata_Bx")+2];
-    double *BNSdata_Sigma  = box->v[Ind("BNSdata_Sigma")];
-    double *BNSdata_wBx    = box->v[Ind("BNSdata_wBx")];
-    double *BNSdata_wBy    = box->v[Ind("BNSdata_wBx")+1];
-    double *BNSdata_wBz    = box->v[Ind("BNSdata_wBx")+2];
-    double r1, m1_r, P1, Phi1, Psi1, m01_r, q1;
-    double r2, m2_r, P2, Phi2, Psi2, m02_r, q2;
-    double Bx1,By1,Bz1;
-    double Bx2,By2,Bz2;
+    /* set initial values in all in boxes */
+    forallboxes(grid,b)
+    {  
+      tBox *box = grid->box[b];
+      int i;
+      double *pX = box->v[Ind("X")];
+      double *pY = box->v[Ind("Y")];
+      double *pZ = box->v[Ind("Z")];
+      double *px = box->v[Ind("x")];
+      double *py = box->v[Ind("y")];
+      double *pz = box->v[Ind("z")];
+      double *BNSdata_Psi    = box->v[Ind("BNSdata_Psi")];
+      double *BNSdata_alphaP = box->v[Ind("BNSdata_alphaP")];
+      double *BNSdata_q      = box->v[Ind("BNSdata_q")];
+      double *BNSdata_Bx     = box->v[Ind("BNSdata_Bx")];
+      double *BNSdata_By     = box->v[Ind("BNSdata_Bx")+1];
+      double *BNSdata_Bz     = box->v[Ind("BNSdata_Bx")+2];
+      double *BNSdata_Sigma  = box->v[Ind("BNSdata_Sigma")];
+      double *BNSdata_wBx    = box->v[Ind("BNSdata_wBx")];
+      double *BNSdata_wBy    = box->v[Ind("BNSdata_wBx")+1];
+      double *BNSdata_wBz    = box->v[Ind("BNSdata_wBx")+2];
+      double r1, m1_r, P1, Phi1, Psi1, m01_r, q1;
+      double r2, m2_r, P2, Phi2, Psi2, m02_r, q2;
+      double Bx1,By1,Bz1;
+      double Bx2,By2,Bz2;
 
 //double x,y,z;
 //printf("m1=%g m2=%g Omega=%g  rs1=%g rs2=%g xc1=%g xc2=%g  xc1-xc2=%g\n",
@@ -472,116 +488,119 @@ exit(77);
 //}
 //exit(11);
 
-    forallpoints(box,i)
-    {
-      double x = pX[i];
-      double y = pY[i];
-      double z = pZ[i];
+      forallpoints(box,i)
+      {
+        double x = pX[i];
+        double y = pY[i];
+        double z = pZ[i];
 
-      if(px!=NULL) 
-      {
-        x = px[i];
-        y = py[i];
-        z = pz[i];
-      }
-      /* set Psi, alphaP, q */
-      if(TOVav || TOVprod || (b==0 || b==1 || b==5) )
-      {
-        r1 = sqrt((x-xc1)*(x-xc1) + (y-ysh1)*(y-ysh1) + z*z);
-        TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
-                                 P_core1, Phic1, Psic1,
-                                 &m1_r, &P1, &Phi1, &Psi1, &m01_r);
-        q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-             pow(P1, 1.0/(1.0 + BNSdata_n));
-        BNSdata_initial_shift(1, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs1, 
-                              -(x-xc1), -(y-ysh1), z,  &Bx1,&By1,&Bz1);
-      }
-      else { m1_r = P1 = Phi1 = m01_r = q1 = Bx1=By1=Bz1 = 0.0;  Psi1 = 1.0; }
-      if(TOVav || TOVprod || (b==2 || b==3 || b==4) )
-      {
-        r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
-        TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
-                                 P_core2, Phic2, Psic2,
-                                 &m2_r, &P2, &Phi2, &Psi2, &m02_r);
-        q2 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-             pow(P2, 1.0/(1.0 + BNSdata_n));
-        BNSdata_initial_shift(2, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs2, 
-                              x-xc2, y, z,  &Bx2,&By2,&Bz2);
-      }
-      else { m2_r = P2 = Phi2 = m02_r = q2 = Bx2=By2=Bz2 = 0.0;  Psi2 = 1.0; }
-      
-      /* set the data */
-      if(TOVprod)
-      {
-        BNSdata_Psi[i]   = Psi1*Psi2;
-        BNSdata_alphaP[i]= exp(Phi1+Phi2)*Psi1*Psi2;
-        BNSdata_q[i]     = q1 + q2;
-      }
-      else /* for TOVav or TOV */
-      {
-        BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
-        BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
-        BNSdata_q[i]     = q1 + q2;
-      }
-      /* set inertial shift B^i if wanted */
-      if(initShift)
-      {
-        BNSdata_Bx[i] = Bx1 + Bx2;
-        BNSdata_By[i] = By1 + By2;
-        BNSdata_Bz[i] = Bz1 + Bz2;
-      }
-      /* set Sigma and wB if needed */
-      if( (b==0 || b==1 || b==5) && (!corot1) )
-      {
-        double Att;
-        double A = pX[i];
-        if(b==1) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
-        else     Att = 1.0;
+        if(px!=NULL) 
+        {
+          x = px[i];
+          y = py[i];
+          z = pz[i];
+        }
+        /* set Psi, alphaP, q */
+        if(TOVav || TOVprod || (b==0 || b==1 || b==5) )
+        {
+          r1 = sqrt((x-xc1)*(x-xc1) + (y-ysh1)*(y-ysh1) + z*z);
+          TOV_m_P_Phi_Psi_m0_OF_rf(r1, rs1, kappa, Gamma,
+                                   P_core1, Phic1, Psic1,
+                                   &m1_r, &P1, &Phi1, &Psi1, &m01_r);
+          q1 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+               pow(P1, 1.0/(1.0 + BNSdata_n));
+          BNSdata_initial_shift(1, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs1, 
+                                -(x-xc1), -(y-ysh1), z,  &Bx1,&By1,&Bz1);
+        }
+        else { m1_r = P1 = Phi1 = m01_r = q1 = Bx1=By1=Bz1 = 0.0;  Psi1 = 1.0; }
+        if(TOVav || TOVprod || (b==2 || b==3 || b==4) )
+        {
+          r2 = sqrt((x-xc2)*(x-xc2) + y*y + z*z);
+          TOV_m_P_Phi_Psi_m0_OF_rf(r2, rs2, kappa, Gamma,
+                                   P_core2, Phic2, Psic2,
+                                   &m2_r, &P2, &Phi2, &Psi2, &m02_r);
+          q2 = pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+               pow(P2, 1.0/(1.0 + BNSdata_n));
+          BNSdata_initial_shift(2, 1.0, m1,m2, Omega, fabs(xc1-xc2), rs2, 
+                                x-xc2, y, z,  &Bx2,&By2,&Bz2);
+        }
+        else { m2_r = P2 = Phi2 = m02_r = q2 = Bx2=By2=Bz2 = 0.0;  Psi2 = 1.0; }
+        
+        /* set the data */
+        if(TOVprod)
+        {
+          BNSdata_Psi[i]   = Psi1*Psi2;
+          BNSdata_alphaP[i]= exp(Phi1+Phi2)*Psi1*Psi2;
+          BNSdata_q[i]     = q1 + q2;
+        }
+        else /* for TOVav or TOV */
+        {
+          BNSdata_Psi[i]   = Psi1 + Psi2 - 1.0;
+          BNSdata_alphaP[i]= exp(Phi1)*Psi1 + exp(Phi2)*Psi2 - 1.0;
+          BNSdata_q[i]     = q1 + q2;
+        }
+        /* set inertial shift B^i if wanted */
+        if(initShift)
+        {
+          BNSdata_Bx[i] = Bx1 + Bx2;
+          BNSdata_By[i] = By1 + By2;
+          BNSdata_Bz[i] = Bz1 + Bz2;
+        }
+        /* set Sigma and wB if needed */
+        if( (b==0 || b==1 || b==5) && (!corot1) )
+        {
+          double Att;
+          double A = pX[i];
+          if(b==1) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
+          else     Att = 1.0;
 
-        BNSdata_Sigma[i] = Omega*(xc1-xCM) * y * Att;
-      }
-      if( (b==3 || b==2 || b==4) && (!corot2) )
-      {
-        double Att;
-        double A = pX[i];
-        if(b==2) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
-        else     Att = 1.0;
+          BNSdata_Sigma[i] = Omega*(xc1-xCM) * y * Att;
+        }
+        if( (b==3 || b==2 || b==4) && (!corot2) )
+        {
+          double Att;
+          double A = pX[i];
+          if(b==2) Att = 1.0-Attenuation01((A-0.1)/0.8, 2.0, 0.5);
+          else     Att = 1.0;
 
-        BNSdata_Sigma[i] = Omega*(xc2-xCM) * y * Att;
-      }
-    } /* end forallpoints */
-  }
-
-  /* set wB in both stars */
-  BNS_set_wB(grid, 1, xc1,0.0,0.0);
-  BNS_set_wB(grid, 2, xc2,0.0,0.0);
-  
-  /* if NS1 is shifted in y-direc. (for testing) adjust grid on right side */
-  if(ysh1 != 0.0 && Getv("BNSdata_adjustdomain01","yes"))
-  {
-    int bi;
-
-    /* adjust grid so that new q=0 is at A=0 */
-    compute_new_q_and_adjust_domainshapes(grid, 0);
-
-    /* set q to zero if q<0, and also in region 1 & 2 */
-    forallboxes(grid, bi)
-    {
-      int i;
-      double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-      forallpoints(grid->box[bi], i)
-        if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+          BNSdata_Sigma[i] = Omega*(xc2-xCM) * y * Att;
+        }
+      } /* end forallpoints */
     }
-  }
 
-  /* set qmax1/2 */
-  Setd("BNSdata_qmax1", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-                        pow(P_core1, 1.0/(1.0 + BNSdata_n)));
-  Setd("BNSdata_qmax2", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-                        pow(P_core2, 1.0/(1.0 + BNSdata_n)));
-  /* set cart positions of qmax1/2 */
-  Setd("BNSdata_xmax1", xc1);
-  Setd("BNSdata_xmax2", xc2);
+    /* set wB in both stars */
+    BNS_set_wB(grid, 1, xc1,0.0,0.0);
+    BNS_set_wB(grid, 2, xc2,0.0,0.0);
+    
+    /* if NS1 is shifted in y-direc. (for testing) adjust grid on right side */
+    if(ysh1 != 0.0 && Getv("BNSdata_adjustdomain01","yes"))
+    {
+      int bi;
+
+      /* adjust grid so that new q=0 is at A=0 */
+      compute_new_q_and_adjust_domainshapes(grid, 0);
+
+      /* set q to zero if q<0, and also in region 1 & 2 */
+      forallboxes(grid, bi)
+      {
+        int i;
+        double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+        forallpoints(grid->box[bi], i)
+          if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+      }
+    }
+
+    /* set qmax1/2 */
+    Setd("BNSdata_qmax1", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+                          pow(P_core1, 1.0/(1.0 + BNSdata_n)));
+    Setd("BNSdata_qmax2", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+                          pow(P_core2, 1.0/(1.0 + BNSdata_n)));
+    /* set cart positions of qmax1/2 */
+    Setd("BNSdata_xmax1", xc1);
+    Setd("BNSdata_xmax2", xc2);
+  } /* end intialization using TOV data */
+
+  /* print out maxima */
   printf("BNSdata_startup: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
          "                 BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
          Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
