@@ -104,3 +104,5 @@ void spec_Eval(tBox *box, double *u, double *c);
 double spec_interpolate(tBox *box, double *c, double X, double Y, double Z);
 void spec_Coeffs_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
 void spec_Eval_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
+void spec_interpolate_Var_from_grid2_to_grid1(tGrid *grid1, tGrid *grid2,
+                                              int vind, int tempind);

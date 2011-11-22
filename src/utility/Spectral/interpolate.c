@@ -155,3 +155,44 @@ void spec_Eval_varlist(tBox *box, tVarList *vlu, tVarList *vlc)
     spec_Eval(box, u, c);
   }
 }
+
+/* interpolate one Var with index vind from grid2 to grid1, use var with 
+   index tempind on grid2 as temporary storage for coefficients */
+void spec_interpolate_Var_from_grid2_to_grid1(tGrid *grid1, tGrid *grid2,
+                                              int vind, int tempind)
+{
+  int cind = tempind;
+  int Xind = Ind("X");
+  int Yind = Ind("Y");
+  int Zind = Ind("Z");
+  int b, i;
+
+  /* save coeffs of vind on grid2 in cind */
+  forallboxes(grid2, b)
+  {
+    tBox *box = grid2->box[b];
+    spec_Coeffs(box, box->v[vind], box->v[cind]);
+  }
+
+  /* loop over grid1 and interpolate vind from grid2 */
+  forallboxes(grid1, b)
+  {
+    tBox *box = grid1->box[b];
+    int b2 = b; /* use same box on grid2 as on grid1 */
+    double *pX = box->v[Xind];
+    double *pY = box->v[Yind];
+    double *pZ = box->v[Zind];
+    double *pv = box->v[vind];
+
+    /* loop over points on grid1 */
+    forallpoints(box, i)
+    {
+      double X = pX[i];
+      double Y = pY[i];
+      double Z = pZ[i];
+
+      /* get var vind at point X,Y,Z by interpolation */
+      pv[i] = spec_interpolate(grid2->box[b2], grid2->box[b2]->v[cind], X,Y,Z);
+    }
+  }
+}
