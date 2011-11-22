@@ -23,3 +23,7 @@ int sgrid_mpi_rank(void);
 int sgrid_mpi_allreduce_sum_int(int n);
 void sgrid_mpi_barrier(void);
 #define processor0 1
+
+/* from read_other_checkpoints.c */
+void read_checkpoint_into_grid2_pdb2(tGrid *grid, char *filename,
+                                     tGrid **grid2, tParameter **pdb2);

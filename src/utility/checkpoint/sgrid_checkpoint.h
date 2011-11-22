@@ -6,3 +6,5 @@
 int checkpoint(tGrid *grid);
 int parameterio_write_current_pars(tGrid *g);
 int parameterio_update_pars(tGrid *g);
+void checkpoint_interpolate_Vars_get_Pars(char *filename, 
+                                          tVarList *varlist, char *parlist);
