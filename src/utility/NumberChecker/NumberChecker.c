@@ -142,3 +142,18 @@ int NumberChecker_ExitIfNAN(tGrid* grid)
   
   return 0;
 }
+
+/* check if a varlist is finite, return sum  */
+int NumberChecker_CheckIfFinite_VarList(tVarList *varlist)
+{
+  tGrid *grid = varlist->grid;
+  int j, ret;
+
+  ret = 0;
+  for(j = 0; j < varlist->n; j++)
+  {
+    ret += abs(NumberChecker_CheckIfFinite(grid, VarName(varlist->index[j])));
+    fflush(stdout);   
+  }
+  return ret;
+}
