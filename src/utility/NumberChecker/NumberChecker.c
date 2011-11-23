@@ -64,17 +64,14 @@ num = 0.0;
     ivar= Ind(varname);
     var = box->v[ivar]; 
  
-    forallpoints(box,ijk)
+    if(var==NULL) 
     {
-      if(var==NULL) 
-      {
-        printf("pointer to %s is NULL at ijk=%d: x=%g y=%g z=%g "
-               "box%d grid=%p X=%g Y=%g Z=%g\n",
-               VarName(ivar),ijk,x[ijk],y[ijk],z[ijk],
-  	       b, grid, X[ijk], Y[ijk], Z[ijk]); 
-        continue;
-      }
-        
+      printf("pointer to %s is NULL in box%d grid=%p\n",
+             VarName(ivar), b, grid); 
+      continue;
+    }
+    else forallpoints(box,ijk)
+    {
       if( !finite(var[ijk]) || fabs(var[ijk])>maxNumber ) 
       {
         if(messageflag==0)
