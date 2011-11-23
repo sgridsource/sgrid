@@ -2454,6 +2454,7 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
 {
   tVarList *varlist;
   char *parlist;
+  int bi;
 
   /* make list of pars we want to read */  
   parlist = "BNSdata_Omega BNSdata_x_CM BNSdata_C1 BNSdata_C2 "
@@ -2473,6 +2474,15 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
 
   /* read vars in varlist and pars in parlist*/
   checkpoint_interpolate_Vars_get_Pars(filename, varlist, parlist);
+
+  /* set q to zero if q<0, and also in region 1 & 2 */
+  forallboxes(grid, bi)
+  {
+    int i;
+    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+    forallpoints(grid->box[bi], i)
+      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+  }
 
   /* set values of A,B,phi in box4/5 */
   set_BNSdata_ABphi(grid);
