@@ -2455,9 +2455,11 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
   tVarList *varlist;
   char *parlist;
   int j, bi;
+  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
 
   /* make list of pars we want to read */  
-  parlist = "BNSdata_Omega BNSdata_x_CM BNSdata_C1 BNSdata_C2 "
+  parlist = "BNSdata_m01 BNSdata_m02 BNSdata_kappa "
+            "BNSdata_Omega BNSdata_x_CM BNSdata_C1 BNSdata_C2 "
             "BNSdata_qmax1 BNSdata_qmax2 BNSdata_xmax1 BNSdata_xmax2 "
             "BNSdata_actual_xmax1 BNSdata_actual_xmax2";
 
@@ -2474,6 +2476,12 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
 
   /* read vars in varlist and pars in parlist*/
   checkpoint_interpolate_Vars_get_Pars(filename, varlist, parlist);
+
+  /* once we have a new Coordinates_AnsorgNS_sigma_pm, we need re-init
+     the Coords again. */
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "no");
+  init_CoordTransform_And_Derivs(grid);
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 
   /* set q to zero if q<0, and also in region 1 & 2 */
   forallboxes(grid, bi)

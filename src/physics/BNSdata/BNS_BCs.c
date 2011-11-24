@@ -442,6 +442,16 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
             y = yp[ind]; 
             z = zp[ind];
             Pinterp = spec_interpolate(grid->box[5], Pcoeffs, x,y,z);
+            if(!finite(Pinterp))
+            {
+              printf("Pinterp=%g  x=%.13g y=%.13g z=%.13g  ind=%d\n", 
+                     Pinterp, x,y,z, ind);
+              NumberChecker_CheckIfFinite(grid, "BNSdata_temp1");
+              printbox(grid->box[5]);
+              grid->time  = 42;
+              write_grid(grid);
+              errorexit("Pinterp is not finite!");
+            }
             FPsi[ind] = Psi[ind] - Pinterp;
           }
         }
