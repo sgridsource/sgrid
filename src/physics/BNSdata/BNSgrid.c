@@ -2454,7 +2454,7 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
 {
   tVarList *varlist;
   char *parlist;
-  int bi;
+  int j, bi;
 
   /* make list of pars we want to read */  
   parlist = "BNSdata_Omega BNSdata_x_CM BNSdata_C1 BNSdata_C2 "
@@ -2490,6 +2490,14 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
   /* set wB */
   BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0);
   BNS_set_wB(grid, 2, Getd("BNSdata_actual_xmax2"),0.0,0.0); 
+
+  /* check the vars we set for NANs */
+  vlpush(varlist, Ind("BNSdata_wBx"));
+  printf("checking for NANs in:\n");
+  for(j = 0; j < varlist->n; j++) printf("%s ", VarName(varlist->index[j]));
+  printf("\n");  
+  NumberChecker_CheckIfFinite_VarList(varlist);
+  fflush(stdout);
 
   /* free varlist */
   vlfree(varlist);  
