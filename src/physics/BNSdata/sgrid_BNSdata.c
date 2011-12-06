@@ -187,7 +187,7 @@ int sgrid_BNSdata()
          "[nothing,WT_L2_method,keep_xout,fix_xout [keep_one_xout,always],"
          "keep_xmax [keep_one_xmax,always,reset_xmax_if_problem],"
          "keep_xfm [keep_one_xmax,always,reset_xmax_if_problem],"
-         "forcebalance"
+         "forcebalance [always]"
          "]");
   AddPar("BNSdata_adjust_first_at", "0", 
          "first iteration when we use BNSdata_adjust. -1 means never");
