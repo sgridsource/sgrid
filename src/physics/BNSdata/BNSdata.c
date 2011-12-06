@@ -2579,6 +2579,205 @@ int adjust_Omega_xCM_keep_dFuncdxfm_eq_0(tGrid *grid, int it, double tol)
   return 0;
 }
 
+/* for newton_linesrch_itsP: compute derivs of Integrated Euler Eqn 
+   in domain 0 and 3, or 4 and 5 */
+/* if n=1 only BNSdata_Omega is adjusted
+   if n=2 both BNSdata_Omega & BNSdata_x_CM are adjusted */
+void dIntegEulerdx_at_X1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
+{
+  tGrid *grid;
+  int b, bi1, bi2;
+  double X1,Y1, X2,Y2;
+  double Om, xcm;
+  t_grid_bXYZ1_bXYZ2_struct *pars;
+
+  /* get pars */
+  pars = (t_grid_bXYZ1_bXYZ2_struct *) p;
+  grid = pars->grid;
+  bi1 = pars->b1;
+  bi2 = pars->b2;
+  X1 = pars->X1;
+  Y1 = pars->Y1;
+  X2 = pars->X2;
+  Y2 = pars->Y2;
+
+  /* set Omega & x_CM */
+  Om  = vec[1];
+  xcm = vec[2];
+
+  /* compute lnIntegEuler in BNSdata_temp4 and 
+     dlnIntegEulerdx/y/z in BNSdata_temp1/2/3 */
+  BNS_set_dlnIntegEuler(grid, Ind("BNSdata_temp4"), 
+                       Ind("BNSdata_temp1"), Om, xcm);
+
+  /* put coeffs of BNSdata_temp1=dlnIntegEulerdx into BNSdata_temp3=c */
+  forallboxes(grid, b) if(b==bi1 || b==bi2)
+  {
+    tBox *box = grid->box[b];
+    double *dlnIE = box->v[Ind("BNSdata_temp1")];
+    double *c     = box->v[Ind("BNSdata_temp3")];
+    spec_Coeffs(box, dlnIE, c);
+  }
+
+  /* find dFunc/dx at the locations X1/2 in NS1/2 and store
+     them in fvec[1] and fvec[2] */
+  fvec[1] = spec_interpolate(grid->box[bi1],
+                       grid->box[bi1]->v[Ind("BNSdata_temp3")], X1,Y1,0);
+  if(n>=2) fvec[2] = spec_interpolate(grid->box[bi2], 
+                       grid->box[bi2]->v[Ind("BNSdata_temp3")], X2,Y2,0);
+
+  printf("dIntegEulerdx_at_X1_2_VectorFuncP: Om=%.13g xcm=%.13g\n"
+         "  => dIntegEuler/dX(X1)=%.13g", Om, xcm, fvec[1]);
+
+  if(n>=2) printf("  dIntegEuler/dX(X2)=%.13g\n", fvec[2]);
+  else	   printf("\n");
+  fflush(stdout);
+  prdivider(0);
+}
+
+/* Adjust Omega and x_CM so that force balance is maintained at xmax */
+int adjust_Omega_xCM_forcebalance(tGrid *grid, int it, double tol)
+{
+  int check, stat, bi, bi1,bi2, i;
+  double OmxCMvec[3];
+  double dIEdxx_m0[3];
+  double dIEdxx_00[3];
+  double dIEdxx_p0[3];
+  double dIEdxx_0m[3];
+  double dIEdxx_0p[3];
+  double Omega, x_CM;
+  double dOmega, dx_CM;
+  double Xqm1,Yqm1, Xqm2,Yqm2;
+  int do_lnsrch = Getv("BNSdata_adjust", "always");
+  t_grid_bXYZ1_bXYZ2_struct pars[1];
+
+  /* save old Omega, x_CM */
+  Omega = Getd("BNSdata_Omega");
+  x_CM  = Getd("BNSdata_x_CM");
+  dOmega= Omega * Getd("BNSdata_dOmega_fac");
+  dx_CM = Getd("BNSdata_b") * Getd("BNSdata_dx_CM_fac");
+  prdivider(0);
+  printf("adjust_Omega_xCM_forcebalance: in BNSdata_solve step %d\n"
+         "  old Omega=%g x_CM=%g tol=%g\n", it, Omega, x_CM, tol);
+
+  /* set Xqm1 and Xqm2, i.e. find max in BNSdata_q */
+  bi1=0;  bi2=3;
+  find_Varmax_along_x_axis_usingBNSdata_temp123(grid, Ind("BNSdata_q"),
+                                                &bi1, &Xqm1, &Yqm1);
+  find_Varmax_along_x_axis_usingBNSdata_temp123(grid, Ind("BNSdata_q"),
+                                                &bi2, &Xqm2, &Yqm2);
+  /* set global vars */
+  pars->grid  = grid;
+  pars->b1 = bi1;
+  pars->X1 = Xqm1;
+  pars->Y1 = Yqm1;
+  pars->Z1 = 0.0;
+  pars->b2 = bi2;
+  pars->X2 = Xqm2;
+  pars->Y2 = Yqm2;
+  pars->Z2 = 0.0;
+
+  if(pars->b1<0 || pars->b2<0)
+  {
+    printf("adjust_Omega_xCM_forcebalance: failed to find Xqm1 or "
+           "Xqm2\n"
+           " pars->b1=%d "
+           " pars->b2=%d\n",
+           pars->b1, pars->b2);
+    return -1;
+  }
+  printf("adjust_Omega_xCM_forcebalance: Xqm1=%g Xqm2=%g\n",
+         pars->X1, pars->X2);
+  prdivider(0);
+//  /* adjust C1/2 so that masses are correct */
+//  adjust_C1_C2_q_keep_restmasses(grid, it, tol*100.0);
+//  prdivider(0);
+
+  if(do_lnsrch==0)
+  {
+    /* find deviations for Omega +/- dOmega, x_CM */
+    OmxCMvec[2] = x_CM;
+    OmxCMvec[1] = Omega - dOmega;
+    dIntegEulerdx_at_X1_2_VectorFuncP(2, OmxCMvec, dIEdxx_m0, (void *) pars);
+    OmxCMvec[1] = Omega + dOmega;
+    dIntegEulerdx_at_X1_2_VectorFuncP(2, OmxCMvec, dIEdxx_p0, (void *) pars);
+    OmxCMvec[1] = Omega;
+    /* dIntegEulerdx_at_X1_2_VectorFuncP(2, OmxCMvec, dIEdxx_00, (void *) pars); */
+    printf("adjust_Omega_xCM_forcebalance: dIEdxx_m0[1]=%g dIEdxx_m0[2]=%g\n",
+           dIEdxx_m0[1], dIEdxx_m0[2]);
+    /* printf("adjust_Omega_xCM_forcebalance: dIEdxx_00[1]=%g dIEdxx_00[2]=%g\n",
+           dIEdxx_00[1], dIEdxx_00[2]); */
+    printf("adjust_Omega_xCM_forcebalance: dIEdxx_p0[1]=%g dIEdxx_p0[2]=%g\n",
+           dIEdxx_p0[1], dIEdxx_p0[2]);
+    prdivider(0);
+  }
+  /* check if there is a zero, if so set do_lnsrch=1 */
+  if( (dIEdxx_m0[1]*dIEdxx_p0[1]<0.0) && (dIEdxx_m0[2]*dIEdxx_p0[2]<0.0) )
+    do_lnsrch = 1;
+  if( (do_lnsrch==0) &&
+      ((dIEdxx_m0[1]*dIEdxx_p0[1]<0.0) || (dIEdxx_m0[2]*dIEdxx_p0[2]<0.0)) )
+  {
+    /* find deviations for Omega, x_CM +/- dx_CM */
+    {
+      OmxCMvec[1] = Omega;
+      OmxCMvec[2] = x_CM - dx_CM;
+      dIntegEulerdx_at_X1_2_VectorFuncP(2, OmxCMvec, dIEdxx_0m, (void *) pars);
+      OmxCMvec[2] = x_CM + dx_CM;
+      dIntegEulerdx_at_X1_2_VectorFuncP(2, OmxCMvec, dIEdxx_0p, (void *) pars);
+      OmxCMvec[2] = x_CM;
+      /* dIntegEulerdx_at_X1_2_VectorFuncP(2, OmxCMvec, dIEdxx_00, (void *) pars); */
+      printf("adjust_Omega_xCM_forcebalance: dIEdxx_0m[1]=%g dIEdxx_0m[2]=%g\n",
+             dIEdxx_m0[1], dIEdxx_m0[2]);
+      /* printf("adjust_Omega_xCM_forcebalance: dIEdxx_00[1]=%g dIEdxx_00[2]=%g\n",
+             dIEdxx_00[1], dIEdxx_00[2]); */
+      printf("adjust_Omega_xCM_forcebalance: dIEdxx_0p[1]=%g dIEdxx_0p[2]=%g\n",
+             dIEdxx_p0[1], dIEdxx_p0[2]);
+  
+      if( (dIEdxx_m0[1]*dIEdxx_p0[1]<0.0) && (dIEdxx_0m[2]*dIEdxx_0p[2]<0.0) )
+        do_lnsrch = 1;
+      if( (dIEdxx_m0[2]*dIEdxx_p0[2]<0.0) && (dIEdxx_0m[1]*dIEdxx_0p[1]<0.0) )
+        do_lnsrch = 1;
+    }
+  }
+  printf("adjust_Omega_xCM_forcebalance: do_lnsrch = %d\n", do_lnsrch);
+  prdivider(0);
+  if(do_lnsrch)
+  {
+    /**************************************************************************/
+    /* do newton_linesrch_itsP iterations until xfm1/2 are where we want them */
+    /**************************************************************************/
+    OmxCMvec[1] = Omega;
+    OmxCMvec[2] = x_CM;
+    stat = newton_linesrch_itsP(OmxCMvec, 2, &check, dIntegEulerdx_at_X1_2_VectorFuncP,
+                               (void *) pars, 1000, tol*0.5);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  }
+  else
+  {
+    OmxCMvec[1] = Omega;
+    dIntegEulerdx_at_X1_2_VectorFuncP(2, OmxCMvec, dIEdxx_00, (void *) pars);
+    printf("adjust_Omega_xCM_forcebalance: dIEdxx_00[1]=%g dIEdxx_00[2]=%g\n",
+           dIEdxx_00[1], dIEdxx_00[2]);
+  }
+
+  /* Nobody has touched the pars BNSdata_Omega and BNSdata_x_CM so far.
+     Now set them to what we found */
+  Setd("BNSdata_Omega", OmxCMvec[1]);
+  Setd("BNSdata_x_CM",  OmxCMvec[2]);
+  printf("adjust_Omega_xCM_forcebalance: new Omega=%g x_CM=%g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+  prdivider(0);
+
+  /* set q to zero if q<0, and also in region 1 & 2 */
+  forallboxes(grid, bi)
+  {
+    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+    forallpoints(grid->box[bi], i)
+      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+  }
+
+  return 0;
+}
 
 /* try to smoothen data after ell. solve by interpolation */
 void smooth_BNSdata_by_Interpolation(tGrid *grid, int nsmooth)
@@ -3147,6 +3346,11 @@ if(0) /* not working */
       else if(Getv("BNSdata_adjust", "keep_xfm"))
       { /* keep max1/2 of a funtion in place, by keeping the pos. of dFunc/dx=0 in place */
         adjust_Omega_xCM_keep_dFuncdxfm_eq_0(grid, it, adjusttol);
+        adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
+      }
+      else if(Getv("BNSdata_adjust", "forcebalance"))
+      { /* keep max1/2 of a funtion in place, by keeping the pos. of dFunc/dx=0 in place */
+        adjust_Omega_xCM_forcebalance(grid, it, adjusttol);
         adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
       }
       else if(Getv("BNSdata_adjust", "min_qchange"))
