@@ -186,7 +186,9 @@ int sgrid_BNSdata()
          "and x_CM to keep either xout1 or xout2 in place. "
          "[nothing,WT_L2_method,keep_xout,fix_xout [keep_one_xout,always],"
          "keep_xmax [keep_one_xmax,always,reset_xmax_if_problem],"
-         "keep_xfm [keep_one_xmax,always,reset_xmax_if_problem]]");
+         "keep_xfm [keep_one_xmax,always,reset_xmax_if_problem],"
+         "forcebalance"
+         "]");
   AddPar("BNSdata_adjust_first_at", "0", 
          "first iteration when we use BNSdata_adjust. -1 means never");
   AddPar("BNSdata_adjust_mintol", "1e-10", "always use tol>=mintol in adjust, "

@@ -28,6 +28,8 @@ void BNS_set_M_ADM_VolInt_integrand(tGrid *grid, int iInteg);
 void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,
                           tVarList *vlJdu, tVarList *vldu,
                           tVarList *vlduDerivs, int nonlin);
+void BNS_set_dlnIntegEuler(tGrid *grid, int ilnIntegEuler,
+                           int idlnIntegEuler, double Om, double xcm);
 
 /* for solving all ell. eqns together */
 void F_BNSdata(tVarList *vlFu, tVarList *vlu,

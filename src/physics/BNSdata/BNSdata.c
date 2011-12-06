@@ -2608,7 +2608,7 @@ void dIntegEulerdx_at_X1_2_VectorFuncP(int n, double *vec, double *fvec, void *p
   /* compute lnIntegEuler in BNSdata_temp4 and 
      dlnIntegEulerdx/y/z in BNSdata_temp1/2/3 */
   BNS_set_dlnIntegEuler(grid, Ind("BNSdata_temp4"), 
-                       Ind("BNSdata_temp1"), Om, xcm);
+                        Ind("BNSdata_temp1"), Om, xcm);
 
   /* put coeffs of BNSdata_temp1=dlnIntegEulerdx into BNSdata_temp3=c */
   forallboxes(grid, b) if(b==bi1 || b==bi2)
