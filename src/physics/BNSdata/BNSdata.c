@@ -2626,10 +2626,10 @@ void dIntegEulerdx_at_X1_2_VectorFuncP(int n, double *vec, double *fvec, void *p
   if(n>=2) fvec[2] = spec_interpolate(grid->box[bi2], 
                        grid->box[bi2]->v[Ind("BNSdata_temp3")], X2,Y2,0);
 
-  printf("dIntegEulerdx_at_X1_2_VectorFuncP: Om=%.13g xcm=%.13g\n"
-         "  => dIntegEuler/dX(X1)=%.13g", Om, xcm, fvec[1]);
+  printf("dIntegEulerdx_at_X1_2_VectorFuncP: Om=%.12g xcm=%.12g\n"
+         " => dIntEuler/dX(X1)=%.12g", Om, xcm, fvec[1]);
 
-  if(n>=2) printf("  dIntegEuler/dX(X2)=%.13g\n", fvec[2]);
+  if(n>=2) printf(" dIntEuler/dX(X2)=%.12g\n", fvec[2]);
   else	   printf("\n");
   fflush(stdout);
   prdivider(0);
