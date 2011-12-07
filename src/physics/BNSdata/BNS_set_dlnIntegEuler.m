@@ -66,7 +66,7 @@ tocompute = {
     (* vR[a] == 0,  ==>  Integ. Euler is h/uzero = - C  *)
 
     (* compute u^0 in rotating frame *)
-    oouzerosqr == alpha2 - Psi4 delta[b,c] (beta[b]) (beta[c]),
+    oouzerosqr == alpha2 - Psi4 delta[b,c] (bet[b]) (bet[c]),
     Cif == (oouzerosqr==0),
       oouzerosqr == 1,
     Cif == end,

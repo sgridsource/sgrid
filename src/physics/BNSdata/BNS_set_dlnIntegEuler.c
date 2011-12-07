@@ -248,7 +248,7 @@ if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 oouzerosqr
 =
-alpha2 - Psi4*(pow2(beta1) + pow2(beta2) + pow2(beta3))
+alpha2 - Psi4*(pow2(bet1) + pow2(bet2) + pow2(bet3))
 ;
 
 
