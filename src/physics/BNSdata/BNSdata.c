@@ -2686,8 +2686,9 @@ int adjust_Omega_xCM_forcebalance(tGrid *grid, int it, double tol)
            pars->b1, pars->b2);
     return -1;
   }
-  printf("adjust_Omega_xCM_forcebalance: Xqm1=%g Xqm2=%g\n",
-         pars->X1, pars->X2);
+  printf("adjust_Omega_xCM_forcebalance:\n");
+  printf("  box%d (X1,Y1)=(%g,%g) , box%d (X2,Y2)=(%g,%g)\n",
+         pars->b1,pars->X1,pars->Y1, pars->b2,pars->X2,pars->Y2);
   prdivider(0);
 //  /* adjust C1/2 so that masses are correct */
 //  adjust_C1_C2_q_keep_restmasses(grid, it, tol*100.0);
