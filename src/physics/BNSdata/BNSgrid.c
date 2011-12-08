@@ -15,7 +15,7 @@ extern double (*Coordinates_AnsorgNS_dsigmap_dphi)(tBox *box, int ind, double B,
 extern double  (*Coordinates_AnsorgNS_sigmam)(tBox *box, int ind, double B, double phi);
 extern double (*Coordinates_AnsorgNS_dsigmam_dB)(tBox *box, int ind, double B, double phi);
 extern double (*Coordinates_AnsorgNS_dsigmam_dphi)(tBox *box, int ind, double B, double phi);
-extern double Coordinates_AnsorgNS_b; /* value of x if A=1 in AnsorgNS0/3 */
+extern int Coordinates_AnsorgNS_b_ParIndex; /* index of par Coordinates_AnsorgNS_b */
 
 /* global vars in this file */
 double sigma1; /* initial sigma_+ */
@@ -128,7 +128,7 @@ int set_boxsizes(tGrid *grid)
   Coordinates_AnsorgNS_dsigmam_dB   = return_dsigma_zero;
   Coordinates_AnsorgNS_dsigmam_dphi = return_dsigma_zero;
   Setd("Coordinates_AnsorgNS_b", BNSdata_b);
-  Coordinates_AnsorgNS_b = BNSdata_b;
+  Coordinates_AnsorgNS_b_ParIndex = GetParIndex("Coordinates_AnsorgNS_b");
 
   /* set some box pars */
   if(Getv("BNSdata_grid", "4ABphi_2xyz"))
@@ -348,7 +348,7 @@ int set_boxsizes(tGrid *grid)
     double box3_max1 = Getd("BNSdata_box3_Amax");
     double scal = 1.05; //1.551108723489246  /* make box4/5 5% larger than needed */
     double xr, xp, xm, xmax, xmin;
-    double b = Coordinates_AnsorgNS_b;
+    double b = GetCachedNumValByParIndex(Coordinates_AnsorgNS_b_ParIndex);    
 
     Setd("box0_max1", box0_max1);
     xmin = x_of_AnsorgNS0(NULL, -1, box0_max1,1.0,0.0);
@@ -2042,7 +2042,7 @@ void adjust_box4_5_pars(tGrid *grid)
   double Bstep= 0.001;
   double xp, xm, xmax, xmin;
   double ymin,ymax, zmin,zmax, res, B;
-  double b = Coordinates_AnsorgNS_b;
+  double b = GetCachedNumValByParIndex(Coordinates_AnsorgNS_b_ParIndex);    
 
   /* adjust box5 */
   ymin=ymax=zmin=zmax = 0.0;
