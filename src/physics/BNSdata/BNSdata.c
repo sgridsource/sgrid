@@ -426,6 +426,15 @@ exit(77);
   TOV_init(P_core1, kappa, Gamma, 1, &rs1, &m1, &Phic1, &Psic1, &m01);
   TOV_init(P_core2, kappa, Gamma, 1, &rs2, &m2, &Phic2, &Psic2, &m02);
 
+  /* set qmax1/2 */
+  Setd("BNSdata_qmax1", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+                        pow(P_core1, 1.0/(1.0 + BNSdata_n)));
+  Setd("BNSdata_qmax2", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
+                        pow(P_core2, 1.0/(1.0 + BNSdata_n)));
+  /* set cart positions of qmax1/2 */
+  Setd("BNSdata_xmax1", xc1);
+  Setd("BNSdata_xmax2", xc2);
+
   /* load data from some old checkpoint file */
   if(initFromChkp && GetsLax("outdir_previous_iteration")!=NULL)
   {
@@ -586,15 +595,6 @@ exit(77);
           if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
       }
     }
-
-    /* set qmax1/2 */
-    Setd("BNSdata_qmax1", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-                          pow(P_core1, 1.0/(1.0 + BNSdata_n)));
-    Setd("BNSdata_qmax2", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
-                          pow(P_core2, 1.0/(1.0 + BNSdata_n)));
-    /* set cart positions of qmax1/2 */
-    Setd("BNSdata_xmax1", xc1);
-    Setd("BNSdata_xmax2", xc2);
   } /* end intialization using TOV data */
 
   /* print out maxima */

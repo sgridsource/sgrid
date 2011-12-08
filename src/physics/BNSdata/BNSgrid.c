@@ -2456,9 +2456,13 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
   char *parlist;
   int j, bi;
   int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
+  char *BNSdata_b_sav = strdup(Gets("BNSdata_b"));
+  char *BNSdata_x_CM_sav = strdup(Gets("BNSdata_x_CM"));
+  char *BNSdata_xmax1_sav = strdup(Gets("BNSdata_xmax1"));
+  char *BNSdata_xmax2_sav = strdup(Gets("BNSdata_xmax2"));
 
   /* make list of pars we want to read */  
-  parlist = "BNSdata_m01 BNSdata_m02 BNSdata_kappa "
+  parlist = "BNSdata_b BNSdata_m01 BNSdata_m02 BNSdata_kappa "
             "BNSdata_Omega BNSdata_x_CM BNSdata_C1 BNSdata_C2 "
             "BNSdata_qmax1 BNSdata_qmax2 BNSdata_xmax1 BNSdata_xmax2 "
             "BNSdata_actual_xmax1 BNSdata_actual_xmax2";
@@ -2492,8 +2496,41 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
       if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
   }
 
-  /* set values of A,B,phi in box4/5 */
-  set_BNSdata_ABphi(grid);
+  if(strcmp(BNSdata_b_sav, Gets("BNSdata_b"))==0)
+  {
+    /* set values of A,B,phi in box4/5 */
+    set_BNSdata_ABphi(grid);
+  }
+  else /* set BNSdata_b=BNSdata_b_sav and adjust other pars */
+  {
+    double m1 = Getd("BNSdata_m01");
+    double m2 = Getd("BNSdata_m02");
+    double r, rc, dr, dOm;
+    
+    /* rc = (distance from checkpoint) */
+    rc = Getd("BNSdata_xmax1")-Getd("BNSdata_xmax2");
+    Sets("BNSdata_b", BNSdata_b_sav); /* set b back to saved value */
+    /* set some things back to saved values */
+    Sets("BNSdata_x_CM", BNSdata_x_CM_sav);
+    Sets("BNSdata_xmax1", BNSdata_xmax1_sav);
+    Sets("BNSdata_xmax2", BNSdata_xmax2_sav);
+    r = Getd("BNSdata_xmax1")-Getd("BNSdata_xmax2");
+    dr = rc-r;
+    /* adjust Omega according to Kepler's law 
+       Om = sqrt(M/r^3)  ==> dOm = -(3/2) Om/r * dr. Here r=2*bc dr=2dx */
+    dOm = -1.5*(Getd("BNSdata_Omega")/rc)*dr;
+    Setd("BNSdata_Omega", Getd("BNSdata_Omega")+dOm);
+
+    printf("Setting:\n");
+    printf(" BNSdata_b = %s\n", Gets("BNSdata_b"));
+    printf(" BNSdata_xmax1 = %s\n", Gets("BNSdata_xmax1"));
+    printf(" BNSdata_xmax2 = %s\n", Gets("BNSdata_xmax2"));
+    printf(" BNSdata_Omega = %s\n", Gets("BNSdata_Omega"));
+    printf(" BNSdata_x_CM = %s\n", Gets("BNSdata_x_CM"));
+    /* adjust coords such that all is ok, e.g. box5/4 need to cover
+       holes in box0/3 */
+    BNSgrid_init_Coords(grid);
+  }
 
   /* set wB */
   BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0);
@@ -2508,7 +2545,13 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
   fflush(stdout);
 
   /* free varlist */
-  vlfree(varlist);  
+  vlfree(varlist);
+  
+  /* free saved strings */
+  free(BNSdata_b_sav);
+  free(BNSdata_x_CM_sav);
+  free(BNSdata_xmax1_sav);
+  free(BNSdata_xmax2_sav);
 }
 
 /************************************************************************/
