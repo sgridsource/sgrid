@@ -35,8 +35,8 @@ double (*Coordinates_AnsorgNS_dsigmap_dphi)(tBox *box, int ind, double B, double
 double  (*Coordinates_AnsorgNS_sigmam)(tBox *box, int ind, double B, double phi);
 double (*Coordinates_AnsorgNS_dsigmam_dB)(tBox *box, int ind, double B, double phi);
 double (*Coordinates_AnsorgNS_dsigmam_dphi)(tBox *box, int ind, double B, double phi);
-double Coordinates_AnsorgNS_b; /* value of x if A=1 in AnsorgNS0/3 */
-
+/* Coordinates_AnsorgNS_b is value of x if A=1 in AnsorgNS0/3 */
+int Coordinates_AnsorgNS_b_ParIndex; /* index of par Coordinates_AnsorgNS_b */
 
 
 /* initialize the coord transforms */
@@ -517,8 +517,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigma_zero;
     }
   }
-  /* read par Coordinates_AnsorgNS_b */
-  Coordinates_AnsorgNS_b = Getd("Coordinates_AnsorgNS_b");
+  /* read index of par Coordinates_AnsorgNS_b */
+  Coordinates_AnsorgNS_b_ParIndex = GetParIndex("Coordinates_AnsorgNS_b");
   /* END: Special initializations */
 
   /* compute cartesian coordinates x,y,z from X,Y,Z */
@@ -1909,7 +1909,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   Ap = A;
 
   /* set some pars */
-  b = Coordinates_AnsorgNS_b; // Getd("BNS_D")*0.5;
+  b = GetCachedNumValByParIndex(Coordinates_AnsorgNS_b_ParIndex);
   if(domain==0 || domain==1)
   {
     /*
@@ -2107,7 +2107,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   dApdA = 1.0;
 
   /* set some pars */
-  b = Coordinates_AnsorgNS_b; // Getd("BNS_D")*0.5;
+  b = GetCachedNumValByParIndex(Coordinates_AnsorgNS_b_ParIndex);
   if(domain==0 || domain==1)
   {
     /*
