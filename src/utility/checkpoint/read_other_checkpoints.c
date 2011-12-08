@@ -44,8 +44,8 @@ void checkpoint_interpolate_Vars_get_Pars(char *filename,
 //printVarList(varlist);         
 
   /* read the file into grid2, pdb2 */
-  printf("Reading parameters and variables from file %s into "
-         "pdb2 and grid2:\n", filename);
+  printf("Setting parameters and variables in pdb2 and grid2 by "
+         "reading from file:\n%s\n", filename);
   read_checkpoint_into_grid2_pdb2(grid, filename, &grid2, &pdb2);
 
   /* we can only interpolate if the box boundaries are in the same place
