@@ -36,6 +36,7 @@ typedef struct {
   char *name;
   char *value;
   char *description;
+  double numericalvalue; /* some pars are pure numbers, we cache them here */
 } tParameter;
 void makeparameter(char *name, char *value, char *description);
 void AddPar(char *name, char *value, char *description);
@@ -53,8 +54,11 @@ char *NextEntry(char *list);
 void Appends(char *name, char *value);
 char *GetsInd(int i);
 char *GetnameInd(int i);
+tParameter *GetPointerTo_pbd();
 int GetnParameters();
-void print_pdb_i1_i2(tParameter *pdb, int i1, int i2);
+double GetCachedNumValByParIndex(int i);
+int GetParIndex(char *name);
+void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache);
 void print_parameter_database();
 void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
                                  tParameter **pdb2);

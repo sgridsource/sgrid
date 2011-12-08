@@ -28,7 +28,7 @@ void setparameter(char *name, char *value);
 void makeparameter(char *name, char *value, char *description);
 void printparameters(void);
 void translatevalue(char **value);
-
+int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
 
 
 
@@ -166,6 +166,7 @@ void makeparameter(char *name, char *value, char *description)
     strcpy(p->name, name);
     strcpy(p->value, value);
     translatevalue(&p->value);
+    set_numericalvalue_byIndex(pdb, npdb-1, npdb);
   } else {
     free(p->description);
   }
@@ -189,6 +190,7 @@ void setparameter(char *name, char *value)
   free(p->value);
   p->value = strdup(value);
   translatevalue(&p->value);
+  set_numericalvalue_byIndex(p, 0, 1);
 }
 
 
@@ -239,6 +241,18 @@ void translatevalue(char **value)
   }
 }
 
+/* Write the numerical (double) value of the par with index ind into the 
+   par cache. 
+   Note: we keep the numerical (double) values of each par in a cache */
+int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
+{
+  if(pdb1!=NULL && ind>=0 && ind<npdb1max)
+    pdb1[ind].numericalvalue = atof(pdb1[ind].value);
+  else
+    errorexit("set_numericalvalue_byIndex: index out of range");
+
+  return 1;
+}
 
 
 
@@ -433,11 +447,28 @@ char *GetnameInd(int i)
   return 0;
 }
 
+tParameter *GetPointerTo_pbd()
+{
+  return pdb;
+}
+
 int GetnParameters()
 {
   return npdb;
 }
 
+/* get the cached numerical value by Index */
+double GetCachedNumValByParIndex(int i)
+{
+  return pdb[i].numericalvalue;
+}
+
+/* get the par Index */
+int GetParIndex(char *name)
+{
+  tParameter *p = findparameter(name, 1);
+  return p-pdb; /* compute index using pointer arithmetic. Is this ok??? */
+}
 
 
 /**************************************************************************/
@@ -527,13 +558,15 @@ int iterate_parameters(void)
 }
 
 /* print pars with index i1 to i2 in pdb */
-void print_pdb_i1_i2(tParameter *pdb, int i1, int i2)
+void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache)
 {
   int i;
 
   printf("print_pdb_i1_i2: pdb=%p i1=%d i2=%d\n", pdb, i1,i2);
   for(i=i1; i<=i2; i++)
   {
+    if(pr_ind) printf("#%d# ", i);
+    if(pr_ind) printf("|%g| ", pdb[i].numericalvalue);
     printf("%s:\n", pdb[i].description);
     printf("%s = %s\n", pdb[i].name, pdb[i].value);
   }
@@ -541,7 +574,7 @@ void print_pdb_i1_i2(tParameter *pdb, int i1, int i2)
 /* print entire parameter database */
 void print_parameter_database()
 {
-  print_pdb_i1_i2(pdb, 0, npdb-1);
+  print_pdb_i1_i2(pdb, 0, npdb-1, 0,0);
 }
 
 /**********************************************/
@@ -569,6 +602,7 @@ void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
     p2[i].name  = strdup(pdb1[i].name);
     p2[i].value = strdup(pdb1[i].value);
     p2[i].description = strdup(pdb1[i].description);
+    p2[i].numericalvalue = pdb1[i].numericalvalue;
     if(!p2[i].name || !p2[i].value || !p2[i].description)
       errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
   }
@@ -592,6 +626,7 @@ tParameter *make_empty_pdb(int npdb1max)
     pdb1[i].name  = NULL;
     pdb1[i].value = NULL;
     pdb1[i].description = NULL;
+    pdb1[i].numericalvalue = 0.0;
   }
 
   return pdb1;
@@ -619,6 +654,7 @@ void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2)
     strcpy(pdb2[i].name, pdb1[i].name);
     strcpy(pdb2[i].value, pdb1[i].value);
     strcpy(pdb2[i].description, pdb1[i].description);
+    pdb2[i].numericalvalue = pdb1[i].numericalvalue;
   }
 }
 
