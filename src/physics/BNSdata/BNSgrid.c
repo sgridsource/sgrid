@@ -2567,7 +2567,7 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
     Sets("BNSdata_xmax1", BNSdata_xmax1_sav);
     Sets("BNSdata_xmax2", BNSdata_xmax2_sav);
     r = Getd("BNSdata_xmax1")-Getd("BNSdata_xmax2");
-    dr = rc-r;
+    dr = r-rc;
     /* adjust Omega according to Kepler's law 
        Om = sqrt(M/r^3)  ==> dOm = -(3/2) Om/r * dr. Here r=2*bc dr=2dx */
     dOm = -1.5*(Getd("BNSdata_Omega")/rc)*dr;
