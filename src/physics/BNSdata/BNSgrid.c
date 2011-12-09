@@ -1379,6 +1379,9 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   
   /* loop over the remaining j,k i.e. B,phi. 
      NOTE: we assume that n1,n2,n3 are the same in both domains */
+  /* we could maybe use SGRID_LEVEL6_Pragma(omp parallel for)  
+     BUT: make thread safe first: remove all external and global vars and use newton_linesrch_itsP in all funcs and subfuncs!!!
+     ALSO: this is a serial loop: we use vec[1] from j+1 as initial guess for step j. Maybe it will not work if we use another guess... */
   for(j=n2-2; j>0; j--) /* we could include j=0 (B=0) here again, so that most sigp_Bphi are found with the same method */
     for(k=0; k<n3; k++)
     {
@@ -1681,6 +1684,7 @@ double InnerVolumeIntegral(tGrid *grid, int b, int vind)
   double *dZdy;
   double *dZdz;
   double *cv;
+  double *cv_i;
   double box0_max1, box3_max1;  
   int box0_n1, box3_n1;
   char *box0_max1_sav = cmalloc( strlen(Gets("box0_max1"))+10 );
@@ -1793,17 +1797,16 @@ double InnerVolumeIntegral(tGrid *grid, int b, int vind)
                              grid->box[ib]->v[Ind("temp1")]);
 
   /* set var and Psi on grid2 by interpolation */
+  cv = grid->box[b]->v[Ind("temp1")];
+  cv_i = grid->box[ib]->v[Ind("temp1")];
+  SGRID_LEVEL6_Pragma(omp parallel for)
   forallpoints(grid2->box[b], i)
+  {
     if(pX[i]<Xmax)
-    {
-      cv = grid->box[b]->v[Ind("temp1")];
       var2[i] = spec_interpolate(grid->box[b], cv, pX[i], pY[i], pZ[i]);
-    }
     else
-    {
-      cv = grid->box[ib]->v[Ind("temp1")];
-      var2[i] = spec_interpolate(grid->box[ib], cv, px[i], py[i], pz[i]);
-    }
+      var2[i] = spec_interpolate(grid->box[ib], cv_i, px[i], py[i], pz[i]);
+  }
 
   /* set integrand in Integ */
   forallpoints(grid2->box[b], i)
