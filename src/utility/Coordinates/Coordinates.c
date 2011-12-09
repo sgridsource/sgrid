@@ -497,9 +497,26 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   {
     if(Getv("Coordinates_AnsorgNS_sigma_pm_vars", "yes"))
     {
-      if(grid->box[0]->v[Ind("Coordinates_AnsorgNS_sigma_pm")] == NULL)
-        errorexit("Coordinates: the var Coordinates_AnsorgNS_sigma_pm "
-                  "has to be set in POST_GRID.");
+      int b;
+      int isigma      = Ind("Coordinates_AnsorgNS_sigma_pm");
+      int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+      int isigma_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+
+      forallboxes(grid, b)
+      {
+        tBox *box = grid->box[b];
+        char str[1000];
+
+        snprintf(str, 999, "box%d_Coordinates", b);
+        if( strstr(Gets(str), "AnsorgNS")==NULL ) continue;
+        if(box->v[isigma] == NULL)
+          errorexit("Coordinates: the var Coordinates_AnsorgNS_sigma_pm "
+                    "has to be set in POST_GRID.");
+        if(pr) printf("  box%d: using %s to compute\n  %s and %s\n", b, 
+                VarName(isigma), VarName(isigma_dB), VarName(isigma_dphi));
+        spec_Deriv1(box, 2, box->v[isigma], box->v[isigma_dB]);
+        spec_Deriv1(box, 3, box->v[isigma], box->v[isigma_dphi]);
+      }
       Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigmap;
       Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigmap_dB;
       Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigmap_dphi;
