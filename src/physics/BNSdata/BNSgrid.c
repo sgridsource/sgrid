@@ -7,6 +7,11 @@
 
 #define Power pow
 
+/* struct types used in root finder newton_linesrch_itsP */
+typedef struct T_grid_b_struct {
+  tGrid *grid; /* grid */
+  int b;      /* box1 */
+} t_grid_b_struct;
 
 /* from Coordinates.c */
 extern double  (*Coordinates_AnsorgNS_sigmap)(tBox *box, int ind, double B, double phi);
@@ -2448,6 +2453,46 @@ void BNS_update_q(tGrid *grid2, double w, tGrid *grid1)
 /************************************************************************/
 /* utilities to load checkpoints with different resolution and pars */
 /************************************************************************/
+/* for newton_linesrch_itsP: compute error in rest mass */
+void m0errOFsigmafac_VectorFuncP(int n, double *vec, double *fvec, void *p)
+{
+  tGrid *grid;
+  int dom;
+  double fac = vec[1];
+  double m0;
+  t_grid_b_struct *pars;
+
+  /* get pars */
+  pars = (t_grid_b_struct *) p;
+  grid = pars->grid;
+  dom  = pars->b;
+
+  /* scale sigma */
+  BNSgrid_scale_Coordinates_AnsorgNS_sigma(grid, fac, dom);
+  BNSgrid_init_Coords(grid);
+  /* set wB */
+  if(dom==0) BNS_set_wB(grid, 1, Getd("BNSdata_xmax1"),0.0,0.0);
+  else       BNS_set_wB(grid, 2, Getd("BNSdata_xmax2"),0.0,0.0); 
+  /* get new mass */
+  m0 =  GetInnerRestMass(grid, dom);
+  printf("m0errOFsigmafac_VectorFuncP: fac=%g => m0%d=%g\n",
+         fac, (dom>=2)+1, m0);
+  fflush(stdout);
+  /* set sigma back to what it was */
+  BNSgrid_scale_Coordinates_AnsorgNS_sigma(grid, 1.0/fac, dom);
+  BNSgrid_init_Coords(grid);
+  /* set wB */
+  if(dom==0) BNS_set_wB(grid, 1, Getd("BNSdata_xmax1"),0.0,0.0);
+  else       BNS_set_wB(grid, 2, Getd("BNSdata_xmax2"),0.0,0.0); 
+  /* set fvec */
+  if(dom==0)
+    fvec[1] = Getd("BNSdata_m01") - m0;
+  else
+    fvec[1] = Getd("BNSdata_m02") - m0;
+  //printf("  => m0_err=%g\n", fvec[1]);
+  //fflush(stdout);
+}
+
 /* load data from a previous result in a checkpoint file 
    (with e.g. lower res) */
 void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
@@ -2500,13 +2545,20 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
   {
     /* set values of A,B,phi in box4/5 */
     set_BNSdata_ABphi(grid);
+
+    /* set wB */
+    BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0);
+    BNS_set_wB(grid, 2, Getd("BNSdata_actual_xmax2"),0.0,0.0); 
   }
   else /* set BNSdata_b=BNSdata_b_sav and adjust other pars */
   {
-    double m1 = Getd("BNSdata_m01");
-    double m2 = Getd("BNSdata_m02");
+    double m01 = Getd("BNSdata_m01");
+    double m02 = Getd("BNSdata_m02");
     double r, rc, dr, dOm;
-    
+    double facvec[2];
+    int stat, check;
+    t_grid_b_struct pars[1];
+
     /* rc = (distance from checkpoint) */
     rc = Getd("BNSdata_xmax1")-Getd("BNSdata_xmax2");
     Sets("BNSdata_b", BNSdata_b_sav); /* set b back to saved value */
@@ -2530,11 +2582,43 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
     /* adjust coords such that all is ok, e.g. box5/4 need to cover
        holes in box0/3 */
     BNSgrid_init_Coords(grid);
-  }
+    /* set wB */
+    BNS_set_wB(grid, 1, Getd("BNSdata_xmax1"),0.0,0.0);
+    BNS_set_wB(grid, 2, Getd("BNSdata_xmax2"),0.0,0.0); 
+    /* Ok now we have complete data, but the var 
+       Coordinates_AnsorgNS_sigma_pm should probabaly be changed as well! */
 
-  /* set wB */
-  BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0);
-  BNS_set_wB(grid, 2, Getd("BNSdata_actual_xmax2"),0.0,0.0); 
+    /* pick Coordinates_AnsorgNS_sigma_pm such that the masses are what we
+       want */
+    /***********************************************************************************************/
+    /* do newton_linesrch_itsP iterations until sigma+ and sigma- are such that masses are correct */
+    /***********************************************************************************************/
+    /* star1 */
+    pars->grid = grid;
+    pars->b = 0;
+    facvec[1] = 1.0;
+    stat = newton_linesrch_itsP(facvec, 1, &check, m0errOFsigmafac_VectorFuncP,
+                               (void *) pars, 100, 0.01*m01);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    /* use factor to scale sigma */
+    BNSgrid_scale_Coordinates_AnsorgNS_sigma(grid, facvec[1], 0);
+    BNSgrid_init_Coords(grid);
+    /* set wB */
+    BNS_set_wB(grid, 1, Getd("BNSdata_xmax1"),0.0,0.0);
+
+    /* star2 */
+    pars->grid = grid;
+    pars->b = 3;
+    facvec[1] = 1.0;
+    stat = newton_linesrch_itsP(facvec, 1, &check, m0errOFsigmafac_VectorFuncP,
+                               (void *) pars, 100, 0.01*m02);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    /* use factor to scale sigma */
+    BNSgrid_scale_Coordinates_AnsorgNS_sigma(grid, facvec[1], 3);
+    BNSgrid_init_Coords(grid);
+    /* set wB */
+    BNS_set_wB(grid, 2, Getd("BNSdata_xmax2"),0.0,0.0); 
+  }
 
   /* check the vars we set for NANs */
   vlpush(varlist, Ind("BNSdata_wBx"));
@@ -2585,6 +2669,36 @@ void BNSgrid_init_Coords(tGrid *grid)
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 }
 
+/* scale Coordinates_AnsorgNS_sigma and its deriv on one side
+   by a factor fac. For star1: ibd=0 , for star2 ibd=3 */
+void BNSgrid_scale_Coordinates_AnsorgNS_sigma(tGrid *grid, double fac, int ibd)
+{
+  int b,i;
+  int isigma      = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+  int isigma_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+  int obd; /* outer box */
+
+  if(ibd==3)      obd = 2;
+  else if(ibd==0) obd = 1;
+  else errorexit("BNSgrid_scale_Coordinates_AnsorgNS_sigma: set ibd=3 or ibd=0.");
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    double *sigma      =  box->v[isigma];
+    double *sigma_dB   =  box->v[isigma_dB];
+    double *sigma_dphi =  box->v[isigma_dphi];
+
+    if(b!=ibd && b!=obd) continue;
+    forallpoints(box, i)
+    {
+      sigma[i] *= fac;
+      sigma_dB[i] *= fac;
+      sigma_dphi[i] *= fac;
+    }
+  }
+}
 
 /*****************************************************************/
 /* useful funcs for equal mass symmetry                           */
