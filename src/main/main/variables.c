@@ -519,7 +519,7 @@ void vlsetconstant(tVarList *u, const double c)
     {
       pu = box->v[u->index[n]];
 
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       for (i = 0; i < nnodes; i++)
         pu[i] = c;
     }
@@ -550,7 +550,7 @@ void vlcopy(tVarList *v, tVarList *u)
       pu = box->v[u->index[n]];
       pv = box->v[v->index[n]];
 
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       for (i = 0; i < nnodes; i++)
         pv[i] = pu[i];
     }
@@ -601,7 +601,7 @@ void vlswap(tVarList *v, tVarList *u)
       pu = box->v[u->index[n]];
       pv = box->v[v->index[n]];
 
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       for (i = 0; i < nnodes; i++)
       {
         temp  = pv[i];
@@ -645,7 +645,7 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
       pa = box->v[a->index[n]];
       pb = box->v[b->index[n]];
 
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       for (i = 0; i < nnodes; i++)
         pr[i] = c * (pa[i] + pb[i]);
     }
@@ -677,7 +677,7 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
       pa = box->v[a->index[n]];
       pb = box->v[b->index[n]];
 
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       for (i = 0; i < nnodes; i++)
         pr[i] = pa[i] - pb[i];
     }
@@ -713,19 +713,19 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
       if(cb!=0)  pb = box->v[b->index[n]];
 
       if (ca == 0 && cb == 0) {
-        #pragma omp parallel for
+        SGRID_LEVEL3_Pragma(omp parallel for)
         for (i = 0; i < nnodes; i++) pr[i] = 0; }
 
       else if (ca == 0) {
-        #pragma omp parallel for
+        SGRID_LEVEL3_Pragma(omp parallel for)
         for (i = 0; i < nnodes; i++) pr[i] = cb * pb[i]; }
 
       else if (cb == 0) {
-        #pragma omp parallel for
+        SGRID_LEVEL3_Pragma(omp parallel for)
         for (i = 0; i < nnodes; i++) pr[i] = ca * pa[i]; }
 
       else {
-        #pragma omp parallel for
+        SGRID_LEVEL3_Pragma(omp parallel for)
         for (i = 0; i < nnodes; i++) pr[i] = ca * pa[i] + cb * pb[i]; }
     }
   }
@@ -773,13 +773,13 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
       pa = box->v[a->index[n]];
   
       if (ca == 1) {
-        #pragma omp parallel for
+        SGRID_LEVEL3_Pragma(omp parallel for)
         for (i = 0; i < nnodes; i++) pr[i] += pa[i]; }
       else if (ca == -1) {
-        #pragma omp parallel for
+        SGRID_LEVEL3_Pragma(omp parallel for)
         for (i = 0; i < nnodes; i++) pr[i] -= pa[i]; }
       else {
-        #pragma omp parallel for
+        SGRID_LEVEL3_Pragma(omp parallel for)
         for (i = 0; i < nnodes; i++) pr[i] += ca * pa[i]; }
     }
   }

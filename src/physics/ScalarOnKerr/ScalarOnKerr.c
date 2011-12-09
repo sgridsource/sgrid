@@ -539,7 +539,7 @@ void ScalarOnKerr_rho_from_rho0_four3modes(tBox *box, double *rho, double t)
   int km = 2*N3;
 
   /* set ScalarOnKerr_rho_four3modes */
-  #pragma omp parallel for
+  SGRID_LEVEL3_Pragma(omp parallel for)
   for(k=0; k<n3; k++)
   {
     int i,j;
@@ -2410,7 +2410,7 @@ void ScalarOnKerr_evolve_1stO(tVarList *unew, tVarList *upre, double dt,
     FirstDerivsOf_S(box, icPi , Ind("ScalarOnKerr_dPix"));
 
     /* loop over points and set RHS */
-    #pragma omp parallel for
+    SGRID_LEVEL3_Pragma(omp parallel for)
     forallpoints(box, i)
     {
       double rPi, rpsi;

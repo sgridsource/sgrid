@@ -113,7 +113,7 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
       for(j = n2-1; j >=0; j--)
       for(i = n1-1; i >=0; i--)
         sum += c[Index(i,j,k)] * B1[i] * B2[j] * B3[k]; */
-  #pragma omp parallel for reduction(+:sum) 
+  SGRID_LEVEL3_Pragma(omp parallel for reduction(+:sum)) 
   for(k = n3-1; k >=0; k--)
   { int j,i;
     for(j = n2-1; j >=0; j--)

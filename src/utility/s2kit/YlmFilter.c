@@ -69,7 +69,7 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
       spec_analysis1(box, 3, var, vc);
 
       /* loop over all phi-coeffs, i.e. all k or m */
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       for(k=0; k<n3; k++)
       {
         int i,m,l;
@@ -124,14 +124,14 @@ void Naive_YlmFilter_lmshift(tVarList *unew, int lmshift)
       /* Note: vc was wrong for all theta>PI !!! */
 
       /* copy var into double covered regions */
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       for(k = 0;    k < n3/2; k++)
       { int i,j;
         for(j = n2/2; j < n2; j++)
         for(i = 0;    i < n1; i++)
           var[Index(i,j,k)] = var[Index(i,n2-j-1,k+n3/2)];
       }
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       for(k = n3/2; k < n3; k++)
       { int i,j;
         for(j = n2/2; j < n2; j++)

@@ -11,12 +11,55 @@
 #define PI  3.14159265358979323846264338327950
 #define PIh 1.57079632679489661923132169163975
 #define PIq 0.785398163397448309615660845819876
+
+/* Indices */
 #define Index(i,j,k) ((i)+n1*((j)+n2*(k)))
 #define Ind_n1n2(i,j,k,n1,n2) ((i)+(n1)*((j)+(n2)*(k)))
 #define forallijk(i,j,k) \
   for (k = 0; k < n3; k++) \
   for (j = 0; j < n2; j++) \
   for (i = 0; i < n1; i++)    
+
+
+/* NOTE: In C99 these two have the same effect:
+   #pragma omp parallel for
+   _Pragma ( "omp parallel for" )
+*/
+/* To parallelize with OpenMP we need _Pragma ( "omp parallel for" ) 
+   in many places. But for different applications we want to switch 
+   them on or off depending on where they are.
+   SGRID_LEVEL2_Pragma used for omp loops over a plane in a box (2d)
+   SGRID_LEVEL3_Pragma used for omp loops over all points in a box (3d)
+   SGRID_LEVEL4_Pragma used for omp loops over all boxes
+   SGRID_LEVEL6_Pragma used for 6d omp loops (e.g. loop over box while interpolating onto each point)
+   more can be defined easily.
+   */
+/* define SGRID_LEVEL2_Pragma macros that allow us to include
+   certain pragmas only if certain things like LEVEL2_Pragmas are defined */
+#ifdef LEVEL2_Pragmas
+#define SGRID_LEVEL2_Pragma(x)  _Pragma ( #x )
+#else
+#define SGRID_LEVEL2_Pragma(x)
+#endif
+
+#ifdef LEVEL3_Pragmas
+#define SGRID_LEVEL3_Pragma(x)  _Pragma ( #x )
+#else
+#define SGRID_LEVEL3_Pragma(x)
+#endif
+
+#ifdef LEVEL4_Pragmas
+#define SGRID_LEVEL4_Pragma(x)  _Pragma ( #x )
+#else
+#define SGRID_LEVEL4_Pragma(x)
+#endif
+
+#ifdef LEVEL6_Pragmas
+#define SGRID_LEVEL6_Pragma(x)  _Pragma ( #x )
+#else
+#define SGRID_LEVEL6_Pragma(x)
+#endif
+
 
 /* snap effect for grid coordinates */
 #define dequaleps 1e-10

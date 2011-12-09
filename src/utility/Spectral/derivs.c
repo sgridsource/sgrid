@@ -756,7 +756,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
     double b = box->bbox[1];
     if(box->TransformType1)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(j,k, n2,n3, uline,duline,n1)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -768,7 +768,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(j,k, n2,n3, uline,duline,n1)
       {
         /* 
@@ -786,7 +786,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
     double b = box->bbox[3];
     if(box->TransformType2)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,k, n1,n3, uline,duline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -798,7 +798,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,k, n1,n3, uline,duline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -814,7 +814,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
     double b = box->bbox[5];
     if(box->TransformType3)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,j, n1,n2, uline,duline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -826,7 +826,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,j, n1,n2, uline,duline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -859,7 +859,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     b = box->bbox[1];
     if(box->TransformType1)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(j,k, n2,n3, uline,duline,dduline,n1)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -875,7 +875,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(j,k, n2,n3, uline,duline,dduline,n1)
       {
         /* 
@@ -895,7 +895,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     b = box->bbox[3];
     if(box->TransformType2)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,k, n1,n3, uline,duline,dduline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -917,7 +917,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,k, n1,n3, uline,duline,dduline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -937,7 +937,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     b = box->bbox[5];
     if(box->TransformType3)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,j, n1,n2, uline,duline,dduline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -965,7 +965,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,j, n1,n2, uline,duline,dduline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -992,7 +992,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(j,k, n2,n3, uline,duline,dduline,n1)
       {
         /* 
@@ -1013,7 +1013,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,j, n1,n2, uline,duline,dduline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1034,7 +1034,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,k, n1,n3, uline,duline,dduline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1062,7 +1062,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,k, n1,n3, uline,duline,dduline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1079,7 +1079,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(j,k, n2,n3, uline,duline,dduline,n1)
       {
         matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
@@ -1095,7 +1095,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,j, n1,n2, uline,duline,dduline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1122,7 +1122,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,k, n1,n3, uline,duline,dduline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1139,7 +1139,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,j, n1,n2, uline,duline,dduline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1160,7 +1160,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(j,k, n2,n3, uline,duline,dduline,n1)
       {
         matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
@@ -1179,7 +1179,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,j, n1,n2, uline,duline,dduline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1196,7 +1196,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(j,k, n2,n3, uline,duline,dduline,n1)
       {
         matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
@@ -1212,7 +1212,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,k, n1,n3, uline,duline,dduline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1239,7 +1239,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType3) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,j, n1,n2, uline,duline,dduline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1256,7 +1256,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType2) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(i,k, n1,n3, uline,duline,dduline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1277,7 +1277,7 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
     if(box->TransformType1) errorexit("the chosen Spectral_second_deriv_order does not work with FFT");
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc3Lines(j,k, n2,n3, uline,duline,dduline,n1)
       {
         matrix_times_vector(box->D1, u+Index(0,j,k), u1+Index(0,j,k), n1);
@@ -1308,7 +1308,7 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
     double b = box->bbox[1];
     if(box->TransformType1)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(j,k, n2,n3, uline,duline,n1)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -1321,7 +1321,7 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(j,k, n2,n3, uline,duline,n1)
       {
         /* 
@@ -1339,7 +1339,7 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
     double b = box->bbox[3];
     if(box->TransformType2)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,k, n1,n3, uline,duline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1352,7 +1352,7 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,k, n1,n3, uline,duline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -1367,7 +1367,7 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
     double b = box->bbox[5];
     if(box->TransformType3)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,j, n1,n2, uline,duline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -1380,7 +1380,7 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,j, n1,n2, uline,duline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);

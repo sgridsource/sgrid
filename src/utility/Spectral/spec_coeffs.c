@@ -194,7 +194,7 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
   {
     if(box->TransformType1)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -204,7 +204,7 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -217,7 +217,7 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
   {
     if(box->TransformType2)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -227,7 +227,7 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -240,7 +240,7 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
   {
     if(box->TransformType3)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -250,7 +250,7 @@ void spec_analysis1(tBox *box, int direc, double *u, double *c)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -283,7 +283,7 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
   {
     if(box->TransformType1)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
         get_memline(c, cline, 1, j, k, n1, n2, n3);
@@ -293,7 +293,7 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(j,k, n2,n3, uline,cline,n1)
       {
         get_memline(c, cline, 1, j, k, n1, n2, n3);
@@ -306,7 +306,7 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
   {
     if(box->TransformType2)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
         get_memline(c, cline, 2, i, k, n1, n2, n3);
@@ -316,7 +316,7 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,k, n1,n3, uline,cline,n2)
       {
         get_memline(c, cline, 2, i, k, n1, n2, n3);
@@ -329,7 +329,7 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
   {
     if(box->TransformType3)
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
         get_memline(c, cline, 3, i, j, n1, n2, n3);
@@ -339,7 +339,7 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
     }
     else
     {
-      #pragma omp parallel for
+      SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines(i,j, n1,n2, uline,cline,n3)
       {
         get_memline(c, cline, 3, i, j, n1, n2, n3);

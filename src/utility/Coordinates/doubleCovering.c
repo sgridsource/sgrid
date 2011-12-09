@@ -99,14 +99,14 @@ void copy_to_doubleCoveredPoints_SphericalDF(tBox *box, int vind)
               "n2 and n3  must be even!");
   
   /* copy var into double covered regions */
-  #pragma omp parallel for
+  SGRID_LEVEL3_Pragma(omp parallel for)
   for(k = 0;    k < n3/2; k++)
   { int i,j;
     for(j = n2/2; j < n2; j++)
     for(i = 0;    i < n1; i++)
       var[Index(i,j,k)] = var[Index(i,n2-j-1,k+n3/2)];
   }
-  #pragma omp parallel for
+  SGRID_LEVEL3_Pragma(omp parallel for)
   for(k = n3/2; k < n3; k++)
   { int i,j;
     for(j = n2/2; j < n2; j++)
