@@ -2593,6 +2593,7 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
     /***********************************************************************************************/
     /* do newton_linesrch_itsP iterations until sigma+ and sigma- are such that masses are correct */
     /***********************************************************************************************/
+    printf("Rescaling Coordinates_AnsorgNS_sigma_pm so that masses are correct:\n");
     /* star1 */
     pars->grid = grid;
     pars->b = 0;
