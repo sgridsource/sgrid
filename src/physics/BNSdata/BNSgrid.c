@@ -13,6 +13,19 @@ typedef struct T_grid_b_struct {
   int b;      /* box1 */
 } t_grid_b_struct;
 
+typedef struct T_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct {
+  tGrid *grid; /* grid */
+  tBox *box;   /* box for DelXR_of_AB_VectorFuncP */
+  double X;    /* X for DelXR_of_AB_VectorFuncP */
+  double R;    /* R for DelXR_of_AB_VectorFuncP */
+  double phi;  /* phi for DelXR_of_AB_VectorFuncP and q_of_sigp_forgiven_Bphi */
+  double sigp_1phi; /* sigp_1phi for q_of_sigp_forgiven_Bphi */
+  double B;         /* B for q_of_sigp_forgiven_Bphi */
+  int    icoeffs;   /* icoeffs for q_of_sigp_forgiven_Bphi */
+  int    innerdom;  /* inner domain for q_of_sigp_forgiven_Bphi */
+  int    outerdom;  /* outer domain for q_of_sigp_forgiven_Bphi */
+} t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct;
+
 /* from Coordinates.c */
 extern double  (*Coordinates_AnsorgNS_sigmap)(tBox *box, int ind, double B, double phi);
 extern double (*Coordinates_AnsorgNS_dsigmap_dB)(tBox *box, int ind, double B, double phi);
@@ -37,10 +50,6 @@ double BNSdata_q_VectorFunc_phi;     /* phi for BNSdata_q_VectorFunc */
 double BNdata_sigp_VectorFunc_sigp_1phi; /* sigp_1phi for BNdata_sigp_VectorFunc */
 double BNdata_sigp_VectorFunc_B;         /* B for BNdata_sigp_VectorFunc */
 double BNdata_sigp_VectorFunc_X0;        /* X0 for BNdata_sigp_VectorFunc */
-double DelXR_of_AB_VectorFunc__phi; /* phi for DelXR_of_AB_VectorFunc */
-tBox * DelXR_of_AB_VectorFunc__box; /* box for DelXR_of_AB_VectorFunc */
-double DelXR_of_AB_VectorFunc__X;   /* X for DelXR_of_AB_VectorFunc */
-double DelXR_of_AB_VectorFunc__R;   /* R for DelXR_of_AB_VectorFunc */
 double q_of_sigp_forgiven_Bphi__sigp_1phi; /* sigp_1phi for q_of_sigp_forgiven_Bphi */
 double q_of_sigp_forgiven_Bphi__B;         /* B for q_of_sigp_forgiven_Bphi */
 double q_of_sigp_forgiven_Bphi__phi;       /* phi for q_of_sigp_forgiven_Bphi */
@@ -687,15 +696,21 @@ printf("sigp_Bphi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_1phi);
 
 
 /* find diff. {Xc(A,B,phi),Rc(A,B,phi)}-{X, R} for any A,B,phi*/
-void DelXR_of_AB_VectorFunc(int n, double *vec, double *fvec)
+void DelXR_of_AB_VectorFuncP(int n, double *vec, double *fvec, void *p)
 {
   double x,y,z, Xc,Rc;
   double A = vec[1];
   double B = vec[2];
-  double phi = DelXR_of_AB_VectorFunc__phi;
-  tBox *box = DelXR_of_AB_VectorFunc__box;
-  double X = DelXR_of_AB_VectorFunc__X;
-  double R = DelXR_of_AB_VectorFunc__R;
+  t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct *pars;
+  tBox *box;
+  double phi, X, R;
+
+  /* get pars */
+  pars = (t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct *) p;
+  phi = pars->phi;
+  box = pars->box;
+  X   = pars->X;
+  R   = pars->R;
 
   /* get diff between {Xc(A,B,phi),Rc(A,B,phi)}-{X, R} */
   xyz_of_AnsorgNS(box, -1, box->b, A,B,phi, &x,&y,&z, &Xc,&Rc);
@@ -704,17 +719,22 @@ void DelXR_of_AB_VectorFunc(int n, double *vec, double *fvec)
 }
 
 /* find diff. Xc(A,B,phi)-X for any A 
-   calls DelXR_of_AB_VectorFunc above and uses the same global vars,
+   calls DelXR_of_AB_VectorFunc above and uses the same pars,
    but ensures that B=0 */
-void DelXR_of_A_forB0_VectorFunc(int n, double *vec1, double *fvec1)
+void DelXR_of_A_forB0_VectorFuncP(int n, double *vec1, double *fvec1, void *p)
 {
-  tBox *box = DelXR_of_AB_VectorFunc__box;
+  tBox *box;
   double vec[3];
   double fvec[3];
+  t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct *pars;
+
+  /* get pars */
+  pars = (t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct *) p;
+  box = pars->box;
   
   vec[1] = vec1[1];
   vec[2] = 0.0; /* since B=0 */
-  DelXR_of_AB_VectorFunc(2, vec, fvec);
+  DelXR_of_AB_VectorFuncP(2, vec, fvec, p);
   if(box->b<2) fvec1[1] = fvec[1]; /* in box0/1 R=0 at B=0 */
   else         fvec1[1] = fvec[2]; /* in box3/2 R=0 at B=0 */
 }
@@ -757,19 +777,20 @@ void q_of_sigp_forgiven_Bphi__old2(int n, double *sigvec, double *qvec)
   dom = innerdom;
   for(i=1; i<=2; i++)
   {
-    DelXR_of_AB_VectorFunc__phi = phi;
-    DelXR_of_AB_VectorFunc__box = grid->box[dom];
-    DelXR_of_AB_VectorFunc__X = X;
-    DelXR_of_AB_VectorFunc__R = R;
+    t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
+    pars->phi = phi;
+    pars->box = grid->box[dom];
+    pars->X   = X;
+    pars->R   = R;
     Acmax  = grid->box[dom]->bbox[1];
     vec[1] = 1e-7; /* initial guess is that Ac,Bc = 0,B*/
     vec[2] = B;
     if(dequal(B,0.0))
-      stat = newton_linesrch_its(vec, 1, &check,
-                                 DelXR_of_A_forB0_VectorFunc, 1000, 1e-10);
+      stat = newton_linesrch_itsP(vec, 1, &check, DelXR_of_A_forB0_VectorFuncP, 
+                                  (void *) pars, 1000, 1e-10);
     else
-      stat = newton_linesrch_its(vec, 2, &check, 
-                                 DelXR_of_AB_VectorFunc, 1000, 1e-10);
+      stat = newton_linesrch_itsP(vec, 2, &check, DelXR_of_AB_VectorFuncP, 
+                                  (void *) pars, 1000, 1e-10);
     if(check) printf("q_of_sigp_forgiven_Bphi: check=%d\n", check);  
     Ac = vec[1];
     Bc = vec[2];
@@ -1067,14 +1088,15 @@ double find_nearest_A_B_given_X_R_phi(tBox *box,
   int i,j,k, pl;
   double min, dist;
   double vec[3], fvec[3];
+  t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
 
   if(box->b>3) errorexit("find_nearest_A_B_given_X_R_phi: "
                          "box->b must be between 0 and 3.");
 
-  DelXR_of_AB_VectorFunc__phi = phi;
-  DelXR_of_AB_VectorFunc__box = box;
-  DelXR_of_AB_VectorFunc__X = X;
-  DelXR_of_AB_VectorFunc__R = R;
+  pars->phi = phi;
+  pars->box = box;
+  pars->X   = X;
+  pars->R   = R;
   pl = find_ind_closest_to_Z0(box, phi);
 
   min = 1e300;
@@ -1082,7 +1104,7 @@ double find_nearest_A_B_given_X_R_phi(tBox *box,
   {
     vec[1] = box->v[Xind][i];
     vec[2] = box->v[Yind][i];
-    DelXR_of_AB_VectorFunc(2, vec, fvec);
+    DelXR_of_AB_VectorFuncP(2, vec, fvec, (void *) pars);
     dist = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2]);
     if(dist<min) 
     { dist = min;   *A=vec[1];   *B=vec[2]; }
@@ -1130,10 +1152,11 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
     dom = innerdom;
     for(i=1; i<=2; i++)
     {
-      DelXR_of_AB_VectorFunc__phi = phi;
-      DelXR_of_AB_VectorFunc__box = grid->box[dom];
-      DelXR_of_AB_VectorFunc__X = X;
-      DelXR_of_AB_VectorFunc__R = R;
+      t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
+      pars->phi = phi;
+      pars->box = grid->box[dom];
+      pars->X   = X;
+      pars->R   = R;
       Acmax  = grid->box[dom]->bbox[1];
   
       /* get initial guess for Ac,Bc in vec[1],vec[2] */
@@ -1153,11 +1176,11 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
       }
       /* do newton line searches */
       if(dequal(B,0.0))
-        stat = newton_linesrch_its(vec, 1, &check,
-                                   DelXR_of_A_forB0_VectorFunc, 1000, 1e-10);
+        stat = newton_linesrch_itsP(vec, 1, &check, DelXR_of_A_forB0_VectorFuncP,
+                                    (void *) pars, 1000, 1e-10);
       else
-        stat = newton_linesrch_its(vec, 2, &check, 
-                                   DelXR_of_AB_VectorFunc, 1000, 1e-10);
+        stat = newton_linesrch_itsP(vec, 2, &check, DelXR_of_AB_VectorFuncP,
+                                    (void *) pars, 1000, 1e-10);
       if(check) printf("q_of_sigp_forgiven_Bphi: check=%d\n", check);  
       Ac = vec[1];
       Bc = vec[2];
