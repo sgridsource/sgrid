@@ -1410,8 +1410,13 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
      BUT: make thread safe first: remove all external and global vars and use newton_linesrch_itsP in all funcs and subfuncs!!!
      ALSO: this is a serial loop: we use vec[1] from j+1 as initial guess for step j. Maybe it will not work if we use another guess... */
   for(j=n2-2; j>0; j--) /* we could include j=0 (B=0) here again, so that most sigp_Bphi are found with the same method */
+  {
+    int k;
     for(k=0; k<n3; k++)
     {
+      double vec[2];
+      double B,phi;
+      int check, stat;
       t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
       /* find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
       B   = grid->box[dom]->v[iY][Index(0,j,k)];
@@ -1442,7 +1447,8 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       }
 //printf("B=%g phi=%g  ", B, phi);
 //printf("sigp_Bphi=%g sigp_0phi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_0phi, sigp_1phi);
-    } /* end for j,k */
+    } /* end for k */
+  } /* end for j */
 
   /* make sure that sigma has only one value at B=0 and also at B=1 */
   for(j=0; j<n2; j+=n2-1)
