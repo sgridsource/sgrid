@@ -3707,24 +3707,62 @@ void J_BNSdata(tVarList *vlJdu, tVarList *vldu,
 void F_oneComp(tVarList *vlFw, tVarList *vlw,
                tVarList *vlwDerivs, tVarList *vlc2)
 {
-  /* Note: vlFu,vlu contains vlFw,vlw */
-  BNS_CTS(vlFu,vlu,  vlJdu,vldu,vlduDerivs, 1);
-                   /* ^-----^----^--------not used by BNS_CTS if nonlin=1 */
+  /* local varlists with the correct grid, with ind copied from global vl */
+  tVarList *lvlFu = vlalloc(vlw->grid);
+  tVarList *lvlu  = vlalloc(vlw->grid);
+  tVarList *lvlJdu = vlalloc(vlw->grid);
+  tVarList *lvldu  = vlalloc(vlw->grid);
+  tVarList *lvlduDerivs = vlalloc(vlw->grid);
+  vlpushvl(lvlFu, vlFu);
+  vlpushvl( lvlu,  vlu);
+  vlpushvl(lvlJdu, vlJdu);
+  vlpushvl( lvldu,  vldu);
+  vlpushvl(lvlduDerivs, vlduDerivs);
+ 
+  /* Note: lvlFu,lvlu contains vlFw,vlw */
+  BNS_CTS(lvlFu,lvlu,  lvlJdu,lvldu,lvlduDerivs, 1);
+                    /* ^------^-----^--------not used by BNS_CTS if nonlin=1 */
   /* BCs */
   set_BNSdata_BCs(vlFw, vlw, vlwDerivs, 1);
-  set_BNSdata_Sigma_BC(vlFu,vlu,  vlJdu,vldu,vlduDerivs, 1);
+  set_BNSdata_Sigma_BC(lvlFu,lvlu,  lvlJdu,lvldu,lvlduDerivs, 1);
+  
+  /* free local varlists */
+  vlfree(lvlFu);
+  vlfree(lvlu);
+  vlfree(lvlJdu);
+  vlfree(lvldu);
+  vlfree(lvlduDerivs);
 }
 
 /* evaluate linearized eqn for a SINGLE one comp. var for vldw */
 void J_oneComp(tVarList *vlJdw, tVarList *vldw,
                tVarList *vldwDerivs, tVarList *vlw)
 {
+  /* local varlists with the correct grid, with ind copied from global vl */
+  tVarList *lvlFu = vlalloc(vldw->grid);
+  tVarList *lvlu  = vlalloc(vldw->grid);
+  tVarList *lvlJdu = vlalloc(vldw->grid);
+  tVarList *lvldu  = vlalloc(vldw->grid);
+  tVarList *lvlduDerivs = vlalloc(vldw->grid);
+  vlpushvl(lvlFu, vlFu);
+  vlpushvl( lvlu,  vlu);
+  vlpushvl(lvlJdu, vlJdu);
+  vlpushvl( lvldu,  vldu);
+  vlpushvl(lvlduDerivs, vlduDerivs);
+
   /* Note: vlJdu,vldu contains vlJdw,vldw */
-  BNS_CTS(vlFu,vlu,  vlJdu,vldu,vlduDerivs, 0);
+  BNS_CTS(lvlFu,lvlu,  lvlJdu,lvldu,lvlduDerivs, 0);
         /* ^--not used by BNS_CTS if nonlin=0 */
   /* BCs */
   set_BNSdata_BCs(vlJdw, vldw, vldwDerivs, 0);
-  set_BNSdata_Sigma_BC(vlFu,vlu,  vlJdu,vldu,vlduDerivs, 0);
+  set_BNSdata_Sigma_BC(lvlFu,lvlu,  lvlJdu,lvldu,lvlduDerivs, 0);
+
+  /* free local varlists */
+  vlfree(lvlFu);
+  vlfree(lvlu);
+  vlfree(lvlJdu);
+  vlfree(lvldu);
+  vlfree(lvlduDerivs);
 }
 
 
