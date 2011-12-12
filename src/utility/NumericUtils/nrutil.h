@@ -3,6 +3,7 @@
 #ifndef _NR_UTILS_H_
 #define _NR_UTILS_H_
 
+/*
 static double sqrarg;
 #define SQR(a) ((sqrarg=(a)) == 0.0 ? 0.0 : sqrarg*sqrarg)
 
@@ -40,6 +41,19 @@ static int imaxarg1,imaxarg2;
 static int iminarg1,iminarg2;
 #define IMIN(a,b) (iminarg1=(a),iminarg2=(b),(iminarg1) < (iminarg2) ?\
         (iminarg1) : (iminarg2))
+*/
+
+/* define the above without static vars */
+#define SQR(a) ((a) == 0.0 ? 0.0 : (a)*(a))
+#define DSQR(a) SQR((a))
+#define FMAX(a,b) ( (a) > (b)  ? ((a)) : ((b)) )
+#define FMIN(a,b) ( (a) < (b)  ? ((a)) : ((b)) )
+#define DMAX(a,b) FMAX((a),(b))
+#define DMIN(a,b) FMIN((a),(b))
+#define LMAX(a,b) FMAX((a),(b))
+#define LMIN(a,b) FMIN((a),(b))
+#define IMAX(a,b) FMAX((a),(b))
+#define IMIN(a,b) FMIN((a),(b))
 
 #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
 
