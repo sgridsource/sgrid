@@ -18,12 +18,12 @@ typedef struct T_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct {
   tBox *box;   /* box for DelXR_of_AB_VectorFuncP */
   double X;    /* X for DelXR_of_AB_VectorFuncP */
   double R;    /* R for DelXR_of_AB_VectorFuncP */
-  double phi;  /* phi for DelXR_of_AB_VectorFuncP and q_of_sigp_forgiven_Bphi */
-  double sigp_1phi; /* sigp_1phi for q_of_sigp_forgiven_Bphi */
-  double B;         /* B for q_of_sigp_forgiven_Bphi */
-  int    icoeffs;   /* icoeffs for q_of_sigp_forgiven_Bphi */
-  int    innerdom;  /* inner domain for q_of_sigp_forgiven_Bphi */
-  int    outerdom;  /* outer domain for q_of_sigp_forgiven_Bphi */
+  double phi;  /* phi for DelXR_of_AB_VectorFuncP and q_of_sigp_forgiven_BphiP */
+  double sigp_1phi; /* sigp_1phi for q_of_sigp_forgiven_BphiP */
+  double B;         /* B for q_of_sigp_forgiven_BphiP */
+  int    icoeffs;   /* icoeffs for q_of_sigp_forgiven_BphiP */
+  int    innerdom;  /* inner domain for q_of_sigp_forgiven_BphiP */
+  int    outerdom;  /* outer domain for q_of_sigp_forgiven_BphiP */
 } t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct;
 
 /* from Coordinates.c */
@@ -50,6 +50,7 @@ double BNSdata_q_VectorFunc_phi;     /* phi for BNSdata_q_VectorFunc */
 double BNdata_sigp_VectorFunc_sigp_1phi; /* sigp_1phi for BNdata_sigp_VectorFunc */
 double BNdata_sigp_VectorFunc_B;         /* B for BNdata_sigp_VectorFunc */
 double BNdata_sigp_VectorFunc_X0;        /* X0 for BNdata_sigp_VectorFunc */
+/* the q_of_sigp_forgiven_Bphi__... are needed only for old versions of code still here */
 double q_of_sigp_forgiven_Bphi__sigp_1phi; /* sigp_1phi for q_of_sigp_forgiven_Bphi */
 double q_of_sigp_forgiven_Bphi__B;         /* B for q_of_sigp_forgiven_Bphi */
 double q_of_sigp_forgiven_Bphi__phi;       /* phi for q_of_sigp_forgiven_Bphi */
@@ -1114,15 +1115,18 @@ double find_nearest_A_B_given_X_R_phi(tBox *box,
 
 /* WE NEED to find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
 /* q as a func of sigp for a given A=0, B, phi */
-void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
+void q_of_sigp_forgiven_BphiP(int n, double *sigvec, double *qvec, void *p)
 {
   double sigp_Bphi = sigvec[1];
-  double sigp_1phi = q_of_sigp_forgiven_Bphi__sigp_1phi;
-  double B         = q_of_sigp_forgiven_Bphi__B;
-  double phi       = q_of_sigp_forgiven_Bphi__phi;
-  tGrid *grid      = q_of_sigp_forgiven_Bphi__grid;
-  int innerdom     = q_of_sigp_forgiven_Bphi__innerdom;
-  int outerdom     = q_of_sigp_forgiven_Bphi__outerdom;
+  /* get pars */
+  t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct *pars = 
+         (t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct *) p;
+  double sigp_1phi = pars->sigp_1phi;
+  double B         = pars->B;
+  double phi       = pars->phi;
+  tGrid *grid      = pars->grid;
+  int innerdom     = pars->innerdom;
+  int outerdom     = pars->outerdom;
   double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
   double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
   double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
@@ -1181,7 +1185,7 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
       else
         stat = newton_linesrch_itsP(vec, 2, &check, DelXR_of_AB_VectorFuncP,
                                     (void *) pars, 1000, 1e-10);
-      if(check) printf("q_of_sigp_forgiven_Bphi: check=%d\n", check);  
+      if(check) printf("q_of_sigp_forgiven_BphiP: check=%d\n", check);  
       Ac = vec[1];
       Bc = vec[2];
   
@@ -1220,17 +1224,17 @@ void q_of_sigp_forgiven_Bphi(int n, double *sigvec, double *qvec)
   if(stat<0 || dless(Ac,0.0) || dless(1.0,Ac) ||
                dless(Bc,0.0) || dless(1.0,Bc)   )
   {
-    printf("q_of_sigp_forgiven_Bphi: guessmode=%d\n", guessmode);
-    printf("q_of_sigp_forgiven_Bphi: stat=%d dom=%d Ac=%g Bc=%g\n",
+    printf("q_of_sigp_forgiven_BphiP: guessmode=%d\n", guessmode);
+    printf("q_of_sigp_forgiven_BphiP: stat=%d dom=%d Ac=%g Bc=%g\n",
            stat,dom, Ac,Bc);
     printf("statin=%d Acin=%g Bcin=%g  statout=%d Acout=%g Bcout=%g\n",
            statin, Acin,Bcin, statout, Acout,Bcout);
-    printf("q_of_sigp_forgiven_Bphi: X=%g R=%g for: A=0 B=%g phi=%g\n"
+    printf("q_of_sigp_forgiven_BphiP: X=%g R=%g for: A=0 B=%g phi=%g\n"
            " sigp_Bphi=%g sigp_1phi=%g\n"
            " ReCp_Bphi=%g ImCp_Bphi=%g ReCp_1phi=%g ImCp_1phi=%g\n",
            X,R, B,phi, sigp_Bphi,sigp_1phi,
            ReCp_Bphi,ImCp_Bphi, ReCp_1phi,ImCp_1phi);
-    errorexit("q_of_sigp_forgiven_Bphi: could not find Ac,Bc");
+    errorexit("q_of_sigp_forgiven_BphiP: could not find Ac,Bc");
   }
   if(Ac<0.0) Ac=0.0; /* make sure we stay in our box */
   if(Ac>1.0) Ac=1.0;
@@ -1408,20 +1412,21 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   for(j=n2-2; j>0; j--) /* we could include j=0 (B=0) here again, so that most sigp_Bphi are found with the same method */
     for(k=0; k<n3; k++)
     {
+      t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
       /* find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
       B   = grid->box[dom]->v[iY][Index(0,j,k)];
       phi = grid->box[dom]->v[iZ][Index(0,j,k)];
       /* use newton_linesrch_its to find sigp_Bphi */
-      q_of_sigp_forgiven_Bphi__sigp_1phi = sigp_1phi;
-      q_of_sigp_forgiven_Bphi__B = B;
-      q_of_sigp_forgiven_Bphi__phi = phi;
-      q_of_sigp_forgiven_Bphi__grid = grid;
-      q_of_sigp_forgiven_Bphi__innerdom = innerdom;
-      q_of_sigp_forgiven_Bphi__outerdom = outerdom;
+      pars->sigp_1phi = sigp_1phi;
+      pars->B = B;
+      pars->phi = phi;
+      pars->grid = grid;
+      pars->innerdom = innerdom;
+      pars->outerdom = outerdom;
       vec[1] = sigp_Bphi;
 //printf("itmax=%d tol=%g vec[1]=%g B=%g phi=%g\n",itmax,tol,vec[1], B,phi);
-      stat=newton_linesrch_its(vec, 1, &check,
-                               q_of_sigp_forgiven_Bphi, itmax, tol);
+      stat=newton_linesrch_itsP(vec, 1, &check, q_of_sigp_forgiven_BphiP,
+                                (void *) pars, itmax, tol);
       /* If q is nowhere negative newton_linesrch_its may not work. In this
          case we should probably search for the zero in (q - 1e-8). */
 //printf("stat=%d\n",stat);
