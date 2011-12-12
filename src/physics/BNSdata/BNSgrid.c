@@ -2335,7 +2335,8 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
       continue;
 
     /* we could maybe use SGRID_LEVEL6_Pragma(omp parallel for)
-      BUT: first eliminate global vars in funcs of findXYZ_of_xyz.c */
+      BUT: first eliminate global vars in all funcs called by 
+      BNSgrid_Get_BoxAndCoords_of_xyz */
     forallpoints(box,i)
     {
       double X = pX[i];
