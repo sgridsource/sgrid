@@ -1,0 +1,34 @@
+Some defines in sgrid:
+----------------------
+NOTE: In C99 these two have the same effect:
+   #pragma omp parallel for
+   _Pragma ( "omp parallel for" )
+
+In sgrid there are defines like this:
+#define SGRID_LEVEL6_Pragma(x)  _Pragma ( #x )
+
+To parallelize with OpenMP we need _Pragma ( "omp parallel for" ) in many
+places.  But for different applications we want to switch them on or off
+depending on where they are.
+SGRID_LEVEL2_Pragma used for omp loops over a plane in a box (2d)
+SGRID_LEVEL3_Pragma used for omp loops over all points in a box (3d)
+SGRID_LEVEL4_Pragma used for omp loops over all boxes
+SGRID_LEVEL6_Pragma used for 6d omp loops (e.g. loop over box while interpolating onto each point) 
+
+
+Switch on OpenMP directives in MyConfig:
+----------------------------------------
+#for icc compile with
+OFLAGS = -O3 -openmp 
+
+#for gcc compile with 
+OFLAGS = -O3 -fopenmp
+
+# use OpenMP pragmas of LEVEL6
+DFLAGS += -DLEVEL6_Pragmas
+
+
+To start sgrid with 2 OpenMP treads:
+------------------------------------
+export OMP_NUM_THREADS=2
+./sgrid test.par
