@@ -5,25 +5,37 @@
 #include "Coordinates.h"
 
 
-/* global vars needed to pass info into xyz_VectorFunc */
-double desired_x;
-double desired_y;
-double desired_z;
-tBox *box_for_xyz_VectorFunc;
+/* pars needed to pass info into xyz_VectorFuncP */
+typedef struct T_grid_box_desired_xyz_struct {
+  tGrid *grid; /* grid */
+  tBox *box;   /* box */
+  double desired_x;
+  double desired_y;
+  double desired_z;
+} t_grid_box_desired_xyz_struct;   
 
 
-/* funtion to be passed into newton_linesrch_its by XYZ_of_xyz */
-void xyz_VectorFunc(int n, double *XYZvec, double *fvec)
+/* funtion to be passed into newton_linesrch_itsP by XYZ_of_xyz */
+void xyz_VectorFuncP(int n, double *XYZvec, double *fvec, void *p)
 {
+  t_grid_box_desired_xyz_struct *pars;
+  tBox *box;
+  double desired_x; 
+  double desired_y;
+  double desired_z;
   double xg,yg,zg;
   int ind=-1; /* works only if the x_of_X[i] don't use ind */
 
-  xg = box_for_xyz_VectorFunc->x_of_X[1]((void *) box_for_xyz_VectorFunc,
-                                         ind, XYZvec[1],XYZvec[2],XYZvec[3]);
-  yg = box_for_xyz_VectorFunc->x_of_X[2]((void *) box_for_xyz_VectorFunc,
-                                         ind, XYZvec[1],XYZvec[2],XYZvec[3]);
-  zg = box_for_xyz_VectorFunc->x_of_X[3]((void *) box_for_xyz_VectorFunc,
-                                         ind, XYZvec[1],XYZvec[2],XYZvec[3]);
+  /* get pars */
+  pars = (t_grid_box_desired_xyz_struct *) p;
+  box = pars->box;
+  desired_x = pars->desired_x;
+  desired_y = pars->desired_y;
+  desired_z = pars->desired_z;
+
+  xg = box->x_of_X[1]((void *) box, ind, XYZvec[1],XYZvec[2],XYZvec[3]);
+  yg = box->x_of_X[2]((void *) box, ind, XYZvec[1],XYZvec[2],XYZvec[3]);
+  zg = box->x_of_X[3]((void *) box, ind, XYZvec[1],XYZvec[2],XYZvec[3]);
   fvec[1] = xg-desired_x;
   fvec[2] = yg-desired_y;
   fvec[3] = zg-desired_z;
@@ -34,15 +46,16 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                 double x, double y, double z)
 {
   double XYZvec[4];
+  t_grid_box_desired_xyz_struct pars[1];
   int check, stat;
 
   if(box->x_of_X[1]==NULL)
     { *X = x;  *Y = y;  *Z = z;  return 0; }
 
-  box_for_xyz_VectorFunc = box;
-  desired_x = x;
-  desired_y = y;
-  desired_z = z;
+  pars->box = box;
+  pars->desired_x = x;
+  pars->desired_y = y;
+  pars->desired_z = z;
 
   /* bad initial guess */
   /* XYZvec[1] = (box->bbox[0] + box->bbox[1]) * 0.5;
@@ -54,10 +67,10 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   XYZvec[2] = *Y;
   XYZvec[3] = *Z;
       
-  /* do newton_linesrch_its iterations: */
-  stat = newton_linesrch_its(XYZvec, 3, &check, xyz_VectorFunc, 
-                             Geti("Coordinates_newtMAXITS"),
-                             Getd("Coordinates_newtTOLF") );
+  /* do newton_linesrch_itsP iterations: */
+  stat = newton_linesrch_itsP(XYZvec, 3, &check, xyz_VectorFuncP, (void *) pars,
+                              Geti("Coordinates_newtMAXITS"),
+                              Getd("Coordinates_newtTOLF") );
   *X = XYZvec[1];
   *Y = XYZvec[2];
   *Z = XYZvec[3];
@@ -287,14 +300,21 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
   return rmin;
 }
 
-/* function to be passed into newton_linesrch_its by X_of_x_forgiven_YZ */
-void x_VectorFunc_YZ(int n, double *XYZvec, double *fvec)
+/* function to be passed into newton_linesrch_itsP by X_of_x_forgiven_YZ */
+void x_VectorFuncP_YZ(int n, double *XYZvec, double *fvec, void *p)
 {
+  t_grid_box_desired_xyz_struct *pars;
+  tBox *box;
+  double desired_x;
   double xg;
   int ind=-1; /* works only if the x_of_X[i] don't use ind */
 
-  xg = box_for_xyz_VectorFunc->x_of_X[1]((void *) box_for_xyz_VectorFunc,
-                                          ind, XYZvec[1],XYZvec[2],XYZvec[3]);
+  /* get pars */
+  pars = (t_grid_box_desired_xyz_struct *) p;
+  box = pars->box;
+  desired_x = pars->desired_x;
+      
+  xg = box->x_of_X[1]((void *) box, ind, XYZvec[1],XYZvec[2],XYZvec[3]);
   fvec[1] = xg-desired_x;
 }
 
@@ -302,12 +322,13 @@ void x_VectorFunc_YZ(int n, double *XYZvec, double *fvec)
 int X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z)
 {
   double XYZvec[4];
+  t_grid_box_desired_xyz_struct pars[1];
   int check, stat;
 
   if(box->x_of_X[1]==NULL)  { *X = x;  return 0; }
 
-  box_for_xyz_VectorFunc = box;
-  desired_x = x;
+  pars->box = box;
+  pars->desired_x = x;
 
   /* initial guess supplied by caller */
   XYZvec[1] = *X;
@@ -316,10 +337,11 @@ int X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z)
   XYZvec[2] = Y;
   XYZvec[3] = Z;
       
-  /* do newton_linesrch_its iterations: */
-  stat = newton_linesrch_its(XYZvec, 1, &check, x_VectorFunc_YZ, 
-                             Geti("Coordinates_newtMAXITS"),
-                             Getd("Coordinates_newtTOLF") );
+  /* do newton_linesrch_itsP iterations: */
+  stat = newton_linesrch_itsP(XYZvec, 1, &check, x_VectorFuncP_YZ,
+                              (void *) pars,
+                              Geti("Coordinates_newtMAXITS"),
+                              Getd("Coordinates_newtTOLF") );
   *X = XYZvec[1];
 
   if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
