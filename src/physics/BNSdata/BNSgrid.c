@@ -1269,7 +1269,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   int n1 = grid->box[innerdom]->n1;
   int n2 = grid->box[innerdom]->n2;
   int n3 = grid->box[innerdom]->n3;
-  int i,j,k, kk;
+  int i,j,k, kk, JK;
   int inz_in;   /* q_in<=0  at i=inz_in (and q_in>0 i=inz_in+1) */
   int inz_out;  /* q_out<=0 at i=inz_out (and q_out>0 i=inz_out-1) */
   int i1, i2, dom; /* zero occurs between index i1 and i2 in domain dom */
@@ -1401,54 +1401,64 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
 //printf("reset_Coordinates_AnsorgNS_sigma_pm: new "
 //       "sigp_0phi=%g sigp_1phi=%g\n", sigp_0phi, sigp_1phi);
 
-  /* guess for sigp_Bphi at j=n2-2 */
-  sigp_Bphi = sigp_1phi;
-  
   /* loop over the remaining j,k i.e. B,phi. 
      NOTE: we assume that n1,n2,n3 are the same in both domains */
+  /* (j,k)-loop should be:
+  for(j=n2-2; j>0; j--) // we could include j=0 (B=0) here again, so that most sigp_Bphi are found with the same method
+  for(k=0; k<n3; k++)  */
   /* we could maybe use SGRID_LEVEL6_Pragma(omp parallel for)  
      BUT: make thread safe first: remove all external and global vars and use newton_linesrch_itsP in all funcs and subfuncs!!!
      ALSO: this is a serial loop: we use vec[1] from j+1 as initial guess for step j. Maybe it will not work if we use another guess... */
-  for(j=n2-2; j>0; j--) /* we could include j=0 (B=0) here again, so that most sigp_Bphi are found with the same method */
+  for(JK=(n2-2)*n3; JK>=0; JK--) /* JK = n3*(J-1) + K , J=1,...,n2-2, K=n3-1-k, K=0,...,n3-1 */
   {
-    int k;
-    for(k=0; k<n3; k++)
-    {
-      double vec[2];
-      double B,phi;
-      int check, stat;
-      t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
-      /* find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
-      B   = grid->box[dom]->v[iY][Index(0,j,k)];
-      phi = grid->box[dom]->v[iZ][Index(0,j,k)];
-      /* use newton_linesrch_its to find sigp_Bphi */
-      pars->sigp_1phi = sigp_1phi;
-      pars->B = B;
-      pars->phi = phi;
-      pars->grid = grid;
-      pars->innerdom = innerdom;
-      pars->outerdom = outerdom;
-      vec[1] = sigp_Bphi;
-//printf("itmax=%d tol=%g vec[1]=%g B=%g phi=%g\n",itmax,tol,vec[1], B,phi);
-      stat=newton_linesrch_itsP(vec, 1, &check, q_of_sigp_forgiven_BphiP,
-                                (void *) pars, itmax, tol);
-      /* If q is nowhere negative newton_linesrch_its may not work. In this
-         case we should probably search for the zero in (q - 1e-8). */
-//printf("stat=%d\n",stat);
-      if(check)
-        printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
-      sigp_Bphi = vec[1];
+    /* compute j,k from JK */
+    int j = JK/n3 + 1;
+    int k = (n3-1) - (JK%n3);
+    double vec[2];
+    double B,phi, sigp_Bphi, sigp_old;
+    double w0, w1, wold;
+    int check, stat;
+    t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
 
-      /* set Coordinates_AnsorgNS_sigma_pm = sigp_Bphi in both domains */
-      for(i=0; i<n1; i++)
-      {
-        gridnew->box[innerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
-        gridnew->box[outerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
-      }
+    /* find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
+    B   = grid->box[dom]->v[iY][Index(0,j,k)];
+    phi = grid->box[dom]->v[iZ][Index(0,j,k)];
+    /* use newton_linesrch_its to find sigp_Bphi */
+    pars->sigp_1phi = sigp_1phi;
+    pars->B = B;
+    pars->phi = phi;
+    pars->grid = grid;
+    pars->innerdom = innerdom;
+    pars->outerdom = outerdom;
+    /* old sigp at B,phi */
+//    sigp_old = grid->box[innerdom]->v[isigma][Index(0,j,k)];
+//    w0=w1=wold=0.333333333333;
+//    vec[1] = w0*sigp_0phi + w1*sigp_1phi + wold*sigp_old;
+
+    /* guess for sigp_Bphi at j=n2-2 */
+//    if(j==n2-2) sigp_Bphi = sigp_1phi;
+    if(JK==(n2-2)*n3) sigp_Bphi = sigp_1phi;
+    vec[1] = sigp_Bphi;
+//printf("itmax=%d tol=%g vec[1]=%g B=%g phi=%g\n",itmax,tol,vec[1], B,phi);
+    stat=newton_linesrch_itsP(vec, 1, &check, q_of_sigp_forgiven_BphiP,
+                              (void *) pars, itmax, tol);
+    /* If q is nowhere negative newton_linesrch_its may not work. In this
+       case we should probably search for the zero in (q - 1e-8). */
+//printf("stat=%d\n",stat);
+    if(check)
+      printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
+    sigp_Bphi = vec[1];
+
+    /* set Coordinates_AnsorgNS_sigma_pm = sigp_Bphi in both domains */
+    for(i=0; i<n1; i++)
+    {
+      gridnew->box[innerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
+      gridnew->box[outerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
+    }
 //printf("B=%g phi=%g  ", B, phi);
 //printf("sigp_Bphi=%g sigp_0phi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_0phi, sigp_1phi);
-    } /* end for k */
-  } /* end for j */
+    
+  } /* end for JK */
 
   /* make sure that sigma has only one value at B=0 and also at B=1 */
   for(j=0; j<n2; j+=n2-1)
