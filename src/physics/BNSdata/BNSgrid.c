@@ -2305,7 +2305,7 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
   int xind = Ind("x");
   int yind = Ind("y");
   int zind = Ind("z");
-  int b,i, b1;
+  int b,i;
 
   /* save coeffs of vind on grid1 in cind = Ind("Temp1") */
   forallboxes(grid1, b)
@@ -2334,12 +2334,15 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
     if( (innerdom==0 && (b>=2 && b<=4)) || (innerdom==3 && (b<=1 || b>=5)) )
       continue;
 
+    /* we could maybe use SGRID_LEVEL6_Pragma(omp parallel for)
+      BUT: first eliminate global vars in funcs of findXYZ_of_xyz.c */
     forallpoints(box,i)
     {
       double X = pX[i];
       double Y = pY[i];
       double Z = pZ[i];
-      
+      int b1;
+
       /* get b1, X,Y,Z on grid1 */
       b1 = BNSgrid_Get_BoxAndCoords_of_xyz(grid1, &X,&Y,&Z, 
                                            b,px[i],py[i],pz[i]);
