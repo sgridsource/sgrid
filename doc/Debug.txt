@@ -52,6 +52,15 @@ Sometimes we are left with a core file. This can be loaded with
 
 --------
 
+I can start gdb also like this:
+===============================
+gdb --args ./sgrid l.par
+(gdb) r           ... run code
+(gdb) bt          ... to see calling stack
+(gdb) q           ... quit
+
+--------
+
 Bracket the problem in time by checking out for different dates:
 cvs co -D 7/21/2003 sgrid
 
