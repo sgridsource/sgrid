@@ -1878,6 +1878,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
                      double A, double BB, double phi, 
                      double *x, double *y, double *z, double *Xp, double *Rp)
 {
+  static int nthreads=0;   /* number of threads that are in this function */
   static tBox *boxsav=NULL;
   static int domainsav=-1;
   static double Asav=-1, BBsav=-1, phisav=-1;
@@ -1890,12 +1891,15 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   double Ap;
   double B;  /* NOTE: B is Ansorg's B coord, while BB is my 
                 computational Y-coord. I use B = func(BB) */
+  nthreads++; /* increase thread counter */
 
   /* check if we have saved values */  
   if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav && box==boxsav)
+  if(nthreads==1) /* read saved val only if no other thread is there */
   {
     *x=xsav;  *y=ysav;  *z=zsav;
     *Xp=Xsav; *Rp=Rsav;
+    nthreads--;
     return;
   }
 
@@ -2046,19 +2050,15 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     *z = LARGE * sin(phi);
   }
 
-  /* domainsav <= -15000 signals that we are writing the static vars */
-  domainsav-=10000;
-  /* so if more than one thread gets here we have domainsav <= -15000 */    
-  /* do not save if sombody else seems to be saving */
-  if(domainsav<=-15000) { domainsav+=10000;  return;}
+  /* if there are two or more threads do not save values */
+  if(nthreads>1) { nthreads--;  return;}
 
   /* and save x,y,z, X,R */
-  domainsav=-15001-domain;
   xsav=*x;  ysav=*y;  zsav=*z;
   Xsav=*Xp; Rsav=*Rp;
   /* set static vars that indicate saved values */
   Asav=A;  BBsav=BB;  phisav=phi;  boxsav=box;
-  domainsav=domain;    /* now we are done writing the static vars */
+  domainsav=domain;
 #ifdef DEBUGrace
   /* check integrity of saved values (other threads may have messed them up) */
   if(!dequal(xsav,*x) || !dequal(ysav,*y) || !dequal(zsav,*z) ||
@@ -2069,6 +2069,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
      errorexit("race1");
   }
 #endif
+  nthreads--;
 }
 
 /* compute d(A,BB,ph)/d(x,y,z) and save result to speed up
@@ -2080,6 +2081,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                           double *dBBdx,  double *dBBdy,  double *dBBdz,
                           double *dphidx, double *dphidy, double *dphidz)
 {
+  static int nthreads=0;   /* number of threads that are in this function */
   static tBox *boxsav=NULL;
   static int domainsav=-1;
   static double Asav=-1, BBsav=-1, phisav=-1;
@@ -2103,13 +2105,17 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                 computational Y-coord. I use B = func(BB) */
   double dBBdB;
 
-  /* check if we have saved values */
+  nthreads++; /* increase thread counter */
+
+  /* check if we have saved values */  
   if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav && box==boxsav)
+  if(nthreads==1) /* read saved val only if no other thread is there */
   {
     *x=xsav; *y=ysav; *z=zsav;
     *dAdx=dAdxsav;     *dAdy=dAdysav;     *dAdz=dAdzsav;
     *dBBdx=dBBdxsav;   *dBBdy=dBBdysav;   *dBBdz=dBBdzsav;
     *dphidx=dphidxsav; *dphidy=dphidysav; *dphidz=dphidzsav;
+    nthreads--;
     return;
   }
 
@@ -2684,14 +2690,26 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   *dBBdy = dBBdB * dBdy;
   *dBBdz = dBBdB * dBdz;
 
-  /* domainsav <= -15000 signals that we are writing the static vars */
-  domainsav-=10000;
-  /* so if more than one thread gets here we have domainsav <= -15000 */    
-  /* do not save if sombody else seems to be saving */
-  if(domainsav<=-15000) { domainsav+=10000;  return;}
+//if( !finite(*dAdx) || !finite(*dAdy) || !finite(*dAdz) ||  
+//    !finite(*dBBdx) || !finite(*dBBdy) || !finite(*dBBdz) ||  
+//    !finite(*dphidx) || !finite(*dphidy) || !finite(*dphidz) )
+//{
+////int k,l;
+////for(k=1; k<=3; k++)
+////for(l=1; l<=3; l++)
+//{
+////printf("dABphi_dXRphi[%d][%d]=%f ",k,l, dABphi_dXRphi[k][l]);
+////printf("dXRphi_dxyz[%d][%d]=%f\n",k,l, dXRphi_dxyz[k][l]);
+////printf("dXRphi_dxyz[%d][1]=%f rho=%g\n", l, dXRphi_dxyz[l][1], rho);
+//printf("Rsqr_p_Xsqr=%g  %g %g %g  %g %g %g  %g %g %g\n",Rsqr_p_Xsqr, 
+//*dAdx,*dAdy,*dAdz, *dBdx,*dBdy,*dBdz, *dphidx,*dphidy,*dphidz);
+//}
+//}
+
+  /* if there are two or more threads do not save values */
+  if(nthreads>1) { nthreads--;  return;}
 
   /* and save */
-  domainsav=-15001-domain;
   xsav=*x; ysav=*y; zsav=*z;
   dAdxsav=*dAdx;     dAdysav=*dAdy;     dAdzsav=*dAdz;
   dBBdxsav=*dBBdx;   dBBdysav=*dBBdy;   dBBdzsav=*dBBdz;
@@ -2712,22 +2730,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
      errorexit("race2");
   }
 #endif
-
-//if( !finite(*dAdx) || !finite(*dAdy) || !finite(*dAdz) ||  
-//    !finite(*dBBdx) || !finite(*dBBdy) || !finite(*dBBdz) ||  
-//    !finite(*dphidx) || !finite(*dphidy) || !finite(*dphidz) )
-//{
-////int k,l;
-////for(k=1; k<=3; k++)
-////for(l=1; l<=3; l++)
-//{
-////printf("dABphi_dXRphi[%d][%d]=%f ",k,l, dABphi_dXRphi[k][l]);
-////printf("dXRphi_dxyz[%d][%d]=%f\n",k,l, dXRphi_dxyz[k][l]);
-////printf("dXRphi_dxyz[%d][1]=%f rho=%g\n", l, dXRphi_dxyz[l][1], rho);
-//printf("Rsqr_p_Xsqr=%g  %g %g %g  %g %g %g  %g %g %g\n",Rsqr_p_Xsqr, 
-//*dAdx,*dAdy,*dAdz, *dBdx,*dBdy,*dBdz, *dphidx,*dphidy,*dphidz);
-//}
-//}
+  nthreads--;
 }
 
 /* compute d^2 phi/dydy */
