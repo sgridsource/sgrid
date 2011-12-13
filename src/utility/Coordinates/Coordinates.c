@@ -1898,7 +1898,6 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     *Xp=Xsav; *Rp=Rsav;
     return;
   }
-  Asav=A;  BBsav=BB;  phisav=phi;  domainsav=domain;  boxsav=box;
 
   /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
   if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
@@ -2046,10 +2045,30 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     *y = LARGE * cos(phi);
     *z = LARGE * sin(phi);
   }
-  
+
+  /* domainsav <= -15000 signals that we are writing the static vars */
+  domainsav-=10000;
+  /* so if more than one thread gets here we have domainsav <= -15000 */    
+  /* do not save if sombody else seems to be saving */
+  if(domainsav<=-15000) { domainsav+=10000;  return;}
+
   /* and save x,y,z, X,R */
+  domainsav=-15001-domain;
   xsav=*x;  ysav=*y;  zsav=*z;
   Xsav=*Xp; Rsav=*Rp;
+  /* set static vars that indicate saved values */
+  Asav=A;  BBsav=BB;  phisav=phi;  boxsav=box;
+  domainsav=domain;    /* now we are done writing the static vars */
+#ifdef DEBUGrace
+  /* check integrity of saved values (other threads may have messed them up) */
+  if(!dequal(xsav,*x) || !dequal(ysav,*y) || !dequal(zsav,*z) ||
+     !dequal(Asav,A) || !dequal(BBsav,BB) || !dequal(phisav,phi) ||
+     boxsav!=box || domainsav!=domain)
+  {
+     domainsav=-42; /* do not use save values!!! */
+     errorexit("race1");
+  }
+#endif
 }
 
 /* compute d(A,BB,ph)/d(x,y,z) and save result to speed up
@@ -2093,7 +2112,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
     *dphidx=dphidxsav; *dphidy=dphidysav; *dphidz=dphidzsav;
     return;
   }
-  Asav=A;  BBsav=BB;  phisav=phi;  domainsav=domain;  boxsav=box;
 
   /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
   if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
@@ -2666,11 +2684,34 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   *dBBdy = dBBdB * dBdy;
   *dBBdz = dBBdB * dBdz;
 
+  /* domainsav <= -15000 signals that we are writing the static vars */
+  domainsav-=10000;
+  /* so if more than one thread gets here we have domainsav <= -15000 */    
+  /* do not save if sombody else seems to be saving */
+  if(domainsav<=-15000) { domainsav+=10000;  return;}
+
   /* and save */
+  domainsav=-15001-domain;
   xsav=*x; ysav=*y; zsav=*z;
   dAdxsav=*dAdx;     dAdysav=*dAdy;     dAdzsav=*dAdz;
   dBBdxsav=*dBBdx;   dBBdysav=*dBBdy;   dBBdzsav=*dBBdz;
   dphidxsav=*dphidx; dphidysav=*dphidy; dphidzsav=*dphidz;
+  /* set static vars that indicate saved values */
+  Asav=A;  BBsav=BB;  phisav=phi;  boxsav=box;
+  domainsav=domain;    /* now we are done writing the static vars */
+#ifdef DEBUGrace
+  /* check integrity of saved values (other threads may have messed them up) */
+  if(!dequal(xsav,*x) || !dequal(ysav,*y) || !dequal(zsav,*z) ||
+     !dequal(dAdxsav,*dAdx)     || !dequal(dAdysav,*dAdy)     || !dequal(dAdzsav,*dAdz)     ||
+     !dequal(dBBdxsav,*dBBdx)   || !dequal(dBBdysav,*dBBdy)   || !dequal(dBBdzsav,*dBBdz)   ||
+     !dequal(dphidxsav,*dphidx) || !dequal(dphidysav,*dphidy) || !dequal(dphidzsav,*dphidz) ||
+     !dequal(Asav,A) || !dequal(BBsav,BB) || !dequal(phisav,phi) ||
+     boxsav!=box || domainsav!=domain)
+  {
+     domainsav=-42; /* do not use saved values!!! */
+     errorexit("race2");
+  }
+#endif
 
 //if( !finite(*dAdx) || !finite(*dAdy) || !finite(*dAdz) ||  
 //    !finite(*dBBdx) || !finite(*dBBdy) || !finite(*dBBdz) ||  
