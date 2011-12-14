@@ -2401,8 +2401,8 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
     if( (innerdom==0 && (b>=2 && b<=4)) || (innerdom==3 && (b<=1 || b>=5)) )
       continue;
 
-    /* we could maybe use SGRID_LEVEL6_Pragma(omp for) */
-#define SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
+    /* here we can use SGRID_LEVEL6_Pragma(omp parallel) */
+#undef SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
 #ifndef SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
     SGRID_LEVEL6_Pragma(omp parallel)
     {
