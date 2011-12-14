@@ -2782,7 +2782,8 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
 /* given a new 
    (Coordinates_AnsorgNS_sigma_pm, 
     Coordinates_AnsorgNS_dsigma_pm_dB, Coordinates_AnsorgNS_dsigma_pm_dphi)
-   on one side of grid initialize Coordinates */
+   on one side of grid initialize Coordinates.
+   Do both sides if innerdom<0 */
 void BNSgrid_init_Coords_pm(tGrid *grid, int innerdom)
 {
   int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
@@ -2794,7 +2795,7 @@ void BNSgrid_init_Coords_pm(tGrid *grid, int innerdom)
   init_CoordTransform_And_Derivs(grid);
 
   /* reset box5/4 boundaries so that A=Amax in box0/3 will be inside box5/4 */
-  adjust_box4_5_pars(grid);
+  adjust_box4_5_pars_pm(grid, innerdom);
   set_BoxStructures_fromPars(grid, 0);
 
   /* reset x,y,z, dXdx and such */

@@ -65,7 +65,6 @@ double ADMmass_fromPsi_inbox1_at_A1B0(tGrid *grid, int iADMmass);
 double InnerVolumeIntegral(tGrid *grid, int b, int vind);
 double VolumeIntegral_inBNSgridBox(tGrid *grid, int b, int vind);
 tGrid *make_grid_with_sigma_pm(tGrid *grid, int nAB, int nphi, int nxyz);
-void adjust_box4_5_pars(tGrid *grid);
 int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
                                     double *X1, double *Y1, double *Z1,
                                     int b, double x, double y, double z);
