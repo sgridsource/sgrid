@@ -2402,7 +2402,9 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
       continue;
 
     /* here we can use SGRID_LEVEL6_Pragma(omp parallel) */
-#undef SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
+    /* BUT there is still a race condition somewhere, 
+       so we switch it off for now */
+#define SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
 #ifndef SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
     SGRID_LEVEL6_Pragma(omp parallel)
     {
