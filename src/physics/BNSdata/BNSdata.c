@@ -4696,7 +4696,7 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   /* NOTE: coords of grid2 are initialized in if clause below. */
 
   /* do we make changes on both sides of grid? */
-  if(1 || Getv("BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator",
+  if(Getv("BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator",
           "Interpolate_Var_From_Grid1_To_Grid2_wrapper"))
   {
     /* initialize coords of grid2 on both sides of grid */
