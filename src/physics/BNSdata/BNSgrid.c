@@ -2121,8 +2121,9 @@ tGrid *make_grid_with_sigma_pm(tGrid *grid, int nAB, int nphi, int nxyz)
 }
 
 
-/* figure out max A inside stars and adjust boxes4/5 accordingly */
-void adjust_box4_5_pars(tGrid *grid)
+/* figure out max A inside star in innerdom and adjust box4/5 accordingly 
+   if innerdom<0 we adjust both box 4 and 5. */
+void adjust_box4_5_pars_pm(tGrid *grid, int innerdom)
 {
   double box0_max1 = grid->box[0]->bbox[1];
   double box3_max1 = grid->box[3]->bbox[1];
@@ -2132,84 +2133,102 @@ void adjust_box4_5_pars(tGrid *grid)
   double xp, xm, xmax, xmin;
   double ymin,ymax, zmin,zmax, res, B;
   double b = GetCachedNumValByParIndex(Coordinates_AnsorgNS_b_ParIndex);    
+  int adjbox4=0;
+  int adjbox5=0;
+
+  /* which box needs adjustment */
+  if(innerdom==0) adjbox5=1;
+  if(innerdom==3) adjbox4=1;
+  if(innerdom<0)  { adjbox5=1; adjbox4=1; }
 
   /* adjust box5 */
-  ymin=ymax=zmin=zmax = 0.0;
-  xmin=xmax = b;
-  for(B=0.0; B<1.0; B+=Bstep)
+  if(adjbox5)
   {
-    res = x_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,0.0);
-    if(res<xmin) xmin=res;
-    if(res>xmax) xmax=res;
+    ymin=ymax=zmin=zmax = 0.0;
+    xmin=xmax = b;
+    for(B=0.0; B<1.0; B+=Bstep)
+    {
+      res = x_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,0.0);
+      if(res<xmin) xmin=res;
+      if(res>xmax) xmax=res;
 
-    res = x_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI*0.5);
-    if(res<xmin) xmin=res;
-    if(res>xmax) xmax=res;
+      res = x_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI*0.5);
+      if(res<xmin) xmin=res;
+      if(res>xmax) xmax=res;
 
-    res = y_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI);
-    if(res<ymin) ymin=res;
+      res = y_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI);
+      if(res<ymin) ymin=res;
 
-    res = y_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,0.0);
-    if(res>ymax) ymax=res;
+      res = y_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,0.0);
+      if(res>ymax) ymax=res;
 
-    res = z_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI*1.5);
-    if(res<zmin) zmin=res;
+      res = z_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI*1.5);
+      if(res<zmin) zmin=res;
 
-    res = z_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI*0.5);
-    if(res>zmax) zmax=res;
+      res = z_of_AnsorgNS0(grid->box[0], -1, box0_max1,B,PI*0.5);
+      if(res>zmax) zmax=res;
+    }
+    xm = scal * (xmin-b);
+    xp = scal * (xmax-b);
+    ymin = scal2 * ymin;
+    ymax = scal2 * ymax;
+    zmin = scal2 * zmin;
+    zmax = scal2 * zmax;
+
+    Setd("box5_min1", b + xm);
+    Setd("box5_max1", b + xp);
+    Setd("box5_min2", ymin);
+    Setd("box5_max2", ymax);
+    Setd("box5_min3", zmin);
+    Setd("box5_max3", zmax);
   }
-  xm = scal * (xmin-b);
-  xp = scal * (xmax-b);
-  ymin = scal2 * ymin;
-  ymax = scal2 * ymax;
-  zmin = scal2 * zmin;
-  zmax = scal2 * zmax;
-
-  Setd("box5_min1", b + xm);
-  Setd("box5_max1", b + xp);
-  Setd("box5_min2", ymin);
-  Setd("box5_max2", ymax);
-  Setd("box5_min3", zmin);
-  Setd("box5_max3", zmax);
 
   /* adjust box4 */
-  ymin=ymax=zmin=zmax = 0.0;
-  xmin=xmax = -b;
-  for(B=0.0; B<1.0; B+=Bstep)
+  if(adjbox4)
   {
-    res = x_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,0.0);
-    if(res<xmin) xmin=res;
-    if(res>xmax) xmax=res;
+    ymin=ymax=zmin=zmax = 0.0;
+    xmin=xmax = -b;
+    for(B=0.0; B<1.0; B+=Bstep)
+    {
+      res = x_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,0.0);
+      if(res<xmin) xmin=res;
+      if(res>xmax) xmax=res;
 
-    res = x_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI*0.5);
-    if(res<xmin) xmin=res;
-    if(res>xmax) xmax=res;
+      res = x_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI*0.5);
+      if(res<xmin) xmin=res;
+      if(res>xmax) xmax=res;
 
-    res = y_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI);
-    if(res<ymin) ymin=res;
+      res = y_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI);
+      if(res<ymin) ymin=res;
 
-    res = y_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,0.0);
-    if(res>ymax) ymax=res;
+      res = y_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,0.0);
+      if(res>ymax) ymax=res;
 
-    res = z_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI*1.5);
-    if(res<zmin) zmin=res;
+      res = z_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI*1.5);
+      if(res<zmin) zmin=res;
 
-    res = z_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI*0.5);
-    if(res>zmax) zmax=res;
+      res = z_of_AnsorgNS3(grid->box[3], -1, box3_max1,B,PI*0.5);
+      if(res>zmax) zmax=res;
+    }
+    xm = scal * (xmin+b);
+    xp = scal * (xmax+b);
+    ymin = scal2 * ymin;
+    ymax = scal2 * ymax;
+    zmin = scal2 * zmin;
+    zmax = scal2 * zmax;
+
+    Setd("box4_min1", -b + xm);
+    Setd("box4_max1", -b + xp);
+    Setd("box4_min2", ymin);
+    Setd("box4_max2", ymax);
+    Setd("box4_min3", zmin);
+    Setd("box4_max3", zmax);
   }
-  xm = scal * (xmin+b);
-  xp = scal * (xmax+b);
-  ymin = scal2 * ymin;
-  ymax = scal2 * ymax;
-  zmin = scal2 * zmin;
-  zmax = scal2 * zmax;
-
-  Setd("box4_min1", -b + xm);
-  Setd("box4_max1", -b + xp);
-  Setd("box4_min2", ymin);
-  Setd("box4_max2", ymax);
-  Setd("box4_min3", zmin);
-  Setd("box4_max3", zmax);
+}
+/* figure out max A inside stars and adjust boxes4/5 accordingly */
+void adjust_box4_5_pars(tGrid *grid)
+{
+  adjust_box4_5_pars_pm(grid, -1); /* adjust both box4 and 5 */
 }
 
 
@@ -2763,8 +2782,8 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
 /* given a new 
    (Coordinates_AnsorgNS_sigma_pm, 
     Coordinates_AnsorgNS_dsigma_pm_dB, Coordinates_AnsorgNS_dsigma_pm_dphi)
-   initialize Coordinates */
-void BNSgrid_init_Coords(tGrid *grid)
+   on one side of grid initialize Coordinates */
+void BNSgrid_init_Coords_pm(tGrid *grid, int innerdom)
 {
   int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
 
@@ -2787,6 +2806,16 @@ void BNSgrid_init_Coords(tGrid *grid)
   /* put back original Coordinates_verbose */
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 }
+/* given a new 
+   (Coordinates_AnsorgNS_sigma_pm, 
+    Coordinates_AnsorgNS_dsigma_pm_dB, Coordinates_AnsorgNS_dsigma_pm_dphi)
+   initialize Coordinates on both sides of grid */
+void BNSgrid_init_Coords(tGrid *grid)
+{
+  BNSgrid_init_Coords_pm(grid, -1); /* init both sides of grid */
+}
+
+
 
 /* scale Coordinates_AnsorgNS_sigma and its deriv on one side
    by a factor fac. For star1: ibd=0 , for star2 ibd=3 */
