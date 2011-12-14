@@ -79,6 +79,7 @@ double BNS_update_q_atXYZ(tGrid *grid2,
                           int b2, double X2, double Y2, double Z2,
                           double w, tGrid *grid1);
 void BNS_update_q(tGrid *grid2, double w, tGrid *grid1);
+void BNSgrid_init_Coords_pm(tGrid *grid, int innerdom);
 void BNSgrid_init_Coords(tGrid *grid);
 void BNSgrid_scale_Coordinates_AnsorgNS_sigma(tGrid *grid, double fac, int ibd);
 void BNSgrid_copy_DomainShape(tGrid *grid, int ibd);

@@ -4693,19 +4693,27 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
 
   /* reset sigma such that q=0 at A=0 */
   reset_Coordinates_AnsorgNS_sigma_pm(grid, grid2, innerdom, outerdom);
+  /* NOTE: coords of grid2 are initialized in if clause below. */
 
-  /* initialize coords on grid2 */
-  BNSgrid_init_Coords(grid2);
-
-  /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  /* NOTE: so far we have to use Interpolate_Var_From_Grid1_To_Grid2_wrapper
-     We have to interpolate on both sides of the grid since 
-     BNSgrid_init_Coords changes box4/5 on both sides!!! */
+  /* do we make changes on both sides of grid? */
   if(1 || Getv("BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator",
           "Interpolate_Var_From_Grid1_To_Grid2_wrapper"))
+  {
+    /* initialize coords of grid2 on both sides of grid */
+    BNSgrid_init_Coords(grid2);
+    /* NOTE: next we have to use Interpolate_Var_From_Grid1_To_Grid2_wrapper
+       We have to interpolate on both sides of the grid since 
+       BNSgrid_init_Coords changes box4/5 on both sides!!! */
     Interp_From_Grid1_To_Grid2 = Interpolate_Var_From_Grid1_To_Grid2_wrapper;
+  }
   else
+  {
+    /* initialize coords of grid2 on side of innerdom */
+    BNSgrid_init_Coords_pm(grid2, innerdom);
+    /* use interpolator that does only side of innerdom */
     Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
+  }
+  /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
   //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
