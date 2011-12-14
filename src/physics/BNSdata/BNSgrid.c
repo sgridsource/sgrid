@@ -1402,77 +1402,101 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
 //printf("reset_Coordinates_AnsorgNS_sigma_pm: new "
 //       "sigp_0phi=%g sigp_1phi=%g\n", sigp_0phi, sigp_1phi);
 
-  /* how we pick initial guess in the loop below */
-  use_last_result_as_new_guess=1;
-
-  /* loop over the remaining j,k i.e. B,phi. 
-     NOTE: we assume that n1,n2,n3 are the same in both domains */
-  /* (j,k)-loop should be:
-  for(j=n2-2; j>0; j--) // we could include j=0 (B=0) here again, so that most sigp_Bphi are found with the same method
-  for(k=0; k<n3; k++)  */
-  /* we could maybe use SGRID_LEVEL6_Pragma(omp parallel for)  
-     BUT: this is a serial loop if use_last_result_as_new_guess=1: 
-     we use vec[1] from j+1 as initial guess for step j. So we have to set
-     use_last_result_as_new_guess=0 to use SGRID_LEVEL6_Pragma(omp parallel for) */
-  for(JK=n3*(n2-2)-1; JK>=0; JK--) /* JK = n3*(J-1) + K , J=1,...,n2-2, K=n3-1-k, K=0,...,n3-1 */
+#define SERIAL_reset_Coordinates_AnsorgNS_sigma_pm
+  /* here we could use SGRID_LEVEL6_Pragma(omp parallel)  
+     BUT: if use_last_result_as_new_guess=1:
+     the loop below is a serial loop where we use vec[1] from j+1 as 
+     initial guess for step j. So we have to set 
+     use_last_result_as_new_guess=0 to use SGRID_LEVEL6_Pragma(omp for) .
+     ALSO: xyz_of_AnsorgNS and dABphi_dxyz_AnsorgNS get slower if we have
+           more than one thread, because static vars cannot be used then. */
+#ifndef SERIAL_reset_Coordinates_AnsorgNS_sigma_pm
+  SGRID_LEVEL6_Pragma(omp parallel)
   {
-    /* compute j,k from JK */
-    int j = JK/n3 + 1;
-    int k = (n3-1) - (JK%n3);
-    double vec[2];
-    double B,phi, sigp_Bphi, sigp_old;
-    double w0, w1, wold;
-    int check, stat;
-    t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
+    tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
+    copy_grid(grid, grid_p, 0);
+    /* how we pick initial guess in the loop below */
+    use_last_result_as_new_guess=0;
+#else
+  {
+    tGrid *grid_p = grid;
+    /* how we pick initial guess in the loop below */
+    use_last_result_as_new_guess=1;
+#endif
 
-    /* set sigp_Bphi = sigp_1phi when we enter loop at j=n2-2, k=0 */
-    if(JK==n3*(n2-2)-1) sigp_Bphi = sigp_1phi;
+    /* loop over the remaining j,k i.e. B,phi. 
+       NOTE: we assume that n1,n2,n3 are the same in both domains */
+    /* (j,k)-loop should be:
+    for(j=n2-2; j>0; j--) // we could include j=0 (B=0) here again, so that most sigp_Bphi are found with the same method
+    for(k=0; k<n3; k++)  */
+#ifndef SERIAL_reset_Coordinates_AnsorgNS_sigma_pm
+    SGRID_LEVEL6_Pragma(omp for)
+#endif
+    for(JK=n3*(n2-2)-1; JK>=0; JK--) /* JK = n3*(J-1) + K , J=1,...,n2-2, K=n3-1-k, K=0,...,n3-1 */
+    {
+      /* compute j,k from JK */
+      int j = JK/n3 + 1;
+      int k = (n3-1) - (JK%n3);
+      double vec[2];
+      double B,phi, sigp_Bphi, sigp_old;
+      double w0, w1, wold;
+      int check, stat;
+      t_grid_box_XRphi_sigp_1phi_B_icoeffs_innerdom_outerdom_struct pars[1];
 
-    /* find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
-    B   = grid->box[dom]->v[iY][Index(0,j,k)];
-    phi = grid->box[dom]->v[iZ][Index(0,j,k)];
-    /* use newton_linesrch_its to find sigp_Bphi */
-    pars->sigp_1phi = sigp_1phi;
-    pars->B = B;
-    pars->phi = phi;
-    pars->grid = grid;
-    pars->innerdom = innerdom;
-    pars->outerdom = outerdom;
-    if(use_last_result_as_new_guess)
-    {
-      /* guess for vec[1] is set to sigp_Bphi, the result of previous iteration */
-      vec[1] = sigp_Bphi;
-    }
-    else
-    {
-      /* old sigp at B,phi and weights */
-      sigp_old = grid->box[innerdom]->v[isigma][Index(0,j,k)];
-      w0 = 1.0-Attenuation01(B*2.0, 2.5, 0.5);
-      w1 = Attenuation01(B*2.0-1.0, 2.5, 0.5);
-      wold = 1.0 - w0 - w1;
-      /* guess for vec[1] is weighted average with weights w0,w1,wold */
-      vec[1] = w0*sigp_0phi + w1*sigp_1phi + wold*sigp_old;
-    }
+      /* set sigp_Bphi = sigp_1phi when we enter loop at j=n2-2, k=0 */
+      if(JK==n3*(n2-2)-1) sigp_Bphi = sigp_1phi;
+
+      /* find sigp_Bphi at B,phi such that q(sigp_Bphi; A=0, B, phi)=0 */
+      B   = grid_p->box[dom]->v[iY][Index(0,j,k)];
+      phi = grid_p->box[dom]->v[iZ][Index(0,j,k)];
+      /* use newton_linesrch_its to find sigp_Bphi */
+      pars->sigp_1phi = sigp_1phi;
+      pars->B = B;
+      pars->phi = phi;
+      pars->grid = grid_p;
+      pars->innerdom = innerdom;
+      pars->outerdom = outerdom;
+      if(use_last_result_as_new_guess)
+      {
+        /* guess for vec[1] is set to sigp_Bphi, the result of previous iteration */
+        vec[1] = sigp_Bphi;
+      }
+      else
+      {
+        /* old sigp at B,phi and weights */
+        sigp_old = grid_p->box[innerdom]->v[isigma][Index(0,j,k)];
+        w0 = 1.0-Attenuation01(B*2.0, 2.5, 0.5);
+        w1 = Attenuation01(B*2.0-1.0, 2.5, 0.5);
+        wold = 1.0 - w0 - w1;
+        /* guess for vec[1] is weighted average with weights w0,w1,wold */
+        vec[1] = w0*sigp_0phi + w1*sigp_1phi + wold*sigp_old;
+      }
 //printf("itmax=%d tol=%g vec[1]=%g B=%g phi=%g\n",itmax,tol,vec[1], B,phi);
-    stat=newton_linesrch_itsP(vec, 1, &check, q_of_sigp_forgiven_BphiP,
-                              (void *) pars, itmax, tol);
-    /* If q is nowhere negative newton_linesrch_its may not work. In this
-       case we should probably search for the zero in (q - 1e-8). */
+      stat=newton_linesrch_itsP(vec, 1, &check, q_of_sigp_forgiven_BphiP,
+                                (void *) pars, itmax, tol);
+      /* If q is nowhere negative newton_linesrch_its may not work. In this
+         case we should probably search for the zero in (q - 1e-8). */
 //printf("stat=%d\n",stat);
-    if(check)
-      printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
-    sigp_Bphi = vec[1];
+      if(check)
+        printf("reset_Coordinates_AnsorgNS_sigma_pm: check=%d\n", check);  
+      sigp_Bphi = vec[1];
 
-    /* set Coordinates_AnsorgNS_sigma_pm = sigp_Bphi in both domains */
-    for(i=0; i<n1; i++)
-    {
-      gridnew->box[innerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
-      gridnew->box[outerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
-    }
+      /* set Coordinates_AnsorgNS_sigma_pm = sigp_Bphi in both domains */
+      for(i=0; i<n1; i++)
+      {
+        gridnew->box[innerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
+        gridnew->box[outerdom]->v[isigma][Index(i,j,k)] = sigp_Bphi;
+      }
 //printf("B=%g phi=%g  ", B, phi);
 //printf("sigp_Bphi=%g sigp_0phi=%g sigp_1phi=%g\n", sigp_Bphi, sigp_0phi, sigp_1phi);
-  } /* end for JK */
-
+    } /* end for JK */
+#ifdef SERIAL_reset_Coordinates_AnsorgNS_sigma_pm
+  }
+#else
+    /* free local copies */
+    free_grid(grid_p);
+  }
+#endif
   /* make sure that sigma has only one value at B=0 and also at B=1 */
   for(j=0; j<n2; j+=n2-1)
     for(k=1; k<n3; k++)
@@ -2222,6 +2246,10 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
         Z = Arg(Y,Z); if(Z<0.0) Z+=2.0*PI;
         if(Aguess_forb_5<0.0 || Aguess_forb_4<0.0) /* init Aguess once */
         { 
+          //BNSdata_box0_Amax_ParIndex = GetParIndex("BNSdata_box0_Amax");
+          //BNSdata_box3_Amax_ParIndex = GetParIndex("BNSdata_box3_Amax");
+          //Aguess_forb_5 = GetCachedNumValByParIndex(BNSdata_box0_Amax_ParIndex);
+          //Aguess_forb_4 = GetCachedNumValByParIndex(BNSdata_box3_Amax_ParIndex);
           Aguess_forb_5 = Getd("BNSdata_box0_Amax");
           Aguess_forb_4 = Getd("BNSdata_box3_Amax");
           printf("BNSgrid_Get_BoxAndCoords_of_xyz: "
@@ -2347,38 +2375,47 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
     if( (innerdom==0 && (b>=2 && b<=4)) || (innerdom==3 && (b<=1 || b>=5)) )
       continue;
 
-    /* we could maybe use SGRID_LEVEL6_Pragma(omp parallel for)
-      BUT: first eliminate global vars in all funcs called by 
-      BNSgrid_Get_BoxAndCoords_of_xyz */
-    forallpoints(box,i)
+#define SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
+    /* we could maybe use SGRID_LEVEL6_Pragma(omp for) */
+#ifndef SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
+    SGRID_LEVEL6_Pragma(omp parallel)
     {
-      double X = pX[i];
-      double Y = pY[i];
-      double Z = pZ[i];
-      int b1;
-
-      /* get b1, X,Y,Z on grid1 */
-      b1 = BNSgrid_Get_BoxAndCoords_of_xyz(grid1, &X,&Y,&Z, 
-                                           b,px[i],py[i],pz[i]);
-      if(b1<0)
+      tGrid *grid1_p = make_empty_grid(grid1->nvariables, 0);
+      copy_grid(grid1, grid1_p, 0);
+#else
+    {
+      tGrid *grid1_p = grid1;
+#endif
+      SGRID_LEVEL6_Pragma(omp for) 
+      forallpoints(box,i)
       {
-        double x,y,z;
-        double *sigpm = box->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
-        printf("b1=%d grid2: b=%d i=%d X=%g Y=%g Z=%g "
-               "sigpm[i]=%g sigpm[box->n1*(box->n1-1)]=%g\n",
-               b1, b,i,X,Y,Z, sigpm[i], sigpm[box->n1*(box->n1-1)]);
-        printf("b1=%d grid2: b=%d x=%g y=%g z=%g\n", b1, b,px[i],py[i],pz[i]);
-        box->x_of_X[3]((void *) box, -1,X*0.5,Y*0.5,Z);
-        x=box->x_of_X[1]((void *) box, i,X,Y,Z);
-        y=box->x_of_X[2]((void *) box, i,X,Y,Z);
-        z=box->x_of_X[3]((void *) box, i,X,Y,Z);
-        printf("b1=%d grid2: box->x_of_X => x=%g y=%g z=%g\n", b1, x,y,z);
-        errorexit("Interpolate_Var_From_Grid1_To_Grid2: "
-                  "could not find X,Y,Z on grid1.");
-      }
+        double X = pX[i];
+        double Y = pY[i];
+        double Z = pZ[i];
+        int b1;
 
-      /* get var at point X,Y,Z by interpolation */
-      pv[i] = spec_interpolate(grid1->box[b1], grid1->box[b1]->v[cind], X,Y,Z);
+        /* get b1, X,Y,Z on grid1_p */
+        b1 = BNSgrid_Get_BoxAndCoords_of_xyz(grid1_p, &X,&Y,&Z, 
+                                             b,px[i],py[i],pz[i]);
+        if(b1<0)
+        {
+          double x,y,z;
+          double *sigpm = box->v[Ind("Coordinates_AnsorgNS_sigma_pm")];
+          printf("b1=%d grid2: b=%d i=%d X=%g Y=%g Z=%g "
+                 "sigpm[i]=%g sigpm[box->n1*(box->n1-1)]=%g\n",
+                 b1, b,i,X,Y,Z, sigpm[i], sigpm[box->n1*(box->n1-1)]);
+          printf("b1=%d grid2: b=%d x=%g y=%g z=%g\n", b1, b,px[i],py[i],pz[i]);
+          box->x_of_X[3]((void *) box, -1,X*0.5,Y*0.5,Z);
+          x=box->x_of_X[1]((void *) box, i,X,Y,Z);
+          y=box->x_of_X[2]((void *) box, i,X,Y,Z);
+          z=box->x_of_X[3]((void *) box, i,X,Y,Z);
+          printf("b1=%d grid2: box->x_of_X => x=%g y=%g z=%g\n", b1, x,y,z);
+          errorexit("Interpolate_Var_From_Grid1_To_Grid2: "
+                    "could not find X,Y,Z on grid1_p.");
+        }
+
+        /* get var at point X,Y,Z by interpolation */
+        pv[i] = spec_interpolate(grid1_p->box[b1], grid1_p->box[b1]->v[cind], X,Y,Z);
 //if(!finite(pv[i]))
 //{
 //double x,y,z;
@@ -2393,8 +2430,15 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
 //CheckIfFinite(grid2, VarName(cind));
 //exit(77);
 //}
+      } /* end forallpoints loop */
+#ifdef SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
     }
-  }
+#else
+      /* free local grid copy */
+      free_grid(grid1_p);
+    }
+#endif
+  } /* end forallboxes(grid2,b) */
 }
 /* wrapper for Interpolate_Var_From_Grid1_To_Grid2 with extra dummy argument */
 void Interpolate_Var_From_Grid1_To_Grid2_wrapper(tGrid *grid1, tGrid *grid2,
