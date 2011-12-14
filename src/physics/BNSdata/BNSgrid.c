@@ -2222,8 +2222,10 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
                                     double *X1, double *Y1, double *Z1,
                                     int b, double x, double y, double z)
 {
-  static double Aguess_forb_5 = -1.0;
-  static double Aguess_forb_4 = -1.0;
+  static int BNSdata_box0_Amax_ParIndex=-1;
+  static int BNSdata_box3_Amax_ParIndex=-1;
+  double Aguess_forb_5;
+  double Aguess_forb_4;
   int b1;
   double X = *X1;
   double Y = *Y1;
@@ -2244,18 +2246,23 @@ int BNSgrid_Get_BoxAndCoords_of_xyz(tGrid *grid1,
       if(b>=4)
       { 
         Z = Arg(Y,Z); if(Z<0.0) Z+=2.0*PI;
-        if(Aguess_forb_5<0.0 || Aguess_forb_4<0.0) /* init Aguess once */
+        if(BNSdata_box0_Amax_ParIndex<0 || BNSdata_box3_Amax_ParIndex<0) /* init Aguess once */
         { 
-          //BNSdata_box0_Amax_ParIndex = GetParIndex("BNSdata_box0_Amax");
-          //BNSdata_box3_Amax_ParIndex = GetParIndex("BNSdata_box3_Amax");
-          //Aguess_forb_5 = GetCachedNumValByParIndex(BNSdata_box0_Amax_ParIndex);
-          //Aguess_forb_4 = GetCachedNumValByParIndex(BNSdata_box3_Amax_ParIndex);
-          Aguess_forb_5 = Getd("BNSdata_box0_Amax");
-          Aguess_forb_4 = Getd("BNSdata_box3_Amax");
+          BNSdata_box0_Amax_ParIndex = GetParIndex("BNSdata_box0_Amax");
+          BNSdata_box3_Amax_ParIndex = GetParIndex("BNSdata_box3_Amax");
+          //Aguess_forb_5 = Getd("BNSdata_box0_Amax");
+          //Aguess_forb_4 = Getd("BNSdata_box3_Amax");
+          Aguess_forb_5 = GetCachedNumValByParIndex(BNSdata_box0_Amax_ParIndex);
+          Aguess_forb_4 = GetCachedNumValByParIndex(BNSdata_box3_Amax_ParIndex);
           printf("BNSgrid_Get_BoxAndCoords_of_xyz: "
-                 "Aguess_forb_5=%g Aguess_forb_4=%g\n",
-                  Aguess_forb_5, Aguess_forb_4);
+                 "Aguess_forb_5=%g Aguess_forb_4=%g\n"
+                 " BNSdata_box0_Amax_ParIndex=%d"
+                 " BNSdata_box3_Amax_ParIndex=%d\n",
+                  Aguess_forb_5, Aguess_forb_4,
+                  BNSdata_box0_Amax_ParIndex, BNSdata_box3_Amax_ParIndex);
         }
+        Aguess_forb_5 = GetCachedNumValByParIndex(BNSdata_box0_Amax_ParIndex);
+        Aguess_forb_4 = GetCachedNumValByParIndex(BNSdata_box3_Amax_ParIndex);
         if(b==5) X = Aguess_forb_5; /* =0.85, bad guess ??? */
         else     X = Aguess_forb_4; /* =0.85, bad guess ??? */
         Y = 0.5;  /* bad guess ??? */
@@ -2375,8 +2382,8 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
     if( (innerdom==0 && (b>=2 && b<=4)) || (innerdom==3 && (b<=1 || b>=5)) )
       continue;
 
-#define SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
     /* we could maybe use SGRID_LEVEL6_Pragma(omp for) */
+#define SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
 #ifndef SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
     SGRID_LEVEL6_Pragma(omp parallel)
     {
@@ -2386,7 +2393,10 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
     {
       tGrid *grid1_p = grid1;
 #endif
+      /* start loop */
+#ifndef SERIAL_Interp_Var_From_Grid1_To_Grid2_pm
       SGRID_LEVEL6_Pragma(omp for) 
+#endif
       forallpoints(box,i)
       {
         double X = pX[i];
