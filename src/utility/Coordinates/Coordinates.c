@@ -1878,7 +1878,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
                      double A, double BB, double phi, 
                      double *x, double *y, double *z, double *Xp, double *Rp)
 {
-  static int nthreads=0;   /* number of threads that are in this function */
+  static volatile int nthreads=0; /* number of threads that are in this function */
   static tBox *boxsav=NULL;
   static int domainsav=-1;
   static double Asav=-1, BBsav=-1, phisav=-1;
@@ -2081,7 +2081,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                           double *dBBdx,  double *dBBdy,  double *dBBdz,
                           double *dphidx, double *dphidy, double *dphidz)
 {
-  static int nthreads=0;   /* number of threads that are in this function */
+  static volatile int nthreads=0; /* number of threads that are in this function */
   static tBox *boxsav=NULL;
   static int domainsav=-1;
   static double Asav=-1, BBsav=-1, phisav=-1;
