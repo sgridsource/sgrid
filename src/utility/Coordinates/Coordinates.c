@@ -1878,12 +1878,12 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
                      double A, double BB, double phi, 
                      double *x, double *y, double *z, double *Xp, double *Rp)
 {
-  static volatile int nthreads=0; /* number of threads that are in this function */
   static tBox *boxsav=NULL;
   static int domainsav=-1;
   static double Asav=-1, BBsav=-1, phisav=-1;
   static double xsav, ysav, zsav, Xsav, Rsav;
   static int BBshift=-1;
+  int read=0;
   double X,R;
   double Rsqr=-1, Xsqr=-1, Rsqr_p_Xsqr=-1;
   double b, lep;
@@ -1891,17 +1891,18 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   double Ap;
   double B;  /* NOTE: B is Ansorg's B coord, while BB is my 
                 computational Y-coord. I use B = func(BB) */
-  nthreads++; /* increase thread counter */
-
-  /* check if we have saved values */  
-  if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav && box==boxsav)
-  if(nthreads==1) /* read saved val only if no other thread is there */
+  /* only 1 thread at a time can enter here */
+  #pragma omp critical (xyz_of_AnsorgNS_ReadWrite)
   {
-    *x=xsav;  *y=ysav;  *z=zsav;
-    *Xp=Xsav; *Rp=Rsav;
-    nthreads--;
-    return;
+    /* check if we have saved values */  
+    if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav && box==boxsav)
+    {
+      *x=xsav;  *y=ysav;  *z=zsav;
+      *Xp=Xsav; *Rp=Rsav;
+      read=1;
+    }
   }
+  if(read) return; /* return from func if we read */
 
   /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
   if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
@@ -2050,15 +2051,16 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     *z = LARGE * sin(phi);
   }
 
-  /* if there are two or more threads do not save values */
-  if(nthreads>1) { nthreads--;  return;}
-
-  /* and save x,y,z, X,R */
-  xsav=*x;  ysav=*y;  zsav=*z;
-  Xsav=*Xp; Rsav=*Rp;
-  /* set static vars that indicate saved values */
-  Asav=A;  BBsav=BB;  phisav=phi;  boxsav=box;
-  domainsav=domain;
+  /* only 1 thread at a time can enter here */
+  #pragma omp critical (xyz_of_AnsorgNS_ReadWrite)
+  {
+    /* and save x,y,z, X,R */
+    xsav=*x;  ysav=*y;  zsav=*z;
+    Xsav=*Xp; Rsav=*Rp;
+    /* set static vars that indicate saved values */
+    Asav=A;  BBsav=BB;  phisav=phi;  boxsav=box;
+    domainsav=domain;
+  }
 #ifdef DEBUGrace
   /* check integrity of saved values (other threads may have messed them up) */
   if(!dequal(xsav,*x) || !dequal(ysav,*y) || !dequal(zsav,*z) ||
@@ -2069,7 +2071,6 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
      errorexit("race1");
   }
 #endif
-  nthreads--;
 }
 
 /* compute d(A,BB,ph)/d(x,y,z) and save result to speed up
@@ -2081,7 +2082,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                           double *dBBdx,  double *dBBdy,  double *dBBdz,
                           double *dphidx, double *dphidy, double *dphidz)
 {
-  static volatile int nthreads=0; /* number of threads that are in this function */
   static tBox *boxsav=NULL;
   static int domainsav=-1;
   static double Asav=-1, BBsav=-1, phisav=-1;
@@ -2091,6 +2091,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                 dphidxsav, dphidysav, dphidzsav;
   double dBdx, dBdy, dBdz;
   static int BBshift=-1;
+  int read=0;
   double X,R;
   double Rsqr=-1, Xsqr=-1, Rsqr_p_Xsqr=-1;
   double dABphi_dXRphi[4][4]; /* dABphi_dXRphi[k][l] = dA^k/dX^l */
@@ -2105,19 +2106,20 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
                 computational Y-coord. I use B = func(BB) */
   double dBBdB;
 
-  nthreads++; /* increase thread counter */
-
-  /* check if we have saved values */  
-  if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav && box==boxsav)
-  if(nthreads==1) /* read saved val only if no other thread is there */
+  /* only 1 thread at a time can enter here */
+  #pragma omp critical (dABphi_dxyz_AnsorgNS_ReadWrite)
   {
-    *x=xsav; *y=ysav; *z=zsav;
-    *dAdx=dAdxsav;     *dAdy=dAdysav;     *dAdz=dAdzsav;
-    *dBBdx=dBBdxsav;   *dBBdy=dBBdysav;   *dBBdz=dBBdzsav;
-    *dphidx=dphidxsav; *dphidy=dphidysav; *dphidz=dphidzsav;
-    nthreads--;
-    return;
+    /* check if we have saved values */  
+    if(A==Asav && BB==BBsav && phi==phisav && domain==domainsav && box==boxsav)
+    {
+      *x=xsav; *y=ysav; *z=zsav;
+      *dAdx=dAdxsav;     *dAdy=dAdysav;     *dAdz=dAdzsav;
+      *dBBdx=dBBdxsav;   *dBBdy=dBBdysav;   *dBBdz=dBBdzsav;
+      *dphidx=dphidxsav; *dphidy=dphidysav; *dphidz=dphidzsav;
+      read=1;
+    }
   }
+  if(read) return; /* return from func if we read */
 
   /* shift BB coord, so that we can use Fourier in BB without hitting BB=0 */
   if(BBshift<0) BBshift=Getv("Coordinates_AnsorgNS_Bshift", "yes");
@@ -2706,17 +2708,18 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
 //}
 //}
 
-  /* if there are two or more threads do not save values */
-  if(nthreads>1) { nthreads--;  return;}
-
-  /* and save */
-  xsav=*x; ysav=*y; zsav=*z;
-  dAdxsav=*dAdx;     dAdysav=*dAdy;     dAdzsav=*dAdz;
-  dBBdxsav=*dBBdx;   dBBdysav=*dBBdy;   dBBdzsav=*dBBdz;
-  dphidxsav=*dphidx; dphidysav=*dphidy; dphidzsav=*dphidz;
-  /* set static vars that indicate saved values */
-  Asav=A;  BBsav=BB;  phisav=phi;  boxsav=box;
-  domainsav=domain;    /* now we are done writing the static vars */
+  /* only 1 thread at a time can enter here */
+  #pragma omp critical (dABphi_dxyz_AnsorgNS_ReadWrite)
+  {
+    /* and save */
+    xsav=*x; ysav=*y; zsav=*z;
+    dAdxsav=*dAdx;     dAdysav=*dAdy;     dAdzsav=*dAdz;
+    dBBdxsav=*dBBdx;   dBBdysav=*dBBdy;   dBBdzsav=*dBBdz;
+    dphidxsav=*dphidx; dphidysav=*dphidy; dphidzsav=*dphidz;
+    /* set static vars that indicate saved values */
+    Asav=A;  BBsav=BB;  phisav=phi;  boxsav=box;
+    domainsav=domain;    /* now we are done writing the static vars */
+  }
 #ifdef DEBUGrace
   /* check integrity of saved values (other threads may have messed them up) */
   if(!dequal(xsav,*x) || !dequal(ysav,*y) || !dequal(zsav,*z) ||
@@ -2730,7 +2733,6 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
      errorexit("race2");
   }
 #endif
-  nthreads--;
 }
 
 /* compute d^2 phi/dydy */
