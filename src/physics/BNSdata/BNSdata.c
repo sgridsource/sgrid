@@ -445,6 +445,14 @@ exit(77);
     printf("loading initial guess from %s\n", filename);
     BNSgrid_load_initial_guess_from_checkpoint(grid, filename);
   }
+  else if(initFromChkp && strlen(Gets("BNSdata_initfile"))>0)
+  {
+    char filename[10000];
+    snprintf(filename, 9999, "%s", Gets("BNSdata_initfile"));
+    prdivider(1);
+    printf("loading initial guess from %s\n", filename);
+    BNSgrid_load_initial_guess_from_checkpoint(grid, filename);
+  }
   else /* use some TOV data */
   {
     /* get yshift1 (for testing) */

@@ -142,7 +142,9 @@ int sgrid_BNSdata()
   AddPar("BNSdata_C2",    "-1", "C2 in q = (C2/F-1)/(n+1) "
          "[needs to be adjusted so that m02 stays the constant]");
   AddPar("BNSdata_guess", "TOV", "init. guess for Psi, alphaP and "
-         "q [TOV,TOVaverage,TOVproduct] for shift [TaniguchiShift]");
+         "q [initialize_from_checkpoint,TOV,TOVaverage,TOVproduct] "
+         "for shift [TaniguchiShift]");
+  AddPar("BNSdata_initfile", "", "name of first initialization file to read");
   AddPar("BNSdata_init_q_fromfields", "no", "init q from other fields [no,yes]");
   if(Getd("BNSdata_m02")==0.0)
   {
