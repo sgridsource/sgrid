@@ -20,6 +20,7 @@ BNSdata_adjust_first_at		= 0 # 20
 BNSdata_itmax			= 99 # 30
 BNSdata_tol			= 1e-4
 BNSdata_Newton_tolFac		= 0.1
+BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator = Interpolate_Var_From_Grid1_To_Grid2_wrapper
 
 Coordinates_AnsorgNS_sigma_pm_vars = yes
 BNSdata_grid = 4ABphi_2xyz

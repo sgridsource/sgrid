@@ -15,6 +15,7 @@ BNSdata_adjust			= keep_xmax always print_current_xmax
 BNSdata_adjust_mintol		= 5e-4
 BNSdata_itmax			= 99 # 30
 BNSdata_tol			= 5e-5
+BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator = Interpolate_Var_From_Grid1_To_Grid2_wrapper
 
 Coordinates_AnsorgNS_sigma_pm_vars = yes
 BNSdata_grid = 4ABphi_2xyz
