@@ -2449,7 +2449,7 @@ void Interp_Var_From_Grid1_To_Grid2_pm(tGrid *grid1, tGrid *grid2, int vind,
           y=box->x_of_X[2]((void *) box, i,X,Y,Z);
           z=box->x_of_X[3]((void *) box, i,X,Y,Z);
           printf("b1=%d grid2: box->x_of_X => x=%g y=%g z=%g\n", b1, x,y,z);
-          errorexit("Interpolate_Var_From_Grid1_To_Grid2: "
+          errorexit("Interp_Var_From_Grid1_To_Grid2_pm: "
                     "could not find X,Y,Z on grid1_p.");
         }
 
