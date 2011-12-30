@@ -1146,7 +1146,7 @@ void q_of_sigp_forgiven_BphiP(int n, double *sigvec, double *qvec, void *p)
   R = ImCp_Bphi - B*ImCp_1phi + B*sin(ArgCp_1phi);
 
   /* try 2 ways of finding an initial guess for Ac,Bc */
-  for(guessmode=0; guessmode<=1; guessmode++)
+  for(guessmode=0; guessmode<=3; guessmode++)
   {
     /* set Acin,Bcin, Acout,Bcout, statin,statout to invalid values */
     statin=statout=-1;
@@ -1169,7 +1169,7 @@ void q_of_sigp_forgiven_BphiP(int n, double *sigvec, double *qvec, void *p)
         vec[1] = 1e-7; /* initial guess is that Ac,Bc = 0,B */
         vec[2] = B;
       }
-      else
+      else if(guessmode==1)
       {
         find_nearest_A_B_given_X_R_phi(grid->box[dom], X,R,phi, &Ac,&Bc);
         if(dlesseq(Ac,0.0)) Ac=1e-7;
@@ -1177,6 +1177,16 @@ void q_of_sigp_forgiven_BphiP(int n, double *sigvec, double *qvec, void *p)
         if(dequal(B,0.0))   Bc=0.0;
         vec[1] = Ac;
         vec[2] = Bc;
+      }
+      else if(guessmode==2)
+      {
+        vec[1] = 0.01;  /* initial guess is that Ac,Bc = 0.01,B */
+        vec[2] = B;
+      }
+      else
+      {
+        vec[1] = 0.1;   /* initial guess is that Ac,Bc = 0.1,B */
+        vec[2] = B;
       }
       /* do newton line searches */
       if(dequal(B,0.0))
