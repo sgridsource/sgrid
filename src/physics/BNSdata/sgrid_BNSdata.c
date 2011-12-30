@@ -225,7 +225,7 @@ int sgrid_BNSdata()
   AddPar("BNSdata_Interpolation_smooths", "0",
          "number of smooths by Interpolate_Var_From_Grid1_To_Grid2");
   AddPar("BNSdata_adjust_domainshapes_Grid1_To_Grid2_Interpolator",
-         "Interpolate_Var_From_Grid1_To_Grid2_wrapper",
+         "Interp_Var_From_Grid1_To_Grid2_pm",
          "how we interpolate from Grid1 to Grid2 in "
          "compute_new_q_and_adjust_domainshapes "
          "[Interp_Var_From_Grid1_To_Grid2_pm,Interpolate_Var_From_Grid1_To_Grid2_wrapper]");
