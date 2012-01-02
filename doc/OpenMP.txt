@@ -15,6 +15,27 @@ SGRID_LEVEL3_Pragma used for omp loops over all points in a box (3d)
 SGRID_LEVEL4_Pragma used for omp loops over all boxes
 SGRID_LEVEL6_Pragma used for 6d omp loops (e.g. loop over box while interpolating onto each point) 
 
+Examples of OpenMP pragmas
+--------------------------
+// parallel for loop:
+SGRID_LEVEL3_Pragma(omp parallel for)
+for(k=0; k<n3; k++) { a[k] = c[k] * B3[k]; }
+// is the tha same as
+#pragma omp parallel for
+for(k=0; k<n3; k++) { a[k] = c[k] * B3[k]; }
+
+// sum up the var sss of different threads once they have finshed the
+//  parallel for loop:
+#pragma omp parallel for reduction(+:sss)
+for(k = n3-1; k >=0; k--) { sss += c[k] * B3[k]; }
+
+// denote a "critical" block, i.e. a block that can be entered only by 
+// one thread at a time:
+#pragma omp critical (name)
+{...}
+// There can be several critical blocks with the same name. If one thread is
+// inside such a block, no other thread can enter any of the blocks with the
+// same name.
 
 Switch on OpenMP directives in MyConfig:
 ----------------------------------------
@@ -28,7 +49,7 @@ OFLAGS = -O3 -fopenmp
 DFLAGS += -DLEVEL6_Pragmas
 
 
-To start sgrid with 2 OpenMP treads:
+To start sgrid with 4 OpenMP treads:
 ------------------------------------
-export OMP_NUM_THREADS=2
+export OMP_NUM_THREADS=4
 ./sgrid test.par
