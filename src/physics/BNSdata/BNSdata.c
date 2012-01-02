@@ -5380,12 +5380,22 @@ void set_BNSdata_actual_xyzmax_pars(tGrid *grid)
 {
   int bi1, bi2;
   double x1,y1,z1, x2,y2,z2;
+  double qmax1, qmax2;
 
   printf("set_BNSdata_actual_xyzmax_pars:\n");
   bi1=0;
   bi2=3;
-  BNSdata_find_xyz_of_qmax(grid, &bi1, &x1,&y1,&z1);
-  BNSdata_find_xyz_of_qmax(grid, &bi2, &x2,&y2,&z2);
+  qmax1 = BNSdata_find_xyz_of_qmax(grid, &bi1, &x1,&y1,&z1);
+  qmax2 = BNSdata_find_xyz_of_qmax(grid, &bi2, &x2,&y2,&z2);
+  if(qmax1<0.0 || qmax2<0.0)
+  {
+    printf("set_BNSdata_actual_xyzmax_pars: BNSdata_find_xyz_of_qmax cannot find one\n");
+    printf("of the maxima: qmax1=%g qmax2=%g\n", qmax1, qmax2);
+    printf("Setting the following parameters to desired (not actual) values:\n");
+    x1 = Getd("BNSdata_xmax1");
+    x2 = Getd("BNSdata_xmax2");
+    y1 = y2 = z1 = z2 = 0.0;
+  }
   Setd("BNSdata_actual_xmax1", x1);
   Setd("BNSdata_actual_ymax1", y1);
   Setd("BNSdata_actual_zmax1", z1);
