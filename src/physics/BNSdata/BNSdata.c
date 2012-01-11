@@ -1255,6 +1255,120 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   }
 }
 
+/* filter Var with index vind with 2/3 rule in B and phi directions 
+   on side of innerdom  */
+void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
+{
+  int b;
+  int outerdom;
+
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("BNSdata_filter_with2o3rule_inBphi: "
+                 "innerdom is not 0 or 3");
+
+  /* loop over boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k;
+    double *var = box->v[vind];
+    double *vc  = box->v[Ind("BNSdata_temp1")];
+
+    /* do nothing if we are in the wrong box */
+    if(b!=innerdom && b!=outerdom) continue;
+
+    /* compute coeffs of var in B- and phi-dir  */
+    spec_analysis1(box, 2, var, vc);
+    spec_analysis1(box, 3, vc, vc);
+
+    /* remove all coeffs with j>=2*(n2/3) */
+    for(k=0; k<n3; k++)
+    for(j=(n2/3)*2; j<n2; j++)
+    for(i=0; i<n1; i++)
+      vc[Index(i,j,k)]=0.0;
+
+    /* also remove all coeffs with k>=2*(n3/3) */
+    for(k=(n3/3)*2; k<n3; k++)
+    for(j=0; j<=(n2/3)*2; j++)
+    for(i=0; i<n1; i++)
+      vc[Index(i,j,k)]=0.0;
+
+    /* use modified coeffs to change var */
+    spec_synthesis1(box, 2, var, vc);
+    spec_synthesis1(box, 3, var, var);
+  }
+}    
+
+/* filter Coordinates_AnsorgNS_sigma_pm and adjust the shape of the 
+   boundary between domain0/1 or domain3/2 accordingly */
+void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
+{
+  tGrid *grid2;
+  int outerdom;
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
+                                     int innerdom);
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("filter_Coordinates_AnsorgNS_sigma_pm: "
+                 "innerdom is not 0 or 3");
+
+  /* do nothing if filter is off */
+  if(Getv("BNSdata_domainshape_filter", "no")) return;
+  printf("filter_Coordinates_AnsorgNS_sigma_pm: innerdom=%d outerdom=%d\n", 
+         innerdom, outerdom);
+
+  /* make new grid2, which is an exact copy of grid */
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid2, 0);
+
+  /* filter Coordinates_AnsorgNS_sigma_pm on grid2 */
+  if(Getv("BNSdata_domainshape_filter", "Bphi2/3"))
+    BNSdata_filter_with2o3rule_inBphi(grid2, sigpmi, innerdom);
+  else
+    errorexit("filter_Coordinates_AnsorgNS_sigma_pm: unknown filter");
+
+  /* initialize coords of grid2 on side of innerdom */
+  BNSgrid_init_Coords_pm(grid2, innerdom);
+  /* use interpolator that does only side of innerdom */
+  Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
+
+  /* interpolate some vars from grid onto new grid2 */
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"),innerdom);
+  if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
+      (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
+  {
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
+  }
+
+  BNS_compute_new_centered_q(grid2);
+
+//  /* set q to zero if q<0 or in region 1 and 2 */
+//  forallboxes(grid2, b)
+//  {
+//    double *BNSdata_q = grid2->box[b]->v[Ind("BNSdata_q")];;
+//    forallpoints(grid2->box[b], i)
+//      if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
+//  }
+
+  /* copy grid2 back into grid, and free grid2 */
+  copy_grid(grid2, grid, 0);
+  free_grid(grid2);
+}
+
 /* Adjust C1/2 and thus by demanding that m01 and m02 stay the same. */
 int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
 {
@@ -1352,7 +1466,10 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
                              1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C1", Cvec[1]);
-  
+
+  /* filter domain shape to keep star1's surface smooth during iterations */
+  filter_Coordinates_AnsorgNS_sigma_pm(grid, 0);
+
   /* see if we keep the new domain shape and C1 */
   restore_grid_pdb_if_change_in_star_is_large(1,grid,pdb, grid_bak,pdb_bak);
 
@@ -1367,6 +1484,9 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
                                1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C2", Cvec[1]);
+
+  /* filter domain shape to keep star2's surface smooth during iterations */
+  filter_Coordinates_AnsorgNS_sigma_pm(grid, 3);
 
   /* see if we keep the new domain shape and C2 */
   restore_grid_pdb_if_change_in_star_is_large(2, grid,pdb, grid_bak,pdb_bak);
