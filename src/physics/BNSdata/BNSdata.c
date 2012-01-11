@@ -1300,6 +1300,12 @@ void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
     /* use modified coeffs to change var */
     spec_synthesis1(box, 2, var, vc);
     spec_synthesis1(box, 3, var, var);
+
+    /* loop over rho=0 boundary and ensure uniqueness
+    for(k=1; k<n3; k++)       /* <-- all phi>0 */
+    for(j=0; j<n2; j=j+n2-1)  /* <-- B=0 and B=1 */
+    for(i=0; i<n1; i++)       /* <-- all A */
+      var[Index(i,j,k)] = var[Index(i,j,0)];
   }
 }    
 
