@@ -200,6 +200,9 @@ int sgrid_BNSdata()
   AddPar("BNSdata_domainshape_diff_tol", "3e30", 
          "adjust domain if difference in shape is less than this number."
          " >=1e30 means adjust always.");
+  AddPar("BNSdata_domainshape_weight", "1",
+         "new and old domainshapes are averaged according to: "
+         "new = weight*new + (1-weight)*old");
   AddPar("BNSdata_domainshape_filter", "no", 
          "how/if we filter domainshape sigma_pm [no,Bphi2/3] "
          "Bphi2/3 means use 2/3 rule in B- and phi-dir");

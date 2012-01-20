@@ -1234,8 +1234,8 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   }
   diff_new_sig = sqrt(diff_new_sig/n);
   diff_new_old = sqrt(diff_new_old/n);
-  printf("restore_grid_pdb_if_change_in_star_is_large: "
-         "diff_new_old=%g diff_new_sig=%g\n", diff_new_old, diff_new_sig);
+  printf("restore_grid_pdb_if_change_in_star_is_large:\n"
+         " diff_new_old=%g diff_new_sig=%g\n", diff_new_old, diff_new_sig);
 
   /* Check if diff_new_old is small. 
      Compare arXiv:0804.3787, III C. Algorithm point 3. */
@@ -1253,6 +1253,46 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
     printf(" with: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
   }
+}
+
+/* average surface shapes for one star */
+void average_current_and_old_surfaceshape(double weight, int innerdom,
+                                          tGrid *grid, tParameter *pdb,
+                                          tGrid *grid_bak, tParameter *pdb_bak)
+{
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int b, i, outerdom;
+
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("average_current_and_old_surfaceshape: "
+                 "innerdom is not 0 or 3");
+
+  /* do nothing if weight=1 */  
+  if(weight==1.0) return;
+
+  printf("average_current_and_old_surfaceshape:  weight=%f  innerdom=%d\n", 
+         weight, innerdom);
+
+  /* loop over AnsorgNS boxes */
+  for(b=0; b<=3; b++)
+  {
+    double *surf_bak;
+    double *surf;
+
+    /* do nothing if we are in the wrong box */
+    if(b!=innerdom && b!=outerdom) continue;
+
+    surf_bak = grid_bak->box[b]->v[sigpmi];
+    surf = grid->box[b]->v[sigpmi];
+
+    /* set val on grid to weighted average */      
+    forallpoints(grid->box[b], i)
+      surf[i] = weight*surf[i] + (1.0-weight)*surf_bak[i];
+  }
+
+  /* init. Coords after changing Coordinates_AnsorgNS_sigma_pm on grid */
+  BNSgrid_init_Coords_pm(grid, innerdom);
 }
 
 /* filter Var with index vind with 2/3 rule in B and phi directions 
@@ -1479,6 +1519,10 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   /* see if we keep the new domain shape and C1 */
   restore_grid_pdb_if_change_in_star_is_large(1,grid,pdb, grid_bak,pdb_bak);
 
+  /* average domain shape of star1 on grid and grid_bak */
+  average_current_and_old_surfaceshape(Getd("BNSdata_domainshape_weight"),
+                                       0, grid,pdb, grid_bak,pdb_bak);
+
   /* backup grid,pdb */
   backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
   m0_errors_VectorFunc__grid = grid;
@@ -1496,6 +1540,10 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
 
   /* see if we keep the new domain shape and C2 */
   restore_grid_pdb_if_change_in_star_is_large(2, grid,pdb, grid_bak,pdb_bak);
+
+  /* average domain shape of star2 on grid and grid_bak */
+  average_current_and_old_surfaceshape(Getd("BNSdata_domainshape_weight"),
+                                       3, grid,pdb, grid_bak,pdb_bak);
 
   printf("adjust_C1_C2_q_keep_restmasses:\n");
   printf(" new: BNSdata_C1=%g BNSdata_C2=%g\n",
