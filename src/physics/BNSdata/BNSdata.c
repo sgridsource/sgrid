@@ -1260,9 +1260,11 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
                                           tGrid *grid, tParameter *pdb,
                                           tGrid *grid_bak, tParameter *pdb_bak)
 {
+  tGrid *grid2;
   int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
   int b, i, outerdom;
-
+  void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
+                                     int innerdom);
   if(innerdom==0)      outerdom=1;
   else if(innerdom==3) outerdom=2;  
   else errorexit("average_current_and_old_surfaceshape: "
@@ -1274,25 +1276,62 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
   printf("average_current_and_old_surfaceshape:  weight=%f  innerdom=%d\n", 
          weight, innerdom);
 
+  /* make new grid2, which is an exact copy of grid */
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid2, 0);
+
   /* loop over AnsorgNS boxes */
   for(b=0; b<=3; b++)
   {
     double *surf_bak;
-    double *surf;
+    double *surf2;
 
     /* do nothing if we are in the wrong box */
     if(b!=innerdom && b!=outerdom) continue;
 
     surf_bak = grid_bak->box[b]->v[sigpmi];
-    surf = grid->box[b]->v[sigpmi];
+    surf2    = grid2->box[b]->v[sigpmi];
 
-    /* set val on grid to weighted average */      
+    /* set val on grid2 to weighted average of grid and grid_bak */      
     forallpoints(grid->box[b], i)
-      surf[i] = weight*surf[i] + (1.0-weight)*surf_bak[i];
+      surf2[i] = weight*surf2[i] + (1.0-weight)*surf_bak[i];
   }
 
-  /* init. Coords after changing Coordinates_AnsorgNS_sigma_pm on grid */
-  BNSgrid_init_Coords_pm(grid, innerdom);
+  /* initialize coords of grid2 on side of innerdom */
+  BNSgrid_init_Coords_pm(grid2, innerdom);
+  /* use interpolator that does only side of innerdom */
+  Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
+
+  /* interpolate some vars from grid onto new grid2 */
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"),innerdom);
+  if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
+      (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
+  {
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
+  }
+
+  /* q on grid2 can just be computed */
+  BNS_compute_new_centered_q(grid2);
+//  /* set q to zero if q<0 or in region 1 and 2 */
+//  forallboxes(grid2, b)
+//  {
+//    double *BNSdata_q = grid2->box[b]->v[Ind("BNSdata_q")];;
+//    forallpoints(grid2->box[b], i)
+//      if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
+//  }
+
+  /* copy grid2 back into grid, and free grid2 */
+  copy_grid(grid2, grid, 0);
+  free_grid(grid2);
 }
 
 /* filter Var with index vind with 2/3 rule in B and phi directions 
