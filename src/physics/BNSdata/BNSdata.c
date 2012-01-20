@@ -1249,8 +1249,8 @@ void restore_grid_pdb_if_change_in_star_is_large(int star,
   {
     copy_grid(grid_bak, grid, 0);
     copy_pdb(pdb_bak, npdb, pdb);
-    printf(" keeping domain shape around star%d\n", star);
-    printf(" with: BNSdata_C1=%g BNSdata_C2=%g\n",
+    printf(" kept domain shape around star%d:", star);
+    printf(" BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
   }
 }
