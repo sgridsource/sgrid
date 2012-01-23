@@ -49,6 +49,14 @@ OFLAGS = -O3 -fopenmp
 DFLAGS += -DLEVEL6_Pragmas
 
 
+The OMP_DYNAMIC environment variable enables or disables dynamic adjustment
+of the number of threads available for the execution of parallel regions
+(possible values are TRUE and FALSE, default is FALSE).
+To start sgrid with a dynamical number of threads:
+--------------------------------------------------
+export OMP_DYNAMIC=TRUE
+./sgrid test.par
+
 To start sgrid with 4 OpenMP treads:
 ------------------------------------
 export OMP_NUM_THREADS=4
