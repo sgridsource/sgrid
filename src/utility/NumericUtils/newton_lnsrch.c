@@ -1,6 +1,7 @@
 /* (c) Wolfgang Tichy 6.6.2003 */
 /* adapted from numrec newt.c + tolerances changed */
 
+#include <stdio.h>
 #include <math.h>
 #define NRANSI
 #include "nrutil.h"
@@ -389,3 +390,117 @@ int newton_linesrch_itsP(double x[], int n, int *check,
 #undef STPMX
 #undef FREERETURN
 #undef NRANSI
+
+
+/***********************************************************/
+/* functions to determine if we are within a certain range */
+/***********************************************************/
+
+/* check if vec is in a certain range: lo[i] <= vec[i] <= hi[i] */
+int newton_lnsrch_vec_within_range(int n, double vec[],
+                                   double hi[], double lo[])
+{
+  int i;
+  int ret=1;
+  
+  for(i=1; i<=n; i++)
+  {
+    if(vec[i]>hi[i]) ret=0;
+    if(vec[i]<lo[i]) ret=0;
+  }
+  return ret;
+}
+
+/* use vector vec and range lo[i] <= vec[i] <= hi[i] to obtain vector 
+   vb on boundary and vi slightly inside this range */
+void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[], 
+          double hi[], double lo[], double *vb, double *vi) 
+{
+  int i;
+  double *cent;
+  double *dir;
+  double s, sc;
+
+  /* alloc */
+  cent=vector(1,n);
+  dir =vector(1,n);
+
+  for(i=1; i<=n; i++) 
+  {
+    /* pos. vec. of center */
+    cent[i] = 0.5*(hi[i]+lo[i]);
+
+    /* set directional vec dir */
+    dir[i] = vec[i] - cent[i];
+    
+    /* find min s such that vb[i] = cent[i] + dir[i]*s is on boundary */
+    s=1;
+    if(dir[i]!=0)
+    {
+      if(vec[i]>hi[i])  sc = (hi[i] - cent[i])/dir[i];
+      if(vec[i]<lo[i])  sc = (lo[i] - cent[i])/dir[i];
+      if(sc<s) s=sc;
+    }
+  }
+
+  /* set vb on boundary and vi a little bit inside boundary */
+  for(i=1; i<=n; i++)
+  {
+    vb[i] = cent[i] + dir[i]*s;
+    vi[i] = cent[i] + dir[i]*s*0.999999;
+    if(vb[i]>hi[i]) vb[i]=hi[i]; /* make sure we stay in range */
+    if(vb[i]<lo[i]) vb[i]=lo[i];
+  }
+  printf("newton_lnsrch_set_vecs_for_lininterp:\n");
+  printf("vec=( ");
+  for(i=1; i<=n; i++) printf("%g ", vec[i]);
+  printf(")\n");
+  printf(" vb=( ");
+  for(i=1; i<=n; i++) printf("%g ", vb[i]);
+  printf(")\n");
+  printf(" vi=( ");
+  for(i=1; i<=n; i++) printf("%g ", vi[i]);
+  printf(")\n");
+
+  /* free */
+  free_vector(cent,1,n);
+  free_vector(dir,1,n);
+}
+
+/* use function values fvb and fvi at vb and vi to find function value
+   fvec at vec by linear interolation */
+void newton_lnsrch_get_fvec_by_lininterp(int n, double vec[], 
+          double vb[], double vi[], double *fvec, double fvb[], double fvi[]) 
+{
+  int i;
+  double h, s;
+
+  /* get length of vb[i] - vi[i] and vec[i] - vb[i]*/
+  h=s=0;
+  for(i=1; i<=n; i++)
+  {
+    double dum;
+    
+    dum = vb[i] - vi[i];
+    h += dum*dum;
+    
+    dum = vec[i] - vb[i];
+    s += dum*dum; 
+  }
+  h=sqrt(h);
+  s=sqrt(s);
+
+  /* use lengths to find fvec from fvb and fvi by lin. interp. */
+  for(i=1; i<=n; i++) fvec[i] = fvb[i] + ((fvb[i]-fvi[i])/h)*s;
+
+  printf("newton_lnsrch_get_fvec_by_lininterp:\n");
+  printf("fvec=( ");
+  for(i=1; i<=n; i++) printf("%g ", fvec[i]);
+  printf(")\n");
+  printf(" fvb=( ");
+  for(i=1; i<=n; i++) printf("%g ", fvb[i]);
+  printf(")\n");
+  printf(" fvi=( ");
+  for(i=1; i<=n; i++) printf("%g ", fvi[i]);
+  printf(")\n");
+}

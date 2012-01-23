@@ -22,6 +22,12 @@ int newton_linesrch_its(double x[], int n, int *check,
 int newton_linesrch_itsP(double x[], int n, int *check,
 			 void (*vecfuncP)(int, double [], double [], void *par),
 			 void *par, int MAXITS, double TOLF);
+int newton_lnsrch_vec_within_range(int n, double vec[],
+                                   double hi[], double lo[]);
+void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[], 
+          double hi[], double lo[], double *vb, double *vi);
+void newton_lnsrch_get_fvec_by_lininterp(int n, double vec[], 
+          double vb[], double vi[], double *fvec, double fvb[], double fvi[]);
   	  	               	   
 /* 1D and 3D integrals */
 double integral(double (*func)(double), double a, double b, double s, int max);
