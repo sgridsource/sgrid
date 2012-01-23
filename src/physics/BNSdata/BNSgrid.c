@@ -713,10 +713,42 @@ void DelXR_of_AB_VectorFuncP(int n, double *vec, double *fvec, void *p)
   X   = pars->X;
   R   = pars->R;
 
-  /* get diff between {Xc(A,B,phi),Rc(A,B,phi)}-{X, R} */
-  xyz_of_AnsorgNS(box, -1, box->b, A,B,phi, &x,&y,&z, &Xc,&Rc);
-  fvec[1] = Xc-X;
-  fvec[2] = Rc-R;
+  /* check if we are within the ranges of A and B */
+  if(A>=0.0 && A<=1.0 && B>=0 && B<=1)
+  {
+    /* get diff between {Xc(A,B,phi),Rc(A,B,phi)}-{X, R} */
+    xyz_of_AnsorgNS(box, -1, box->b, A,B,phi, &x,&y,&z, &Xc,&Rc);
+    fvec[1] = Xc-X;
+    fvec[2] = Rc-R;
+  }
+  else /* out of range: get fvec by interp. */
+  {
+    double hi[3];
+    double lo[3];
+    double vb[3];
+    double vi[3];
+    double fvb[3];
+    double fvi[3];
+
+    printf("DelXR_of_AB_VectorFuncP: vec=(A,B)=(%g,%g) out of range!\n", A,B);
+
+    lo[1] = lo[2] = 0.0;
+    hi[1] = hi[2] = 1.0;
+
+    /* get vb, vi */
+    newton_lnsrch_set_vecs_for_lininterp(2, vec,hi,lo, vb, vi);
+
+    /* compute fvb,fvi */
+    xyz_of_AnsorgNS(box, -1, box->b, vb[1],vb[2],phi, &x,&y,&z, &Xc,&Rc);
+    fvb[1] = Xc-X;
+    fvb[2] = Rc-R;
+    xyz_of_AnsorgNS(box, -1, box->b, vi[1],vi[2],phi, &x,&y,&z, &Xc,&Rc);
+    fvi[1] = Xc-X;
+    fvi[2] = Rc-R;
+            
+    /* set fvec from fvb,fvi */
+    newton_lnsrch_get_fvec_by_lininterp(2, vec,vb,vi, fvec,fvb,fvi);
+  }
 }
 
 /* find diff. Xc(A,B,phi)-X for any A 
