@@ -1166,19 +1166,23 @@ void q_of_sigp_forgiven_BphiP(int n, double *sigvec, double *qvec, void *p)
   tGrid *grid      = pars->grid;
   int innerdom     = pars->innerdom;
   int outerdom     = pars->outerdom;
-  double AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
-  double ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
-  double ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
-  double ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
-  double AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
-  double ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
-  double ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
-  double ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+  double AbsCp_Bphi, ArgCp_Bphi, ReCp_Bphi, ImCp_Bphi;
+  double AbsCp_1phi, ArgCp_1phi, ReCp_1phi, ImCp_1phi;
   double X,R;
   double Ac,Bc, Acin,Bcin, Acout,Bcout, Acmax, q;
   double vec[3];
   int i, check, stat,statin,statout, dom;
   int guessmode;
+
+  /* set Cp at B,phi and 1,phi */
+  AbsCp_Bphi = sqrt( Abstanh(0.25*sigp_Bphi, 0.25*PI*B) );
+  ArgCp_Bphi = 0.5 * Argtanh(0.25*sigp_Bphi, 0.25*PI*B);
+  ReCp_Bphi = AbsCp_Bphi * cos(ArgCp_Bphi);
+  ImCp_Bphi = AbsCp_Bphi * sin(ArgCp_Bphi);
+  AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
+  ArgCp_1phi = 0.5 * Argtanh(0.25*sigp_1phi, 0.25*PI);
+  ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
+  ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
 
   /* use Eq. (22), (23) or (24) at A=0 to compute X,R */
   X = ReCp_Bphi - B*ReCp_1phi + B*cos(ArgCp_1phi);
