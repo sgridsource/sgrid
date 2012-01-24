@@ -425,6 +425,7 @@ void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[],
   cent=vector(1,n);
   dir =vector(1,n);
 
+  s=1;
   for(i=1; i<=n; i++) 
   {
     /* pos. vec. of center */
@@ -434,7 +435,6 @@ void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[],
     dir[i] = vec[i] - cent[i];
     
     /* find min s such that vb[i] = cent[i] + dir[i]*s is on boundary */
-    s=1;
     if(dir[i]!=0)
     {
       if(vec[i]>hi[i])  sc = (hi[i] - cent[i])/dir[i];
