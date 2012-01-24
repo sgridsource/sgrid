@@ -451,6 +451,7 @@ void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[],
     if(vb[i]>hi[i]) vb[i]=hi[i]; /* make sure we stay in range */
     if(vb[i]<lo[i]) vb[i]=lo[i];
   }
+  /*
   printf("newton_lnsrch_set_vecs_for_lininterp:\n");
   printf("vec=( ");
   for(i=1; i<=n; i++) printf("%g ", vec[i]);
@@ -461,7 +462,7 @@ void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[],
   printf(" vi=( ");
   for(i=1; i<=n; i++) printf("%g ", vi[i]);
   printf(")\n");
-
+  */
   /* free */
   free_vector(cent,1,n);
   free_vector(dir,1,n);
@@ -492,7 +493,7 @@ void newton_lnsrch_get_fvec_by_lininterp(int n, double vec[],
 
   /* use lengths to find fvec from fvb and fvi by lin. interp. */
   for(i=1; i<=n; i++) fvec[i] = fvb[i] + ((fvb[i]-fvi[i])/h)*s;
-
+  /*
   printf("newton_lnsrch_get_fvec_by_lininterp:\n");
   printf("fvec=( ");
   for(i=1; i<=n; i++) printf("%g ", fvec[i]);
@@ -503,4 +504,5 @@ void newton_lnsrch_get_fvec_by_lininterp(int n, double vec[],
   printf(" fvi=( ");
   for(i=1; i<=n; i++) printf("%g ", fvi[i]);
   printf(")\n");
+  */
 }

@@ -4,7 +4,7 @@
 #include <math.h>
 #define NRANSI
 #include "nrutil.h"
-#define EPS 1.0e-4    /* should be approx square root of machine precision */
+#define EPS 1.0e-7    /* should be approx square root of machine precision */
 #define HMIN 1.0e-10  /* min h we use in fin. diff. computation of derivs */
 
 void fd_jacobian(int n, double x[], double fvec[], double **df,
