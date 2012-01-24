@@ -730,8 +730,6 @@ void DelXR_of_AB_VectorFuncP(int n, double *vec, double *fvec, void *p)
     double fvb[3];
     double fvi[3];
 
-    printf("DelXR_of_AB_VectorFuncP: vec=(A,B)=(%g,%g) out of range!\n", A,B);
-
     lo[1] = lo[2] = 0.0;
     hi[1] = hi[2] = 1.0;
 
@@ -748,6 +746,15 @@ void DelXR_of_AB_VectorFuncP(int n, double *vec, double *fvec, void *p)
             
     /* set fvec from fvb,fvi */
     newton_lnsrch_get_fvec_by_lininterp(2, vec,vb,vi, fvec,fvb,fvi);
+
+    /* print */
+    /*
+    printf("DelXR_of_AB_VectorFuncP: box->b=%d, vec=(A,B)=(%g,%g)\n", 
+           box->b, A,B);
+    printf("vec=(%g,%g) fvec=(%g,%g)\n", vec[1],vec[2], fvec[1],fvec[2]);
+    printf(" vb=(%g,%g)  fvb=(%g,%g)\n", vb[1],vb[2], fvb[1],fvb[2]);
+    printf(" vi=(%g,%g)  fvi=(%g,%g)\n", vi[1],vi[2], fvi[1],fvi[2]);
+    */
   }
 }
 
@@ -1220,6 +1227,8 @@ void q_of_sigp_forgiven_BphiP(int n, double *sigvec, double *qvec, void *p)
         vec[1] = 0.1;   /* initial guess is that Ac,Bc = 0.1,B */
         vec[2] = B;
       }
+//printf("q_of_sigp_forgiven_BphiP: guessmode=%d (A,B)=(%g,%g)\n",
+//guessmode, vec[1],vec[2]);
       /* do newton line searches */
       if(dequal(B,0.0))
         stat = newton_linesrch_itsP(vec, 1, &check, DelXR_of_A_forB0_VectorFuncP,
@@ -1234,9 +1243,9 @@ void q_of_sigp_forgiven_BphiP(int n, double *sigvec, double *qvec, void *p)
       /* save vals for later */
       if(dom == innerdom) {  Acin=Ac;  Bcin=Bc;  statin=stat; }
       else                { Acout=Ac; Bcout=Bc; statout=stat; }
-  //printf("  sigp_Bphi=%g sigp_1phi=%g:\n"
-  //"       X=%g R=%g: stat=%d dom=%d Ac=%g Bc=%g\n",
-  //sigp_Bphi,sigp_1phi, X,R, stat,dom, Ac,Bc);
+//printf("  sigp_Bphi=%g sigp_1phi=%g:\n"
+//"       X=%g R=%g: stat=%d dom=%d Ac=%g Bc=%g\n",
+//sigp_Bphi,sigp_1phi, X,R, stat,dom, Ac,Bc);
       /* if(stat>=0 && Ac>=0.0 && Ac<=Acmax && Bc>=0.0 && Bc<=1.0) break; */
       if(stat>=0 && dlesseq(0.0,Ac) && dlesseq(Ac,1.0) &&
                     dlesseq(0.0,Bc) && dlesseq(Bc,1.0)   ) break;
