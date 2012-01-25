@@ -28,6 +28,11 @@ void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[],
           double hi[], double lo[], double *vb, double *vi);
 void newton_lnsrch_get_fvec_by_lininterp(int n, double vec[], 
           double vb[], double vi[], double *fvec, double fvb[], double fvi[]);
+
+/* 1D root finding with bracketing */
+int zbrent_itsP(double *x0, double (*func)(double,void *par),
+                double x1, double x2, void *par, int ITMAX, double tol);
+
   	  	               	   
 /* 1D and 3D integrals */
 double integral(double (*func)(double), double a, double b, double s, int max);
