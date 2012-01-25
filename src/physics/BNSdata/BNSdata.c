@@ -125,6 +125,9 @@ double GetInnerRestMass(tGrid *grid, int bi);
 void m01_guesserror_VectorFunc(int n, double *vec, double *fvec);
 void m02_guesserror_VectorFunc(int n, double *vec, double *fvec);
 void m0_errors_VectorFunc(int n, double *vec, double *fvec);
+void compute_new_q_and_adjust_domainshapes_InterpFromGrid0(tGrid *grid, 
+                                                           tGrid *grid0, 
+                                                           int innerdom);
 void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom);
 void m01_error_VectorFunc(int n, double *vec, double *fvec);
 void m02_error_VectorFunc(int n, double *vec, double *fvec);
@@ -4892,8 +4895,11 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
 }
 
 /* compute the new q and adjust the shape of the boundary between domain0/1
-   or domain3/2 accordingly */
-void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
+   or domain3/2 accordingly. This func modifies grid. It always
+   interpolate vars from grid0 which is left untouched. */
+void compute_new_q_and_adjust_domainshapes_InterpFromGrid0(tGrid *grid, 
+                                                           tGrid *grid0, 
+                                                           int innerdom)
 {
   tGrid *grid2;
   int outerdom;
@@ -4937,18 +4943,18 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
   //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
   //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_Psi"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_alphaP"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_Bx"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_By"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_Bz"),innerdom);
   if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
       (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
   {
-    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
-    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
-    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
-    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_Sigma"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_wBx"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_wBy"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_wBz"),innerdom);
   }
 
   BNS_compute_new_centered_q(grid2);
@@ -4965,7 +4971,12 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
   copy_grid(grid2, grid, 0);
   free_grid(grid2);
 }
-
+/* compute the new q and adjust the shape of the boundary between domain0/1
+   or domain3/2 accordingly. This is a wrapper that modifies grid */
+void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
+{
+  compute_new_q_and_adjust_domainshapes_InterpFromGrid0(grid, grid, innerdom);
+}
 
 /* compute difference m01 - BNSdata_m01 */
 void m01_error_VectorFunc(int n, double *vec, double *fvec)

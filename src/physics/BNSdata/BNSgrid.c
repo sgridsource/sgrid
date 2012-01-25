@@ -1328,6 +1328,8 @@ double q_of_sigp_forgiven_Bphi_ZP(double sigp, void *p)
   double qvec[2];
   sigvec[1] = sigp;
   q_of_sigp_forgiven_BphiP(1, sigvec, qvec, p);
+//  printf("q_of_sigp_forgiven_Bphi_ZP: sigvec[1]=%g qvec[1]=%g\n",
+//         sigvec[1], qvec[1]);
   return qvec[1];
 }
 
@@ -1564,7 +1566,9 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         sigp2 = sigp*1.01;
         if(zbrac_P(q_of_sigp_forgiven_Bphi_ZP, &sigp1,&sigp2, (void *) pars)<0)
           errorexit("cannot find bracket for q_of_sigp_forgiven_Bphi_ZP");
-  
+        if(sigp1*sigp2<0.0)
+          printf("bad bracket: [sigp1,sigp,sigp2]=[%g,%g,%g]\n",
+                 sigp1,sigp,sigp2);
         stat=zbrent_itsP(&sigp, q_of_sigp_forgiven_Bphi_ZP,  sigp1,sigp2,
                          (void *) pars, itmax, tol);
         vec[1] = sigp;
