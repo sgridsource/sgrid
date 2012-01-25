@@ -1321,7 +1321,15 @@ void q_of_sigp_forgiven_BphiP(int n, double *sigvec, double *qvec, void *p)
     printf(" setting q=%g\n", q);
   }
 }
-
+/* q_of_sigp_forgiven_BphiP wrapper for use with zbrent_itsP */
+double q_of_sigp_forgiven_Bphi_ZP(double sigp, void *p)
+{
+  double sigvec[2];
+  double qvec[2];
+  sigvec[1] = sigp;
+  q_of_sigp_forgiven_BphiP(1, sigvec, qvec, p);
+  return qvec[1];
+}
 
 /* reset sigma such that the zeros in BNSdata_q are at A=0 */
 void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
@@ -1542,8 +1550,25 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         vec[1] = w0*sigp_0phi + w1*sigp_1phi + wold*sigp_old;
       }
 //printf("itmax=%d tol=%g vec[1]=%g B=%g phi=%g\n",itmax,tol,vec[1], B,phi);
-      stat=newton_linesrch_itsP(vec, 1, &check, q_of_sigp_forgiven_BphiP,
-                                (void *) pars, itmax, tol);
+      if(0)
+      {
+        stat=newton_linesrch_itsP(vec, 1, &check, q_of_sigp_forgiven_BphiP,
+                                  (void *) pars, itmax, tol);
+      }
+      else
+      {
+        double sigp, sigp1, sigp2;
+
+        sigp = vec[1];
+        sigp1 = sigp*0.99;
+        sigp2 = sigp*1.01;
+        if(zbrac_P(q_of_sigp_forgiven_Bphi_ZP, &sigp1,&sigp2, (void *) pars))
+          errorexit("cannot find bracket for q_of_sigp_forgiven_Bphi_ZP");
+  
+        stat=zbrent_itsP(&sigp, q_of_sigp_forgiven_Bphi_ZP,  sigp1,sigp2,
+                         (void *) pars, itmax, tol);
+        vec[1] = sigp;
+      }
       /* If q is nowhere negative newton_linesrch_its may not work. In this
          case we should probably search for the zero in (q - 1e-8). */
 //printf("stat=%d\n",stat);
