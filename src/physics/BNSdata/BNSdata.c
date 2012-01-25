@@ -36,6 +36,7 @@ extern tParameter *pdb;
 extern int npdb;
 extern int npdbmax;
 tGrid *m0_errors_VectorFunc__grid; /* grid var for m0_errors_VectorFunc */
+tGrid *m0_errors_VectorFunc__grid0; /* grid0 var for m0_errors_VectorFunc */
 double m0_errors_VectorFunc__m01;  /* m01 we currently try to achieve */
 double m0_errors_VectorFunc__m02;  /* m02 we currently try to achieve */
 tGrid *central_q_errors_VectorFunc__grid; /* grid var for central_q_errors_VectorFunc */
@@ -1007,6 +1008,7 @@ int b;
   /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
   /**********************************************************************/
   m0_errors_VectorFunc__grid = grid;
+  m0_errors_VectorFunc__grid0= grid;
   /* adjust C1 and thus m01 */
   Cvec[1] = Getd("BNSdata_C1");
   stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
@@ -1547,6 +1549,7 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   /* backup grid,pdb */
   backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
   m0_errors_VectorFunc__grid = grid;
+  m0_errors_VectorFunc__grid0= grid;
 
   /* adjust C1 and thus m01 */
   Cvec[1] = Getd("BNSdata_C1");
@@ -1568,6 +1571,7 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   /* backup grid,pdb */
   backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
   m0_errors_VectorFunc__grid = grid;
+  m0_errors_VectorFunc__grid0= grid;
 
   /* adjust C2 and thus m02 */
   Cvec[1] = Getd("BNSdata_C2");
@@ -4982,13 +4986,15 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
 void m01_error_VectorFunc(int n, double *vec, double *fvec)
 {
   tGrid *grid = m0_errors_VectorFunc__grid;
+  tGrid *grid0= m0_errors_VectorFunc__grid0;
   double m01;
 
   /* set C1 */
   Setd("BNSdata_C1", vec[1]);
 
   /* adjust grid so that new q=0 is at A=0 */
-  compute_new_q_and_adjust_domainshapes(grid, 0);
+  //compute_new_q_and_adjust_domainshapes(grid, 0);
+  compute_new_q_and_adjust_domainshapes_InterpFromGrid0(grid, grid0, 0);
 
   /*************************************/
   /* compute rest mass error Delta_m01 */
@@ -5008,13 +5014,15 @@ void m01_error_VectorFunc(int n, double *vec, double *fvec)
 void m02_error_VectorFunc(int n, double *vec, double *fvec)
 {
   tGrid *grid = m0_errors_VectorFunc__grid;
+  tGrid *grid0= m0_errors_VectorFunc__grid0;
   double m02;
 
   /* set C2 */
   Setd("BNSdata_C2", vec[1]);
 
   /* adjust grid so that new q=0 is at A=0 */
-  compute_new_q_and_adjust_domainshapes(grid, 3);
+  //compute_new_q_and_adjust_domainshapes(grid, 3);
+  compute_new_q_and_adjust_domainshapes_InterpFromGrid0(grid, grid0, 3);
 
   /*************************************/
   /* compute rest mass error Delta_m01 */
