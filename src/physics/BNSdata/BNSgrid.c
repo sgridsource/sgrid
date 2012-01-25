@@ -1562,7 +1562,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         sigp = vec[1];
         sigp1 = sigp*0.99;
         sigp2 = sigp*1.01;
-        if(zbrac_P(q_of_sigp_forgiven_Bphi_ZP, &sigp1,&sigp2, (void *) pars))
+        if(zbrac_P(q_of_sigp_forgiven_Bphi_ZP, &sigp1,&sigp2, (void *) pars)<0)
           errorexit("cannot find bracket for q_of_sigp_forgiven_Bphi_ZP");
   
         stat=zbrent_itsP(&sigp, q_of_sigp_forgiven_Bphi_ZP,  sigp1,sigp2,
