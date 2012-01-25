@@ -30,6 +30,7 @@ void newton_lnsrch_get_fvec_by_lininterp(int n, double vec[],
           double vb[], double vi[], double *fvec, double fvb[], double fvi[]);
 
 /* 1D root finding with bracketing */
+int zbrac_P(double (*func)(double,void *par), double *x1, double *x2, void *par);
 int zbrent_itsP(double *x0, double (*func)(double,void *par),
                 double x1, double x2, void *par, int ITMAX, double tol);
 
