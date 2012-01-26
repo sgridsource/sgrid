@@ -223,6 +223,10 @@ int sgrid_BNSdata()
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("BNSdata_guess", "test", "initial guess [test]");
 
+  /* pick root finders and their options */
+  AddPar("BNSdata_sigp_Bphi_FINDER_reset_Coordinates_AnsorgNS_sigma_pm",
+         "newton_linesrch_itsP", "[newton_linesrch_itsP,zbrent_itsP]");
+
   /* The next 2 pars affect how the overall iteration proceeds. E.g. they
      affect how close x_CM is to zero for equal masses. Set:
      BNSdata_Interpolation_smooths = 0 

@@ -1366,6 +1366,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   double vec[2];
   int check, stat;
   int use_last_result_as_new_guess;
+  int use_newton_tofind_sigp_Bphi = Getv("BNSdata_sigp_Bphi_FINDER_reset_Coordinates_AnsorgNS_sigma_pm", "newton_linesrch_itsP");
 
   /* look at B=1 (j=n2-1) and B=0 (j=0)  
      NOTE: we assue that n1,n2,n3 are the same in both domains */
@@ -1552,23 +1553,30 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         vec[1] = w0*sigp_0phi + w1*sigp_1phi + wold*sigp_old;
       }
 //printf("itmax=%d tol=%g vec[1]=%g B=%g phi=%g\n",itmax,tol,vec[1], B,phi);
-      if(0)
+      if(use_newton_tofind_sigp_Bphi)
       {
         stat=newton_linesrch_itsP(vec, 1, &check, q_of_sigp_forgiven_BphiP,
                                   (void *) pars, itmax, tol);
       }
       else
       {
-        double sigp, sigp1, sigp2;
+        double sigp=vec[1], sigp1, sigp2;
 
-        sigp = vec[1];
-        sigp1 = sigp*0.99;
-        sigp2 = sigp*1.01;
+        if( (innerdom==0 && sigp<=0) || (innerdom==3 && sigp>=0) )
+          sigp = sigp_1phi;
+        if(sigp>0) { sigp1 = sigp*0.99;  sigp2 = sigp*1.01; }
+        else       { sigp2 = sigp*0.99;  sigp1 = sigp*1.01; }
         if(zbrac_P(q_of_sigp_forgiven_Bphi_ZP, &sigp1,&sigp2, (void *) pars)<0)
           errorexit("cannot find bracket for q_of_sigp_forgiven_Bphi_ZP");
-        if(sigp1*sigp2<0.0)
-          printf("bad bracket: [sigp1,sigp,sigp2]=[%g,%g,%g]\n",
+        if(sigp1*sigp2<=0.0)
+        {
+          printf("bad bracket: [sigp1,sigp,sigp2]=[%g,%g,%g] -->\n",
                  sigp1,sigp,sigp2);
+          if(innerdom==0) { sigp1 = sigp*0.1;  sigp2=sigp*2; }
+          else            { sigp2 = sigp*0.1;  sigp1=sigp*2; }
+          printf("new bracket: [sigp1,sigp,sigp2]=[%g,%g,%g]\n",
+                 sigp1,sigp,sigp2);
+        }
         stat=zbrent_itsP(&sigp, q_of_sigp_forgiven_Bphi_ZP,  sigp1,sigp2,
                          (void *) pars, itmax, tol);
         vec[1] = sigp;
