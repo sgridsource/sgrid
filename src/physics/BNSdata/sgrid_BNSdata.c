@@ -226,6 +226,9 @@ int sgrid_BNSdata()
   /* pick root finders and their options */
   AddPar("BNSdata_sigp_Bphi_FINDER_reset_Coordinates_AnsorgNS_sigma_pm",
          "newton_linesrch_itsP", "[newton_linesrch_itsP,zbrent_itsP]");
+  AddPar("BNSdata_m0_error_VectorFuncP_grid0", "grid",
+         "grid from which we interpolate vars when domains change "
+         "[grid,grid_bak]");
 
   /* The next 2 pars affect how the overall iteration proceeds. E.g. they
      affect how close x_CM is to zero for equal masses. Set:

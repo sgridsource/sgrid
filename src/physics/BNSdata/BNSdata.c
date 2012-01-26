@@ -1554,7 +1554,8 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   /* backup grid,pdb */
   backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
   pars->grid = grid;
-  pars->grid0= grid; /* grid_bak; */
+  if(Getv("BNSdata_m0_error_VectorFuncP_grid0","grid_bak")) pars->grid0=grid_bak;
+  else  pars->grid0 = grid;
 
   /* adjust C1 and thus m01 */
   Cvec[1] = Getd("BNSdata_C1");
@@ -1576,7 +1577,8 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   /* backup grid,pdb */
   backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
   pars->grid = grid;
-  pars->grid0= grid; /* grid_bak; */
+  if(Getv("BNSdata_m0_error_VectorFuncP_grid0","grid_bak")) pars->grid0=grid_bak;
+  else  pars->grid0 = grid;
 
   /* adjust C2 and thus m02 */
   Cvec[1] = Getd("BNSdata_C2");
