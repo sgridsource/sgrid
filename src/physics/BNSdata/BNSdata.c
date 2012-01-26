@@ -26,6 +26,13 @@ typedef struct T_grid_bXYZ1_bXYZ2_struct {
   double Z2 ;  /* Z pos 2 */
 } t_grid_bXYZ1_bXYZ2_struct;
 
+typedef struct T_grid_grid0_m01_m02_struct {
+  tGrid *grid;  /* grid where we operate */
+  tGrid *grid0; /* grid from which we interpolate vars when domains change */
+  double m01;   /* desired m01 */
+  double m02;   /* desired m02 */
+} t_grid_grid0_m01_m02_struct;
+
 
 /* global vars */
 extern double rf_surf1; /* radius of star1 */
@@ -35,10 +42,6 @@ extern double P_core2;  /* core pressure of star2 */
 extern tParameter *pdb;
 extern int npdb;
 extern int npdbmax;
-tGrid *m0_errors_VectorFunc__grid; /* grid var for m0_errors_VectorFunc */
-tGrid *m0_errors_VectorFunc__grid0; /* grid0 var for m0_errors_VectorFunc */
-double m0_errors_VectorFunc__m01;  /* m01 we currently try to achieve */
-double m0_errors_VectorFunc__m02;  /* m02 we currently try to achieve */
 tGrid *central_q_errors_VectorFunc__grid; /* grid var for central_q_errors_VectorFunc */
 tGrid *xouts_error_VectorFunc__grid; /* grid var for xouts_error_VectorFunc */
 int    xouts_error_VectorFunc__it;   /* it for xouts_error_VectorFunc */
@@ -123,15 +126,15 @@ int BNS_Eqn_sequence3(tGrid *grid,
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)),
   int pr);
 double GetInnerRestMass(tGrid *grid, int bi);
-void m01_guesserror_VectorFunc(int n, double *vec, double *fvec);
-void m02_guesserror_VectorFunc(int n, double *vec, double *fvec);
-void m0_errors_VectorFunc(int n, double *vec, double *fvec);
+void m01_guesserror_VectorFuncP(int n, double *vec, double *fvec, void *p);
+void m02_guesserror_VectorFuncP(int n, double *vec, double *fvec, void *p);
+void m0_errors_VectorFuncP(int n, double *vec, double *fvec, void *p);
 void compute_new_q_and_adjust_domainshapes_InterpFromGrid0(tGrid *grid, 
                                                            tGrid *grid0, 
                                                            int innerdom);
 void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom);
-void m01_error_VectorFunc(int n, double *vec, double *fvec);
-void m02_error_VectorFunc(int n, double *vec, double *fvec);
+void m01_error_VectorFuncP(int n, double *vec, double *fvec, void *p);
+void m02_error_VectorFuncP(int n, double *vec, double *fvec, void *p);
 void find_Varmax_along_x_axis_usingBNSdata_temp123(tGrid *grid, int varind, 
                                                 int *bi, double *X, double *Y);
 void find_qmax1_along_x_axis(tGrid *grid, int *bi, double *X, double *Y);
@@ -857,6 +860,7 @@ int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
   double Omega, dOmega=1e-3; 
   double L2norm1,L2norm2,L2norm3;
   int check, stat, bi, i;
+  t_grid_grid0_m01_m02_struct pars[1];
 
   /* rest masses before adjusting q */
   m01 = GetInnerRestMass(grid, 0);
@@ -947,11 +951,11 @@ int b;
 */
 
   /* set desired masses for this iteration */
-  m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
-  m0_errors_VectorFunc__m02 = Getd("BNSdata_m02"); // + dm02*0.9;
+  pars->m01 = Getd("BNSdata_m01"); // + dm01*0.9;
+  pars->m02 = Getd("BNSdata_m02"); // + dm02*0.9;
   printf("BNSdata_solve step %d: "
          "adjusting q,C1,C2 to achieve: m01=%g  m02=%g\n",
-         it, m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02);
+         it, pars->m01, pars->m02);
 
   /* print C1/2 we used before */
   printf("old: BNSdata_C1=%g BNSdata_C2=%g\n",
@@ -984,17 +988,17 @@ int b;
   }
 
   /* refine guess for C1/2 */
-  m0_errors_VectorFunc__grid = grid;
+  pars->grid = grid;
   Cvec[1] = Getd("BNSdata_C1");
-  stat = newton_linesrch_its(Cvec, 1, &check, m01_guesserror_VectorFunc,
-                             30, max2(m0_error*0.1, tol*0.1));
+  stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
+                              (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   Setd("BNSdata_C1", Cvec[1]);
 
   Cvec[1] = Getd("BNSdata_C2");
   if(Getd("BNSdata_m02")>0)
-    stat = newton_linesrch_its(Cvec, 1, &check, m02_guesserror_VectorFunc,
-                               30, max2(m0_error*0.1, tol*0.1));
+    stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
+                                (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   Setd("BNSdata_C2", Cvec[1]);
 
@@ -1004,23 +1008,23 @@ int b;
 //Yo(3);
 //CheckIfFinite(grid,  "BNSdata_q");
 
-  /**********************************************************************/
-  /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
-  /**********************************************************************/
-  m0_errors_VectorFunc__grid = grid;
-  m0_errors_VectorFunc__grid0= grid;
+  /***********************************************************************/
+  /* do newton_linesrch_itsP iterations of Cvec until m0errorvec is zero */
+  /***********************************************************************/
+  pars->grid = grid;
+  pars->grid0= grid;
   /* adjust C1 and thus m01 */
   Cvec[1] = Getd("BNSdata_C1");
-  stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
-                             1000, tol*0.01);
+  stat = newton_linesrch_itsP(Cvec, 1, &check, m01_error_VectorFuncP,
+                              (void *) pars, 1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C1", Cvec[1]);
 
   /* adjust C2 and thus m02 */
   Cvec[1] = Getd("BNSdata_C2");
   if(Getd("BNSdata_m02")>0)
-    stat = newton_linesrch_its(Cvec, 1, &check, m02_error_VectorFunc,
-                               1000, tol*0.01);
+    stat = newton_linesrch_itsP(Cvec, 1, &check, m02_error_VectorFuncP,
+                                (void *) pars, 1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C2", Cvec[1]);
   printf("new: BNSdata_C1=%g BNSdata_C2=%g\n",
@@ -1468,6 +1472,7 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   int check, stat, bi, i;
   tGrid *grid_bak;
   tParameter *pdb_bak;
+  t_grid_grid0_m01_m02_struct pars[1];
 
   /* grid and pdb for backups */
   grid_bak = make_empty_grid(grid->nvariables, 0);
@@ -1489,10 +1494,10 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
          "(before adjusting C1/2)\n", m0_error);
 
   /* set desired masses for this iteration */
-  m0_errors_VectorFunc__m01 = Getd("BNSdata_m01"); // + dm01*0.9;
-  m0_errors_VectorFunc__m02 = Getd("BNSdata_m02"); // + dm02*0.9;
+  pars->m01 = Getd("BNSdata_m01"); // + dm01*0.9;
+  pars->m02 = Getd("BNSdata_m02"); // + dm02*0.9;
   printf(" adjusting q,C1,C2 to achieve: m01=%g  m02=%g  tol*0.01=%g\n",
-         m0_errors_VectorFunc__m01, m0_errors_VectorFunc__m02, tol*0.01);
+         pars->m01, pars->m02, tol*0.01);
 
   /* print C1/2 we used before */
   printf(" old: BNSdata_C1=%g BNSdata_C2=%g\n",
@@ -1525,17 +1530,17 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   }
 
   /* refine guess for C1/2 */
-  m0_errors_VectorFunc__grid = grid;
+  pars->grid = grid;
   Cvec[1] = Getd("BNSdata_C1");
-  stat = newton_linesrch_its(Cvec, 1, &check, m01_guesserror_VectorFunc,
-                             30, max2(m0_error*0.1, tol*0.1));
+  stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
+                              (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   Setd("BNSdata_C1", Cvec[1]);
 
   Cvec[1] = Getd("BNSdata_C2");
   if(Getd("BNSdata_m02")>0)
-    stat = newton_linesrch_its(Cvec, 1, &check, m02_guesserror_VectorFunc,
-                               30, max2(m0_error*0.1, tol*0.1));
+    stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
+                                (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   Setd("BNSdata_C2", Cvec[1]);
 
@@ -1543,18 +1548,18 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   printf(" guess: BNSdata_C1=%g BNSdata_C2=%g\n",
          Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
-  /**********************************************************************/
-  /* do newton_linesrch_its iterations of Cvec until m0errorvec is zero */
-  /**********************************************************************/
+  /***********************************************************************/
+  /* do newton_linesrch_itsP iterations of Cvec until m0errorvec is zero */
+  /***********************************************************************/
   /* backup grid,pdb */
   backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
-  m0_errors_VectorFunc__grid = grid;
-  m0_errors_VectorFunc__grid0= grid;
+  pars->grid = grid;
+  pars->grid0= grid; /* grid_bak; */
 
   /* adjust C1 and thus m01 */
   Cvec[1] = Getd("BNSdata_C1");
-  stat = newton_linesrch_its(Cvec, 1, &check, m01_error_VectorFunc,
-                             1000, tol*0.01);
+  stat = newton_linesrch_itsP(Cvec, 1, &check, m01_error_VectorFuncP,
+                              (void *) pars, 1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C1", Cvec[1]);
 
@@ -1570,14 +1575,14 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
 
   /* backup grid,pdb */
   backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
-  m0_errors_VectorFunc__grid = grid;
-  m0_errors_VectorFunc__grid0= grid;
+  pars->grid = grid;
+  pars->grid0= grid; /* grid_bak; */
 
   /* adjust C2 and thus m02 */
   Cvec[1] = Getd("BNSdata_C2");
   if(Getd("BNSdata_m02")>0)
-    stat = newton_linesrch_its(Cvec, 1, &check, m02_error_VectorFunc,
-                               1000, tol*0.01);
+    stat = newton_linesrch_itsP(Cvec, 1, &check, m02_error_VectorFuncP,
+                                (void *) pars, 1000, tol*0.01);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
   Setd("BNSdata_C2", Cvec[1]);
 
@@ -4803,32 +4808,41 @@ double GetInnerRestMass(tGrid *grid, int bi)
 
 /* guess error in m01 from inner Volume int., but without adjusting
    surfaces */
-void m01_guesserror_VectorFunc(int n, double *vec, double *fvec)
+void m01_guesserror_VectorFuncP(int n, double *vec, double *fvec, void *p)
 {
   double m01;
-
+  t_grid_grid0_m01_m02_struct *pars;
+  
+  /* get pars */
+  pars = (t_grid_grid0_m01_m02_struct *) p;
+      
   Setd("BNSdata_C1", vec[1]);
-  BNS_compute_new_centered_q(m0_errors_VectorFunc__grid);
-  m01 = GetInnerRestMass(m0_errors_VectorFunc__grid, 0);
-  fvec[1] = m01 - m0_errors_VectorFunc__m01;
+  BNS_compute_new_centered_q(pars->grid);
+  m01 = GetInnerRestMass(pars->grid, 0);
+  fvec[1] = m01 - pars->m01;
 }
 
 /* guess error in m02 from inner Volume int., but without adjusting
    surfaces */
-void m02_guesserror_VectorFunc(int n, double *vec, double *fvec)
+void m02_guesserror_VectorFuncP(int n, double *vec, double *fvec, void *p)
 {
   double m02;
+  t_grid_grid0_m01_m02_struct *pars;
+
+  /* get pars */
+  pars = (t_grid_grid0_m01_m02_struct *) p;
 
   Setd("BNSdata_C2", vec[1]);
-  BNS_compute_new_centered_q(m0_errors_VectorFunc__grid);
-  m02 = GetInnerRestMass(m0_errors_VectorFunc__grid, 3);
-  fvec[1] = m02 - m0_errors_VectorFunc__m02;
+  BNS_compute_new_centered_q(pars->grid);
+  m02 = GetInnerRestMass(pars->grid, 3);
+  fvec[1] = m02 - pars->m02;
 }
 
 /* compute differences m01/2 - BNSdata_m01/2 */
-void m0_errors_VectorFunc(int n, double *vec, double *fvec)
+void m0_errors_VectorFuncP(int n, double *vec, double *fvec, void *p)
 {
-  tGrid *grid = m0_errors_VectorFunc__grid;
+  t_grid_grid0_m01_m02_struct *pars = (t_grid_grid0_m01_m02_struct *) p; /* get pars */
+  tGrid *grid = pars->grid;
   tGrid *grid2;
   double BNSdata_n = Getd("BNSdata_n");
   double kappa     = Getd("BNSdata_kappa");
@@ -4890,12 +4904,12 @@ void m0_errors_VectorFunc(int n, double *vec, double *fvec)
   m01 = GetInnerRestMass(grid, 0);
   m02 = GetInnerRestMass(grid, 3);
 
-  printf("m0_errors_VectorFunc: C1=%g C2=%g  m01=%g m02=%g\n",
+  printf("m0_errors_VectorFuncP: C1=%g C2=%g  m01=%g m02=%g\n",
          vec[1], vec[2], m01, m02);  fflush(stdout);
 //write_grid(grid);
 
-  fvec[1] = m01 - m0_errors_VectorFunc__m01;
-  fvec[2] = m02 - m0_errors_VectorFunc__m02;
+  fvec[1] = m01 - pars->m01;
+  fvec[2] = m02 - pars->m02;
 }
 
 /* compute the new q and adjust the shape of the boundary between domain0/1
@@ -4983,10 +4997,11 @@ void compute_new_q_and_adjust_domainshapes(tGrid *grid, int innerdom)
 }
 
 /* compute difference m01 - BNSdata_m01 */
-void m01_error_VectorFunc(int n, double *vec, double *fvec)
+void m01_error_VectorFuncP(int n, double *vec, double *fvec, void *p)
 {
-  tGrid *grid = m0_errors_VectorFunc__grid;
-  tGrid *grid0= m0_errors_VectorFunc__grid0;
+  t_grid_grid0_m01_m02_struct *pars = (t_grid_grid0_m01_m02_struct *) p; /* get pars */
+  tGrid *grid = pars->grid;
+  tGrid *grid0= pars->grid0;
   double m01;
 
   /* set C1 */
@@ -5002,19 +5017,20 @@ void m01_error_VectorFunc(int n, double *vec, double *fvec)
   /* get rest mass */
   m01 = GetInnerRestMass(grid, 0);
 
-  printf("m01_error_VectorFunc: C1=%.13g  m01=%.13g\n", vec[1], m01);
+  printf("m01_error_VectorFuncP: C1=%.13g  m01=%.13g\n", vec[1], m01);
   fflush(stdout);
 //grid->time=-100;
 //write_grid(grid);
 
-  fvec[1] = m01 - m0_errors_VectorFunc__m01;
+  fvec[1] = m01 - pars->m01;
 }
 
 /* compute difference m02 - BNSdata_m02 */
-void m02_error_VectorFunc(int n, double *vec, double *fvec)
+void m02_error_VectorFuncP(int n, double *vec, double *fvec, void *p)
 {
-  tGrid *grid = m0_errors_VectorFunc__grid;
-  tGrid *grid0= m0_errors_VectorFunc__grid0;
+  t_grid_grid0_m01_m02_struct *pars = (t_grid_grid0_m01_m02_struct *) p; /* get pars */
+  tGrid *grid = pars->grid;
+  tGrid *grid0= pars->grid0;
   double m02;
 
   /* set C2 */
@@ -5030,12 +5046,12 @@ void m02_error_VectorFunc(int n, double *vec, double *fvec)
   /* get rest mass */
   m02 = GetInnerRestMass(grid, 3);
 
-  printf("m02_error_VectorFunc: C2=%.13g  m02=%.13g\n", vec[1], m02);
+  printf("m02_error_VectorFuncP: C2=%.13g  m02=%.13g\n", vec[1], m02);
   fflush(stdout);
 //grid->time=-200;
 //write_grid(grid);
   
-  fvec[1] = m02 - m0_errors_VectorFunc__m02;
+  fvec[1] = m02 - pars->m02;
 }
 
 
