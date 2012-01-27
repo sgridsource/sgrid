@@ -1416,42 +1416,39 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
   printf("filter_Coordinates_AnsorgNS_sigma_pm: innerdom=%d outerdom=%d\n", 
          innerdom, outerdom);
 
-  /* make new grid2, which is an exact copy of grid */
-  grid2 = make_empty_grid(grid->nvariables, 0);
-  copy_grid(grid, grid2, 0);
-
   /* filter Coordinates_AnsorgNS_sigma_pm on grid2 */
   if(Getv("BNSdata_domainshape_filter", "Bphi2/3"))
-    BNSdata_filter_with2o3rule_inBphi(grid2, sigpmi, innerdom);
-  else if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
-    printf(" set dsigma_pm_dB=0 at B=0,1 inside"
-           " reset_Coordinates_AnsorgNS_sigma_pm\n");
-  else
-    errorexit("filter_Coordinates_AnsorgNS_sigma_pm: unknown filter");
-
-  /* initialize coords of grid2 on side of innerdom */
-  BNSgrid_init_Coords_pm(grid2, innerdom);
-  /* use interpolator that does only side of innerdom */
-  Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
-
-  /* interpolate some vars from grid onto new grid2 */
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"),innerdom);
-  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"),innerdom);
-  if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
-      (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
   {
-    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
-    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
-    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
-    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
-  }
+    /* make new grid2, which is an exact copy of grid */
+    grid2 = make_empty_grid(grid->nvariables, 0);
+    copy_grid(grid, grid2, 0);
 
-  BNS_compute_new_centered_q(grid2);
+    /* filter with 2/3 rule */
+    BNSdata_filter_with2o3rule_inBphi(grid2, sigpmi, innerdom);
+
+    /* initialize coords of grid2 on side of innerdom */
+    BNSgrid_init_Coords_pm(grid2, innerdom);
+    /* use interpolator that does only side of innerdom */
+    Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
+
+    /* interpolate some vars from grid onto new grid2 */
+    //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
+    //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"),innerdom);
+    if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
+        (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
+    {
+      Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
+      Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
+      Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
+      Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
+    }
+
+    BNS_compute_new_centered_q(grid2);
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
 //  forallboxes(grid2, b)
@@ -1461,9 +1458,15 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
 //      if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
 //  }
 
-  /* copy grid2 back into grid, and free grid2 */
-  copy_grid(grid2, grid, 0);
-  free_grid(grid2);
+    /* copy grid2 back into grid, and free grid2 */
+    copy_grid(grid2, grid, 0);
+    free_grid(grid2);
+  }
+  else if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
+    printf(" set dsigma_pm_dB=0 at B=0,1 inside"
+           " reset_Coordinates_AnsorgNS_sigma_pm\n");
+  else
+    errorexit("filter_Coordinates_AnsorgNS_sigma_pm: unknown filter");
 }
 
 /* Adjust C1/2 and thus by demanding that m01 and m02 stay the same. */
