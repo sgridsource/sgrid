@@ -1423,6 +1423,9 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
   /* filter Coordinates_AnsorgNS_sigma_pm on grid2 */
   if(Getv("BNSdata_domainshape_filter", "Bphi2/3"))
     BNSdata_filter_with2o3rule_inBphi(grid2, sigpmi, innerdom);
+  else if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
+    printf(" set dsigma_pm_dB=0 at B=0,1 inside"
+           " reset_Coordinates_AnsorgNS_sigma_pm\n");
   else
     errorexit("filter_Coordinates_AnsorgNS_sigma_pm: unknown filter");
 

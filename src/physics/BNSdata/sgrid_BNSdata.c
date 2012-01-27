@@ -204,8 +204,10 @@ int sgrid_BNSdata()
          "new and old domainshapes are averaged according to: "
          "new = weight*new + (1-weight)*old");
   AddPar("BNSdata_domainshape_filter", "no", 
-         "how/if we filter domainshape sigma_pm [no,Bphi2/3] "
-         "Bphi2/3 means use 2/3 rule in B- and phi-dir");
+         "how/if we filter domainshape sigma_pm [no,Bphi2/3,"
+         "dsigma_pm_dB_01_EQ_0] Bphi2/3 means use 2/3 rule in B- and phi-dir, "
+         "dsigma_pm_dB_01_EQ_0 sets B-deriv of sigma_pm to zero at B=0 and " 
+         "B=1 (inside reset_Coordinates_AnsorgNS_sigma_pm)");
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",
          "how we solve for Psi,B^i,alphaP,Sigma "
          "[allatonce, BNS_Eqn_Iterator, BNS_ordered_Eqn_Iterator,"

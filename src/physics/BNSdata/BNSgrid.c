@@ -1612,6 +1612,53 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[outerdom]->v[isigma][Index(i,j,k)] =
                         gridnew->box[innerdom]->v[isigma][Index(0,j,0)];
 
+  /* set dsigma/dB to zero at B=0 and B=1 by modifying sigma at the
+     points j=1 and j=K=n2-2 */
+  if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
+  {
+    /* dsigma/dB[0] = sum_{j=0...n2-1} D0j sigma[j] = D0j sigma[j] 
+                    = (D0j sigma[j] - D01 sigma[1]) + D01 sigma[1]
+       So if we were to change only dsigma/dB[1] we would use
+       sigmanew[1] = sigma[1] - (D0j sigma[j])/D01. For both we get 2 eqns:
+       dsigma/dB[0] = (D0j sigma[j]-D01 sigma[1]-D0K sigma[K])
+                      + D01 sigma[1] + D0K sigma[K]
+       dsigma/dB[J] = (DJj sigma[j]-DJ1 sigma[1]-DJK sigma[K])
+                      + DJ1 sigma[1] + DJK sigma[K]            here J=n2-1
+       => (D01 D0K)(sigmanew[1]-sigma[1]) + (\partial_B sigma[0]) = (0)
+          (DJ1 DJK)(sigmanew[K]-sigma[K])   (\partial_B sigma[J])   (0)
+        =>sigmanew[1] = sigma[1] - ( DJK -D0K)(\partial_B sigma[0])/(detM)
+          sigmanew[K] = sigma[K] - (-DJ1  D01)(\partial_B sigma[J])/(detM)
+          where detM = D01*DJK - DJ1*D0K
+       */
+    int J = n2-1;
+    int K = J-1;
+    double D01 = gridnew->box[innerdom]->D2[1];
+    double D0K = gridnew->box[innerdom]->D2[K];
+    double DJ1 = gridnew->box[innerdom]->D2[n2*J+1];
+    double DJK = gridnew->box[innerdom]->D2[n2*J+K];
+    double detM = D01*DJK - DJ1*D0K;
+    double *sigma = gridnew->box[innerdom]->v[isigma];
+    double *dsigma= gridnew->box[innerdom]->v[isigma_dB];
+    /* compute B deriv of sigma */
+    spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
+                gridnew->box[innerdom]->v[isigma_dB]);
+    /* loop over surface */
+    for(k=0; k<n3; k++)
+    for(i=0; i<n1; i++)
+    {
+      int i0 = Index(i,0,k);
+      int i1 = Index(i,1,k);
+      int iK = Index(i,K,k);
+      int iJ = Index(i,J,k);
+      /* set new sigmanew */
+      sigma[i1] = sigma[i1] - ( DJK*dsigma[i0]-D0K*dsigma[iJ])/detM;
+      sigma[iK] = sigma[iK] - (-DJ1*dsigma[i0]+D01*dsigma[iJ])/detM;
+      /* copy sigmanew to outerdom */
+      gridnew->box[outerdom]->v[isigma][i1] = sigma[i1];
+      gridnew->box[outerdom]->v[isigma][iK] = sigma[iK];
+    }    
+  }
+
   /* compute derivs of sigma in both domains */
   spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
               gridnew->box[innerdom]->v[isigma_dB]);
