@@ -58,13 +58,16 @@ tGrid *q_of_sigp_forgiven_Bphi__grid;      /* grid for q_of_sigp_forgiven_Bphi *
 int    q_of_sigp_forgiven_Bphi__icoeffs;   /* icoeffs for q_of_sigp_forgiven_Bphi */
 int    q_of_sigp_forgiven_Bphi__innerdom;  /* inner domain for q_of_sigp_forgiven_Bphi */
 int    q_of_sigp_forgiven_Bphi__outerdom;  /* outer domain for q_of_sigp_forgiven_Bphi */
-
+/* global vars in this file for minimization with numrec's powell */
+t_grid_b_struct *grid_b_PARS;
 
 /* funs in this file */
 void rf_surf1_VectorFunc(int n, double *vec, double *fvec);
 void rf_surf2_VectorFunc(int n, double *vec, double *fvec);
 void m01_VectorFunc(int n, double *vec, double *fvec);
 void m02_VectorFunc(int n, double *vec, double *fvec);
+void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid, 
+                                                   int innerdom, int outerdom);
 
 
 
@@ -1612,6 +1615,10 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[outerdom]->v[isigma][Index(i,j,k)] =
                         gridnew->box[innerdom]->v[isigma][Index(0,j,0)];
 
+  /* minimize dsigma/dB at B=1 on gridnew */
+  if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
+    minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(gridnew, innerdom, outerdom);
+
   /* set dsigma/dB to zero at B=0 and B=1 by modifying sigma at the
      points j=1 and j=K=n2-2 */
   if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
@@ -1668,6 +1675,105 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
               gridnew->box[outerdom]->v[isigma_dB]);
   spec_Deriv1(gridnew->box[outerdom], 3, gridnew->box[outerdom]->v[isigma],
               gridnew->box[outerdom]->v[isigma_dphi]);
+}
+
+/* function to minimize in minimize_dsigma_pm_dB_1 */
+double func_to_min_dsigma_pm_dB_1(double *sigp_1phi)
+{
+  tGrid *grid = grid_b_PARS->grid;
+  int innerdom= grid_b_PARS->b;
+  int n1 = grid->box[innerdom]->n1;
+  int n2 = grid->box[innerdom]->n2;
+  int n3 = grid->box[innerdom]->n3;
+  int J=n2-1;
+  int isigma    = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int isigma_dB = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+  double *sigma = grid->box[innerdom]->v[isigma];
+  double *dsigma= grid->box[innerdom]->v[isigma_dB];
+  int k;
+  double dsig, old_sigp_1phi;
+
+  /* save old sigp_1phi */
+  old_sigp_1phi = sigma[Index(0,J,0)];
+
+  /* set new sigp_1phi */
+  for(k=0; k<n3; k++)
+  {
+    int iJ = Index(0,J,k);
+    sigma[iJ] = sigp_1phi[1];
+  }
+
+  /* compute B deriv of sigma for new sigp_1phi */
+  spec_Deriv1(grid->box[innerdom], 2, sigma, dsigma);
+
+  /* loop over phi and compute L2 norm of derivs */
+  for(dsig=0.0, k=0; k<n3; k++)
+  {
+    int iJ = Index(0,J,k);
+    dsig += dsigma[iJ]*dsigma[iJ];
+  }    
+
+  /* set sigp_1phi back to old_sigp_1phi */
+  for(k=0; k<n3; k++)
+  {
+    int iJ = Index(0,J,k);
+    sigma[iJ] = old_sigp_1phi;
+  }
+
+  return dsig;
+}
+
+/* choose point at B=1 such that dsigma_pm_dB_1 is as small as possible
+   for all phi */
+void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid, 
+                                                   int innerdom, int outerdom)
+{
+  int n1 = grid->box[innerdom]->n1;
+  int n2 = grid->box[innerdom]->n2;
+  int n3 = grid->box[innerdom]->n3;
+  int J=n2-1;
+  int i,j,k;
+  int isigma = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int nsig=1;
+  double *sig; /* array for vars over which we minimize: here sig[1]=sigp_1phi */
+  double **xi; /* matrix with initial directions */
+  int iter;
+  double fret;
+  double mintol = Getd("Coordinates_newtTOLF");
+  t_grid_b_struct pars[1];
+
+  /* allocate pars and matrix for powell */
+  sig= dvector(1,nsig);  /* Note: only sig[1...nsig] is used by numrec. */
+  xi = dmatrix(1,nsig, 1,nsig);
+
+  /* set aux pars */
+  pars->grid = grid;
+  pars->b = innerdom;
+  grid_b_PARS = pars; /* set global var */
+
+  /* set initial directions for minimizer */
+  for(i=1; i<=nsig; i++)
+  for(j=1; j<=nsig; j++)
+  {
+    if(i==j) xi[i][j] = 1e-4;
+    else     xi[i][j] = 0.0;
+  }
+
+  /* call minimizer. NOTE: numrec's powel is NOT thread safe! */  
+  powell(sig, xi, nsig, mintol, &iter, &fret, func_to_min_dsigma_pm_dB_1);
+
+  /* loop over i and k at B=1 and set sigma to sig[1] from powell */
+  for(k=0; k<n3; k++)
+  for(i=0; i<n1; i++)
+  {
+      int iJ = Index(i,J,k);
+      grid->box[innerdom]->v[isigma][iJ] = sig[1];
+      grid->box[outerdom]->v[isigma][iJ] = sig[1];
+  }    
+
+  /* free sig and matrix for powell */
+  free_dvector(sig, 1,nsig);
+  free_dmatrix(xi, 1,nsig, 1,nsig);
 }
 
 
