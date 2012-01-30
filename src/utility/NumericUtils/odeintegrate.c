@@ -87,12 +87,18 @@ double odeintegrate(double ystart[], int nvar, double x1, double x2,
 		}
 		if(fabs(hnext) <= hmin) /* nrerror("Step size too small in odeintegrate"); */
 		{
+                  free_vector(dydx,1,nvar);
+                  free_vector(y,1,nvar);
+                  free_vector(yscal,1,nvar);
 		  *status = -1;
 		  return x;
 		}
 		h=hnext;
 	}
 	/* nrerror("Too many steps in routine odeintegrate"); */
+	free_vector(dydx,1,nvar);
+	free_vector(y,1,nvar);
+	free_vector(yscal,1,nvar);
 	*status = -2;
 	return x;
 }
