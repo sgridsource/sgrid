@@ -1416,6 +1416,13 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
   printf("filter_Coordinates_AnsorgNS_sigma_pm: innerdom=%d outerdom=%d\n", 
          innerdom, outerdom);
 
+  if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
+    printf(" minimized dsigma_pm_dB at B=1 inside"
+           " reset_Coordinates_AnsorgNS_sigma_pm\n");
+  if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
+    printf(" set dsigma_pm_dB=0 at B=0,1 inside"
+           " reset_Coordinates_AnsorgNS_sigma_pm\n");
+
   /* filter Coordinates_AnsorgNS_sigma_pm on grid2 */
   if(Getv("BNSdata_domainshape_filter", "Bphi2/3"))
   {
@@ -1462,14 +1469,6 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
     copy_grid(grid2, grid, 0);
     free_grid(grid2);
   }
-  else if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
-    printf(" minimize dsigma_pm_dB at B=1 inside"
-           " reset_Coordinates_AnsorgNS_sigma_pm\n");
-  else if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
-    printf(" set dsigma_pm_dB=0 at B=0,1 inside"
-           " reset_Coordinates_AnsorgNS_sigma_pm\n");
-  else
-    errorexit("filter_Coordinates_AnsorgNS_sigma_pm: unknown filter");
 }
 
 /* Adjust C1/2 and thus by demanding that m01 and m02 stay the same. */
