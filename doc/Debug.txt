@@ -82,3 +82,9 @@ OR:
 2. examine the core file from the crash with gdb:
  gdb sgrid core.9073
 
+
+Finding memory leaks with valgrind:
+-----------------------------------
+1. compile code without OpenMP and with OFLAGS = -g
+2. run code with valgrid's memcheck
+ valgrind --tool=memcheck --leak-check=yes ./sgrid t2.par >& t2.out
