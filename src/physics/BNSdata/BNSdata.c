@@ -2954,10 +2954,10 @@ int adjust_Omega_xCM_forcebalance(tGrid *grid, int it, double tol)
     printf("adjust_Omega_xCM_forcebalance: dIEdxx_p0[1]=%g dIEdxx_p0[2]=%g\n",
            dIEdxx_p0[1], dIEdxx_p0[2]);
     prdivider(0);
+    /* check if there is a zero, if so set do_lnsrch=1 */
+    if( (dIEdxx_m0[1]*dIEdxx_p0[1]<0.0) && (dIEdxx_m0[2]*dIEdxx_p0[2]<0.0) )
+      do_lnsrch = 1;
   }
-  /* check if there is a zero, if so set do_lnsrch=1 */
-  if( (dIEdxx_m0[1]*dIEdxx_p0[1]<0.0) && (dIEdxx_m0[2]*dIEdxx_p0[2]<0.0) )
-    do_lnsrch = 1;
   if( (do_lnsrch==0) &&
       ((dIEdxx_m0[1]*dIEdxx_p0[1]<0.0) || (dIEdxx_m0[2]*dIEdxx_p0[2]<0.0)) )
   {
