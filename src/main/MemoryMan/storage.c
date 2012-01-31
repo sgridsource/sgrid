@@ -68,7 +68,7 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
 
   /* allocate storage for data pointers, they default to NULL */
   box->v = NULL;
-  realloc_gridvariables(g, g->nvariables);
+  realloc_boxvariables(box, g->nvariables);
 
   /* get mem. for diff. matrices */
   box->D1 = box->D2 = box->D3 = box->DD1 = box->DD2 = box->DD3 = NULL;
@@ -387,6 +387,22 @@ void enablesamevars(tGrid *grid, tGrid *newgrid)
 
 
 
+/* create room for more variables in one box */
+void realloc_boxvariables(tBox *box, int nvariables)
+{
+  tGrid *grid = box->grid;
+  int i;
+  int box_nvariables = grid->nvariables;
+
+  if (PR) printf(" realloc_boxvariables in box%d from %d to %d\n", 
+		 box->b, grid->nvariables, nvariables);
+
+  if(box->v == NULL) box_nvariables=0;
+  box->v = (double **) realloc(box->v, sizeof(double *) * nvariables);
+  if(nvariables > box_nvariables) 
+    for(i=box_nvariables; i<nvariables; i++)  box->v[i] = 0;
+}
+
 /* create room for more variables */
 void realloc_gridvariables(tGrid *grid, int nvariables)
 {
@@ -398,13 +414,7 @@ void realloc_gridvariables(tGrid *grid, int nvariables)
   for (b = 0; b < grid->nboxes; b++)
   {
     tBox *box = grid->box[b];
-    int i;
-    int box_nvariables = grid->nvariables;
-    
-    if(box->v == NULL) box_nvariables=0;
-    box->v = (double **) realloc(box->v, sizeof(double *) * nvariables);
-    if(nvariables > box_nvariables) 
-      for(i=box_nvariables; i<nvariables; i++)  box->v[i] = 0;
+    realloc_boxvariables(box, nvariables);
   }
   grid->nvariables = nvariables;
 }
