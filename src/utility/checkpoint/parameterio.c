@@ -31,6 +31,7 @@ int parameterio_write_current_pars(tGrid *g)
     fprintf(fp, "%s\n", GetsInd(i));
   }
   fclose(fp);
+  free(filename);
   return 0;
 }
 
@@ -92,5 +93,6 @@ int parameterio_update_pars(tGrid *g)
   sprintf(str, "%s_done", filename);
   system3("mv -f", filename, str);
 
+  free(filename);
   return 1;
 }
