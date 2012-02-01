@@ -439,8 +439,8 @@ exit(77);
   Setd("BNSdata_qmax2", pow(kappa, BNSdata_n/(1.0 + BNSdata_n)) *
                         pow(P_core2, 1.0/(1.0 + BNSdata_n)));
   /* set cart positions of qmax1/2 */
-  Setd("BNSdata_xmax1", xc1);
-  Setd("BNSdata_xmax2", xc2);
+  if(Getd("BNSdata_xmax1")<=0.0) Setd("BNSdata_xmax1", xc1);
+  if(Getd("BNSdata_xmax2")>=0.0) Setd("BNSdata_xmax2", xc2);
 
   /* load data from some old checkpoint file */
   if(initFromChkp && GetsLax("outdir_previous_iteration")!=NULL)
