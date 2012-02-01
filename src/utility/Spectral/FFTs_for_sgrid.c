@@ -424,6 +424,17 @@ int reinit_FFTW3_plans(tGrid* grid)
 /* free the plans */
 int free_FFTW3_plans(tGrid* grid)
 {
+  int N;
+  /* deallocate the plans and all their associated data */
+  for(N=1; N<=FFTW3_Nmax_of_plan_array; N++)
+  {
+    fftw_destroy_plan(FFTW3_dft_r2c_1d_plan[N]);
+    fftw_destroy_plan(FFTW3_dft_c2r_1d_plan[N]);
+    fftw_destroy_plan(FFTW_REDFT00_1d_plan[N]);
+    fftw_destroy_plan(FFTW_REDFT10_1d_plan[N]);
+    fftw_destroy_plan(FFTW_REDFT01_1d_plan[N]);
+  }
+
   /* free arrays of plans */
   printf("free_FFTW3_plans: freeing global plan arrays.\n");
   free(FFTW3_dft_r2c_1d_plan);
