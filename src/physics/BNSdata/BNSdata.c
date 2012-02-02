@@ -618,7 +618,7 @@ exit(77);
 
   /* print out maxima */
   printf("BNSdata_startup: BNSdata_qmax1 = %g  BNSdata_qmax2 = %g\n"
-         "                 BNSdata_xmax1 = %g  BNSdata_xmax2 = %g\n",
+         "                 BNSdata_xmax1 = %g  BNSdata_xmax2 = %g\n"
          "                  BNSdata_xin1 = %g   BNSdata_xin2 = %g\n",
          Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
          Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"),
