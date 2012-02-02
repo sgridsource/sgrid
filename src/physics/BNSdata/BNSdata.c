@@ -3484,6 +3484,9 @@ exit(11);
     if(Getv("BNSdata_center_new_q_timebin", "before_ell_solve"))
       BNSdata_center_q_if_desired(grid, it);
 
+    /* center the fields around each star if desired */
+    BNSdata_center_fields_if_desired(grid, it);
+
     /* save old values before ell. solve */
     varcopy(grid, Ind("BNSdata_Psiold"),    Ind("BNSdata_Psi"));
     varcopy(grid, Ind("BNSdata_alphaPold"), Ind("BNSdata_alphaP"));
@@ -3755,9 +3758,6 @@ if(0) /* not working */
     set_BNSdata_actual_xyzmax_pars(grid);
     if(Getv("BNSdata_center_new_q_timebin", "after_adjusting_Omega_xCM"))
       BNSdata_center_q_if_desired(grid, it);
-
-    /* center the fields around each star if desired */
-    BNSdata_center_fields_if_desired(grid, it);
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
