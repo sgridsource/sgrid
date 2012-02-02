@@ -126,14 +126,22 @@ int sgrid_BNSdata()
   AddPar("BNSdata_center_new_q_flag", "no",
          "set automatically in main iteration [no,yes]");
   AddPar("BNSdata_center_new_q_fac", "0.1",
-         "by how much we try to move the the qmax location");
+         "by how much we try to move the qmax location");
   AddPar("BNSdata_center_fields", "no",
          "if and how we center fields on (BNSdata_xmax1/2,0,0) "
          "[no,center_yz,center_xyz,reset_q,adjust_domainshapes]");
   AddPar("BNSdata_center_fields_first_at", "0", "first iteration when we "
          "center q [#,-1]. -1 means never");
   AddPar("BNSdata_center_fields_fac", "0.1",
-         "by how much we try to move the the qmax location");
+         "by how much we try to move the qmax location");
+  AddPar("BNSdata_xin1", "0", "pos. of inner edge of NS1 along x-axis");
+  AddPar("BNSdata_xin2", "0", "pos. of inner edge of NS2 along x-axis");
+  AddPar("BNSdata_keep_xin", "no", "if and how we keep the actual xin1/2 "
+         "[no,yes,reset_q,adjust_domainshapes]");
+  AddPar("BNSdata_keep_xin_first_at", "0", "first iteration when we "
+         "try to keep xin1/2 [#,-1]. -1 means never");
+  AddPar("BNSdata_keep_xin_fac", "1",
+         "by how much we try to move the actual xin1/2");
   AddPar("BNSdata_Omega_init", "BNSdata_Omega", "ini. orbital angular velocity "
          "[#,estimate,estimate_from_desired_m0,BNSdata_Omega]");
   AddPar("BNSdata_x_CM_init", "BNSdata_x_CM",

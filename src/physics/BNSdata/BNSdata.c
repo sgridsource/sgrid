@@ -661,10 +661,10 @@ void BNS_translate_var_in_box(tBox *box, int iv, int ivx,
   /* get gradient of var */
   FirstDerivsOf_S(box, iv, ivx);
   
-  /* v_translated(x) = v(x+dx) ~ v(x) + [vq(x)/dx] dx */
+  /* v_translated(x) = v(x-dx) ~ v(x) - [vq(x)/dx] dx */
   //printf("b=%d: dx=%g dy=%g dz=%g\n", b, dx,dy,dz);
   forallpoints(box, i)
-    var[i] = var[i] + (dvdx[i]*dx + dvdy[i]*dy + dvdz[i]*dz);
+    var[i] = var[i] - (dvdx[i]*dx + dvdy[i]*dy + dvdz[i]*dz);
 }
 /* translate var on one side of grid specified by star */
 void BNS_translate_var_aroundStar(tGrid *grid, int star, int iv, int ivx,
@@ -720,9 +720,9 @@ int BNSdata_center_fields_if_desired(tGrid *grid, int it)
            Gets("BNSdata_center_fields"));
 
     /* get dx,dy,dz and center around star1 */
-    dx = fac*(x1-xmax1);
-    dy = fac*y1;
-    dz = fac*z1;
+    dx = -fac*(x1-xmax1);
+    dy = -fac*y1;
+    dz = -fac*z1;
     dx = dx*xon;  /* <-- switch centering on/off */
     dy = dy*yon;
     dz = dz*zon;
@@ -734,9 +734,9 @@ int BNSdata_center_fields_if_desired(tGrid *grid, int it)
     BNS_translate_var_aroundStar(grid,1, iSig,itx, dx,dy,dz);
 
     /* get dx,dy,dz and center around star2 */
-    dx = fac*(x2-xmax2);
-    dy = fac*y2;
-    dz = fac*z2;
+    dx = -fac*(x2-xmax2);
+    dy = -fac*y2;
+    dz = -fac*z2;
     dx = dx*xon;  /* <-- switch centering on/off */
     dy = dy*yon;
     dz = dz*zon;
@@ -783,6 +783,91 @@ int BNSdata_center_fields_if_desired(tGrid *grid, int it)
   return 0;
 }
 
+/* keep inner edges of stars in place */
+int BNSdata_keep_xin_if_desired(tGrid *grid, int it)
+{
+  if(    !Getv("BNSdata_keep_xin", "no")    &&
+     it>=Geti("BNSdata_keep_xin_first_at")  && 
+         Geti("BNSdata_keep_xin_first_at")>=0 )
+  {
+    int b,i;
+    double m01, m02;
+    int iPsi = Ind("BNSdata_Psi");
+    int iBx  = Ind("BNSdata_Bx");
+    int iBy  = Ind("BNSdata_By");
+    int iBz  = Ind("BNSdata_Bz");
+    int ialP = Ind("BNSdata_alphaP");
+    int iSig = Ind("BNSdata_Sigma");
+    int itx  = Ind("BNSdata_temp1");
+    double dx, xin1, xin2;
+    double fac = Getd("BNSdata_keep_xin_fac");
+    double BNSdata_xin1 = Getd("BNSdata_xin1");
+    double BNSdata_xin2 = Getd("BNSdata_xin2");
+
+    /* get pos of actual xin1/2 */
+    xin1 = grid->box[0]->x_of_X[1]((void *) grid->box[0], -1, 0.0,1.0,0.0);
+    xin2 = grid->box[3]->x_of_X[1]((void *) grid->box[3], -1, 0.0,1.0,0.0);
+    printf("Actual:          xin1=%.12g         xin2=%.12g\n", xin1, xin2);
+    printf("Desired: BNSdata_xin1=%.12g BNSdata_xin2=%.12g\n",
+           BNSdata_xin1, BNSdata_xin2);
+    printf("Shifting fields:  BNSdata_keep_xin_fac = %s\n"
+           " BNSdata_keep_xin = %s\n",
+           Gets("BNSdata_keep_xin_fac"),
+           Gets("BNSdata_keep_xin"));
+
+    /* get dx and shift around star1 */
+    dx = -fac*(xin1-BNSdata_xin1);
+    BNS_translate_var_aroundStar(grid,1, iPsi,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,1, iBx ,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,1, iBy ,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,1, iBz ,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,1, ialP,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,1, iSig,itx, dx,0.0,0.0);
+
+    /* get dx and shift around star2 */       
+    dx = -fac*(xin2-BNSdata_xin2);
+    BNS_translate_var_aroundStar(grid,2, iPsi,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,2, iBx ,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,2, iBy ,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,2, iBz ,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,2, ialP,itx, dx,0.0,0.0);
+    BNS_translate_var_aroundStar(grid,2, iSig,itx, dx,0.0,0.0);
+
+    /* recalc q as well? */
+    if(Getv("BNSdata_keep_xin", "reset_q"))
+    {
+      if(Getv("BNSdata_keep_xin", "adjust_domainshapes"))
+      {
+        compute_new_q_and_adjust_domainshapes(grid, 0);
+        compute_new_q_and_adjust_domainshapes(grid, 3);
+      }
+      else
+        BNS_compute_new_centered_q(grid);
+
+      /* set q to zero if q<0 or in region 1 and 2 */
+      forallboxes(grid, b)
+      {
+        double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
+        forallpoints(grid->box[b], i)
+          if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
+      }
+    }
+   
+    /* enforce uniqueness on axis:
+       set vars equal to val at phi=0 for all phi>0 */
+    if(Getv("BNSdata_uniqueness_on_axis", "yes"))
+      BNS_enforce_uniqueness_on_axis(vlu);
+
+    /* set actual positions of maxima again */
+    set_BNSdata_actual_xyzmax_pars(grid);
+
+    /* print new masses */
+    m01 = GetInnerRestMass(grid, 0);
+    m02 = GetInnerRestMass(grid, 3);
+    printf("     => m01=%.19g m02=%.19g\n", m01, m02);
+  }
+  return 0;
+}
 
 /* functions to compute new q from fields, and to also shift them so
    that the max in q is centered where we want it on the x-axis */
