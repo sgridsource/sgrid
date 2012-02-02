@@ -442,6 +442,10 @@ exit(77);
   if(Getd("BNSdata_xmax1")<=0.0) Setd("BNSdata_xmax1", xc1);
   if(Getd("BNSdata_xmax2")>=0.0) Setd("BNSdata_xmax2", xc2);
 
+  /* set cart positions of inner star edges */
+  if(Getd("BNSdata_xin1")<=0.0) Setd("BNSdata_xin1", xin1);
+  if(Getd("BNSdata_xin2")>=0.0) Setd("BNSdata_xin2", xin2);
+
   /* load data from some old checkpoint file */
   if(initFromChkp && GetsLax("outdir_previous_iteration")!=NULL)
   {
@@ -613,10 +617,12 @@ exit(77);
   } /* end intialization using TOV data */
 
   /* print out maxima */
-  printf("BNSdata_startup: BNSdata_qmax1 = %g  BNSdata_qmax2=%g\n"
-         "                 BNSdata_xmax1 = %g  BNSdata_xmax2=%g\n",
+  printf("BNSdata_startup: BNSdata_qmax1 = %g  BNSdata_qmax2 = %g\n"
+         "                 BNSdata_xmax1 = %g  BNSdata_xmax2 = %g\n",
+         "                  BNSdata_xin1 = %g   BNSdata_xin2 = %g\n",
          Getd("BNSdata_qmax1"), Getd("BNSdata_qmax2"),
-         Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"));
+         Getd("BNSdata_xmax1"), Getd("BNSdata_xmax2"),
+         Getd("BNSdata_xin1"), Getd("BNSdata_xin2"));
 
   /* recompute q from the other fields */
   if(Getv("BNSdata_init_q_fromfields", "yes"))
