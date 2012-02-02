@@ -127,6 +127,13 @@ int sgrid_BNSdata()
          "set automatically in main iteration [no,yes]");
   AddPar("BNSdata_center_new_q_fac", "0.1",
          "by how much we try to move the the qmax location");
+  AddPar("BNSdata_center_fields", "no",
+         "if and how we center fields on (BNSdata_xmax1/2,0,0) "
+         "[no,center_yz,center_xyz,reset_q,adjust_domainshapes]");
+  AddPar("BNSdata_center_fields_first_at", "0", "first iteration when we "
+         "center q [#,-1]. -1 means never");
+  AddPar("BNSdata_center_fields_fac", "0.1",
+         "by how much we try to move the the qmax location");
   AddPar("BNSdata_Omega_init", "BNSdata_Omega", "ini. orbital angular velocity "
          "[#,estimate,estimate_from_desired_m0,BNSdata_Omega]");
   AddPar("BNSdata_x_CM_init", "BNSdata_x_CM",
