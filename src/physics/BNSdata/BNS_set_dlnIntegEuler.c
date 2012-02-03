@@ -1,5 +1,5 @@
 /* BNS_set_dlnIntegEuler.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 6.12.2011 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 8.12.2011 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"

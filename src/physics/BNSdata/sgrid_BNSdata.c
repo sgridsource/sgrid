@@ -227,7 +227,7 @@ int sgrid_BNSdata()
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",
          "how we solve for Psi,B^i,alphaP,Sigma "
          "[allatonce, BNS_Eqn_Iterator, BNS_ordered_Eqn_Iterator,"
-         " sequence1, sequence2, sequence3]");
+         " BNS_ordered_Var_Eqn_Iterator, sequence1, sequence2, sequence3]");
   AddPar("BNSdata_CTS_Eqs_Iteration_order", 
          "BNSdata_Psi BNSdata_Bx BNSdata_By BNSdata_Bz BNSdata_alphaP",
          "Order we use in function BNS_ordered_Eqn_Iterator. "

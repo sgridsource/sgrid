@@ -3657,6 +3657,30 @@ exit(11);
       BNS_ordered_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
                                linear_solver, 1);
     }
+    else if(Getv("BNSdata_EllSolver_method", "BNS_ordered_Var_Eqn_Iterator"))
+    {
+      /* solve completely in outer boxes at first iteration */
+      if(grid->time == 1.0-itmax)
+      {
+        printf("Setting BNSdata_Sigma outside the stars only...\n");
+        /* do not touch Sigma in inner boxes, but solve in outer */
+        Sets("BNSdata_KeepInnerSigma", "yes");
+        BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+               &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+        Sets("BNSdata_KeepInnerSigma", "no");
+        totalerr1 = average_current_and_old(1, grid,vlFu,vlu,vluDerivs, vlJdu);
+        varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+        /* reset Newton_tol, use error norm of all vars in vlu */
+        F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+        normresnonlin = GridL2Norm(vlFu);
+        Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+        /* reset Sigmaold so that Sigma does not change when we average later */
+        varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+      }
+      /* now solve all coupled ell. eqns one after an other */
+      BNS_ordered_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
+                               linear_solver, 1);
+    }
     else if(Getv("BNSdata_EllSolver_method", "BNS_ordered_Eqn_Iterator_old"))
     { /* solve the coupled ell. eqns one after an other */
       if(!Getv("BNSdata_CTS_Eqs_Iteration_order", "BNSdata_Sigma"))
@@ -4472,7 +4496,7 @@ int BNS_Eqn_Iterator_for_vars_in_string(tGrid *grid, int itmax,
   if(pr)
   { 
     printf("BNS_Eqn_Iterator_for_vars_in_string:\n"); 
-    printf("Vars we solve for: %s\n", str);
+    printf("%s\n", str);
     printf("  starting iterations, itmax=%d tol=%g\n", itmax, tol);
   }
   for (it = 0; it < itmax; it++)
