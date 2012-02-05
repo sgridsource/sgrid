@@ -1759,8 +1759,11 @@ void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid,
     else     xi[i][j] = 0.0;
   }
 
-  /* call minimizer. NOTE: numrec's powel is NOT thread safe! */  
-  powell(sig, xi, nsig, mintol, &iter, &fret, func_to_min_dsigma_pm_dB_1);
+  /* call minimizer. NOTE: numrec's powell is NOT thread safe! */
+  #pragma omp critical (minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi_powell)
+  {  
+    powell(sig, xi, nsig, mintol, &iter, &fret, func_to_min_dsigma_pm_dB_1);
+  }
 
   /* loop over i and k at B=1 and set sigma to sig[1] from powell */
   for(k=0; k<n3; k++)
