@@ -1740,50 +1740,53 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
          Getd("BNSdata_C1"), Getd("BNSdata_C2"));
   /* printf("     => m01=%g m02=%g\n", m01, m02); */
 
-  /* choose C1/2 such that rest masses are not too big or too small */
-  for(i=0; i<1000; i++)
+  /* refine guesses for C1,C2? */
+  if(Getv("BNSdata_adjust_C1C2", "refineguess"))
   {
-    double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
-    double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+    /* choose C1/2 such that rest masses are not too big or too small */
+    for(i=0; i<1000; i++)
+    {
+      double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
+      double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
 
-    BNS_compute_new_centered_q(grid);
-    m01 = GetInnerRestMass(grid, 0);
-    m02 = GetInnerRestMass(grid, 3);
+      BNS_compute_new_centered_q(grid);
+      m01 = GetInnerRestMass(grid, 0);
+      m02 = GetInnerRestMass(grid, 3);
 
-    check = 0;
+      check = 0;
 
-    if(m01 > 1.1*Getd("BNSdata_m01"))
-      { Setd("BNSdata_C1", 0.999*Getd("BNSdata_C1"));  check=1; }
-    else if(m01 < 0.9*Getd("BNSdata_m01"))
-      { Setd("BNSdata_C1", 1.002*Getd("BNSdata_C1"));  check=1; }
+      if(m01 > 1.1*Getd("BNSdata_m01"))
+        { Setd("BNSdata_C1", 0.999*Getd("BNSdata_C1"));  check=1; }
+      else if(m01 < 0.9*Getd("BNSdata_m01"))
+        { Setd("BNSdata_C1", 1.002*Getd("BNSdata_C1"));  check=1; }
+  
+      if(m02 > 1.1*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
+        { Setd("BNSdata_C2", 0.999*Getd("BNSdata_C2"));  check=1; }
+      else if(m02 < 0.9*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
+        { Setd("BNSdata_C2", 1.002*Getd("BNSdata_C2"));  check=1; }
 
-    if(m02 > 1.1*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
-      { Setd("BNSdata_C2", 0.999*Getd("BNSdata_C2"));  check=1; }
-    else if(m02 < 0.9*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
-      { Setd("BNSdata_C2", 1.002*Getd("BNSdata_C2"));  check=1; }
+      if(check==0) break;
+    }
 
-    if(check==0) break;
-  }
-
-  /* refine guess for C1/2 */
-  pars->grid = grid;
-  Cvec[1] = Getd("BNSdata_C1");
-  stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
-                              (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-  Setd("BNSdata_C1", Cvec[1]);
-
-  Cvec[1] = Getd("BNSdata_C2");
-  if(Getd("BNSdata_m02")>0)
-    stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
+    /* refine guess for C1/2 */
+    pars->grid = grid;
+    Cvec[1] = Getd("BNSdata_C1");
+    stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
                                 (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-  Setd("BNSdata_C2", Cvec[1]);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    Setd("BNSdata_C1", Cvec[1]);
 
-  /* print guess for C1/2 */                                        
-  printf(" guess: BNSdata_C1=%g BNSdata_C2=%g\n",
-         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+    Cvec[1] = Getd("BNSdata_C2");
+    if(Getd("BNSdata_m02")>0)
+      stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
+                                  (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    Setd("BNSdata_C2", Cvec[1]);
 
+    /* print guess for C1/2 */                                        
+    printf(" guess: BNSdata_C1=%g BNSdata_C2=%g\n",
+           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+  }
   /***********************************************************************/
   /* do newton_linesrch_itsP iterations of Cvec until m0errorvec is zero */
   /***********************************************************************/
