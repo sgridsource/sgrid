@@ -199,7 +199,7 @@ int sgrid_BNSdata()
          "what we do with BNSdata_xmax1/2 inside BNSdata_analyze "
          "[set_BNSdata_xmax,print_xmax]");
   AddPar("BNSdata_adjust_C1C2", "refineguess", "how to adjust C1/2 "
-         "[refineguess,noguess]");
+         "[refineguess,noguess,no]");
   AddPar("BNSdata_adjust", "nothing", "what we adjust (apart from C1/2) "
          "after ell. solve. E.g. \"keep_xout keep_one_xout\" adjusts Omega "
          "and x_CM to keep either xout1 or xout2 in place. "

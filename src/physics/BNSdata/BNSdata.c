@@ -1699,7 +1699,7 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
   }
 }
 
-/* Adjust C1/2 and thus by demanding that m01 and m02 stay the same. */
+/* Adjust C1/2 and thus q by demanding that m01 and m02 stay the same. */
 int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
 {
   double Cvec[3];
@@ -1740,106 +1740,152 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
          Getd("BNSdata_C1"), Getd("BNSdata_C2"));
   /* printf("     => m01=%g m02=%g\n", m01, m02); */
 
-  /* refine guesses for C1,C2? */
-  if(Getv("BNSdata_adjust_C1C2", "refineguess"))
+  /* adjust C1/2 */
+  if(!Getv("BNSdata_adjust_C1C2", "no"))
   {
-    /* choose C1/2 such that rest masses are not too big or too small */
-    for(i=0; i<1000; i++)
+    /* refine guesses for C1,C2? */
+    if(Getv("BNSdata_adjust_C1C2", "refineguess"))
     {
-      double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
-      double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
+      /* choose C1/2 such that rest masses are not too big or too small */
+      for(i=0; i<1000; i++)
+      {
+        double *q_b1 = grid->box[1]->v[Ind("BNSdata_q")];
+        double *q_b2 = grid->box[2]->v[Ind("BNSdata_q")];
 
-      BNS_compute_new_centered_q(grid);
-      m01 = GetInnerRestMass(grid, 0);
-      m02 = GetInnerRestMass(grid, 3);
+        BNS_compute_new_centered_q(grid);
+        m01 = GetInnerRestMass(grid, 0);
+        m02 = GetInnerRestMass(grid, 3);
 
-      check = 0;
+        check = 0;
 
-      if(m01 > 1.1*Getd("BNSdata_m01"))
-        { Setd("BNSdata_C1", 0.999*Getd("BNSdata_C1"));  check=1; }
-      else if(m01 < 0.9*Getd("BNSdata_m01"))
-        { Setd("BNSdata_C1", 1.002*Getd("BNSdata_C1"));  check=1; }
-  
-      if(m02 > 1.1*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
-        { Setd("BNSdata_C2", 0.999*Getd("BNSdata_C2"));  check=1; }
-      else if(m02 < 0.9*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
-        { Setd("BNSdata_C2", 1.002*Getd("BNSdata_C2"));  check=1; }
+        if(m01 > 1.1*Getd("BNSdata_m01"))
+          { Setd("BNSdata_C1", 0.999*Getd("BNSdata_C1"));  check=1; }
+        else if(m01 < 0.9*Getd("BNSdata_m01"))
+          { Setd("BNSdata_C1", 1.002*Getd("BNSdata_C1"));  check=1; }
+    
+        if(m02 > 1.1*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
+          { Setd("BNSdata_C2", 0.999*Getd("BNSdata_C2"));  check=1; }
+        else if(m02 < 0.9*Getd("BNSdata_m02") && Getd("BNSdata_m02")>0)
+          { Setd("BNSdata_C2", 1.002*Getd("BNSdata_C2"));  check=1; }
 
-      if(check==0) break;
+        if(check==0) break;
+      }
+
+      /* refine guess for C1/2 */
+      pars->grid = grid;
+      Cvec[1] = Getd("BNSdata_C1");
+      stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
+                                  (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
+      if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+      Setd("BNSdata_C1", Cvec[1]);
+
+      Cvec[1] = Getd("BNSdata_C2");
+      if(Getd("BNSdata_m02")>0)
+        stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
+                                    (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
+      if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+      Setd("BNSdata_C2", Cvec[1]);
+
+      /* print guess for C1/2 */                                        
+      printf(" guess: BNSdata_C1=%g BNSdata_C2=%g\n",
+             Getd("BNSdata_C1"), Getd("BNSdata_C2"));
     }
-
-    /* refine guess for C1/2 */
+    /***********************************************************************/
+    /* do newton_linesrch_itsP iterations of Cvec until m0errorvec is zero */
+    /***********************************************************************/
+    /* backup grid,pdb */
+    backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
     pars->grid = grid;
+    if(Getv("BNSdata_m0_error_VectorFuncP_grid0","grid_bak")) pars->grid0=grid_bak;
+    else  pars->grid0 = grid;
+
+    /* adjust C1 and thus m01 */
     Cvec[1] = Getd("BNSdata_C1");
-    stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
-                                (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
-    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    stat = newton_linesrch_itsP(Cvec, 1, &check, m01_error_VectorFuncP,
+                                (void *) pars, 1000, tol*0.01);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C1", Cvec[1]);
 
+    /* filter domain shape to keep star1's surface smooth during iterations */
+    filter_Coordinates_AnsorgNS_sigma_pm(grid, 0);
+
+    /* see if we keep the new domain shape and C1 */
+    restore_grid_pdb_if_change_in_star_is_large(1,grid,pdb, grid_bak,pdb_bak);
+
+    /* average domain shape of star1 on grid and grid_bak */
+    average_current_and_old_surfaceshape(Getd("BNSdata_domainshape_weight"),
+                                         0, grid,pdb, grid_bak,pdb_bak);
+
+    /* backup grid,pdb */
+    backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
+    pars->grid = grid;
+    if(Getv("BNSdata_m0_error_VectorFuncP_grid0","grid_bak")) pars->grid0=grid_bak;
+    else  pars->grid0 = grid;
+
+    /* adjust C2 and thus m02 */
     Cvec[1] = Getd("BNSdata_C2");
     if(Getd("BNSdata_m02")>0)
-      stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
-                                  (void *) pars, 30, max2(m0_error*0.1, tol*0.1));
-    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+      stat = newton_linesrch_itsP(Cvec, 1, &check, m02_error_VectorFuncP,
+                                  (void *) pars, 1000, tol*0.01);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
     Setd("BNSdata_C2", Cvec[1]);
 
-    /* print guess for C1/2 */                                        
-    printf(" guess: BNSdata_C1=%g BNSdata_C2=%g\n",
+    /* filter domain shape to keep star2's surface smooth during iterations */
+    filter_Coordinates_AnsorgNS_sigma_pm(grid, 3);
+
+    /* see if we keep the new domain shape and C2 */
+    restore_grid_pdb_if_change_in_star_is_large(2, grid,pdb, grid_bak,pdb_bak);
+
+    /* average domain shape of star2 on grid and grid_bak */
+    average_current_and_old_surfaceshape(Getd("BNSdata_domainshape_weight"),
+                                         3, grid,pdb, grid_bak,pdb_bak);
+
+    printf("adjust_C1_C2_q_keep_restmasses:\n");
+    printf(" new: BNSdata_C1=%g BNSdata_C2=%g\n",
            Getd("BNSdata_C1"), Getd("BNSdata_C2"));
   }
-  /***********************************************************************/
-  /* do newton_linesrch_itsP iterations of Cvec until m0errorvec is zero */
-  /***********************************************************************/
-  /* backup grid,pdb */
-  backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
-  pars->grid = grid;
-  if(Getv("BNSdata_m0_error_VectorFuncP_grid0","grid_bak")) pars->grid0=grid_bak;
-  else  pars->grid0 = grid;
+  else /* keep C1/2, but adjust q */
+  {
+    /* backup grid,pdb */
+    backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
+    pars->grid = grid;
+    if(Getv("BNSdata_m0_error_VectorFuncP_grid0","grid_bak")) pars->grid0=grid_bak;
+    else  pars->grid0 = grid;
 
-  /* adjust C1 and thus m01 */
-  Cvec[1] = Getd("BNSdata_C1");
-  stat = newton_linesrch_itsP(Cvec, 1, &check, m01_error_VectorFuncP,
-                              (void *) pars, 1000, tol*0.01);
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
-  Setd("BNSdata_C1", Cvec[1]);
+    /* compute new q in star1 */
+    compute_new_q_and_adjust_domainshapes_InterpFromGrid0(grid, pars->grid0, 0);
 
-  /* filter domain shape to keep star1's surface smooth during iterations */
-  filter_Coordinates_AnsorgNS_sigma_pm(grid, 0);
+    /* filter domain shape to keep star1's surface smooth during iterations */
+    filter_Coordinates_AnsorgNS_sigma_pm(grid, 0);
 
-  /* see if we keep the new domain shape and C1 */
-  restore_grid_pdb_if_change_in_star_is_large(1,grid,pdb, grid_bak,pdb_bak);
+    /* see if we keep the new domain shape and C1 */
+    restore_grid_pdb_if_change_in_star_is_large(1,grid,pdb, grid_bak,pdb_bak);
 
-  /* average domain shape of star1 on grid and grid_bak */
-  average_current_and_old_surfaceshape(Getd("BNSdata_domainshape_weight"),
-                                       0, grid,pdb, grid_bak,pdb_bak);
+    /* average domain shape of star1 on grid and grid_bak */
+    average_current_and_old_surfaceshape(Getd("BNSdata_domainshape_weight"),
+                                         0, grid,pdb, grid_bak,pdb_bak);
 
-  /* backup grid,pdb */
-  backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
-  pars->grid = grid;
-  if(Getv("BNSdata_m0_error_VectorFuncP_grid0","grid_bak")) pars->grid0=grid_bak;
-  else  pars->grid0 = grid;
+    /* backup grid,pdb */
+    backup_grid_pdb(grid,pdb, grid_bak,pdb_bak);
+    pars->grid = grid;
+    if(Getv("BNSdata_m0_error_VectorFuncP_grid0","grid_bak")) pars->grid0=grid_bak;
+    else  pars->grid0 = grid;
 
-  /* adjust C2 and thus m02 */
-  Cvec[1] = Getd("BNSdata_C2");
-  if(Getd("BNSdata_m02")>0)
-    stat = newton_linesrch_itsP(Cvec, 1, &check, m02_error_VectorFuncP,
-                                (void *) pars, 1000, tol*0.01);
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);  
-  Setd("BNSdata_C2", Cvec[1]);
+    /* compute new q in star2 */
+    compute_new_q_and_adjust_domainshapes_InterpFromGrid0(grid, pars->grid0, 3);
+  
+    /* filter domain shape to keep star2's surface smooth during iterations */
+    filter_Coordinates_AnsorgNS_sigma_pm(grid, 3);
 
-  /* filter domain shape to keep star2's surface smooth during iterations */
-  filter_Coordinates_AnsorgNS_sigma_pm(grid, 3);
+    /* see if we keep the new domain shape and C2 */
+    restore_grid_pdb_if_change_in_star_is_large(2, grid,pdb, grid_bak,pdb_bak);
 
-  /* see if we keep the new domain shape and C2 */
-  restore_grid_pdb_if_change_in_star_is_large(2, grid,pdb, grid_bak,pdb_bak);
+    /* average domain shape of star2 on grid and grid_bak */
+    average_current_and_old_surfaceshape(Getd("BNSdata_domainshape_weight"),
+                                         3, grid,pdb, grid_bak,pdb_bak);
 
-  /* average domain shape of star2 on grid and grid_bak */
-  average_current_and_old_surfaceshape(Getd("BNSdata_domainshape_weight"),
-                                       3, grid,pdb, grid_bak,pdb_bak);
-
-  printf("adjust_C1_C2_q_keep_restmasses:\n");
-  printf(" new: BNSdata_C1=%g BNSdata_C2=%g\n",
-         Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+    printf("adjust_C1_C2_q_keep_restmasses: adjusted q, but kept C1/2\n");
+  }
 
   /* set q to zero if q<0, and also in region 1 & 2 */
   forallboxes(grid, bi)
