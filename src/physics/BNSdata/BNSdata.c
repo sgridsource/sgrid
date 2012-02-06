@@ -1644,6 +1644,9 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
   printf("filter_Coordinates_AnsorgNS_sigma_pm: innerdom=%d outerdom=%d\n", 
          innerdom, outerdom);
 
+  if(Getv("BNSdata_domainshape_filter", "keep_sigma_pm_B1"))
+    printf(" kept previous sigma_pm at B=1 inside"
+           " reset_Coordinates_AnsorgNS_sigma_pm\n");
   if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
     printf(" minimized dsigma_pm_dB at B=1 inside"
            " reset_Coordinates_AnsorgNS_sigma_pm\n");

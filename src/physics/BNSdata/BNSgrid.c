@@ -1361,9 +1361,10 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   double q1, q2;
   double X0, R0;  /* value of X,R at A=A0 */
   double B,phi, x,y,z;
-  double ArgCp_1phi, AbsCp_1phi, ReCp_1phi, ImCp_1phi;
+  double ArgCp_1phi; /* , AbsCp_1phi , ReCp_1phi, ImCp_1phi; */
   double ArgCp_Bphi, ReCp_Bphi, ImCp_Bphi;
   double sigp_1phi, sigp_0phi, sigp_Bphi;
+  double sigp_1phi_old = grid->box[innerdom]->v[isigma][Index(0,n2-1,0)];
   int itmax = Geti("Coordinates_newtMAXITS");
   double tol = Getd("Coordinates_newtTOLF");
   double vec[2];
@@ -1459,9 +1460,12 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       /* 2 ArgCp = ArcTan[Sin[Pi B/2]/Sinh[sigma/2]] */
       /* Tan[2 ArgCp] = Sin[Pi B/2]/Sinh[sigma/2] */
       sigp_1phi = 2.0 * asinh( (1.0/tan(2.0*ArgCp_1phi)) );
+      /* next three are not needed 
       AbsCp_1phi = sqrt( Abstanh(0.25*sigp_1phi, 0.25*PI) );
       ReCp_1phi = AbsCp_1phi * cos(ArgCp_1phi);
-      ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi);
+      ImCp_1phi = AbsCp_1phi * sin(ArgCp_1phi); */
+      if(Getv("BNSdata_domainshape_filter", "keep_sigma_pm_B1"))
+        sigp_1phi = sigp_1phi_old;
       sigp_Bphi = sigp_1phi;
     }
     if(j==0) /* B=0 case */
