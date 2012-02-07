@@ -204,6 +204,7 @@ int sgrid_BNSdata()
          "after ell. solve. E.g. \"keep_xout keep_one_xout\" adjusts Omega "
          "and x_CM to keep either xout1 or xout2 in place. "
          "[nothing,WT_L2_method,keep_xout,fix_xout [keep_one_xout,always],"
+         "fix_xin [keep_one_xin,always],"
          "keep_xmax [keep_one_xmax,always,reset_xmax_if_problem],"
          "keep_xfm [keep_one_xmax,always,reset_xmax_if_problem],"
          "forcebalance [always]"
