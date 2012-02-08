@@ -2697,14 +2697,14 @@ void q_at_xin1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
   pars2->m02 = Getd("BNSdata_m02");
   Cvec[1] = Getd("BNSdata_C1");
   stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
-                              (void *) pars2, 30, pars->tol*0.25);
+                              (void *) pars2, 30, pars->tol*0.05);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   Setd("BNSdata_C1", Cvec[1]);
 
   Cvec[1] = Getd("BNSdata_C2");
   if(n>=2)
     stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
-                                (void *) pars2, 30, pars->tol*0.25);
+                                (void *) pars2, 30, pars->tol*0.05);
   if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   Setd("BNSdata_C2", Cvec[1]);
 
@@ -2852,7 +2852,7 @@ int adjust_Omega_xCM_q_fix_xin(tGrid *grid, int it, double tol)
     OmxCMvec[1] = Omega;
     OmxCMvec[2] = x_CM;
     stat = newton_linesrch_itsP(OmxCMvec, 2, &check, q_at_xin1_2_VectorFuncP,
-                                (void *) pars, 1000, tol*0.5);
+                                (void *) pars, 1000, tol*0.1);
     if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
   }
   else
