@@ -2774,8 +2774,8 @@ int adjust_Omega_xCM_q_fix_xin(tGrid *grid, int it, double tol)
   printf("adjust_Omega_xCM_q_fix_xin: old xin1 = %g  xin2 = %g\n",
          pars->x1, pars->x2);
   prdivider(0);
-  adjust_C1_C2_q_keep_restmasses(grid, it, tol*100.0);
-  prdivider(0);
+  /* adjust_C1_C2_q_keep_restmasses(grid, it, tol*100.0);
+     prdivider(0); */
 
   if(do_lnsrch==0)
   {
