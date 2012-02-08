@@ -2376,7 +2376,7 @@ int adjust_Omega_xCM_q_fix_xout(tGrid *grid, int it, double tol)
          it, Omega, x_CM);
 
   /* set global vars */
-  pars->grid =  grid;
+  pars->grid = grid;
   pars->x1 = grid->box[0]->v[xind][0];
   pars->x2 = grid->box[3]->v[xind][0];
   printf("adjust_Omega_xCM_q_fix_xout: old xout1 = %g  xout2 = %g\n",
@@ -2549,6 +2549,9 @@ int adjust_Omega_xCM_q_fix_xin(tGrid *grid, int it, double tol)
   int do_lnsrch = Getv("BNSdata_adjust", "always");
   int keepone   = Getv("BNSdata_adjust", "keep_one_xin");
   t_grid_x1_2_struct pars[1]; /**/
+  int n1 = grid->box[0]->n1;
+  int n2 = grid->box[0]->n2;
+  int n3 = grid->box[0]->n3;
 
   /* save old Omega, x_CM */
   Omega = Getd("BNSdata_Omega");
@@ -2561,9 +2564,9 @@ int adjust_Omega_xCM_q_fix_xin(tGrid *grid, int it, double tol)
          it, Omega, x_CM);
 
   /* set global vars */
-  pars->grid =  grid;
-  pars->x1 = grid->box[0]->v[xind][0];
-  pars->x2 = grid->box[3]->v[xind][0];
+  pars->grid = grid;
+  pars->x1 = grid->box[0]->v[xind][Index(0,n2-1,0)];
+  pars->x2 = grid->box[3]->v[xind][Index(0,n2-1,0)];
   printf("adjust_Omega_xCM_q_fix_xin: old xin1 = %g  xin2 = %g\n",
          pars->x1, pars->x2);
   prdivider(0);
