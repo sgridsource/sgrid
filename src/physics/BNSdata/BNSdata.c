@@ -2688,7 +2688,7 @@ void q_at_xin1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
   /* set BNSdata_Omega & BNSdata_x_CM */
   Setd("BNSdata_Omega", vec[1]);
   if(n>=2) Setd("BNSdata_x_CM",  vec[2]);
-  printf("q_at_xin1_2_VectorFuncP: Omega=%g x_CM=%g\n",
+  printf("q_at_xin1_2_VectorFuncP: Omega=%.13g x_CM=%.13g\n",
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
 
   /* adjust C1/2 with m01/2_guesserror_VectorFuncP */
