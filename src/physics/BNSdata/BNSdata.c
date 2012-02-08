@@ -12,6 +12,8 @@ typedef struct T_grid_x1_2_struct {
   tGrid *grid;   /* grid */
   double x1;  /* edge of NS1 */
   double x2;  /* edge of NS2 */
+  int    it;  /* iteration number */
+  double tol; /* tolerance */
 } t_grid_x1_2_struct;
 
 typedef struct T_grid_bXYZ1_bXYZ2_struct {
@@ -2304,6 +2306,186 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   return 0;
 }
 
+/* for newton_linesrch_itsP: compute error in xins */
+/* if n=1 only BNSdata_Omega is adjusted
+   if n=2 both BNSdata_Omega & BNSdata_x_CM are adjusted */
+void xins_error_VectorFuncP(int n, double *vec, double *fvec, void *p)
+{
+  double xin1, xin2;
+  int xind = Ind("x");
+  tBox *box0;
+  tBox *box3;
+  t_grid_x1_2_struct *pars;
+  int n1,n2,n3;
+
+  /* get pars */
+  pars = (t_grid_x1_2_struct *) p;
+  box0 = pars->grid->box[0];      
+  box3 = pars->grid->box[3];
+
+  /* set n1,n2,n3 */
+  n1 = box0->n1;
+  n2 = box0->n2;
+  n3 = box0->n3;
+
+  /* set BNSdata_Omega & BNSdata_x_CM */
+  Setd("BNSdata_Omega", vec[1]);
+  if(n>=2) Setd("BNSdata_x_CM",  vec[2]);
+  printf("xins_error_VectorFuncP: Omega=%g x_CM=%g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+  adjust_C1_C2_q_keep_restmasses(pars->grid, pars->it, pars->tol);
+  xin1 = box0->v[xind][Index(0,n2-1,0)];
+  xin2 = box3->v[xind][Index(0,n2-1,0)];
+  printf("xins_error_VectorFuncP: Omega=%g x_CM=%g xin1=%g xin2=%g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"),
+         xin1, xin2);  fflush(stdout);
+  prdivider(0);
+
+  /* return errors */
+  fvec[1] = xin1 - pars->x1;
+  if(n>=2) fvec[2] = xin2 - pars->x2;
+}
+
+/* Adjust Omega and x_CM so that inner edges xin1/2 stay put */
+int adjust_C1_C2_Omega_xCM_q_keep_xin(tGrid *grid, int it, double tol)
+{
+  int check, stat, bi, i;
+  int xind = Ind("x");
+  double OmxCMvec[3];
+  double dxin_m0[3];
+  double dxin_00[3];
+  double dxin_p0[3];
+  double dxin_0m[3];
+  double dxin_0p[3];
+  double Omega, x_CM;
+  double dOmega, dx_CM;
+  int do_lnsrch = Getv("BNSdata_adjust", "always");
+  int keepone   = Getv("BNSdata_adjust", "keep_one_xin");
+  t_grid_x1_2_struct pars[1]; /* pars array */
+  int n1 = grid->box[0]->n1;
+  int n2 = grid->box[0]->n2;
+  int n3 = grid->box[0]->n3;
+
+  /* save old Omega, x_CM */
+  Omega = Getd("BNSdata_Omega");
+  x_CM  = Getd("BNSdata_x_CM");
+  dOmega= Omega * Getd("BNSdata_dOmega_fac");
+  dx_CM = Getd("BNSdata_b") * Getd("BNSdata_dx_CM_fac");
+  prdivider(0);
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xin: in BNSdata_solve step %d\n"
+         "adjust_C1_C2_Omega_xCM_q_keep_xin: old Omega = %g  x_CM = %g\n",
+         it, Omega, x_CM);
+
+  /* set global vars */
+  pars->grid  = grid;
+  pars->it    = it;
+  pars->tol   = tol;
+  pars->x1 = grid->box[0]->v[xind][Index(0,n2-1,0)];
+  pars->x2 = grid->box[3]->v[xind][Index(0,n2-1,0)];
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xin: old xin1 = %g  xin2 = %g\n",
+         pars->x1, pars->x2);
+  prdivider(0);
+
+  if(do_lnsrch==0)
+  {
+    /* find deviations for Omega +/- dOmega, x_CM */
+    OmxCMvec[2] = x_CM;
+    OmxCMvec[1] = Omega - dOmega;
+    xins_error_VectorFuncP(2, OmxCMvec, dxin_m0, (void *) pars);
+    OmxCMvec[1] = Omega + dOmega;
+    xins_error_VectorFuncP(2, OmxCMvec, dxin_p0, (void *) pars);
+    OmxCMvec[1] = Omega;
+    /* xins_error_VectorFuncP(2, OmxCMvec, dxin_00, (void *) pars); */
+    printf("adjust_C1_C2_Omega_xCM_q_keep_xin: dxin_m0[1]=%g dxin_m0[2]=%g\n",
+           dxin_m0[1], dxin_m0[2]);
+    /* printf("adjust_C1_C2_Omega_xCM_q_keep_xin: dxin_00[1]=%g dxin_00[2]=%g\n",
+           dxin_00[1], dxin_00[2]); */
+    printf("adjust_C1_C2_Omega_xCM_q_keep_xin: dxin_p0[1]=%g dxin_p0[2]=%g\n",
+           dxin_p0[1], dxin_p0[2]);
+    prdivider(0);
+  }
+  /* check if there is a zero, if so set do_lnsrch=1 */
+  if( (dxin_m0[1]*dxin_p0[1]<0.0) && (dxin_m0[2]*dxin_p0[2]<0.0) )
+    do_lnsrch = 1;
+  if( (do_lnsrch==0) &&
+      ((dxin_m0[1]*dxin_p0[1]<0.0) || (dxin_m0[2]*dxin_p0[2]<0.0)) )
+  {
+    if(keepone) /* fix one xin to current value and then set do_lnsrch=1 */
+    {
+      OmxCMvec[1] = Omega;
+      OmxCMvec[2] = x_CM;
+      if(dxin_m0[1]*dxin_p0[1]>=0.0)
+      {
+        xins_error_VectorFuncP(2, OmxCMvec, dxin_00, (void *) pars);
+        pars->x1 = grid->box[0]->v[xind][Index(0,n2-1,0)];
+      }
+      if(dxin_m0[2]*dxin_p0[2]>=0.0)
+      {
+        xins_error_VectorFuncP(2, OmxCMvec, dxin_00, (void *) pars);
+        pars->x2 = grid->box[3]->v[xind][Index(0,n2-1,0)];
+      }
+      do_lnsrch = 1;
+      printf("adjust_C1_C2_Omega_xCM_q_keep_xin: "
+             "changed: old xin1 = %g  xin2 = %g\n",
+             pars->x1, pars->x2);
+    }
+    else /* find deviations for Omega, x_CM +/- dx_CM */
+    {
+      OmxCMvec[1] = Omega;
+      OmxCMvec[2] = x_CM - dx_CM;
+      xins_error_VectorFuncP(2, OmxCMvec, dxin_0m, (void *) pars);
+      OmxCMvec[2] = x_CM + dx_CM;
+      xins_error_VectorFuncP(2, OmxCMvec, dxin_0p, (void *) pars);
+      OmxCMvec[2] = x_CM;
+      /* xins_error_VectorFuncP(2, OmxCMvec, dxin_00, (void *) pars); */
+      printf("adjust_C1_C2_Omega_xCM_q_keep_xin: dxin_0m[1]=%g dxin_0m[2]=%g\n",
+             dxin_m0[1], dxin_m0[2]);
+      /* printf("adjust_C1_C2_Omega_xCM_q_keep_xin: dxin_00[1]=%g dxin_00[2]=%g\n",
+             dxin_00[1], dxin_00[2]); */
+      printf("adjust_C1_C2_Omega_xCM_q_keep_xin: dxin_0p[1]=%g dxin_0p[2]=%g\n",
+             dxin_p0[1], dxin_p0[2]);
+  
+      if( (dxin_m0[1]*dxin_p0[1]<0.0) && (dxin_0m[2]*dxin_0p[2]<0.0) )
+        do_lnsrch = 1;
+      if( (dxin_m0[2]*dxin_p0[2]<0.0) && (dxin_0m[1]*dxin_0p[1]<0.0) )
+        do_lnsrch = 1;
+    }
+  }
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xin: do_lnsrch = %d\n", do_lnsrch);
+  prdivider(0);
+  if(do_lnsrch)
+  {
+    /**************************************************************************/
+    /* do newton_linesrch_its iterations until xin1/2 are where we want them */
+    /**************************************************************************/
+    OmxCMvec[1] = Omega;
+    OmxCMvec[2] = x_CM;
+    stat = newton_linesrch_itsP(OmxCMvec, 2, &check, xins_error_VectorFuncP,
+                                (void *) pars, 1000, tol*0.5);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  }
+  else
+  {
+    OmxCMvec[1] = Omega;
+    xins_error_VectorFuncP(2, OmxCMvec, dxin_00, (void *) pars);
+    printf("adjust_C1_C2_Omega_xCM_q_keep_xin: dxin_00[1] = %g  dxin_00[2] = %g\n",
+           dxin_00[1], dxin_00[2]);
+  }
+  printf("adjust_C1_C2_Omega_xCM_q_keep_xin: new Omega = %g  x_CM = %g\n",
+         Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+  prdivider(0);
+
+  /* set q to zero if q<0, and also in region 1 & 2 */
+  forallboxes(grid, bi)
+  {
+    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
+    forallpoints(grid->box[bi], i)
+      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
+  }
+
+  return 0;
+}
+
 /* for newton_linesrch_its: compute error in xouts, but without
    changing domain shapes, i.e. for given C1/2 */
 /* if n=1 only BNSdata_Omega is adjusted
@@ -2363,7 +2545,7 @@ int adjust_Omega_xCM_q_fix_xout(tGrid *grid, int it, double tol)
   double dOmega, dx_CM;
   int do_lnsrch = Getv("BNSdata_adjust", "always");
   int keepone   = Getv("BNSdata_adjust", "keep_one_xout");
-  t_grid_x1_2_struct pars[1]; /**/
+  t_grid_x1_2_struct pars[1]; /* pars array */
 
   /* save old Omega, x_CM */
   Omega = Getd("BNSdata_Omega");
@@ -4068,12 +4250,14 @@ if(0) /* not working */
         adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, adjusttol, &dOmega);
       else if(Getv("BNSdata_adjust", "keep_xout")) /* old keep_xout */
         adjust_C1_C2_Omega_xCM_q_keep_xout(grid, it, adjusttol);
+      else if(Getv("BNSdata_adjust", "keep_xin")) /* old keep_xin */
+        adjust_C1_C2_Omega_xCM_q_keep_xin(grid, it, adjusttol);
       else if(Getv("BNSdata_adjust", "fix_xout")) /* alternative keep_xout */
       { /* keep xout1/2 in place */
         adjust_Omega_xCM_q_fix_xout(grid, it, adjusttol);
         adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
       }
-      else if(Getv("BNSdata_adjust", "fix_xin"))
+      else if(Getv("BNSdata_adjust", "fix_xin")) /* alternative keep_xin */
       { /* keep xin1/2 in place */
         adjust_Omega_xCM_q_fix_xin(grid, it, adjusttol);
         adjust_C1_C2_q_keep_restmasses(grid, it, adjusttol*100.0); /* *100 because adjust_C1_C2_q_keep_restmasses multiplies its tol with 0.01 */
