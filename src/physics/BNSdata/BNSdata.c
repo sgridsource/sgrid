@@ -2667,8 +2667,8 @@ int adjust_Omega_xCM_q_fix_xout(tGrid *grid, int it, double tol)
   return 0;
 }
 
-/* for newton_linesrch_its: compute error in xins, but without
-   changing domain shapes, i.e. for given C1/2 */
+/* for newton_linesrch_itsP: compute error in xins without changing domain
+   shapes, but adjust C1/2 using m01/2_guesserror_VectorFuncP */
 /* if n=1 only BNSdata_Omega is adjusted
    if n=2 both BNSdata_Omega & BNSdata_x_CM are adjusted */
 void q_at_xin1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
@@ -2677,8 +2677,11 @@ void q_at_xin1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
   int bi;
   int blist[2];
   double q1, q2;
-  t_grid_x1_2_struct *pars;
-
+  t_grid_x1_2_struct *pars; /* pointer to access par p that is passed in */
+  t_grid_grid0_m01_m02_struct pars2[1]; /* pars for guesserror_VectorFuncP */
+  double Cvec[3];
+  int check, stat;
+        
   /* get pars */
   pars = (t_grid_x1_2_struct *) p;
 
@@ -2687,6 +2690,23 @@ void q_at_xin1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
   if(n>=2) Setd("BNSdata_x_CM",  vec[2]);
   printf("q_at_xin1_2_VectorFuncP: Omega=%g x_CM=%g\n",
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
+
+  /* adjust C1/2 with m01/2_guesserror_VectorFuncP */
+  pars2->grid = pars->grid;
+  pars2->m01 = Getd("BNSdata_m01");
+  pars2->m02 = Getd("BNSdata_m02");
+  Cvec[1] = Getd("BNSdata_C1");
+  stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
+                              (void *) pars2, 30, pars->tol*0.25);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  Setd("BNSdata_C1", Cvec[1]);
+
+  Cvec[1] = Getd("BNSdata_C2");
+  if(n>=2)
+    stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
+                                (void *) pars2, 30, pars->tol*0.25);
+  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+  Setd("BNSdata_C2", Cvec[1]);
 
   /* compute q at xin1 */
   X=0.001;
@@ -2730,7 +2750,7 @@ int adjust_Omega_xCM_q_fix_xin(tGrid *grid, int it, double tol)
   double dOmega, dx_CM;
   int do_lnsrch = Getv("BNSdata_adjust", "always");
   int keepone   = Getv("BNSdata_adjust", "keep_one_xin");
-  t_grid_x1_2_struct pars[1]; /**/
+  t_grid_x1_2_struct pars[1];
   int n1 = grid->box[0]->n1;
   int n2 = grid->box[0]->n2;
   int n3 = grid->box[0]->n3;
@@ -2747,6 +2767,8 @@ int adjust_Omega_xCM_q_fix_xin(tGrid *grid, int it, double tol)
 
   /* set global vars */
   pars->grid = grid;
+  pars->it   = it;
+  pars->tol  = tol;
   pars->x1 = grid->box[0]->v[xind][Index(0,n2-1,0)];
   pars->x2 = grid->box[3]->v[xind][Index(0,n2-1,0)];
   printf("adjust_Omega_xCM_q_fix_xin: old xin1 = %g  xin2 = %g\n",
