@@ -2678,9 +2678,6 @@ void q_at_xin1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
   int blist[2];
   double q1, q2;
   t_grid_x1_2_struct *pars; /* pointer to access par p that is passed in */
-  t_grid_grid0_m01_m02_struct pars2[1]; /* pars for guesserror_VectorFuncP */
-  double Cvec[3];
-  int check, stat;
         
   /* get pars */
   pars = (t_grid_x1_2_struct *) p;
@@ -2692,22 +2689,30 @@ void q_at_xin1_2_VectorFuncP(int n, double *vec, double *fvec, void *p)
          Getd("BNSdata_Omega"), Getd("BNSdata_x_CM"));
 
   /* adjust C1/2 with m01/2_guesserror_VectorFuncP */
-  pars2->grid = pars->grid;
-  pars2->m01 = Getd("BNSdata_m01");
-  pars2->m02 = Getd("BNSdata_m02");
-  Cvec[1] = Getd("BNSdata_C1");
-  stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
-                              (void *) pars2, 30, pars->tol*0.05);
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-  Setd("BNSdata_C1", Cvec[1]);
+  if(0)
+  {
+    t_grid_grid0_m01_m02_struct pars2[1]; /* pars for guesserror_VectorFuncP */
+    double Cvec[3];
+    int check, stat;
 
-  Cvec[1] = Getd("BNSdata_C2");
-  if(n>=2)
-    stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
+    pars2->grid = pars->grid;
+    pars2->m01 = Getd("BNSdata_m01");
+    pars2->m02 = Getd("BNSdata_m02");
+    Cvec[1] = Getd("BNSdata_C1");
+    stat = newton_linesrch_itsP(Cvec, 1, &check, m01_guesserror_VectorFuncP,
                                 (void *) pars2, 30, pars->tol*0.05);
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-  Setd("BNSdata_C2", Cvec[1]);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    Setd("BNSdata_C1", Cvec[1]);
 
+    Cvec[1] = Getd("BNSdata_C2");
+    if(n>=2)
+      stat = newton_linesrch_itsP(Cvec, 1, &check, m02_guesserror_VectorFuncP,
+                                  (void *) pars2, 30, pars->tol*0.05);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    Setd("BNSdata_C2", Cvec[1]);
+    printf("q_at_xin1_2_VectorFuncP: C1=%.13g C2=%.13g\n",
+           Getd("BNSdata_C1"), Getd("BNSdata_C2"));
+  }
   /* compute q at xin1 */
   X=0.001;
   Y=1.0;
@@ -2769,13 +2774,15 @@ int adjust_Omega_xCM_q_fix_xin(tGrid *grid, int it, double tol)
   pars->grid = grid;
   pars->it   = it;
   pars->tol  = tol;
-  pars->x1 = grid->box[0]->v[xind][Index(0,n2-1,0)];
-  pars->x2 = grid->box[3]->v[xind][Index(0,n2-1,0)];
+  /* pars->x1 = grid->box[0]->v[xind][Index(0,n2-1,0)];
+     pars->x2 = grid->box[3]->v[xind][Index(0,n2-1,0)]; */
+  pars->x1 = Getd("BNSdata_xin1");
+  pars->x2 = Getd("BNSdata_xin2");
   printf("adjust_Omega_xCM_q_fix_xin: old xin1 = %g  xin2 = %g\n",
          pars->x1, pars->x2);
   prdivider(0);
-  /* adjust_C1_C2_q_keep_restmasses(grid, it, tol*100.0);
-     prdivider(0); */
+  adjust_C1_C2_q_keep_restmasses(grid, it, tol*100.0);
+  prdivider(0);
 
   if(do_lnsrch==0)
   {
