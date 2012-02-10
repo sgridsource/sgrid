@@ -4106,6 +4106,9 @@ exit(11);
       }
       /* reset Sigmaold so that Sigma does not change when we average later */
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+
+      /* make sure we do not enter this block in the next iteration */
+      realnormres = 1e300;
     }
 
     /* How we solve the coupled ell. eqns */
