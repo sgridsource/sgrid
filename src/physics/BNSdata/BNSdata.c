@@ -4128,7 +4128,13 @@ exit(11);
         /* reset Sigmaold so that Sigma does not change when we average later */
         varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
       }
-      /* now solve all coupled ell. eqns one after an other */
+      /* reset Newton_tol */
+      normresnonlin = GridL2Norm_of_vars_in_string(grid, 
+                                      Gets("BNSdata_CTS_Eqs_Iteration_order"));
+      Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+
+      /* now solve ell. eqns for vars in BNSdata_CTS_Eqs_Iteration_order
+         one after an other */
       BNS_ordered_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
                                linear_solver, 1);
     }
