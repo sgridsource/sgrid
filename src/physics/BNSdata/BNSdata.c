@@ -3833,6 +3833,22 @@ double average_current_and_old(double weight, tGrid *grid,
   return error;
 }
 
+/* get total residual but without contribution in outer boxes */
+double normresnonlin_without_BNSdata_Sigma_inbox12(tGrid *grid)
+{
+  int b;
+  int iSig = Ind("BNSdata_Sigma_Err");
+
+  F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+  for(b=1; b<=2; b++)
+  {
+    tBox *box = grid->box[b];
+    int i;
+    forallpoints(box, i)  box->v[iSig][i] = 0.0;
+  }
+  return GridL2Norm(vlFu);
+}
+
 
 /* Solve the Equations */
 int BNSdata_solve(tGrid *grid)
@@ -3853,6 +3869,8 @@ int BNSdata_solve(tGrid *grid)
   double linSolver_tolFac = Getd("BNSdata_linSolver_tolFac");
   double linSolver_tol    = Getd("BNSdata_linSolver_tol");
   double normresnonlin;
+  double realnormres = 1e300;
+  double realnormres_old;
   int (*linear_solver)(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -4048,6 +4066,47 @@ exit(11);
     /* set wB before we solve */
     BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0); 
     BNS_set_wB(grid, 2, Getd("BNSdata_actual_xmax2"),0.0,0.0); 
+
+    /* check if we do another ell. solve for BNSdata_Sigma */
+    realnormres_old = realnormres; /* save realnormres */
+    realnormres = normresnonlin_without_BNSdata_Sigma_inbox12(grid);
+    printf(" realnormres=%g  realnormres_old=%g\n",
+           realnormres, realnormres_old);
+    if(realnormres_old <= realnormres*Getd("BNSdata_extraSigmaSolve_fac"))
+    {
+      /* solve BNSdata_Sigma completely in outer boxes */
+      printf("Setting BNSdata_Sigma outside the stars only...\n");
+      Sets("BNSdata_KeepInnerSigma", "yes");
+      BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+             &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+      Sets("BNSdata_KeepInnerSigma", "no");
+      totalerr1 = average_current_and_old(1, grid,vlFu,vlu,vluDerivs, vlJdu);
+      varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+      /* reset Newton_tol, use error norm of all vars in vlu */
+      F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+      normresnonlin = GridL2Norm(vlFu);
+      Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+      /* reset Sigmaold to take into account new Sigma in outer boxes */
+      varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+
+      /* solve the ell. eqn for Sigma alone */
+      BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+             &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+      totalerr1 = average_current_and_old(Sigma_esw, 
+                                          grid,vlFu,vlu,vluDerivs, vlJdu);
+      if(Sigma_esw<1.0 && it>=allow_Sigma_esw1_it && allow_Sigma_esw1_it>=0)
+      {
+        /* complete step */
+        totalerr = average_current_and_old(Sigma_esw1/Sigma_esw,
+                                           grid,vlFu,vlu,vluDerivs,vlJdu);
+        /* but go back to Sigma_esw if totalerr is larger */
+        if(totalerr>totalerr1)
+          totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
+                                             grid,vlFu,vlu,vluDerivs,vlJdu);
+      }
+      /* reset Sigmaold so that Sigma does not change when we average later */
+      varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+    }
 
     /* How we solve the coupled ell. eqns */
     if(Getv("BNSdata_EllSolver_method", "allatonce"))
@@ -4338,6 +4397,7 @@ if(0) /* not working */
     set_BNSdata_actual_xyzmax_pars(grid);
     if(Getv("BNSdata_center_new_q_timebin", "after_adjusting_Omega_xCM"))
       BNSdata_center_q_if_desired(grid, it);
+
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
