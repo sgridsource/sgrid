@@ -4073,10 +4073,10 @@ exit(11);
     realnormres = normresnonlin_without_BNSdata_Sigma_inbox12(grid);
     itsSinceExtraSigma++;
     prdivider(1);
-    printf("BNSdata_solve step %d: itsSinceExtraSigma=%d", it, itsSinceExtraSigma);
+    printf("BNSdata_solve step %d: itsSinceExtraSigma=%d\n",
+           it, itsSinceExtraSigma);
     printf(" realnormres=%g  realnormres_old=%g\n",
            realnormres, realnormres_old);
-    prdivider(1);
     if( (realnormres_old <= realnormres*Getd("BNSdata_extraSigmaSolve_fac")) &&
         (itsSinceExtraSigma >= Geti("BNSdata_extraSigmaSolve_every")) )
     {
@@ -4415,9 +4415,11 @@ if(0) /* not working */
     /* evalute residual and break if it is small enough */
     F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
     normresnonlin = GridL2Norm(vlFu);
-    printf("BNSdata_solve step %d: residual = %.4e\n", it, normresnonlin);
+    printf("BNSdata_solve step %d: residual = %e\n", it, normresnonlin);
+    totalerr1 = normresnonlin_without_BNSdata_Sigma_inbox12(grid);
+    printf(" with Sigma_Err=0 in box1/2: real residual = %e\n", totalerr1);
     prdivider(1);  fflush(stdout);
-    if(normresnonlin<tol && 
+    if((normresnonlin<tol || totalerr1<tol) && 
        Getv("BNSdata_break_if_err_below_tol","at_iterationend")) break;
 
     /* set new tol for Newton */
