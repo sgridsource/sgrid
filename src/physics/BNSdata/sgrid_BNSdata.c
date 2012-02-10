@@ -239,6 +239,8 @@ int sgrid_BNSdata()
          "This par has to contain all we solve for!");
   AddPar("BNSdata_extraSigmaSolve_fac", "0",
          "solve for Sigma if res_old/res <= fac");
+  AddPar("BNSdata_extraSigmaSolve_every", "10",
+         "how often we do the extra Sigma solve");
   AddPar("BNSdata_linSolver", "UMFPACK", 
          "linear solver used [LAPACK,templates_GMRES,bicgstab,UMFPACK]");
   AddPar("BNSdata_linSolver_itmax", "20", "max num of linSolver iterations");

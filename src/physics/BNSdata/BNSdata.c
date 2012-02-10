@@ -3871,6 +3871,7 @@ int BNSdata_solve(tGrid *grid)
   double normresnonlin;
   double realnormres = 1e300;
   double realnormres_old;
+  int    itsSinceExtraSigma = 0;
   int (*linear_solver)(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -4070,9 +4071,14 @@ exit(11);
     /* check if we do another ell. solve for BNSdata_Sigma */
     realnormres_old = realnormres; /* save realnormres */
     realnormres = normresnonlin_without_BNSdata_Sigma_inbox12(grid);
+    itsSinceExtraSigma++;
+    prdivider(1);
+    printf("BNSdata_solve step %d: itsSinceExtraSigma=%d", it, itsSinceExtraSigma);
     printf(" realnormres=%g  realnormres_old=%g\n",
            realnormres, realnormres_old);
-    if(realnormres_old <= realnormres*Getd("BNSdata_extraSigmaSolve_fac"))
+    prdivider(1);
+    if( (realnormres_old <= realnormres*Getd("BNSdata_extraSigmaSolve_fac")) &&
+        (itsSinceExtraSigma >= Geti("BNSdata_extraSigmaSolve_every")) )
     {
       /* solve BNSdata_Sigma completely in outer boxes */
       printf("Setting BNSdata_Sigma outside the stars only...\n");
@@ -4109,6 +4115,7 @@ exit(11);
 
       /* make sure we do not enter this block in the next iteration */
       realnormres = 1e300;
+      itsSinceExtraSigma = 0;
     }
 
     /* How we solve the coupled ell. eqns */
