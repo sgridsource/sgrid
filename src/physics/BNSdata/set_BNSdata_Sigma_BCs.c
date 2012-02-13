@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 26.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 13.2.2012 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -15,8 +15,7 @@
 
 
 
-void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,  
-		   tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs, 		   int nonlin)
+void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs,      int nonlin)
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
@@ -32,6 +31,7 @@ int SigmaZeroInOuterBoxes = Getv("BNSdata_Sigma_surface_BCs","ZeroInOuterBoxes")
 int noBCs = Getv("BNSdata_Sigma_surface_BCs","none");
 int KeepInnerSigma = Getv("BNSdata_KeepInnerSigma","yes");
 int UniqueSigmaAtPoles = 0; //Getv("BNSdata_Sigma_surface_BCs","UniqueSigmaAtPoles");
+int ImposeActualBC = !Getv("BNSdata_Sigma_surface_BCs","EllEqn");
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
@@ -386,7 +386,7 @@ continue;
 
 
 /* conditional */
-if (((bi == 0 || bi == 1) && corot1) || ((bi == 2 || bi == 3) && corot2)) {
+if ((bi == 0 || bi == 1) && corot1 || (bi == 2 || bi == 3) && corot2) {
 
 
 
@@ -475,39 +475,18 @@ double *dSigmain1, *dSigmain2, *dSigmain3;
 double *dlSigmain1, *dlSigmain2, *dlSigmain3; 
 
 
-double *ddSigmain11, *ddSigmain12, *ddSigmain13,                      
-                            *ddSigmain22, *ddSigmain23, *ddSigmain33;
+double *ddSigmain11, *ddSigmain12, *ddSigmain13,                             *ddSigmain22, *ddSigmain23, *ddSigmain33; 
 
-double *ddlSigmain11, *ddlSigmain12, *ddlSigmain13,                      
-                            *ddlSigmain22, *ddlSigmain23, *ddlSigmain33;
+
+double *ddlSigmain11, *ddlSigmain12, *ddlSigmain13,                             *ddlSigmain22, *ddlSigmain23, *ddlSigmain33; 
+
 
 if(bi==1) biin=0; else biin=3; 
 
 
-n1in = grid->box[biin]->n1;                                              
-                     n2in = grid->box[biin]->n2;
-                     n3in = grid->box[biin]->n3;
+n1in = grid->box[biin]->n1;                      n2in = grid->box[biin]->n2;                      n3in = grid->box[biin]->n3;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+                Sigmain    = grid->box[biin]->v[index_Sigma];                lSigmain   = grid->box[biin]->v[index_lSigma];                dSigmain1  = grid->box[biin]->v[index_BNSdata_Sigmax+0];                dSigmain2  = grid->box[biin]->v[index_BNSdata_Sigmax+1];                dSigmain3  = grid->box[biin]->v[index_BNSdata_Sigmax+2];               dlSigmain1  = grid->box[biin]->v[index_dlSigma1];               dlSigmain2  = grid->box[biin]->v[index_dlSigma2];               dlSigmain3  = grid->box[biin]->v[index_dlSigma3];               ddSigmain11 = grid->box[biin]->v[index_BNSdata_Sigmaxx+0];               ddSigmain12 = grid->box[biin]->v[index_BNSdata_Sigmaxx+1];               ddSigmain13 = grid->box[biin]->v[index_BNSdata_Sigmaxx+2];               ddSigmain22 = grid->box[biin]->v[index_BNSdata_Sigmaxx+3];               ddSigmain23 = grid->box[biin]->v[index_BNSdata_Sigmaxx+4];               ddSigmain33 = grid->box[biin]->v[index_BNSdata_Sigmaxx+5];              ddlSigmain11 = grid->box[biin]->v[index_ddlSigma11];              ddlSigmain12 = grid->box[biin]->v[index_ddlSigma12];              ddlSigmain13 = grid->box[biin]->v[index_ddlSigma13];              ddlSigmain22 = grid->box[biin]->v[index_ddlSigma22];              ddlSigmain23 = grid->box[biin]->v[index_ddlSigma23];              ddlSigmain33 = grid->box[biin]->v[index_ddlSigma33];
 
-               Sigmain    = grid->box[biin]->v[index_Sigma];
-               lSigmain   = grid->box[biin]->v[index_lSigma];
-               dSigmain1  = grid->box[biin]->v[index_BNSdata_Sigmax+0];
-               dSigmain2  = grid->box[biin]->v[index_BNSdata_Sigmax+1];
-               dSigmain3  = grid->box[biin]->v[index_BNSdata_Sigmax+2];
-              dlSigmain1  = grid->box[biin]->v[index_dlSigma1];
-              dlSigmain2  = grid->box[biin]->v[index_dlSigma2];
-              dlSigmain3  = grid->box[biin]->v[index_dlSigma3];
-              ddSigmain11 = grid->box[biin]->v[index_BNSdata_Sigmaxx+0];
-              ddSigmain12 = grid->box[biin]->v[index_BNSdata_Sigmaxx+1];
-              ddSigmain13 = grid->box[biin]->v[index_BNSdata_Sigmaxx+2];
-              ddSigmain22 = grid->box[biin]->v[index_BNSdata_Sigmaxx+3];
-              ddSigmain23 = grid->box[biin]->v[index_BNSdata_Sigmaxx+4];
-              ddSigmain33 = grid->box[biin]->v[index_BNSdata_Sigmaxx+5];
-             ddlSigmain11 = grid->box[biin]->v[index_ddlSigma11];
-             ddlSigmain12 = grid->box[biin]->v[index_ddlSigma12];
-             ddlSigmain13 = grid->box[biin]->v[index_ddlSigma13];
-             ddlSigmain22 = grid->box[biin]->v[index_ddlSigma22];
-             ddlSigmain23 = grid->box[biin]->v[index_ddlSigma23];
-             ddlSigmain33 = grid->box[biin]->v[index_ddlSigma33];
 if(n2in!=n2 || n3in!=n3) errorexit("we need n2in=n2 and n3in=n3"); 
 
 
@@ -545,10 +524,9 @@ dddSigmadA3[ijk] + 2.*ddSigmadA2[ijk] + dSigmadA[ijk]
 forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
 
 
-ind0   = Ind_n1n2(0,j,k,n1,n2);                            
-                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
-                       Sig    = Sigma[ind0];
-                       Sigin  = Sigmain[ind0in];FSigma[ijk]
+ind0   = Ind_n1n2(0,j,k,n1,n2);                        ind0in = Ind_n1n2(0,j,k,n1in,n2in);                        Sig    = Sigma[ind0];                        Sigin  = Sigmain[ind0in]; 
+
+FSigma[ijk]
 =
 Sig - Sigin
 ;
@@ -870,10 +848,9 @@ dddlSigmadA3[ijk] + 2.*ddlSigmadA2[ijk] + dlSigmadA[ijk]
 forplane1(i,j,k, n1,n2,n3, 1){ ijk=Index(i,j,k); 
 
 
-ind0   = Ind_n1n2(0,j,k,n1,n2);                            
-                       ind0in = Ind_n1n2(0,j,k,n1in,n2in);
-                       lSig   = lSigma[ind0];
-                       lSigin = lSigmain[ind0in];FlSigma[ijk]
+ind0   = Ind_n1n2(0,j,k,n1,n2);                        ind0in = Ind_n1n2(0,j,k,n1in,n2in);                        lSig   = lSigma[ind0];                        lSigin = lSigmain[ind0in]; 
+
+FlSigma[ijk]
 =
 lSig - lSigin
 ;
@@ -1176,7 +1153,7 @@ FlSigma[ijk]
 if (bi == 0 || bi == 3) {
 
 
-FirstDerivsOf_S(box,  Ind("BNSdata_q"), 			                 Ind("BNSdata_qx")); 
+FirstDerivsOf_S(box,  Ind("BNSdata_q"),                     Ind("BNSdata_qx")); 
 
 
 
@@ -1192,8 +1169,8 @@ FirstDerivsOf_S(box, index_Sigma,                                        Ind("BN
 if (AddInnerVolIntToBC || InnerVolIntZero) {
 
 
-VolAvSigma =                                                  
-          VolumeIntegral_inBNSgridBox(grid, bi, index_Sigma);
+VolAvSigma =           VolumeIntegral_inBNSgridBox(grid, bi, index_Sigma); 
+
 }
 /* if (AddInnerVolIntToBC || InnerVolIntZero) */
 
@@ -1392,6 +1369,11 @@ uzero
 sqrt(uzerosqr)
 ;
 
+
+
+/* conditional */
+if (ImposeActualBC) {
+
 FSigma[ijk]
 =
 (dSigmaUp1 - beta1*h*Psi4*uzero)*dq1[ijk] + 
@@ -1404,6 +1386,10 @@ FSigma[ijk]
 FSigma[ijk] + Psim2*(dq1[ijk]*wB1[ijk] + dq2[ijk]*wB2[ijk] + 
      dq3[ijk]*wB3[ijk])
 ;
+
+}
+/* if (ImposeActualBC) */
+
 
 
 
@@ -1428,10 +1414,9 @@ VolAvSigma + FSigma[ijk]
 if (RegularityOnAxis) {
 
 
-                                                                      
-        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 */ 
-        BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FSigma,
-                        Sigma, dSigma1,dSigma2,dSigma3);}
+         /* Be careful: this func overwrites BNSdata_temp1/2/3/4 */          BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FSigma,                         Sigma, dSigma1,dSigma2,dSigma3); 
+
+}
 /* if (RegularityOnAxis) */
 
 
@@ -1533,8 +1518,8 @@ FirstDerivsOf_S(box, index_lSigma, index_dlSigma1);
 if (AddInnerVolIntToBC || InnerVolIntZero) {
 
 
-VolAvlSigma =                                                  
-          VolumeIntegral_inBNSgridBox(grid, bi, index_lSigma);
+VolAvlSigma =           VolumeIntegral_inBNSgridBox(grid, bi, index_lSigma); 
+
 }
 /* if (AddInnerVolIntToBC || InnerVolIntZero) */
 
@@ -1917,6 +1902,11 @@ h*Psi4*uzero*lB3[ijk] + beta3*(Psi4*(h*luzero + lh*uzero) +
      4.*h*Psi3*uzero*lPsi[ijk])
 ;
 
+
+
+/* conditional */
+if (ImposeActualBC) {
+
 FlSigma[ijk]
 =
 dlq1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
@@ -1934,6 +1924,10 @@ FlSigma[ijk] + Psim2*(lwB1*dq1[ijk] + lwB2*dq2[ijk] + lwB3*dq3[ijk] +
   2.*Psim3*lPsi[ijk]*(dq1[ijk]*wB1[ijk] + dq2[ijk]*wB2[ijk] + 
      dq3[ijk]*wB3[ijk])
 ;
+
+}
+/* if (ImposeActualBC) */
+
 
 
 
@@ -1958,10 +1952,9 @@ VolAvlSigma + FlSigma[ijk]
 if (RegularityOnAxis) {
 
 
-                                                                       
-        /* Be careful: this func overwrites BNSdata_temp1/2/3/4 */
-        BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FlSigma,
-                        lSigma, dlSigma1,dlSigma2,dlSigma3);}
+         /* Be careful: this func overwrites BNSdata_temp1/2/3/4 */         BNSdata_RegularityConditions_for_Var_at_rho_eq_0(box, FlSigma,                         lSigma, dlSigma1,dlSigma2,dlSigma3); 
+
+}
 /* if (RegularityOnAxis) */
 
 
@@ -2169,4 +2162,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 121, n* = 570,  n/ = 282,  n+ = 388, n = 1240, O = 1 */
+/* nvars = 121, n* = 578,  n/ = 290,  n+ = 388, n = 1256, O = 1 */

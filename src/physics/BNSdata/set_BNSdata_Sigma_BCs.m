@@ -286,10 +286,13 @@ tocompute = {
         uzerosqr == L2/(alpha2 h2),
         uzero == sqrt[uzerosqr],
 
-        FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
-        (* add extra term with wB *)
-        FSigma == FSigma + Psim2 wB[c] dq[c],
-        (* add VolAvSigma=0 to BC for 0<B<1 *)
+        (* actual Physical BC *)
+        Cif == ImposeActualBC,
+          FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
+          (* add extra term with wB *)
+          FSigma == FSigma + Psim2 wB[c] dq[c],
+        Cif == end,
+          (* add VolAvSigma=0 to BC for 0<B<1 *)
         Cif == ( (AddInnerVolIntToBC || AddInnerSumToBC) ),
           FSigma == FSigma + VolAvSigma,
         Cif == end,
@@ -413,11 +416,14 @@ tocompute = {
                                  4 uzero Psi3 lPsi beta[a] +
                                  uzero Psi4 lB[a]) + lh uzero Psi4 beta[a],
         
-        FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c] +
-                    dSigmaUp[c] dlq[c] - h uzero Psi4 beta[c] dlq[c],
-        (* add extra term with wB *)
-        FlSigma == FlSigma + Psim2 lwB[c] dq[c] - 2 Psim3 lPsi wB[c] dq[c] +
-                             Psim2 wB[c] dlq[c],
+        (* actual Physical BC *)
+        Cif == ImposeActualBC,
+          FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c] +
+                      dSigmaUp[c] dlq[c] - h uzero Psi4 beta[c] dlq[c],
+          (* add extra term with wB *)
+          FlSigma == FlSigma + Psim2 lwB[c] dq[c] - 2 Psim3 lPsi wB[c] dq[c] +
+                               Psim2 wB[c] dlq[c],
+        Cif == end,
 
         (* add VolAvlSigma=0 to BC *)
         Cif == ( (AddInnerVolIntToBC || AddInnerSumToBC) ),
@@ -566,6 +572,7 @@ BeginCFunction[] := Module[{},
   pr["int noBCs = Getv(\"BNSdata_Sigma_surface_BCs\",\"none\");\n"];
   pr["int KeepInnerSigma = Getv(\"BNSdata_KeepInnerSigma\",\"yes\");\n"];
   pr["int UniqueSigmaAtPoles = 0; //Getv(\"BNSdata_Sigma_surface_BCs\",\"UniqueSigmaAtPoles\");\n"];
+  pr["int ImposeActualBC = !Getv(\"BNSdata_Sigma_surface_BCs\",\"EllEqn\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];

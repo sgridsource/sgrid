@@ -171,7 +171,7 @@ int sgrid_BNSdata()
          "BCs for Sigma on star surfaces "
          "[AddInnerVolIntToBC,AddInnerSumToBC,RegularityOnAxis,"
          "ZeroAtPoint,InnerVolIntZero,InnerSumZero,AtA0B0,AtA0B1,"
-         "none,ZeroInOuterBoxes]");
+         "none,ZeroInOuterBoxes,EllEqn]");
   AddPar("BNSdata_KeepInnerSigma", "no", "keep Sigma in inner boxes [no,yes]");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
