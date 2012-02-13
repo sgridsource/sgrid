@@ -36,6 +36,8 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
     int BCs_atInf = 1;
     int BCs_box1_2 = 1;
     int BCs_AxisAtOuterInterfaces = 1;
+    int BCs_box0_A0 = 1; /* set BCs at A=0 in box0 */
+    int BCs_box3_A0 = 1; /* set BCs at A=0 in box3 */
     //int BCs_box0_1 = 1;
     //int BCs_box3_2 = 1;
     char *varname = VarName(vlu->index[vind]);
@@ -45,6 +47,8 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
       BCs_atInf = 0;
       BCs_box1_2 = 0;
       BCs_AxisAtOuterInterfaces = 0;
+      BCs_box0_A0 = 0;
+      BCs_box3_A0 = 0;
       /* printf("varname=%s\n", varname); */
     }
 
@@ -425,9 +429,12 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
         if(b==0)  /* in box0 */
         {
           /* values at A=0 are equal in box0 and box1 */
-          P = grid->box[1]->v[vlu->index[vind]]; /* values in box1 */
-          forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
-            FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
+          if(BCs_box0_A0)
+          {
+            P = grid->box[1]->v[vlu->index[vind]]; /* values in box1 */
+            forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
+              FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
+          }
           /* values at A=Amin are interpolated from box5 */
           xp = box->v[Ind("x")];
           yp = box->v[Ind("y")];
@@ -458,9 +465,12 @@ void set_BNSdata_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int non
         else if(b==3)  /* in box3 */
         {
           /* values at A=0 are equal in box3 and box2 */
-          P = grid->box[2]->v[vlu->index[vind]]; /* values in box2 */
-          forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
-            FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
+          if(BCs_box3_A0)
+          {
+            P = grid->box[2]->v[vlu->index[vind]]; /* values in box2 */
+            forplane1(i,j,k, n1,n2,n3, 0) /* <-- A=0 */
+              FPsi[Index(i,j,k)] = Psi[Index(i,j,k)] - P[Index(i,j,k)];
+          }
           /* values at A=Amin are interpolated from box4 */
           xp = box->v[Ind("x")];
           yp = box->v[Ind("y")];
