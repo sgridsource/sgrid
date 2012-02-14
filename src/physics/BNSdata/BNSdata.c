@@ -1647,9 +1647,16 @@ void smooth_BNSdata_Sigma_NearBoundary(tGrid *grid, int itmax, double tol,
   tParameter *pdb_bak;
   double dsig_ch = Getd("BNSdata_SmoothSigmaRegion");
   int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int xi     = Ind("x");
   double dsigp = grid->box[0]->v[sigpmi][0] * dsig_ch;
   double dsigm = grid->box[3]->v[sigpmi][0] * dsig_ch;
   double normresnonlin;
+  double xout1, xin1, xout2, xin2;
+  int b0n1 = grid->box[0]->n1;
+  int b0n2 = grid->box[0]->n2;
+  int b3n1 = grid->box[3]->n1;
+  int b3n2 = grid->box[3]->n2;
+  double sigp_00, sigp_10, sigm_00, sigm_10;
 
   /* do nothing if no change */
   if(dsig_ch==0.0) return;
@@ -1668,6 +1675,18 @@ void smooth_BNSdata_Sigma_NearBoundary(tGrid *grid, int itmax, double tol,
      move inwards */
   add_const_to_sigma_pm(grid, dsigp, 0);
   add_const_to_sigma_pm(grid, dsigm, 3);
+  /* get inner and outer edges of both stars */
+  xout1 = grid->box[0]->v[xi][0]; /* sigma_p at B=phi=0 */
+  xin1  = grid->box[0]->v[xi][Ind_n1n2(0,b0n2-1,0, b0n1,b0n2)]; /* sigma_p at B=1, phi=0 */
+  xout2 = grid->box[3]->v[xi][0]; /* sigma_m at B=phi=0 */
+  xin2  = grid->box[3]->v[xi][Ind_n1n2(0,b3n2-1,0, b3n1,b3n2)]; /* sigma_m at B=1, phi=0 */
+  printf(" -> xin1=%g xout1=%g  xin2=%g xout2=%g\n", xin1,xout1, xin2, xout2);
+  sigp_00 = grid->box[0]->v[sigpmi][0]; /* sigma_p at B=phi=0 */
+  sigp_10 = grid->box[0]->v[sigpmi][Ind_n1n2(0,b0n2-1,0, b0n1,b0n2)]; /* sigma_p at B=1, phi=0 */
+  sigm_00 = grid->box[3]->v[sigpmi][0]; /* sigma_m at B=phi=0 */
+  sigm_10 = grid->box[3]->v[sigpmi][Ind_n1n2(0,b3n2-1,0, b3n1,b3n2)]; /* sigma_m at B=1, phi=0 */
+  printf(" -> sigp_10=%g sigp_00=%g  sigm_10=%g sigm_00=%g\n",
+         sigp_10, sigp_00, sigm_10, sigm_00);
 
   /* do not touch BNSdata_Sigma in inner boxes, but solve in outer */
   printf("set BNSdata_Sigma by interpolation outside newly shrunk boxes 0 and 3...\n");
