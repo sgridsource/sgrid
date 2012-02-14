@@ -1617,6 +1617,8 @@ void add_const_to_sigma_pm(tGrid *grid, double dsig, int innerdom)
   Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
 
   /* interpolate some vars from grid onto new grid2 */
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
