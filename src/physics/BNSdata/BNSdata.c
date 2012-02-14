@@ -1680,7 +1680,6 @@ void smooth_BNSdata_Sigma_NearBoundary(tGrid *grid, int itmax, double tol,
   Interp_Var_From_Grid1_To_Grid2_pm(grid, grid_bak, Ind("BNSdata_Sigma"), 0);
   Interp_Var_From_Grid1_To_Grid2_pm(grid, grid_bak, Ind("BNSdata_Sigma"), 3);
   printf("smooth_BNSdata_Sigma_NearBoundary: modified BNSdata_Sigma.\n");
-  prdivider(1);
 
   /* copy grid_bak and pdb_bak back into grid and pdb */
   copy_grid(grid_bak, grid, 0);
