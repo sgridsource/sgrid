@@ -1573,6 +1573,123 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
   free_grid(grid2);
 }
 
+/* add a const to sigma_pm to change surface shape for one star */
+void add_const_to_sigma_pm(tGrid *grid, double dsig, int innerdom)
+{
+  tGrid *grid2;
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int b, i, outerdom;
+  void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
+                                     int innerdom);
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("add_const_to_sigma_pm: innerdom is not 0 or 3");
+
+  /* do nothing if dsig=0 */  
+  if(dsig==0.0) return;
+
+  printf(" add_const_to_sigma_pm:  dsig=%f  innerdom=%d\n", 
+         dsig, innerdom);
+
+  /* make new grid2, which is an exact copy of grid */
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid2, 0);
+
+  /* loop over AnsorgNS boxes */
+  for(b=0; b<=3; b++)
+  {
+    double *surf;
+    double *surf2;
+
+    /* do nothing if we are in the wrong box */
+    if(b!=innerdom && b!=outerdom) continue;
+
+    surf  = grid->box[b]->v[sigpmi];
+    surf2 = grid2->box[b]->v[sigpmi];
+
+    /* add dsig on grid2 to */      
+    forallpoints(grid->box[b], i)  surf2[i] = surf[i] + dsig;
+  }
+
+  /* initialize coords of grid2 on side of innerdom */
+  BNSgrid_init_Coords_pm(grid2, innerdom);
+  /* use interpolator that does only side of innerdom */
+  Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
+
+  /* interpolate some vars from grid onto new grid2 */
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"),innerdom);
+  if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
+      (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
+  {
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
+  }
+  /* copy grid2 back into grid, and free grid2 */
+  copy_grid(grid2, grid, 0);
+  free_grid(grid2);
+}
+
+void smooth_BNSdata_Sigma_NearBoundary(tGrid *grid, int itmax, double tol,
+     int (*linear_solver)(tVarList *x, tVarList *b,
+              tVarList *r, tVarList *c1,tVarList *c2,
+              int itmax, double tol, double *normres,
+              void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *),
+              void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)))
+{
+  tGrid *grid_bak;
+  tParameter *pdb_bak;
+  double dsig_ch = Getd("BNSdata_SmoothSigmaRegion");
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  double dsigp = grid->box[0]->v[sigpmi][0] * dsig_ch;
+  double dsigm = grid->box[3]->v[sigpmi][0] * dsig_ch;
+  double normresnonlin;
+
+  /* do nothing if no change */
+  if(dsig_ch==0.0) return;
+
+  prdivider(1);
+  printf("smooth_BNSdata_Sigma_NearBoundary:  dsigp=%g  dsigm=%g\n",
+         dsigp, dsigm);
+
+  /* make exact copies of grid and pdb */
+  grid_bak = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid_bak, 0);
+  pdb_bak  = make_empty_pdb(npdbmax);
+  copy_pdb(pdb, npdb, pdb_bak);
+
+  /* now change Coordinates_AnsorgNS_sigma_pm on grid, so that boundaries
+     move inwards */
+  add_const_to_sigma_pm(grid, dsigp, 0);
+  add_const_to_sigma_pm(grid, dsigm, 3);
+
+  /* do not touch BNSdata_Sigma in inner boxes, but solve in outer */
+  printf("set BNSdata_Sigma by interpolation outside newly shrunk boxes 0 and 3...\n");
+  Sets("BNSdata_KeepInnerSigma", "yes");
+  BNS_Eqn_Iterator_for_vars_in_string(grid, itmax, tol, 
+               &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+  Sets("BNSdata_KeepInnerSigma", "no");
+
+  /* interpolate new BNSdata_Sigma to grid_bak */
+  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid_bak, Ind("BNSdata_Sigma"), 0);
+  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid_bak, Ind("BNSdata_Sigma"), 3);
+  printf("smooth_BNSdata_Sigma_NearBoundary: modified BNSdata_Sigma.\n");
+  prdivider(1);
+
+  /* copy grid_bak and pdb_bak back into grid and pdb */
+  copy_grid(grid_bak, grid, 0);
+  copy_pdb(pdb_bak, npdb, pdb);
+  /* free grid_bak pdb_bak */
+  free_grid(grid_bak);
+  free_pdb(pdb_bak, npdb); 
+}
+
 /* filter Var with index vind with 2/3 rule in B and phi directions 
    on side of innerdom  */
 void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
@@ -4339,6 +4456,9 @@ if(0) /* not working */
     /* adjust C1/2, Omega, xCM according to WT with L2 */
     adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
 }
+
+    /* try to smoothe NSdata_Sigma near the boundary */
+    smooth_BNSdata_Sigma_NearBoundary(grid, 2, tol, linear_solver);
 
     /* reset BNSdata_qmax1/2, BNSdata_xmax1/2 pars if the iteration 
        # it is contained in the list BNSdata_reset_qmax_xmax_pars_at */
