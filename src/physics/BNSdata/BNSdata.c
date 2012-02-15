@@ -1508,6 +1508,7 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
                                           tGrid *grid_bak, tParameter *pdb_bak)
 {
   tGrid *grid2;
+  int interp_qgold = !Getv("BNSdata_new_q", "FromFields");
   int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
   int b, i, outerdom;
   void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
@@ -1550,8 +1551,6 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
   Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
 
   /* interpolate some vars from grid onto new grid2 */
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
@@ -1565,6 +1564,9 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
   }
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
+  if(interp_qgold) 
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
 
   /* q on grid2 can just be computed */
   BNS_compute_new_centered_q(grid2);
@@ -1585,6 +1587,7 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
 void add_const_to_sigma_pm(tGrid *grid, double dsig, int innerdom)
 {
   tGrid *grid2;
+  int interp_qgold = !Getv("BNSdata_new_q", "FromFields");
   int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
   int b, i, outerdom;
   void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
@@ -1625,8 +1628,6 @@ void add_const_to_sigma_pm(tGrid *grid, double dsig, int innerdom)
   Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
 
   /* interpolate some vars from grid onto new grid2 */
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
@@ -1640,6 +1641,11 @@ void add_const_to_sigma_pm(tGrid *grid, double dsig, int innerdom)
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
+  }
+  if(interp_qgold)
+  {
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
   }
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);
@@ -1777,6 +1783,7 @@ void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
 void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
 {
   tGrid *grid2;
+  int interp_qgold = !Getv("BNSdata_new_q", "FromFields");
   int outerdom;
   int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
   void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
@@ -1832,6 +1839,8 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
       Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
       Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
     }
+    if(interp_qgold)
+      Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
 
     BNS_compute_new_centered_q(grid2);
 
@@ -5871,6 +5880,7 @@ void compute_new_q_and_adjust_domainshapes_InterpFromGrid0(tGrid *grid,
                                                            int innerdom)
 {
   tGrid *grid2;
+  int interp_qgold = !Getv("BNSdata_new_q", "FromFields");
   int outerdom;
   void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
                                      int innerdom);
@@ -5925,6 +5935,8 @@ void compute_new_q_and_adjust_domainshapes_InterpFromGrid0(tGrid *grid,
     Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_wBy"),innerdom);
     Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_wBz"),innerdom);
   }
+  if(interp_qgold)
+    Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_qgold"),innerdom);
 
   BNS_compute_new_centered_q(grid2);
 
