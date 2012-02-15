@@ -2838,6 +2838,7 @@ void BNS_update_q(tGrid *grid2, double w, tGrid *grid1)
   int iY = Ind("Y");
   int iZ = Ind("Z");
   int iq = Ind("BNSdata_q");
+  int iqg= Ind("BNSdata_qg");
   int b2, i;
 
   forallboxes(grid2,b2)
@@ -2847,9 +2848,13 @@ void BNS_update_q(tGrid *grid2, double w, tGrid *grid1)
     double *Y2 = box->v[iY];
     double *Z2 = box->v[iZ];
     double *q = box->v[iq];
+    double *qg= box->v[iqg];
 
     forallpoints(box, i)
+    {
       q[i] = BNS_update_q_atXYZ(grid2,b2, X2[i],Y2[i],Z2[i], w, grid1);
+      qg[i]= q[i];
+    }
   }
 }
 

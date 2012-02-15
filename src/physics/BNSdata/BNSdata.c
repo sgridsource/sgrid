@@ -415,11 +415,12 @@ exit(77);
   enablevar(grid, Ind("BNSdata_temp2"));
   enablevar(grid, Ind("BNSdata_temp3"));
   enablevar(grid, Ind("BNSdata_temp4"));
+  enablevar(grid, Ind("BNSdata_qg"));
   enablevar(grid, Ind("BNSdata_Psiold"));
   enablevar(grid, Ind("BNSdata_Boldx"));
   enablevar(grid, Ind("BNSdata_alphaPold"));
   enablevar(grid, Ind("BNSdata_Sigmaold"));
-  enablevar(grid, Ind("BNSdata_qold"));
+  enablevar(grid, Ind("BNSdata_qgold"));
   enablevar(grid, Ind("BNSdata_qcorot"));
   enablevar(grid, Ind("BNSdata_qnocent"));
   enablevar(grid, Ind("BNSdata_surface_sigma_pm"));
@@ -644,6 +645,10 @@ exit(77);
         if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
     }
   }
+
+  /* set qg=q, qgold=qg */
+  varcopy(grid, Ind("BNSdata_qg"), Ind("BNSdata_q"));  
+  varcopy(grid, Ind("BNSdata_qgold"), Ind("BNSdata_qg"));  
 
   /* save initial surface positions in BNSdata_surface_sigma_pm */
   save_surfacepos_in_BNSdata_surface_sigma_pm(1, grid, grid, 99999.0);
@@ -882,6 +887,8 @@ int BNSdata_keep_xin_if_desired(tGrid *grid, int it)
 void BNS_compute_new_centered_q(tGrid *grid)
 {
   int iq = Ind("BNSdata_q");
+  int iqg= Ind("BNSdata_qg");
+
   BNS_compute_new_q(grid, iq);
   if(Getv("BNSdata_center_new_q_flag", "yes"))
   {
@@ -928,6 +935,7 @@ void BNS_compute_new_centered_q(tGrid *grid)
                        fac*(dqdx[i]*dx + dqdy[i]*dy + dqdz[i]*dz);
     }
   }
+  varcopy(grid, iqg, iq); /* set qg=q */
 }
 double BNS_compute_new_centered_q_atXYZ(tGrid *grid, int bi,
                                         double X, double Y, double Z)
@@ -1129,28 +1137,28 @@ int adjust_C1_C2_Omega_q_Pedro(tGrid *grid, int it, double tol)
   printf("BNSdata_solve step %d: old Omega = %.4e  dOmega = %.4e\n",
          it, Getd("BNSdata_Omega"), dOmega);
          
-  /* save old q in BNSdata_qold */
-  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+  /* save old qg in BNSdata_qgold */
+  varcopy(grid, Ind("BNSdata_qgold"), Ind("BNSdata_qg"));
 
   /* compute L2-diff between new q and qold for Omega - dOmega */
   Setd("BNSdata_Omega", Omega - dOmega);
   BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   L2norm3 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
 
   /* compute L2-diff between new q and qold for Omega + dOmega */
   Setd("BNSdata_Omega", Omega + dOmega);
   BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   L2norm2 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
 
   /* compute L2-diff between new q and qold for Omega */
   Setd("BNSdata_Omega", Omega);
   BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   L2norm1 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1"));
 
   printf("BNSdata_solve step %d: L2norm1=%g\n", it, L2norm1);
@@ -1287,7 +1295,7 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
 //Setd("BNSdata_Omega", 0.01);
 
   /* save old q in BNSdata_qold */
-  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+  varcopy(grid, Ind("BNSdata_qgold"), Ind("BNSdata_qg"));
 
   /* rest masses before adjusting q */
   m01 = GetInnerRestMass(grid, 0);
@@ -1542,8 +1550,8 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
   Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
 
   /* interpolate some vars from grid onto new grid2 */
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
@@ -1617,8 +1625,8 @@ void add_const_to_sigma_pm(tGrid *grid, double dsig, int innerdom)
   Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
 
   /* interpolate some vars from grid onto new grid2 */
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
   Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
@@ -1809,8 +1817,8 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
     Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
 
     /* interpolate some vars from grid onto new grid2 */
-    //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
-    //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
+    //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
+    //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
     Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
@@ -2065,8 +2073,8 @@ int adjust_C1_C2_Omega_xCM_q_WT(tGrid *grid, int it, double tol,
   printf("BNSdata_solve step %d: old Omega = %.4e  *dOmega = %.4e\n",
          it, Omega, *dOmega);
          
-  /* save old q in BNSdata_qold */
-  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+  /* save old qg in BNSdata_qgold */
+  varcopy(grid, Ind("BNSdata_qgold"), Ind("BNSdata_qg"));
 
   /* find max q locations xmax1/2 in NS1/2 */
   bi1=0;  bi2=3;
@@ -2154,8 +2162,8 @@ int adjust_C1_C2_Omega_xCM_q_WT_L2(tGrid *grid, int it, double tol,
   printf("BNSdata_solve step %d: old Omega = %.4e  *dOmega = %.4e\n",
          it, Omega, *dOmega);
          
-  /* save old q in BNSdata_qold */
-  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+  /* save old qg in BNSdata_qgold */
+  varcopy(grid, Ind("BNSdata_qgold"), Ind("BNSdata_qg"));
 
   /* compute L2-diff between new q and qold for Omega - *dOmega */
   Setd("BNSdata_Omega", Omega - *dOmega);
@@ -2163,7 +2171,7 @@ int adjust_C1_C2_Omega_xCM_q_WT_L2(tGrid *grid, int it, double tol,
          it, Getd("BNSdata_Omega"));
   BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   dif_m = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
           varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
 
@@ -2173,7 +2181,7 @@ int adjust_C1_C2_Omega_xCM_q_WT_L2(tGrid *grid, int it, double tol,
          it, Getd("BNSdata_Omega"));
   BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   dif_p = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
           varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
 
@@ -2183,7 +2191,7 @@ int adjust_C1_C2_Omega_xCM_q_WT_L2(tGrid *grid, int it, double tol,
          it, Getd("BNSdata_Omega"));
   BNS_compute_new_centered_q(grid);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   dif_0 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
           varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
 
@@ -2216,7 +2224,7 @@ int adjust_C1_C2_Omega_xCM_q_min_qchange(tGrid *grid, int it, double tol,
   double dif_m, dif_0, dif_p;
 
 errorexit("in order to use adjust_C1_C2_Omega_xCM_q_min_qchange you must uncomment\n"
-          "//Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind(\"BNSdata_qold\"));\n"
+          "//Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind(\"BNSdata_qgold\"));\n"
           "in the function compute_new_q_and_adjust_domainshapes");
 
   /* save Omega */
@@ -2224,8 +2232,8 @@ errorexit("in order to use adjust_C1_C2_Omega_xCM_q_min_qchange you must uncomme
   printf("BNSdata_solve step %d: old Omega = %.4e  *dOmega = %.4e\n",
          it, Omega, *dOmega);
          
-  /* save old q in BNSdata_qold */
-  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+  /* save old q in BNSdata_qgold */
+  varcopy(grid, Ind("BNSdata_qgold"), Ind("BNSdata_qg"));
 
   /* compute L2-diff between new q and qold for Omega - *dOmega */
   Setd("BNSdata_Omega", Omega - *dOmega);
@@ -2233,7 +2241,7 @@ errorexit("in order to use adjust_C1_C2_Omega_xCM_q_min_qchange you must uncomme
          it, Getd("BNSdata_Omega"));
   adjust_C1_C2_q_keep_restmasses(grid, it, tol);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   dif_m = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
           varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
 
@@ -2243,7 +2251,7 @@ errorexit("in order to use adjust_C1_C2_Omega_xCM_q_min_qchange you must uncomme
          it, Getd("BNSdata_Omega"));
   adjust_C1_C2_q_keep_restmasses(grid, it, tol);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   dif_p = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
           varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
 
@@ -2253,7 +2261,7 @@ errorexit("in order to use adjust_C1_C2_Omega_xCM_q_min_qchange you must uncomme
          it, Getd("BNSdata_Omega"));
   adjust_C1_C2_q_keep_restmasses(grid, it, tol);
   varadd(grid, Ind("BNSdata_temp1"), 
-             1,Ind("BNSdata_q"), -1,Ind("BNSdata_qold"));
+             1,Ind("BNSdata_qg"), -1,Ind("BNSdata_qgold"));
   dif_0 = varBoxL2Norm(grid->box[0], Ind("BNSdata_temp1")) +
           varBoxL2Norm(grid->box[3], Ind("BNSdata_temp1"));
 
@@ -3032,8 +3040,8 @@ void xmaxs_error_VectorFunc(int n, double *vec, double *fvec)
   double xmax1, xmax2;
   tGrid *grid = xmaxs_error_VectorFunc__grid;
 
-//  /* save old q in BNSdata_qold */
-//  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+//  /* save old q in BNSdata_qgold */
+//  varcopy(grid, Ind("BNSdata_qgold"), Ind("BNSdata_qg"));
 
   /* set BNSdata_Omega & BNSdata_x_CM */
   Setd("BNSdata_Omega", vec[1]);
@@ -3235,8 +3243,8 @@ void dqdx_at_Xmax1_2_VectorFunc(int n, double *vec, double *fvec)
   double Ymax2 = dqdx_at_Xmax1_2_VectorFunc__Ymax2;
   int b;
 
-//  /* save old q in BNSdata_qold */
-//  varcopy(grid, Ind("BNSdata_qold"), Ind("BNSdata_q"));
+//  /* save old q in BNSdata_qgold */
+//  varcopy(grid, Ind("BNSdata_qgold"), Ind("BNSdata_qg"));
 
   /* set BNSdata_Omega & BNSdata_x_CM */
   Setd("BNSdata_Omega", vec[1]);
@@ -4193,7 +4201,7 @@ exit(11);
     varcopy(grid, Ind("BNSdata_Boldy"),     Ind("BNSdata_By"));
     varcopy(grid, Ind("BNSdata_Boldz"),     Ind("BNSdata_Bz"));
     varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
-    varcopy(grid, Ind("BNSdata_qold"),      Ind("BNSdata_q"));
+    varcopy(grid, Ind("BNSdata_qgold"),     Ind("BNSdata_qg"));
 
     /* set BNSdata_qcorot before ell solve */
     compute_qcorot_with_corotation_formula(grid, Ind("BNSdata_qcorot"));
@@ -5816,7 +5824,7 @@ void m0_errors_VectorFuncP(int n, double *vec, double *fvec, void *p)
   BNSgrid_init_Coords(grid2);
 
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"));
+  Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"));
@@ -5826,6 +5834,7 @@ void m0_errors_VectorFuncP(int n, double *vec, double *fvec, void *p)
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"));
   Interpolate_Var_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"));
+  varcopy(grid2, Ind("BNSdata_q"), Ind("BNSdata_qg"));
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
 //  forallboxes(grid2, b)
@@ -5901,8 +5910,8 @@ void compute_new_q_and_adjust_domainshapes_InterpFromGrid0(tGrid *grid,
     Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
   }
   /* interpolate q (and maybe some other vars) from grid onto new grid2 */
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
-  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qold"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
+  //  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
   Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_Psi"),innerdom);
   Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_alphaP"),innerdom);
   Interp_From_Grid1_To_Grid2(grid0, grid2, Ind("BNSdata_Bx"),innerdom);

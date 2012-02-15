@@ -54,12 +54,14 @@ int sgrid_BNSdata()
          "previous Coordinates_AnsorgNS_sigma_pm. We save only in box0/3 and "
          "keep previous surfaces at indices i=1,2,... current surf is at i=0");
 
+  /* q we get from BNS_compute_new_q, with neg. values kept in box1/2 */
+  AddVar("BNSdata_qg", "", "global smooth q with neg. values kept in box1/2");   
   /* sometimes we save the old vars before the ell. solve */
   AddVar("BNSdata_Psiold",    "",  "old Psi");
   AddVar("BNSdata_Bold",      "I", "old B");
   AddVar("BNSdata_alphaPold", "",  "old alphaP");
   AddVar("BNSdata_Sigmaold",  "",  "old Sigma");
-  AddVar("BNSdata_qold",      "",  "old q");
+  AddVar("BNSdata_qgold",     "",  "old qg");
   /* q we get with corotating formula */
   AddVar("BNSdata_qcorot",    "",  "q we get with corotating formula");
   AddVar("BNSdata_qnocent",   "",  "q we get without centering");
@@ -115,6 +117,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_actual_xmax2", "0", "x-pos. of actual global max of q in NS2");
   AddPar("BNSdata_actual_ymax2", "0", "y-pos. of actual global max of q in NS2");
   AddPar("BNSdata_actual_zmax2", "0", "z-pos. of actual global max of q in NS2");
+  //AddPar("BNSdata_new_q", "FromFields", "how we compute the new q "
+  //       "[FromFields,Fromqold]");
   AddPar("BNSdata_center_new_q", "no",
          "if and how we center new q on (BNSdata_xmax1/2,0,0) "
          "[no,center_yz,center_xyz,adjust_domainshapes]");
