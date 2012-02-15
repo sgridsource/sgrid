@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 13.2.2012 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 15.2.2012 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -19,6 +19,7 @@ void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, 
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
+int dqFromqg = Getv("BNSdata_q_derivs","dqg");
 int RegularityOnAxis = Getv("BNSdata_Sigma_surface_BCs","RegularityOnAxis");
 int SigmaZeroAtPoint = Getv("BNSdata_Sigma_surface_BCs","ZeroAtPoint");
 int AtA0B0 = Getv("BNSdata_Sigma_surface_BCs","AtA0B0");
@@ -1153,7 +1154,22 @@ FlSigma[ijk]
 if (bi == 0 || bi == 3) {
 
 
-FirstDerivsOf_S(box,  Ind("BNSdata_q"),                     Ind("BNSdata_qx")); 
+
+/* conditional */
+if (dqFromqg) {
+
+
+FirstDerivsOf_S(box, Ind("BNSdata_qg"),      Ind("BNSdata_qx")); 
+
+
+} else { /* if (!dqFromqg) */
+
+
+FirstDerivsOf_S(box, Ind("BNSdata_q"),      Ind("BNSdata_qx")); 
+
+}
+/* if (dqFromqg) */
+
 
 
 
@@ -2162,4 +2178,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 121, n* = 578,  n/ = 290,  n+ = 388, n = 1256, O = 1 */
+/* nvars = 121, n* = 584,  n/ = 296,  n+ = 388, n = 1268, O = 1 */

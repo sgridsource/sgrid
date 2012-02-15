@@ -117,6 +117,7 @@ int sgrid_BNSdata()
   AddPar("BNSdata_actual_xmax2", "0", "x-pos. of actual global max of q in NS2");
   AddPar("BNSdata_actual_ymax2", "0", "y-pos. of actual global max of q in NS2");
   AddPar("BNSdata_actual_zmax2", "0", "z-pos. of actual global max of q in NS2");
+  AddPar("BNSdata_q_derivs", "dq", "how we compute the derivs of q [dq,dqg]");
   AddPar("BNSdata_new_q", "FromFields", "how we compute the new q "
          "[FromFields,Fromqgold]");
   AddPar("BNSdata_center_new_q", "no",

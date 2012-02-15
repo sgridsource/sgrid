@@ -48,8 +48,14 @@ tocompute = {
 
   Cinstruction == "FirstDerivsOf_Sa(box, Ind(\"BNSdata_wBx\"), \
 					 Ind(\"BNSdata_wBxx\"));",
-  Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
-			                 Ind(\"BNSdata_qx\"));",
+  Cif == dqFromqg,
+    Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_qg\"), \
+				     Ind(\"BNSdata_qx\"));",
+  Cif == else,
+    Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
+				     Ind(\"BNSdata_qx\"));",
+  Cif == end, 
+
   (* loop of all points *)
   Cinstruction == "forallpoints(box, ijk) {",
 
@@ -512,6 +518,7 @@ BeginCFunction[] := Module[{},
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
+  pr["int dqFromqg = Getv(\"BNSdata_q_derivs\",\"dqg\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double kappa = Getd(\"BNSdata_kappa\");\n"];
   pr["double Omega = Getd(\"BNSdata_Omega\");\n"];

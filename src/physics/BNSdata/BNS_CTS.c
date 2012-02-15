@@ -1,5 +1,5 @@
 /* BNS_CTS.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 19.12.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 15.2.2012 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -15,11 +15,11 @@
 
 
 
-void BNS_CTS(tVarList *vlFu, tVarList *vlu,  
-		   tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs, 		   int nonlin)
+void BNS_CTS(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, tVarList *vldu, tVarList *vlduDerivs,      int nonlin)
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
+int dqFromqg = Getv("BNSdata_q_derivs","dqg");
 double n = Getd("BNSdata_n");
 double kappa = Getd("BNSdata_kappa");
 double Omega = Getd("BNSdata_Omega");
@@ -548,16 +548,16 @@ double wDown3;
 if (nonlin) {
 
 
-FirstAndSecondDerivsOf_S(box, index_Psi,       
-			Ind("BNSdata_Psix"), Ind("BNSdata_Psixx"));
-
-FirstAndSecondDerivsOf_Sa(box, index_B1, 			Ind("BNSdata_Bxx"), Ind("BNSdata_Bxxx")); 
+FirstAndSecondDerivsOf_S(box, index_Psi,     Ind("BNSdata_Psix"), Ind("BNSdata_Psixx")); 
 
 
-FirstAndSecondDerivsOf_S(box, index_alphaP, 			Ind("BNSdata_alphaPx"), Ind("BNSdata_alphaPxx")); 
+FirstAndSecondDerivsOf_Sa(box, index_B1,    Ind("BNSdata_Bxx"), Ind("BNSdata_Bxxx")); 
 
 
-FirstAndSecondDerivsOf_S(box, index_Sigma, 			Ind("BNSdata_Sigmax"), Ind("BNSdata_Sigmaxx")); 
+FirstAndSecondDerivsOf_S(box, index_alphaP,    Ind("BNSdata_alphaPx"), Ind("BNSdata_alphaPxx")); 
+
+
+FirstAndSecondDerivsOf_S(box, index_Sigma,    Ind("BNSdata_Sigmax"), Ind("BNSdata_Sigmaxx")); 
 
 
 spec_Deriv2(box, 1, Sigma, ddSigmadA2); 
@@ -572,16 +572,16 @@ spec_Deriv1(box, 1, Sigma, dSigmadA);
 } else { /* if (!nonlin) */
 
 
-FirstAndSecondDerivsOf_S(box, index_lPsi,   
-					index_dlPsi1, index_ddlPsi11);
-
-FirstAndSecondDerivsOf_Sa(box, index_lB1, 					index_dlB11, index_ddlB111); 
+FirstAndSecondDerivsOf_S(box, index_lPsi,       index_dlPsi1, index_ddlPsi11); 
 
 
-FirstAndSecondDerivsOf_S(box, index_lalphaP, 					index_dlalphaP1, index_ddlalphaP11); 
+FirstAndSecondDerivsOf_Sa(box, index_lB1,      index_dlB11, index_ddlB111); 
 
 
-FirstAndSecondDerivsOf_S(box, index_lSigma, 					index_dlSigma1, index_ddlSigma11); 
+FirstAndSecondDerivsOf_S(box, index_lalphaP,      index_dlalphaP1, index_ddlalphaP11); 
+
+
+FirstAndSecondDerivsOf_S(box, index_lSigma,      index_dlSigma1, index_ddlSigma11); 
 
 
 spec_Deriv2(box, 1, lSigma, ddlSigmadA2); 
@@ -597,10 +597,25 @@ spec_Deriv1(box, 1, lSigma, dlSigmadA);
 
 
 
-FirstDerivsOf_Sa(box, Ind("BNSdata_wBx"), 					 Ind("BNSdata_wBxx")); 
+FirstDerivsOf_Sa(box, Ind("BNSdata_wBx"),       Ind("BNSdata_wBxx")); 
 
 
-FirstDerivsOf_S(box,  Ind("BNSdata_q"), 			                 Ind("BNSdata_qx")); 
+
+/* conditional */
+if (dqFromqg) {
+
+
+FirstDerivsOf_S(box,  Ind("BNSdata_qg"),          Ind("BNSdata_qx")); 
+
+
+} else { /* if (!dqFromqg) */
+
+
+FirstDerivsOf_S(box,  Ind("BNSdata_q"),          Ind("BNSdata_qx")); 
+
+}
+/* if (dqFromqg) */
+
 
 
 forallpoints(box, ijk) { 
@@ -759,7 +774,7 @@ Power(q[ijk]/kappa,n)
 
 
 /* conditional */
-if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 vR1
 =
@@ -789,7 +804,7 @@ uzerosqr
 ;
 
 
-} else { /* if (!((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) */
+} else { /* if (!(bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) */
 
 Psim1
 =
@@ -1267,7 +1282,7 @@ dbeta11 + dbeta22 + dbeta33
 ;
 
 }
-/* if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) */
+/* if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) */
 
 
 VR1[ijk]
@@ -1360,26 +1375,26 @@ vecLapB3
 
 FPsi[ijk]
 =
-Psi5*((0.03125*LBLB)/alpha2 + 6.2831853071795864769*rho) + ddPsi11[ijk] + 
+Psi5*((0.03125*LBLB)/alpha2 + 6.283185307179586477*rho) + ddPsi11[ijk] + 
   ddPsi22[ijk] + ddPsi33[ijk]
 ;
 
 FB1[ijk]
 =
 -(dLnalphaPsim61*LB11) - dLnalphaPsim62*LB12 - dLnalphaPsim63*LB13 + 
-  vecLapB1 - 50.265482457436691815*j1*Psi4*alpha[ijk]
+  vecLapB1 - 50.26548245743669182*j1*Psi4*alpha[ijk]
 ;
 
 FB2[ijk]
 =
 -(dLnalphaPsim61*LB12) - dLnalphaPsim62*LB22 - dLnalphaPsim63*LB23 + 
-  vecLapB2 - 50.265482457436691815*j2*Psi4*alpha[ijk]
+  vecLapB2 - 50.26548245743669182*j2*Psi4*alpha[ijk]
 ;
 
 FB3[ijk]
 =
 -(dLnalphaPsim61*LB13) - dLnalphaPsim62*LB23 - dLnalphaPsim63*LB33 + 
-  vecLapB3 - 50.265482457436691815*j3*Psi4*alpha[ijk]
+  vecLapB3 - 50.26548245743669182*j3*Psi4*alpha[ijk]
 ;
 
 FalphaP[ijk]
@@ -1391,7 +1406,7 @@ FalphaP[ijk]
 
 
 /* conditional */
-if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 FSigma[ijk]
 =
@@ -1399,7 +1414,7 @@ Sigma[ijk]
 ;
 
 
-} else { /* if (!((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) */
+} else { /* if (!(bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) */
 
 
 
@@ -1571,7 +1586,7 @@ lalpha
 
 
 /* conditional */
-if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 lvR1
 =
@@ -1604,7 +1619,7 @@ luzerosqr
 ;
 
 
-} else { /* if (!((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) */
+} else { /* if (!(bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) */
 
 lLnalpha
 =
@@ -2039,7 +2054,7 @@ Psim1*dlPsi3[ijk] - Psim2*dPsi3[ijk]*lPsi[ijk]
 ;
 
 }
-/* if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) */
+/* if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) */
 
 
 lrho
@@ -2102,7 +2117,7 @@ FlPsi[ijk]
 ((0.0625*(LBdo11*LlB11 + (LBdo12 + LBdo21)*LlB12 + 
           (LBdo13 + LBdo31)*LlB13 + LBdo22*LlB22 + 
           (LBdo23 + LBdo32)*LlB23 + LBdo33*LlB33))/alpha2 + 
-     6.2831853071795864769*lrho)*Psi5 + ddlPsi11[ijk] + ddlPsi22[ijk] + 
+     6.283185307179586477*lrho)*Psi5 + ddlPsi11[ijk] + ddlPsi22[ijk] + 
   ddlPsi33[ijk] + 31.415926535897932385*Psi4*rho*lPsi[ijk] + 
   LBLB*((-0.0625*Psi7*lalphaP[ijk])/alphaP3 + 
      (0.21875*Psi6*lPsi[ijk])/alphaP2)
@@ -2144,7 +2159,7 @@ ddlalphaP11[ijk] + ddlalphaP22[ijk] + ddlalphaP33[ijk] +
              (LBdo13 + LBdo31)*LlB13 + LBdo22*LlB22 + 
              (LBdo23 + LBdo32)*LlB23 + LBdo33*LlB33))/alpha2 + 
         3.1415926535897932385*(2.*lrho + 4.*lS))*alphaP[ijk] + 
-     6.2831853071795864769*rho*lalphaP[ijk]) - 
+     6.283185307179586477*rho*lalphaP[ijk]) - 
   ((1.3125*LBLB*Psi5)/alphaP2 + 3.1415926535897932385*Psi3*(8.*rho + 16.*S))*
    alphaP[ijk]*lPsi[ijk]
 ;
@@ -2152,7 +2167,7 @@ ddlalphaP11[ijk] + ddlalphaP22[ijk] + ddlalphaP33[ijk] +
 
 
 /* conditional */
-if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 FlSigma[ijk]
 =
@@ -2160,7 +2175,7 @@ lSigma[ijk]
 ;
 
 
-} else { /* if (!((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) */
+} else { /* if (!(bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) */
 
 
 
@@ -2370,4 +2385,4 @@ dddlSigmadA3[ijk] + 2.*ddlSigmadA2[ijk] + dlSigmadA[ijk]
 }  /* end of function */
 
 /* BNS_CTS.c */
-/* nvars = 175, n* = 1292,  n/ = 188,  n+ = 1033, n = 2513, O = 1 */
+/* nvars = 175, n* = 1298,  n/ = 194,  n+ = 1033, n = 2525, O = 1 */

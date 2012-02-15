@@ -236,8 +236,14 @@ tocompute = {
   (* if not b=1 or 2, i.e. bi==0 || bi==3 *)
   Cif == ( bi==0 || bi==3 ),
     (* if we get here bi=0 or 3 and there is no corot in this box *)
-    Cinstruction == "FirstDerivsOf_S(box,  Ind(\"BNSdata_q\"), \
-			                 Ind(\"BNSdata_qx\"));",
+    Cif == dqFromqg,
+      Cinstruction == "FirstDerivsOf_S(box, Ind(\"BNSdata_qg\"), \
+					Ind(\"BNSdata_qx\"));",
+    Cif == else,
+      Cinstruction == "FirstDerivsOf_S(box, Ind(\"BNSdata_q\"), \
+					Ind(\"BNSdata_qx\"));",
+    Cif == end, 
+
     (* non-linear case: *)
     Cif == nonlin,
       Cinstruction == "FirstDerivsOf_S(box, index_Sigma, \
@@ -560,6 +566,7 @@ BeginCFunction[] := Module[{},
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
+  pr["int dqFromqg = Getv(\"BNSdata_q_derivs\",\"dqg\");\n"];
   pr["int RegularityOnAxis = Getv(\"BNSdata_Sigma_surface_BCs\",\"RegularityOnAxis\");\n"];
   pr["int SigmaZeroAtPoint = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAtPoint\");\n"];
   pr["int AtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"AtA0B0\");\n"];
