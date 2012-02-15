@@ -1,5 +1,5 @@
 /* BNS_compute_new_q.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 25.3.2011 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 14.2.2012 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -20,6 +20,7 @@ void BNS_compute_new_q(tGrid *grid, int iq)
 {
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
+int qFromFields = Getv("BNSdata_new_q","FromFields");
 double n = Getd("BNSdata_n");
 double C1 = Getd("BNSdata_C1");
 double C2 = Getd("BNSdata_C2");
@@ -59,6 +60,8 @@ int index_BNSdata_Sigmax = Ind("BNSdata_Sigmax");
 double *dSigma1 = box->v[index_BNSdata_Sigmax + 0];
 double *dSigma2 = box->v[index_BNSdata_Sigmax + 1];
 double *dSigma3 = box->v[index_BNSdata_Sigmax + 2];
+int index_BNSdata_qgold = Ind("BNSdata_qgold");
+double *qgold = box->v[index_BNSdata_qgold + 0];
 
 
 double alpha;
@@ -74,7 +77,10 @@ double DSigmaUp2;
 double DSigmaUp3;
 double F;
 double h;
+double hOLD;
+double hOLD2;
 double L2;
+double LOLD2;
 double OmegaCrossR1;
 double OmegaCrossR2;
 double OmegaCrossR3;
@@ -86,6 +92,7 @@ double Psim4;
 double Psim6;
 double twoalpha2wdSigmapw;
 double uzero;
+double uzerosqr;
 double vR1;
 double vR2;
 double vR3;
@@ -106,27 +113,21 @@ double xi3;
 
 /* Jetzt geht's los! */
 
-FirstDerivsOf_S(box,index_BNSdata_Sigma,                   
-                                   Ind("BNSdata_Sigmax"));
+FirstDerivsOf_S(box,index_BNSdata_Sigma,                                    Ind("BNSdata_Sigmax")); 
+
 
 
 /* conditional */
 if (bi == 1) {
 
 
-                                                                     
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 0,1);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 0,1);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 0,1);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 0,1);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 0,1);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 0,1);}
+                                                                      
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 0,1);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 0,1);}
 /* if (bi == 1) */
 
 
@@ -136,19 +137,13 @@ if (bi == 1) {
 if (bi == 2) {
 
 
-                                                                     
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 3,2);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 3,2);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 3,2);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 3,2);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 3,2);
-
-    copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 3,2);}
+                                                                      
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmax"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmay"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_Sigmaz"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBx"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBy"), 3,2);
+     copy_Var_at_i0_from_Box1_Box2(grid, Ind("BNSdata_wBz"), 3,2);}
 /* if (bi == 2) */
 
 
@@ -208,7 +203,7 @@ pow2(Psi2)
 
 
 /* conditional */
-if (((bi <= 1 || bi == 5) && corot1) || (bi >= 2 && bi <= 4 && corot2)) {
+if ((bi <= 1 || bi == 5) && corot1 || bi >= 2 && bi <= 4 && corot2) {
 
 vR1
 =
@@ -411,6 +406,11 @@ wDown3
 Psim2*wBDown3
 ;
 
+
+
+/* conditional */
+if (qFromFields) {
+
 twoalpha2wdSigmapw
 =
 2.*alpha2*(w1*(wDown1 + dSigma1[ijk]) + w2*(wDown2 + dSigma2[ijk]) + 
@@ -439,13 +439,67 @@ Sqrt(Abs(L2 - (DSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) -
     (DSigmaUp3 + w3)*(wDown3 + dSigma3[ijk])))
 ;
 
+
+} else { /* if (!qFromFields) */
+
+hOLD
+=
+1. + (1. + n)*qgold[ijk]
+;
+
+hOLD2
+=
+pow2(hOLD)
+;
+
+LOLD2
+=
+hOLD2 + (DSigmaUp1 + w1)*(wDown1 + dSigma1[ijk]) + 
+  (DSigmaUp2 + w2)*(wDown2 + dSigma2[ijk]) + 
+  (DSigmaUp3 + w3)*(wDown3 + dSigma3[ijk])
+;
+
+uzerosqr
+=
+LOLD2/(alpha2*hOLD2)
+;
+
+uzero
+=
+sqrt(uzerosqr)
+;
+
+vR1
+=
+-beta1 + (DSigmaUp1 + w1)/(hOLD*uzero)
+;
+
+vR2
+=
+-beta2 + (DSigmaUp2 + w2)/(hOLD*uzero)
+;
+
+vR3
+=
+-beta3 + (DSigmaUp3 + w3)/(hOLD*uzero)
+;
+
+h
+=
+-(uzero*(CC + vR1*dSigma1[ijk] + vR2*dSigma2[ijk] + vR3*dSigma3[ijk]))
+;
+
+}
+/* if (qFromFields) */
+
+
 q[ijk]
 =
 (-1. + h)/(1. + n)
 ;
 
 }
-/* if (bi <= 1 || bi == 5) */
+/* if (qFromFields) */
 
 
 
@@ -457,4 +511,4 @@ q[ijk]
 }  /* end of function */
 
 /* BNS_compute_new_q.c */
-/* nvars = 15, n* = 107,  n/ = 60,  n+ = 92, n = 259, O = 1 */
+/* nvars = 16, n* = 126,  n/ = 70,  n+ = 118, n = 314, O = 1 */

@@ -6,9 +6,9 @@
 
 (* variables *)
 variables = {BNSPsi, BNSB[a], BNSalphaP, BNSSigma, BNSdSigma[a], BNSwB[a],
-             temp4}
+             BNSqgold, temp4}
 
-constvariables = {Psi, B[a], alphaP, Sigma, dSigma[a], wB[a], x,y, 
+constvariables = {Psi, B[a], alphaP, Sigma, dSigma[a], wB[a], x,y, qgold,
                   OmegaCrossR[a]}
 
 (* compute in this order *)
@@ -149,11 +149,24 @@ tocompute = {
     w[a] == Psim6 wB[a],
     wBDown[a] == wB[a],
     wDown[a] == Psim2 wBDown[a],
-    twoalpha2wdSigmapw == 2 alpha2 w[c] (dSigma[c]+wDown[c]),
-    betadSigmaMinusCC == beta[c] dSigma[c] - CC, 
-    bb == betadSigmaMinusCC^2 + twoalpha2wdSigmapw,
-    L2 == (bb + Sqrt[Abs[bb*bb + twoalpha2wdSigmapw^2]])/(2 alpha2),
-    h == Sqrt[Abs[L2 - (dSigma[a]+wDown[a]) (DSigmaUp[a]+w[a])]],
+    Cif == qFromFields,
+      twoalpha2wdSigmapw == 2 alpha2 w[c] (dSigma[c]+wDown[c]),
+      betadSigmaMinusCC == beta[c] dSigma[c] - CC, 
+      bb == betadSigmaMinusCC^2 + twoalpha2wdSigmapw,
+      L2 == (bb + Sqrt[Abs[bb*bb + twoalpha2wdSigmapw^2]])/(2 alpha2),
+      h == Sqrt[Abs[L2 - (dSigma[a]+wDown[a]) (DSigmaUp[a]+w[a])]],
+    Cif == else,
+      Cinstruction == "spec_Coeffs(box, BNSqgold, temp4);",
+      Cinstruction == "qgold = spec_interpolate(box, temp4, X,Y,Z);",
+      (* h == (n+1) q + 1, *)
+      hOLD == (n+1.0) qgold + 1.0,
+      hOLD2 == hOLD*hOLD,
+      LOLD2 == hOLD2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
+      uzerosqr == LOLD2/(alpha2 hOLD2),
+      uzero == sqrt[uzerosqr],
+      vR[a] == (w[a] + DSigmaUp[a])/(uzero*hOLD) - beta[a],
+      h == -( CC + dSigma[a] vR[a] ) uzero,
+    Cif == end,
 
     (* h == (n+1) q + 1, *)
     q == (h - 1.0)/(n + 1.0),
@@ -196,6 +209,7 @@ BeginCFunction[] := Module[{},
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
+  pr["int qFromFields = Getv(\"BNSdata_new_q\",\"FromFields\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double C1 = Getd(\"BNSdata_C1\");\n"];
   pr["double C2 = Getd(\"BNSdata_C2\");\n"];
@@ -221,13 +235,14 @@ variabledeclarations[] := Module[{},
   prdecvarname[{BNSalphaP},    "BNSdata_alphaP"];
   prdecvarname[{BNSB[a]},      "BNSdata_Bx"];
   prdecvarname[{BNSq},         "BNSdata_q"];
-  prdecvarname[{BNSwB[a]},    "BNSdata_wBx"];
+  prdecvarname[{BNSwB[a]},     "BNSdata_wBx"];
   prdecvarname[{BNSSigma},     "BNSdata_Sigma"];
   prdecvarname[{BNSdSigma[a]}, "BNSdata_Sigmax"];
+  prdecvarname[{BNSqgold},     "BNSdata_qgold"];
   prdecvarname[{temp4},        "BNSdata_temp4"];
 
   pr["double Psi, B1,B2,B3, alphaP;\n"];
-  pr["double Sigma, dSigma1,dSigma2,dSigma3, wB1,wB2,wB3, x,y;\n"];
+  pr["double Sigma, dSigma1,dSigma2,dSigma3, wB1,wB2,wB3, x,y, qgold;\n"];
 
   pr["\n"];
 ];    

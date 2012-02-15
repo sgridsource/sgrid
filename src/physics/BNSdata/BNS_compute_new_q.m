@@ -5,7 +5,7 @@
 
 
 (* variables *)
-variables = {Psi, B[a], alphaP, Sigma, dSigma[a], q, wB[a], x, y}
+variables = {Psi, B[a], alphaP, Sigma, dSigma[a], q, wB[a], x, y, qgold}
 
 constvariables = {OmegaCrossR[a]}
 
@@ -100,11 +100,22 @@ tocompute = {
     w[a] == Psim6 wB[a],
     wBDown[a] == wB[a],
     wDown[a] == Psim2 wBDown[a],
-    twoalpha2wdSigmapw == 2 alpha2 w[c] (dSigma[c]+wDown[c]),
-    betadSigmaMinusCC == beta[c] dSigma[c] - CC, 
-    bb == betadSigmaMinusCC^2 + twoalpha2wdSigmapw,
-    L2 == (bb + Sqrt[Abs[bb*bb + twoalpha2wdSigmapw^2]])/(2 alpha2),
-    h == Sqrt[Abs[L2 - (dSigma[a]+wDown[a]) (DSigmaUp[a]+w[a])]],
+    Cif == qFromFields,
+      twoalpha2wdSigmapw == 2 alpha2 w[c] (dSigma[c]+wDown[c]),
+      betadSigmaMinusCC == beta[c] dSigma[c] - CC, 
+      bb == betadSigmaMinusCC^2 + twoalpha2wdSigmapw,
+      L2 == (bb + Sqrt[Abs[bb*bb + twoalpha2wdSigmapw^2]])/(2 alpha2),
+      h == Sqrt[Abs[L2 - (dSigma[a]+wDown[a]) (DSigmaUp[a]+w[a])]],
+    Cif == else,
+      (* h == (n+1) q + 1, *)
+      hOLD == (n+1.0) qgold + 1.0,
+      hOLD2 == hOLD*hOLD,
+      LOLD2 == hOLD2 + (wDown[c] + dSigma[c]) (w[c] + DSigmaUp[c]),
+      uzerosqr == LOLD2/(alpha2 hOLD2),
+      uzero == sqrt[uzerosqr],
+      vR[a] == (w[a] + DSigmaUp[a])/(uzero*hOLD) - beta[a],
+      h == -( CC + dSigma[a] vR[a] ) uzero,
+    Cif == end, 
 
     (* h == (n+1) q + 1, *)
     q == (h - 1.0)/(n + 1.0),
@@ -147,6 +158,7 @@ BeginCFunction[] := Module[{},
 
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
+  pr["int qFromFields = Getv(\"BNSdata_new_q\",\"FromFields\");\n"];
   pr["double n = Getd(\"BNSdata_n\");\n"];
   pr["double C1 = Getd(\"BNSdata_C1\");\n"];
   pr["double C2 = Getd(\"BNSdata_C2\");\n"];
@@ -184,7 +196,7 @@ variabledeclarations[] := Module[{},
   prdecvarname[{wB[a]},     "BNSdata_wBx"];
   prdecvarname[{Sigma},     "BNSdata_Sigma"];
   prdecvarname[{dSigma[a]}, "BNSdata_Sigmax"];
-
+  prdecvarname[{qgold},     "BNSdata_qgold"];
 
   pr["\n"];
 ];    
