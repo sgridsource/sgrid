@@ -1396,7 +1396,7 @@ void set_BNSdata_desired_VolAvSigma12_pars(tGrid *grid)
   }
   Setd("BNSdata_desired_VolAvSigma1", VolAvSigma1);
   Setd("BNSdata_desired_VolAvSigma2", VolAvSigma2);
-  printf(" setting: BNSdata_desired_VolAvSigma1/2=%g/%g\n",
+  printf(" setting: BNSdata_desired_VolAvSigma1 / 2 = %g / %g\n",
   VolAvSigma1, VolAvSigma2);
 }
 
