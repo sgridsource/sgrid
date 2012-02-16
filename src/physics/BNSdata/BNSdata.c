@@ -1811,7 +1811,7 @@ double FindMaxSphere_insideStar(tGrid *grid, int innerdom)
 
     /* set min |sigma| on grid */      
     forallpoints(grid->box[b], i)
-      if(fabs(surf[i])<fabs(MaxSphere_sig)) MaxSphere_sig=surf[i];;
+      if(fabs(surf[i])>fabs(MaxSphere_sig)) MaxSphere_sig=surf[i];;
   }
   printf(" FindMaxSphere_insideStar:  MaxSphere_sig=%g  innerdom=%d\n", 
          MaxSphere_sig, innerdom);
