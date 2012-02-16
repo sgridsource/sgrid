@@ -179,6 +179,8 @@ int sgrid_BNSdata()
          "none,ZeroInOuterBoxes,EllEqn]");
   AddPar("BNSdata_KeepInnerSigma", "no", "keep Sigma in inner boxes [no,yes]");
   AddPar("BNSdata_SmoothSigmaRegion", "0", "size of smoothing region");
+  AddPar("BNSdata_Sphere_sigma_p", "0", "sigma_p of sphere inside smoothing region");
+  AddPar("BNSdata_Sphere_sigma_m", "0", "sigma_m of sphere inside smoothing region");
   AddPar("BNSdata_useDD", "no",
          "whether we use the DD ops to compute second derivs [no,yes]");
   AddPar("BNSdata_itmax", "10", "max. number of iterations in BNSdata_solve");

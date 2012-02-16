@@ -1724,6 +1724,197 @@ void smooth_BNSdata_Sigma_NearBoundary(tGrid *grid, int itmax, double tol,
   free_pdb(pdb_bak, npdb); 
 }
 
+/* add a const to sigma_pm to change surface shape for one star */
+void set_sigma_pm_const(tGrid *grid, double sig, int innerdom)
+{
+  tGrid *grid2;
+  int interp_qgold = !Getv("BNSdata_new_q", "FromFields");
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int b, i, outerdom;
+  void (*Interp_From_Grid1_To_Grid2)(tGrid *grid1, tGrid *grid2, int vind,
+                                     int innerdom);
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("add_const_to_sigma_pm: innerdom is not 0 or 3");
+
+  printf(" set_sigma_pm_const:  sig=%f  innerdom=%d\n", sig, innerdom);
+
+  /* make new grid2, which is an exact copy of grid */
+  grid2 = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid2, 0);
+
+  /* loop over AnsorgNS boxes */
+  for(b=0; b<=3; b++)
+  {
+    double *surf2;
+
+    /* do nothing if we are in the wrong box */
+    if(b!=innerdom && b!=outerdom) continue;
+
+    surf2 = grid2->box[b]->v[sigpmi];
+
+    /* set sig on grid2 to */      
+    forallpoints(grid->box[b], i)  surf2[i] = sig;
+  }
+
+  /* initialize coords of grid2 on side of innerdom */
+  BNSgrid_init_Coords_pm(grid2, innerdom);
+  /* use interpolator that does only side of innerdom */
+  Interp_From_Grid1_To_Grid2 = Interp_Var_From_Grid1_To_Grid2_pm;
+
+  /* interpolate some vars from grid onto new grid2 */
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_q"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Psi"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_alphaP"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bx"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_By"),innerdom);
+  Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Bz"),innerdom);
+  if( (innerdom==0 && !Getv("BNSdata_rotationstate1","corotation")) ||
+      (innerdom==3 && !Getv("BNSdata_rotationstate2","corotation"))   )
+  {
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_Sigma"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBx"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBy"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_wBz"),innerdom);
+  }
+  if(interp_qgold)
+  {
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qg"),innerdom);
+    Interp_From_Grid1_To_Grid2(grid, grid2, Ind("BNSdata_qgold"),innerdom);
+  }
+  /* copy grid2 back into grid, and free grid2 */
+  copy_grid(grid2, grid, 0);
+  free_grid(grid2);
+}
+
+/* find a sigma such that we get a sphere that fits inside the star */
+double FindMaxSphere_insideStar(tGrid *grid, int innerdom)
+{
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int b, i, outerdom;
+  double MaxSphere_sig;
+
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("FindMaxSphere_insideStar: innerdom is not 0 or 3");
+
+  /* loop over outer AnsorgNS boxes to find min |sigma_pm| */
+  for(b=1; b<=2; b++)
+  {
+    double *surf;
+    /* do nothing if we are in the wrong box */
+    if(b!=outerdom) continue;
+
+    surf = grid->box[b]->v[sigpmi];
+    MaxSphere_sig = surf[0];
+
+    /* set min |sigma| on grid */      
+    forallpoints(grid->box[b], i)
+      if(fabs(surf[i])<fabs(MaxSphere_sig)) MaxSphere_sig=surf[i];;
+  }
+  printf(" FindMaxSphere_insideStar:  MaxSphere_sig=%g  innerdom=%d\n", 
+         MaxSphere_sig, innerdom);
+  return MaxSphere_sig;
+}
+
+
+/* change boundary temporarily to a sphere, then solve for BNSdata_Sigma
+   and interpolate back onto real grid */
+void solve_BNSdata_Sigma_WithSphereBoundary(tGrid *grid, int itmax, double tol,
+                                            double *normres,
+     int (*linear_solver)(tVarList *x, tVarList *b,
+              tVarList *r, tVarList *c1,tVarList *c2,
+              int itmax, double tol, double *normres,
+              void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *),
+              void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *)))
+{
+  tGrid *grid_bak;
+  tParameter *pdb_bak;
+  double dsig_ch = Getd("BNSdata_SmoothSigmaRegion");
+  double Sphere_sigma_p = Getd("BNSdata_Sphere_sigma_p");
+  double Sphere_sigma_m = Getd("BNSdata_Sphere_sigma_m");
+  int sigpmi = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int xi     = Ind("x");
+  double dsigp = grid->box[0]->v[sigpmi][0] * dsig_ch;
+  double dsigm = grid->box[3]->v[sigpmi][0] * dsig_ch;
+  double xout1, xin1, xout2, xin2;
+  int b0n1 = grid->box[0]->n1;
+  int b0n2 = grid->box[0]->n2;
+  int b3n1 = grid->box[3]->n1;
+  int b3n2 = grid->box[3]->n2;
+  double sigp_00, sigp_10, sigm_00, sigm_10;
+  double MaxSphere_sigp, MaxSphere_sigm;
+  double ds;
+  char *BCs_sav;
+  char *str;
+
+  prdivider(1);
+  printf("solve_BNSdata_Sigma_WithSphereBoundary:\n");
+  
+  /* get max possible sphere sizes */
+  MaxSphere_sigp = FindMaxSphere_insideStar(grid, 0);
+  MaxSphere_sigm = FindMaxSphere_insideStar(grid, 3);
+
+  /* if Sphere_sigma_p/m - MaxSphere_sigp/m is about dsigp/m do nothing */
+  ds = Sphere_sigma_p - MaxSphere_sigp;
+  if(ds<=0.9*dsigp || ds>=1.1*dsigp) Sphere_sigma_p = MaxSphere_sigp + dsigp;
+  ds = Sphere_sigma_m - MaxSphere_sigm;
+  if(ds>=0.9*dsigm || ds<=1.1*dsigm) Sphere_sigma_m = MaxSphere_sigm + dsigm;
+  Setd("BNSdata_Sphere_sigma_p", Sphere_sigma_p);
+  Setd("BNSdata_Sphere_sigma_m", Sphere_sigma_m);
+  printf(" Sphere_sigma_p=%g  Sphere_sigma_m=%g\n",
+         Sphere_sigma_p, Sphere_sigma_m);
+
+  /* make exact copies of grid and pdb */
+  grid_bak = make_empty_grid(grid->nvariables, 0);
+  copy_grid(grid, grid_bak, 0);
+  pdb_bak  = make_empty_pdb(npdbmax);
+  copy_pdb(pdb, npdb, pdb_bak);
+
+  /* now change Coordinates_AnsorgNS_sigma_pm on grid, so that boundaries
+     move inwards */
+  set_sigma_pm_const(grid, Sphere_sigma_p, 0);
+  set_sigma_pm_const(grid, Sphere_sigma_m, 3);
+  /* get inner and outer edges of both spheres */
+  xout1 = grid->box[0]->v[xi][0]; /* sigma_p at B=phi=0 */
+  xin1  = grid->box[0]->v[xi][Ind_n1n2(0,b0n2-1,0, b0n1,b0n2)]; /* sigma_p at B=1, phi=0 */
+  xout2 = grid->box[3]->v[xi][0]; /* sigma_m at B=phi=0 */
+  xin2  = grid->box[3]->v[xi][Ind_n1n2(0,b3n2-1,0, b3n1,b3n2)]; /* sigma_m at B=1, phi=0 */
+  printf(" -> xin1=%g xout1=%g  xin2=%g xout2=%g\n", xin1,xout1, xin2, xout2);
+  sigp_00 = grid->box[0]->v[sigpmi][0]; /* sigma_p at B=phi=0 */
+  sigp_10 = grid->box[0]->v[sigpmi][Ind_n1n2(0,b0n2-1,0, b0n1,b0n2)]; /* sigma_p at B=1, phi=0 */
+  sigm_00 = grid->box[3]->v[sigpmi][0]; /* sigma_m at B=phi=0 */
+  sigm_10 = grid->box[3]->v[sigpmi][Ind_n1n2(0,b3n2-1,0, b3n1,b3n2)]; /* sigma_m at B=1, phi=0 */
+  printf(" -> sigp_10=%g sigp_00=%g  sigm_10=%g sigm_00=%g\n",
+         sigp_10, sigp_00, sigm_10, sigm_00);
+
+  /* do not touch BNSdata_Sigma in inner boxes, but solve in outer */
+  printf("solve for BNSdata_Sigma with new shrunk boundary...\n");
+  BCs_sav = cmalloc( strlen(Gets("BNSdata_Sigma_surface_BCs"))+10 );
+  str     = cmalloc( strlen(BCs_sav)+100 );
+  strcpy(BCs_sav, Gets("BNSdata_Sigma_surface_BCs"));
+  sprintf(str, "%s %s", BCs_sav, "EllEqn");
+  Sets("BNSdata_Sigma_surface_BCs", str); 
+  BNS_Eqn_Iterator_for_vars_in_string(grid, itmax, tol, normres, 
+                                      linear_solver, 1, "BNSdata_Sigma");
+  Sets("BNSdata_Sigma_surface_BCs", BCs_sav);
+  free(str);
+  free(BCs_sav);
+
+  /* interpolate new BNSdata_Sigma to grid_bak */
+  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid_bak, Ind("BNSdata_Sigma"), 0);
+  Interp_Var_From_Grid1_To_Grid2_pm(grid, grid_bak, Ind("BNSdata_Sigma"), 3);
+  printf("solve_BNSdata_Sigma_WithSphereBoundary: done.\n");
+  prdivider(1);
+
+  /* copy grid_bak and pdb_bak back into grid and pdb */
+  copy_grid(grid_bak, grid, 0);
+  copy_pdb(pdb_bak, npdb, pdb);
+  /* free grid_bak pdb_bak */
+  free_grid(grid_bak);
+  free_pdb(pdb_bak, npdb);
+}
+
 /* filter Var with index vind with 2/3 rule in B and phi directions 
    on side of innerdom  */
 void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
@@ -4307,6 +4498,56 @@ exit(11);
       /* solve the ell. eqn for Sigma alone */
       BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
              &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+      totalerr1 = average_current_and_old(Sigma_esw, 
+                                          grid,vlFu,vlu,vluDerivs, vlJdu);
+      if(Sigma_esw<1.0 && it>=allow_Sigma_esw1_it && allow_Sigma_esw1_it>=0)
+      {
+        /* complete step */
+        totalerr = average_current_and_old(Sigma_esw1/Sigma_esw,
+                                           grid,vlFu,vlu,vluDerivs,vlJdu);
+        /* but go back to Sigma_esw if totalerr is larger */
+        if(totalerr>totalerr1)
+          totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
+                                             grid,vlFu,vlu,vluDerivs,vlJdu);
+      }
+      /* reset Sigmaold so that Sigma does not change when we average later */
+      varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+
+      /* reset Newton_tol */
+      normresnonlin = GridL2Norm_of_vars_in_string(grid, 
+                                      Gets("BNSdata_CTS_Eqs_Iteration_order"));
+      Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+
+      /* now solve the coupled CTS ell. eqns one after an other */
+      BNS_ordered_Eqn_Iterator(grid, Newton_itmax, Newton_tol, &normresnonlin,
+                               linear_solver, 1);
+    }
+    else if(Getv("BNSdata_EllSolver_method",
+                 "BNS_ordered_Eqn_Iterator_SphereSigma"))
+    {
+      // /* reset Newton_tol, so that we always solve for Sigma */
+      // normresnonlin = GridL2Norm_of_vars_in_string(grid, "BNSdata_Sigma");
+      // Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+
+      /* solve completely in outer boxes at first iteration */
+      if(grid->time == 1.0-itmax)
+      {
+        printf("Setting BNSdata_Sigma outside the stars only...\n");
+        /* do not touch Sigma in inner boxes, but solve in outer */
+        Sets("BNSdata_KeepInnerSigma", "yes");
+        solve_BNSdata_Sigma_WithSphereBoundary(grid, Newton_itmax, Newton_tol,
+                                               &normresnonlin, linear_solver);
+        Sets("BNSdata_KeepInnerSigma", "no");
+        totalerr1 = average_current_and_old(1, grid,vlFu,vlu,vluDerivs, vlJdu);
+        varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+        /* reset Newton_tol, use error norm of all vars in vlu */
+        F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+        normresnonlin = GridL2Norm(vlFu);
+        Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+      }
+      /* solve the ell. eqn for Sigma alone */
+      solve_BNSdata_Sigma_WithSphereBoundary(grid, Newton_itmax, Newton_tol,
+                                             &normresnonlin, linear_solver);
       totalerr1 = average_current_and_old(Sigma_esw, 
                                           grid,vlFu,vlu,vluDerivs, vlJdu);
       if(Sigma_esw<1.0 && it>=allow_Sigma_esw1_it && allow_Sigma_esw1_it>=0)
