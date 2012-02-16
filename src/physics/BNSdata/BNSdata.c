@@ -1676,6 +1676,7 @@ void smooth_BNSdata_Sigma_NearBoundary(tGrid *grid, int itmax, double tol,
 
   /* do nothing if no change */
   if(dsig_ch==0.0) return;
+  if(Getv("BNSdata_SmoothSigma", "no")) return;
 
   prdivider(1);
   printf("smooth_BNSdata_Sigma_NearBoundary:  dsigp=%g  dsigm=%g\n",
@@ -4735,7 +4736,7 @@ if(0) /* not working */
     adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
 }
 
-    /* try to smoothe NSdata_Sigma near the boundary */
+    /* try to smooth BNSdata_Sigma near the boundary */
     smooth_BNSdata_Sigma_NearBoundary(grid, 2, tol, linear_solver);
 
     /* reset BNSdata_qmax1/2, BNSdata_xmax1/2 pars if the iteration 
