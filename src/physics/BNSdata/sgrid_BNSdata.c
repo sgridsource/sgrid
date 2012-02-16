@@ -177,6 +177,10 @@ int sgrid_BNSdata()
          "[AddInnerVolIntToBC,AddInnerSumToBC,RegularityOnAxis,"
          "ZeroAtPoint,InnerVolIntZero,InnerSumZero,AtA0B0,AtA0B1,"
          "none,ZeroInOuterBoxes,EllEqn]");
+  AddPar("BNSdata_desired_VolAvSigma1", "0", "desired value of VolAvSigma "
+         "(i.e. InnerVolInt or InnerSum) in Sigma surface BC for star1");
+  AddPar("BNSdata_desired_VolAvSigma2", "0", "desired value of VolAvSigma "
+         "(i.e. InnerVolInt or InnerSum) in Sigma surface BC for star2");
   AddPar("BNSdata_KeepInnerSigma", "no", "keep Sigma in inner boxes [no,yes]");
   AddPar("BNSdata_SmoothSigma", "no", "whether we apply extra smoothing after "
          "all elliptic solves are done [no,yes]");

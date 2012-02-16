@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 15.2.2012 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 16.2.2012 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -39,6 +39,8 @@ double Omega = Getd("BNSdata_Omega");
 double xCM = Getd("BNSdata_x_CM");
 double xmax1 = Getd("BNSdata_xmax1");
 double xmax2 = Getd("BNSdata_xmax2");
+double VolAvSigma1 = Getd("BNSdata_desired_VolAvSigma1");
+double VolAvSigma2 = Getd("BNSdata_desired_VolAvSigma2");
 double VolAvSigma, VolAvlSigma;
 
 tGrid *grid = vlu->grid;
@@ -1213,6 +1215,24 @@ VolAvSigma += Sigma[ijk];
 
 
 
+
+/* conditional */
+if (bi == 0) {
+
+
+VolAvSigma = VolAvSigma - VolAvSigma1; 
+
+
+} else { /* if (!bi == 0) */
+
+
+VolAvSigma = VolAvSigma - VolAvSigma2; 
+
+}
+/* if (bi == 0) */
+
+
+
 //printf("VolAvSigma=%g\n",VolAvSigma); 
 
 
@@ -2178,4 +2198,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 121, n* = 584,  n/ = 296,  n+ = 388, n = 1268, O = 1 */
+/* nvars = 121, n* = 590,  n/ = 302,  n+ = 390, n = 1282, O = 1 */

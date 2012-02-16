@@ -259,6 +259,15 @@ tocompute = {
         Cinstruction == "VolAvSigma += Sigma[ijk];",
         Cinstruction == "} /* endfor */",
       Cif == end,
+
+      (* modify VolAvSigma so that we later we impose 
+         VolAvSigma=VolAvSigma1/2 *)
+      Cif == ( bi==0),
+        Cinstruction == "VolAvSigma = VolAvSigma - VolAvSigma1;",
+      Cif == else,
+        Cinstruction == "VolAvSigma = VolAvSigma - VolAvSigma2;",
+      Cif == end,
+
       Cinstruction == "//printf(\"VolAvSigma=%g\\n\",VolAvSigma);",
 
       (* go over A=0 plane *)
@@ -586,6 +595,8 @@ BeginCFunction[] := Module[{},
   pr["double xCM = Getd(\"BNSdata_x_CM\");\n"];
   pr["double xmax1 = Getd(\"BNSdata_xmax1\");\n"];
   pr["double xmax2 = Getd(\"BNSdata_xmax2\");\n"];
+  pr["double VolAvSigma1 = Getd(\"BNSdata_desired_VolAvSigma1\");\n"];
+  pr["double VolAvSigma2 = Getd(\"BNSdata_desired_VolAvSigma2\");\n"];
   pr["double VolAvSigma, VolAvlSigma;\n"];
   pr["\n"];
 
