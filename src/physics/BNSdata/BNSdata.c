@@ -4564,6 +4564,10 @@ exit(11);
     else if(Getv("BNSdata_EllSolver_method",
                  "BNS_ordered_Eqn_Iterator_SphereSigma"))
     {
+      /* set VolAvSigma1/2 to zero for the BNSdata_Sigma solve in this block */
+      Sets("BNSdata_desired_VolAvSigma1", "0");
+      Sets("BNSdata_desired_VolAvSigma2", "0");
+
       // /* reset Newton_tol, so that we always solve for Sigma */
       // normresnonlin = GridL2Norm_of_vars_in_string(grid, "BNSdata_Sigma");
       // Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
@@ -4587,6 +4591,8 @@ exit(11);
       /* solve the ell. eqn for Sigma alone */
       solve_BNSdata_Sigma_WithSphereBoundary(grid, Newton_itmax, Newton_tol,
                                              &normresnonlin, linear_solver);
+      /* reset VolAvSigma1/2 after solve */
+      set_BNSdata_desired_VolAvSigma12_pars(grid);
       totalerr1 = average_current_and_old(Sigma_esw, 
                                           grid,vlFu,vlu,vluDerivs, vlJdu);
       if(Sigma_esw<1.0 && it>=allow_Sigma_esw1_it && allow_Sigma_esw1_it>=0)
