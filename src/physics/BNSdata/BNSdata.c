@@ -4567,7 +4567,8 @@ exit(11);
       /* set VolAvSigma1/2 to zero for the BNSdata_Sigma solve in this block */
       Sets("BNSdata_desired_VolAvSigma1", "0");
       Sets("BNSdata_desired_VolAvSigma2", "0");
-
+      printf(" setting: BNSdata_desired_VolAvSigma1 / 2 = 0 / 0\n");
+  
       // /* reset Newton_tol, so that we always solve for Sigma */
       // normresnonlin = GridL2Norm_of_vars_in_string(grid, "BNSdata_Sigma");
       // Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
