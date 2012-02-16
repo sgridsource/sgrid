@@ -1367,6 +1367,40 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
 }
 
 
+/* set the pars BNSdata_desired_VolAvSigma12 to current values */
+void set_BNSdata_desired_VolAvSigma12_pars(tGrid *grid)
+{
+  int ijk;
+  int AddInnerVolIntToBC=Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
+  int InnerVolIntZero = Getv("BNSdata_Sigma_surface_BCs", "InnerVolIntZero");
+  int index_Sigma = Ind("BNSdata_Sigma");
+  double *Sigma;
+  double VolAvSigma1, VolAvSigma2;
+
+  /* do nothing? */
+  if(Getv("BNSdata_set_desired_VolAvSigmas", "no")) return;
+
+  /* set VolAvSigma1/2 to sum of Sigmas */
+  VolAvSigma1 = 0.0;
+  Sigma      = grid->box[0]->v[index_Sigma];
+  forallpoints(grid->box[0], ijk) VolAvSigma1 += Sigma[ijk]; 
+  VolAvSigma2 = 0.0;
+  Sigma      = grid->box[0]->v[index_Sigma];
+  forallpoints(grid->box[3], ijk) VolAvSigma2 += Sigma[ijk]; 
+
+  /* use VolInt instead in some other cases */
+  if (AddInnerVolIntToBC || InnerVolIntZero)
+  {
+    VolAvSigma1 = VolumeIntegral_inBNSgridBox(grid, 0, index_Sigma); 
+    VolAvSigma2 = VolumeIntegral_inBNSgridBox(grid, 3, index_Sigma); 
+  }
+  Setd("BNSdata_desired_VolAvSigma1", VolAvSigma1);
+  Setd("BNSdata_desired_VolAvSigma2", VolAvSigma2);
+  printf(" setting: BNSdata_desired_VolAvSigma1/2=%g/%g\n",
+  VolAvSigma1, VolAvSigma2);
+}
+
+
 /* backup grid,pdb to grid_bak,pdb_bak.
    But do it only if BNSdata_domainshape_diff_tol<1e30. 
    Call as:    backup_grid_pdb(grid,pdb, grid_bak,pdb_bak); */
@@ -4413,6 +4447,10 @@ exit(11);
     /* set wB before we solve */
     BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0); 
     BNS_set_wB(grid, 2, Getd("BNSdata_actual_xmax2"),0.0,0.0); 
+
+    /* set VolAvSigma1/2 so that ell. solves all try to achieve a certain
+      Volume Average for BNSdata_Sigma */
+    set_BNSdata_desired_VolAvSigma12_pars(grid);
 
     /* check if we do another ell. solve for BNSdata_Sigma */
     realnormres_old = realnormres; /* save realnormres */
