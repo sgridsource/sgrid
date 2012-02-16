@@ -4448,9 +4448,6 @@ exit(11);
     BNS_set_wB(grid, 1, Getd("BNSdata_actual_xmax1"),0.0,0.0); 
     BNS_set_wB(grid, 2, Getd("BNSdata_actual_xmax2"),0.0,0.0); 
 
-    /* set VolAvSigma1/2 so that ell. solves all try to achieve a certain
-      Volume Average for BNSdata_Sigma */
-    set_BNSdata_desired_VolAvSigma12_pars(grid);
 
     /* check if we do another ell. solve for BNSdata_Sigma */
     realnormres_old = realnormres; /* save realnormres */
@@ -4852,6 +4849,11 @@ if(0) /* not working */
     if(Getv("BNSdata_center_new_q_timebin", "after_adjusting_Omega_xCM"))
       BNSdata_center_q_if_desired(grid, it);
 
+    /* Set VolAvSigma1/2 so that the next ell. solves all try to 
+       achieve a certain Volume Average for BNSdata_Sigma. This also
+       results in residuals do not take into account the arbitrary 
+       constant that can be added to BNSdata_Sigma. */
+    set_BNSdata_desired_VolAvSigma12_pars(grid);
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
