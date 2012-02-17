@@ -1367,13 +1367,12 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
 }
 
 
-/* set the pars BNSdata_desired_VolAvSigma12 to current values */
-void set_BNSdata_desired_VolAvSigma12_pars(tGrid *grid)
+/* set the pars BNSdata_desired_VolAvSigma12 to values that min BC violation */
+void set_BNSdata_desired_VolAvSigma12_toMinBCerr(tGrid *grid, int index_Sigma)
 {
   int ijk;
   int AddInnerVolIntToBC=Getv("BNSdata_Sigma_surface_BCs","AddInnerVolIntToBC");
   int InnerVolIntZero = Getv("BNSdata_Sigma_surface_BCs", "InnerVolIntZero");
-  int index_Sigma = Ind("BNSdata_Sigma");
   double *Sigma;
   double VolAvSigma1, VolAvSigma2;
 
@@ -4564,7 +4563,7 @@ exit(11);
       /* set VolAvSigma1/2 to zero for the BNSdata_Sigma solve in this block */
       Sets("BNSdata_desired_VolAvSigma1", "0");
       Sets("BNSdata_desired_VolAvSigma2", "0");
-      printf(" setting: BNSdata_desired_VolAvSigma1 / 2 = 0 / 0\n");
+      printf(" setting: BNSdata_desired_VolAvSigma1/2 to zero\n");
   
       // /* reset Newton_tol, so that we always solve for Sigma */
       // normresnonlin = GridL2Norm_of_vars_in_string(grid, "BNSdata_Sigma");
@@ -4590,7 +4589,7 @@ exit(11);
       solve_BNSdata_Sigma_WithSphereBoundary(grid, Newton_itmax, Newton_tol,
                                              &normresnonlin, linear_solver);
       /* reset VolAvSigma1/2 after solve */
-      set_BNSdata_desired_VolAvSigma12_pars(grid);
+      set_BNSdata_desired_VolAvSigma12_toMinBCerr(grid, Ind("BNSdata_Sigmaold"));
       totalerr1 = average_current_and_old(Sigma_esw, 
                                           grid,vlFu,vlu,vluDerivs, vlJdu);
       if(Sigma_esw<1.0 && it>=allow_Sigma_esw1_it && allow_Sigma_esw1_it>=0)
@@ -4605,6 +4604,8 @@ exit(11);
       }
       /* reset Sigmaold so that Sigma does not change when we average later */
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+      /* reset VolAvSigma1/2 again */
+      set_BNSdata_desired_VolAvSigma12_toMinBCerr(grid, Ind("BNSdata_Sigma"));
 
       /* reset Newton_tol */
       normresnonlin = GridL2Norm_of_vars_in_string(grid, 
@@ -4853,7 +4854,7 @@ if(0) /* not working */
        achieve a certain Volume Average for BNSdata_Sigma. This also
        results in residuals do not take into account the arbitrary 
        constant that can be added to BNSdata_Sigma. */
-    set_BNSdata_desired_VolAvSigma12_pars(grid);
+    set_BNSdata_desired_VolAvSigma12_toMinBCerr(grid, Ind("BNSdata_Sigma"));
 
     /* compute diagnostics like ham and mom */
     BNSdata_verify_solution(grid);
