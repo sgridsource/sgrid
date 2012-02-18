@@ -1949,60 +1949,6 @@ void solve_BNSdata_Sigma_WithSphereBoundary(tGrid *grid, int itmax, double tol,
   free_pdb(pdb_bak, npdb);
 }
 
-/* filter Var with index vind with 2/3 rule in B and phi directions 
-   on side of innerdom  */
-void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
-{
-  int b;
-  int outerdom;
-
-  if(innerdom==0)      outerdom=1;
-  else if(innerdom==3) outerdom=2;  
-  else errorexit("BNSdata_filter_with2o3rule_inBphi: "
-                 "innerdom is not 0 or 3");
-
-  /* loop over boxes */
-  forallboxes(grid,b)
-  {
-    tBox *box = grid->box[b];
-    int n1=box->n1;
-    int n2=box->n2;
-    int n3=box->n3;
-    int i,j,k;
-    double *var = box->v[vind];
-    double *vc  = box->v[Ind("BNSdata_temp1")];
-
-    /* do nothing if we are in the wrong box */
-    if(b!=innerdom && b!=outerdom) continue;
-
-    /* compute coeffs of var in B- and phi-dir  */
-    spec_analysis1(box, 2, var, vc);
-    spec_analysis1(box, 3, vc, vc);
-
-    /* remove all coeffs with j>=2*(n2/3) */
-    for(k=0; k<n3; k++)
-    for(j=(n2/3)*2; j<n2; j++)
-    for(i=0; i<n1; i++)
-      vc[Index(i,j,k)]=0.0;
-
-    /* also remove all coeffs with k>=2*(n3/3) */
-    for(k=(n3/3)*2; k<n3; k++)
-    for(j=0; j<=(n2/3)*2; j++)
-    for(i=0; i<n1; i++)
-      vc[Index(i,j,k)]=0.0;
-
-    /* use modified coeffs to change var */
-    spec_synthesis1(box, 2, var, vc);
-    spec_synthesis1(box, 3, var, var);
-
-    /* loop over rho=0 boundary and ensure uniqueness */
-    for(k=1; k<n3; k++)       /* <-- all phi>0 */
-    for(j=0; j<n2; j=j+n2-1)  /* <-- B=0 and B=1 */
-    for(i=0; i<n1; i++)       /* <-- all A */
-      var[Index(i,j,k)] = var[Index(i,j,0)];
-  }
-}    
-
 /* filter Coordinates_AnsorgNS_sigma_pm and adjust the shape of the 
    boundary between domain0/1 or domain3/2 accordingly */
 void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
@@ -2023,6 +1969,10 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
   printf("filter_Coordinates_AnsorgNS_sigma_pm: innerdom=%d outerdom=%d\n", 
          innerdom, outerdom);
 
+  if(Getv("BNSdata_domainshape_filter", "LowPassInB"))
+    printf(" LowPassInB with jmax=%d inside"
+           " reset_Coordinates_AnsorgNS_sigma_pm\n",
+           Geti("BNSdata_domainshape_filter_jmax"));
   if(Getv("BNSdata_domainshape_filter", "keep_sigma_pm_B1"))
     printf(" kept previous sigma_pm at B=1 inside"
            " reset_Coordinates_AnsorgNS_sigma_pm\n");

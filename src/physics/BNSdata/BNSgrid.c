@@ -1619,6 +1619,17 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[outerdom]->v[isigma][Index(i,j,k)] =
                         gridnew->box[innerdom]->v[isigma][Index(0,j,0)];
 
+  /* smooth domain shape with low pass filter */
+  if(Getv("BNSdata_domainshape_filter", "LowPassInB"))
+  {
+    double *sigin = gridnew->box[innerdom]->v[isigma];
+    double *sigout= gridnew->box[outerdom]->v[isigma];;
+    BNSdata_LowPassFilter_inB(gridnew, isigma, innerdom,
+                              Geti("BNSdata_domainshape_filter_jmax"));
+    for(k=0; k<n3; k++)
+      for(j=0; j<n2; j++)
+        for(i=0; i<n1; i++) sigout[Index(i,j,k)] = sigin[Index(i,j,k)];
+  }
   /* minimize dsigma/dB at B=1 on gridnew */
   if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
     minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(gridnew, innerdom, outerdom);
@@ -1782,6 +1793,105 @@ void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid,
   free_dvector(sig, 1,nsig);
   free_dmatrix(xi, 1,nsig, 1,nsig);
 }
+
+/* filter Var with index vind with 2/3 rule in B and phi directions 
+   on side of innerdom  */
+void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
+{
+  int b;
+  int outerdom;
+
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("BNSdata_filter_with2o3rule_inBphi: "
+                 "innerdom is not 0 or 3");
+
+  /* loop over boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k;
+    double *var = box->v[vind];
+    double *vc  = box->v[Ind("BNSdata_temp1")];
+
+    /* do nothing if we are in the wrong box */
+    if(b!=innerdom && b!=outerdom) continue;
+
+    /* compute coeffs of var in B- and phi-dir  */
+    spec_analysis1(box, 2, var, vc);
+    spec_analysis1(box, 3, vc, vc);
+
+    /* remove all coeffs with j>=2*(n2/3) */
+    for(k=0; k<n3; k++)
+    for(j=(n2/3)*2; j<n2; j++)
+    for(i=0; i<n1; i++)
+      vc[Index(i,j,k)]=0.0;
+
+    /* also remove all coeffs with k>=2*(n3/3) */
+    for(k=(n3/3)*2; k<n3; k++)
+    for(j=0; j<=(n2/3)*2; j++)
+    for(i=0; i<n1; i++)
+      vc[Index(i,j,k)]=0.0;
+
+    /* use modified coeffs to change var */
+    spec_synthesis1(box, 2, var, vc);
+    spec_synthesis1(box, 3, var, var);
+
+    /* loop over rho=0 boundary and ensure uniqueness */
+    for(k=1; k<n3; k++)       /* <-- all phi>0 */
+    for(j=0; j<n2; j=j+n2-1)  /* <-- B=0 and B=1 */
+    for(i=0; i<n1; i++)       /* <-- all A */
+      var[Index(i,j,k)] = var[Index(i,j,0)];
+  }
+}    
+
+/* Low pass filter for Var with index vind on side of innerdom */
+void BNSdata_LowPassFilter_inB(tGrid *grid, int vind, int innerdom, int jmax)
+{
+  int b;
+  int outerdom;
+
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("BNSdata_LowPassFilter_inB: "
+                 "innerdom is not 0 or 3");
+
+  /* loop over boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k;
+    double *var = box->v[vind];
+    double *vc  = box->v[Ind("BNSdata_temp1")];
+
+    /* do nothing if we are in the wrong box */
+    if(b!=innerdom && b!=outerdom) continue;
+
+    /* compute coeffs of var in B-dir  */
+    spec_analysis1(box, 2, var, vc);
+
+    /* remove all coeffs with j>jmax */
+    for(k=0; k<n3; k++)
+    for(j=jmax+1; j<n2; j++)
+    for(i=0; i<n1; i++)
+      vc[Index(i,j,k)]=0.0;
+
+    /* use modified coeffs to change var */
+    spec_synthesis1(box, 2, var, vc);
+
+    /* loop over rho=0 boundary and ensure uniqueness */
+    for(k=1; k<n3; k++)       /* <-- all phi>0 */
+    for(j=0; j<n2; j=j+n2-1)  /* <-- B=0 and B=1 */
+    for(i=0; i<n1; i++)       /* <-- all A */
+      var[Index(i,j,k)] = var[Index(i,j,0)];
+  }
+}    
 
 
 /******************************************************************/
