@@ -68,7 +68,7 @@ void m01_VectorFunc(int n, double *vec, double *fvec);
 void m02_VectorFunc(int n, double *vec, double *fvec);
 void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid, 
                                                    int innerdom, int outerdom);
-
+void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom, int outerdom);
 
 
 
@@ -1637,49 +1637,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
   /* set dsigma/dB to zero at B=0 and B=1 by modifying sigma at the
      points j=1 and j=K=n2-2 */
   if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
-  {
-    /* dsigma/dB[0] = sum_{j=0...n2-1} D0j sigma[j] = D0j sigma[j] 
-                    = (D0j sigma[j] - D01 sigma[1]) + D01 sigma[1]
-       So if we were to change only dsigma/dB[1] we would use
-       sigmanew[1] = sigma[1] - (D0j sigma[j])/D01. For both we get 2 eqns:
-       dsigma/dB[0] = (D0j sigma[j]-D01 sigma[1]-D0K sigma[K])
-                      + D01 sigma[1] + D0K sigma[K]
-       dsigma/dB[J] = (DJj sigma[j]-DJ1 sigma[1]-DJK sigma[K])
-                      + DJ1 sigma[1] + DJK sigma[K]            here J=n2-1
-       => (D01 D0K)(sigmanew[1]-sigma[1]) + (\partial_B sigma[0]) = (0)
-          (DJ1 DJK)(sigmanew[K]-sigma[K])   (\partial_B sigma[J])   (0)
-        =>sigmanew[1] = sigma[1] - ( DJK -D0K)(\partial_B sigma[0])/(detM)
-          sigmanew[K] = sigma[K] - (-DJ1  D01)(\partial_B sigma[J])/(detM)
-          where detM = D01*DJK - DJ1*D0K
-       */
-    int J = n2-1;
-    int K = J-1;
-    double D01 = gridnew->box[innerdom]->D2[1];
-    double D0K = gridnew->box[innerdom]->D2[K];
-    double DJ1 = gridnew->box[innerdom]->D2[n2*J+1];
-    double DJK = gridnew->box[innerdom]->D2[n2*J+K];
-    double detM = D01*DJK - DJ1*D0K;
-    double *sigma = gridnew->box[innerdom]->v[isigma];
-    double *dsigma= gridnew->box[innerdom]->v[isigma_dB];
-    /* compute B deriv of sigma */
-    spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
-                gridnew->box[innerdom]->v[isigma_dB]);
-    /* loop over surface */
-    for(k=0; k<n3; k++)
-    for(i=0; i<n1; i++)
-    {
-      int i0 = Index(i,0,k);
-      int i1 = Index(i,1,k);
-      int iK = Index(i,K,k);
-      int iJ = Index(i,J,k);
-      /* set new sigmanew */
-      sigma[i1] = sigma[i1] - ( DJK*dsigma[i0]-D0K*dsigma[iJ])/detM;
-      sigma[iK] = sigma[iK] - (-DJ1*dsigma[i0]+D01*dsigma[iJ])/detM;
-      /* copy sigmanew to outerdom */
-      gridnew->box[outerdom]->v[isigma][i1] = sigma[i1];
-      gridnew->box[outerdom]->v[isigma][iK] = sigma[iK];
-    }    
-  }
+    set_dsigma_pm_dB_toZero_atB01(gridnew, innerdom, outerdom);
 
   /* compute derivs of sigma in both domains */
   spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
@@ -1794,6 +1752,58 @@ void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid,
   free_dmatrix(xi, 1,nsig, 1,nsig);
 }
 
+/* set dsigma_pm_dB to zero at B=0 and B=1 */
+/* dsigma/dB[0] = sum_{j=0...n2-1} D0j sigma[j] = D0j sigma[j] 
+                    = (D0j sigma[j] - D01 sigma[1]) + D01 sigma[1]
+       So if we were to change only dsigma/dB[1] we would use
+       sigmanew[1] = sigma[1] - (D0j sigma[j])/D01. For both we get 2 eqns:
+       dsigma/dB[0] = (D0j sigma[j]-D01 sigma[1]-D0K sigma[K])
+                      + D01 sigma[1] + D0K sigma[K]
+       dsigma/dB[J] = (DJj sigma[j]-DJ1 sigma[1]-DJK sigma[K])
+                      + DJ1 sigma[1] + DJK sigma[K]            here J=n2-1
+       => (D01 D0K)(sigmanew[1]-sigma[1]) + (\partial_B sigma[0]) = (0)
+          (DJ1 DJK)(sigmanew[K]-sigma[K])   (\partial_B sigma[J])   (0)
+        =>sigmanew[1] = sigma[1] - ( DJK -D0K)(\partial_B sigma[0])/(detM)
+          sigmanew[K] = sigma[K] - (-DJ1  D01)(\partial_B sigma[J])/(detM)
+          where detM = D01*DJK - DJ1*D0K       */
+void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom, int outerdom)
+{
+  int isigma      = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+  int n1 = grid->box[innerdom]->n1;
+  int n2 = grid->box[innerdom]->n2;
+  int n3 = grid->box[innerdom]->n3;
+  int J = n2-1;
+  int K = J-1;
+  double D01 = grid->box[innerdom]->D2[1];
+  double D0K = grid->box[innerdom]->D2[K];
+  double DJ1 = grid->box[innerdom]->D2[n2*J+1];
+  double DJK = grid->box[innerdom]->D2[n2*J+K];
+  double detM = D01*DJK - DJ1*D0K;
+  double *sigma = grid->box[innerdom]->v[isigma];
+  double *dsigma= grid->box[innerdom]->v[isigma_dB];
+  int i, k;
+
+  /* compute B deriv of sigma */
+  spec_Deriv1(grid->box[innerdom], 2, grid->box[innerdom]->v[isigma],
+              grid->box[innerdom]->v[isigma_dB]);
+  /* loop over surface */
+  for(k=0; k<n3; k++)
+  for(i=0; i<n1; i++)
+  {
+    int i0 = Index(i,0,k);
+    int i1 = Index(i,1,k);
+    int iK = Index(i,K,k);
+    int iJ = Index(i,J,k);
+    /* set new sigmanew */
+    sigma[i1] = sigma[i1] - ( DJK*dsigma[i0]-D0K*dsigma[iJ])/detM;
+    sigma[iK] = sigma[iK] - (-DJ1*dsigma[i0]+D01*dsigma[iJ])/detM;
+    /* copy sigmanew to outerdom */
+    grid->box[outerdom]->v[isigma][i1] = sigma[i1];
+    grid->box[outerdom]->v[isigma][iK] = sigma[iK];
+  }    
+}
+
 /* filter Var with index vind with 2/3 rule in B and phi directions 
    on side of innerdom  */
 void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
@@ -1891,7 +1901,190 @@ void BNSdata_LowPassFilter_inB(tGrid *grid, int vind, int innerdom, int jmax)
     for(i=0; i<n1; i++)       /* <-- all A */
       var[Index(i,j,k)] = var[Index(i,j,0)];
   }
-}    
+}
+
+/* make a dummy grid for sigma_pm only */
+tGrid *make_dummygrid_for_sigma_pm(tGrid *grid, int nAB, int nphi)
+{
+  int pr=0;
+  tGrid *grid2;
+  char *box0_n1_sav = strdup(Gets("box0_n1"));
+  char *box1_n1_sav = strdup(Gets("box1_n1"));
+  char *box2_n1_sav = strdup(Gets("box2_n1"));
+  char *box3_n1_sav = strdup(Gets("box3_n1"));
+  char *box0_n2_sav = strdup(Gets("box0_n2"));
+  char *box1_n2_sav = strdup(Gets("box1_n2"));
+  char *box2_n2_sav = strdup(Gets("box2_n2"));
+  char *box3_n2_sav = strdup(Gets("box3_n2"));
+  char *box0_n3_sav = strdup(Gets("box0_n3"));
+  char *box1_n3_sav = strdup(Gets("box1_n3"));
+  char *box2_n3_sav = strdup(Gets("box2_n3"));
+  char *box3_n3_sav = strdup(Gets("box3_n3"));
+  int isigma   = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int isigcoef = Ind("temp1");
+  int b;
+  int i,j,k;
+  int Coordinates_verbose = Getv("Coordinates_verbose", "yes");
+
+  /* adjust n1,n2,n3 in boxes */
+  Seti("box0_n1", nAB);
+  Seti("box1_n1", nAB);
+  Seti("box2_n1", nAB);
+  Seti("box3_n1", nAB);
+  Seti("box0_n2", nAB);
+  Seti("box1_n2", nAB);
+  Seti("box2_n2", nAB);
+  Seti("box3_n2", nAB);
+  Seti("box0_n3", nphi);
+  Seti("box1_n3", nphi);
+  Seti("box2_n3", nphi);
+  Seti("box3_n3", nphi);
+
+  /* make grid with new adjusted boxes */
+  grid2 = make_empty_grid(grid->nvariables, pr);
+  set_BoxStructures_fromPars(grid2, pr);
+
+  /* enable some vars needed on grid2 */
+  enablevar(grid2, Ind("x"));
+  enablevar(grid2, Ind("y"));
+  enablevar(grid2, Ind("z"));
+  enablevar(grid2, Ind("dXdx"));
+  enablevar(grid2, Ind("dYdx"));
+  enablevar(grid2, Ind("dZdx"));
+  enablevar(grid2, Ind("Temp1"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_sigma_pm"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dB"));
+  enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dphi"));  
+
+  /* set coeffs of new Sigma  */
+  for(b=0; b<=3; b++)
+  {
+    tBox *box = grid->box[b];
+    tBox *box2 = grid2->box[b];
+    double *c  = box->v[isigcoef];
+    double *c2 = box2->v[isigcoef];
+    int n1 = grid->box[b]->n1;
+    int n2 = grid->box[b]->n2;
+    int n3 = grid->box[b]->n3;
+    int ind, ind2;
+
+    /* get coeffs of Coordinates_AnsorgNS_sigma_pm */
+    spec_analysis1(box, 2, box->v[isigma], box->v[isigcoef]);
+    spec_analysis1(box, 3, box->v[isigcoef], box->v[isigcoef]); 
+
+    /* copy coeffs for i=0 <===> A=0 */
+    for(k=0; k<min2(n3,nphi); k++)
+    for(j=0; j<min2(n2,nAB); j++)
+    for(i=0; i<min2(n1,nAB); i++)
+    {
+      ind = Index(0,j,k);
+      ind2= Ind_n1n2(i,j,k, nAB,nAB);
+      c2[ind2] = c[ind];
+    }
+
+    /* set Coordinates_AnsorgNS_sigma_pm from new coeffs */
+    spec_synthesis1(box2, 3, box2->v[isigma], c2); 
+    spec_synthesis1(box2, 2, box2->v[isigma], box2->v[isigma]);
+  }
+
+  /* initialize coords on grid2 */
+  if(Coordinates_verbose && pr==0) Sets("Coordinates_verbose", "no");
+  init_CoordTransform_And_Derivs(grid2);
+  if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
+
+  /* reset box pars */
+  Sets("box0_n1", box0_n1_sav);
+  Sets("box1_n1", box1_n1_sav);
+  Sets("box2_n1", box2_n1_sav);
+  Sets("box3_n1", box3_n1_sav);
+  Sets("box0_n2", box0_n2_sav);
+  Sets("box1_n2", box1_n2_sav);
+  Sets("box2_n2", box2_n2_sav);
+  Sets("box3_n2", box3_n2_sav);
+  Sets("box0_n3", box0_n3_sav);
+  Sets("box1_n3", box1_n3_sav);
+  Sets("box2_n3", box2_n3_sav);
+  Sets("box3_n3", box3_n3_sav);
+  
+  /* free saved strings */
+  free(box0_n1_sav);
+  free(box1_n1_sav);
+  free(box2_n1_sav);
+  free(box3_n1_sav);
+  free(box0_n2_sav);
+  free(box1_n2_sav);
+  free(box2_n2_sav);
+  free(box3_n2_sav);
+  free(box0_n3_sav);
+  free(box1_n3_sav);
+  free(box2_n3_sav);
+  free(box3_n3_sav);
+
+  return grid2;
+}
+
+/* make grid with less points in B-dir and use 
+   minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi, set_dsigma_pm_dB_toZero_atB01
+   to filter domainshape */
+void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, 
+                                                    int innerdom, int outerdom)
+{
+  tGrid *grid2;
+  int b, i,j,k;
+  int isigma   = Ind("Coordinates_AnsorgNS_sigma_pm");
+  int isigcoef = Ind("temp1");
+  int jmax = Geti("BNSdata_domainshape_filter_jmax");
+  int nAB = jmax+1;
+  int nphi;
+
+  /* make a new smaller grid with nB = jmax+1 */
+  grid2 = make_dummygrid_for_sigma_pm(grid, nAB, grid->box[outerdom]->n3);
+
+  /* apply functions to set dsigma_pm_dB=0 at B=0,1 on grid2 */
+  minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(grid2, innerdom, outerdom);
+  set_dsigma_pm_dB_toZero_atB01(grid2, innerdom, outerdom);
+
+  /* copy coeffs from grid2 onto grid */
+  for(b=0; b<=3; b++)
+  {
+    tBox *box = grid->box[b];
+    tBox *box2 = grid2->box[b];
+    double *c  = box->v[isigcoef];
+    double *c2 = box2->v[isigcoef];
+    int n1 = grid->box[b]->n1;
+    int n2 = grid->box[b]->n2;
+    int n3 = grid->box[b]->n3;
+    int ind, ind2;
+    int nphi = box2->n3;
+
+    /* do nothing if we are in the wrong box */
+    if(b!=innerdom && b!=outerdom) continue;
+
+    /* get coeffs of Coordinates_AnsorgNS_sigma_pm */
+    spec_analysis1(box2, 2, box2->v[isigma], box2->v[isigcoef]);
+
+    /* copy coeffs for i=0 <===> A=0 */
+    for(k=0; k<n3; k++)
+    for(j=0; j<n2; j++)
+    for(i=0; i<n1; i++)
+    {
+      ind = Index(i,j,k);
+      if(j<nAB && k<nphi)
+      {
+        ind2= Ind_n1n2(0,j,k, nAB,nAB);
+        c[ind] = c2[ind2];
+      }
+      else 
+        c[ind] = 0.0;
+    }
+
+    /* set Coordinates_AnsorgNS_sigma_pm from new coeffs */
+    spec_synthesis1(box, 2, box->v[isigma], box->v[isigcoef]);
+  }
+  
+  /* free grid2 */
+  free_grid(grid2);  
+}
 
 
 /******************************************************************/
