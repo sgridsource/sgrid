@@ -1974,9 +1974,9 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
            " reset_Coordinates_AnsorgNS_sigma_pm\n",
            Geti("BNSdata_domainshape_filter_jmax"));
   if(Getv("BNSdata_domainshape_filter", "LowPassInB_dsigma_pm_dB_01_EQ_0"))
-    printf(" LowPassInB_dsigma_pm_dB_01_EQ_0 with jmax=%d inside"
+    printf(" dsigma_pm_dB01=0 on grid with n2=%d in"
            " reset_Coordinates_AnsorgNS_sigma_pm\n",
-           Geti("BNSdata_domainshape_filter_jmax"));
+           Geti("BNSdata_domainshape_filter_jmax")+1);
   if(Getv("BNSdata_domainshape_filter", "keep_sigma_pm_B1"))
     printf(" kept previous sigma_pm at B=1 inside"
            " reset_Coordinates_AnsorgNS_sigma_pm\n");
