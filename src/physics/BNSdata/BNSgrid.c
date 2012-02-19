@@ -66,9 +66,9 @@ void rf_surf1_VectorFunc(int n, double *vec, double *fvec);
 void rf_surf2_VectorFunc(int n, double *vec, double *fvec);
 void m01_VectorFunc(int n, double *vec, double *fvec);
 void m02_VectorFunc(int n, double *vec, double *fvec);
-void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid, 
-                                                   int innerdom, int outerdom);
-void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom, int outerdom);
+void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid, int innerdom);
+void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom);
+void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom);
 
 
 
@@ -1630,14 +1630,17 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       for(j=0; j<n2; j++)
         for(i=0; i<n1; i++) sigout[Index(i,j,k)] = sigin[Index(i,j,k)];
   }
+  if(Getv("BNSdata_domainshape_filter", "LowPassInB_dsigma_pm_dB_01_EQ_0"))
+    BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(grid, innerdom);
+
   /* minimize dsigma/dB at B=1 on gridnew */
   if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
-    minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(gridnew, innerdom, outerdom);
+    minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(gridnew, innerdom);
 
   /* set dsigma/dB to zero at B=0 and B=1 by modifying sigma at the
      points j=1 and j=K=n2-2 */
   if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
-    set_dsigma_pm_dB_toZero_atB01(gridnew, innerdom, outerdom);
+    set_dsigma_pm_dB_toZero_atB01(gridnew, innerdom);
 
   /* compute derivs of sigma in both domains */
   spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
@@ -1698,9 +1701,9 @@ double func_to_min_dsigma_pm_dB_1(double *sigp_1phi)
 
 /* choose point at B=1 such that dsigma_pm_dB_1 is as small as possible
    for all phi */
-void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid, 
-                                                   int innerdom, int outerdom)
+void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid, int innerdom)
 {
+  int outerdom;
   int n1 = grid->box[innerdom]->n1;
   int n2 = grid->box[innerdom]->n2;
   int n3 = grid->box[innerdom]->n3;
@@ -1714,6 +1717,11 @@ void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid,
   double fret;
   double mintol = Getd("Coordinates_newtTOLF");
   t_grid_b_struct pars[1];
+
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi: "
+                 "innerdom is not 0 or 3");
 
   /* allocate pars and matrix for powell */
   sig= dvector(1,nsig);  /* Note: only sig[1...nsig] is used by numrec. */
@@ -1766,8 +1774,9 @@ void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid,
         =>sigmanew[1] = sigma[1] - ( DJK -D0K)(\partial_B sigma[0])/(detM)
           sigmanew[K] = sigma[K] - (-DJ1  D01)(\partial_B sigma[J])/(detM)
           where detM = D01*DJK - DJ1*D0K       */
-void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom, int outerdom)
+void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom)
 {
+  int outerdom;
   int isigma      = Ind("Coordinates_AnsorgNS_sigma_pm");
   int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
   int n1 = grid->box[innerdom]->n1;
@@ -1783,6 +1792,11 @@ void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom, int outerdom)
   double *sigma = grid->box[innerdom]->v[isigma];
   double *dsigma= grid->box[innerdom]->v[isigma_dB];
   int i, k;
+
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("set_dsigma_pm_dB_toZero_atB01: "
+                 "innerdom is not 0 or 3");
 
   /* compute B deriv of sigma */
   spec_Deriv1(grid->box[innerdom], 2, grid->box[innerdom]->v[isigma],
@@ -2026,9 +2040,9 @@ tGrid *make_dummygrid_for_sigma_pm(tGrid *grid, int nAB, int nphi)
 /* make grid with less points in B-dir and use 
    minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi, set_dsigma_pm_dB_toZero_atB01
    to filter domainshape */
-void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, 
-                                                    int innerdom, int outerdom)
+void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
 {
+  int outerdom;
   tGrid *grid2;
   int b, i,j,k;
   int isigma   = Ind("Coordinates_AnsorgNS_sigma_pm");
@@ -2037,12 +2051,17 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid,
   int nAB = jmax+1;
   int nphi;
 
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0: "
+                 "innerdom is not 0 or 3");
+
   /* make a new smaller grid with nB = jmax+1 */
   grid2 = make_dummygrid_for_sigma_pm(grid, nAB, grid->box[outerdom]->n3);
 
   /* apply functions to set dsigma_pm_dB=0 at B=0,1 on grid2 */
-  minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(grid2, innerdom, outerdom);
-  set_dsigma_pm_dB_toZero_atB01(grid2, innerdom, outerdom);
+  minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(grid2, innerdom);
+  set_dsigma_pm_dB_toZero_atB01(grid2, innerdom);
 
   /* copy coeffs from grid2 onto grid */
   for(b=0; b<=3; b++)
