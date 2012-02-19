@@ -1631,7 +1631,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         for(i=0; i<n1; i++) sigout[Index(i,j,k)] = sigin[Index(i,j,k)];
   }
   if(Getv("BNSdata_domainshape_filter", "LowPassInB_dsigma_pm_dB_01_EQ_0"))
-    BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(grid, innerdom);
+    BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(gridnew, innerdom);
 
   /* minimize dsigma/dB at B=1 on gridnew */
   if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
@@ -2006,23 +2006,7 @@ tGrid *make_dummygrid_for_sigma_pm(tGrid *grid, int nAB, int nphi)
   if(Coordinates_verbose && pr==0) Sets("Coordinates_verbose", "no");
   init_CoordTransform_And_Derivs(grid2);
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
-{
-int b=0;
-int j;
-int i=3, k=2;
-int n1 = grid->box[b]->n1;
-int n2 = grid->box[b]->n2;
-int n3 = grid->box[b]->n3;
-spec_analysis1(grid->box[b],  2,  grid->box[b]->v[isigma], grid->box[b]->v[isigcoef]);
-spec_analysis1(grid2->box[b], 2, grid2->box[b]->v[isigma], grid2->box[b]->v[isigcoef]);
-printf("make grid2 coeffs:\n");
-for(j=0;j<n2;j++)
- printf("%g ",  grid->box[b]->v[isigcoef][Ind_n1n2(i,j,k, n1,n2)]);
-printf("\n");
-for(j=0;j<nAB;j++)
- printf("%g ", grid2->box[b]->v[isigcoef][Ind_n1n2(i,j,k, nAB,nAB)]);
-printf("\n");
-}
+
   /* reset box pars */
   Sets("box0_n1", box0_n1_sav);
   Sets("box1_n1", box1_n1_sav);
@@ -2118,43 +2102,6 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
     spec_synthesis1(box, 2, box->v[isigma], c);
   }
 
-{
-static int cou=0;
-int b=0;
-int j;
-int i=3, k=2;
-int n1 = grid->box[b]->n1;
-int n2 = grid->box[b]->n2;
-int n3 = grid->box[b]->n3;
-spec_analysis1(grid->box[b],  2,  grid->box[b]->v[isigma], grid->box[b]->v[isigcoef]);
-spec_analysis1(grid2->box[b], 2, grid2->box[b]->v[isigma], grid2->box[b]->v[isigcoef]);
-printf("after dsig=0:\n");
-for(j=0;j<n2;j++)
- printf("%g ",  grid->box[b]->v[isigcoef][Ind_n1n2(i,j,k, n1,n2)]);
-printf("\n");
-for(j=0;j<nAB;j++)
- printf("%g ", grid2->box[b]->v[isigcoef][Ind_n1n2(i,j,k, nAB,nAB)]);
-printf("\n");
-
-cou++;
-if(0 && cou>=9)
-{
-int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
-spec_Deriv1(grid->box[b], 2,   grid->box[b]->v[isigma],
-            grid->box[b]->v[isigma_dB]);
-spec_Deriv1(grid2->box[b], 2, grid2->box[b]->v[isigma],
-            grid2->box[b]->v[isigma_dB]);
-
-//grid->time=77;
-grid->time -= 0.1;
-grid2->time = grid->time;
-write_grid(grid2);
-write_grid(grid);
-grid->time += 0.1;
-//exit(77);      
-}
-}
-  
   /* free grid2 */
   free_grid(grid2);  
 }
