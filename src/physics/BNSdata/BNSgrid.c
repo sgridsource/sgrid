@@ -1984,8 +1984,8 @@ tGrid *make_dummygrid_for_sigma_pm(tGrid *grid, int nAB, int nphi)
     int ind, ind2;
 
     /* get coeffs of Coordinates_AnsorgNS_sigma_pm */
-    spec_analysis1(box, 2, box->v[isigma], box->v[isigcoef]);
-    spec_analysis1(box, 3, box->v[isigcoef], box->v[isigcoef]); 
+    spec_analysis1(box, 2, box->v[isigma], c);
+    spec_analysis1(box, 3, c, c); 
 
     /* copy coeffs for i=0 <===> A=0 */
     for(k=0; k<min2(n3,nphi); k++)
@@ -2006,7 +2006,23 @@ tGrid *make_dummygrid_for_sigma_pm(tGrid *grid, int nAB, int nphi)
   if(Coordinates_verbose && pr==0) Sets("Coordinates_verbose", "no");
   init_CoordTransform_And_Derivs(grid2);
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
-
+{
+int b=0;
+int j;
+int i=3, k=2;
+int n1 = grid->box[b]->n1;
+int n2 = grid->box[b]->n2;
+int n3 = grid->box[b]->n3;
+spec_analysis1(grid->box[b],  2,  grid->box[b]->v[isigma], grid->box[b]->v[isigcoef]);
+spec_analysis1(grid2->box[b], 2, grid2->box[b]->v[isigma], grid2->box[b]->v[isigcoef]);
+printf("make grid2 coeffs:\n");
+for(j=0;j<n2;j++)
+ printf("%g ",  grid->box[b]->v[isigcoef][Ind_n1n2(i,j,k, n1,n2)]);
+printf("\n");
+for(j=0;j<nAB;j++)
+ printf("%g ", grid2->box[b]->v[isigcoef][Ind_n1n2(i,j,k, nAB,nAB)]);
+printf("\n");
+}
   /* reset box pars */
   Sets("box0_n1", box0_n1_sav);
   Sets("box1_n1", box1_n1_sav);
@@ -2081,7 +2097,7 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
     if(b!=innerdom && b!=outerdom) continue;
 
     /* get coeffs of Coordinates_AnsorgNS_sigma_pm */
-    spec_analysis1(box2, 2, box2->v[isigma], box2->v[isigcoef]);
+    spec_analysis1(box2, 2, box2->v[isigma], c2);
 
     /* copy coeffs for i=0 <===> A=0 */
     for(k=0; k<n3; k++)
@@ -2099,8 +2115,45 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
     }
 
     /* set Coordinates_AnsorgNS_sigma_pm from new coeffs */
-    spec_synthesis1(box, 2, box->v[isigma], box->v[isigcoef]);
+    spec_synthesis1(box, 2, box->v[isigma], c);
   }
+
+{
+static int cou=0;
+int b=0;
+int j;
+int i=3, k=2;
+int n1 = grid->box[b]->n1;
+int n2 = grid->box[b]->n2;
+int n3 = grid->box[b]->n3;
+spec_analysis1(grid->box[b],  2,  grid->box[b]->v[isigma], grid->box[b]->v[isigcoef]);
+spec_analysis1(grid2->box[b], 2, grid2->box[b]->v[isigma], grid2->box[b]->v[isigcoef]);
+printf("after dsig=0:\n");
+for(j=0;j<n2;j++)
+ printf("%g ",  grid->box[b]->v[isigcoef][Ind_n1n2(i,j,k, n1,n2)]);
+printf("\n");
+for(j=0;j<nAB;j++)
+ printf("%g ", grid2->box[b]->v[isigcoef][Ind_n1n2(i,j,k, nAB,nAB)]);
+printf("\n");
+
+cou++;
+if(0 && cou>=9)
+{
+int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+spec_Deriv1(grid->box[b], 2,   grid->box[b]->v[isigma],
+            grid->box[b]->v[isigma_dB]);
+spec_Deriv1(grid2->box[b], 2, grid2->box[b]->v[isigma],
+            grid2->box[b]->v[isigma_dB]);
+
+//grid->time=77;
+grid->time -= 0.2;
+write_grid(grid2)
+grid->time += 0.1;
+write_grid(grid);
+grid->time += 0.1;
+//exit(77);      
+}
+}
   
   /* free grid2 */
   free_grid(grid2);  
