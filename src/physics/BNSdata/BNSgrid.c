@@ -1966,6 +1966,7 @@ tGrid *make_dummygrid_for_sigma_pm(tGrid *grid, int nAB, int nphi)
   enablevar(grid2, Ind("dYdx"));
   enablevar(grid2, Ind("dZdx"));
   enablevar(grid2, Ind("Temp1"));
+  enablevar(grid2, Ind("temp1"));
   enablevar(grid2, Ind("Coordinates_AnsorgNS_sigma_pm"));
   enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dB"));
   enablevar(grid2, Ind("Coordinates_AnsorgNS_dsigma_pm_dphi"));  
@@ -2058,7 +2059,6 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
 
   /* make a new smaller grid with nB = jmax+1 */
   grid2 = make_dummygrid_for_sigma_pm(grid, nAB, grid->box[outerdom]->n3);
-  enablevar(grid2, Ind("temp1"));
 
   /* apply functions to set dsigma_pm_dB=0 at B=0,1 on grid2 */
   minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(grid2, innerdom);
