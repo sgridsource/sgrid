@@ -2146,9 +2146,9 @@ spec_Deriv1(grid2->box[b], 2, grid2->box[b]->v[isigma],
             grid2->box[b]->v[isigma_dB]);
 
 //grid->time=77;
-grid->time -= 0.2;
-write_grid(grid2)
-grid->time += 0.1;
+grid->time -= 0.1;
+grid2->time = grid->time;
+write_grid(grid2);
 write_grid(grid);
 grid->time += 0.1;
 //exit(77);      
