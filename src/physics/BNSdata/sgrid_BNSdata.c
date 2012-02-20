@@ -237,6 +237,10 @@ int sgrid_BNSdata()
   AddPar("BNSdata_domainshape_weight", "1",
          "new and old domainshapes are averaged according to: "
          "new = weight*new + (1-weight)*old");
+  AddPar("BNSdata_filter", "no", "whether we filter vars before ell. solve");
+  AddPar("BNSdata_filter_nfA",  "10", "filter coeffs with i>=nfA");
+  AddPar("BNSdata_filter_nfB",  "10", "filter coeffs with j>=nfB");
+  AddPar("BNSdata_filter_nfphi","10", "filter coeffs with k>=nfphi");
   AddPar("BNSdata_domainshape_filter", "no", 
          "how/if we filter domainshape sigma_pm [no,Bphi2/3,min_dsigma_pm_dB_1"
          ",dsigma_pm_dB_01_EQ_0,keep_sigma_pm_B1,LowPassInB"

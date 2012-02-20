@@ -1818,6 +1818,33 @@ void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom)
   }    
 }
 
+/* filter all vars */
+void BNSdata_filter_all_Vars(tGrid *grid, int it)
+{
+  int cind = Ind("BNSdata_temp1");
+  int b;
+  int nfA = Geti("BNSdata_filter_nfA");
+  int nfB = Geti("BNSdata_filter_nfB");
+  int nfphi = Geti("BNSdata_filter_nfphi");
+
+  if(Getv("BNSdata_filter", "no")) return;
+  
+  /* filter in boxes 0-3 */
+  for(b=0; b<=3; b++)
+  {
+    tBox *box = grid->box[b];
+    spec_filter3d_inbox(box, Ind("BNSdata_Psi"), cind, nfA,nfB,nfphi);
+    spec_filter3d_inbox(box, Ind("BNSdata_Bx"), cind, nfA,nfB,nfphi);
+    spec_filter3d_inbox(box, Ind("BNSdata_By"), cind, nfA,nfB,nfphi);
+    spec_filter3d_inbox(box, Ind("BNSdata_Bz"), cind, nfA,nfB,nfphi);
+    spec_filter3d_inbox(box, Ind("BNSdata_alphaP"), cind, nfA,nfB,nfphi);
+    spec_filter3d_inbox(box, Ind("BNSdata_Sigma"), cind, nfA,nfB,nfphi);
+    spec_filter3d_inbox(box, Ind("BNSdata_q"), cind, nfA,nfB,nfphi);
+    //spec_filter3d_inbox(box, Ind("BNSdata_qg"), cind, nfA,nfB,nfphi);
+  }
+  printf("Filtering vars: (nfA,nfB,nfphi)=(%d,%d,%d)\n", nfA,nfB,nfphi);
+}
+
 /* filter Var with index vind with 2/3 rule in B and phi directions 
    on side of innerdom  */
 void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
