@@ -153,14 +153,14 @@ void spec_filter3d_inbox(tBox *box, int vind, int cind,
 
 
   /* remove all coeffs with j>=nf2 */
-  for(k=0; k<nf3; k++)
+  for(k=0; k<min2(nf3,n3); k++)
   for(j=nf2; j<n2; j++)
   for(i=0; i<n1; i++)
     vc[Index(i,j,k)]=0.0;
 
   /* remove all coeffs with i>=nf1 */
-  for(k=0; k<nf3; k++)
-  for(j=0; j<nf2; j++)
+  for(k=0; k<min2(nf3,n3); k++)
+  for(j=0; j<min2(nf2,n2); j++)
   for(i=nf1; i<n1; i++)
     vc[Index(i,j,k)]=0.0;
 
