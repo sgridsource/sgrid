@@ -4374,8 +4374,8 @@ exit(11);
        that has $time = 0, do not solve again! */
     if(grid->time==0.0 && restart == 1) break;
 
-    /* filter all vars if desired */
-    BNSdata_filter_all_Vars(grid, it);
+    /* filter vars if desired */
+    BNSdata_filter_Vars(grid, it);
 
     /* center q first, then solve and adjust C1/2, Omega, xCM. */
     if(Getv("BNSdata_center_new_q_timebin", "before_ell_solve"))

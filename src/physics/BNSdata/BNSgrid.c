@@ -1819,30 +1819,31 @@ void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom)
 }
 
 /* filter all vars */
-void BNSdata_filter_all_Vars(tGrid *grid, int it)
+void BNSdata_filter_Vars(tGrid *grid, int it)
 {
   int cind = Ind("BNSdata_temp1");
-  int b;
+  int pos, b;
   int nfA = Geti("BNSdata_filter_nfA");
   int nfB = Geti("BNSdata_filter_nfB");
   int nfphi = Geti("BNSdata_filter_nfphi");
+  char *Vars = Gets("BNSdata_filter_Vars");
+  char *word;
 
   if(Getv("BNSdata_filter", "no")) return;
+
+  printf("Filtering vars with (nfA,nfB,nfphi)=(%d,%d,%d):\n", nfA,nfB,nfphi);
+  printf("%s\n", Vars);
   
-  /* filter in boxes 0-3 */
-  for(b=0; b<=3; b++)
+  /* go through BNSdata_Eqn_Iterator_order and solve for all vars in there */
+  word = cmalloc(strlen(Vars) + 10);
+  pos=0;
+  while( (pos=sscan_word_at_p(Vars, pos, word)) != EOF )
   {
-    tBox *box = grid->box[b];
-    spec_filter3d_inbox(box, Ind("BNSdata_Psi"), cind, nfA,nfB,nfphi);
-    spec_filter3d_inbox(box, Ind("BNSdata_Bx"), cind, nfA,nfB,nfphi);
-    spec_filter3d_inbox(box, Ind("BNSdata_By"), cind, nfA,nfB,nfphi);
-    spec_filter3d_inbox(box, Ind("BNSdata_Bz"), cind, nfA,nfB,nfphi);
-    spec_filter3d_inbox(box, Ind("BNSdata_alphaP"), cind, nfA,nfB,nfphi);
-    spec_filter3d_inbox(box, Ind("BNSdata_Sigma"), cind, nfA,nfB,nfphi);
-    spec_filter3d_inbox(box, Ind("BNSdata_q"), cind, nfA,nfB,nfphi);
-    //spec_filter3d_inbox(box, Ind("BNSdata_qg"), cind, nfA,nfB,nfphi);
+    /* filter in boxes 0-3 */
+    for(b=0; b<=3; b++)
+      spec_filter3d_inbox(grid->box[b], Ind(word), cind, nfA,nfB,nfphi);
   }
-  printf("Filtering vars: (nfA,nfB,nfphi)=(%d,%d,%d)\n", nfA,nfB,nfphi);
+  free(word);
 }
 
 /* filter Var with index vind with 2/3 rule in B and phi directions 
