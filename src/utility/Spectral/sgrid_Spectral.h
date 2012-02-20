@@ -61,6 +61,8 @@ void initfiltermatrix(double *F, int k, int n1,
                     void (*filter_coeffs)(double *, int, int),
                     void (*eval_onPoints)(double *,double *, int) );
 void spec_filter1(tBox *box, int direc, double *u);
+void spec_filter3d_inbox(tBox *box, int vind, int cind,
+                         int nf1, int nf2, int nf3);
 
 /* Functions from spec_coeffs.c */
 void initMatrix_ForCoeffs(double *M, int n1,

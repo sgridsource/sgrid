@@ -126,3 +126,46 @@ void spec_filter1(tBox *box, int direc, double *u)
     free(uline);
     free(ufline);
 }
+
+
+/* generic filter in 3d: 
+   set all coeffs with i>=nf1 or j>=nf2 or k>=nf3  to zero.
+   return new var with vind and it new coeefs in cind */
+void spec_filter3d_inbox(tBox *box, int vind, int cind,
+                         int nf1, int nf2, int nf3)
+{
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+  int i,j,k;
+  double *var = box->v[vind];
+  double *vc  = box->v[cind];
+  
+  spec_analysis1(box, 1, var, vc);
+  spec_analysis1(box, 2, vc, vc);
+  spec_analysis1(box, 3, vc, vc);
+      
+  /* remove all coeffs with k>=nf3 */
+  for(k=nf3; k<n3; k++)
+  for(j=0; j<n2; j++)
+  for(i=0; i<n1; i++)
+    vc[Index(i,j,k)]=0.0;
+
+
+  /* remove all coeffs with j>=nf2 */
+  for(k=0; k<nf3; k++)
+  for(j=nf2; j<n2; j++)
+  for(i=0; i<n1; i++)
+    vc[Index(i,j,k)]=0.0;
+
+  /* remove all coeffs with i>=nf1 */
+  for(k=0; k<nf3; k++)
+  for(j=0; j<nf2; j++)
+  for(i=nf1; i<n1; i++)
+    vc[Index(i,j,k)]=0.0;
+
+  /* use modified coeffs to change var */
+  spec_synthesis1(box, 3, var, vc);
+  spec_synthesis1(box, 2, var, var);
+  spec_synthesis1(box, 1, var, var);
+}
