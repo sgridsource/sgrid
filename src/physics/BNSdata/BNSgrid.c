@@ -1661,7 +1661,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
     double *sigin = gridnew->box[innerdom]->v[isigma];
     double *sigout= gridnew->box[outerdom]->v[isigma];;
     BNSdata_LowPassFilter_inB(gridnew, isigma, innerdom,
-                              Geti("BNSdata_domainshape_filter_jmax"));
+                              Geti("BNSdata_domainshape_filter_nfB"));
     for(k=0; k<n3; k++)
       for(j=0; j<n2; j++)
         for(i=0; i<n1; i++) sigout[Index(i,j,k)] = sigin[Index(i,j,k)];
@@ -1937,7 +1937,7 @@ void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom)
 }    
 
 /* Low pass filter for Var with index vind on side of innerdom */
-void BNSdata_LowPassFilter_inB(tGrid *grid, int vind, int innerdom, int jmax)
+void BNSdata_LowPassFilter_inB(tGrid *grid, int vind, int innerdom, int nfB)
 {
   int b;
   int outerdom;
@@ -1964,9 +1964,9 @@ void BNSdata_LowPassFilter_inB(tGrid *grid, int vind, int innerdom, int jmax)
     /* compute coeffs of var in B-dir  */
     spec_analysis1(box, 2, var, vc);
 
-    /* remove all coeffs with j>jmax */
+    /* remove all coeffs with j>=nfB */
     for(k=0; k<n3; k++)
-    for(j=jmax+1; j<n2; j++)
+    for(j=nfB; j<n2; j++)
     for(i=0; i<n1; i++)
       vc[Index(i,j,k)]=0.0;
 
@@ -2112,8 +2112,7 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
   int b, i,j,k;
   int isigma   = Ind("Coordinates_AnsorgNS_sigma_pm");
   int isigcoef = Ind("temp1");
-  int jmax = Geti("BNSdata_domainshape_filter_jmax");
-  int nAB = jmax+1;
+  int nAB = Geti("BNSdata_domainshape_filter_nfB");
   int nphi;
 
   if(innerdom==0)      outerdom=1;
@@ -2121,7 +2120,7 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
   else errorexit("BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0: "
                  "innerdom is not 0 or 3");
 
-  /* make a new smaller grid with nB = jmax+1 */
+  /* make a new smaller grid with n2 = nfB */
   grid2 = make_dummygrid_for_sigma_pm(grid, nAB, grid->box[outerdom]->n3);
 
   /* apply functions to set dsigma_pm_dB=0 at B=0,1 on grid2 */

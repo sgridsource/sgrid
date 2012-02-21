@@ -253,7 +253,7 @@ int sgrid_BNSdata()
          "B=1 (inside reset_Coordinates_AnsorgNS_sigma_pm), "
          "min_dsigma_pm_dB_1 tries to min B-derivs (for all phi) at B=1 "
          "keep_sigma_pm_B1 keeps previous sigma_pm at B=1");
-  AddPar("BNSdata_domainshape_filter_jmax",  "9", "j of highest coeffs we keep");
+  AddPar("BNSdata_domainshape_filter_nfB", "10", "filter coeffs with j>=nfB");
   AddPar("BNSdata_EllSolver_method", "BNS_Eqn_Iterator",
          "how we solve for Psi,B^i,alphaP,Sigma "
          "[allatonce, BNS_Eqn_Iterator, BNS_ordered_Eqn_Iterator,"

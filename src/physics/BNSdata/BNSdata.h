@@ -88,7 +88,7 @@ void BNSgrid_set_allVars_onLeft_equalmasses(tGrid *grid);
 void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc);
 void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename);
 void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom);
-void BNSdata_LowPassFilter_inB(tGrid *grid, int vind, int innerdom, int jmax);
+void BNSdata_LowPassFilter_inB(tGrid *grid, int vind, int innerdom, int nfB);
 void BNSdata_filter_Vars(tGrid *grid, int it);
 void set_Var_to_Val_if_below_limit_or_inbox12(tGrid *grid, int vi, 
                                               double Val, double lim);
