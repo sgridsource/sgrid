@@ -242,6 +242,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_filter_nfA",  "10", "filter coeffs with i>=nfA");
   AddPar("BNSdata_filter_nfB",  "10", "filter coeffs with j>=nfB");
   AddPar("BNSdata_filter_nfphi","10", "filter coeffs with k>=nfphi");
+  AddPar("BNSdata_set_q_atA0", "no", "what to do with q at A=0 [no,zero]");
+  AddPar("BNSdata_set_negative_q", "no", "what to do with q<0 [no,zero]");
   AddPar("BNSdata_domainshape_filter", "no", 
          "how/if we filter domainshape sigma_pm [no,Bphi2/3,min_dsigma_pm_dB_1"
          ",dsigma_pm_dB_01_EQ_0,keep_sigma_pm_B1,LowPassInB"

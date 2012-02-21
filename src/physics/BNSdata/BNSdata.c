@@ -4281,11 +4281,12 @@ exit(11);
 
     /* filter vars if desired */
     BNSdata_filter_Vars(grid, it);
-    if(Getv("BNSdata_filter_Vars", "BNSdata_q"))
-    {
+
+    /* what to do with q at A=0 and q<0 */
+    if(Getv("BNSdata_set_negative_q", "zero"))
       set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
+    if(Getv("BNSdata_set_q_atA0", "zero"))
       set_Var_to_Val_atA0(grid, Ind("BNSdata_q"), 0.0);
-    }
 
     /* center q first, then solve and adjust C1/2, Omega, xCM. */
     if(Getv("BNSdata_center_new_q_timebin", "before_ell_solve"))
