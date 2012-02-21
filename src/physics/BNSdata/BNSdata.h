@@ -90,6 +90,9 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename);
 void BNSdata_filter_with2o3rule_inBphi(tGrid *grid, int vind, int innerdom);
 void BNSdata_LowPassFilter_inB(tGrid *grid, int vind, int innerdom, int jmax);
 void BNSdata_filter_Vars(tGrid *grid, int it);
+void set_Var_to_Val_if_below_limit_or_inbox12(tGrid *grid, int vi, 
+                                              double Val, double lim);
+void set_Var_to_Val_atA0(tGrid *grid, int vi, double Val);
 
 /* from BNS_Interpolate_ADMvars.c */
 int BNS_Interpolate_ADMvars(tGrid *grid);

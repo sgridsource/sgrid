@@ -603,19 +603,11 @@ exit(77);
     /* if NS1 is shifted in y-direc. (for testing) adjust grid on right side */
     if(ysh1 != 0.0 && Getv("BNSdata_adjustdomain01","yes"))
     {
-      int bi;
-
       /* adjust grid so that new q=0 is at A=0 */
       compute_new_q_and_adjust_domainshapes(grid, 0);
 
       /* set q to zero if q<0, and also in region 1 & 2 */
-      forallboxes(grid, bi)
-      {
-        int i;
-        double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-        forallpoints(grid->box[bi], i)
-          if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-      }
+      set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
     }
   } /* end intialization using TOV data */
 
@@ -630,20 +622,12 @@ exit(77);
   /* recompute q from the other fields */
   if(Getv("BNSdata_init_q_fromfields", "yes"))
   {
-    int bi;
-
     /* adjust grid so that new q=0 is at A=0 */
     compute_new_q_and_adjust_domainshapes(grid, 0);
     compute_new_q_and_adjust_domainshapes(grid, 3);
   
     /* set q to zero if q<0, and also in region 1 & 2 */
-    forallboxes(grid, bi)
-    {
-      int i;
-      double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-      forallpoints(grid->box[bi], i)
-        if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-    }
+    set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
   }
 
   /* set qg=q, qgold=qg */
@@ -772,12 +756,7 @@ int BNSdata_center_fields_if_desired(tGrid *grid, int it)
         BNS_compute_new_centered_q(grid);
 
       /* set q to zero if q<0 or in region 1 and 2 */
-      forallboxes(grid, b)
-      {
-        double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
-        forallpoints(grid->box[b], i)
-          if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
-      }
+      set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
     }
    
     /* enforce uniqueness on axis:
@@ -858,12 +837,7 @@ int BNSdata_keep_xin_if_desired(tGrid *grid, int it)
         BNS_compute_new_centered_q(grid);
 
       /* set q to zero if q<0 or in region 1 and 2 */
-      forallboxes(grid, b)
-      {
-        double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
-        forallpoints(grid->box[b], i)
-          if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
-      }
+      set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
     }
    
     /* enforce uniqueness on axis:
@@ -1029,12 +1003,8 @@ int BNSdata_center_q_if_desired(tGrid *grid, int it)
     }
     Sets("BNSdata_center_new_q_flag", "no");  /* deactivate centering of q */
     /* set q to zero if q<0 or in region 1 and 2 */
-    forallboxes(grid, b)
-    {
-      double *BNSdata_q = grid->box[b]->v[Ind("BNSdata_q")];;
-      forallpoints(grid->box[b], i)
-        if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
-    }
+    set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
+
     /* enforce uniqueness on axis:
        set vars equal to val at phi=0 for all phi>0 */
     if(Getv("BNSdata_uniqueness_on_axis", "yes"))
@@ -1269,12 +1239,7 @@ int b;
          Getd("BNSdata_C1"), Getd("BNSdata_C2"));
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   /* print new masses */
   m01 = GetInnerRestMass(grid, 0);
@@ -1351,12 +1316,7 @@ int adjust_C1_C2_Omega_q_BGM(tGrid *grid, int it, double tol)
   compute_new_q_and_adjust_domainshapes(grid, 0);
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   /* print new masses */
   m01 = GetInnerRestMass(grid, 0);
@@ -1604,12 +1564,7 @@ void average_current_and_old_surfaceshape(double weight, int innerdom,
   /* q on grid2 can just be computed */
   BNS_compute_new_centered_q(grid2);
 //  /* set q to zero if q<0 or in region 1 and 2 */
-//  forallboxes(grid2, b)
-//  {
-//    double *BNSdata_q = grid2->box[b]->v[Ind("BNSdata_q")];;
-//    forallpoints(grid2->box[b], i)
-//      if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
-//  }
+//  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);
@@ -2024,12 +1979,7 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
     BNS_compute_new_centered_q(grid2);
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
-//  forallboxes(grid2, b)
-//  {
-//    double *BNSdata_q = grid2->box[b]->v[Ind("BNSdata_q")];;
-//    forallpoints(grid2->box[b], i)
-//      if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
-//  }
+//  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
     /* copy grid2 back into grid, and free grid2 */
     copy_grid(grid2, grid, 0);
@@ -2226,12 +2176,7 @@ int adjust_C1_C2_q_keep_restmasses(tGrid *grid, int it, double tol)
   }
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   /* print new masses */
   m01 = GetInnerRestMass(grid, 0);
@@ -2629,12 +2574,7 @@ int adjust_C1_C2_Omega_xCM_q_keep_xout(tGrid *grid, int it, double tol)
   prdivider(0);
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   return 0;
 }
@@ -2809,12 +2749,7 @@ int adjust_C1_C2_Omega_xCM_q_keep_xin(tGrid *grid, int it, double tol)
   prdivider(0);
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   return 0;
 }
@@ -2990,12 +2925,7 @@ int adjust_Omega_xCM_q_fix_xout(tGrid *grid, int it, double tol)
   prdivider(0);
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   return 0;
 }
@@ -3207,12 +3137,7 @@ int adjust_Omega_xCM_q_fix_xin(tGrid *grid, int it, double tol)
   prdivider(0);
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   return 0;
 }
@@ -3407,12 +3332,7 @@ int adjust_Omega_xCM_keep_xmax(tGrid *grid, int it, double tol)
   }
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   return 0;
 }
@@ -3613,12 +3533,7 @@ int adjust_Omega_xCM_keep_dqdxmax_eq_0(tGrid *grid, int it, double tol)
   }
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   return 0;
 }
@@ -3824,12 +3739,7 @@ int adjust_Omega_xCM_keep_dFuncdxfm_eq_0(tGrid *grid, int it, double tol)
   prdivider(0);
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   return 0;
 }
@@ -4025,12 +3935,7 @@ int adjust_Omega_xCM_forcebalance(tGrid *grid, int it, double tol)
   prdivider(0);
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   return 0;
 }
@@ -6093,12 +5998,7 @@ void m0_errors_VectorFuncP(int n, double *vec, double *fvec, void *p)
   varcopy(grid2, Ind("BNSdata_q"), Ind("BNSdata_qg"));
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
-//  forallboxes(grid2, b)
-//  {
-//    double *BNSdata_q = grid2->box[b]->v[Ind("BNSdata_q")];;
-//    forallpoints(grid2->box[b], i)
-//      if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
-//  }
+//  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);
@@ -6188,12 +6088,7 @@ void compute_new_q_and_adjust_domainshapes_InterpFromGrid0(tGrid *grid,
   BNS_compute_new_centered_q(grid2);
 
 //  /* set q to zero if q<0 or in region 1 and 2 */
-//  forallboxes(grid2, b)
-//  {
-//    double *BNSdata_q = grid2->box[b]->v[Ind("BNSdata_q")];;
-//    forallpoints(grid2->box[b], i)
-//      if( BNSdata_q[i]<0.0 || b==1 || b==2 )  BNSdata_q[i] = 0.0;
-//  }
+//  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   /* copy grid2 back into grid, and free grid2 */
   copy_grid(grid2, grid, 0);

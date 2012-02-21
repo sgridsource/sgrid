@@ -483,6 +483,42 @@ void m02_VectorFunc(int n, double *vec, double *fvec)
   fvec[1] = m0-m02;
 }
 
+/*****************************/
+/* functions to to avoid q<0 */
+/*****************************/
+
+/* set q (or other Var) to zero if q<0 or in region 1 and 2 */
+void set_Var_to_Val_if_below_limit_or_inbox12(tGrid *grid, int vi, 
+                                              double Val, double lim)
+{
+  int b;
+  forallboxes(grid, b)
+  {
+    int i;
+    double *Var = grid->box[b]->v[vi];
+    forallpoints(grid->box[b], i)
+      if( Var[i]<lim || b==1 || b==2 )  Var[i] = Val;
+  }
+}
+/* set q (or other Var) to zero at A=0 */
+void set_Var_to_Val_atA0(tGrid *grid, int vi, double Val)
+{
+  int b;
+  for(b=0; b<=3; b++)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *Var = box->v[vi];
+    int j,k;
+
+    for(k=0; k<n3; k++)
+    for(j=0; j<n2; j++)  
+      Var[Index(0,j,k)] = Val;
+  }
+}
+
 
 /*************************************/
 /* functions to adjust star surfaces */
@@ -3293,13 +3329,7 @@ void BNSgrid_load_initial_guess_from_checkpoint(tGrid *grid, char *filename)
   if(Coordinates_verbose) Sets("Coordinates_verbose", "yes");
 
   /* set q to zero if q<0, and also in region 1 & 2 */
-  forallboxes(grid, bi)
-  {
-    int i;
-    double *BNSdata_q = grid->box[bi]->v[Ind("BNSdata_q")];
-    forallpoints(grid->box[bi], i)
-      if( BNSdata_q[i]<0.0 || bi==1 || bi==2 )  BNSdata_q[i] = 0.0;
-  }
+  set_Var_to_Val_if_below_limit_or_inbox12(grid, Ind("BNSdata_q"), 0.0, 0.0);
 
   if(strcmp(BNSdata_b_sav, Gets("BNSdata_b"))==0)
   {
