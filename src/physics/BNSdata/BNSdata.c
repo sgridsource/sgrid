@@ -1344,7 +1344,7 @@ void set_BNSdata_desired_VolAvSigma12_toMinBCerr(tGrid *grid, int index_Sigma)
   Sigma      = grid->box[0]->v[index_Sigma];
   forallpoints(grid->box[0], ijk) VolAvSigma1 += Sigma[ijk]; 
   VolAvSigma2 = 0.0;
-  Sigma      = grid->box[0]->v[index_Sigma];
+  Sigma      = grid->box[3]->v[index_Sigma];
   forallpoints(grid->box[3], ijk) VolAvSigma2 += Sigma[ijk]; 
 
   /* use VolInt instead in some other cases */
