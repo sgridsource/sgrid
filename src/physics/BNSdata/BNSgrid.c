@@ -1867,6 +1867,15 @@ void BNSdata_filter_Vars(tGrid *grid, int it)
 
   if(Getv("BNSdata_filter", "no")) return;
 
+  /* use 2/3 rule? */
+  if(Getv("BNSdata_filter", "AB2/3")) 
+  {
+    int n1 = grid->box[0]->n1;
+    int n2 = grid->box[0]->n2;
+    nfA = (n1/3)*2;
+    nfB = (n2/3)*2;
+  }
+
   printf("Filtering vars with (nfA,nfB,nfphi)=(%d,%d,%d):\n", nfA,nfB,nfphi);
   printf("%s\n", Vars);
   
