@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 16.2.2012 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 22.2.2012 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -20,6 +20,7 @@ void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, 
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
 int dqFromqg = Getv("BNSdata_q_derivs","dqg");
+int dRHOFromdA = Getv("BNSdata_drho0_inBC","dA");
 int RegularityOnAxis = Getv("BNSdata_Sigma_surface_BCs","RegularityOnAxis");
 int SigmaZeroAtPoint = Getv("BNSdata_Sigma_surface_BCs","ZeroAtPoint");
 int AtA0B0 = Getv("BNSdata_Sigma_surface_BCs","AtA0B0");
@@ -234,6 +235,10 @@ int index_BNSdata_qx = Ind("BNSdata_qx");
 double *dq1 = box->v[index_BNSdata_qx + 0];
 double *dq2 = box->v[index_BNSdata_qx + 1];
 double *dq3 = box->v[index_BNSdata_qx + 2];
+int index_dXdx = Ind("dXdx");
+double *dA1 = box->v[index_dXdx + 0];
+double *dA2 = box->v[index_dXdx + 1];
+double *dA3 = box->v[index_dXdx + 2];
 int index_BNSdata_SigmaX = Ind("BNSdata_SigmaX");
 double *dSigmadA = box->v[index_BNSdata_SigmaX + 0];
 int index_BNSdata_SigmaXX = Ind("BNSdata_SigmaXX");
@@ -289,9 +294,9 @@ double ddSigin23;
 double ddSigin31;
 double ddSigin32;
 double ddSigin33;
-double dlq1;
-double dlq2;
-double dlq3;
+double dlRHO1;
+double dlRHO2;
+double dlRHO3;
 double dlSig1;
 double dlSig2;
 double dlSig3;
@@ -310,6 +315,9 @@ double dlwB23;
 double dlwB31;
 double dlwB32;
 double dlwB33;
+double dRHO1;
+double dRHO2;
+double dRHO3;
 double dSig1;
 double dSig2;
 double dSig3;
@@ -1408,19 +1416,60 @@ sqrt(uzerosqr)
 
 
 /* conditional */
+if (dRHOFromdA) {
+
+dRHO1
+=
+dA1[ijk]
+;
+
+dRHO2
+=
+dA2[ijk]
+;
+
+dRHO3
+=
+dA3[ijk]
+;
+
+
+} else { /* if (!dRHOFromdA) */
+
+dRHO1
+=
+dq1[ijk]
+;
+
+dRHO2
+=
+dq2[ijk]
+;
+
+dRHO3
+=
+dq3[ijk]
+;
+
+}
+/* if (dRHOFromdA) */
+
+
+
+
+/* conditional */
 if (ImposeActualBC) {
 
 FSigma[ijk]
 =
-(dSigmaUp1 - beta1*h*Psi4*uzero)*dq1[ijk] + 
-  (dSigmaUp2 - beta2*h*Psi4*uzero)*dq2[ijk] + 
-  (dSigmaUp3 - beta3*h*Psi4*uzero)*dq3[ijk]
+dRHO1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
+  dRHO2*(dSigmaUp2 - beta2*h*Psi4*uzero) + 
+  dRHO3*(dSigmaUp3 - beta3*h*Psi4*uzero)
 ;
 
 FSigma[ijk]
 =
-FSigma[ijk] + Psim2*(dq1[ijk]*wB1[ijk] + dq2[ijk]*wB2[ijk] + 
-     dq3[ijk]*wB3[ijk])
+FSigma[ijk] + Psim2*(dRHO1*wB1[ijk] + dRHO2*wB2[ijk] + dRHO3*wB3[ijk])
 ;
 
 }
@@ -1789,17 +1838,17 @@ lq
 0
 ;
 
-dlq1
+dlRHO1
 =
 0
 ;
 
-dlq2
+dlRHO2
 =
 0
 ;
 
-dlq3
+dlRHO3
 =
 0
 ;
@@ -1941,24 +1990,65 @@ h*Psi4*uzero*lB3[ijk] + beta3*(Psi4*(h*luzero + lh*uzero) +
 
 
 /* conditional */
+if (dRHOFromdA) {
+
+dRHO1
+=
+dA1[ijk]
+;
+
+dRHO2
+=
+dA2[ijk]
+;
+
+dRHO3
+=
+dA3[ijk]
+;
+
+
+} else { /* if (!dRHOFromdA) */
+
+dRHO1
+=
+dq1[ijk]
+;
+
+dRHO2
+=
+dq2[ijk]
+;
+
+dRHO3
+=
+dq3[ijk]
+;
+
+}
+/* if (dRHOFromdA) */
+
+
+
+
+/* conditional */
 if (ImposeActualBC) {
 
 FlSigma[ijk]
 =
-dlq1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
-  dlq2*(dSigmaUp2 - beta2*h*Psi4*uzero) + 
-  dlq3*(dSigmaUp3 - beta3*h*Psi4*uzero) + 
-  (dlSigmaUp1 - lhuzeroPsi4beta1)*dq1[ijk] + 
-  (dlSigmaUp2 - lhuzeroPsi4beta2)*dq2[ijk] + 
-  (dlSigmaUp3 - lhuzeroPsi4beta3)*dq3[ijk]
+dRHO1*(dlSigmaUp1 - lhuzeroPsi4beta1) + 
+  dRHO2*(dlSigmaUp2 - lhuzeroPsi4beta2) + 
+  dRHO3*(dlSigmaUp3 - lhuzeroPsi4beta3) + 
+  dlRHO1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
+  dlRHO2*(dSigmaUp2 - beta2*h*Psi4*uzero) + 
+  dlRHO3*(dSigmaUp3 - beta3*h*Psi4*uzero)
 ;
 
 FlSigma[ijk]
 =
-FlSigma[ijk] + Psim2*(lwB1*dq1[ijk] + lwB2*dq2[ijk] + lwB3*dq3[ijk] + 
-     dlq1*wB1[ijk] + dlq2*wB2[ijk] + dlq3*wB3[ijk]) - 
-  2.*Psim3*lPsi[ijk]*(dq1[ijk]*wB1[ijk] + dq2[ijk]*wB2[ijk] + 
-     dq3[ijk]*wB3[ijk])
+FlSigma[ijk] + Psim2*(dRHO1*lwB1 + dRHO2*lwB2 + dRHO3*lwB3 + 
+     dlRHO1*wB1[ijk] + dlRHO2*wB2[ijk] + dlRHO3*wB3[ijk]) - 
+  2.*Psim3*lPsi[ijk]*(dRHO1*wB1[ijk] + dRHO2*wB2[ijk] + dRHO3*wB3[ijk])
 ;
 
 }
@@ -2198,4 +2288,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 121, n* = 590,  n/ = 302,  n+ = 390, n = 1282, O = 1 */
+/* nvars = 124, n* = 605,  n/ = 314,  n+ = 396, n = 1315, O = 1 */

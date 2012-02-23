@@ -10,7 +10,7 @@ variables = {Psi, B[a], alphaP, Sigma, FPsi, FB[a], FalphaP, FSigma,
 	     lPsi,lB[a],lalphaP,lSigma, FlPsi,FlB[a],FlalphaP,FlSigma,
               dlPsi[a],   dlB[a,b],   dlalphaP[a],    dlSigma[a],
              ddlPsi[a,b],ddlB[a,b,c],ddlalphaP[a,b], ddlSigma[a,b],
-             q, wB[a], dq[a], x, y, z, dSigmadA,dlSigmadA,
+             q, wB[a], dq[a], dA[a], x, y, z, dSigmadA,dlSigmadA,
              ddSigmadA2,ddlSigmadA2, dddSigmadA3,dddlSigmadA3,
              dSigmain[a], dlSigmain[a], ddSigmain[a,b], ddlSigmain[a,b]}
 
@@ -301,11 +301,18 @@ tocompute = {
         uzerosqr == L2/(alpha2 h2),
         uzero == sqrt[uzerosqr],
 
+        (* do we use dA instead of dq as surface normal? *)
+        Cif == dRHOFromdA,
+          dRHO[a] == dA[a],
+        Cif == else,
+          dRHO[a] == dq[a],
+        Cif == end,
+
         (* actual Physical BC *)
         Cif == ImposeActualBC,
-          FSigma == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
+          FSigma == dSigmaUp[c] dRHO[c] - h uzero Psi4 beta[c] dRHO[c],
           (* add extra term with wB *)
-          FSigma == FSigma + Psim2 wB[c] dq[c],
+          FSigma == FSigma + Psim2 wB[c] dRHO[c],
         Cif == end,
           (* add VolAvSigma=0 to BC for 0<B<1 *)
         Cif == ( (AddInnerVolIntToBC || AddInnerSumToBC) ),
@@ -411,7 +418,7 @@ tocompute = {
 
         (* linearized terms *)
         lq     == 0,
-        dlq[a] == 0,
+        dlRHO[a] == 0,
         lh   == 0,
         lLnh == 0,
         (* wB remains const under linearization *)
@@ -430,14 +437,21 @@ tocompute = {
         lhuzeroPsi4beta[a] == h (luzero Psi4 beta[a] +
                                  4 uzero Psi3 lPsi beta[a] +
                                  uzero Psi4 lB[a]) + lh uzero Psi4 beta[a],
-        
+
+       (* do we use dA instead of dq as surface normal? *)
+        Cif == dRHOFromdA,
+          dRHO[a] == dA[a],
+        Cif == else,
+          dRHO[a] == dq[a],
+        Cif == end,
+
         (* actual Physical BC *)
         Cif == ImposeActualBC,
-          FlSigma  == dlSigmaUp[c] dq[c] - lhuzeroPsi4beta[c] dq[c] +
-                      dSigmaUp[c] dlq[c] - h uzero Psi4 beta[c] dlq[c],
+          FlSigma  == dlSigmaUp[c] dRHO[c] - lhuzeroPsi4beta[c] dRHO[c] +
+                      dSigmaUp[c] dlRHO[c] - h uzero Psi4 beta[c] dlRHO[c],
           (* add extra term with wB *)
-          FlSigma == FlSigma + Psim2 lwB[c] dq[c] - 2 Psim3 lPsi wB[c] dq[c] +
-                               Psim2 wB[c] dlq[c],
+          FlSigma == FlSigma + Psim2 lwB[c] dRHO[c] - 2 Psim3 lPsi wB[c] dRHO[c] +
+                               Psim2 wB[c] dlRHO[c],
         Cif == end,
 
         (* add VolAvlSigma=0 to BC *)
@@ -461,8 +475,8 @@ tocompute = {
       Cif == SigmaZeroAtPoint,
         Cinstruction == "i=0;  if(AtA0B0) j=0; else j=n2-1;",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
-          (* FSig == dSigmaUp[c] dq[c] - h uzero Psi4 beta[c] dq[c],
-             FSig == FSig + Psim2 wB[c] dq[c],
+          (* FSig == dSigmaUp[c] dRHO[c] - h uzero Psi4 beta[c] dRHO[c],
+             FSig == FSig + Psim2 wB[c] dRHO[c],
              FlSigma == 2 FSig FlSigma + 2 Sigma lSigma, *)
           FlSigma == lSigma,
         Cinstruction == "} /* end for k  */",
@@ -576,6 +590,7 @@ BeginCFunction[] := Module[{},
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
   pr["int dqFromqg = Getv(\"BNSdata_q_derivs\",\"dqg\");\n"];
+  pr["int dRHOFromdA = Getv(\"BNSdata_drho0_inBC\",\"dA\");\n"];
   pr["int RegularityOnAxis = Getv(\"BNSdata_Sigma_surface_BCs\",\"RegularityOnAxis\");\n"];
   pr["int SigmaZeroAtPoint = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAtPoint\");\n"];
   pr["int AtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"AtA0B0\");\n"];
@@ -649,6 +664,7 @@ variabledeclarations[] := Module[{},
   prdecvarname[{q},       "BNSdata_q"];
   prdecvarname[{wB[a]},   "BNSdata_wBx"];
   prdecvarname[{dq[a]},   "BNSdata_qx"];
+  prdecvarname[{dA[a]},   "dXdx"];      
 
   prdecvarname[{dSigmadA},     "BNSdata_SigmaX"];
   prdecvarname[{ddSigmadA2},   "BNSdata_SigmaXX"];
