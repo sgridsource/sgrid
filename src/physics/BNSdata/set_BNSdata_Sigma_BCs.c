@@ -20,7 +20,7 @@ void set_BNSdata_Sigma_BC(tVarList *vlFu, tVarList *vlu,       tVarList *vlJdu, 
 int corot1 = Getv("BNSdata_rotationstate1","corotation");
 int corot2 = Getv("BNSdata_rotationstate2","corotation");
 int dqFromqg = Getv("BNSdata_q_derivs","dqg");
-int dRHOFromdA = Getv("BNSdata_drho0_inBC","dA");
+int dQFromdA = Getv("BNSdata_drho0_inBC","dA");
 int RegularityOnAxis = Getv("BNSdata_Sigma_surface_BCs","RegularityOnAxis");
 int SigmaZeroAtPoint = Getv("BNSdata_Sigma_surface_BCs","ZeroAtPoint");
 int AtA0B0 = Getv("BNSdata_Sigma_surface_BCs","AtA0B0");
@@ -294,9 +294,9 @@ double ddSigin23;
 double ddSigin31;
 double ddSigin32;
 double ddSigin33;
-double dlRHO1;
-double dlRHO2;
-double dlRHO3;
+double dlQ1;
+double dlQ2;
+double dlQ3;
 double dlSig1;
 double dlSig2;
 double dlSig3;
@@ -315,9 +315,9 @@ double dlwB23;
 double dlwB31;
 double dlwB32;
 double dlwB33;
-double dRHO1;
-double dRHO2;
-double dRHO3;
+double dQ1;
+double dQ2;
+double dQ3;
 double dSig1;
 double dSig2;
 double dSig3;
@@ -1416,43 +1416,43 @@ sqrt(uzerosqr)
 
 
 /* conditional */
-if (dRHOFromdA) {
+if (dQFromdA) {
 
-dRHO1
+dQ1
 =
 dA1[ijk]
 ;
 
-dRHO2
+dQ2
 =
 dA2[ijk]
 ;
 
-dRHO3
+dQ3
 =
 dA3[ijk]
 ;
 
 
-} else { /* if (!dRHOFromdA) */
+} else { /* if (!dQFromdA) */
 
-dRHO1
+dQ1
 =
 dq1[ijk]
 ;
 
-dRHO2
+dQ2
 =
 dq2[ijk]
 ;
 
-dRHO3
+dQ3
 =
 dq3[ijk]
 ;
 
 }
-/* if (dRHOFromdA) */
+/* if (dQFromdA) */
 
 
 
@@ -1462,14 +1462,13 @@ if (ImposeActualBC) {
 
 FSigma[ijk]
 =
-dRHO1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
-  dRHO2*(dSigmaUp2 - beta2*h*Psi4*uzero) + 
-  dRHO3*(dSigmaUp3 - beta3*h*Psi4*uzero)
+dQ1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
+  dQ2*(dSigmaUp2 - beta2*h*Psi4*uzero) + dQ3*(dSigmaUp3 - beta3*h*Psi4*uzero)
 ;
 
 FSigma[ijk]
 =
-FSigma[ijk] + Psim2*(dRHO1*wB1[ijk] + dRHO2*wB2[ijk] + dRHO3*wB3[ijk])
+FSigma[ijk] + Psim2*(dQ1*wB1[ijk] + dQ2*wB2[ijk] + dQ3*wB3[ijk])
 ;
 
 }
@@ -1838,17 +1837,17 @@ lq
 0
 ;
 
-dlRHO1
+dlQ1
 =
 0
 ;
 
-dlRHO2
+dlQ2
 =
 0
 ;
 
-dlRHO3
+dlQ3
 =
 0
 ;
@@ -1990,43 +1989,43 @@ h*Psi4*uzero*lB3[ijk] + beta3*(Psi4*(h*luzero + lh*uzero) +
 
 
 /* conditional */
-if (dRHOFromdA) {
+if (dQFromdA) {
 
-dRHO1
+dQ1
 =
 dA1[ijk]
 ;
 
-dRHO2
+dQ2
 =
 dA2[ijk]
 ;
 
-dRHO3
+dQ3
 =
 dA3[ijk]
 ;
 
 
-} else { /* if (!dRHOFromdA) */
+} else { /* if (!dQFromdA) */
 
-dRHO1
+dQ1
 =
 dq1[ijk]
 ;
 
-dRHO2
+dQ2
 =
 dq2[ijk]
 ;
 
-dRHO3
+dQ3
 =
 dq3[ijk]
 ;
 
 }
-/* if (dRHOFromdA) */
+/* if (dQFromdA) */
 
 
 
@@ -2036,19 +2035,18 @@ if (ImposeActualBC) {
 
 FlSigma[ijk]
 =
-dRHO1*(dlSigmaUp1 - lhuzeroPsi4beta1) + 
-  dRHO2*(dlSigmaUp2 - lhuzeroPsi4beta2) + 
-  dRHO3*(dlSigmaUp3 - lhuzeroPsi4beta3) + 
-  dlRHO1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
-  dlRHO2*(dSigmaUp2 - beta2*h*Psi4*uzero) + 
-  dlRHO3*(dSigmaUp3 - beta3*h*Psi4*uzero)
+dQ1*(dlSigmaUp1 - lhuzeroPsi4beta1) + dQ2*(dlSigmaUp2 - lhuzeroPsi4beta2) + 
+  dQ3*(dlSigmaUp3 - lhuzeroPsi4beta3) + 
+  dlQ1*(dSigmaUp1 - beta1*h*Psi4*uzero) + 
+  dlQ2*(dSigmaUp2 - beta2*h*Psi4*uzero) + 
+  dlQ3*(dSigmaUp3 - beta3*h*Psi4*uzero)
 ;
 
 FlSigma[ijk]
 =
-FlSigma[ijk] + Psim2*(dRHO1*lwB1 + dRHO2*lwB2 + dRHO3*lwB3 + 
-     dlRHO1*wB1[ijk] + dlRHO2*wB2[ijk] + dlRHO3*wB3[ijk]) - 
-  2.*Psim3*lPsi[ijk]*(dRHO1*wB1[ijk] + dRHO2*wB2[ijk] + dRHO3*wB3[ijk])
+FlSigma[ijk] + Psim2*(dQ1*lwB1 + dQ2*lwB2 + dQ3*lwB3 + dlQ1*wB1[ijk] + 
+     dlQ2*wB2[ijk] + dlQ3*wB3[ijk]) - 
+  2.*Psim3*lPsi[ijk]*(dQ1*wB1[ijk] + dQ2*wB2[ijk] + dQ3*wB3[ijk])
 ;
 
 }

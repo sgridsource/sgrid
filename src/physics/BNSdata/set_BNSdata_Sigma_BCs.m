@@ -302,17 +302,17 @@ tocompute = {
         uzero == sqrt[uzerosqr],
 
         (* do we use dA instead of dq as surface normal? *)
-        Cif == dRHOFromdA,
-          dRHO[a] == dA[a],
+        Cif == dQFromdA,
+          dQ[a] == dA[a],
         Cif == else,
-          dRHO[a] == dq[a],
+          dQ[a] == dq[a],
         Cif == end,
 
         (* actual Physical BC *)
         Cif == ImposeActualBC,
-          FSigma == dSigmaUp[c] dRHO[c] - h uzero Psi4 beta[c] dRHO[c],
+          FSigma == dSigmaUp[c] dQ[c] - h uzero Psi4 beta[c] dQ[c],
           (* add extra term with wB *)
-          FSigma == FSigma + Psim2 wB[c] dRHO[c],
+          FSigma == FSigma + Psim2 wB[c] dQ[c],
         Cif == end,
           (* add VolAvSigma=0 to BC for 0<B<1 *)
         Cif == ( (AddInnerVolIntToBC || AddInnerSumToBC) ),
@@ -418,7 +418,7 @@ tocompute = {
 
         (* linearized terms *)
         lq     == 0,
-        dlRHO[a] == 0,
+        dlQ[a] == 0,
         lh   == 0,
         lLnh == 0,
         (* wB remains const under linearization *)
@@ -439,19 +439,19 @@ tocompute = {
                                  uzero Psi4 lB[a]) + lh uzero Psi4 beta[a],
 
        (* do we use dA instead of dq as surface normal? *)
-        Cif == dRHOFromdA,
-          dRHO[a] == dA[a],
+        Cif == dQFromdA,
+          dQ[a] == dA[a],
         Cif == else,
-          dRHO[a] == dq[a],
+          dQ[a] == dq[a],
         Cif == end,
 
         (* actual Physical BC *)
         Cif == ImposeActualBC,
-          FlSigma  == dlSigmaUp[c] dRHO[c] - lhuzeroPsi4beta[c] dRHO[c] +
-                      dSigmaUp[c] dlRHO[c] - h uzero Psi4 beta[c] dlRHO[c],
+          FlSigma  == dlSigmaUp[c] dQ[c] - lhuzeroPsi4beta[c] dQ[c] +
+                      dSigmaUp[c] dlQ[c] - h uzero Psi4 beta[c] dlQ[c],
           (* add extra term with wB *)
-          FlSigma == FlSigma + Psim2 lwB[c] dRHO[c] - 2 Psim3 lPsi wB[c] dRHO[c] +
-                               Psim2 wB[c] dlRHO[c],
+          FlSigma == FlSigma + Psim2 lwB[c] dQ[c] - 2 Psim3 lPsi wB[c] dQ[c] +
+                               Psim2 wB[c] dlQ[c],
         Cif == end,
 
         (* add VolAvlSigma=0 to BC *)
@@ -475,8 +475,8 @@ tocompute = {
       Cif == SigmaZeroAtPoint,
         Cinstruction == "i=0;  if(AtA0B0) j=0; else j=n2-1;",
         Cinstruction == "for(k=0; k<n3; k++){ ijk=Index(i,j,k);",
-          (* FSig == dSigmaUp[c] dRHO[c] - h uzero Psi4 beta[c] dRHO[c],
-             FSig == FSig + Psim2 wB[c] dRHO[c],
+          (* FSig == dSigmaUp[c] dQ[c] - h uzero Psi4 beta[c] dQ[c],
+             FSig == FSig + Psim2 wB[c] dQ[c],
              FlSigma == 2 FSig FlSigma + 2 Sigma lSigma, *)
           FlSigma == lSigma,
         Cinstruction == "} /* end for k  */",
@@ -590,7 +590,7 @@ BeginCFunction[] := Module[{},
   pr["int corot1 = Getv(\"BNSdata_rotationstate1\",\"corotation\");\n"];
   pr["int corot2 = Getv(\"BNSdata_rotationstate2\",\"corotation\");\n"];
   pr["int dqFromqg = Getv(\"BNSdata_q_derivs\",\"dqg\");\n"];
-  pr["int dRHOFromdA = Getv(\"BNSdata_drho0_inBC\",\"dA\");\n"];
+  pr["int dQFromdA = Getv(\"BNSdata_drho0_inBC\",\"dA\");\n"];
   pr["int RegularityOnAxis = Getv(\"BNSdata_Sigma_surface_BCs\",\"RegularityOnAxis\");\n"];
   pr["int SigmaZeroAtPoint = Getv(\"BNSdata_Sigma_surface_BCs\",\"ZeroAtPoint\");\n"];
   pr["int AtA0B0 = Getv(\"BNSdata_Sigma_surface_BCs\",\"AtA0B0\");\n"];
