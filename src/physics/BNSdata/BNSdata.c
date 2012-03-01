@@ -80,6 +80,7 @@ void free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(
      tVarList *vlw,  tVarList *vlwDerivs,  tVarList *vlFw,
      tVarList *vldw, tVarList *vldwDerivs, tVarList *vlJdw);
 double GridL2Norm_of_vars_in_string(tGrid *grid, char *str);
+double GridL2Norm_of_vars_in_string_withZeroErr_inbox12(tGrid *grid, char *str);
 int BNS_Eqn_Iterator_for_vars_in_string(tGrid *grid, int itmax, 
   double tol, double *normres, 
   int (*linear_solver)(tVarList *x, tVarList *b, 
@@ -4109,6 +4110,7 @@ int BNSdata_solve(tGrid *grid)
   double normresnonlin;
   double realnormres = 1e300;
   double realnormres_old;
+  double realSigmares;
   int    itsSinceExtraSigma = 0;
   int (*linear_solver)(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
@@ -4323,7 +4325,7 @@ exit(11);
     prdivider(1);
     printf("BNSdata_solve step %d: itsSinceExtraSigma=%d\n",
            it, itsSinceExtraSigma);
-    printf(" realnormres=%g  realnormres_old=%g\n",
+    printf(" realnormres=%g   realnormres_old=%g\n",
            realnormres, realnormres_old);
     if( (realnormres_old <= realnormres*Getd("BNSdata_extraSigmaSolve_fac")) &&
         (itsSinceExtraSigma >= Geti("BNSdata_extraSigmaSolve_every")) )
@@ -4398,23 +4400,30 @@ exit(11);
         normresnonlin = GridL2Norm(vlFu);
         Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
       }
-      /* solve the ell. eqn for Sigma alone */
-      BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
-             &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
-      totalerr1 = average_current_and_old(Sigma_esw, 
-                                          grid,vlFu,vlu,vluDerivs, vlJdu);
-      if(Sigma_esw<1.0 && it>=allow_Sigma_esw1_it && allow_Sigma_esw1_it>=0)
+      /* do we want to solve for Sigma? */
+      realSigmares =
+       GridL2Norm_of_vars_in_string_withZeroErr_inbox12(grid, "BNSdata_Sigma");
+      printf(" realSigmares=%g  Newton_tol=%g\n", realSigmares, Newton_tol);
+      if( realSigmares >= Newton_tol * Getd("BNSdata_SigmaSolve_tolFac") )
       {
-        /* complete step */
-        totalerr = average_current_and_old(Sigma_esw1/Sigma_esw,
-                                           grid,vlFu,vlu,vluDerivs,vlJdu);
-        /* but go back to Sigma_esw if totalerr is larger */
-        if(totalerr>totalerr1)
-          totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
+        /* solve the ell. eqn for Sigma alone */
+        BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+               &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+        totalerr1 = average_current_and_old(Sigma_esw, 
+                                            grid,vlFu,vlu,vluDerivs, vlJdu);
+        if(Sigma_esw<1.0 && it>=allow_Sigma_esw1_it && allow_Sigma_esw1_it>=0)
+        {
+          /* complete step */
+          totalerr = average_current_and_old(Sigma_esw1/Sigma_esw,
                                              grid,vlFu,vlu,vluDerivs,vlJdu);
+          /* but go back to Sigma_esw if totalerr is larger */
+          if(totalerr>totalerr1)
+            totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
+                                               grid,vlFu,vlu,vluDerivs,vlJdu);
+        }
+        /* reset Sigmaold so that Sigma does not change when we average later */
+        varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
       }
-      /* reset Sigmaold so that Sigma does not change when we average later */
-      varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
 
       /* reset Newton_tol */
       normresnonlin = GridL2Norm_of_vars_in_string(grid, 
@@ -5312,6 +5321,49 @@ double GridL2Norm_of_vars_in_string(tGrid *grid, char *str)
              &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw,  word);
       
     F_oneComp(vlFw, vlw, vlwDerivs, NULL);
+    norm = GridL2Norm(vlFw);
+    sum += norm;
+    //printf("%s: residual = %g\n", word, norm);
+     
+    free_vl_vlDeriv_vlF_vld_vldDerivs_vlJd(vlw, vlwDerivs, vlFw,  
+                                           vldw, vldwDerivs, vlJdw);
+  }
+  //printf(" => total residual = %g\n", sum);
+  free(word);
+  return sum;
+}
+
+/* find residual of vars listed in string, but set Err to zero in box1&2 */
+/* this works only if the string contains at most
+   "BNSdata_Psi BNSdata_Bx BNSdata_By BNSdata_Bz BNSdata_alphaP BNSdata_Sigma" 
+   */
+double GridL2Norm_of_vars_in_string_withZeroErr_inbox12(tGrid *grid, char *str)
+{
+  int pos;
+  char *word;
+  double norm;
+  double sum=0.0;
+    
+  word = cmalloc(strlen(str) + 10);
+  pos=0;
+  while( (pos=sscan_word_at_p(str, pos, word)) != EOF)
+  {
+    int b;
+    tVarList *vlw, *vlwDerivs, *vlFw, *vldw, *vldwDerivs, *vlJdw;
+
+    /* make new vlw, ... for var in string word */
+    make_vl_vlDeriv_vlF_vld_vldDerivs_vlJd_forComponent(grid,
+             &vlw,&vlwDerivs,&vlFw,  &vldw,&vldwDerivs,&vlJdw,  word);
+      
+    F_oneComp(vlFw, vlw, vlwDerivs, NULL);
+    /* set Error in box1 and 2 to zero */
+    for(b=1; b<=2; b++)
+    {
+      tBox *box = grid->box[b];
+      int iVar  = vlFw->index[0];
+      int i;
+      forallpoints(box, i)  box->v[iVar][i] = 0.0;
+    }
     norm = GridL2Norm(vlFw);
     sum += norm;
     //printf("%s: residual = %g\n", word, norm);

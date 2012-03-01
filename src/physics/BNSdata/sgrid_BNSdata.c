@@ -268,6 +268,8 @@ int sgrid_BNSdata()
          "solve for Sigma if res_old/res <= fac");
   AddPar("BNSdata_extraSigmaSolve_every", "10",
          "how often we do the extra Sigma solve");
+  AddPar("BNSdata_SigmaSolve_tolFac", "0",
+         "use solver for Sigma if Sigma_Err >= Newton_tol * tolFac");
   AddPar("BNSdata_linSolver", "UMFPACK", 
          "linear solver used [LAPACK,templates_GMRES,bicgstab,UMFPACK]");
   AddPar("BNSdata_linSolver_itmax", "20", "max num of linSolver iterations");
