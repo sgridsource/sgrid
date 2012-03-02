@@ -4110,7 +4110,7 @@ int BNSdata_solve(tGrid *grid)
   double normresnonlin;
   double realnormres = 1e300;
   double realnormres_old;
-  double realSigmares;
+  double realSigmares, restres;
   int    itsSinceExtraSigma = 0;
   int (*linear_solver)(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
@@ -4403,8 +4403,10 @@ exit(11);
       /* do we want to solve for Sigma? */
       realSigmares =
        GridL2Norm_of_vars_in_string_withZeroErr_inbox12(grid, "BNSdata_Sigma");
-      printf(" realSigmares=%g  Newton_tol=%g\n", realSigmares, Newton_tol);
-      if( realSigmares >= Newton_tol * Getd("BNSdata_SigmaSolve_tolFac") )
+      restres = GridL2Norm_of_vars_in_string(grid,  
+                                      Gets("BNSdata_CTS_Eqs_Iteration_order"));
+      printf(" realSigmares=%g  restres=%g\n", realSigmares, restres);
+      if( realSigmares >= restres * Getd("BNSdata_SigmaSolve_tolFac") )
       {
         /* solve the ell. eqn for Sigma alone */
         BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
