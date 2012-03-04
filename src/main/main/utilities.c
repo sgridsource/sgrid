@@ -140,14 +140,33 @@ int system3(char *s1, char *s2, char *s3)
   char command[10000];
   int status = 0;
 
-  if (1) { 
+  /* check for special cases where we can use c-functions */
+  if( strcmp(s1,"mv")==0 || strcmp(s1,"mv -f")==0 ) /* use rename */
+  {
+    sprintf(command, "rename(\"%s\", \"%s\");", s2, s3);
+    status = rename(s2, s3);
+    printf("ANSI C call:  %s\n", command);
+  }
+  else if( strcmp(s1,"rm -rf")==0 && 0 ) /* use remove */
+  {
+    if(strlen(s2)>0)
+    {
+      sprintf(command, "remove(\"%s\");", s2);
+      status = remove(s2); /* Note: remove fails if dir is not empty */
+      printf("ANSI C call:  %s\n", command);
+    }
+    if(strlen(s3)>0)
+    {
+      sprintf(command, "remove(\"%s\");", s3);
+      status = remove(s3);
+      printf("ANSI C call:  %s\n", command);
+    }
+  }
+  else /* use system */
+  { 
     sprintf(command, "%s %s %s", s1, s2, s3);
+    status = system(command);
     printf("System call:  %s\n", command);
-    status = system(command);
-  } else {
-    sprintf(command, "%s %s %s", s1, s2, s3);
-    //if (1) printf("System call for proc %d:  %s\n", sgridpi_rank(), command);
-    status = system(command);
   }
   return status;
 }
