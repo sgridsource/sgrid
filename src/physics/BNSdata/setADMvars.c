@@ -1,5 +1,5 @@
 /* setADMvars.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 28.11.2010 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 2010/11/28 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
