@@ -84,7 +84,7 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   /* make a finer grid2 so that nearest_b_XYZ_of_xyz_inboxlist used
      with grid2 finds points that are closer to the correct point. */
   /* use 40 points in A,B and leave point number in other directions. */
-  printf(" making finer grid2 to get a good guess for XYZ ...\n");
+  printf(" making finer grid2 to get a good guess for X,Y,Z ...\n");
   fflush(stdout);
   grid2 = make_grid_with_sigma_pm(grid, 40, 
                                         grid->box[1]->n3, grid->box[5]->n1);
