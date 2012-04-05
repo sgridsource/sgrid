@@ -10,6 +10,21 @@
 #endif
 
 
+#define PrintErrorCodesAndExit  \
+  { printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1); \
+    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);  \
+    printf("umfpack_di_solve returned INFO=%d\n", INFO); \
+    printf("some common error codes:\n"); \
+    printf(" UMFPACK_ERROR_out_of_memory=%d\n", UMFPACK_ERROR_out_of_memory); \
+    printf(" UMFPACK_ERROR_invalid_Numeric_object=%d\n", UMFPACK_ERROR_invalid_Numeric_object); \
+    printf(" UMFPACK_ERROR_invalid_Symbolic_object=%d\n", UMFPACK_ERROR_invalid_Symbolic_object); \
+    printf(" UMFPACK_ERROR_invalid_matrix=%d\n", UMFPACK_ERROR_invalid_matrix); \
+    printf(" UMFPACK_ERROR_invalid_system=%d\n", UMFPACK_ERROR_invalid_system); \
+    printf("for more info do:\n"); \
+    printf(" grep UMFPACK_ERROR /usr/include/suitesparse/umfpack.h\n"); \
+    fflush(stdout); \
+    errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO); }
+
 /* solve A x = b with umfpack's umfpack_di_solve
    for a matrix made up of sparse line vectors that was written 
    by SetMatrixLines_slowly */
@@ -121,7 +136,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
 #else
   errorexit("umfpack_solve: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
-            "SPECIALINCS += -I/usr/include/ufsparse\n"
+            "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
@@ -131,13 +146,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   }
 
   if(INFO!=0)
-  {
-    printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
-    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
-    printf("umfpack_di_solve returned INFO=%d\n", INFO);
-    fflush(stdout);
-    errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
-  }
+    PrintErrorCodesAndExit;
 
   /* set vlx = x */
   if(pr)
@@ -284,7 +293,7 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
 #else
   errorexit("umfpack_solve_forSortedVars: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
-            "SPECIALINCS += -I/usr/include/ufsparse\n"
+            "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
@@ -294,13 +303,7 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   }
 
   if(INFO!=0)
-  {
-    printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
-    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
-    printf("umfpack_di_solve returned INFO=%d\n", INFO);
-    fflush(stdout);
-    errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
-  }
+    PrintErrorCodesAndExit;
 
   /* set vlx = x */
   if(pr)
@@ -445,7 +448,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
 #else
   errorexit("umfpack_solve_fromAcolumns: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
-            "SPECIALINCS += -I/usr/include/ufsparse\n"
+            "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
@@ -455,13 +458,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   }
 
   if(INFO!=0)
-  {
-    printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
-    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
-    printf("umfpack_di_solve returned INFO=%d\n", INFO);
-    fflush(stdout);
-    errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
-  }
+    PrintErrorCodesAndExit;
 
   /* set vlx = x */
   if(pr)
@@ -607,7 +604,7 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
 #else
   errorexit("umfpack_solve_forSortedVars_fromAcolumns: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
-            "SPECIALINCS += -I/usr/include/ufsparse\n"
+            "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
@@ -617,13 +614,7 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   }
 
   if(INFO!=0)
-  {
-    printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1);
-    printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);
-    printf("umfpack_di_solve returned INFO=%d\n", INFO);
-    fflush(stdout);
-    errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO);
-  }
+    PrintErrorCodesAndExit;
 
   /* set vlx = x */
   if(pr)
