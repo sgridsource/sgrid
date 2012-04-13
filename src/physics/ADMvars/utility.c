@@ -512,3 +512,41 @@ int set_K_initial(tGrid *grid)
   }
   return 0;
 }
+
+
+/* undo conformal transformation:
+   g = psi^4 g
+   psi = 1, dpsi = 0, ddpsi = 0 */
+int ADMvars_undo_conformal_split(tGrid *grid)
+{
+  tBox *box;
+  double psi4;
+  int ig = Ind("gxx");
+  int ip = Ind("psi");
+  int idpop = Ind("dpsiopsix");
+  int iddpop = Ind("ddpsiopsixx");
+  int b, i, n;
+
+  printf("ADMvars_undo_conformal_split: g -> psi^4 g,  psi -> 1 \n");
+
+  forallgridpoints(grid,box, b, i)
+  {
+    double *psi = box->v[ip];
+
+    /* set psi4 and then set psi=1 */
+    psi4 = pow(psi[i], 4.0);
+    psi[i] = 1;
+
+    /* rescale metric */
+    for(n = 0; n < 6; n++) box->v[ig+n][i] *= psi4;
+
+    if (box->v[idpop])
+    {
+      /* set all derivs of psi to zero */
+      for(n = 0; n < 3; n++) box->v[idpop+n][i] = 0;
+      for(n = 0; n < 6; n++) box->v[iddpop+n][i] = 0;
+    }
+  }
+
+  return 0;
+}
