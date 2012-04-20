@@ -36,7 +36,7 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_orbitfile", "orbit.t",
          "filename for evolved orbital parameters");
   AddPar("PN_CircularOrbit_GWs_orbitfile_format", "S/m^2",
-         "format used in orbitfile [S/m^2,yvec]");
+         "format used in orbitfile [S/m^2,yvec,Add_E_J]");
   AddPar("PN_CircularOrbit_GWs_lmax", "6", "max l mode we compute");
   AddPar("PN_CircularOrbit_GWs_sphere_Lmax", "13",
          "max l mode we can represent on grid. We need Lmax>=lmax");

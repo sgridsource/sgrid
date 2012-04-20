@@ -128,6 +128,18 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   int ImHmodesign;
   double theta_h = Getd("PN_CircularOrbit_GWs_theta_h");
   double phi_h = Getd("PN_CircularOrbit_GWs_phi_h");
+  int EOM_type;
+  double Etot, Jx,Jy,Jz;
+
+  /* set EOM_type from pars */
+  if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","TaylorT4_bug")) 
+    EOM_type=TaylorT4_bug;
+  else if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","TaylorT4")) 
+    EOM_type=TaylorT4;
+  else if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","Kidder1995"))
+    EOM_type=Kidder1995;
+  else
+    EOM_type=BuonannoEtAl2003;
 
   /* flip sign of Im H mode in case of plus_cross format (as for NINJA) */
   if(Getv("PN_CircularOrbit_GWs_HmodeOutputFormat", "plus_cross"))
@@ -213,6 +225,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   else
     fprintf(out_orb, "# time  separation  omega  S1x  S1y  S1z  S2x  S2y  S2z"
                      "  Lnx  Lny  Lnz  Phi");
+  if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "Add_E_J"))
+    fprintf(out_orb, "  E  Jx  Jy  Jz");
   if(theta_h>=0.0) fprintf(out_orb, "  {h+,hx}(%g,%g)\n", theta_h, phi_h);
   else             fprintf(out_orb, "\n");
 
@@ -253,6 +267,105 @@ int PN_CircularOrbit_GWs(tGrid *grid)
                              time, Re_Hmodep, Im_Hmodep,
                              lmax,s, ImHmodesign);
 
+    /* compute total energy and angular momentum */
+    /* if(EOM_type==Kidder1995 || EOM_type==BuonannoEtAl2003) */
+    if(1)
+    {
+      double m  = m1 + m2;
+      double mu = m1*m2/m;
+      double eta= mu/m;   
+      double r = yvec[0];
+      double sxomsqr1 = yvec[2]/(m1*m1);	/* sx1 /m1^2 */
+      double syomsqr1 = yvec[3]/(m1*m1);	/* sy1 /m1^2 */
+      double szomsqr1 = yvec[4]/(m1*m1);	/* sz1 /m1^2 */
+      double sxomsqr2 = yvec[5]/(m2*m2);	/* sx2 /m2^2 */
+      double syomsqr2 = yvec[6]/(m2*m2);	/* sy2 /m2^2 */
+      double szomsqr2 = yvec[7]/(m2*m2);	/* sz2 /m2^2 */
+      double LNhatx = yvec[8];	/* Lnx */
+      double LNhaty = yvec[9];	/* Lny */
+      double LNhatz = yvec[10];	/* Lnz */
+      double mor = m/r;		/* m/r */
+      double LNhat_dot_somsqr1; /* LNhat . s1/m1^2 */
+      double LNhat_dot_somsqr2; /* LNhat . s2/m2^2 */
+      double somsqr1_dot_somsqr2; /* s1 . s2 / (m1 m2)^2 */
+      double Lterm1, Lx,Ly,Lz, Eb;
+
+      /* some dot products */
+      LNhat_dot_somsqr1 = LNhatx*sxomsqr1 + LNhaty*syomsqr1 + LNhatz*szomsqr1;
+      LNhat_dot_somsqr2 = LNhatx*sxomsqr2 + LNhaty*syomsqr2 + LNhatz*szomsqr2;
+      somsqr1_dot_somsqr2 
+         = sxomsqr1*sxomsqr2 + syomsqr1*syomsqr2 + szomsqr1*szomsqr2;
+
+      /* binding energy Eq. (4.6) */
+      Eb = -0.5*mu*mor *
+           ( 1 - 0.25*(7.-eta)*mor
+             +( LNhat_dot_somsqr1*(2.*m1*m1/(m*m)+eta)
+               +LNhat_dot_somsqr2*(2.*m2*m2/(m*m)+eta) )*pow(mor,1.5)
+             -( (7.0 -49.0*eta -eta*eta)/8.0 
+                -0.5*eta*(somsqr1_dot_somsqr2
+                          -3.0*LNhat_dot_somsqr1*LNhat_dot_somsqr2) )*mor*mor );
+      Etot = m + Eb;
+
+      /* orbital ang. mom. */
+      /* total PN orbital ang. mom. L_i coming from Eq. (4.7) and L_i = J_i - S_i */
+      Lterm1 = mu*sqrt(m*r) *
+         ( 1.0 + 2.0*mor
+           -0.25*( LNhat_dot_somsqr1*(8.*m1*m1/(m*m)+7.*eta)
+                  +LNhat_dot_somsqr2*(8.*m2*m2/(m*m)+7.*eta) )*pow(mor,1.5)
+           +( 0.5*(5.-9.*eta)
+              -0.75*eta*(somsqr1_dot_somsqr2
+                        -3.0*LNhat_dot_somsqr1*LNhat_dot_somsqr2) )*mor*mor );
+      Lx = Lterm1 * LNhatx
+           -0.25*mu*sqrt(m*r) * 
+            ( sxomsqr1*(4.*m1*m1/(m*m)+eta) + sxomsqr2*(4.*m2*m2/(m*m)+eta) ) *
+            pow(mor,1.5);
+      Ly = Lterm1 * LNhaty
+           -0.25*mu*sqrt(m*r) * 
+            ( syomsqr1*(4.*m1*m1/(m*m)+eta) + syomsqr2*(4.*m2*m2/(m*m)+eta) ) *
+            pow(mor,1.5);
+      Lz = Lterm1 * LNhatz
+           -0.25*mu*sqrt(m*r) * 
+           ( szomsqr1*(4.*m1*m1/(m*m)+eta) + szomsqr2*(4.*m2*m2/(m*m)+eta) ) *
+           pow(mor,1.5);
+
+      /* total ang. mom. */
+      Jx = Lx + m1*m1*sxomsqr1 + m2*m2*sxomsqr2;
+      Jy = Ly + m1*m1*syomsqr1 + m2*m2*syomsqr2;
+      Jz = Lz + m1*m1*szomsqr1 + m2*m2*szomsqr2;
+
+      /* more terms since BuonannoEtAl2003 is higher order */
+      /* FIXME: for now we also include TaylorT4,
+                because I have no seperate expressions for it*/
+      if(EOM_type==BuonannoEtAl2003 || EOM_type==TaylorT4)
+      {
+        double Momega = yvec[1]*m;
+        double E2PN, E3PN;
+        double Seff_x,Seff_y,Seff_z, LNhat_dot_Seff;
+
+        /* Eq 7 */
+        Seff_x = (1+0.75*m2/m1)*yvec[2] + (1+0.75*m1/m2)*yvec[5];
+        Seff_y = (1+0.75*m2/m1)*yvec[3] + (1+0.75*m1/m2)*yvec[6];
+        Seff_z = (1+0.75*m2/m1)*yvec[4] + (1+0.75*m1/m2)*yvec[7];
+
+        /* some dot products */
+        LNhat_dot_Seff = LNhatx*Seff_x + LNhaty*Seff_y + LNhatz*Seff_z; 
+
+        /* Eq 11 and Eq 12 */
+        E2PN = -0.5*mu*pow(Momega,2.0/3.0)*
+               ( 1 - ((9.0+eta)/12.0)*pow(Momega,2.0/3.0) 
+                 +(8.0/3.0)*LNhat_dot_Seff*Momega
+                 +(1.0/24.0)*(-81.0+57.0*eta-eta*eta)*pow(Momega,4.0/3.0)
+                 +(somsqr1_dot_somsqr2 - 3*LNhat_dot_somsqr1*LNhat_dot_somsqr2)
+                  *(m1*m1*m2*m2/eta)*pow(Momega,4.0/3.0)
+               );
+        E3PN = E2PN - 0.5*mu*pow(Momega,2.0/3.0)*
+               ( -675.0/64.0 + (34445.0/576-(205.0/96.0)*PI*PI)*eta
+                 -(155.0/96.0)*eta*eta - (35.0/5184.0)*eta*eta*eta
+               )*Momega*Momega;
+        Etot = m + E3PN;
+      }
+    }
+
     /* output orbit file */
     fprintf(out_orb, "%-.16e", time);
     if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "S/m^2"))
@@ -264,6 +377,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     }
     else
       for(i=0; i<=11; i++) fprintf(out_orb, "  %+.16e", yvec[i]);
+    if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "Add_E_J"))
+      fprintf(out_orb, "  %+.16e  %+.16e  %+.16e  %+.16e", Etot, Jx,Jy,Jz);
     if(theta_h>=0.0)
     {
       double hplus, hcross;
