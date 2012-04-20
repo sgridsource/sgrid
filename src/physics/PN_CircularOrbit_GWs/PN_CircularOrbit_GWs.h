@@ -1,6 +1,16 @@
 /* PN_CircularOrbit_GWs.h */
 /* Wolfgang Tichy 2/2010 */
 
+/* types of EOM we can use */
+enum
+{
+  Kidder1995,       /* as in Kidder, PRD 52, 821 (1995) */
+  BuonannoEtAl2003, /* Petr's implementation */
+  TaylorT4_bug,     /* M. Boyle: this old T4 from SpEC has a bug  */
+  TaylorT4          /* Taylor T4 as used in SpEC */
+};
+
+
 /* funcs in PN_CircularOrbit_GWs.c */
 int PN_CircularOrbit_GWs_set_boxsize(tGrid *grid);
 int PN_CircularOrbit_GWs_startup(tGrid *grid);

@@ -1,6 +1,7 @@
 /* Driver for routine odeint */
 
 #include "sgrid.h"
+#include "PN_CircularOrbit_GWs.h"
 
 #define N 11  /* number of vars in odeint */
 #define GammaE 0.577215664901532860606512090082402431042  /* Euler's gamma */
@@ -15,17 +16,9 @@ double c1, c2, c3, c4, c5, c6, c7, c8, c9,
 /* flags (0 or 1) that decide which order of v=om^{1/3} we include */
 int f1, f2, f3, f4, f5, f6, f7;  
 int OLS1, OLS2, OLS3, OSS1;
-int EOM_type;
+int EOM_type; /* types of EOM from PN_CircularOrbit_GWs.h */
 
-/* types of EOM */
-enum
-{
-  Kidder1995,       /* as in Kidder, PRD 52, 821 (1995) */
-  BuonannoEtAl2003, /* Petr's implementation */
-  TaylorT4_bug,     /* M. Boyle: this old T4 from SpEC has a bug  */
-  TaylorT4          /* Taylor T4 as used in SpEC */
-};
-                            
+
 
 /* compute global constants that depend only on masses or pi,gammaE,theta_cap */
 void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
