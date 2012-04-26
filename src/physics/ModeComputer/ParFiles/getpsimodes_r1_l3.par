@@ -1,0 +1,7 @@
+physics = ModeComputer
+
+ModeComputer_lmax = 8
+
+ModeComputer_Re_sphere_data = rpsi4.r1.l3
+ModeComputer_Im_sphere_data = ipsi4.r1.l3
+ModeComputer_outfile_prefix = psi4_r1_
