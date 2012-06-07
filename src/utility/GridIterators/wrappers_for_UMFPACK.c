@@ -27,7 +27,7 @@ int UMFPACK_solve_wrapper(tVarList *x, tVarList *b,
   ncols = 0;
   forallboxes(grid,bi)  ncols+=(grid->box[bi]->nnodes)*nvars;
   Acol = calloc(ncols, sizeof(*Acol));
-  if(Acol)  if(pr) printf("allocated %d matrix columns\n", ncols);
+  if(Acol) { if(pr) printf("allocated %d matrix columns\n", ncols); }
   else       errorexit("no memory for Acol");
   for(col=0; col<ncols; col++)  Acol[col]=AllocateSparseVector();
 
