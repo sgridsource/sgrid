@@ -12,7 +12,8 @@
 
 /* compute coeffs of deriv cder[0...n] from coeffs c for a periodic grid:
  x_j = j (b-a)/(n+1) + a ,  j=0, ..., n */
-void fd2_deriv_periodic(double a, double b, double c[], double cder[], int n)
+void fd2_deriv_periodic(void *aux,
+                        double a, double b, double c[], double cder[], int n)
 {
   int j;
   double con = 0.5*(n+1)/(b-a);
@@ -27,7 +28,8 @@ void fd2_deriv_periodic(double a, double b, double c[], double cder[], int n)
 
 /* compute coeffs of deriv cder[0...n] from coeffs c for a non-periodic grid:
  x_j = j (b-a)/n + a ,  j=0, ..., n */
-void fd2_deriv_onesidedBC(double a, double b, double c[], double cder[], int n)
+void fd2_deriv_onesidedBC(void *aux,
+                          double a, double b, double c[], double cder[], int n)
 {
   int j;
   double con = 0.5*n/(b-a);
@@ -42,7 +44,8 @@ void fd2_deriv_onesidedBC(double a, double b, double c[], double cder[], int n)
 
 /* compute coeffs of 2nd deriv cder[0...n] from coeffs c for a periodic grid:
  x_j = j (b-a)/(n+1) + a ,  j=0, ..., n */
-void fd2_2ndderiv_periodic(double a, double b, double c[], double cder[], int n)
+void fd2_2ndderiv_periodic(void *aux, double a, double b, 
+                           double c[], double cder[], int n)
 {
   int j;
   double ooh = (n+1)/(b-a);
@@ -58,7 +61,7 @@ void fd2_2ndderiv_periodic(double a, double b, double c[], double cder[], int n)
 
 /* compute coeffs of 2nd deriv cder[0...n] from coeffs c for a non-periodic 
    grid: x_j = j (b-a)/n + a ,  j=0, ..., n */
-void fd2_2ndderiv_onesidedBC(double a, double b, 
+void fd2_2ndderiv_onesidedBC(void *aux, double a, double b, 
                              double c[], double cder[], int n)
 {
   int j;

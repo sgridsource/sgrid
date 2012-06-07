@@ -33,13 +33,13 @@ void spec_Int1(tBox *box, int direc, double *u, double *U);
 
 
 /* Functions from diffmatrices.c */
-void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
+void initdiffmatrix(tBox *box, int dir, double *D, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
-                    void (*coeffs_of_deriv)(double, double, double *,double *, int),
+                    void (*coeffs_of_deriv)(void *, double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) );
-void initdiffmatrix2(double a, double b, double *DD, int n1,
+void initdiffmatrix2(tBox *box, int dir, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
-                    void (*coeffs_of_2ndderiv)(double, double, double *,double *, int),
+                    void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) );
 void init_fdcentered_diffmatrix(double *x, double *D, int n1,
               void (*fd_deriv)(double *, double *,double *, int) );
@@ -77,8 +77,8 @@ void set_TransformType_flags_inbox(tBox *box);
 void init_spec_functionpointers(tBox *box);
 void get_spec_functionpointers(tBox *box, int direc,
      void (**get_coeffs)(double *,double *, int),
-     void (**coeffs_of_deriv)(double, double, double *,double *, int),
-     void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
+     void (**coeffs_of_deriv)(void *, double, double, double *,double *, int),
+     void (**coeffs_of_2ndderiv)(void *, double, double, double *,double *, int),
      void (**coeffs_of_int)(double, double, double *,double *, int),
      void (**eval_onPoints)(double *,double *, int),
      void (**filter_coeffs)(double *, int, int),

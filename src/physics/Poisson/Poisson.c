@@ -369,8 +369,8 @@ void filterSing(tBox *box, double *u)
   int filt3=n3-1; // n3-1; // n3/2;
   int i,j,k;
   void (*get_coeffs)(double *,double *, int)=NULL;
-  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
-  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(void *, double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int)=NULL;
   void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
@@ -1366,7 +1366,7 @@ void convert_grid_to_fd(tGrid *grid)
     tBox *box = grid->box[b];
     int n3 = box->n3;
 
-    initdiffmatrix(box->bbox[4], box->bbox[5], box->D3, box->DD3, n3,
+    initdiffmatrix(box, 3, box->D3, box->DD3, n3,
                    fd2_coeffs, fd2_deriv_periodic, fd2_eval);
   }      
 }

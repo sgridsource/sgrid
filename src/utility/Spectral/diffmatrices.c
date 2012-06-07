@@ -7,12 +7,14 @@
 
 
 /* init the n1*n1 diff. matrices D and DD */
-void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
+void initdiffmatrix(tBox *box, int dir, double *D, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
-                    void (*coeffs_of_deriv)(double, double, double *,double *, int),
+                    void (*coeffs_of_deriv)(void *, double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) )
 {
   int i,j;
+  double a = box->bbox[2*(dir-1)];
+  double b = box->bbox[2*(dir-1)+1];
   double *u;
   double *c;
   double *d;
@@ -32,7 +34,7 @@ void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
     get_coeffs(c, u, n1-1);
     
     //cheb_deriv(a, b,  c, d, n1-1);
-    coeffs_of_deriv(a, b,  c, d, n1-1);
+    coeffs_of_deriv((void *) box, a, b,  c, d, n1-1);
     
     //cheb_eval_onExtrema(d, c, n1-1);
     eval_onPoints(d, c, n1-1);
@@ -41,7 +43,7 @@ void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
     for(i=0; i<n1; i++) D[n1*i + j] = c[i];
     
     //cheb_deriv(a, b,  d, c, n1-1);
-    coeffs_of_deriv(a, b,  d, c, n1-1);
+    coeffs_of_deriv((void *) box, a, b,  d, c, n1-1);
 
     //cheb_eval_onExtrema(c, d, n1-1);
     eval_onPoints(c, d, n1-1);
@@ -59,12 +61,14 @@ void initdiffmatrix(double a, double b, double *D, double *DD, int n1,
 
 
 /* init the diff. matrix DD for second derivs only */
-void initdiffmatrix2(double a, double b, double *DD, int n1,
+void initdiffmatrix2(tBox *box, int dir, double *DD, int n1,
                     void (*get_coeffs)(double *,double *, int),
-                    void (*coeffs_of_2ndderiv)(double, double, double *,double *, int),
+                    void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int),
                     void (*eval_onPoints)(double *,double *, int) )
 {
   int i,j;
+  double a = box->bbox[2*(dir-1)];
+  double b = box->bbox[2*(dir-1)+1];
   double *u;
   double *c;
   double *d;
@@ -81,7 +85,7 @@ void initdiffmatrix2(double a, double b, double *DD, int n1,
   {
     u[j]=1.0;
     get_coeffs(c, u, n1-1);
-    coeffs_of_2ndderiv(a, b,  c, d, n1-1);
+    coeffs_of_2ndderiv((void *) box, a, b,  c, d, n1-1);
     eval_onPoints(d, c, n1-1);
     
     /* set DD */

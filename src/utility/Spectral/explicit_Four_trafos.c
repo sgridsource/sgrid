@@ -19,7 +19,8 @@
 
 
 /* compute Four coeffs of deriv cder[0...n] from Four coeffs c[0...n] */
-void four_deriv(double a, double b, double c[], double cder[], int n)
+void four_deriv(void *aux, 
+                double a, double b, double c[], double cder[], int n)
 {
   int j;
   double PI2_con;

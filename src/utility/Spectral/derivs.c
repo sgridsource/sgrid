@@ -25,7 +25,7 @@ void cheb_d1(double a, double b, double *u, double *d1u, int n1)
   if(cp==NULL) errorexit("cheb_d1: out of memory for cp");
 
   cheb_coeffs_fromExtrema(c, u, n1-1);
-  cheb_deriv(a, b,  c , cp, n1-1);
+  cheb_deriv(NULL, a, b,  c , cp, n1-1);
 
   //cheb_filter(cp, 2*(n1-1)/3, n1-1);
   cheb_eval_onExtrema(cp, d1u, n1-1);
@@ -61,11 +61,11 @@ void cheb_d2(double a, double b, double *u, double *d1u, double *d2u, int n1)
   
   cheb_coeffs_fromExtrema(c, u, n1-1);
 
-  cheb_deriv(a, b,  c , cp, n1-1);
+  cheb_deriv(NULL, a, b,  c , cp, n1-1);
   //cheb_filter(cp, 2*(n1-1)/3, n1-1);
   cheb_eval_onExtrema(cp, d1u, n1-1);
 
-  cheb_deriv(a, b,  cp, c , n1-1);
+  cheb_deriv(NULL, a, b,  cp, c , n1-1);
   //cheb_filter(c, 2*(n1-1)/3, n1-1);
   cheb_eval_onExtrema(c, d2u, n1-1);
 
@@ -761,7 +761,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
         box->get_coeffs1(duline, uline, n1-1);
-        box->coeffs_of_deriv1(a,b, duline, uline, n1-1);
+        box->coeffs_of_deriv1((void *) box, a,b, duline, uline, n1-1);
         box->eval_onPoints1(uline, duline, n1-1);
         put_memline(du, duline, 1, j, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,duline)
@@ -791,7 +791,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
         box->get_coeffs2(duline, uline, n2-1);
-        box->coeffs_of_deriv2(a,b, duline, uline, n2-1);
+        box->coeffs_of_deriv2((void *) box, a,b, duline, uline, n2-1);
         box->eval_onPoints2(uline, duline, n2-1);
         put_memline(du, duline, 2, i, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,duline)
@@ -819,7 +819,7 @@ void spec_Deriv1(tBox *box, int direc, double *u, double *du)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
         box->get_coeffs3(duline, uline, n3-1);
-        box->coeffs_of_deriv3(a,b, duline, uline, n3-1);
+        box->coeffs_of_deriv3((void *) box, a,b, duline, uline, n3-1);
         box->eval_onPoints3(uline, duline, n3-1);
         put_memline(du, duline, 3, i, j, n1, n2, n3);
       } end_forLines_free2Lines(uline,duline)
@@ -864,11 +864,11 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
         box->get_coeffs1(duline, uline, n1-1);
-        box->coeffs_of_deriv1(a,b, duline, uline, n1-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv1((void *) box, a,b, duline, uline, n1-1); /* coeffs of du are now in uline */
         box->eval_onPoints1(uline, duline, n1-1);
         put_memline(u1, duline, 1, j, k, n1, n2, n3);
 
-        box->coeffs_of_deriv1(a,b, uline, duline, n1-1); /* coeffs of ddu are now in duline */
+        box->coeffs_of_deriv1((void *) box, a,b, uline, duline, n1-1); /* coeffs of ddu are now in duline */
         box->eval_onPoints1(duline, dduline, n1-1);
         put_memline(u11, dduline, 1, j, k, n1, n2, n3); 
       } end_forLines_free3Lines(uline,duline,dduline)
@@ -900,17 +900,17 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
         box->get_coeffs2(duline, uline, n2-1);
-        box->coeffs_of_deriv2(a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv2((void *) box, a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
         box->eval_onPoints2(uline, duline, n2-1);
         put_memline(u2, duline, 2, i, k, n1, n2, n3);
 
-        box->coeffs_of_deriv2(a,b, uline, duline, n2-1); /* coeffs of ddu are now in duline */
+        box->coeffs_of_deriv2((void *) box, a,b, uline, duline, n2-1); /* coeffs of ddu are now in duline */
         box->eval_onPoints2(duline, dduline, n2-1);
         put_memline(u22, dduline, 2, i, k, n1, n2, n3);
 
         get_memline(u1, uline, 2, i, k, n1, n2, n3);
         box->get_coeffs2(duline, uline, n2-1);
-        box->coeffs_of_deriv2(a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv2((void *) box, a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
         box->eval_onPoints2(uline, duline, n2-1);
         put_memline(u12, duline, 2, i, k, n1, n2, n3);
       } end_forLines_free3Lines(uline,duline,dduline)
@@ -942,23 +942,23 @@ void spec_allDerivs(tBox *box, double *u, double *u1, double *u2, double *u3,
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
         box->get_coeffs3(duline, uline, n3-1);
-        box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv3((void *) box, a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
         box->eval_onPoints3(uline, duline, n3-1);
         put_memline(u3, duline, 3, i, j, n1, n2, n3);
 
-        box->coeffs_of_deriv3(a,b, uline, duline, n3-1); /* coeffs of ddu are now in duline */
+        box->coeffs_of_deriv3((void *) box, a,b, uline, duline, n3-1); /* coeffs of ddu are now in duline */
         box->eval_onPoints3(duline, dduline, n3-1);
         put_memline(u33, dduline, 3, i, j, n1, n2, n3);
 
         get_memline(u1, uline, 3, i, j, n1, n2, n3);
         box->get_coeffs3(duline, uline, n3-1);
-        box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv3((void *) box, a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
         box->eval_onPoints3(uline, duline, n3-1);
         put_memline(u13, duline, 3, i, j, n1, n2, n3);
         
         get_memline(u2, uline, 3, i, j, n1, n2, n3);
         box->get_coeffs3(duline, uline, n3-1);
-        box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv3((void *) box, a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
         box->eval_onPoints3(uline, duline, n3-1);
         put_memline(u23, duline, 3, i, j, n1, n2, n3);
       } end_forLines_free3Lines(uline,duline,dduline)
@@ -1313,8 +1313,8 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
         box->get_coeffs1(duline, uline, n1-1);
-        box->coeffs_of_deriv1(a,b, duline, uline, n1-1); /* coeffs of du are now in uline */
-        box->coeffs_of_deriv1(a,b, uline, duline, n1-1); /* coeffs of ddu are now in duline */
+        box->coeffs_of_deriv1((void *) box, a,b, duline, uline, n1-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv1((void *) box, a,b, uline, duline, n1-1); /* coeffs of ddu are now in duline */
         box->eval_onPoints1(duline, uline, n1-1); /* ddu is in now in uline */
         put_memline(du, uline, 1, j, k, n1, n2, n3);
       } end_forLines_free2Lines(uline,duline)
@@ -1344,8 +1344,8 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
         box->get_coeffs2(duline, uline, n2-1);
-        box->coeffs_of_deriv2(a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
-        box->coeffs_of_deriv2(a,b, uline, duline, n2-1); /* coeffs of ddu are now in duline */
+        box->coeffs_of_deriv2((void *) box, a,b, duline, uline, n2-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv2((void *) box, a,b, uline, duline, n2-1); /* coeffs of ddu are now in duline */
         box->eval_onPoints2(duline, uline, n2-1); /* ddu is now in uline */
         put_memline(du, uline, 2, i, k, n1, n2, n3);        
       } end_forLines_free2Lines(uline,duline)
@@ -1372,8 +1372,8 @@ void spec_Deriv2(tBox *box, int direc, double *u, double *du)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
         box->get_coeffs3(duline, uline, n3-1);
-        box->coeffs_of_deriv3(a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
-        box->coeffs_of_deriv3(a,b, uline, duline, n3-1); /* coeffs of ddu are now in duline */
+        box->coeffs_of_deriv3((void *) box, a,b, duline, uline, n3-1); /* coeffs of du are now in uline */
+        box->coeffs_of_deriv3((void *) box, a,b, uline, duline, n3-1); /* coeffs of ddu are now in duline */
         box->eval_onPoints3(duline, uline, n3-1); /* ddu is now in uline */
         put_memline(du, uline, 3, i, j, n1, n2, n3);
       } end_forLines_free2Lines(uline,duline)

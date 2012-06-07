@@ -12,7 +12,7 @@ void cheb_getcoeff(double a, double b, double c[], int n,
 double cheb_eval(double a, double b, double c[], int n, double X);
 
 /* compute Cheb coeffs of deriv cder[0...n] from Cheb coeffs c[0...n] */
-void cheb_deriv(double a, double b, double c[], double cder[], int n);
+void cheb_deriv(void *aux, double a, double b, double c[], double cder[], int n);
 
 /* compute Cheb coeffs of integral cint[0...n] from Cheb coeffs c[0...n] */
 void cheb_int(double a, double b, double c[], double cint[], int n);
@@ -43,7 +43,7 @@ double cheb_basisfunc_FromSum(void *aux, double a, double b, int n, int n1, doub
 /* Functions from explicit_Four_trafos.c */
 
 /* compute Four coeffs of deriv cder[0...N-1] from Four coeffs c[0...N-1] */
-void four_deriv(double a, double b, double c[], double cder[], int N);
+void four_deriv(void *aux, double a, double b, double c[], double cder[], int N);
 
 /* compute Cheb coeffs of integral cint[0...n] from Cheb coeffs c[0...n] */
 void four_int(double a, double b, double c[], double cint[], int n);
@@ -65,19 +65,19 @@ double four_basisfunc(void *aux, double a, double b, int n, int N, double X);
 
 /* compute coeffs of deriv cder[0...n] from coeffs c for a periodic grid:
  x_j = j (b-a)/(n+1) + a ,  j=0, ..., n */
-void fd2_deriv_periodic(double a, double b, double c[], double cder[], int n);
+void fd2_deriv_periodic(void *aux, double a, double b, double c[], double cder[], int n);
 
 /* compute coeffs of deriv cder[0...n] from coeffs c for a non-periodic grid:
  x_j = j (b-a)/n + a ,  j=0, ..., n */
-void fd2_deriv_onesidedBC(double a, double b, double c[], double cder[], int n);
+void fd2_deriv_onesidedBC(void *aux, double a, double b, double c[], double cder[], int n);
 
 /* compute coeffs of 2nd deriv cder[0...n] from coeffs c for a periodic grid:
  x_j = j (b-a)/(n+1) + a ,  j=0, ..., n */
-void fd2_2ndderiv_periodic(double a, double b, double c[], double cder[], int n);
+void fd2_2ndderiv_periodic(void *aux, double a, double b, double c[], double cder[], int n);
 
 /* compute coeffs of 2nd deriv cder[0...n] from coeffs c for a non-periodic 
    grid: x_j = j (b-a)/n + a ,  j=0, ..., n */
-void fd2_2ndderiv_onesidedBC(double a, double b, 
+void fd2_2ndderiv_onesidedBC(void *aux, double a, double b, 
                              double c[], double cder[], int n);
 
 /* compute Four coeffs c[0...n] from function u */

@@ -15,8 +15,8 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   int n2=box->n2;
   int n3=box->n3;
   void (*get_coeffs)(double *,double *, int)=NULL;
-  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
-  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(void *, double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int)=NULL;
   void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
@@ -182,8 +182,8 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   int n2=box->n2;
   int n3=box->n3;
   void (*get_coeffs)(double *,double *, int)=NULL;
-  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
-  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(void *, double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int)=NULL;
   void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
@@ -272,8 +272,8 @@ void spec_sphericalDF2dIntegral_at_radial_index_i(tBox *box,
   int n2=box->n2;
   int n3=box->n3;
   void (*get_coeffs)(double *,double *, int)=NULL;
-  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
-  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(void *, double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int)=NULL;
   void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;

@@ -35,8 +35,8 @@ void spec_Coeffs_old(tBox *box, double *u, double *c)
   double *M;
   double *d;
   void (*get_coeffs)(double *,double *, int)=NULL;
-  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
-  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(void *, double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int)=NULL;
   void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;

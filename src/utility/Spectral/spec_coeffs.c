@@ -404,8 +404,8 @@ void set_TransformType_flags_inbox(tBox *box)
 /* this is the old void get_spec_functionpointers */
 void get_spec_functionpointers_from_pars(tBox *box, int direc,
      void (**get_coeffs)(double *,double *, int),
-     void (**coeffs_of_deriv)(double, double, double *,double *, int),
-     void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
+     void (**coeffs_of_deriv)(void *, double, double, double *,double *, int),
+     void (**coeffs_of_2ndderiv)(void *, double, double, double *,double *, int),
      void (**coeffs_of_int)(double, double, double *,double *, int),
      void (**eval_onPoints)(double *,double *, int),
      void (**filter_coeffs)(double *, int, int),
@@ -514,8 +514,8 @@ void get_spec_functionpointers_from_pars(tBox *box, int direc,
 void get_spec_functionpointerTO_get_coeffs(tBox *box, int direc,
                                void (**get_coeffs)(double *,double *, int))
 {
-  void (*coeffs_of_deriv)(double, double, double *,double *, int)=NULL;
-  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_deriv)(void *, double, double, double *,double *, int)=NULL;
+  void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int)=NULL;
   void (*coeffs_of_int)(double, double, double *,double *, int)=NULL;
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
@@ -532,8 +532,8 @@ void init_spec_functionpointers(tBox *box)
   char str[1000];
   int dir;
   void (*get_coeffs)(double *,double *, int);
-  void (*coeffs_of_deriv)(double, double, double *,double *, int);
-  void (*coeffs_of_2ndderiv)(double, double, double *,double *, int);
+  void (*coeffs_of_deriv)(void *, double, double, double *,double *, int);
+  void (*coeffs_of_2ndderiv)(void *, double, double, double *,double *, int);
   void (*coeffs_of_int)(double, double, double *,double *, int);
   void (*eval_onPoints)(double *,double *, int);
   void (*filter_coeffs)(double *, int, int);
@@ -592,8 +592,8 @@ void init_spec_functionpointers(tBox *box)
 /* read all relevant function points in one box in direction dir from box struct */
 void get_spec_functionpointers(tBox *box, int dir,
      void (**get_coeffs)(double *,double *, int),
-     void (**coeffs_of_deriv)(double, double, double *,double *, int),
-     void (**coeffs_of_2ndderiv)(double, double, double *,double *, int),
+     void (**coeffs_of_deriv)(void *, double, double, double *,double *, int),
+     void (**coeffs_of_2ndderiv)(void *, double, double, double *,double *, int),
      void (**coeffs_of_int)(double, double, double *,double *, int),
      void (**eval_onPoints)(double *,double *, int),
      void (**filter_coeffs)(double *, int, int),

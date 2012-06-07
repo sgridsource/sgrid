@@ -77,7 +77,8 @@ double cheb_eval(double a, double b, double c[], int n, double X)
 
 
 /* compute Cheb coeffs of deriv cder[0...n] from Cheb coeffs c[0...n] */
-void cheb_deriv(double a, double b, double c[], double cder[], int n)
+void cheb_deriv(void *aux,
+                double a, double b, double c[], double cder[], int n)
 {
   int j;
   double con;
