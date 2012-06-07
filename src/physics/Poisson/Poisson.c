@@ -12,7 +12,9 @@
 void set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluDerivs, int nonlin);
 void ABphi_of_xyz(tBox *box, double *A, double *B, double *phi,
                   double x, double y, double z);
-void convert_grid_to_fd(tGrid *grid);
+void convert_grid_to_fd_old(tGrid *grid);
+void Precon_fd_Poisson_UMFPACK(tVarList *vlx, tVarList *vlb,
+                               tVarList *vlc1, tVarList *vlc2);
 
 
 /* initialize Poisson */
@@ -158,6 +160,7 @@ int Poisson_solve(tGrid *grid)
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+  void (*Precon)(tVarList *vlx, tVarList *vlb, tVarList *vlc1, tVarList *vlc2);
   tVarList *vlu, *vlFu, *vluDerivs;
   tVarList *vldu, *vlr, *vlduDerivs;
   tVarList *vlrhs;
@@ -216,6 +219,14 @@ int Poisson_solve(tGrid *grid)
   else
     errorexit("Poisson_solve: unknown Poisson_linSolver");
 
+  /* choose preconditioner */
+  if(Getv("Poisson_linSolver_Precon", "I"))
+    Precon=Preconditioner_I;
+  else if(Getv("Poisson_linSolver_Precon", "fd_UMFPACK"))
+    Precon=Precon_fd_Poisson_UMFPACK;
+  else
+    errorexit("Poisson_solve: unknown Poisson_linSolver_Precon");
+
 // remove this later:
 tGrid *grid_bak=make_empty_grid(grid->nvariables, 1);
 copy_grid_withoutvars(grid, grid_bak, 1);
@@ -256,7 +267,7 @@ write_grid(grid);
   /* call Newton solver */
   Newton(F_Poisson, J_Poisson, vlu, vlFu, vluDerivs, vlrhs,
          itmax, tol, &normresnonlin, 1,
-         linear_solver, Preconditioner_I, vldu, vlr, vlduDerivs, vlrhs,
+         linear_solver, Precon, vldu, vlr, vlduDerivs, vlrhs,
          linSolver_itmax, linSolver_tolFac, linSolver_tol);
 
   /* free varlists */     
@@ -581,6 +592,32 @@ void J_Poisson(tVarList *vlJdu, tVarList *vldu,
 
   /* BCs */
   set_BCs(vlJdu, vldu, vlduDerivs, 0);
+}
+
+/* switch to fin. diff. and use UMFPACK as lin solver as precon */
+void Precon_fd_Poisson_UMFPACK(tVarList *vlx, tVarList *vlb,
+                               tVarList *vlc1, tVarList *vlc2)
+{
+  tVarList *vlr = AddDuplicateEnable(vlx, "_Precon_r");
+  tGrid *grid = vlx->grid;
+  tGrid *grid_bak=make_empty_grid(grid->nvariables, 0);
+  int INFO;
+  int itmax = 1;  /* UMPACK does not iterate */
+  double tol = 0; /* UMPACK has no tol, it solves explicitly */
+  double normres;
+
+  /* save current grid in grid_bak and then convert grid to fin. diff. */
+  copy_grid_withoutvars(grid, grid_bak, 0);
+  convert_grid_to_fd(grid);
+
+  /* when we call J_Poisson, we evaluate lin. eqns, but now with fd */
+  INFO = UMFPACK_solve_wrapper(vlx, vlb, vlr, vlc1, vlc2, 
+                               itmax, tol, &normres,
+                               J_Poisson, Preconditioner_I);
+  /* restore grid */
+  copy_grid_withoutvars(grid_bak, grid, 0);
+  free_grid(grid_bak);
+  VLDisableFree(vlr);
 }
 
 /* set BCs for a varlist */

@@ -49,6 +49,8 @@ int sgrid_Poisson()
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("Poisson_linSolver_tol","0", "tol for linSolver is "
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
+  AddPar("Poisson_linSolver_Precon", "I", 
+         "Preconditioner used [I,fd_UMFPACK]");
   AddPar("Poisson_guess", "zero", "initial guess [zero,exact]");
          
   AddPar("Poisson_grid", "SphericalDF",
