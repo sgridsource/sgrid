@@ -49,12 +49,12 @@ typedef struct tBOX {
   void (*get_coeffs1)(double *,double *, int); /* get coeffs in dir. 1 */
   void (*get_coeffs2)(double *,double *, int); /* get coeffs in dir. 2 */
   void (*get_coeffs3)(double *,double *, int); /* get coeffs in dir. 3 */
-  void (*coeffs_of_deriv1)(double, double, double *,double *, int);
-  void (*coeffs_of_deriv2)(double, double, double *,double *, int);
-  void (*coeffs_of_deriv3)(double, double, double *,double *, int);
-  void (*coeffs_of_2ndderiv1)(double, double, double *,double *, int);
-  void (*coeffs_of_2ndderiv2)(double, double, double *,double *, int);
-  void (*coeffs_of_2ndderiv3)(double, double, double *,double *, int);
+  void (*coeffs_of_deriv1)(void *aux, double, double, double *,double *, int);
+  void (*coeffs_of_deriv2)(void *aux, double, double, double *,double *, int);
+  void (*coeffs_of_deriv3)(void *aux, double, double, double *,double *, int);
+  void (*coeffs_of_2ndderiv1)(void *aux, double, double, double *,double *, int);
+  void (*coeffs_of_2ndderiv2)(void *aux, double, double, double *,double *, int);
+  void (*coeffs_of_2ndderiv3)(void *aux, double, double, double *,double *, int);
   void (*coeffs_of_int1)(double, double, double *,double *, int);
   void (*coeffs_of_int2)(double, double, double *,double *, int);
   void (*coeffs_of_int3)(double, double, double *,double *, int);
