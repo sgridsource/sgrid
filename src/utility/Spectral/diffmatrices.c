@@ -172,7 +172,8 @@ void init_fdcentered_diffmatrix(double *x, double *D, int n1,
 
 
 /* reset all matrices and basis funcs on grid to do finite differencing */
-void convert_grid_to_fd_onesidedBC(tGrid *grid)
+/* this is OLD! Use convert_grid_to_fd below */
+void convert_grid_to_fd_matrices_onesidedBC(tGrid *grid)
 {
   int b;
 
@@ -212,6 +213,61 @@ void convert_grid_to_fd_onesidedBC(tGrid *grid)
     box->basis3=fd_basis3;
     initMatrix_ForCoeffs(box->Mcoeffs3, n3, fd2_coeffs);
     initMatrix_ToEvaluate(box->Meval3,  n3, fd2_eval);
+  }      
+}
+
+/* reset all matrices, coeffs of derivs and basis funcs on grid to 
+   do finite differencing */
+void convert_grid_to_fd(tGrid *grid)
+{
+  int b;
+  char str[1000];
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+
+    /* direction 1 */
+    box->get_coeffs1      = fd2_coeffs;
+    box->coeffs_of_deriv1 = fdcentered_deriv1_onesidedBC;
+    box->eval_onPoints1   = fd2_eval;
+    box->basis1           = fd_basis1;
+    snprintf(str, 999, "box%d_basis%d", box->b, 1);
+    if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
+      box->coeffs_of_deriv1 = fd2_deriv_periodic;
+    initdiffmatrix(box, 1, box->D1, box->DD1, n1, box->get_coeffs1,
+                   box->coeffs_of_deriv1, box->eval_onPoints1);
+    initMatrix_ForCoeffs(box->Mcoeffs1, n1, box->get_coeffs1);
+    initMatrix_ToEvaluate(box->Meval1,  n1, box->eval_onPoints1);
+
+    /* direction 2 */
+    box->get_coeffs2      = fd2_coeffs;
+    box->coeffs_of_deriv2 = fdcentered_deriv2_onesidedBC;
+    box->eval_onPoints2   = fd2_eval;
+    box->basis2           = fd_basis2;
+    snprintf(str, 999, "box%d_basis%d", box->b, 2);
+    if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
+      box->coeffs_of_deriv2 = fd2_deriv_periodic;
+    initdiffmatrix(box, 2, box->D2, box->DD2, n2, box->get_coeffs2,
+                   box->coeffs_of_deriv2, box->eval_onPoints2);
+    initMatrix_ForCoeffs(box->Mcoeffs2, n2, box->get_coeffs2);
+    initMatrix_ToEvaluate(box->Meval2,  n2, box->eval_onPoints2);
+
+    /* direction 3 */
+    box->get_coeffs3      = fd2_coeffs;
+    box->coeffs_of_deriv3 = fdcentered_deriv3_onesidedBC;
+    box->eval_onPoints3   = fd2_eval;
+    box->basis3           = fd_basis3;
+    snprintf(str, 999, "box%d_basis%d", box->b, 3);
+    if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
+      box->coeffs_of_deriv3 = fd2_deriv_periodic;
+    initdiffmatrix(box, 3, box->D3, box->DD3, n3, box->get_coeffs3,
+                   box->coeffs_of_deriv3, box->eval_onPoints3);
+    initMatrix_ForCoeffs(box->Mcoeffs3, n3, box->get_coeffs3);
+    initMatrix_ToEvaluate(box->Meval3,  n3, box->eval_onPoints3);
   }      
 }
 

@@ -92,6 +92,13 @@ void fd2_filter(double c[], int k, int n);
 /* compute coeffs cder[0...n] of centered deriv from coeffs c[0...n] for
    a non-periodic grid with non-uniform grid spacing: x_j,  j=0, ..., n */
 void fdcentered_deriv_onesidedBC(double x[], double c[], double cder[], int n);
+/* use fdcentered_deriv_onesidedBC to get derivs in X,Y,Z dirs */
+void fdcentered_deriv1_onesidedBC(void *aux, double a, double b, 
+                                  double c[], double cder[], int n);
+void fdcentered_deriv2_onesidedBC(void *aux, double a, double b, 
+                                  double c[], double cder[], int n);
+void fdcentered_deriv3_onesidedBC(void *aux, double a, double b, 
+                                  double c[], double cder[], int n);
 
 /* compute coeffs cder[0...n] of deriv D^+ from coeffs c[0...n] for
    a non-periodic grid with non-uniform grid spacing: x_j,  j=0, ..., n */

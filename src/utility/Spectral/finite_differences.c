@@ -115,6 +115,58 @@ void fdcentered_deriv_onesidedBC(double x[], double c[], double cder[], int n)
   cder[n] = (c[n] - c[n-1])/(x[n] - x[n-1]);
 }
 
+/* use fdcentered_deriv_onesidedBC (above) in direc 1 */
+void fdcentered_deriv1_onesidedBC(void *aux, double a, double b, 
+                                  double c[], double cder[], int n)
+{
+  tBox *box = (tBox *) aux;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int vind;
+  int i;
+  double *temp = dmalloc(n+1);
+
+  /* direction 1 */
+  vind=Ind("X");
+  for(i=0; i<n1; i++)  temp[i] = box->v[vind][Index(i,0,0)];
+  fdcentered_deriv_onesidedBC(temp, c, cder, n);
+  free(temp);
+}
+/* use fdcentered_deriv_onesidedBC (above) in direc 2 */
+void fdcentered_deriv2_onesidedBC(void *aux, double a, double b, 
+                                  double c[], double cder[], int n)
+{
+  tBox *box = (tBox *) aux;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int vind;
+  int i;
+  double *temp = dmalloc(n+1);
+
+  /* direction 2 */
+  vind=Ind("Y");
+  for(i=0; i<n2; i++)  temp[i] = box->v[vind][Index(0,i,0)];
+  fdcentered_deriv_onesidedBC(temp, c, cder, n);
+  free(temp);
+}
+/* use fdcentered_deriv_onesidedBC (above) in direc 3 */
+void fdcentered_deriv3_onesidedBC(void *aux, double a, double b, 
+                                  double c[], double cder[], int n)
+{
+  tBox *box = (tBox *) aux;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int vind;
+  int i;
+  double *temp = dmalloc(n+1);
+
+  /* direction 3 */
+  vind=Ind("Z");
+  for(i=0; i<n3; i++)  temp[i] = box->v[vind][Index(0,0,i)];
+  fdcentered_deriv_onesidedBC(temp, c, cder, n);
+  free(temp);
+}
 
 /* compute coeffs cder[0...n] of deriv D^+ from coeffs c[0...n] for
    a non-periodic grid with non-uniform grid spacing: x_j,  j=0, ..., n */

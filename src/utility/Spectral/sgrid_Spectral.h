@@ -43,7 +43,7 @@ void initdiffmatrix2(tBox *box, int dir, double *DD, int n1,
                     void (*eval_onPoints)(double *,double *, int) );
 void init_fdcentered_diffmatrix(double *x, double *D, int n1,
               void (*fd_deriv)(double *, double *,double *, int) );
-void convert_grid_to_fd_onesidedBC(tGrid *grid);
+void convert_grid_to_fd(tGrid *grid);
 void initIntegrationMatrix(double a, double b, double *Int, int n1,
                     void (*get_coeffs)(double *,double *, int),
                     void (*coeffs_of_int)(double, double, double *,double *, int),

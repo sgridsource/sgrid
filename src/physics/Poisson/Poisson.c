@@ -1352,11 +1352,13 @@ void ABphi_of_xyz(tBox *box, double *A, double *B, double *phi,
 }
 
 /* reset matrices and basis funcs to do finite differencing */
-void convert_grid_to_fd(tGrid *grid)
+void convert_grid_to_fd_old(tGrid *grid)
 {
   int b, bmax;
 
-  convert_grid_to_fd_onesidedBC(grid);
+  convert_grid_to_fd(grid);
+  /* Until June 7 2012, the above line was calling the code that is now in: 
+     convert_grid_to_fd_matrices_onesidedBC(grid); */
 
   /* make use of the fact that the phi-direction is periodic */
   if(Getv("Poisson_grid", "4ABphi_2xyz")) bmax=4;
