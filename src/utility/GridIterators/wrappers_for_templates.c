@@ -125,6 +125,7 @@ int templates_gmres_wrapper(
   long int ITER;
   double RESID;
   long int INFO;
+  double norm_b = GridL2Norm(b);
 
   /* set long int vars */
   N = 0 ;
@@ -137,10 +138,14 @@ int templates_gmres_wrapper(
   LDH = (RESTRT+1) + 1;
   ITER = itmax;
   RESID = tol;
+  /* do we scale RESID? */
+  if(Getv("GridIterators_templates_RESID_mode", "tol/norm(b)") && norm_b>0.0)
+    RESID = RESID / norm_b;
+
   if(pr) printf("  templates_gmres_wrapper: itmax=%d tol=%.3e "
                 "N=%ld LDW=%ld\n"
-                "  RESTRT=%ld LDH=%ld\n",
-                itmax, tol, N, LDW, RESTRT, LDH);
+                "  ITER=%ld RESID=%.3e  RESTRT=%ld LDH=%ld\n",
+                itmax, tol, N, LDW, ITER, RESID, RESTRT, LDH);
   
   /* temporary storage */
   B = (double *) calloc(N, sizeof(double));
@@ -150,7 +155,6 @@ int templates_gmres_wrapper(
   if(B==NULL || X==NULL || WORK==NULL || H==NULL)
     errorexit("templates_gmres_wrapper: out of memory for X, B, WORK, H\n"
               "  consider reducing GridIterators_GMRES_restart");
-
 
   /* setup global vars and functions needed in matvec and psolve */
   lop_fortemplates	= lop;
@@ -164,7 +168,6 @@ int templates_gmres_wrapper(
   /* setup local B and X */
   copy_vl_into_array_outervlloop(b, B, N);
   copy_vl_into_array_outervlloop(x, X, N);
-
 
 #ifdef TEMPLATES
   /* call gmres from templates */
@@ -213,6 +216,7 @@ int templates_bicgstab_wrapper(
   long int ITER;
   double RESID;
   long int INFO;
+  double norm_b = GridL2Norm(b);
 
   /* set long int vars */
   N = 0 ;
@@ -221,8 +225,14 @@ int templates_bicgstab_wrapper(
   LDW = (N) + 1; 
   ITER = itmax;
   RESID = tol;
+  /* do we scale RESID? */
+  if(Getv("GridIterators_templates_RESID_mode", "tol/norm(b)") && norm_b>0.0)
+    RESID = RESID / norm_b;
+
   if(pr) printf("  templates_bicgstab_wrapper: itmax=%d tol=%.3e "
-                "N=%ld LDW=%ld\n", itmax, tol, N, LDW);
+                "N=%ld LDW=%ld\n"
+                "  ITER=%ld RESID=%.3e\n",
+                itmax, tol, N, LDW, ITER, RESID);
   
   /* temporary storage */
   B = (double *) calloc(N, sizeof(double));
@@ -291,6 +301,7 @@ int templates_cgs_wrapper(
   long int ITER;
   double RESID;
   long int INFO;
+  double norm_b = GridL2Norm(b);
 
   /* set long int vars */
   N = 0 ;
@@ -299,8 +310,14 @@ int templates_cgs_wrapper(
   LDW = (N) + 1; 
   ITER = itmax;
   RESID = tol;
+  /* do we scale RESID? */
+  if(Getv("GridIterators_templates_RESID_mode", "tol/norm(b)") && norm_b>0.0)
+    RESID = RESID / norm_b;
+
   if(pr) printf("  templates_cgs_wrapper: itmax=%d tol=%.3e "
-                "N=%ld LDW=%ld\n", itmax, tol, N, LDW);
+                "N=%ld LDW=%ld\n"
+                "  ITER=%ld RESID=%.3e\n",
+                itmax, tol, N, LDW, ITER, RESID);
   
   /* temporary storage */
   B = (double *) calloc(N, sizeof(double));

@@ -19,6 +19,8 @@ int sgrid_GridIterators()
          "is below this value [any positive number]");
   AddPar("GridIterators_Newtonstep", "full",
          "how we take Newton steps [full,backtrack]");
+  AddPar("GridIterators_templates_RESID_mode", "tol/norm(b)",
+         "how we compute input RESID from tol [tol/norm(b),tol]");
 
   /* check whether there is more to do */
   if (!Getv("physics", "GridIterators")) return 0;
