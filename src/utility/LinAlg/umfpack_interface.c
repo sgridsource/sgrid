@@ -30,6 +30,24 @@
 /* some helper routines                                                    */
 /***************************************************************************/
 
+/* allocate memory for matrix in umfpack format. Call as:
+   allocate_umfpack_matrix(&Ap, &Ai, &Ax, n, nz); */
+void allocate_umfpack_matrix(int **Ap, int **Ai, double **Ax, int n, int nz)
+{
+  /* allocate memory for matrix */
+  *Ap=calloc(n+1, sizeof(double));
+  *Ai=calloc(nz,  sizeof(int));
+  *Ax=calloc(nz,  sizeof(double));
+  if(*Ap==NULL || *Ai==NULL || *Ax==NULL)
+    errorexit("allocate_umfpack_matrix: out of memory for *Ap, *Ai, *Ax");
+}
+/* free umfpack matrix allocated by allocate_umfpack_matrix */
+void free_umfpack_matrix(int *Ap, int *Ai, double *Ax)
+{
+  free(Ap); free(Ai); free(Ax);
+  Ap=NULL;  Ai=NULL;  Ax=NULL;       
+}
+
 /* set a matrix in umfpack format (i.e. Ap, Ai, Ax) from Acol */
 int set_umfpack_matrix_from_lines(int *Ap, int *Ai, double *Ax,
                                   tSparseVector **Aline, int nlines,
@@ -171,13 +189,11 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   /* allocate memory for b and x */
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
+  if(b==NULL || x==NULL)
+    errorexit("umfpack_solve: out of memory for x,b");
 
-  /* allocate memory matrix */
-  Ap=calloc(nlines+1, sizeof(double));
-  Ai=calloc(nz, sizeof(int));
-  Ax=calloc(nz, sizeof(double));
-  if(b==NULL || x==NULL || Ap==NULL || Ai==NULL || Ax==NULL)
-    errorexit("umfpack_solve: out of memory for x,b, Ap, Ai, Ax");
+  /* allocate memory for matrix */
+  allocate_umfpack_matrix(&Ap, &Ai, &Ax, nlines, nz);
 
   /* set b = vlb */
   line = 0;
@@ -247,9 +263,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   /* free mem. */
   free(b);
   free(x);
-  free(Ap);
-  free(Ai);
-  free(Ax);
+  free_umfpack_matrix(Ap, Ai, Ax);
 
   return INFO;
 }
@@ -291,13 +305,11 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   /* allocate memory for b and x */
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
+  if(b==NULL || x==NULL)
+    errorexit("umfpack_solve_forSortedVars: out of memory for x,b");
 
-  /* allocate memory matrix */
-  Ap=calloc(nlines+1, sizeof(double));
-  Ai=calloc(nz, sizeof(int));
-  Ax=calloc(nz, sizeof(double));
-  if(b==NULL || x==NULL || Ap==NULL || Ai==NULL || Ax==NULL)
-    errorexit("umfpack_solve_forSortedVars: out of memory for x,b, Ap, Ai, Ax");
+  /* allocate memory for matrix */
+  allocate_umfpack_matrix(&Ap, &Ai, &Ax, nlines, nz);
 
   /* set b = vlb */
   line = 0;
@@ -370,9 +382,7 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   /* free mem. */
   free(b);
   free(x);
-  free(Ap);
-  free(Ai);
-  free(Ax);
+  free_umfpack_matrix(Ap, Ai, Ax);
 
   return INFO;
 }
@@ -411,13 +421,11 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   /* allocate memory for b and x */
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
+  if(b==NULL || x==NULL)
+    errorexit("umfpack_solve_fromAcolumns: out of memory for x,b");
 
-  /* allocate memory matrix */
-  Ap=calloc(nlines+1, sizeof(double));
-  Ai=calloc(nz, sizeof(int));
-  Ax=calloc(nz, sizeof(double));
-  if(b==NULL || x==NULL || Ap==NULL || Ai==NULL || Ax==NULL)
-    errorexit("umfpack_solve_fromAcolumns: out of memory for x,b, Ap, Ai, Ax");
+  /* allocate memory for matrix */
+  allocate_umfpack_matrix(&Ap, &Ai, &Ax, nlines, nz);
 
   /* set b = vlb */
   line = 0;
@@ -487,9 +495,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   /* free mem. */
   free(b);
   free(x);
-  free(Ap);
-  free(Ai);
-  free(Ax);
+  free_umfpack_matrix(Ap, Ai, Ax);
 
   return INFO;
 }
@@ -528,13 +534,11 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   /* allocate memory for b and x */
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
+  if(b==NULL || x==NULL)
+    errorexit("umfpack_solve_forSortedVars_fromAcolumns: out of memory for x,b");
 
-  /* allocate memory matrix */
-  Ap=calloc(nlines+1, sizeof(double));
-  Ai=calloc(nz, sizeof(int));
-  Ax=calloc(nz, sizeof(double));
-  if(b==NULL || x==NULL || Ap==NULL || Ai==NULL || Ax==NULL)
-    errorexit("umfpack_solve_forSortedVars_fromAcolumns: out of memory for x,b, Ap, Ai, Ax");
+  /* allocate memory for matrix */
+  allocate_umfpack_matrix(&Ap, &Ai, &Ax, nlines, nz);
 
   /* set b = vlb */
   line = 0;
@@ -608,9 +612,7 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   /* free mem. */
   free(b);
   free(x);
-  free(Ap);
-  free(Ai);
-  free(Ax);
+  free_umfpack_matrix(Ap, Ai, Ax);
 
   return INFO;
 }
