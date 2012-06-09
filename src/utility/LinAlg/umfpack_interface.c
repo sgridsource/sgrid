@@ -196,44 +196,9 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   }
 
   /* set matrix */
-  /* All nonzeros are entries, but an entry may be numerically zero. The row
-     indices of entries in column j are stored in Ai[Ap[j] ... Ap[j+1]-1].
-     The corresponding numerical values are stored in Ax[Ap[j] ... Ap[j+1]-1].
-     No duplicate row indices may be present, and the row indices in any
-     given column must be sorted in ascending order. The first entry Ap[0]
-     must be zero. The total number of entries in the matrix is thus nz =
-     Ap[n]. Except for the fact that extra zero entries can be included,
-     there is thus a unique compressed column representation of any given
-     matrix A. */
-  Ap[0] = n = 0;
-  for(j = 0; j < nlines; j++)
-  {
-    Ap[j+1] = Ap[j];
-    for(i = 0; i < nlines; i++)
-    {
-      Aij = GetSparseVectorComponent(Aline[i],j);
-      if(fabs(Aij)<=dropbelow) continue;
-      Ap[j+1]++;
-      Ai[n] = i;
-      Ax[n] = Aij;
-      n++;
-    }
-  }
-  if(pr) printf("umfpack_solve: the sparse %d*%d matrix "
-                "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
-                nlines, nlines, nlines, Ap[nlines], Ai, Ax);
+  set_umfpack_matrix_from_lines(Ap, Ai, Ax, Aline, nlines, dropbelow, pr);
   if(pr) printf("umfpack_solve: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
-
-  if(pr&&0)
-  {
-    printf("Ax = \n");
-    for(i = 0; i < nz; i++)
-    {
-      printf("%g ", Ax[i]);
-    }
-    printf("\n");
-  }
 
 #ifdef UMFPACK
   /* call umfpack routine */
@@ -353,44 +318,9 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   }
 
   /* set matrix */
-  /* All nonzeros are entries, but an entry may be numerically zero. The row
-     indices of entries in column j are stored in Ai[Ap[j] ... Ap[j+1]-1].
-     The corresponding numerical values are stored in Ax[Ap[j] ... Ap[j+1]-1].
-     No duplicate row indices may be present, and the row indices in any
-     given column must be sorted in ascending order. The first entry Ap[0]
-     must be zero. The total number of entries in the matrix is thus nz =
-     Ap[n]. Except for the fact that extra zero entries can be included,
-     there is thus a unique compressed column representation of any given
-     matrix A. */
-  Ap[0] = n = 0;
-  for(j = 0; j < nlines; j++)
-  {
-    Ap[j+1] = Ap[j];
-    for(i = 0; i < nlines; i++)
-    {
-      Aij = GetSparseVectorComponent(Aline[i],j);
-      if(fabs(Aij)<=dropbelow) continue;
-      Ap[j+1]++;
-      Ai[n] = i;
-      Ax[n] = Aij;
-      n++;
-    }
-  }
-  if(pr) printf("umfpack_solve_forSortedVars: the sparse %d*%d matrix "
-                "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
-                nlines, nlines, nlines, Ap[nlines], Ai, Ax);
+  set_umfpack_matrix_from_lines(Ap, Ai, Ax, Aline, nlines, dropbelow, pr);
   if(pr) printf("umfpack_solve_forSortedVars: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
-
-  if(pr&&0)
-  {
-    printf("Ax = \n");
-    for(i = 0; i < nz; i++)
-    {
-      printf("%g ", Ax[i]);
-    }
-    printf("\n");
-  }
 
 #ifdef UMFPACK
   /* call umfpack routine */
