@@ -4376,11 +4376,13 @@ exit(11);
       /* solve BNSdata_Sigma completely in outer boxes at first iteration */
       if(grid->time == 1.0-itmax)
       {
-        printf("Setting BNSdata_Sigma outside the stars only...\n");
+        printf("Setting BNSdata_Sigma outside the stars only (using UMFPACK)...\n");
         /* do not touch Sigma in inner boxes, but solve in outer */
         Sets("BNSdata_KeepInnerSigma", "yes");
+        // BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+        //       &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
         BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
-               &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+               &normresnonlin, UMFPACK_solve_wrapper, 1, "BNSdata_Sigma");
         Sets("BNSdata_KeepInnerSigma", "no");
         totalerr1 = average_current_and_old(1, grid,vlFu,vlu,vluDerivs, vlJdu);
         varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
