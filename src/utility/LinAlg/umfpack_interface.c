@@ -35,7 +35,7 @@
 void allocate_umfpack_matrix(int **Ap, int **Ai, double **Ax, int n, int nz)
 {
   /* allocate memory for matrix */
-  *Ap=calloc(n+1, sizeof(double));
+  *Ap=calloc(n+1, sizeof(int));
   *Ai=calloc(nz,  sizeof(int));
   *Ax=calloc(nz,  sizeof(double));
   if(*Ap==NULL || *Ai==NULL || *Ax==NULL)
