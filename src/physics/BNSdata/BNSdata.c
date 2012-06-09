@@ -4126,6 +4126,8 @@ int BNSdata_solve(tGrid *grid)
   /* choose linear solver */
   if(Getv("BNSdata_linSolver", "bicgstab"))
     linear_solver=bicgstab;
+  else if(Getv("BNSdata_linSolver", "bicgstab_with_fd_UMFPACK_precon"))
+    linear_solver=bicgstab_with_fd_UMFPACK_precon;
   else if(Getv("BNSdata_linSolver", "LAPACK"))
     linear_solver=LAPACK_dgesv_wrapper;
   else if(Getv("BNSdata_linSolver", "templates_GMRES"))
