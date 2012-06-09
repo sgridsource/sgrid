@@ -43,6 +43,14 @@ void SetMatrixColumns_forSortedVars_slowly(tSparseVector **Acol,
 int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr);
 
 /* umfpack_interface.c */
+void allocate_umfpack_matrix(int **Ap, int **Ai, double **Ax, int n, int nz);
+void free_umfpack_matrix(int *Ap, int *Ai, double *Ax);
+int set_umfpack_matrix_from_lines(int *Ap, int *Ai, double *Ax,
+                                  tSparseVector **Aline, int nlines,
+                                  double dropbelow, int pr);
+int set_umfpack_matrix_from_columns(int *Ap, int *Ai, double *Ax,
+                                    tSparseVector **Acol, int ncols,
+                                    double dropbelow, int pr);
 int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
                   double dropbelow, int pr);
 int umfpack_solve_fromAcolumns(tSparseVector **Acol,
@@ -51,3 +59,5 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
 int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
       tVarList *vlx, tVarList *vlb,
       double dropbelow, int pr);
+int umfpack_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
+                                tVarList *vlx, tVarList *vlb, int pr);

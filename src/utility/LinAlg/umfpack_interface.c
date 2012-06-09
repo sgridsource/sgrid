@@ -616,3 +616,100 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
 
   return INFO;
 }
+
+
+/* solve A x = b with umfpack's umfpack_di_solve
+   for a matrix that is already saved in
+   int *Ap, int *Ai, double *Ax */
+int umfpack_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
+                                tVarList *vlx, tVarList *vlb, int pr)
+{
+  tGrid *grid = vlx->grid;
+  int i,j;
+  int bi, line;
+  int nvars=vlx->n;
+  int nlines=0;
+  double *x;
+  double *b;
+  double *null = (double *) NULL;
+  void *Symbolic, *Numeric;
+  int INFO, INFO1, INFO2;
+
+  /* figure out number of lines */
+  forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
+
+  /* allocate memory for b and x */
+  b=calloc(nlines, sizeof(double));
+  x=calloc(nlines, sizeof(double));
+  if(b==NULL || x==NULL)
+    errorexit("umfpack_solve_from_Ap_Ai_Ax: out of memory for x,b");
+
+  /* set b = vlb */
+  line = 0;
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+    int i,j;
+
+    forallpoints(box,i)
+      for(j = 0; j < vlb->n; j++)
+      {
+        double *bp = box->v[vlb->index[j]];
+        b[line] = bp[i];
+        line++;
+      }
+  }
+
+#ifdef UMFPACK
+  /* call umfpack routine */
+  if(pr)
+  { printf("umfpack_solve_from_Ap_Ai_Ax: calling umfpack_di_solve\n"); fflush(stdout); }
+  INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  umfpack_di_free_symbolic(&Symbolic);
+  INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
+  umfpack_di_free_numeric(&Numeric);
+#else
+  errorexit("umfpack_solve_from_Ap_Ai_Ax: in order to compile with umfpack use MyConfig with\n"
+            "DFLAGS += -DUMFPACK\n"
+            "SPECIALINCS += -I/usr/include/suitesparse\n"
+            "SPECIALLIBS += -lumfpack -lamd -lblas");
+#endif
+  if(pr)
+  { 
+    printf("umfpack_solve_from_Ap_Ai_Ax: umfpack_di_solve -> INFO=%d\n", INFO); 
+    fflush(stdout);
+  }
+
+  if(INFO!=0)
+    PrintErrorCodesAndExit;
+
+  /* set vlx = x */
+  if(pr)
+  { 
+    printf("umfpack_solve_from_Ap_Ai_Ax: setting solution vector\n");
+    fflush(stdout);
+  }
+  line = 0;
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+    int i,j;
+
+    forallpoints(box,i)
+      for(j = 0; j < vlx->n; j++)
+      {
+        double *xp = box->v[vlx->index[j]];
+        xp[i] = x[line];
+        line++;
+      }
+  }
+  if(pr)
+  { printf("umfpack_solve_from_Ap_Ai_Ax: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
+
+  /* free mem. for x,b */
+  free(b);
+  free(x);
+
+  return INFO;
+}
