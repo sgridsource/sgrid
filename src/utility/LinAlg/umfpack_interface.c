@@ -82,7 +82,7 @@ int set_umfpack_matrix_from_lines(int *Ap, int *Ai, double *Ax,
 
 /* set a matrix in umfpack format (i.e. Ap, Ai, Ax) from Acol */
 int set_umfpack_matrix_from_columns(int *Ap, int *Ai, double *Ax,
-                                    tSparseVector **Acol, int nlines,
+                                    tSparseVector **Acol, int ncols,
                                     double dropbelow, int pr)
 {
   int i, j, n, ent;
@@ -99,7 +99,7 @@ int set_umfpack_matrix_from_columns(int *Ap, int *Ai, double *Ax,
      there is thus a unique compressed column representation of any given
      matrix A. */
   Ap[0] = n = 0;
-  for(j = 0; j < nlines; j++)
+  for(j = 0; j < ncols; j++)
   {
     Ap[j+1] = Ap[j];
     for(ent = 0; ent < Acol[j]->entries; ent++)
@@ -116,19 +116,19 @@ int set_umfpack_matrix_from_columns(int *Ap, int *Ai, double *Ax,
   if(pr)
     printf("set_umfpack_matrix_from_columns: the sparse %d*%d matrix "
            "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
-           nlines, nlines, nlines, Ap[nlines], Ai, Ax);
+           ncols, ncols, ncols, Ap[ncols], Ai, Ax);
 
   if(pr&&0)
   {
     printf("Ax = \n");
-    for(i = 0; i < Ap[nlines]; i++)
+    for(i = 0; i < Ap[ncols]; i++)
     {
       printf("%g ", Ax[i]);
     }
     printf("\n");
   }
   /* return number of entries */
-  return Ap[nlines];
+  return Ap[ncols];
 }
 
 
