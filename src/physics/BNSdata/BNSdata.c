@@ -4372,8 +4372,24 @@ exit(11);
 
     /* How we solve the coupled ell. eqns */
     if(Getv("BNSdata_EllSolver_method", "allatonce"))
-    { /* solve the coupled ell. eqns all together */
-      /* call Newton solver */
+    { 
+      /* solve BNSdata_Sigma completely in outer boxes at first iteration */
+      if(grid->time == 1.0-itmax)
+      {
+        printf("Setting BNSdata_Sigma outside the stars only...\n");
+        /* do not touch Sigma in inner boxes, but solve in outer */
+        Sets("BNSdata_KeepInnerSigma", "yes");
+        BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+               &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+        Sets("BNSdata_KeepInnerSigma", "no");
+        totalerr1 = average_current_and_old(1, grid,vlFu,vlu,vluDerivs, vlJdu);
+        varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+        /* reset Newton_tol, use error norm of all vars in vlu */
+        F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+        normresnonlin = GridL2Norm(vlFu);
+        Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+      }
+      /* solve the coupled ell. eqns all together */
       vldummy = vlJdu;
       Newton(F_BNSdata, J_BNSdata, vlu, vlFu, vluDerivs, vldummy,
              Newton_itmax, Newton_tol, &normresnonlin, 1,
