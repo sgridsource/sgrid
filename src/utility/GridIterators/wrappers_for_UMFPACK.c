@@ -53,10 +53,18 @@ int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   else       errorexit("no memory for Acol");
   for(col=0; col<ncols; col++)  Acol[col]=AllocateSparseVector();
 
+  /* save current grid in grid_bak and then convert grid to fin. diff. */
+  copy_grid_withoutvars(grid, grid_bak, 0);
+  convert_grid_to_fd(grid);
+
   /* set Acol */                
   SetMatrixColumns_slowly(Acol, lop, r, x, c1, c2, pr);
   if(pr&&0) 
     for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
+
+  /* restore grid to spectral */
+  copy_grid_withoutvars(grid_bak, grid, 0);
+  free_grid(grid_bak);
 
   /* count number of entries in sparse matrix */
   for(col = 0; col < ncols; col++) nz+=Acol[col]->entries;
@@ -64,20 +72,12 @@ int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   /* allocate memory for matrix in UMFPACK format */
   allocate_umfpack_matrix(&Ap, &Ai, &Ax, ncols, nz);
 
-  /* save current grid in grid_bak and then convert grid to fin. diff. */
-  copy_grid_withoutvars(grid, grid_bak, 0);
-  convert_grid_to_fd(grid);
-
   /* now set fin. diff. matrix for UMFPACK */
   set_umfpack_matrix_from_columns(Ap, Ai, Ax, Acol, ncols, drop, pr);
   if(pr)
     printf("bicgstab_with_fd_UMFPACK_precon:\n"
            "  %d entries of magnitude <= %g were dropped\n",
            nz-Ap[ncols], drop);
-
-  /* restore grid to spectral */
-  copy_grid_withoutvars(grid_bak, grid, 0);
-  free_grid(grid_bak);
 
   /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
   INFO = bicgstab(x, b, r,c1,c2, itmax,tol,normres, lop, precon_fd_UMFPACK);

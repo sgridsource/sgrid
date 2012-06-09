@@ -56,6 +56,11 @@ int LAPACK_dgesv_wrapper(tVarList *x, tVarList *b,
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
 
 /* wrappers for UMFPACK */
+int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
 int UMFPACK_solve_wrapper(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
