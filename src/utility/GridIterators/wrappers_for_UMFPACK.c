@@ -97,7 +97,7 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   return INFO;
 }
 
-/*do a linear solve with bicgstab and precon_fd_UMFPACK */
+/* do a linear solve with bicgstab and precon_fd_UMFPACK */
 int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -110,6 +110,57 @@ int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
 
   /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
   INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, bicgstab,
+                                         itmax,tol,normres, lop);
+  return INFO;
+}
+
+/* do a linear solve with templates_gmres_wrapper and precon_fd_UMFPACK */
+int templates_gmres_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  int pr = Getv("GridIterators_verbose", "yes");
+  int INFO;
+  if(pr) printf("bicgstab_with_fd_UMFPACK_precon: using ");
+
+  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
+  INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_gmres_wrapper,
+                                         itmax,tol,normres, lop);
+  return INFO;
+}
+
+/* do a linear solve with templates_bicgstab_wrapper and precon_fd_UMFPACK */
+int templates_bicgstab_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  int pr = Getv("GridIterators_verbose", "yes");
+  int INFO;
+  if(pr) printf("bicgstab_with_fd_UMFPACK_precon: using ");
+
+  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
+  INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_bicgstab_wrapper,
+                                         itmax,tol,normres, lop);
+  return INFO;
+}
+
+/* do a linear solve with templates_cgs_wrapper and precon_fd_UMFPACK */
+int templates_cgs_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  int pr = Getv("GridIterators_verbose", "yes");
+  int INFO;
+  if(pr) printf("bicgstab_with_fd_UMFPACK_precon: using ");
+
+  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
+  INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_cgs_wrapper,
                                          itmax,tol,normres, lop);
   return INFO;
 }
