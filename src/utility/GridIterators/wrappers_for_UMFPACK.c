@@ -26,12 +26,15 @@ void precon_fd_UMFPACK(tVarList *vlx, tVarList *vlb,
     printf("precon_fd_UMFPACK: umfpack_solve_from_Ap_Ai_Ax returned INFO=%d\n",INFO);
 }
 
-/* call all relevant routines to set up an UMFPACK call */
-int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
+/* do a linear solve with precon_fd_UMFPACK */
+int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
+            int (*lsolver)(tVarList *, tVarList *, tVarList *, tVarList *,tVarList *,
+	                   int imax, double tl, double *res,
+	                   void (*Lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	                   void (*Prec)(tVarList *, tVarList *, tVarList *, tVarList *)),
 	    int itmax, double tol, double *normres,
-	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
-	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *)) 
 {
   tGrid *grid = b->grid;
   tGrid *grid_bak=make_empty_grid(grid->nvariables, 0);
@@ -42,7 +45,7 @@ int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   tSparseVector **Acol;
   int nz=0;
 
-  if(pr) printf("bicgstab_with_fd_UMFPACK_precon: ");
+  if(pr) printf("lsolver_with_fd_UMFPACK_precon:\n");
 
   /* allocate Acol */
   nvars=x->n; 
@@ -75,12 +78,12 @@ int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   /* now set fin. diff. matrix for UMFPACK */
   set_umfpack_matrix_from_columns(Ap, Ai, Ax, Acol, ncols, drop, pr);
   if(pr)
-    printf("bicgstab_with_fd_UMFPACK_precon:\n"
+    printf("lsolver_with_fd_UMFPACK_precon:\n"
            "  %d entries of magnitude <= %g were dropped\n",
            nz-Ap[ncols], drop);
 
-  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
-  INFO = bicgstab(x, b, r,c1,c2, itmax,tol,normres, lop, precon_fd_UMFPACK);
+  /* solve A x = b with lsolver and the Precon precon_fd_UMFPACK */
+  INFO = lsolver(x, b, r,c1,c2, itmax,tol,normres, lop, precon_fd_UMFPACK);
 
   /* free matrix A in UMFPACK format */
   /* maybe we could save and reuse this matrix for several lin solves,
@@ -91,6 +94,23 @@ int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   for(col=0; col<ncols; col++)  FreeSparseVector(Acol[col]);
   free(Acol);
 
+  return INFO;
+}
+
+/*do a linear solve with bicgstab and precon_fd_UMFPACK */
+int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  int pr = Getv("GridIterators_verbose", "yes");
+  int INFO;
+  if(pr) printf("bicgstab_with_fd_UMFPACK_precon: using ");
+
+  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
+  INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, bicgstab,
+                                         itmax,tol,normres, lop);
   return INFO;
 }
 
