@@ -13,9 +13,9 @@ int *Ai;
 double *Ax;
 
 
-/* switch to fin. diff. and use UMFPACK as lin solver as precon */
-void precon_fd_UMFPACK(tVarList *vlx, tVarList *vlb,
-                       tVarList *vlc1, tVarList *vlc2)
+/* use UMFPACK (with matrix set in global Ap,Ai,Ax) as lin solver as precon */
+void precon_Ap_Ai_Ax_UMFPACK(tVarList *vlx, tVarList *vlb,
+                             tVarList *vlc1, tVarList *vlc2)
 {
   int pr = Getv("GridIterators_verbose", "yes");
   int INFO;
@@ -23,10 +23,11 @@ void precon_fd_UMFPACK(tVarList *vlx, tVarList *vlb,
   /* use umfpack for solve */
   INFO = umfpack_solve_from_Ap_Ai_Ax(Ap,Ai,Ax, vlx, vlb, pr);
   if(pr) 
-    printf("precon_fd_UMFPACK: umfpack_solve_from_Ap_Ai_Ax returned INFO=%d\n",INFO);
+    printf("precon_Ap_Ai_Ax_UMFPACK: umfpack_solve_from_Ap_Ai_Ax returned INFO=%d\n",INFO);
 }
 
-/* do a linear solve with precon_fd_UMFPACK */
+/* do a linear solve with precon_Ap_Ai_Ax_UMFPACK, where global
+   Ap,Ai,Ax is set by temporarily switching to finite differencing */
 int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
             int (*lsolver)(tVarList *, tVarList *, tVarList *, tVarList *,tVarList *,
@@ -82,8 +83,8 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
            "  %d entries of magnitude <= %g were dropped\n",
            nz-Ap[ncols], drop);
 
-  /* solve A x = b with lsolver and the Precon precon_fd_UMFPACK */
-  INFO = lsolver(x, b, r,c1,c2, itmax,tol,normres, lop, precon_fd_UMFPACK);
+  /* solve A x = b with lsolver and the Precon precon_Ap_Ai_Ax_UMFPACK */
+  INFO = lsolver(x, b, r,c1,c2, itmax,tol,normres, lop, precon_Ap_Ai_Ax_UMFPACK);
 
   /* free matrix A in UMFPACK format */
   /* maybe we could save and reuse this matrix for several lin solves,
@@ -97,7 +98,7 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   return INFO;
 }
 
-/* do a linear solve with bicgstab and precon_fd_UMFPACK */
+/* do a linear solve with bicgstab and precon_Ap_Ai_Ax_UMFPACK */
 int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -108,13 +109,13 @@ int bicgstab_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   int INFO;
   if(pr) printf("bicgstab_with_fd_UMFPACK_precon: using ");
 
-  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
+  /* solve A x = b with bicgstab and the Precon precon_Ap_Ai_Ax_UMFPACK */
   INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, bicgstab,
                                          itmax,tol,normres, lop);
   return INFO;
 }
 
-/* do a linear solve with templates_gmres_wrapper and precon_fd_UMFPACK */
+/* do a linear solve with templates_gmres_wrapper and precon_Ap_Ai_Ax_UMFPACK */
 int templates_gmres_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -125,13 +126,13 @@ int templates_gmres_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   int INFO;
   if(pr) printf("templates_gmres_wrapper_with_fd_UMFPACK_precon: using ");
 
-  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
+  /* solve A x = b with bicgstab and the Precon precon_Ap_Ai_Ax_UMFPACK */
   INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_gmres_wrapper,
                                          itmax,tol,normres, lop);
   return INFO;
 }
 
-/* do a linear solve with templates_bicgstab_wrapper and precon_fd_UMFPACK */
+/* do a linear solve with templates_bicgstab_wrapper and precon_Ap_Ai_Ax_UMFPACK */
 int templates_bicgstab_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -142,13 +143,13 @@ int templates_bicgstab_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   int INFO;
   if(pr) printf("templates_bicgstab_wrapper_with_fd_UMFPACK_precon: using ");
 
-  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
+  /* solve A x = b with bicgstab and the Precon precon_Ap_Ai_Ax_UMFPACK */
   INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_bicgstab_wrapper,
                                          itmax,tol,normres, lop);
   return INFO;
 }
 
-/* do a linear solve with templates_cgs_wrapper and precon_fd_UMFPACK */
+/* do a linear solve with templates_cgs_wrapper and precon_Ap_Ai_Ax_UMFPACK */
 int templates_cgs_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -159,7 +160,7 @@ int templates_cgs_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   int INFO;
   if(pr) printf("templates_cgs_wrapper_with_fd_UMFPACK_precon: using ");
 
-  /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
+  /* solve A x = b with bicgstab and the Precon precon_Ap_Ai_Ax_UMFPACK */
   INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_cgs_wrapper,
                                          itmax,tol,normres, lop);
   return INFO;
