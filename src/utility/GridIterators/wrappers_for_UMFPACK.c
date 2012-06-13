@@ -123,7 +123,7 @@ int templates_gmres_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
 {
   int pr = Getv("GridIterators_verbose", "yes");
   int INFO;
-  if(pr) printf("bicgstab_with_fd_UMFPACK_precon: using ");
+  if(pr) printf("templates_gmres_wrapper_with_fd_UMFPACK_precon: using ");
 
   /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
   INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_gmres_wrapper,
@@ -140,7 +140,7 @@ int templates_bicgstab_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
 {
   int pr = Getv("GridIterators_verbose", "yes");
   int INFO;
-  if(pr) printf("bicgstab_with_fd_UMFPACK_precon: using ");
+  if(pr) printf("templates_bicgstab_wrapper_with_fd_UMFPACK_precon: using ");
 
   /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
   INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_bicgstab_wrapper,
@@ -157,7 +157,7 @@ int templates_cgs_wrapper_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
 {
   int pr = Getv("GridIterators_verbose", "yes");
   int INFO;
-  if(pr) printf("bicgstab_with_fd_UMFPACK_precon: using ");
+  if(pr) printf("templates_cgs_wrapper_with_fd_UMFPACK_precon: using ");
 
   /* solve A x = b with bicgstab and the Precon precon_fd_UMFPACK */
   INFO = linSolve_with_fd_UMFPACK_precon(x, b, r,c1,c2, templates_cgs_wrapper,
