@@ -208,6 +208,12 @@ int Poisson_solve(tGrid *grid)
     linear_solver=bicgstab;
   else if(Getv("Poisson_linSolver", "bicgstab_with_fd_UMFPACK_precon"))
     linear_solver=bicgstab_with_fd_UMFPACK_precon;
+  else if(Getv("Poisson_linSolver", "templates_GMRES_with_fd_UMFPACK_precon"))
+    linear_solver=templates_gmres_wrapper_with_fd_UMFPACK_precon;
+  else if(Getv("Poisson_linSolver", "templates_BICGSTAB_with_fd_UMFPACK_precon"))
+    linear_solver=templates_bicgstab_wrapper_with_fd_UMFPACK_precon;
+  else if(Getv("Poisson_linSolver", "templates_CGS_with_fd_UMFPACK_precon"))
+    linear_solver=templates_cgs_wrapper_with_fd_UMFPACK_precon;
   else if(Getv("Poisson_linSolver", "LAPACK"))
     linear_solver=LAPACK_dgesv_wrapper;
   else if(Getv("Poisson_linSolver", "templates_GMRES"))
