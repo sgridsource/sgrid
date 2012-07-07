@@ -14,7 +14,11 @@
   { printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1); \
     printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);  \
     printf("umfpack_di_solve returned INFO=%d\n", INFO); \
-    printf("some common error codes:\n"); \
+    printf("some common return values:\n"); \
+    printf(" UMFPACK_OK=%d\n", UMFPACK_OK); \
+    printf(" UMFPACK_WARNING_singular_matrix=%d\n", UMFPACK_WARNING_singular_matrix); \
+    printf(" UMFPACK_WARNING_determinant_underflow=%d\n", UMFPACK_WARNING_determinant_underflow); \
+    printf(" UMFPACK_WARNING_determinant_overflow=%d\n", UMFPACK_WARNING_determinant_overflow); \
     printf(" UMFPACK_ERROR_out_of_memory=%d\n", UMFPACK_ERROR_out_of_memory); \
     printf(" UMFPACK_ERROR_invalid_Numeric_object=%d\n", UMFPACK_ERROR_invalid_Numeric_object); \
     printf(" UMFPACK_ERROR_invalid_Symbolic_object=%d\n", UMFPACK_ERROR_invalid_Symbolic_object); \
