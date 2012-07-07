@@ -27,7 +27,7 @@
     printf("for more info do:\n"); \
     printf(" grep UMFPACK_ERROR /usr/include/suitesparse/umfpack.h\n"); \
     fflush(stdout); \
-    errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO); }
+    if(INFO<0) errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO); }
 
 
 /***************************************************************************/
