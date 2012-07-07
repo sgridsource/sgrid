@@ -75,6 +75,10 @@ If you need to debug segfaults with electric fence do this:
 
 1. compile code with libefence liked in, e.g. add -lefence to SPECIALLIBS
 2. run code in gdb
+3. Quit the debugger..
+4. Set EF_PROTECT_BELOW = 1 in the shell environment..
+5. Repeat step 2, this time repairing underruns if they occur..
+6. Quit the debugger.
 
 OR:
 1. execute the following (which loads the shared lib version of libefence):
@@ -82,6 +86,22 @@ OR:
 2. examine the core file from the crash with gdb:
  gdb sgrid core.9073
 
+duma is an alternative to electric fence:
+------------------------------------------
+INSTRUCTIONS FOR DEBUGGING YOUR PROGRAM
+1. Link with libduma.a i.e. with -lduma or 
+   SPECIALLIBS += -lduma
+2. Run  your program in a debugger and fix any overruns or accesses
+   to free memory.
+3. Quit the debugger.
+4. Set DUMA_PROTECT_BELOW = 1 in the shell environment.
+5. Repeat step 2, this time repairing underruns if they occur.
+6. Quit the debugger.
+7. Read the restrictions in the section on WORD-ALIGNMENT AND
+   OVER‐RUN  DETECTION. See  if  you  can  set DUMA_ALIGNMENT to 0
+   and repeat step 2. Sometimes this will be too much  work,  or
+   there will  be problems with library routines for which you don't
+   have the source, that will prevent you from doing this.
 
 Finding memory leaks with valgrind:
 -----------------------------------
