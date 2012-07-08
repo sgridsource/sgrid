@@ -1,5 +1,5 @@
-Bernd's Tips on debugging
--------------------------
+Tips on debugging
+-----------------
 
 1. Don't write buggy code.
 
@@ -45,6 +45,19 @@ A simple debugger is gdb.
 
 ... in order to print variables (e.g. vdb[1].name) ...
 (gdb) print vdb[ivar[0]].name
+
+Sometimes we get an error e.g. in free, but we do not want to debug libc's
+free. Then we need to go up a few frames, e.g:
+(gdb) f 1
+
+If we have threads (e.g. from OpenMP) we may need to switch threads, e.g:
+(gdb) thread 5
+
+In general we may need some info:
+(gdb) info threads
+(gdb) info locals
+(gdb) info variables
+(gdb) info symbol 0x7ffff66dae40
 
 Sometimes we are left with a core file. This can be loaded with
 
