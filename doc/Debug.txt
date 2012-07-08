@@ -71,6 +71,9 @@ gdb --args ./sgrid l.par
 (gdb) r           ... run code
 (gdb) bt          ... to see calling stack
 (gdb) q           ... quit
+(gdb) help info   ... help on info
+(gdb) thread 5    ... switch to thread 5
+(gdb) frame 2     ... switch to frame 2
 
 --------
 
