@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 22.2.2012 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 9.7.2012 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -2199,29 +2199,22 @@ for(bb=0; bb<=1; bb++) {
 if (nonlin) {
 
 
-forallpoints(bo[bb], ijk) { 
-
-FSigma[ijk]
-=
-0
-;
+double *FSigma_bb = vlldataptr(vlFu, bo[bb], 5); 
 
 
-} /* endfor */ 
+forallpoints(bo[bb], ijk)                            FSigma_bb[ijk] = 0.0; 
 
 
 } else { /* if (!nonlin) */
 
 
-forallpoints(bo[bb], ijk) { 
-
-FlSigma[ijk]
-=
-lSigma[ijk]
-;
+double *FlSigma_bb = vlldataptr(vlJdu, bo[bb], 5); 
 
 
-} /* endfor */ 
+double *lSigma_bb  = vlldataptr( vldu, bo[bb], 5); 
+
+
+forallpoints(bo[bb], ijk)                            FlSigma_bb[ijk] = lSigma_bb[ijk]; 
 
 }
 /* if (nonlin) */
@@ -2286,4 +2279,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 124, n* = 605,  n/ = 314,  n+ = 396, n = 1315, O = 1 */
+/* nvars = 124, n* = 604,  n/ = 310,  n+ = 396, n = 1310, O = 1 */

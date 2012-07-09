@@ -516,13 +516,16 @@ tocompute = {
     Cinstruction == "bo[1] = grid->box[(bi==0)+4]; /* box4/5 */",
     Cinstruction == "for(bb=0; bb<=1; bb++) {",
       Cif == nonlin, (* non-linear case *)
-        Cinstruction == "forallpoints(bo[bb], ijk) {",
-          FSigma  == 0,  (* Zero error ==> do not touch Sigma  *)
-        Cinstruction == "} /* endfor */",
+        Cinstruction == "double *FSigma_bb = vlldataptr(vlFu, bo[bb], 5);",
+        Cinstruction == "/* Zero error ==> do not touch Sigma */";
+        Cinstruction == "forallpoints(bo[bb], ijk)
+                           FSigma_bb[ijk] = 0.0;",
       Cif == else,   (* linear case *)
-        Cinstruction == "forallpoints(bo[bb], ijk) {",
-          FlSigma  == lSigma,  (* make lin. matrix diagonal ==> no correction *)
-        Cinstruction == "} /* endfor */",
+        Cinstruction == "double *FlSigma_bb = vlldataptr(vlJdu, bo[bb], 5);",
+        Cinstruction == "double *lSigma_bb  = vlldataptr( vldu, bo[bb], 5);",
+        Cinstruction == "/* make lin. matrix diagonal ==> no correction */";
+        Cinstruction == "forallpoints(bo[bb], ijk)
+                           FlSigma_bb[ijk] = lSigma_bb[ijk];",
       Cif == end,
     Cinstruction == "} /* endfor bb */",
   Cif == end,
