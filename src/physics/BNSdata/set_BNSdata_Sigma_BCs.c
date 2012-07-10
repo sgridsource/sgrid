@@ -60,6 +60,7 @@ if(Getv("BNSdata_InnerToOuterSigmaTransition","C1"))
   OuterSigmaTransitionD2 = 0.0;
 if(Getv("BNSdata_InnerToOuterSigmaTransition","C0"))
   OuterSigmaTransitionD2 = OuterSigmaTransitionD1 = 0.0;
+
 forallboxes(grid,bi)
 {
 tBox *box = grid->box[bi];
