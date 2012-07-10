@@ -638,6 +638,7 @@ BeginCFunction[] := Module[{},
   pr["  OuterSigmaTransitionD2 = 0.0;\n"]; 
   pr["if(Getv(\"BNSdata_InnerToOuterSigmaTransition\",\"C0\"))\n"]; 
   pr["  OuterSigmaTransitionD2 = OuterSigmaTransitionD1 = 0.0;\n"]; 
+  pr["\n"];
 
   pr["forallboxes(grid,bi)\n"];
   pr["{\n"];
