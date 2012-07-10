@@ -178,6 +178,8 @@ int sgrid_BNSdata()
          "[AddInnerVolIntToBC,AddInnerSumToBC,RegularityOnAxis,"
          "ZeroAtPoint,InnerVolIntZero,InnerSumZero,AtA0B0,AtA0B1,"
          "none,ZeroInOuterBoxes,EllEqn]");
+  AddPar("BNSdata_InnerToOuterSigmaTransition", "C2", 
+         "smoothness (at A=0) as we go from inner to outer box [C2,C1,C0]");
   AddPar("BNSdata_set_desired_VolAvSigmas", "no",
          "whether we set desired_VolAvSigma1/2 before ell. solves [no,yes]");
   AddPar("BNSdata_desired_VolAvSigma1", "0", "desired value of VolAvSigma "

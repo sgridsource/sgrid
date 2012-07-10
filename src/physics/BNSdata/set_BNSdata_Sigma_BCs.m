@@ -138,7 +138,7 @@ tocompute = {
         dSig[a] == dSigma[a],
         dSigin[a] == dSigmain[a],
         Cinstruction == "ijk=Index(0,j,k); /* set index to i=0 */",        
-        FSigma == nv[a] (dSig[a] - dSigin[a]),
+        FSigma == nv[a] (dSig[a] - dSigin[a] OuterSigmaTransitionD1),
         Cinstruction == "} /* endfor */",
       Cif == end,
 
@@ -159,7 +159,7 @@ tocompute = {
       ddSig[a,b] == ddSigma[a,b],
       ddSigin[a,b] == ddSigmain[a,b],
       Cinstruction == "ijk=Index(2,j,k); /* set index to i=2 */",        
-      FSigma == nv[a] nv[b] (ddSig[a,b] - ddSigin[a,b]),
+      FSigma == nv[a] nv[b] (ddSig[a,b] - ddSigin[a,b] OuterSigmaTransitionD2),
       Cinstruction == "} /* endfor */",
 
     Cif == else,   (* linear case *)
@@ -204,7 +204,7 @@ tocompute = {
         dlSig[a] == dlSigma[a],
         dlSigin[a] == dlSigmain[a],
         Cinstruction == "ijk=Index(0,j,k); /* set index to i=0 */",        
-        FlSigma == nv[a] (dlSig[a] - dlSigin[a]),
+        FlSigma == nv[a] (dlSig[a] - dlSigin[a] OuterSigmaTransitionD1),
         Cinstruction == "} /* endfor */",
       Cif == end,   
 
@@ -225,7 +225,7 @@ tocompute = {
       ddlSig[a,b] == ddlSigma[a,b],
       ddlSigin[a,b] == ddlSigmain[a,b],
       Cinstruction == "ijk=Index(2,j,k); /* set index to i=2 */",        
-      FlSigma == nv[a] nv[b] (ddlSig[a,b] - ddlSigin[a,b]),
+      FlSigma == nv[a] nv[b] (ddlSig[a,b] - ddlSigin[a,b] OuterSigmaTransitionD2),
       Cinstruction == "} /* endfor */",
 
     Cif == end, (* end linear case *)
@@ -616,6 +616,8 @@ BeginCFunction[] := Module[{},
   pr["double VolAvSigma1 = Getd(\"BNSdata_desired_VolAvSigma1\");\n"];
   pr["double VolAvSigma2 = Getd(\"BNSdata_desired_VolAvSigma2\");\n"];
   pr["double VolAvSigma, VolAvlSigma;\n"];
+  pr["double OuterSigmaTransitionD1 = 1.0;\n"];
+  pr["double OuterSigmaTransitionD2 = 1.0;\n"];
   pr["\n"];
 
   pr["tGrid *grid = vlu->grid;\n"];
@@ -625,6 +627,13 @@ BeginCFunction[] := Module[{},
 
   pr["/* do nothing if noBCs, i.e. BNSdata_Sigma_surface_BCs = none */\n"];
   pr["if(noBCs) return;\n\n\n"];
+
+  pr["/* parse some pars: */\n"];
+  pr["/* check if BNSdata_InnerToOuterSigmaTransition is only C1 or C0 */\n"];
+  pr["if(Getv(\"BNSdata_InnerToOuterSigmaTransition\",\"C1\"))\n"];
+  pr["  OuterSigmaTransitionD2 = 0.0;\n"]; 
+  pr["if(Getv(\"BNSdata_InnerToOuterSigmaTransition\",\"C0\"))\n"]; 
+  pr["  OuterSigmaTransitionD2 = OuterSigmaTransitionD1 = 0.0;\n"]; 
 
   pr["forallboxes(grid,bi)\n"];
   pr["{\n"];
