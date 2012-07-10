@@ -1,5 +1,5 @@
 /* set_BNSdata_Sigma_BCs.c */
-/* Copyright (C) 2005-2008 Wolfgang Tichy, 9.7.2012 */
+/* Copyright (C) 2005-2008 Wolfgang Tichy, 10.7.2012 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"
@@ -43,6 +43,8 @@ double xmax2 = Getd("BNSdata_xmax2");
 double VolAvSigma1 = Getd("BNSdata_desired_VolAvSigma1");
 double VolAvSigma2 = Getd("BNSdata_desired_VolAvSigma2");
 double VolAvSigma, VolAvlSigma;
+double OuterSigmaTransitionD1 = 1.0;
+double OuterSigmaTransitionD2 = 1.0;
 
 tGrid *grid = vlu->grid;
 int bi;
@@ -52,6 +54,12 @@ int bi;
 if(noBCs) return;
 
 
+/* parse some pars: */
+/* check if BNSdata_InnerToOuterSigmaTransition is only C1 or C0 */
+if(Getv("BNSdata_InnerToOuterSigmaTransition","C1"))
+  OuterSigmaTransitionD2 = 0.0;
+if(Getv("BNSdata_InnerToOuterSigmaTransition","C0"))
+  OuterSigmaTransitionD2 = OuterSigmaTransitionD1 = 0.0;
 forallboxes(grid,bi)
 {
 tBox *box = grid->box[bi];
@@ -261,38 +269,26 @@ double beta3;
 double ddlSig11;
 double ddlSig12;
 double ddlSig13;
-double ddlSig21;
 double ddlSig22;
 double ddlSig23;
-double ddlSig31;
-double ddlSig32;
 double ddlSig33;
 double ddlSigin11;
 double ddlSigin12;
 double ddlSigin13;
-double ddlSigin21;
 double ddlSigin22;
 double ddlSigin23;
-double ddlSigin31;
-double ddlSigin32;
 double ddlSigin33;
 double ddSig11;
 double ddSig12;
 double ddSig13;
-double ddSig21;
 double ddSig22;
 double ddSig23;
-double ddSig31;
-double ddSig32;
 double ddSig33;
 double ddSigin11;
 double ddSigin12;
 double ddSigin13;
-double ddSigin21;
 double ddSigin22;
 double ddSigin23;
-double ddSigin31;
-double ddSigin32;
 double ddSigin33;
 double dlQ1;
 double dlQ2;
@@ -648,7 +644,9 @@ ijk=Index(0,j,k); /* set index to i=0 */
 
 FSigma[ijk]
 =
-(dSig1 - dSigin1)*nv1 + (dSig2 - dSigin2)*nv2 + (dSig3 - dSigin3)*nv3
+nv1*(dSig1 - dSigin1*OuterSigmaTransitionD1) + 
+  nv2*(dSig2 - dSigin2*OuterSigmaTransitionD1) + 
+  nv3*(dSig3 - dSigin3*OuterSigmaTransitionD1)
 ;
 
 
@@ -736,27 +734,12 @@ ddSig13
 ddSigma13[ijk]
 ;
 
-ddSig21
-=
-ddSigma12[ijk]
-;
-
 ddSig22
 =
 ddSigma22[ijk]
 ;
 
 ddSig23
-=
-ddSigma23[ijk]
-;
-
-ddSig31
-=
-ddSigma13[ijk]
-;
-
-ddSig32
 =
 ddSigma23[ijk]
 ;
@@ -781,27 +764,12 @@ ddSigin13
 ddSigmain13[ijk]
 ;
 
-ddSigin21
-=
-ddSigmain12[ijk]
-;
-
 ddSigin22
 =
 ddSigmain22[ijk]
 ;
 
 ddSigin23
-=
-ddSigmain23[ijk]
-;
-
-ddSigin31
-=
-ddSigmain13[ijk]
-;
-
-ddSigin32
 =
 ddSigmain23[ijk]
 ;
@@ -816,11 +784,12 @@ ijk=Index(2,j,k); /* set index to i=2 */
 
 FSigma[ijk]
 =
-(ddSig23 + ddSig32)*nv2*nv3 - (ddSigin23 + ddSigin32)*nv2*nv3 - 
-  nv1*((ddSigin12 + ddSigin21)*nv2 + ddSigin13*nv3) + 
-  nv1*((ddSig12 + ddSig21)*nv2 + (ddSig13 + ddSig31 - ddSigin31)*nv3) + 
-  (ddSig11 - ddSigin11)*pow2(nv1) + (ddSig22 - ddSigin22)*pow2(nv2) + 
-  (ddSig33 - ddSigin33)*pow2(nv3)
+2.*(ddSig23*nv2*nv3 + nv1*(ddSig12*nv2 + ddSig13*nv3) - 
+     (ddSigin23*nv2*nv3 + nv1*(ddSigin12*nv2 + ddSigin13*nv3))*
+      OuterSigmaTransitionD2) + 
+  (ddSig11 - ddSigin11*OuterSigmaTransitionD2)*pow2(nv1) + 
+  (ddSig22 - ddSigin22*OuterSigmaTransitionD2)*pow2(nv2) + 
+  (ddSig33 - ddSigin33*OuterSigmaTransitionD2)*pow2(nv3)
 ;
 
 
@@ -972,7 +941,9 @@ ijk=Index(0,j,k); /* set index to i=0 */
 
 FlSigma[ijk]
 =
-(dlSig1 - dlSigin1)*nv1 + (dlSig2 - dlSigin2)*nv2 + (dlSig3 - dlSigin3)*nv3
+nv1*(dlSig1 - dlSigin1*OuterSigmaTransitionD1) + 
+  nv2*(dlSig2 - dlSigin2*OuterSigmaTransitionD1) + 
+  nv3*(dlSig3 - dlSigin3*OuterSigmaTransitionD1)
 ;
 
 
@@ -1060,27 +1031,12 @@ ddlSig13
 ddlSigma13[ijk]
 ;
 
-ddlSig21
-=
-ddlSigma12[ijk]
-;
-
 ddlSig22
 =
 ddlSigma22[ijk]
 ;
 
 ddlSig23
-=
-ddlSigma23[ijk]
-;
-
-ddlSig31
-=
-ddlSigma13[ijk]
-;
-
-ddlSig32
 =
 ddlSigma23[ijk]
 ;
@@ -1105,27 +1061,12 @@ ddlSigin13
 ddlSigmain13[ijk]
 ;
 
-ddlSigin21
-=
-ddlSigmain12[ijk]
-;
-
 ddlSigin22
 =
 ddlSigmain22[ijk]
 ;
 
 ddlSigin23
-=
-ddlSigmain23[ijk]
-;
-
-ddlSigin31
-=
-ddlSigmain13[ijk]
-;
-
-ddlSigin32
 =
 ddlSigmain23[ijk]
 ;
@@ -1140,11 +1081,12 @@ ijk=Index(2,j,k); /* set index to i=2 */
 
 FlSigma[ijk]
 =
-(ddlSig23 + ddlSig32)*nv2*nv3 - (ddlSigin23 + ddlSigin32)*nv2*nv3 - 
-  nv1*((ddlSigin12 + ddlSigin21)*nv2 + ddlSigin13*nv3) + 
-  nv1*((ddlSig12 + ddlSig21)*nv2 + (ddlSig13 + ddlSig31 - ddlSigin31)*nv3) + 
-  (ddlSig11 - ddlSigin11)*pow2(nv1) + (ddlSig22 - ddlSigin22)*pow2(nv2) + 
-  (ddlSig33 - ddlSigin33)*pow2(nv3)
+2.*(ddlSig23*nv2*nv3 + nv1*(ddlSig12*nv2 + ddlSig13*nv3) - 
+     (ddlSigin23*nv2*nv3 + nv1*(ddlSigin12*nv2 + ddlSigin13*nv3))*
+      OuterSigmaTransitionD2) + 
+  (ddlSig11 - ddlSigin11*OuterSigmaTransitionD2)*pow2(nv1) + 
+  (ddlSig22 - ddlSigin22*OuterSigmaTransitionD2)*pow2(nv2) + 
+  (ddlSig33 - ddlSigin33*OuterSigmaTransitionD2)*pow2(nv3)
 ;
 
 
@@ -2279,4 +2221,4 @@ lSigma[ijk]
 }  /* end of function */
 
 /* set_BNSdata_Sigma_BCs.c */
-/* nvars = 124, n* = 604,  n/ = 310,  n+ = 396, n = 1310, O = 1 */
+/* nvars = 124, n* = 624,  n/ = 314,  n+ = 384, n = 1322, O = 1 */

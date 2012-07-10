@@ -554,12 +554,16 @@ ddB[a_,b_,c_]    := ddB[a,c,b]    /; !OrderedQ[{b,c}]
 ddalphaP[a_,b_]  := ddalphaP[b,a] /; !OrderedQ[{a,b}]
 ddSigma[a_,b_]   := ddSigma[b,a]  /; !OrderedQ[{a,b}]
 ddSigmain[a_,b_] := ddSigmain[b,a]  /; !OrderedQ[{a,b}]
+ddSig[a_,b_]     := ddSig[b,a]  /; !OrderedQ[{a,b}]
+ddSigin[a_,b_]   := ddSigin[b,a]  /; !OrderedQ[{a,b}]
 
 ddlPsi[a_,b_]     := ddlPsi[b,a]    /; !OrderedQ[{a,b}]
 ddlB[a_,b_,c_]    := ddlB[a,c,b]    /; !OrderedQ[{b,c}]
 ddlalphaP[a_,b_]  := ddlalphaP[b,a] /; !OrderedQ[{a,b}]
 ddlSigma[a_,b_]   := ddlSigma[b,a]  /; !OrderedQ[{a,b}]
 ddlSigmain[a_,b_] := ddlSigmain[b,a]  /; !OrderedQ[{a,b}]
+ddlSig[a_,b_]     := ddlSig[b,a]  /; !OrderedQ[{a,b}]
+ddlSigin[a_,b_]   := ddlSigin[b,a]  /; !OrderedQ[{a,b}]
 
 (************************************************************************)
 (* information for C output *)
