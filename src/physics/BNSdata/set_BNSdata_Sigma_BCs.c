@@ -545,7 +545,7 @@ Sig - Sigin
 
 
 /* conditional */
-if (0) {
+if (OuterSigmaTransitionD1 != 1.) {
 
 
 
@@ -842,7 +842,7 @@ lSig - lSigin
 
 
 /* conditional */
-if (0) {
+if (OuterSigmaTransitionD1 != 1.) {
 
 
 

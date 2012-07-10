@@ -122,7 +122,9 @@ tocompute = {
 
       (* set n^i dSigma/dx^i equal at star surfaces, 
          impose it at i=0. The n^i is the normal vec. *)
-      Cif == 0,  (* we do not need this since set_BNSdata_BCs sets this already *)
+      (* we do not need this for OuterSigmaTransitionD1=1, 
+         since set_BNSdata_BCs sets this already *)
+      Cif == (OuterSigmaTransitionD1 != 1.0),
         Cif == (bi == 1),
           xc == xmax1,
         Cif == else,
@@ -188,7 +190,9 @@ tocompute = {
 
       (* set n^i dSigma/dx^i equal at star surfaces, 
          impose it at i=0. The n^i is the normal vec. *)
-      Cif == 0,  (* we do not need this since set_BNSdata_BCs sets this already *)
+      (* we do not need this for OuterSigmaTransitionD1=1, 
+         since set_BNSdata_BCs sets this already *)
+      Cif == (OuterSigmaTransitionD1 != 1.0),
         Cif == (bi == 1),
           xc == xmax1,
         Cif == else,
