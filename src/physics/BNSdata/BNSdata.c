@@ -4443,6 +4443,9 @@ exit(11);
             totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
                                                grid,vlFu,vlu,vluDerivs,vlJdu);
         }
+        /* try to smooth BNSdata_Sigma near the boundary */
+        smooth_BNSdata_Sigma_NearBoundary(grid, 2, tol, linear_solver);
+
         /* reset Sigmaold so that Sigma does not change when we average later */
         varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
       }
@@ -4678,8 +4681,6 @@ if(0) /* not working */
     adjust_C1_C2_Omega_xCM_q_WT_L2(grid, it, tol, &dOmega);
 }
 
-    /* try to smooth BNSdata_Sigma near the boundary */
-    smooth_BNSdata_Sigma_NearBoundary(grid, 2, tol, linear_solver);
 
     /* reset BNSdata_qmax1/2, BNSdata_xmax1/2 pars if the iteration 
        # it is contained in the list BNSdata_reset_qmax_xmax_pars_at */

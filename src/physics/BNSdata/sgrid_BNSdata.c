@@ -188,7 +188,7 @@ int sgrid_BNSdata()
          "(i.e. InnerVolInt or InnerSum) in Sigma surface BC for star2");
   AddPar("BNSdata_KeepInnerSigma", "no", "keep Sigma in inner boxes [no,yes]");
   AddPar("BNSdata_SmoothSigma", "no", "whether we apply extra smoothing after "
-         "all elliptic solves are done [no,yes]");
+         "elliptic solve for Sigma [no,yes]");
   AddPar("BNSdata_SmoothSigmaRegion", "0", "size of smoothing region");
   AddPar("BNSdata_Sphere_sigma_p", "0", "sigma_p of sphere inside smoothing region");
   AddPar("BNSdata_Sphere_sigma_m", "0", "sigma_m of sphere inside smoothing region");
