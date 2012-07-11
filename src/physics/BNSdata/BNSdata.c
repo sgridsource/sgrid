@@ -4332,20 +4332,22 @@ exit(11);
     if( (realnormres_old <= realnormres*Getd("BNSdata_extraSigmaSolve_fac")) &&
         (itsSinceExtraSigma >= Geti("BNSdata_extraSigmaSolve_every")) )
     {
-      /* solve BNSdata_Sigma completely in outer boxes */
-      printf("Setting BNSdata_Sigma outside the stars only...\n");
-      Sets("BNSdata_KeepInnerSigma", "yes");
-      BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
-             &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
-      Sets("BNSdata_KeepInnerSigma", "no");
-      totalerr1 = average_current_and_old(1, grid,vlFu,vlu,vluDerivs, vlJdu);
-      varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
-      /* reset Newton_tol, use error norm of all vars in vlu */
-      F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
-      normresnonlin = GridL2Norm(vlFu);
+      /* solve BNSdata_Sigma completely in outer boxes, unless we do it later */
+      if(Getv("BNSdata_SmoothSigma", "no"))
+      {
+        printf("Setting BNSdata_Sigma outside the stars only...\n");
+        Sets("BNSdata_KeepInnerSigma", "yes");
+        BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
+               &normresnonlin, linear_solver, 1, "BNSdata_Sigma");
+        Sets("BNSdata_KeepInnerSigma", "no");
+        totalerr1 = average_current_and_old(1, grid,vlFu,vlu,vluDerivs, vlJdu);
+        /* reset Sigmaold to take into account new Sigma in outer boxes */
+        varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
+      }
+      /* reset Newton_tol, use only other vars */
+      normresnonlin = GridL2Norm_of_vars_in_string(grid, 
+                                      Gets("BNSdata_CTS_Eqs_Iteration_order"));
       Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
-      /* reset Sigmaold to take into account new Sigma in outer boxes */
-      varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
 
       /* solve the ell. eqn for Sigma alone */
       BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, Newton_tol, 
@@ -4362,6 +4364,14 @@ exit(11);
           totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
                                              grid,vlFu,vlu,vluDerivs,vlJdu);
       }
+      /* reset Newton_tol, use error norm of all vars in vlu */
+      F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+      normresnonlin = GridL2Norm(vlFu);
+      Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
+
+      /* try to smooth BNSdata_Sigma near the boundary */
+      smooth_BNSdata_Sigma_NearBoundary(grid, 2, tol, linear_solver);
+
       /* reset Sigmaold so that Sigma does not change when we average later */
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
 
