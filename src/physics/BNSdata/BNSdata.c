@@ -4364,13 +4364,13 @@ exit(11);
           totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
                                              grid,vlFu,vlu,vluDerivs,vlJdu);
       }
+      /* try to smooth BNSdata_Sigma near the boundary */
+      smooth_BNSdata_Sigma_NearBoundary(grid, 2, tol, linear_solver);
+
       /* reset Newton_tol, use error norm of all vars in vlu */
       F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
       normresnonlin = GridL2Norm(vlFu);
       Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
-
-      /* try to smooth BNSdata_Sigma near the boundary */
-      smooth_BNSdata_Sigma_NearBoundary(grid, 2, tol, linear_solver);
 
       /* reset Sigmaold so that Sigma does not change when we average later */
       varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
@@ -4453,8 +4453,9 @@ exit(11);
             totalerr = average_current_and_old(Sigma_esw/Sigma_esw1, 
                                                grid,vlFu,vlu,vluDerivs,vlJdu);
         }
-        /* try to smooth BNSdata_Sigma near the boundary */
+        /* try to smooth BNSdata_Sigma near the boundary, recomp Err */
         smooth_BNSdata_Sigma_NearBoundary(grid, 2, tol, linear_solver);
+        F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
 
         /* reset Sigmaold so that Sigma does not change when we average later */
         varcopy(grid, Ind("BNSdata_Sigmaold"),  Ind("BNSdata_Sigma"));
