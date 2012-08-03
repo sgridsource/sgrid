@@ -1,0 +1,68 @@
+benchBNS1.par
+=============
+
+neeshjaa (icc 10.1  -O3 -openmp):
+time ~/sgrid/exe/sgrid benchBNS1.par > benchBNS1.out
+real	1m49.647s
+user	8m28.648s
+sys	1m34.382s
+
+mars (icc 10.1  -O3 -openmp):
+time ~/sgrid/exe/sgrid benchBNS1.par > benchBNS1.out
+real	2m34.490s
+user	9m39.347s
+sys	3m47.784s
+
+thor (pathcc -O3 -mp):
+export OMP_NUM_THREADS=16
+time ~/sgrid_pathcc/exe/sgrid benchBNS1.par > benchBNS1.out 
+real	2m34.024s
+user	10m1.662s
+sys	2m40.594s
+
+thor (gcc -O3 -fopenmp):
+export OMP_NUM_THREADS=16  
+time ~/sgrid_gcc/exe/sgrid benchBNS1.par > benchBNS1.out
+real	3m7.897s
+user	12m57.033s
+sys	2m48.551s
+
+thor (gcc -Ofast -fopenmp):
+export OMP_NUM_THREADS=16
+time ~/sgrid_pathcc/exe/sgrid benchBNS1.par
+CRASH!!!
+
+thor (icc 10.1  -O3 -openmp):
+export OMP_NUM_THREADS=16  
+time ~/sgrid_icc/exe/sgrid benchBNS1.par
+CRASH!!!
+
+-------------------------------------------
+
+benchBNS2.par
+============= 
+
+neeshjaa (icc 10.1  -O3 -openmp):
+time ~/sgrid/exe/sgrid benchBNS2.par > benchBNS2.out
+real	10m46.576s
+user	49m38.642s
+sys	2m21.569s
+
+mars (icc 10.1  -O3 -openmp):
+time ~/sgrid/exe/sgrid benchBNS2.par > benchBNS2.out
+real	15m19.835s
+user	63m38.646s
+sys	4m35.860s
+
+thor (pathcc -O3 -mp):
+export OMP_NUM_THREADS=16  
+time ~/sgrid_pathcc/exe/sgrid benchBNS2.par > benchBNS2.out 
+real	15m46.082s
+user	56m30.400s
+sys	3m20.201s
+
+thor (icc 10.1  -O3 -openmp):
+export OMP_NUM_THREADS=16  
+time ~/sgrid_icc/exe/sgrid benchBNS2.par > benchBNS2.out
+CRASH in adjustment of m2 at end after: real	13m53.129s
+
