@@ -6747,19 +6747,23 @@ double BNSdata_find_position_of_qmax(tGrid *grid, int *bi,
   Xvec[2] = *Y;
   Xvec[3] = *Z;
 
-  /* move Y away from boundary in case we are in box0/3 */
-  box = grid->box[*bi];
-  if(dlesseq(Xvec[2],box->bbox[2]))    Xvec[2] += dequaleps*1000.0;
-  if(dgreatereq(Xvec[2],box->bbox[3])) Xvec[2] -= dequaleps*1000.0;
+  /* do we actually try to find Xvec[1],Xvec[2],Xvec[3]? */
+  if(Getv("BNSdata_find_position_of_qmax","find_XYZ"))
+  {
+    /* move Y away from boundary in case we are in box0/3 */
+    box = grid->box[*bi];
+    if(dlesseq(Xvec[2],box->bbox[2]))    Xvec[2] += dequaleps*1000.0;
+    if(dgreatereq(Xvec[2],box->bbox[3])) Xvec[2] -= dequaleps*1000.0;
 
-  /* use newton_linesrch_itsP to find max, use var box as parameters */
-  stat = newton_linesrch_itsP(Xvec, 3, &check,
-                              gradient_q_VectorFuncP, (void *) box,
-                              1000, dequaleps);
-  if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
-  if(check || stat<0) printf("  --> Xvec=(%.15g,%.15g,%.15g)\n",
-                             Xvec[1],Xvec[2],Xvec[3]);
-
+    /* use newton_linesrch_itsP to find max, use var box as parameters */
+    stat = newton_linesrch_itsP(Xvec, 3, &check,
+                                gradient_q_VectorFuncP, (void *) box,
+                                1000, dequaleps);
+    if(check || stat<0) printf("  --> check=%d stat=%d\n", check, stat);
+    if(check || stat<0) printf("  --> Xvec=(%.15g,%.15g,%.15g)\n",
+                               Xvec[1],Xvec[2],Xvec[3]);
+  }
+  
   /* make sure Y is inside bounding box */
   if( Xvec[1]<box->bbox[0] ||
       Xvec[1]>box->bbox[1] ||

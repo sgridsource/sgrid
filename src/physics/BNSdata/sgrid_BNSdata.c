@@ -111,6 +111,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_qmax2", "0", "max q of NS2 along x-axis");
   AddPar("BNSdata_xmax1", "0", "pos. of max q of NS1 along x-axis");
   AddPar("BNSdata_xmax2", "0", "pos. of max q of NS2 along x-axis");
+  AddPar("BNSdata_find_position_of_qmax", "find_XYZ",
+         "how we set X,Y,Z of qmax in this func [find_XYZ,initial_XYZ_guess]");
   AddPar("BNSdata_actual_xmax1", "0", "x-pos. of actual global max of q in NS1");
   AddPar("BNSdata_actual_ymax1", "0", "y-pos. of actual global max of q in NS1");
   AddPar("BNSdata_actual_zmax1", "0", "z-pos. of actual global max of q in NS1");
