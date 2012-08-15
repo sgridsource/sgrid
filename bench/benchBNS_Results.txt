@@ -26,6 +26,11 @@ numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgr
 603.53user 222.58system 2:36.06elapsed 529%CPU (0avgtext+0avgdata 112288maxresident)k
 3080inputs+59968outputs (14major+18455372minor)pagefaults 0swaps
 
+thor (pathcc -O3):
+numactl --physcpubind=48 time ~/sgrid_pathcc/exe/sgrid-O3 benchBNS1.par > benchBNS1.out
+246.72user 0.28system 4:07.25elapsed 99%CPU (0avgtext+0avgdata 40224maxresident)k
+16inputs+100920outputs (0major+41932minor)pagefaults 0swaps
+
 thor (gcc -O3 -fopenmp):
 export OMP_NUM_THREADS=16  
 time ~/sgrid_gcc/exe/sgrid benchBNS1.par > benchBNS1.out
@@ -56,6 +61,11 @@ export OMP_NUM_THREADS=16
 numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS1.par > benchBNS1.out
 599.67user 216.55system 2:27.45elapsed 553%CPU (0avgtext+0avgdata 111840maxresident)k
 0inputs+77848outputs (0major+18434426minor)pagefaults 0swaps
+
+thor (opencc 4.5.2 -Ofast):
+numactl --physcpubind=48 time ~/sgrid_open64/exe/sgrid-Ofast benchBNS1.par > benchBNS1.out 
+220.46user 0.38system 3:41.18elapsed 99%CPU (0avgtext+0avgdata 35036maxresident)k
+6896inputs+82544outputs (19major+34057minor)pagefaults 0swaps
 
 thor (gcc -Ofast -fopenmp):
 export OMP_NUM_THREADS=16
