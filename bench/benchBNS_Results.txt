@@ -20,12 +20,24 @@ real	2m34.024s
 user	10m1.662s
 sys	2m40.594s
 
+thor (pathcc -O3 -mp):
+export OMP_NUM_THREADS=16
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_pathcc/exe/sgrid benchBNS1.par > benchBNS1.out
+603.53user 222.58system 2:36.06elapsed 529%CPU (0avgtext+0avgdata 112288maxresident)k
+3080inputs+59968outputs (14major+18455372minor)pagefaults 0swaps
+
 thor (gcc -O3 -fopenmp):
 export OMP_NUM_THREADS=16  
 time ~/sgrid_gcc/exe/sgrid benchBNS1.par > benchBNS1.out
 real	3m7.897s
 user	12m57.033s
 sys	2m48.551s
+
+thor (opencc -O3 -mp):
+export OMP_NUM_THREADS=16
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS1.par > benchBNS1.out
+718.40user 227.43system 3:05.24elapsed 510%CPU (0avgtext+0avgdata 111368maxresident)k
+0inputs+77872outputs (0major+18452968minor)pagefaults 0swaps
 
 thor (gcc -Ofast -fopenmp):
 export OMP_NUM_THREADS=16
@@ -60,6 +72,18 @@ time ~/sgrid_pathcc/exe/sgrid benchBNS2.par > benchBNS2.out
 real	15m46.082s
 user	56m30.400s
 sys	3m20.201s
+
+thor (pathcc -O3 -mp):
+export OMP_NUM_THREADS=16  
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_pathcc/exe/sgrid benchBNS2.par > benchBNS2.out
+3264.42user 241.13system 13:58.83elapsed 417%CPU (0avgtext+0avgdata 1027900maxresident)k
+0inputs+129608outputs (0major+21718065minor)pagefaults 0swaps
+
+thor (opencc -O3 -mp):
+export OMP_NUM_THREADS=16
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS2.par > benchBNS2.out
+3996.30user 239.84system 15:58.30elapsed 442%CPU (0avgtext+0avgdata 1026796maxresident)k
+0inputs+129584outputs (0major+21713018minor)pagefaults 0swaps
 
 thor (icc 10.1  -O3 -openmp):
 export OMP_NUM_THREADS=16  
