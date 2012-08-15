@@ -33,11 +33,29 @@ real	3m7.897s
 user	12m57.033s
 sys	2m48.551s
 
-thor (opencc -O3 -mp):
+thor (opencc 4.2.4 -O3 -mp):
 export OMP_NUM_THREADS=16
 numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS1.par > benchBNS1.out
 718.40user 227.43system 3:05.24elapsed 510%CPU (0avgtext+0avgdata 111368maxresident)k
 0inputs+77872outputs (0major+18452968minor)pagefaults 0swaps
+
+thor (opencc 4.5.2 -O3 -mp):
+export OMP_NUM_THREADS=16
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS1.par > benchBNS1.out
+719.90user 220.92system 2:48.54elapsed 558%CPU (0avgtext+0avgdata 111364maxresident)k
+0inputs+78056outputs (0major+18434341minor)pagefaults 0swaps
+
+thor (opencc 4.5.2 -O3 -mp -march=bdver1):
+export OMP_NUM_THREADS=16
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS1.par > benchBNS1.out
+719.26user 225.69system 2:48.98elapsed 559%CPU (0avgtext+0avgdata 111168maxresident)k
+0inputs+59856outputs (0major+18524955minor)pagefaults 0swaps
+
+thor (opencc 4.5.2 -Ofast -mp):              
+export OMP_NUM_THREADS=16
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS1.par > benchBNS1.out
+599.67user 216.55system 2:27.45elapsed 553%CPU (0avgtext+0avgdata 111840maxresident)k
+0inputs+77848outputs (0major+18434426minor)pagefaults 0swaps
 
 thor (gcc -Ofast -fopenmp):
 export OMP_NUM_THREADS=16
@@ -79,14 +97,31 @@ numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgr
 3264.42user 241.13system 13:58.83elapsed 417%CPU (0avgtext+0avgdata 1027900maxresident)k
 0inputs+129608outputs (0major+21718065minor)pagefaults 0swaps
 
-thor (opencc -O3 -mp):
+thor (opencc 4.2.4 -O3 -mp):
 export OMP_NUM_THREADS=16
 numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS2.par > benchBNS2.out
 3996.30user 239.84system 15:58.30elapsed 442%CPU (0avgtext+0avgdata 1026796maxresident)k
 0inputs+129584outputs (0major+21713018minor)pagefaults 0swaps
 
+thor (opencc 4.5.2 -O3 -mp):
+export OMP_NUM_THREADS=16
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS2.par > benchBNS2.out
+3176.35user 235.48system 12:57.21elapsed 438%CPU (0avgtext+0avgdata 1071248maxresident)k
+0inputs+129536outputs (0major+21706978minor)pagefaults 0swaps
+
+thor (opencc 4.5.2 -O3 -mp -march=bdver1):
+export OMP_NUM_THREADS=16   
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS2.par > benchBNS2.out
+3172.55user 238.40system 12:56.03elapsed 439%CPU (0avgtext+0avgdata 1071608maxresident)k
+0inputs+129552outputs (0major+21706004minor)pagefaults 0swaps
+
+thor (opencc 4.5.2 -Ofast -mp):
+export OMP_NUM_THREADS=16
+numactl --physcpubind=48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 time ~/sgrid_open64/exe/sgrid benchBNS2.par > benchBNS2.out
+2823.44user 239.29system 11:13.47elapsed 454%CPU (0avgtext+0avgdata 1071412maxresident)k
+0inputs+129600outputs (0major+21772721minor)pagefaults 0swaps
+
 thor (icc 10.1  -O3 -openmp):
 export OMP_NUM_THREADS=16  
 time ~/sgrid_icc/exe/sgrid benchBNS2.par > benchBNS2.out
 CRASH in adjustment of m2 at end after: real	13m53.129s
-
