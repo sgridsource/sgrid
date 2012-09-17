@@ -21,6 +21,10 @@ typedef struct tNEWTONSTEPVARS {
 } tNewtonStepVars;
 
 
+/* function pointer that is called before the linear solver,
+   if it does not point to NULL */
+int (*Newton_do_before_linSolver)(tGrid *g);
+
 /* funcs */
 void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu);
 void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
@@ -74,6 +78,11 @@ int Newton(
     }
     
     if (*normres <= tol) break;
+
+    /* user defined function that is called before the linear solver,
+       if it does not point to NULL */
+    if(Newton_do_before_linSolver != NULL)
+      Newton_do_before_linSolver(grid);
 
     /* solve linear equation */
     lin_its=linSolver(vldu, vlFu, vlres, vld1, vld2, 
@@ -232,4 +241,13 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
   }
   /* reset du to zero */
   vlsetconstant(vldu, 0.0);
+}
+
+/* Newton startup initialization */
+int Init_Newton(tGrid *grid)
+{
+  /* set function pointer to NULL */
+  Newton_do_before_linSolver = NULL;
+
+  return 0;
 }

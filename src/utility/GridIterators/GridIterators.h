@@ -6,6 +6,8 @@
 #define dot(vlu,vlv)  GridDotProduct((vlu), (vlv))
 #define norm2(vlu)    GridL2Norm((vlu))
 
+/* init Newton */
+int Init_Newton(tGrid *grid);
 
 /* from WTsolver.c */
 void copy_varlist_into_array(tVarList *vlx, double *x);
