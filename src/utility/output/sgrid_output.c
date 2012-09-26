@@ -34,6 +34,8 @@ int sgrid_output()
 	 "whether to interpolate onto standard coord");
   AddPar("3doutinterpolate", "no", 
 	 "whether to interpolate onto standard coord");
+  AddPar("0doutput_normtype", "integral", 
+	 "how we compute norms such as rms [integral,L2norm]");
   AddPar("0doutput_VolumeIntegralJacobian", "fromCoordinates", 
 	 "which Jacobian we use for vol. integrals [fromCoordinates,one]");
 
