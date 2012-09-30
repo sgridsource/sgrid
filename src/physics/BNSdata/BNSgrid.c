@@ -103,7 +103,7 @@ int set_boxsizes(tGrid *grid)
   double xCM, Omega;
   double Fc, qc, Cc, oouzerosqr;
   double vec[2];
-  int check;
+  int check, stat;
 
   printf("set_boxsizes: setting box sizes and coordinates used ...\n");
 
@@ -216,14 +216,21 @@ int set_boxsizes(tGrid *grid)
   }
 
   /* find P_core1, s.t. rest mass is m01 */
+  printf("find P_core1 of a TOV star, s.t. rest mass is m01=%g\n",
+         Getd("BNSdata_m01"));
   vec[1] = 1e-10;   /* initial guess */
   /* do newton_linesrch_its iterations: */
-  newton_linesrch_its(vec, 1, &check, m01_VectorFunc, 
- 		Geti("Coordinates_newtMAXITS"),
-    		Getd("Coordinates_newtTOLF") );
-  if(check) printf(": check=%d\n", check);  
+  stat=newton_linesrch_its(vec, 1, &check, m01_VectorFunc, 
+ 		           Geti("Coordinates_newtMAXITS"),
+ 		           Getd("Coordinates_newtTOLF") );
+  if(check || stat<0)
+  {
+    printf("WARNING from newton_linesrch_its with MAXITS=%d TOLF=%g:\n",
+           Geti("Coordinates_newtMAXITS"), Getd("Coordinates_newtTOLF"));
+    printf("  check=%d stat=%d\n", check, stat);
+  }
   P_core1 = vec[1];
-  printf(" setting: P_core1=%g\n", P_core1);
+  printf("setting: P_core1=%g\n", P_core1);
 
   /* TOV_init yields m01 for a given P_core1 */
   TOV_init(P_core1, kappa, Gamma, 1, &rf_surf1, &m1, &Phic1, &Psic1, &m01);
@@ -233,14 +240,21 @@ int set_boxsizes(tGrid *grid)
   if(Getd("BNSdata_m02")>0)
   {
     /* find P_core2, s.t. rest mass is m02 */
+    printf("find P_core2 of a TOV star, s.t. rest mass is m02=%g\n",
+           Getd("BNSdata_m02"));
     vec[1] = 1e-10;   /* initial guess */
     /* do newton_linesrch_its iterations: */
-    newton_linesrch_its(vec, 1, &check, m02_VectorFunc, 
-                Geti("Coordinates_newtMAXITS"),
-                Getd("Coordinates_newtTOLF") );
-    if(check) printf(": check=%d\n", check);  
+    stat=newton_linesrch_its(vec, 1, &check, m02_VectorFunc, 
+                             Geti("Coordinates_newtMAXITS"),
+                             Getd("Coordinates_newtTOLF") );
+    if(check || stat<0)
+    {
+      printf("WARNING from newton_linesrch_its with MAXITS=%d TOLF=%g:\n",
+             Geti("Coordinates_newtMAXITS"), Getd("Coordinates_newtTOLF"));
+      printf("  check=%d stat=%d\n", check, stat);
+    }
     P_core2 = vec[1];
-    printf(" setting: P_core2=%g\n", P_core2);
+    printf("setting: P_core2=%g\n", P_core2);
 
     /* TOV_init yields m02 for a given P_core2 */
     TOV_init(P_core2, kappa, Gamma, 1, &rf_surf2, &m2, &Phic2, &Psic2, &m02);
@@ -467,6 +481,7 @@ void m01_VectorFunc(int n, double *vec, double *fvec)
 
   Pc = vec[1];
   TOV_init(Pc, kappa, Gamma, 0, &rf_surf1, &m, &Phic, &Psic, &m0);
+  printf("   Pc=%+.16e  m0=%.16e\n",Pc,m0);
   fvec[1] = m0-m01;
 }
 /* funtion to be passed into newton_linesrch_its to find P_core2 from m02 */
@@ -480,6 +495,7 @@ void m02_VectorFunc(int n, double *vec, double *fvec)
 
   Pc = vec[1];
   TOV_init(Pc, kappa, Gamma, 0, &rf_surf2, &m, &Phic, &Psic, &m0);
+  printf("   Pc=%+.16e  m0=%.16e\n",Pc,m0);
   fvec[1] = m0-m02;
 }
 
