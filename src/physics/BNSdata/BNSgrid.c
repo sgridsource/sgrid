@@ -103,6 +103,7 @@ int set_boxsizes(tGrid *grid)
   double xCM, Omega;
   double Fc, qc, Cc, oouzerosqr;
   double vec[2];
+  double fvec[2];
   int check, stat;
 
   printf("set_boxsizes: setting box sizes and coordinates used ...\n");
@@ -229,6 +230,19 @@ int set_boxsizes(tGrid *grid)
            Geti("Coordinates_newtMAXITS"), Getd("Coordinates_newtTOLF"));
     printf("  check=%d stat=%d\n", check, stat);
   }
+  /* check if we found correct vec or just a local max in m0 */
+  m01_VectorFunc(1, vec, fvec);
+  if(fabs(fvec[1])>Getd("Coordinates_newtTOLF")*1000)
+  {
+    int i;
+    double v[2], f[2];
+    printf("There may be a max in m0 near Pc=%g\n", vec[1]);
+    for(i=-15; i<=15; i++)
+    { 
+      v[1] = vec[1] + i*vec[1]/1000;
+      m01_VectorFunc(1, v, f);
+    }
+  }
   P_core1 = vec[1];
   printf("setting: P_core1=%g\n", P_core1);
 
@@ -252,6 +266,19 @@ int set_boxsizes(tGrid *grid)
       printf("WARNING from newton_linesrch_its with MAXITS=%d TOLF=%g:\n",
              Geti("Coordinates_newtMAXITS"), Getd("Coordinates_newtTOLF"));
       printf("  check=%d stat=%d\n", check, stat);
+    }
+    /* check if we found correct vec or just a local max in m0 */
+    m02_VectorFunc(1, vec, fvec);
+    if(fabs(fvec[1])>Getd("Coordinates_newtTOLF")*1000)
+    {
+      int i;
+      double v[2], f[2];
+      printf("There may be a max in m0 near Pc=%g\n", vec[1]);
+      for(i=-15; i<=15; i++)
+      { 
+        v[1] = vec[1] + i*vec[1]/1000;
+        m02_VectorFunc(1, v, f);
+      }
     }
     P_core2 = vec[1];
     printf("setting: P_core2=%g\n", P_core2);
