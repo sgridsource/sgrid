@@ -1,0 +1,35 @@
+# Get a single TOV star with its max mass.
+# This is achieved by asking for a BNSdata_m01 that is above the max TOV mass.
+# Then the code picks a P_core1 such that we get the max TOV mass m0.
+# This mass is printed on the screen together with P_core1 near the max.
+
+physics = ADMvars BNSdata
+Coordinates_AnsorgNS_sigma_pm_vars = yes
+
+BNSdata_kappa	= 123.6489
+BNSdata_n	= 1
+BNSdata_b	= 13
+BNSdata_m01	= 3
+BNSdata_m02	= 0
+
+BNSdata_itmax	= 0
+
+nboxes		= 6
+n1		= 6
+n2		= 6
+n3		= 8
+BNSdata_2xyz_n	= 6
+
+0doutiter	= 1
+0doutput	= BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err ham momx trK dtrK_dt normham normmomx
+0doutputall	= yes
+0doutput_VolumeIntegralJacobian = one
+ADMvars_normalizedConstraints = yes
+
+1doutiter	= 1
+1doutput	= BNSdata_q BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Sigma BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi alpha betax psi gxx Kxx rho jx Sxx ham momx trK dtrK_dt x y z  X Y Z
+1doutputall	= yes
+
+2doutiter	= 1
+2doutput	= BNSdata_q BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Sigma BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm ham momx trK dtrK_dt x y z  X Y Z
+2doutputall	= yes
