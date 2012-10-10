@@ -7,9 +7,6 @@
 
 #ifdef UMFPACK
 #include "umfpack.h"
-#endif
-
-
 #define PrintErrorCodesAndExit  \
   { printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1); \
     printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);  \
@@ -28,6 +25,9 @@
     printf(" grep UMFPACK_ERROR /usr/include/suitesparse/umfpack.h\n"); \
     fflush(stdout); \
     if(INFO<0) errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO); }
+#else
+#define PrintErrorCodesAndExit  errorexit("umfpack is not compiled in")
+#endif
 
 
 /***************************************************************************/
