@@ -35,27 +35,27 @@
 /***************************************************************************/
 
 /* allocate memory for matrix in umfpack format. Call as:
-   allocate_umfpack_matrix(&Ap, &Ai, &Ax, n, nz); */
-void allocate_umfpack_matrix(int **Ap, int **Ai, double **Ax, int n, int nz)
+   allocate_umfpack_di_matrix(&Ap, &Ai, &Ax, n, nz); */
+void allocate_umfpack_di_matrix(int **Ap, int **Ai, double **Ax, int n, int nz)
 {
   /* allocate memory for matrix */
   *Ap=calloc(n+1, sizeof(int));
   *Ai=calloc(nz,  sizeof(int));
   *Ax=calloc(nz,  sizeof(double));
   if(*Ap==NULL || *Ai==NULL || *Ax==NULL)
-    errorexit("allocate_umfpack_matrix: out of memory for *Ap, *Ai, *Ax");
+    errorexit("allocate_umfpack_di_matrix: out of memory for *Ap, *Ai, *Ax");
 }
-/* free umfpack matrix allocated by allocate_umfpack_matrix */
-void free_umfpack_matrix(int *Ap, int *Ai, double *Ax)
+/* free umfpack matrix allocated by allocate_umfpack_di_matrix */
+void free_umfpack_di_matrix(int *Ap, int *Ai, double *Ax)
 {
   free(Ap); free(Ai); free(Ax);
   Ap=NULL;  Ai=NULL;  Ax=NULL;       
 }
 
 /* set a matrix in umfpack format (i.e. Ap, Ai, Ax) from Acol */
-int set_umfpack_matrix_from_lines(int *Ap, int *Ai, double *Ax,
-                                  tSparseVector **Aline, int nlines,
-                                  double dropbelow, int pr)
+int set_umfpack_di_matrix_from_lines(int *Ap, int *Ai, double *Ax,
+                                     tSparseVector **Aline, int nlines,
+                                     double dropbelow, int pr)
 {
   int i, j, n, ent;
   double Aij;
@@ -85,7 +85,7 @@ int set_umfpack_matrix_from_lines(int *Ap, int *Ai, double *Ax,
     }
   }
   if(pr)
-    printf("set_umfpack_matrix_from_lines: the sparse %d*%d matrix "
+    printf("set_umfpack_di_matrix_from_lines: the sparse %d*%d matrix "
            "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
            nlines, nlines, nlines, Ap[nlines], Ai, Ax);
 
@@ -103,9 +103,9 @@ int set_umfpack_matrix_from_lines(int *Ap, int *Ai, double *Ax,
 }
 
 /* set a matrix in umfpack format (i.e. Ap, Ai, Ax) from Acol */
-int set_umfpack_matrix_from_columns(int *Ap, int *Ai, double *Ax,
-                                    tSparseVector **Acol, int ncols,
-                                    double dropbelow, int pr)
+int set_umfpack_di_matrix_from_columns(int *Ap, int *Ai, double *Ax,
+                                       tSparseVector **Acol, int ncols,
+                                       double dropbelow, int pr)
 {
   int i, j, n, ent;
   double Aij;
@@ -136,7 +136,7 @@ int set_umfpack_matrix_from_columns(int *Ap, int *Ai, double *Ax,
     }
   }
   if(pr)
-    printf("set_umfpack_matrix_from_columns: the sparse %d*%d matrix "
+    printf("set_umfpack_di_matrix_from_columns: the sparse %d*%d matrix "
            "Ap[%d]=%d, Ai=%p, Ax=%p is now set!\n",
            ncols, ncols, ncols, Ap[ncols], Ai, Ax);
 
@@ -161,8 +161,8 @@ int set_umfpack_matrix_from_columns(int *Ap, int *Ai, double *Ax,
 /* solve A x = b with umfpack's umfpack_di_solve
    for a matrix made up of sparse line vectors that was written 
    by SetMatrixLines_slowly */
-int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
-                  double dropbelow, int pr)
+int umfpack_di_solve_fromAlines(tSparseVector **Aline, tVarList *vlx,
+                                tVarList *vlb, double dropbelow, int pr)
 {
   tGrid *grid = vlx->grid;
   int i,j,n;
@@ -180,7 +180,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   void *Symbolic, *Numeric;
   int INFO, INFO1, INFO2;
 
-  if(pr) { printf("umfpack_solve: setting sparse matrix\n"); fflush(stdout); }
+  if(pr) { printf("umfpack_di_solve_fromAlines: setting sparse matrix\n"); fflush(stdout); }
 
   /* figure out number of lines */
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
@@ -194,10 +194,10 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
   if(b==NULL || x==NULL)
-    errorexit("umfpack_solve: out of memory for x,b");
+    errorexit("umfpack_di_solve_fromAlines: out of memory for x,b");
 
   /* allocate memory for matrix */
-  allocate_umfpack_matrix(&Ap, &Ai, &Ax, nlines, nz);
+  allocate_umfpack_di_matrix(&Ap, &Ai, &Ax, nlines, nz);
 
   /* set b = vlb */
   line = 0;
@@ -216,28 +216,28 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
   }
 
   /* set matrix */
-  set_umfpack_matrix_from_lines(Ap, Ai, Ax, Aline, nlines, dropbelow, pr);
-  if(pr) printf("umfpack_solve: %d entries of magnitude <= %g were dropped\n",
+  set_umfpack_di_matrix_from_lines(Ap, Ai, Ax, Aline, nlines, dropbelow, pr);
+  if(pr) printf("umfpack_di_solve_fromAlines: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
-  { printf("umfpack_solve: calling umfpack_di_solve\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_fromAlines: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
   INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
 #else
-  errorexit("umfpack_solve: in order to compile with umfpack use MyConfig with\n"
+  errorexit("umfpack_di_solve_fromAlines: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
   { 
-    printf("umfpack_solve: umfpack_di_solve -> INFO=%d\n", INFO); 
+    printf("umfpack_di_solve_fromAlines: umfpack_di_solve -> INFO=%d\n", INFO); 
     fflush(stdout);
   }
 
@@ -246,7 +246,7 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
 
   /* set vlx = x */
   if(pr)
-  { printf("umfpack_solve: setting solution vector\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_fromAlines: setting solution vector\n"); fflush(stdout); }
   line = 0;
   forallboxes(grid,bi)
   {
@@ -262,12 +262,12 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
       }
   }
   if(pr)
-  { printf("umfpack_solve: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
+  { printf("umfpack_di_solve_fromAlines: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
 
   /* free mem. */
   free(b);
   free(x);
-  free_umfpack_matrix(Ap, Ai, Ax);
+  free_umfpack_di_matrix(Ap, Ai, Ax);
 
   return INFO;
 }
@@ -276,9 +276,9 @@ int umfpack_solve(tSparseVector **Aline, tVarList *vlx, tVarList *vlb,
 /* solve A x = b with umfpack's umfpack_di_solve
    for a matrix made up of sparse line vectors that was written 
    by SetMatrixLines_forSortedVars_slowly */
-int umfpack_solve_forSortedVars(tSparseVector **Aline, 
-				tVarList *vlx, tVarList *vlb,
-                  		double dropbelow, int pr)
+int umfpack_di_solve_forSortedVars_fromAlines(tSparseVector **Aline, 
+				              tVarList *vlx, tVarList *vlb,
+                  		              double dropbelow, int pr)
 {
   tGrid *grid = vlx->grid;
   int i,j,n;
@@ -296,7 +296,7 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   void *Symbolic, *Numeric;
   int INFO, INFO1, INFO2;
 
-  if(pr) { printf("umfpack_solve_forSortedVars: setting sparse matrix\n"); fflush(stdout); }
+  if(pr) { printf("umfpack_di_solve_forSortedVars_fromAlines: setting sparse matrix\n"); fflush(stdout); }
 
   /* figure out number of lines */
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
@@ -310,10 +310,10 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
   if(b==NULL || x==NULL)
-    errorexit("umfpack_solve_forSortedVars: out of memory for x,b");
+    errorexit("umfpack_di_solve_forSortedVars_fromAlines: out of memory for x,b");
 
   /* allocate memory for matrix */
-  allocate_umfpack_matrix(&Ap, &Ai, &Ax, nlines, nz);
+  allocate_umfpack_di_matrix(&Ap, &Ai, &Ax, nlines, nz);
 
   /* set b = vlb */
   line = 0;
@@ -334,28 +334,28 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
   }
 
   /* set matrix */
-  set_umfpack_matrix_from_lines(Ap, Ai, Ax, Aline, nlines, dropbelow, pr);
-  if(pr) printf("umfpack_solve_forSortedVars: %d entries of magnitude <= %g were dropped\n",
+  set_umfpack_di_matrix_from_lines(Ap, Ai, Ax, Aline, nlines, dropbelow, pr);
+  if(pr) printf("umfpack_di_solve_forSortedVars_fromAlines: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
-  { printf("umfpack_solve_forSortedVars: calling umfpack_di_solve\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_forSortedVars_fromAlines: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
   INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
 #else
-  errorexit("umfpack_solve_forSortedVars: in order to compile with umfpack use MyConfig with\n"
+  errorexit("umfpack_di_solve_forSortedVars_fromAlines: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
   { 
-    printf("umfpack_solve_forSortedVars: umfpack_di_solve -> INFO=%d\n", INFO); 
+    printf("umfpack_di_solve_forSortedVars_fromAlines: umfpack_di_solve -> INFO=%d\n", INFO); 
     fflush(stdout);
   }
 
@@ -364,7 +364,7 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
 
   /* set vlx = x */
   if(pr)
-  { printf("umfpack_solve_forSortedVars: setting solution vector\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_forSortedVars_fromAlines: setting solution vector\n"); fflush(stdout); }
   line = 0;
   forallboxes(grid,bi)
   {
@@ -381,12 +381,12 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
       }
     } 
   } 
-  if(pr) { printf("umfpack_solve_forSortedVars: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
+  if(pr) { printf("umfpack_di_solve_forSortedVars_fromAlines: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
 
   /* free mem. */
   free(b);
   free(x);
-  free_umfpack_matrix(Ap, Ai, Ax);
+  free_umfpack_di_matrix(Ap, Ai, Ax);
 
   return INFO;
 }
@@ -395,9 +395,9 @@ int umfpack_solve_forSortedVars(tSparseVector **Aline,
 /* solve A x = b with umfpack's umfpack_di_solve
    for a matrix made up of sparse column vectors that was written 
    by SetMatrixColumns_slowly */
-int umfpack_solve_fromAcolumns(tSparseVector **Acol,
-                               tVarList *vlx, tVarList *vlb,
-                               double dropbelow, int pr)
+int umfpack_di_solve_fromAcolumns(tSparseVector **Acol,
+                                  tVarList *vlx, tVarList *vlb,
+                                  double dropbelow, int pr)
 {
   tGrid *grid = vlx->grid;
   int i,j;
@@ -414,7 +414,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   void *Symbolic, *Numeric;
   int INFO, INFO1, INFO2;
 
-  if(pr) { printf("umfpack_solve_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
+  if(pr) { printf("umfpack_di_solve_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
 
   /* figure out number of lines */
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
@@ -426,10 +426,10 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
   if(b==NULL || x==NULL)
-    errorexit("umfpack_solve_fromAcolumns: out of memory for x,b");
+    errorexit("umfpack_di_solve_fromAcolumns: out of memory for x,b");
 
   /* allocate memory for matrix */
-  allocate_umfpack_matrix(&Ap, &Ai, &Ax, nlines, nz);
+  allocate_umfpack_di_matrix(&Ap, &Ai, &Ax, nlines, nz);
 
   /* set b = vlb */
   line = 0;
@@ -448,28 +448,28 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
   }
 
   /* set matrix */
-  set_umfpack_matrix_from_columns(Ap, Ai, Ax, Acol, nlines, dropbelow, pr);
-  if(pr) printf("umfpack_solve_fromAcolumns: %d entries of magnitude <= %g were dropped\n",
+  set_umfpack_di_matrix_from_columns(Ap, Ai, Ax, Acol, nlines, dropbelow, pr);
+  if(pr) printf("umfpack_di_solve_fromAcolumns: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
-  { printf("umfpack_solve_fromAcolumns: calling umfpack_di_solve\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_fromAcolumns: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
   INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
 #else
-  errorexit("umfpack_solve_fromAcolumns: in order to compile with umfpack use MyConfig with\n"
+  errorexit("umfpack_di_solve_fromAcolumns: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
   { 
-    printf("umfpack_solve_fromAcolumns: umfpack_di_solve -> INFO=%d\n", INFO); 
+    printf("umfpack_di_solve_fromAcolumns: umfpack_di_solve -> INFO=%d\n", INFO); 
     fflush(stdout);
   }
 
@@ -478,7 +478,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
 
   /* set vlx = x */
   if(pr)
-  { printf("umfpack_solve_fromAcolumns: setting solution vector\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_fromAcolumns: setting solution vector\n"); fflush(stdout); }
   line = 0;
   forallboxes(grid,bi)
   {
@@ -494,12 +494,12 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
       }
   }
   if(pr)
-  { printf("umfpack_solve_fromAcolumns: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
+  { printf("umfpack_di_solve_fromAcolumns: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
 
   /* free mem. */
   free(b);
   free(x);
-  free_umfpack_matrix(Ap, Ai, Ax);
+  free_umfpack_di_matrix(Ap, Ai, Ax);
 
   return INFO;
 }
@@ -508,7 +508,7 @@ int umfpack_solve_fromAcolumns(tSparseVector **Acol,
 /* solve A x = b with umfpack's umfpack_di_solve
    for a matrix made up of sparse column vectors that was written 
    by SetMatrixColumns_slowly */
-int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
+int umfpack_di_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
       tVarList *vlx, tVarList *vlb,
       double dropbelow, int pr)
 {
@@ -527,7 +527,7 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   void *Symbolic, *Numeric;
   int INFO, INFO1, INFO2;
 
-  if(pr) { printf("umfpack_solve_forSortedVars_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
+  if(pr) { printf("umfpack_di_solve_forSortedVars_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
 
   /* figure out number of lines */
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
@@ -539,10 +539,10 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
   if(b==NULL || x==NULL)
-    errorexit("umfpack_solve_forSortedVars_fromAcolumns: out of memory for x,b");
+    errorexit("umfpack_di_solve_forSortedVars_fromAcolumns: out of memory for x,b");
 
   /* allocate memory for matrix */
-  allocate_umfpack_matrix(&Ap, &Ai, &Ax, nlines, nz);
+  allocate_umfpack_di_matrix(&Ap, &Ai, &Ax, nlines, nz);
 
   /* set b = vlb */
   line = 0;
@@ -563,28 +563,28 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   }
 
   /* set matrix */
-  set_umfpack_matrix_from_columns(Ap, Ai, Ax, Acol, nlines, dropbelow, pr);
-  if(pr) printf("umfpack_solve_forSortedVars_fromAcolumns: %d entries of magnitude <= %g were dropped\n",
+  set_umfpack_di_matrix_from_columns(Ap, Ai, Ax, Acol, nlines, dropbelow, pr);
+  if(pr) printf("umfpack_di_solve_forSortedVars_fromAcolumns: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
-  { printf("umfpack_solve_forSortedVars_fromAcolumns: calling umfpack_di_solve\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_forSortedVars_fromAcolumns: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
   INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
 #else
-  errorexit("umfpack_solve_forSortedVars_fromAcolumns: in order to compile with umfpack use MyConfig with\n"
+  errorexit("umfpack_di_solve_forSortedVars_fromAcolumns: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
   { 
-    printf("umfpack_solve_forSortedVars_fromAcolumns: umfpack_di_solve -> INFO=%d\n", INFO); 
+    printf("umfpack_di_solve_forSortedVars_fromAcolumns: umfpack_di_solve -> INFO=%d\n", INFO); 
     fflush(stdout);
   }
 
@@ -593,7 +593,7 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
 
   /* set vlx = x */
   if(pr)
-  { printf("umfpack_solve_forSortedVars_fromAcolumns: setting solution vector\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_forSortedVars_fromAcolumns: setting solution vector\n"); fflush(stdout); }
   line = 0;
   forallboxes(grid,bi)
   {
@@ -611,12 +611,12 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
     }
   }
   if(pr)
-  { printf("umfpack_solve_forSortedVars_fromAcolumns: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
+  { printf("umfpack_di_solve_forSortedVars_fromAcolumns: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
 
   /* free mem. */
   free(b);
   free(x);
-  free_umfpack_matrix(Ap, Ai, Ax);
+  free_umfpack_di_matrix(Ap, Ai, Ax);
 
   return INFO;
 }
@@ -625,8 +625,8 @@ int umfpack_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
 /* solve A x = b with umfpack's umfpack_di_solve
    for a matrix that is already saved in
    int *Ap, int *Ai, double *Ax */
-int umfpack_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
-                                tVarList *vlx, tVarList *vlb, int pr)
+int umfpack_di_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
+                                   tVarList *vlx, tVarList *vlb, int pr)
 {
   tGrid *grid = vlx->grid;
   int i,j;
@@ -646,7 +646,7 @@ int umfpack_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
   b=calloc(nlines, sizeof(double));
   x=calloc(nlines, sizeof(double));
   if(b==NULL || x==NULL)
-    errorexit("umfpack_solve_from_Ap_Ai_Ax: out of memory for x,b");
+    errorexit("umfpack_di_solve_from_Ap_Ai_Ax: out of memory for x,b");
 
   /* set b = vlb */
   line = 0;
@@ -667,21 +667,21 @@ int umfpack_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
-  { printf("umfpack_solve_from_Ap_Ai_Ax: calling umfpack_di_solve\n"); fflush(stdout); }
+  { printf("umfpack_di_solve_from_Ap_Ai_Ax: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
   INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
 #else
-  errorexit("umfpack_solve_from_Ap_Ai_Ax: in order to compile with umfpack use MyConfig with\n"
+  errorexit("umfpack_di_solve_from_Ap_Ai_Ax: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
   if(pr)
   { 
-    printf("umfpack_solve_from_Ap_Ai_Ax: umfpack_di_solve -> INFO=%d\n", INFO); 
+    printf("umfpack_di_solve_from_Ap_Ai_Ax: umfpack_di_solve -> INFO=%d\n", INFO); 
     fflush(stdout);
   }
 
@@ -691,7 +691,7 @@ int umfpack_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
   /* set vlx = x */
   if(pr)
   { 
-    printf("umfpack_solve_from_Ap_Ai_Ax: setting solution vector\n");
+    printf("umfpack_di_solve_from_Ap_Ai_Ax: setting solution vector\n");
     fflush(stdout);
   }
   line = 0;
@@ -709,7 +709,7 @@ int umfpack_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
       }
   }
   if(pr)
-  { printf("umfpack_solve_from_Ap_Ai_Ax: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
+  { printf("umfpack_di_solve_from_Ap_Ai_Ax: vector vlx=%p is now set!\n", vlx); fflush(stdout);}
 
   /* free mem. for x,b */
   free(b);

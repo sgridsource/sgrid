@@ -21,9 +21,9 @@ void precon_Ap_Ai_Ax_UMFPACK(tVarList *vlx, tVarList *vlb,
   int INFO;
 
   /* use umfpack for solve */
-  INFO = umfpack_solve_from_Ap_Ai_Ax(Ap,Ai,Ax, vlx, vlb, pr);
+  INFO = umfpack_di_solve_from_Ap_Ai_Ax(Ap,Ai,Ax, vlx, vlb, pr);
   if(pr) 
-    printf("precon_Ap_Ai_Ax_UMFPACK: umfpack_solve_from_Ap_Ai_Ax returned INFO=%d\n",INFO);
+    printf("precon_Ap_Ai_Ax_UMFPACK: umfpack_di_solve_from_Ap_Ai_Ax returned INFO=%d\n",INFO);
 }
 
 /* do a linear solve with precon_Ap_Ai_Ax_UMFPACK, where global
@@ -74,10 +74,10 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   for(col = 0; col < ncols; col++) nz+=Acol[col]->entries;
 
   /* allocate memory for matrix in UMFPACK format */
-  allocate_umfpack_matrix(&Ap, &Ai, &Ax, ncols, nz);
+  allocate_umfpack_di_matrix(&Ap, &Ai, &Ax, ncols, nz);
 
   /* now set fin. diff. matrix for UMFPACK */
-  set_umfpack_matrix_from_columns(Ap, Ai, Ax, Acol, ncols, drop, pr);
+  set_umfpack_di_matrix_from_columns(Ap, Ai, Ax, Acol, ncols, drop, pr);
   if(pr)
     printf("lsolver_with_fd_UMFPACK_precon:\n"
            "  %d entries of magnitude <= %g were dropped\n",
@@ -89,7 +89,7 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   /* free matrix A in UMFPACK format */
   /* maybe we could save and reuse this matrix for several lin solves,
      if the linear solve succeeds in driving down the residual of lop ???*/
-  free_umfpack_matrix(Ap, Ai, Ax);
+  free_umfpack_di_matrix(Ap, Ai, Ax);
 
   /* free matrix Acol */
   for(col=0; col<ncols; col++)  FreeSparseVector(Acol[col]);
@@ -198,9 +198,9 @@ int UMFPACK_solve_wrapper(tVarList *x, tVarList *b,
     for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
 
   /* solve A x = b with umfpack */
-  INFO=umfpack_solve_fromAcolumns(Acol, x, b, drop, pr);
+  INFO=umfpack_di_solve_fromAcolumns(Acol, x, b, drop, pr);
   if(pr) 
-    printf("UMFPACK_solve_wrapper: umfpack_solve_fromAcolumns returned INFO=%d\n",INFO);
+    printf("UMFPACK_solve_wrapper: umfpack_di_solve_fromAcolumns returned INFO=%d\n",INFO);
 
   /* free matrix Acol */
   for(col=0; col<ncols; col++)  FreeSparseVector(Acol[col]);
@@ -211,7 +211,7 @@ int UMFPACK_solve_wrapper(tVarList *x, tVarList *b,
 
 
 /* call all relevant routines to set up an umfpack call using
-   umfpack_solve_forSortedVars_fromAcolumns */
+   umfpack_di_solve_forSortedVars_fromAcolumns */
 int UMFPACK_solve_forSortedVars_wrapper(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -242,9 +242,9 @@ int UMFPACK_solve_forSortedVars_wrapper(tVarList *x, tVarList *b,
     for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
 
   /* solve A x = b with umfpack */
-  INFO=umfpack_solve_forSortedVars_fromAcolumns(Acol, x, b, drop, pr);
+  INFO=umfpack_di_solve_forSortedVars_fromAcolumns(Acol, x, b, drop, pr);
   if(pr) 
-    printf("UMFPACK_solve_forSortedVars_wrapper: umfpack_solve_fromAcolumns returned INFO=%d\n",INFO);
+    printf("UMFPACK_solve_forSortedVars_wrapper: umfpack_di_solve_fromAcolumns returned INFO=%d\n",INFO);
 
   /* free matrix Acol */
   for(col=0; col<ncols; col++)  FreeSparseVector(Acol[col]);
