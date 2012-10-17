@@ -8,12 +8,14 @@
 
 /* global vars */
 /* UMFPACK matrix */
-int *Ap;
-int *Ai;
-double *Ax;
+int *umfAp;
+int *umfAi;
+LONGINT *LumfAp;
+LONGINT *LumfAi;
+double *umfAx;
 
 
-/* use UMFPACK (with matrix set in global Ap,Ai,Ax) as lin solver as precon */
+/* use UMFPACK (with matrix set in global umfAp,umfAi,umfAx) as lin solver as precon */
 void precon_Ap_Ai_Ax_UMFPACK(tVarList *vlx, tVarList *vlb,
                              tVarList *vlc1, tVarList *vlc2)
 {
@@ -21,13 +23,17 @@ void precon_Ap_Ai_Ax_UMFPACK(tVarList *vlx, tVarList *vlb,
   int INFO;
 
   /* use umfpack for solve */
-  INFO = umfpack_di_solve_from_Ap_Ai_Ax(Ap,Ai,Ax, vlx, vlb, pr);
+  if(Getv("GridIterators_UMFPACK_version", "di"))
+    INFO = umfpack_di_solve_from_Ap_Ai_Ax(umfAp,umfAi,umfAx, vlx, vlb, pr);
+  else
+    INFO = umfpack_dl_solve_from_Ap_Ai_Ax(LumfAp,LumfAi,umfAx, vlx, vlb, pr);
+    
   if(pr) 
-    printf("precon_Ap_Ai_Ax_UMFPACK: umfpack_di_solve_from_Ap_Ai_Ax returned INFO=%d\n",INFO);
+    printf("precon_Ap_Ai_Ax_UMFPACK: umfpack_*_solve_from_Ap_Ai_Ax returned INFO=%d\n",INFO);
 }
 
 /* do a linear solve with precon_Ap_Ai_Ax_UMFPACK, where global
-   Ap,Ai,Ax is set by temporarily switching to finite differencing */
+   umfAp,umfAi,umfAx is set by temporarily switching to finite differencing */
 int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
             int (*lsolver)(tVarList *, tVarList *, tVarList *, tVarList *,tVarList *,
@@ -44,7 +50,7 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   double drop = Getd("GridIterators_setABStozero_below");
   int col, ncols, nvars, INFO;
   tSparseVector **Acol;
-  int nz=0;
+  LONGINT nz=0;
 
   if(pr) printf("lsolver_with_fd_UMFPACK_precon:\n");
 
@@ -73,15 +79,28 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   /* count number of entries in sparse matrix */
   for(col = 0; col < ncols; col++) nz+=Acol[col]->entries;
 
-  /* allocate memory for matrix in UMFPACK format */
-  allocate_umfpack_di_matrix(&Ap, &Ai, &Ax, ncols, nz);
-
-  /* now set fin. diff. matrix for UMFPACK */
-  set_umfpack_di_matrix_from_columns(Ap, Ai, Ax, Acol, ncols, drop, pr);
-  if(pr)
-    printf("lsolver_with_fd_UMFPACK_precon:\n"
-           "  %d entries of magnitude <= %g were dropped\n",
-           nz-Ap[ncols], drop);
+  if(Getv("GridIterators_UMFPACK_version", "di"))
+  {
+    /* allocate memory for matrix in UMFPACK format */
+    allocate_umfpack_di_matrix(&umfAp, &umfAi, &umfAx, ncols, nz);
+    /* now set fin. diff. matrix for UMFPACK */
+    set_umfpack_di_matrix_from_columns(umfAp, umfAi, umfAx, Acol, ncols, drop, pr);
+    if(pr)
+      printf("lsolver_with_fd_UMFPACK_precon:\n"
+             "  %d entries of magnitude <= %g were dropped\n",
+             (int) (nz-umfAp[ncols]), drop);
+  }
+  else
+  {
+    /* allocate memory for matrix in UMFPACK format */
+    allocate_umfpack_dl_matrix(&LumfAp, &LumfAi, &umfAx, ncols, nz);
+    /* now set fin. diff. matrix for UMFPACK */
+    set_umfpack_dl_matrix_from_columns(LumfAp, LumfAi, umfAx, Acol, ncols, drop, pr);
+    if(pr)
+      printf("lsolver_with_fd_UMFPACK_precon:\n"
+             "  %ld entries of magnitude <= %g were dropped\n",
+             (LONGINT) (nz-umfAp[ncols]), drop);
+  }
 
   /* solve A x = b with lsolver and the Precon precon_Ap_Ai_Ax_UMFPACK */
   INFO = lsolver(x, b, r,c1,c2, itmax,tol,normres, lop, precon_Ap_Ai_Ax_UMFPACK);
@@ -89,7 +108,10 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
   /* free matrix A in UMFPACK format */
   /* maybe we could save and reuse this matrix for several lin solves,
      if the linear solve succeeds in driving down the residual of lop ???*/
-  free_umfpack_di_matrix(Ap, Ai, Ax);
+  if(Getv("GridIterators_UMFPACK_version", "di"))
+    free_umfpack_di_matrix(umfAp, umfAi, umfAx);
+  else
+    free_umfpack_dl_matrix(LumfAp, LumfAi, umfAx);
 
   /* free matrix Acol */
   for(col=0; col<ncols; col++)  FreeSparseVector(Acol[col]);
@@ -198,9 +220,13 @@ int UMFPACK_solve_wrapper(tVarList *x, tVarList *b,
     for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
 
   /* solve A x = b with umfpack */
-  INFO=umfpack_di_solve_fromAcolumns(Acol, x, b, drop, pr);
+  if(Getv("GridIterators_UMFPACK_version", "di"))
+    INFO=umfpack_di_solve_fromAcolumns(Acol, x, b, drop, pr);
+  else
+    INFO=umfpack_dl_solve_fromAcolumns(Acol, x, b, drop, pr);
   if(pr) 
-    printf("UMFPACK_solve_wrapper: umfpack_di_solve_fromAcolumns returned INFO=%d\n",INFO);
+    printf("UMFPACK_solve_wrapper: "
+           "umfpack_*_solve_fromAcolumns returned INFO=%d\n",INFO);
 
   /* free matrix Acol */
   for(col=0; col<ncols; col++)  FreeSparseVector(Acol[col]);
@@ -242,7 +268,11 @@ int UMFPACK_solve_forSortedVars_wrapper(tVarList *x, tVarList *b,
     for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
 
   /* solve A x = b with umfpack */
-  INFO=umfpack_di_solve_forSortedVars_fromAcolumns(Acol, x, b, drop, pr);
+  if(Getv("GridIterators_UMFPACK_version", "di"))
+    INFO=umfpack_di_solve_forSortedVars_fromAcolumns(Acol, x, b, drop, pr);
+  else /* INFO=umfpack_dl_solve_forSortedVars_fromAcolumns(Acol, x, b, drop, pr); */
+    errorexit("implement umfpack_dl_solve_forSortedVars_fromAcolumns");
+    
   if(pr) 
     printf("UMFPACK_solve_forSortedVars_wrapper: umfpack_di_solve_fromAcolumns returned INFO=%d\n",INFO);
 

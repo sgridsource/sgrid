@@ -24,6 +24,8 @@ int sgrid_GridIterators()
          "how we take Newton steps [full,backtrack]");
   AddPar("GridIterators_templates_RESID_mode", "tol/norm(b)",
          "how we compute input RESID from tol [tol/norm(b),tol]");
+  AddPar("GridIterators_UMFPACK_version", "di",
+         "umfpack version to be called [di,dl]");
 
   /* check whether there is more to do */
   if (!Getv("physics", "GridIterators")) return 0;
