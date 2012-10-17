@@ -2,6 +2,12 @@
 /* Wolfgang Tichy 8/2003 */
 
 
+
+/* LongInt contains the long integer type used. For umfpack it must be 
+   the same as SuiteSparse_long, which is a 64 bit integer on linux. */
+#define LONGINT long
+
+
 /* TYPES */
 
 /* type def for Sparse Vectors */
@@ -42,7 +48,7 @@ void SetMatrixColumns_forSortedVars_slowly(tSparseVector **Acol,
 /* lapack_interface.c */
 int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr);
 
-/* umfpack_interface.c */
+/* umfpack_di_interface.c */
 void allocate_umfpack_di_matrix(int **Ap, int **Ai, double **Ax, int n, int nz);
 void free_umfpack_di_matrix(int *Ap, int *Ai, double *Ax);
 int set_umfpack_di_matrix_from_lines(int *Ap, int *Ai, double *Ax,
@@ -60,4 +66,20 @@ int umfpack_di_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
       tVarList *vlx, tVarList *vlb,
       double dropbelow, int pr);
 int umfpack_di_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
+                                   tVarList *vlx, tVarList *vlb, int pr);
+
+/* umfpack_dl_interface.c */
+void allocate_umfpack_dl_matrix(LONGINT **Ap, LONGINT **Ai, double **Ax,
+                                LONGINT n, LONGINT nz);
+void free_umfpack_dl_matrix(LONGINT *Ap, LONGINT *Ai, double *Ax);
+LONGINT set_umfpack_dl_matrix_from_lines(LONGINT *Ap, LONGINT *Ai, double *Ax,
+                                         tSparseVector **Aline, LONGINT nlines,
+                                         double dropbelow, int pr);
+LONGINT set_umfpack_dl_matrix_from_columns(LONGINT *Ap, LONGINT *Ai, double *Ax,
+                                           tSparseVector **Acol, LONGINT ncols,
+                                           double dropbelow, int pr);
+int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
+                                  tVarList *vlx, tVarList *vlb,
+                                  double dropbelow, int pr);
+int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
                                    tVarList *vlx, tVarList *vlb, int pr);

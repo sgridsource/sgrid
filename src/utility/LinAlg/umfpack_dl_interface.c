@@ -5,10 +5,6 @@
 #include "sgrid.h"
 #include "LinAlg.h"
 
-/* LongInt contains the long integer type used. It must be the same as
-   SuiteSparse_long, which is a 64 bit integer. */
-#define LONGINT long
-
 #ifdef UMFPACK
 #include "umfpack.h"
 #define PrintErrorCodesAndExit  \
