@@ -99,7 +99,7 @@ int linSolve_with_fd_UMFPACK_precon(tVarList *x, tVarList *b,
     if(pr)
       printf("lsolver_with_fd_UMFPACK_precon:\n"
              "  %ld entries of magnitude <= %g were dropped\n",
-             (LONGINT) (nz-umfAp[ncols]), drop);
+             (LONGINT) (nz-LumfAp[ncols]), drop);
   }
 
   /* solve A x = b with lsolver and the Precon precon_Ap_Ai_Ax_UMFPACK */
