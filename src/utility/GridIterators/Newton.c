@@ -238,6 +238,9 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
     /* do reduced Newton step */
     vlcopy(vlu, vltemp);
     do_partial_Newton_step(vlu, lambda, vldu);
+
+    /* free varlist vltemp */
+    vlfree(vltemp);
   }
   /* reset du to zero */
   vlsetconstant(vldu, 0.0);
