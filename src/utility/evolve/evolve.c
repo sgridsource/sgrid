@@ -151,10 +151,10 @@ int evolve(tGrid *grid)
         {
           ch[i] = new[i] - old[i];
         }
-        /* free temp. var lists */
-        vlfree(change);
-        vlfree(var);
       }
+      /* free temp. var lists */
+      vlfree(change);
+      vlfree(var);
     }
   }
 
