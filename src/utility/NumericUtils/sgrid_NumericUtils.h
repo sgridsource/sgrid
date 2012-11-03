@@ -70,6 +70,9 @@ void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
 	void (*derivs)(double, double [], double []));
 
 /* 1D Minimization */
+void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
+	    double *fa, double *fb, double *fc,
+	    double (*func)(double, void *ppointer), void *parpointer);
 double brent_with_pointer_to_pars(double ax, double bx, double cx,
                                   double (*f)(double, void *ppointer),
                                   double tol, double *xmin, void *parpointer);

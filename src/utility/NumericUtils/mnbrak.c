@@ -58,6 +58,62 @@ void mnbrak(double *ax, double *bx, double *cx,
 		SHFT(*fa,*fb,*fc,fu)
 	}
 }
+
+/* same as above: BUT with an additional pointer argument that
+   allows to pass a pointer to certain pars to the function f */
+void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
+	    double *fa, double *fb, double *fc,
+	    double (*func)(double, void *ppointer), void *parpointer)
+{
+	double ulim,u,r,q,fu,dum;
+
+	*fa=(*func)(*ax, parpointer);
+	*fb=(*func)(*bx, parpointer);
+	if (*fb > *fa) {
+		SHFT(dum,*ax,*bx,dum)
+		SHFT(dum,*fb,*fa,dum)
+	}
+	*cx=(*bx)+GOLD*(*bx-*ax);
+	*fc=(*func)(*cx, parpointer);
+	while (*fb > *fc) {
+		r=(*bx-*ax)*(*fb-*fc);
+		q=(*bx-*cx)*(*fb-*fa);
+		u=(*bx)-((*bx-*cx)*q-(*bx-*ax)*r)/
+			(2.0*SIGN(FMAX(fabs(q-r),TINY),q-r));
+		ulim=(*bx)+GLIMIT*(*cx-*bx);
+		if ((*bx-u)*(u-*cx) > 0.0) {
+			fu=(*func)(u, parpointer);
+			if (fu < *fc) {
+				*ax=(*bx);
+				*bx=u;
+				*fa=(*fb);
+				*fb=fu;
+				return;
+			} else if (fu > *fb) {
+				*cx=u;
+				*fc=fu;
+				return;
+			}
+			u=(*cx)+GOLD*(*cx-*bx);
+			fu=(*func)(u, parpointer);
+		} else if ((*cx-u)*(u-ulim) > 0.0) {
+			fu=(*func)(u, parpointer);
+			if (fu < *fc) {
+				SHFT(*bx,*cx,u,*cx+GOLD*(*cx-*bx))
+				SHFT(*fb,*fc,fu,(*func)(u, parpointer))
+			}
+		} else if ((u-ulim)*(ulim-*cx) >= 0.0) {
+			u=ulim;
+			fu=(*func)(u, parpointer);
+		} else {
+			u=(*cx)+GOLD*(*cx-*bx);
+			fu=(*func)(u, parpointer);
+		}
+		SHFT(*ax,*bx,*cx,u)
+		SHFT(*fa,*fb,*fc,fu)
+	}
+}
+
 #undef GOLD
 #undef GLIMIT
 #undef TINY
