@@ -26,6 +26,8 @@ int sgrid_GridIterators()
          "how we compute input RESID from tol [tol/norm(b),tol]");
   AddPar("GridIterators_UMFPACK_version", "di",
          "umfpack version to be called [di,dl]");
+  AddPar("GridIterators_JacobiPreconditioner", "fd",
+         "whether we use spectral or finite diff [spectral,fd]");
 
   /* check whether there is more to do */
   if (!Getv("physics", "GridIterators")) return 0;
