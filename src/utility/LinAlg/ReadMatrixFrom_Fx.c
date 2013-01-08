@@ -62,9 +62,13 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
     tBox *box = grid->box[b];
     int i,j, bb;
 
+/* FIXME: make parallel
+   see SetMatrixColumns_slowly on how to do it. */
+printf("\nFIXME: SetMatrixLines_slowly is not OpenMP parallel!!!");
+
     if(pr)
     {
-      printf("\n"); prdivider(0);  
+      printf("\n"); prdivider(0);
       printf("SetMatrixLines_slowly: working on box%d\ncol=",b);
     }
     forallpoints(box,i)

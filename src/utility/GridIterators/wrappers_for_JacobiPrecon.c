@@ -1,4 +1,4 @@
-/* UMFPACK_solve_wrapper.c */
+/* wrappers_for_JacobiPrecon.c */
 /* Wolfgang Tichy 1/2013 */
 
 
