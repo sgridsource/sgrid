@@ -162,47 +162,6 @@ int WTiterator(tSparseVector **Aline, int nlines,
   return it;
 }
 
-/* set x = vlx */
-void copy_varlist_into_array(tVarList *vlx, double *x)
-{
-  tGrid *grid = vlx->grid;
-  int bi;
-  int line = 0;
-  forallboxes(grid,bi)
-  {
-    tBox *box = grid->box[bi];
-    int i,j;
-
-    forallpoints(box,i)
-      for(j = 0; j < vlx->n; j++)
-      {
-        double *px = box->v[vlx->index[j]];
-        x[line] = px[i];
-        line++;
-      }
-  }
-}
-
-/* set vlx = x */
-void copy_array_into_varlist(double *x, tVarList *vlx)
-{
-  tGrid *grid = vlx->grid;
-  int bi;
-  int line = 0;
-  forallboxes(grid,bi)
-  {
-    tBox *box = grid->box[bi];
-    int i,j;
-
-    forallpoints(box,i)
-      for(j = 0; j < vlx->n; j++)
-      {
-        double *px = box->v[vlx->index[j]];
-        px[i] = x[line];
-        line++;
-      }
-  }
-}
 
 /* this one works only if nlines = 2, bad!!! */
 int WTiterator1(tSparseVector **Aline, int nlines,

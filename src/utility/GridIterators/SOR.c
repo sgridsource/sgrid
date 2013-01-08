@@ -41,7 +41,7 @@ void SOR_step(tSparseVector **Aline, int nlines,
   }
 }
 
-/* SOR for a matrix set with SetMatrixLines_slowly */
+/* SOR for a matrix set with SetMatrixLines */
 int matrix_SOR(tSparseVector **Aline, int nlines,
                double *x, double *b, double omega,
                int itmax, double tol, double *normres)
@@ -103,6 +103,27 @@ int SOR_Iterator(tVarList *vlx, tVarList *vlb,
   double *x;
   double *b;
   tSparseVector **Aline;
+  void (*SetMatrixLines)(tSparseVector **Aline,
+       void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
+       tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
+  void (*copy_vl_into_array)(tVarList *vlx, double *x);
+  void (*copy_array_into_vl)(double *x, tVarList *vlx);
+
+  /* decide how we order the matrix lines */
+  if(Getv("GridIterators_SOR_matrix", "SetMatrixLines_slowly"))
+  {
+    SetMatrixLines = SetMatrixLines_slowly;
+    copy_vl_into_array = copy_varlist_into_array;
+    copy_array_into_vl = copy_array_into_varlist;
+  }
+  else if(Getv("GridIterators_SOR_matrix", "SetMatrixLines_forSortedVars_slowly"))
+  {
+    SetMatrixLines = SetMatrixLines_forSortedVars_slowly;
+    copy_vl_into_array = copy_varlist_into_array_forSortedVars;
+    copy_array_into_vl = copy_array_into_varlist_forSortedVars;
+  }
+  else
+    errorexit("SOR_Iterator: unknown GridIterators_SOR_matrix");
 
   if(pr) printf("sgrid_SOR:\n");
 
@@ -116,7 +137,7 @@ int SOR_Iterator(tVarList *vlx, tVarList *vlb,
   for(line=0; line<nlines; line++)  Aline[line]=AllocateSparseVector();
 
   /* set Aline */
-  SetMatrixLines_slowly(Aline, lop, r, vlx, c1, c2, pr);
+  SetMatrixLines(Aline, lop, r, vlx, c1, c2, pr);
   if(pr&&0) 
     for(line=0; line<nlines; line++) prSparseVector(Aline[line]);
 
@@ -126,14 +147,14 @@ int SOR_Iterator(tVarList *vlx, tVarList *vlb,
   if(x==NULL || b==NULL) errorexit("sgrid_SOR: no memory for x,b");
      
   /* set x = vlx , b = vlb */
-  copy_varlist_into_array(vlx, x);
-  copy_varlist_into_array(vlb, b);
+  copy_vl_into_array(vlx, x);
+  copy_vl_into_array(vlb, b);
 
   /* solve A x = b with WTiterator */
   INFO=matrix_SOR(Aline, nlines, x, b, omega, itmax, tol, normres);
                  
   /* set vlx = x */
-  copy_array_into_varlist(x, vlx);
+  copy_array_into_vl(x, vlx);
 
   /* free matrix Aline and x,b */
   for(line=0; line<nlines; line++)  FreeSparseVector(Aline[line]);
@@ -145,7 +166,7 @@ int SOR_Iterator(tVarList *vlx, tVarList *vlb,
 }
 
 
-/* SOR_Aline contains the matrix set with SetMatrixLines_slowly */
+/* SOR_Aline contains the matrix set with SetMatrixLines */
 void SOR_Preconditioner_from_SOR_Aline(tVarList *vlx, tVarList *vlb,
                                        tVarList *vlc1, tVarList *vlc2)
 {
@@ -159,6 +180,22 @@ void SOR_Preconditioner_from_SOR_Aline(tVarList *vlx, tVarList *vlb,
   double normb, res;
   double *x;
   double *b;
+  void (*copy_vl_into_array)(tVarList *vlx, double *x);
+  void (*copy_array_into_vl)(double *x, tVarList *vlx);
+
+  /* decide how we order the matrix lines */
+  if(Getv("GridIterators_SOR_matrix", "SetMatrixLines_slowly"))
+  {
+    copy_vl_into_array = copy_varlist_into_array;
+    copy_array_into_vl = copy_array_into_varlist;
+  }
+  else if(Getv("GridIterators_SOR_matrix", "SetMatrixLines_forSortedVars_slowly"))
+  {
+    copy_vl_into_array = copy_varlist_into_array_forSortedVars;
+    copy_array_into_vl = copy_array_into_varlist_forSortedVars;
+  }
+  else
+    errorexit("SOR_Iterator: unknown GridIterators_SOR_matrix");
 
   if(pr) printf("SOR_Preconditioner_from_SOR_Aline:\n");
 
@@ -168,8 +205,8 @@ void SOR_Preconditioner_from_SOR_Aline(tVarList *vlx, tVarList *vlb,
   if(x==NULL || b==NULL) errorexit("SOR_Preconditioner_from_SOR_Aline: no memory for x,b");
      
   /* set x = vlx , b = vlb */
-  copy_varlist_into_array(vlx, x);
-  copy_varlist_into_array(vlb, b);
+  copy_vl_into_array(vlx, x);
+  copy_vl_into_array(vlb, b);
 
   normb = sqrt(scalarproduct_vectors(b,b, SOR_nlines));
 
@@ -183,7 +220,7 @@ void SOR_Preconditioner_from_SOR_Aline(tVarList *vlx, tVarList *vlb,
   }
 
   /* set vlx = x */
-  copy_array_into_varlist(x, vlx);
+  copy_array_into_vl(x, vlx);
 
   /* free x,b */
   free(x);
@@ -213,6 +250,17 @@ int linSolve_with_SOR_precon(tVarList *x, tVarList *b,
   int pr = Getv("GridIterators_verbose", "yes");
   int line, nvars, ent, INFO;
   int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
+  void (*SetMatrixLines)(tSparseVector **Aline,
+       void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
+       tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
+
+  /* decide how we order the matrix lines */
+  if(Getv("GridIterators_SOR_matrix", "SetMatrixLines_slowly"))
+    SetMatrixLines = SetMatrixLines_slowly;
+  else if(Getv("GridIterators_SOR_matrix", "SetMatrixLines_forSortedVars_slowly"))
+    SetMatrixLines = SetMatrixLines_forSortedVars_slowly;
+  else
+    errorexit("SOR_Iterator: unknown GridIterators_SOR_matrix");
 
   if(pr) printf("linSolve_with_SOR_precon\n");
 
@@ -235,7 +283,7 @@ int linSolve_with_SOR_precon(tVarList *x, tVarList *b,
   }
 
   /* set SOR_Aline */
-  SetMatrixLines_slowly(SOR_Aline, lop, r, x, c1, c2, pr);                
+  SetMatrixLines(SOR_Aline, lop, r, x, c1, c2, pr);                
   if(pr&&0) 
     for(line=0; line<SOR_nlines; line++) prSparseVector(SOR_Aline[line]);
 

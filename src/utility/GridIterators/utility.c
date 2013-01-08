@@ -70,3 +70,91 @@ double varBoxL2Norm(tBox *box, int iu)
   vlfree(vlu);
   return res;
 }
+
+
+/*******************************************************/
+/* copy between ordinary C-arrays and varlists on grid */
+/******************************************************/
+/* set x = vlx compatible with SetMatrixLines_slowly */
+void copy_varlist_into_array(tVarList *vlx, double *x)
+{
+  tGrid *grid = vlx->grid;
+  int bi;
+  int line = 0;
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+    int i,j;
+
+    forallpoints(box,i)
+      for(j = 0; j < vlx->n; j++)
+      {
+        double *px = box->v[vlx->index[j]];
+        x[line] = px[i];
+        line++;
+      }
+  }
+}
+
+/* set vlx = x compatible with SetMatrixLines_slowly */
+void copy_array_into_varlist(double *x, tVarList *vlx)
+{
+  tGrid *grid = vlx->grid;
+  int bi;
+  int line = 0;
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+    int i,j;
+
+    forallpoints(box,i)
+      for(j = 0; j < vlx->n; j++)
+      {
+        double *px = box->v[vlx->index[j]];
+        px[i] = x[line];
+        line++;
+      }
+  }
+}
+
+/* set x = vlx compatible with SetMatrixLines_forSortedVars_slowly */
+void copy_varlist_into_array_forSortedVars(tVarList *vlx, double *x)
+{
+  tGrid *grid = vlx->grid;
+  int bi;
+  int line = 0;
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+    int i,j;
+
+    for(j = 0; j < vlx->n; j++)
+      forallpoints(box,i)
+      {
+        double *px = box->v[vlx->index[j]];
+        x[line] = px[i];
+        line++;
+      }
+  }
+}
+
+/* set vlx = x compatible with SetMatrixLines_forSortedVars_slowly */
+void copy_array_into_varlist_forSortedVars(double *x, tVarList *vlx)
+{
+  tGrid *grid = vlx->grid;
+  int bi;
+  int line = 0;
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+    int i,j;
+
+    for(j = 0; j < vlx->n; j++)
+      forallpoints(box,i)
+      {
+        double *px = box->v[vlx->index[j]];
+        px[i] = x[line];
+        line++;
+      }
+  }
+}

@@ -38,6 +38,9 @@ void SparseMatrixLinesTranspose_times_vector(tSparseVector **Aline, int nlines,
 void SetMatrixLines_slowly(tSparseVector **Aline,
     void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
+void SetMatrixLines_forSortedVars_slowly(tSparseVector **Aline,
+    void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
+    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
 void SetMatrixColumns_slowly(tSparseVector **Acol,
     void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);

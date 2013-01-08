@@ -184,6 +184,10 @@ void SetMatrixLines_forSortedVars_slowly(tSparseVector **Aline,
     tBox *box = grid->box[b];
     int i,j, bb;
 
+/* FIXME: make parallel
+   see SetMatrixColumns_slowly on how to do it. */
+printf("\nFIXME: SetMatrixLines_forSortedVars_slowly is not OpenMP parallel!!!");
+
     if(pr)
     {
       printf("\n"); prdivider(0);  
@@ -444,6 +448,10 @@ void SetMatrixColumns_forSortedVars_slowly(tSparseVector **Acol,
   {
     tBox *box = grid->box[b];
     int i,j, bb;
+
+/* FIXME: make parallel
+   see SetMatrixColumns_slowly on how to do it. */
+printf("\nFIXME: SetMatrixColumns_forSortedVars_slowly is not OpenMP parallel!!!");
 
     if(pr)
     {

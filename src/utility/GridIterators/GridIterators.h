@@ -10,7 +10,11 @@
 int Init_Newton(tGrid *grid);
 
 /* from WTsolver.c */
-void copy_varlist_into_array(tVarList *vlx, double *x);
-void copy_array_into_varlist(double *x, tVarList *vlx);
 int WTiterator(tSparseVector **Aline, int nlines,
                double *x, double *b, int itmax, double tol, double *normres);
+
+/* from utility.c */
+void copy_varlist_into_array(tVarList *vlx, double *x);
+void copy_array_into_varlist(double *x, tVarList *vlx);
+void copy_varlist_into_array_forSortedVars(tVarList *vlx, double *x);
+void copy_array_into_varlist_forSortedVars(double *x, tVarList *vlx);

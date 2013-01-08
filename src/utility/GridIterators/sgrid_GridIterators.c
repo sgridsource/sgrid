@@ -34,6 +34,9 @@ int sgrid_GridIterators()
          "relative tol in Preconditioner");
   AddPar("GridIterators_SOR_omega", "1.5",
          "omega par in SOR algorithm, we like: 0<omega<2, omega=1 is Gauss-Seidel");
+  AddPar("GridIterators_SOR_matrix", "SetMatrixLines_slowly",
+         "how we set the matrix for SOR "
+         "[SetMatrixLines_slowly,SetMatrixLines_forSortedVars_slowly]");
 
   /* check whether there is more to do */
   if (!Getv("physics", "GridIterators")) return 0;
