@@ -224,6 +224,12 @@ int Poisson_solve(tGrid *grid)
     linear_solver=templates_cgs_wrapper;
   else if(Getv("Poisson_linSolver", "UMFPACK"))
     linear_solver=UMFPACK_solve_wrapper;
+  else if(Getv("Poisson_linSolver", "templates_GMRES_with_Jacobi_precon"))
+    linear_solver=templates_gmres_wrapper_with_Jacobi_precon;
+  else if(Getv("Poisson_linSolver", "templates_GMRES_with_SOR_precon"))
+    linear_solver=templates_gmres_wrapper_with_SOR_precon;
+  else if(Getv("Poisson_linSolver", "SOR"))
+    linear_solver=SOR_Iterator;
   else
     errorexit("Poisson_solve: unknown Poisson_linSolver");
 

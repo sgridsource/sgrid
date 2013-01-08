@@ -13,7 +13,7 @@ double *DiagM;
 
 /* Diag contains the diagonal of a matrix set with SetMatrixColumns_slowly */
 void Jacobi_Preconditioner_from_DiagM(tVarList *vlx, tVarList *vlb,
-                                     tVarList *vlc1, tVarList *vlc2)
+                                      tVarList *vlc1, tVarList *vlc2)
 {
   tGrid *grid = vlx->grid;
   int bi, line;
@@ -60,7 +60,7 @@ int linSolve_with_Jacobi_precon(tVarList *x, tVarList *b,
   int pr = Getv("GridIterators_verbose", "yes");
   int col, ncols, nvars, ent, INFO;
   tSparseVector **Acol;
-  int use_fd = Getv("GridIterators_JacobiPreconditioner", "fd");
+  int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
 
   if(pr) printf("linSolve_with_Jacobi_precon\n");
 

@@ -6,8 +6,87 @@
 
 /* global vars */
 /* Matrix for SOR */
-tSparseVector **SOR_Aline
+tSparseVector **SOR_Aline;
+int SOR_nlines;
 
+
+/* basic SOR step */
+void SOR_step(tSparseVector **Aline, int nlines,
+              double *x, double *b, double omega)
+{
+  int i;
+
+  /* loop over x[i] */
+  for(i=0; i<nlines; i++)
+  {
+    int ent;
+    double Aii, sig;
+
+    /* compute Aij * x[j] */
+    sig = Aii = 0.0;
+    for(ent = 0; ent < Aline[i]->entries; ent++)
+    {
+       int j;
+       double Aij;
+
+       j   = Aline[i]->pos[ent];
+       Aij = Aline[i]->val[ent];
+       if(j!=i)  sig += Aij * x[j];
+       else      Aii = Aij;
+    }
+    if(Aii==0.0) errorexit("SOR_step failed, because Aii=0.");
+    
+    /* set x[i] = (1-omega) x[i] + (omega/Aii)(b[i] - sig) */
+    x[i] = (1.0 - omega)*x[i] + (omega/Aii)*(b[i] - sig);
+  }
+}
+
+/* SOR for a matrix set with SetMatrixLines_slowly */
+int matrix_SOR(tSparseVector **Aline, int nlines,
+               double *x, double *b, double omega,
+               int itmax, double tol, double *normres)
+{
+  int i, it;
+  int pr = Getv("GridIterators_verbose", "yes");
+  double *f;
+
+  f  = calloc(nlines, sizeof(double));
+  if(f==NULL) errorexit("matrix_SOR: no memory for f");
+
+  /* compute the residual f_i */
+  /* f_i = sum_j A_ij x_j - b_i */
+  SparseMatrixLines_times_vector(Aline, nlines, x, f);
+  for(i=0; i<nlines; i++)  f[i] -= b[i];
+  *normres = sqrt(scalarproduct_vectors(f,f, nlines));
+  if(pr) 
+  { 
+    printf("matrix_SOR: nlines=%d  omega=%g  itmax=%d  tol=%g\n", 
+           nlines, omega, itmax, tol);
+    printf("matrix_SOR: step %d  residual=%g\n", 0, *normres); fflush(stdout);
+  }
+  if(*normres <= tol) return 0;
+
+  /* start iterations */
+  for(it=1; it<=itmax; it++)
+  { 
+    /* make one SOR step */
+    SOR_step(Aline, nlines, x, b, omega);
+    /* compute the residual f_i */
+    /* f_i = sum_j A_ij x_j - b_i */
+    SparseMatrixLines_times_vector(Aline, nlines, x, f);
+    for(i=0; i<nlines; i++)  f[i] -= b[i];
+    *normres = sqrt(scalarproduct_vectors(f,f, nlines));
+    if(pr)
+    { 
+      printf("matrix_SOR: step %d  residual=%g\n", it, *normres);
+      fflush(stdout);
+    }
+    if(*normres <= tol)  break;
+  } /* end iterations loop */
+
+  free(f);
+  return it;
+}
 
 /* prepare matrix and vectors and then call my own matrix SOR implementation */
 int SOR_Iterator(tVarList *vlx, tVarList *vlb, 
@@ -65,82 +144,6 @@ int SOR_Iterator(tVarList *vlx, tVarList *vlb,
   return INFO;
 }
 
-/* basic SOR step */
-void SOR_step(tSparseVector **Aline, int nlines,
-              double *x, double *b, double omega)
-{
-  int i;
-
-  /* loop over x[i] */
-  for(i=0; i<nlines; i++)
-  {
-    int ent;
-    double Aii, sig;
-
-    /* compute Aij * x[j] */
-    sig = Aii = 0.0;
-    for(ent = 0; ent < Aline[i]->entries; ent++)
-    {
-       int j;
-       double Aij;
-
-       j   = Aline[i]->pos[ent];
-       Aij = Aline[i]->val[ent];
-       if(j!=i)  sig += Aij * x[j];
-       else      Aii = Aij;
-    }
-    if(Aii==0.0) errorexit("SOR_step failed, because Aii=0.");
-    
-    /* set x[i] = (1-omega) x[i] + (omega/Aii)(b[i] - sig) */
-    x[i] = (1.0 - omega)*x[i] + (omega/Aii)*(b[i] - sig);
-  }
-}
-
-/* SOR for a matrix set with SetMatrixLines_slowly */
-int matrix_SOR(tSparseVector **Aline, int nlines,
-               double *x, double *b, double omega,
-               int itmax, double tol, double *normres)
-{
-  int i,, it;
-  int pr = Getv("GridIterators_verbose", "yes");
-  double *f;
-
-  f  = calloc(nlines, sizeof(double));
-  if(f==NULL) errorexit("matrix_SOR: no memory for f");
-
-  /* compute the residual f_i */
-  /* f_i = sum_j A_ij x_j - b_i */
-  SparseMatrixLines_times_vector(Aline, nlines, x, f);
-  for(i=0; i<nlines; i++)  f[i] -= b[i];
-  *normres = sqrt(scalarproduct_vectors(f,f, nlines)/nlines);
-  if(pr) 
-  { 
-    printf("matrix_SOR: %d  res=%g\n", 0, *normres); fflush(stdout);
-  }
-  if(*normres <= tol) return 0;
-
-  /* start iterations */
-  for(it=1; it<=itmax; it++)
-  { 
-    /* make one SOR step */
-    SOR_step(Aline, nlines, x, b, omega);
-    /* compute the residual f_i */
-    /* f_i = sum_j A_ij x_j - b_i */
-    SparseMatrixLines_times_vector(Aline, nlines, x, f);
-    for(i=0; i<nlines; i++)  f[i] -= b[i];
-    *normres = sqrt(scalarproduct_vectors(f,f, nlines)/nlines);
-    if(pr)
-    { 
-      printf("matrix_SOR: %d  res=%g  sfac=%g\n", it, *normres, sfac);
-      fflush(stdout);
-    }
-    if(*normres <= tol)  break;
-  } /* end iterations loop */
-
-  free(f);
-  return it;
-}
-
 
 /* SOR_Aline contains the matrix set with SetMatrixLines_slowly */
 void SOR_Preconditioner_from_SOR_Aline(tVarList *vlx, tVarList *vlb,
@@ -148,30 +151,41 @@ void SOR_Preconditioner_from_SOR_Aline(tVarList *vlx, tVarList *vlb,
 {
   tGrid *grid = vlb->grid;
   int bi;
-  int line, nlines, nvars, INFO;
+  int line, INFO;
   int pr = Getv("GridIterators_verbose", "yes");
+  int itmax = Getd("GridIterators_Preconditioner_itmax");
+  double rtol = Getd("GridIterators_Preconditioner_reltol");
   double omega = Getd("GridIterators_SOR_omega");
+  double normb, res;
   double *x;
   double *b;
 
   if(pr) printf("SOR_Preconditioner_from_SOR_Aline:\n");
 
   /* allocate x,b */
-  x = calloc(nlines, sizeof(double));
-  b = calloc(nlines, sizeof(double));
+  x = calloc(SOR_nlines, sizeof(double));
+  b = calloc(SOR_nlines, sizeof(double));
   if(x==NULL || b==NULL) errorexit("SOR_Preconditioner_from_SOR_Aline: no memory for x,b");
      
   /* set x = vlx , b = vlb */
   copy_varlist_into_array(vlx, x);
   copy_varlist_into_array(vlb, b);
 
-  /* solve A x = b with SOR */
-  INFO=matrix_SOR(Aline, nlines, x, b, omega, itmax, tol, normres);
+  normb = sqrt(scalarproduct_vectors(b,b, SOR_nlines));
+
+  /* solve only if b!=0 (if b=0 => x=0) */
+  if(normb>0.0)
+  {
+    double tol = normb*rtol;
+
+    /* solve A x = b with SOR */
+    INFO=matrix_SOR(SOR_Aline, SOR_nlines, x, b, omega, itmax, tol, &res);
+  }
 
   /* set vlx = x */
   copy_array_into_varlist(x, vlx);
 
-  /* free matrix Aline and x,b */
+  /* free x,b */
   free(x);
   free(b);
   if(pr)
@@ -197,19 +211,19 @@ int linSolve_with_SOR_precon(tVarList *x, tVarList *b,
   tGrid *grid_bak;
   int bi;
   int pr = Getv("GridIterators_verbose", "yes");
-  int line, nlines, nvars, ent, INFO;
-  int use_fd = Getv("GridIterators_SOR_Preconditioner", "fd");
+  int line, nvars, ent, INFO;
+  int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
 
   if(pr) printf("linSolve_with_SOR_precon\n");
 
   /* allocate SOR_Aline */
   nvars=x->n; 
-  nlines = 0;
-  forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
-  SOR_Aline = calloc(nlines, sizeof(*SOR_Aline));
-  if(SOR_Aline) { if(pr) printf("allocated %d matrix lines\n", nlines); }
+  SOR_nlines = 0;
+  forallboxes(grid,bi)  SOR_nlines+=(grid->box[bi]->nnodes)*nvars;
+  SOR_Aline = calloc(SOR_nlines, sizeof(*SOR_Aline));
+  if(SOR_Aline) { if(pr) printf("allocated %d matrix lines\n", SOR_nlines); }
   else      errorexit("no memory for SOR_Aline");
-  for(line=0; line<nlines; line++)  SOR_Aline[line]=AllocateSparseVector();
+  for(line=0; line<SOR_nlines; line++)  SOR_Aline[line]=AllocateSparseVector();
 
   if(use_fd)
   {
@@ -221,9 +235,9 @@ int linSolve_with_SOR_precon(tVarList *x, tVarList *b,
   }
 
   /* set SOR_Aline */
-  SetMatrixLines_slowly(SOR_Aline, lop, r, vlx, c1, c2, pr);                
+  SetMatrixLines_slowly(SOR_Aline, lop, r, x, c1, c2, pr);                
   if(pr&&0) 
-    for(line=0; line<nlines; line++) prSparseVector(SOR_Aline[line]);
+    for(line=0; line<SOR_nlines; line++) prSparseVector(SOR_Aline[line]);
 
   if(use_fd)
   {
@@ -238,8 +252,9 @@ int linSolve_with_SOR_precon(tVarList *x, tVarList *b,
   /* free matrix SOR_Aline */
   /* maybe we could save and reuse this matrix for several lin solves,
      if the linear solve succeeds in driving down the residual of lop ???*/
-  for(line=0; line<nlines; line++)  FreeSparseVector(SOR_Aline[line]);
+  for(line=0; line<SOR_nlines; line++)  FreeSparseVector(SOR_Aline[line]);
   free(SOR_Aline);
+  SOR_nlines=0;
 
   return INFO;
 }

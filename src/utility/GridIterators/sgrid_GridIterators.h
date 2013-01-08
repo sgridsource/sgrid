@@ -115,3 +115,30 @@ int WTsolver(tVarList *vlx, tVarList *vlb,
 	     int itmax, double tol, double *normres,
 	     void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	     void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+
+/* from SOR.c */
+int SOR_Iterator(tVarList *vlx, tVarList *vlb, 
+                 tVarList *r, tVarList *c1,tVarList *c2,
+    	         int itmax, double tol, double *normres,
+	         void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	         void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int bicgstab_with_SOR_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int templates_gmres_wrapper_with_SOR_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int templates_bicgstab_wrapper_with_SOR_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int templates_cgs_wrapper_with_SOR_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));

@@ -26,8 +26,14 @@ int sgrid_GridIterators()
          "how we compute input RESID from tol [tol/norm(b),tol]");
   AddPar("GridIterators_UMFPACK_version", "di",
          "umfpack version to be called [di,dl]");
-  AddPar("GridIterators_JacobiPreconditioner", "fd",
+  AddPar("GridIterators_Preconditioner_type", "fd",
          "whether we use spectral or finite diff [spectral,fd]");
+  AddPar("GridIterators_Preconditioner_itmax", "1000",
+         "max number of iterations in Preconditioner");
+  AddPar("GridIterators_Preconditioner_reltol", "0.001",
+         "relative tol in Preconditioner");
+  AddPar("GridIterators_SOR_omega", "1.5",
+         "omega par in SOR algorithm, we like: 0<omega<2, omega=1 is Gauss-Seidel");
 
   /* check whether there is more to do */
   if (!Getv("physics", "GridIterators")) return 0;
