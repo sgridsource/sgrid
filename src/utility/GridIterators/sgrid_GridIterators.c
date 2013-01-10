@@ -26,6 +26,8 @@ int sgrid_GridIterators()
          "how we compute input RESID from tol [tol/norm(b),tol]");
   AddPar("GridIterators_UMFPACK_version", "di",
          "umfpack version to be called [di,dl]");
+  AddPar("GridIterators_templates_as_Preconditioner", "GMRES",
+         "which templates wrapper we use as precon [GMRES,BICGSTAB,CGS]");
   AddPar("GridIterators_Preconditioner_type", "fd",
          "whether we use spectral or finite diff [spectral,fd]");
   AddPar("GridIterators_Preconditioner_itmax", "1000",

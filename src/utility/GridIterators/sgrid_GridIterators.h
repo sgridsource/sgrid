@@ -47,6 +47,10 @@ int templates_cgs_wrapper(
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+void templates_Preconditioner_for_templates_solver(tVarList *vlx,
+                                                   tVarList *vlr,
+                                                   tVarList *vlc1,
+                                                   tVarList *vlc2);
 
 /* wrappers for LAPACK */
 int LAPACK_dgesv_wrapper(tVarList *x, tVarList *b, 

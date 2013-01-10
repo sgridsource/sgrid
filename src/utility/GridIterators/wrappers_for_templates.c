@@ -29,6 +29,20 @@ tVarList *c2_fortemplates[MAX_NGLOBALS];
 long int dim_fortemplates[MAX_NGLOBALS];
 
 
+/* print global vars in this file */
+void print_globals_fortemplates(void)
+{
+  printf("iglobal_fortemplates = %d\n", iglobal_fortemplates);
+  printf("lop_fortemplates[iglobal_fortemplates] = %p\n", lop_fortemplates[iglobal_fortemplates]);
+  printf("precon_fortemplates[iglobal_fortemplates] = %p\n", precon_fortemplates[iglobal_fortemplates]);
+  printf("r_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", r_fortemplates[iglobal_fortemplates], GridL2Norm(r_fortemplates[iglobal_fortemplates]));
+  printf("x_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", x_fortemplates[iglobal_fortemplates], GridL2Norm(x_fortemplates[iglobal_fortemplates]));
+  printf("c1_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", c1_fortemplates[iglobal_fortemplates], GridL2Norm(c1_fortemplates[iglobal_fortemplates]));
+  printf("c2_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", c2_fortemplates[iglobal_fortemplates], GridL2Norm(c2_fortemplates[iglobal_fortemplates]));
+  printf("dim_fortemplates[iglobal_fortemplates] = %ld\n", dim_fortemplates[iglobal_fortemplates]);
+}
+
+
 /* copy var list vlx into array xa. The outer loop is over vars in vlx. */
 /* xa = vlx */
 int copy_vl_into_array_outervlloop(tVarList *vlx, double *xa, int dim)
@@ -175,6 +189,7 @@ int templates_gmres_wrapper(
   iglobal_fortemplates++;
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
   if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
+  fflush(stdout);
 
   /* setup global vars and functions needed in matvec and psolve */
   lop_fortemplates[iglobal_fortemplates]	= lop;
@@ -200,7 +215,7 @@ int templates_gmres_wrapper(
   iglobal_fortemplates--;
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
 
-  /* read out vlx and normres */
+  /* read out x and normres */
   copy_array_into_vl_outervlloop(x, X, N);
   *normres = RESID;
 
@@ -212,6 +227,7 @@ int templates_gmres_wrapper(
 
   if(pr) printf("  templates_gmres_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
                 ITER, RESID, INFO);
+  fflush(stdout);
 
   /* iteration failed */
   if(INFO<0) return INFO;
@@ -268,6 +284,7 @@ int templates_bicgstab_wrapper(
   iglobal_fortemplates++;
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
   if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
+  fflush(stdout);
 
   /* setup global vars and functions needed in matvec and psolve */
   lop_fortemplates[iglobal_fortemplates]	= lop;
@@ -303,6 +320,7 @@ int templates_bicgstab_wrapper(
 
   if(pr) printf("  templates_bicgstab_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
                 ITER, RESID, INFO);
+  fflush(stdout);
 
   /* iteration failed */
   if(INFO<0) return INFO;
@@ -359,6 +377,7 @@ int templates_cgs_wrapper(
   iglobal_fortemplates++;
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
   if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
+  fflush(stdout);
 
   /* setup global vars and functions needed in matvec and psolve */
   lop_fortemplates[iglobal_fortemplates]	= lop;
@@ -395,6 +414,7 @@ int templates_cgs_wrapper(
 
   if(pr) printf("  templates_cgs_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
                 ITER, RESID, INFO);
+  fflush(stdout);
 
   /* iteration failed */
   if(INFO<0) return INFO;
@@ -402,4 +422,72 @@ int templates_cgs_wrapper(
   
   /* success! */
   return ITER;
+}
+
+
+/*************************************************************************/
+/* use one of the wrappers (e.g. templates_gmres_wrapper) as precon for  */
+/* one of the linear solvers in this file (e.g. templates_gmres_wrapper) */
+/* this precon is called by psolve above                                 */
+/*************************************************************************/
+void templates_Preconditioner_for_templates_solver(tVarList *vlx,
+                                                   tVarList *vlr,
+                                                   tVarList *vlc1,
+                                                   tVarList *vlc2)
+{
+  tGrid *grid = vlx->grid;
+  tGrid *grid_bak;
+  int pr = Getv("GridIterators_verbose", "yes");
+  int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
+  int itmax = Getd("GridIterators_Preconditioner_itmax");
+  double rtol = Getd("GridIterators_Preconditioner_reltol");
+  double tol, res;
+  int its;
+  int (*templates_wrapper)
+           (tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+
+  if(Getv("GridIterators_templates_as_Preconditioner", "GMRES"))
+    templates_wrapper = templates_gmres_wrapper;
+  else if(Getv("GridIterators_templates_as_Preconditioner", "BICGSTAB"))
+    templates_wrapper = templates_bicgstab_wrapper;
+  else if(Getv("GridIterators_templates_as_Preconditioner", "CGS"))
+    templates_wrapper = templates_cgs_wrapper;
+  else
+    errorexit("unkown GridIterators_templates_as_Preconditioner");
+
+  if(iglobal_fortemplates<0)
+    errorexit("templates_Preconditioner_for_templates_solver "
+              "works only if called from psolve in wrappers_for_templates.c");
+
+  /* set tol */
+  tol = GridL2Norm(vlr)*rtol;
+  if(tol==0.0) tol=rtol;
+
+  if(pr) printf("  templates_Preconditioner_for_templates_solver:\n");        
+  if(use_fd)
+  {
+    /* save current grid in grid_bak and then convert grid to fin. diff. */
+    grid_bak = make_empty_grid(grid->nvariables, 0);
+    copy_grid_withoutvars(grid, grid_bak, 0);
+    convert_grid_to_fd(grid);
+    if(pr) printf("  Using finite differencing...\n");
+  }
+  fflush(stdout);
+  /* Note: the 2nd and 3rd arg can be the same, because templates_*_wrapper
+     saves the 2nd arg immediately in its B. Of course vlr is overwritten! */
+  its = templates_wrapper(vlx, vlr, vlr, vlc1,vlc2, itmax, tol, &res,
+                          lop_fortemplates[iglobal_fortemplates],
+                          Preconditioner_I);
+  if(use_fd)
+  {
+    /* restore grid to spectral */
+    copy_grid_withoutvars(grid_bak, grid, 0);
+    free_grid(grid_bak);
+  }
+  if(pr)
+    printf("  templates_Preconditioner_for_templates_solver: its=%d\n", its);
+  fflush(stdout);
 }

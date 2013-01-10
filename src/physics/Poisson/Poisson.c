@@ -238,6 +238,8 @@ int Poisson_solve(tGrid *grid)
     Precon=Preconditioner_I;
   else if(Getv("Poisson_linSolver_Precon", "fd_UMFPACK"))
     Precon=Precon_fd_Poisson_UMFPACK;
+  else if(Getv("Poisson_linSolver_Precon", "templates"))
+    Precon=templates_Preconditioner_for_templates_solver;
   else
     errorexit("Poisson_solve: unknown Poisson_linSolver_Precon");
 
