@@ -87,3 +87,8 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
                                   double dropbelow, int pr);
 int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
                                    tVarList *vlx, tVarList *vlb, int pr);
+
+/* SuiteSparseQR_C_interface.c */
+int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
+                                     tVarList *vlx, tVarList *vlb,
+                                     double dropbelow, int pr);

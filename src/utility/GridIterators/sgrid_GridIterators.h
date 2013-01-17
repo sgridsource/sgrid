@@ -146,3 +146,10 @@ int templates_cgs_wrapper_with_SOR_precon(tVarList *x, tVarList *b,
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+
+/* wrappers for SuiteSparseQR */
+int SuiteSparseQR_solve_wrapper(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));

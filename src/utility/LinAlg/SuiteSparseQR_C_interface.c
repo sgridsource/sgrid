@@ -83,7 +83,8 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
 {
   tGrid *grid = vlx->grid;
   int i,j;
-  int bi, line, INFO;
+  int bi, line;
+  int INFO=-6662442;
   int nvars=vlx->n;
   int nlines=0;
 #ifdef SUITESPARSEQR
@@ -164,7 +165,11 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
             "MyConfig with\n"
             "DFLAGS += -DSUITESPARSEQR\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
-            "you may also need to set SPECIALLIBS");
+            "SPECIALLIBS += -lspqr -lcholmod\n"
+            "you may also need something like\n"
+            "CLINKER = g++\n"
+            "or\n"
+            "CLINKER = icpc\n");
 #endif
   return INFO;
 }
