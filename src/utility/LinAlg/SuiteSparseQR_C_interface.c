@@ -138,7 +138,8 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
   INFO=cc->status;
   if(pr)
   { 
-    printf(" -> INFO=%d\n", INFO); 
+    cholmod_l_print_dense(X, "X", cc);
+    printf(" -> INFO=%d\n", INFO);
     fflush(stdout);
   }
   if(INFO!=0)
