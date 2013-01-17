@@ -60,12 +60,17 @@ cholmod_sparse *get_cholmod_sparse_fromAcolumns(tSparseVector **Acol,
   Ai = (LONGINT *) A->i;
   Ax = (double *) A->x;
   set_umfpack_dl_matrix_from_columns(Ap,Ai,Ax, Acol,ncols, dropbelow, 0);
-  
+
+  if(!cholmod_l_check_sparse(A, cc))
+    errorexit("cholmod_l_check_sparse(A, cc) failed");
+
   if(pr)
+  {
+    cholmod_l_print_sparse(A, "A" ,cc);
     printf("get_cholmod_sparse_fromAcolumns: the sparse %ld*%ld matrix "
            "A->p[%ld]=%ld, A->i=%p, A->x=%p is now set!\n",
            nrows, ncols, ncols, Ap[ncols], Ai, Ax);
-
+  }
   return A;
 }
 #endif
@@ -103,8 +108,8 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
   A = get_cholmod_sparse_fromAcolumns(Acol, nlines,nlines, dropbelow, pr, cc);
 
   /* allocate B */
-  B = cholmod_l_allocate_dense(nlines,1, 1, A->xtype, cc);
-      
+  B = cholmod_l_allocate_dense(nlines,1, nlines, A->xtype, cc);
+
   /* set B = vlb */
   line = 0;
   forallboxes(grid,bi)
@@ -121,6 +126,9 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
         line++;
       }
   }
+  if(!cholmod_l_check_dense(B ,cc))
+    errorexit("cholmod_l_check_dense(B, cc) failed");
+  if(pr) cholmod_l_print_dense(B, "B", cc);
 
   if(pr)
   { printf("SuiteSparseQR_solve_fromAcolumns: SuiteSparseQR_C_backslash_default\n"); fflush(stdout); }
@@ -128,7 +136,6 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
   /* Solve, i.e. in matlab notation do: X = A\B */
   X = SuiteSparseQR_C_backslash_default(A, B, cc);
   INFO=cc->status;
-
   if(pr)
   { 
     printf(" -> INFO=%d\n", INFO); 
