@@ -29,7 +29,10 @@ void write3d_boxvar(tBox *box, char *name)
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
-  
+
+  /* return if var has no memory */
+  if(box->v[Ind(name)]==NULL) return;  
+
   /* parameter defaults */
   if (!flt && !dbl) flt = 1;
   if (!text && !binary) binary = 1;
