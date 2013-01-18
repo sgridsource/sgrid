@@ -418,10 +418,10 @@ int write_grid(tGrid *grid)
           int vi0 = IndComponent0(vi);
 
           for(i=0; i<VarNComponents(vi0); i++)
-            dump3d_boxvar(box, VarName(vi0+i));
+            write3d_boxvar(box, VarName(vi0+i));
         }
         else
-          dump3d_boxvar(box, str);
+          write3d_boxvar(box, str);
       }
     }
   }
