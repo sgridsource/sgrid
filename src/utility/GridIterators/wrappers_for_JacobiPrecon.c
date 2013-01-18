@@ -35,11 +35,13 @@ void Jacobi_Preconditioner_from_DiagM(tVarList *vlx, tVarList *vlb,
         line++;
       }
   }
+  /*
   if(pr)
   { 
     printf("Jacobi_Preconditioner_from_DiagM: vector vlx=%p is now set!\n", vlx);
     fflush(stdout);
   }
+  */
 }
 
 
