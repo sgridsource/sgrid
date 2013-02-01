@@ -18,6 +18,8 @@
 
 #define COPY_ARRAY_INTO_VL copy_array_into_varlist
 #define COPY_VL_INTO_ARRAY copy_varlist_into_array
+// #define COPY_ARRAY_INTO_VL copy_array_into_varlist_LEVEL3
+// #define COPY_VL_INTO_ARRAY copy_varlist_into_array_LEVEL3
 
 #define MAX_NGLOBALS 1024
 
@@ -32,7 +34,7 @@ tVarList *c2_fortemplates[MAX_NGLOBALS];
 long int dim_fortemplates[MAX_NGLOBALS];
 
 /* extern globals */
-extern double *DiagM; /* from wrappers_for_JacobiPrecon.c */
+extern double *DiagMinv_JacobiPrecon; /* from wrappers_for_JacobiPrecon.c */
 
 
 /* print global vars in this file */
@@ -83,7 +85,7 @@ int psolve(double *x, double *b)
 
     SGRID_LEVEL4_Pragma(omp parallel for)
     for(i=0; i<dim_fortemplates[iglobal_fortemplates]; i++)
-      x[i] = b[i]/DiagM[i];
+      x[i] = b[i]*DiagMinv_JacobiPrecon[i];
   }
   else /* generic case */
   {

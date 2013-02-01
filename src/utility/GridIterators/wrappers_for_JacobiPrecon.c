@@ -7,8 +7,8 @@
 
 
 /* global vars */
-/* Diagonal Matrix elements*/
-double *DiagM;
+/* inverse Diagonal Matrix elements */
+double *DiagMinv_JacobiPrecon;
 
 
 /* Diag contains the diagonal of a matrix set with SetMatrixColumns_slowly */
@@ -31,7 +31,7 @@ void Jacobi_Preconditioner_from_DiagM(tVarList *vlx, tVarList *vlb,
       {
         double *xp = box->v[vlx->index[j]];
         double *bp = box->v[vlb->index[j]];
-        xp[i] = bp[i]/DiagM[line];
+        xp[i] = bp[i]*DiagMinv_JacobiPrecon[line];
         line++;
       }
   }
@@ -46,7 +46,7 @@ void Jacobi_Preconditioner_from_DiagM(tVarList *vlx, tVarList *vlb,
 
 
 /* do a linear solve with Jacobi_Preconditioner_from_DiagM, where global
-   DiagM is set by temporarily switching to finite differencing */
+   DiagMinv_JacobiPrecon is set by temporarily switching to finite differencing */
 int linSolve_with_Jacobi_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
             int (*lsolver)(tVarList *, tVarList *, tVarList *, tVarList *,tVarList *,
@@ -96,26 +96,27 @@ int linSolve_with_Jacobi_precon(tVarList *x, tVarList *b,
     free_grid(grid_bak);
   }
 
-  /* allocate memory for diagonal of matrix in DiagM */
-  DiagM = calloc(ncols, sizeof(*DiagM));
+  /* allocate memory for diagonal of matrix in DiagMinv_JacobiPrecon */
+  DiagMinv_JacobiPrecon = calloc(ncols, sizeof(*DiagMinv_JacobiPrecon));
 
-  /* now set DiagM to diagonal of matrix Acol */
+  /* now set DiagMinv_JacobiPrecon to diagonal of matrix Acol */
   for(col=0; col<ncols; col++)
     for(ent = 0; ent < Acol[col]->entries; ent++)
       if(Acol[col]->pos[ent] == col) 
       {
-        DiagM[col] = Acol[col]->val[ent];
-        if(DiagM[col]==0.0) errorexit("DiagM is singular!!!");
+        double DiagM = Acol[col]->val[ent];
+        if(DiagM==0.0) errorexit("DiagM is singular!!!");
+        DiagMinv_JacobiPrecon[col] = 1.0/Acol[col]->val[ent];
         break;
       }
   
   /* solve A x = b with lsolver and the Precon Jacobi_Preconditioner_from_DiagM */
   INFO = lsolver(x, b, r,c1,c2, itmax,tol,normres, lop, Jacobi_Preconditioner_from_DiagM);
 
-  /* free matrix DiagM */
+  /* free matrix DiagMinv_JacobiPrecon */
   /* maybe we could save and reuse this matrix for several lin solves,
      if the linear solve succeeds in driving down the residual of lop ???*/
-  free(DiagM);
+  free(DiagMinv_JacobiPrecon);
 
   /* free matrix Acol */
   for(col=0; col<ncols; col++)  FreeSparseVector(Acol[col]);
