@@ -29,6 +29,7 @@ tVarList *r_fortemplates[MAX_NGLOBALS];
 tVarList *x_fortemplates[MAX_NGLOBALS];
 tVarList *c1_fortemplates[MAX_NGLOBALS];
 tVarList *c2_fortemplates[MAX_NGLOBALS];
+long int dim_fortemplates[MAX_NGLOBALS];
 
 
 /* print global vars in this file */
@@ -41,6 +42,7 @@ void print_globals_fortemplates(void)
   printf("x_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", x_fortemplates[iglobal_fortemplates], GridL2Norm(x_fortemplates[iglobal_fortemplates]));
   printf("c1_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", c1_fortemplates[iglobal_fortemplates], GridL2Norm(c1_fortemplates[iglobal_fortemplates]));
   printf("c2_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", c2_fortemplates[iglobal_fortemplates], GridL2Norm(c2_fortemplates[iglobal_fortemplates]));
+  printf("dim_fortemplates[iglobal_fortemplates] = %ld\n", dim_fortemplates[iglobal_fortemplates]);
 }
 
 
@@ -149,6 +151,7 @@ int templates_gmres_wrapper(
   x_fortemplates[iglobal_fortemplates]		= x;
   c1_fortemplates[iglobal_fortemplates]		= c1;
   c2_fortemplates[iglobal_fortemplates]		= c2;
+  dim_fortemplates[iglobal_fortemplates]	= N;
 
   /* setup local B and X */
   COPY_VL_INTO_ARRAY(b, B);
@@ -243,6 +246,7 @@ int templates_bicgstab_wrapper(
   x_fortemplates[iglobal_fortemplates]		= x;
   c1_fortemplates[iglobal_fortemplates]		= c1;
   c2_fortemplates[iglobal_fortemplates]		= c2;
+  dim_fortemplates[iglobal_fortemplates]	= N;
 
   /* setup local B and X */
   COPY_VL_INTO_ARRAY(b, B);
@@ -335,6 +339,7 @@ int templates_cgs_wrapper(
   x_fortemplates[iglobal_fortemplates]		= x;
   c1_fortemplates[iglobal_fortemplates]		= c1;
   c2_fortemplates[iglobal_fortemplates]		= c2;
+  dim_fortemplates[iglobal_fortemplates]	= N;
 
   /* setup local B and X */
   COPY_VL_INTO_ARRAY(b, B);
