@@ -158,3 +158,43 @@ void copy_array_into_varlist_forSortedVars(double *x, tVarList *vlx)
       }
   }
 }
+
+/* copy var list vlx into array xa. The outer loop is over vars in vlx. */
+/* xa = vlx */
+void copy_vl_into_array_outervlloop(tVarList *vlx, double *xa)
+{
+  tGrid *grid = vlx->grid;
+  int j, i, boxi, n;
+  
+  for(n=0,j=0; j<vlx->n; j++)
+    forallboxes(grid,boxi)
+    {
+      tBox *box = grid->box[boxi];      
+      double *px  = vlldataptr(vlx,  box, j);
+      forallpoints(box,i) 
+      {
+        xa[n] = px[i];
+        n++;
+      }
+    }
+}
+
+/* copy array xa into var list vlx. The outer loop is over vars in vlx. */
+/* vlx = xa */
+void copy_array_into_vl_outervlloop(tVarList *vlx, double *xa)
+{
+  tGrid *grid = vlx->grid;
+  int j, i, boxi, n;
+  
+  for(n=0,j=0; j<vlx->n; j++)
+    forallboxes(grid,boxi)
+    {
+      tBox *box = grid->box[boxi];      
+      double *px  = vlldataptr(vlx,  box, j);
+      forallpoints(box,i) 
+      {
+        px[i] = xa[n];
+        n++;
+      }
+    }
+}

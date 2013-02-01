@@ -16,6 +16,9 @@
 "SPECIALLIBS += -L$(TEMPLATESDIR) -L$(TEMPLATESDIR)/F2CLIBS \\\n"\
 "-literatortemplates # -lI77 -lF77\n", (str))
 
+#define COPY_ARRAY_INTO_VL copy_array_into_vl_outervlloop
+#define COPY_VL_INTO_ARRAY copy_vl_into_array_outervlloop
+
 #define MAX_NGLOBALS 1024
 
 /* global var arrays in this file */
@@ -26,7 +29,6 @@ tVarList *r_fortemplates[MAX_NGLOBALS];
 tVarList *x_fortemplates[MAX_NGLOBALS];
 tVarList *c1_fortemplates[MAX_NGLOBALS];
 tVarList *c2_fortemplates[MAX_NGLOBALS];
-long int dim_fortemplates[MAX_NGLOBALS];
 
 
 /* print global vars in this file */
@@ -39,52 +41,6 @@ void print_globals_fortemplates(void)
   printf("x_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", x_fortemplates[iglobal_fortemplates], GridL2Norm(x_fortemplates[iglobal_fortemplates]));
   printf("c1_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", c1_fortemplates[iglobal_fortemplates], GridL2Norm(c1_fortemplates[iglobal_fortemplates]));
   printf("c2_fortemplates[iglobal_fortemplates] = %p -> norm %g\n", c2_fortemplates[iglobal_fortemplates], GridL2Norm(c2_fortemplates[iglobal_fortemplates]));
-  printf("dim_fortemplates[iglobal_fortemplates] = %ld\n", dim_fortemplates[iglobal_fortemplates]);
-}
-
-
-/* copy var list vlx into array xa. The outer loop is over vars in vlx. */
-/* xa = vlx */
-int copy_vl_into_array_outervlloop(tVarList *vlx, double *xa, int dim)
-{
-  tGrid *grid = vlx->grid;
-  int j, i, boxi, n;
-  
-  for(n=0,j=0; j<vlx->n; j++)
-    forallboxes(grid,boxi)
-    {
-      tBox *box = grid->box[boxi];      
-      double *px  = vlldataptr(vlx,  box, j);
-      forallpoints(box,i) 
-      {
-        xa[n] = px[i];
-        n++;
-        if(n>=dim) return dim;
-      }
-    }
-  return n;
-}
-
-/* copy array xa into var list vlx. The outer loop is over vars in vlx. */
-/* vlx = xa */
-int copy_array_into_vl_outervlloop(tVarList *vlx, double *xa, int dim)
-{
-  tGrid *grid = vlx->grid;
-  int j, i, boxi, n;
-  
-  for(n=0,j=0; j<vlx->n; j++)
-    forallboxes(grid,boxi)
-    {
-      tBox *box = grid->box[boxi];      
-      double *px  = vlldataptr(vlx,  box, j);
-      forallpoints(box,i) 
-      {
-        px[i] = xa[n];
-        n++;
-        if(n>=dim) return dim;
-      }
-    }
-  return n;
 }
 
 
@@ -92,16 +48,14 @@ int copy_array_into_vl_outervlloop(tVarList *vlx, double *xa, int dim)
 int matvec(double *alpha, double *x, double *beta, double *y)
 {
   /* compute r = A*x */
-  copy_array_into_vl_outervlloop(x_fortemplates[iglobal_fortemplates], x,
-                                 dim_fortemplates[iglobal_fortemplates]);
+  COPY_ARRAY_INTO_VL(x_fortemplates[iglobal_fortemplates], x);
   lop_fortemplates[iglobal_fortemplates](r_fortemplates[iglobal_fortemplates],
                                          x_fortemplates[iglobal_fortemplates],
                                          c1_fortemplates[iglobal_fortemplates],
                                          c2_fortemplates[iglobal_fortemplates]);
 
   /* set x_fortemplates[iglobal_fortemplates] = y */
-  copy_array_into_vl_outervlloop(x_fortemplates[iglobal_fortemplates], y,
-                                 dim_fortemplates[iglobal_fortemplates]);
+  COPY_ARRAY_INTO_VL(x_fortemplates[iglobal_fortemplates], y);
 
   /* set r=alpha*r + beta*x_fortemplates[iglobal_fortemplates] */
   vladd(r_fortemplates[iglobal_fortemplates], *alpha,
@@ -109,8 +63,7 @@ int matvec(double *alpha, double *x, double *beta, double *y)
         x_fortemplates[iglobal_fortemplates]);
 
   /* copy r into y */
-  copy_vl_into_array_outervlloop(r_fortemplates[iglobal_fortemplates], y,
-                                 dim_fortemplates[iglobal_fortemplates]);
+  COPY_VL_INTO_ARRAY(r_fortemplates[iglobal_fortemplates], y);
   
   return 0;
 }
@@ -120,16 +73,14 @@ int psolve(double *x, double *b)
 {
   /* solve M*x = b for x, solution is x_fortemplates[iglobal_fortemplates],
      b is in r_fortemplates[iglobal_fortemplates] */
-  copy_array_into_vl_outervlloop(r_fortemplates[iglobal_fortemplates], b,
-                                 dim_fortemplates[iglobal_fortemplates]);
+  COPY_ARRAY_INTO_VL(r_fortemplates[iglobal_fortemplates], b);
   precon_fortemplates[iglobal_fortemplates](x_fortemplates[iglobal_fortemplates],
                       r_fortemplates[iglobal_fortemplates],
                       c1_fortemplates[iglobal_fortemplates],
                       c2_fortemplates[iglobal_fortemplates]);
 
   /* copy x_fortemplates[iglobal_fortemplates] into x */
-  copy_vl_into_array_outervlloop(x_fortemplates[iglobal_fortemplates], x,
-                                 dim_fortemplates[iglobal_fortemplates]);
+  COPY_VL_INTO_ARRAY(x_fortemplates[iglobal_fortemplates], x);
   
   return 0;
 }
@@ -198,11 +149,10 @@ int templates_gmres_wrapper(
   x_fortemplates[iglobal_fortemplates]		= x;
   c1_fortemplates[iglobal_fortemplates]		= c1;
   c2_fortemplates[iglobal_fortemplates]		= c2;
-  dim_fortemplates[iglobal_fortemplates]	= N;
 
   /* setup local B and X */
-  copy_vl_into_array_outervlloop(b, B, N);
-  copy_vl_into_array_outervlloop(x, X, N);
+  COPY_VL_INTO_ARRAY(b, B);
+  COPY_VL_INTO_ARRAY(x, X);
 
 #ifdef TEMPLATES
   /* call gmres from templates */
@@ -216,7 +166,7 @@ int templates_gmres_wrapper(
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
 
   /* read out x and normres */
-  copy_array_into_vl_outervlloop(x, X, N);
+  COPY_ARRAY_INTO_VL(x, X);
   *normres = RESID;
 
   /* free temporary storage */
@@ -293,11 +243,10 @@ int templates_bicgstab_wrapper(
   x_fortemplates[iglobal_fortemplates]		= x;
   c1_fortemplates[iglobal_fortemplates]		= c1;
   c2_fortemplates[iglobal_fortemplates]		= c2;
-  dim_fortemplates[iglobal_fortemplates]	= N;
 
   /* setup local B and X */
-  copy_vl_into_array_outervlloop(b, B, N);
-  copy_vl_into_array_outervlloop(x, X, N);
+  COPY_VL_INTO_ARRAY(b, B);
+  COPY_VL_INTO_ARRAY(x, X);
 
 #ifdef TEMPLATES
   /* call bicgstab from templates */
@@ -310,7 +259,7 @@ int templates_bicgstab_wrapper(
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
 
   /* read out vlx and normres */
-  copy_array_into_vl_outervlloop(x, X, N);
+  COPY_ARRAY_INTO_VL(x, X);
   *normres = RESID;
 
   /* free temporary storage */
@@ -386,11 +335,10 @@ int templates_cgs_wrapper(
   x_fortemplates[iglobal_fortemplates]		= x;
   c1_fortemplates[iglobal_fortemplates]		= c1;
   c2_fortemplates[iglobal_fortemplates]		= c2;
-  dim_fortemplates[iglobal_fortemplates]	= N;
 
   /* setup local B and X */
-  copy_vl_into_array_outervlloop(b, B, N);
-  copy_vl_into_array_outervlloop(x, X, N);
+  COPY_VL_INTO_ARRAY(b, B);
+  COPY_VL_INTO_ARRAY(x, X);
 
 #ifdef TEMPLATES
   /* call cgs from templates */
@@ -404,7 +352,7 @@ int templates_cgs_wrapper(
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
 
   /* read out vlx and normres */
-  copy_array_into_vl_outervlloop(x, X, N);
+  COPY_ARRAY_INTO_VL(x, X);
   *normres = RESID;
 
   /* free temporary storage */
