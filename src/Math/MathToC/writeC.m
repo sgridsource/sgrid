@@ -80,12 +80,9 @@ prdecvlindices[vars_, name_] := Module[{cvars, s, nf},
 ]
 
 
-(* write var declarations *)
+(* module to write var declarations for auxvars *)
 writeCdef[vars_, auxvars_] := Module[{cvars, s, nf, nfields, nl},
 
-  variabledeclarations[];
-  pr["\n"];
-  
   nfields = Length[auxvars];
   For[nf = 1, nf <= nfields, nf++,
     s = StringForm["double ``;\n", auxvars[[nf]]];
@@ -94,10 +91,18 @@ writeCdef[vars_, auxvars_] := Module[{cvars, s, nf, nfields, nl},
   pr["\n\n\n"]
 ]
 
+(* write var declarations for global vars in variabledeclarations[] *)
+variabledeclarations[];
+pr["\n"];
+
+(* insert custom InitializationCommands[] *)
+(* in InitializationCommands[] we can put an OpenMP loop and all 
+   auxvars are then thread local. *)
+InitializationCommands[];
+
+(* write var declarations for auxvars *)
 writeCdef[vars, auxvars]
 
-(* insert custom InitializationCommands *)
-InitializationCommands[];
 
 (***************************************************************************)
 (* write equations *)
