@@ -16,8 +16,8 @@
 "SPECIALLIBS += -L$(TEMPLATESDIR) -L$(TEMPLATESDIR)/F2CLIBS \\\n"\
 "-literatortemplates # -lI77 -lF77\n", (str))
 
-#define COPY_ARRAY_INTO_VL copy_array_into_vl_outervlloop
-#define COPY_VL_INTO_ARRAY copy_vl_into_array_outervlloop
+#define COPY_ARRAY_INTO_VL copy_array_into_varlist
+#define COPY_VL_INTO_ARRAY copy_varlist_into_array
 
 #define MAX_NGLOBALS 1024
 
