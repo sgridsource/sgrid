@@ -31,6 +31,9 @@ tVarList *c1_fortemplates[MAX_NGLOBALS];
 tVarList *c2_fortemplates[MAX_NGLOBALS];
 long int dim_fortemplates[MAX_NGLOBALS];
 
+/* extern globals */
+extern double *DiagM; /* from wrappers_for_JacobiPrecon.c */
+
 
 /* print global vars in this file */
 void print_globals_fortemplates(void)
@@ -73,17 +76,28 @@ int matvec(double *alpha, double *x, double *beta, double *y)
 /* Precon: solves M*x = b for x */
 int psolve(double *x, double *b)
 {
-  /* solve M*x = b for x, solution is x_fortemplates[iglobal_fortemplates],
-     b is in r_fortemplates[iglobal_fortemplates] */
-  COPY_ARRAY_INTO_VL(b, r_fortemplates[iglobal_fortemplates]);
-  precon_fortemplates[iglobal_fortemplates](x_fortemplates[iglobal_fortemplates],
-                      r_fortemplates[iglobal_fortemplates],
-                      c1_fortemplates[iglobal_fortemplates],
-                      c2_fortemplates[iglobal_fortemplates]);
+  /* speed up special Jacobi precon */
+  if(precon_fortemplates[iglobal_fortemplates]==Jacobi_Preconditioner_from_DiagM)
+  {
+    int i;
 
-  /* copy x_fortemplates[iglobal_fortemplates] into x */
-  COPY_VL_INTO_ARRAY(x_fortemplates[iglobal_fortemplates], x);
-  
+    SGRID_LEVEL4_Pragma(omp parallel for)
+    for(i=0; i<dim_fortemplates[iglobal_fortemplates]; i++)
+      x[i] = b[i]/DiagM[i];
+  }
+  else /* generic case */
+  {
+    /* solve M*x = b for x, solution is x_fortemplates[iglobal_fortemplates],
+       b is in r_fortemplates[iglobal_fortemplates] */
+    COPY_ARRAY_INTO_VL(b, r_fortemplates[iglobal_fortemplates]);
+    precon_fortemplates[iglobal_fortemplates](x_fortemplates[iglobal_fortemplates],
+                        r_fortemplates[iglobal_fortemplates],
+                        c1_fortemplates[iglobal_fortemplates],
+                        c2_fortemplates[iglobal_fortemplates]);
+
+    /* copy x_fortemplates[iglobal_fortemplates] into x */
+    COPY_VL_INTO_ARRAY(x_fortemplates[iglobal_fortemplates], x);
+  }
   return 0;
 }
 
