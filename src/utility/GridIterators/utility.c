@@ -98,6 +98,34 @@ void copy_varlist_into_array(tVarList *vlx, double *x)
     }
   }
 }
+/* same as above but with thread safe: int line */
+void copy_varlist_into_array_LEVEL3(tVarList *vlx, double *x)
+{
+  tGrid *grid = vlx->grid;
+  int nvar = vlx->n;
+  int bi;
+  
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+    int nnodes = box->nnodes;
+    int lb = nvar*nnodes*bi;
+    int i;
+
+    SGRID_LEVEL3_Pragma(omp parallel for)
+    forallpoints(box,i)
+    {
+      int li = nvar*i + lb;
+      int j;
+      for(j = 0; j < nvar; j++)
+      {
+        double *px = box->v[vlx->index[j]];
+        int line = j + li;
+        x[line] = px[i];
+      }
+    }
+  }
+}
 
 /* set vlx = x compatible with SetMatrixLines_slowly */
 void copy_array_into_varlist(double *x, tVarList *vlx)
@@ -122,6 +150,35 @@ void copy_array_into_varlist(double *x, tVarList *vlx)
     }
   }
 }
+/* same as above but with thread safe: int line */
+void copy_array_into_varlist_LEVEL3(double *x, tVarList *vlx)
+{
+  tGrid *grid = vlx->grid;
+  int nvar = vlx->n;
+  int bi;
+  
+  forallboxes(grid,bi)
+  {
+    tBox *box = grid->box[bi];
+    int nnodes = box->nnodes;
+    int lb = nvar*nnodes*bi;
+    int i;
+
+    SGRID_LEVEL3_Pragma(omp parallel for)
+    forallpoints(box,i)
+    {
+      int li = nvar*i + lb;
+      int j;
+      for(j = 0; j < nvar; j++)
+      {
+        double *px = box->v[vlx->index[j]];
+        int line = j + li;
+        px[i] = x[line];
+      }
+    }
+  }
+}
+
 
 /* set x = vlx compatible with SetMatrixLines_forSortedVars_slowly */
 void copy_varlist_into_array_forSortedVars(tVarList *vlx, double *x)

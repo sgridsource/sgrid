@@ -16,6 +16,8 @@ int WTiterator(tSparseVector **Aline, int nlines,
 /* from utility.c */
 void copy_varlist_into_array(tVarList *vlx, double *x);
 void copy_array_into_varlist(double *x, tVarList *vlx);
+void copy_varlist_into_array_LEVEL3(tVarList *vlx, double *x);
+void copy_array_into_varlist_LEVEL3(double *x, tVarList *vlx);
 void copy_varlist_into_array_forSortedVars(tVarList *vlx, double *x);
 void copy_array_into_varlist_forSortedVars(double *x, tVarList *vlx);
 void copy_vl_into_array_outervlloop(tVarList *vlx, double *xa);
