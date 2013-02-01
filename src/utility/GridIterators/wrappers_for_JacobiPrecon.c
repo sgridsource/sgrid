@@ -106,7 +106,7 @@ int linSolve_with_Jacobi_precon(tVarList *x, tVarList *b,
       {
         double DiagM = Acol[col]->val[ent];
         if(DiagM==0.0) errorexit("DiagM is singular!!!");
-        DiagMinv_JacobiPrecon[col] = 1.0/Acol[col]->val[ent];
+        DiagMinv_JacobiPrecon[col] = 1.0/DiagM;
         break;
       }
   
