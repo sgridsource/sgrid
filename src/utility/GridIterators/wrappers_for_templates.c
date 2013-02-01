@@ -48,14 +48,14 @@ void print_globals_fortemplates(void)
 int matvec(double *alpha, double *x, double *beta, double *y)
 {
   /* compute r = A*x */
-  COPY_ARRAY_INTO_VL(x_fortemplates[iglobal_fortemplates], x);
+  COPY_ARRAY_INTO_VL(x, x_fortemplates[iglobal_fortemplates]);
   lop_fortemplates[iglobal_fortemplates](r_fortemplates[iglobal_fortemplates],
                                          x_fortemplates[iglobal_fortemplates],
                                          c1_fortemplates[iglobal_fortemplates],
                                          c2_fortemplates[iglobal_fortemplates]);
 
   /* set x_fortemplates[iglobal_fortemplates] = y */
-  COPY_ARRAY_INTO_VL(x_fortemplates[iglobal_fortemplates], y);
+  COPY_ARRAY_INTO_VL(y, x_fortemplates[iglobal_fortemplates]);
 
   /* set r=alpha*r + beta*x_fortemplates[iglobal_fortemplates] */
   vladd(r_fortemplates[iglobal_fortemplates], *alpha,
@@ -73,7 +73,7 @@ int psolve(double *x, double *b)
 {
   /* solve M*x = b for x, solution is x_fortemplates[iglobal_fortemplates],
      b is in r_fortemplates[iglobal_fortemplates] */
-  COPY_ARRAY_INTO_VL(r_fortemplates[iglobal_fortemplates], b);
+  COPY_ARRAY_INTO_VL(b, r_fortemplates[iglobal_fortemplates]);
   precon_fortemplates[iglobal_fortemplates](x_fortemplates[iglobal_fortemplates],
                       r_fortemplates[iglobal_fortemplates],
                       c1_fortemplates[iglobal_fortemplates],
@@ -166,7 +166,7 @@ int templates_gmres_wrapper(
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
 
   /* read out x and normres */
-  COPY_ARRAY_INTO_VL(x, X);
+  COPY_ARRAY_INTO_VL(X, x);
   *normres = RESID;
 
   /* free temporary storage */
@@ -259,7 +259,7 @@ int templates_bicgstab_wrapper(
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
 
   /* read out vlx and normres */
-  COPY_ARRAY_INTO_VL(x, X);
+  COPY_ARRAY_INTO_VL(X, x);
   *normres = RESID;
 
   /* free temporary storage */
@@ -352,7 +352,7 @@ int templates_cgs_wrapper(
   if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
 
   /* read out vlx and normres */
-  COPY_ARRAY_INTO_VL(x, X);
+  COPY_ARRAY_INTO_VL(X, x);
   *normres = RESID;
 
   /* free temporary storage */

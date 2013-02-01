@@ -181,7 +181,7 @@ void copy_vl_into_array_outervlloop(tVarList *vlx, double *xa)
 
 /* copy array xa into var list vlx. The outer loop is over vars in vlx. */
 /* vlx = xa */
-void copy_array_into_vl_outervlloop(tVarList *vlx, double *xa)
+void copy_array_into_vl_outervlloop(double *xa, tVarList *vlx)
 {
   tGrid *grid = vlx->grid;
   int j, i, boxi, n;
