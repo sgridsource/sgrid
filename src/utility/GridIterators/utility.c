@@ -84,15 +84,18 @@ void copy_varlist_into_array(tVarList *vlx, double *x)
   forallboxes(grid,bi)
   {
     tBox *box = grid->box[bi];
-    int i,j;
+    int i;
 
     forallpoints(box,i)
+    {
+      int j;
       for(j = 0; j < vlx->n; j++)
       {
         double *px = box->v[vlx->index[j]];
         x[line] = px[i];
         line++;
       }
+    }
   }
 }
 
@@ -105,15 +108,18 @@ void copy_array_into_varlist(double *x, tVarList *vlx)
   forallboxes(grid,bi)
   {
     tBox *box = grid->box[bi];
-    int i,j;
+    int i;
 
     forallpoints(box,i)
+    {
+      int j;
       for(j = 0; j < vlx->n; j++)
       {
         double *px = box->v[vlx->index[j]];
         px[i] = x[line];
         line++;
       }
+    }
   }
 }
 
