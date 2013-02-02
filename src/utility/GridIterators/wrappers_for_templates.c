@@ -12,9 +12,9 @@
 #define COMPILETEMPLATES(str) errorexits("templates_%s_wrapper: "\
 "to compile with templates use MyConfig with\n"\
 "DFLAGS += -DTEMPLATES\n"\
-"TEMPLATESDIR = /home/wolf/Packages/dctemplates\n"\
+"TEMPLATESDIR = /home/wolf/Packages/dctemplates_extBlasLapack\n"\
 "SPECIALLIBS += -L$(TEMPLATESDIR) -L$(TEMPLATESDIR)/F2CLIBS \\\n"\
-"-literatortemplates # -lI77 -lF77\n", (str))
+"-literatortemplates -lI77 -lF77 -lblas -llapack\n", (str))
 
 #define COPY_ARRAY_INTO_VL copy_array_into_varlist
 #define COPY_VL_INTO_ARRAY copy_varlist_into_array
@@ -122,7 +122,7 @@ int templates_gmres_wrapper(
   double *H;		long int LDH;
   long int ITER;
   double RESID;
-  long int INFO;
+  long int INFO=-1;
   double norm_b = GridL2Norm(b);
 
   /* set long int vars */
@@ -223,7 +223,7 @@ int templates_bicgstab_wrapper(
   double *WORK;		long int LDW;
   long int ITER;
   double RESID;
-  long int INFO;
+  long int INFO=-1;
   double norm_b = GridL2Norm(b);
 
   /* set long int vars */
@@ -316,7 +316,7 @@ int templates_cgs_wrapper(
   double *WORK;		long int LDW;
   long int ITER;
   double RESID;
-  long int INFO;
+  long int INFO=-1;
   double norm_b = GridL2Norm(b);
 
   /* set long int vars */
