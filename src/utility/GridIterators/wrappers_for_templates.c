@@ -109,6 +109,13 @@ int psolveLEFT(double *x, double *b)
     for(i=0; i<dim_fortemplates[iglobal_fortemplates]; i++)
       x[i] = b[i]*DiagMinv_JacobiPrecon[i];
   }
+  else if(precon_fortemplates[iglobal_fortemplates]==Preconditioner_I)
+  {
+    int i;
+    //SGRID_LEVEL4_Pragma(omp parallel for)
+    for(i=0; i<dim_fortemplates[iglobal_fortemplates]; i++)
+      x[i] = b[i];
+  }
   else /* generic case */
   {
     /* solve M*x = b for x, solution is x_fortemplates[iglobal_fortemplates],
@@ -136,6 +143,13 @@ int psolveLEFTtrans(double *x, double *b)
     SGRID_LEVEL4_Pragma(omp parallel for)
     for(i=0; i<dim_fortemplates[iglobal_fortemplates]; i++)
       x[i] = b[i]*DiagMinv_JacobiPrecon[i];
+  }
+  else if(precon_fortemplates[iglobal_fortemplates]==Preconditioner_I)
+  {
+    int i;
+    //SGRID_LEVEL4_Pragma(omp parallel for)
+    for(i=0; i<dim_fortemplates[iglobal_fortemplates]; i++)
+      x[i] = b[i];
   }
   else /* generic case */
     errorexit("psolveLEFTtrans works only for Jacobi_Preconditioner_from_DiagM");
