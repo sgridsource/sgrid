@@ -32,6 +32,7 @@ tVarList *x_fortemplates[MAX_NGLOBALS];
 tVarList *c1_fortemplates[MAX_NGLOBALS];
 tVarList *c2_fortemplates[MAX_NGLOBALS];
 long int dim_fortemplates[MAX_NGLOBALS];
+tSparseVector **Acol_fortemplates[MAX_NGLOBALS];
 
 /* extern globals */
 extern double *DiagMinv_JacobiPrecon; /* from wrappers_for_JacobiPrecon.c */
@@ -75,8 +76,29 @@ int matvec(double *alpha, double *x, double *beta, double *y)
   return 0;
 }
 
+/* matvectrans: */
+/* y := alpha*A'*x + beta*y, where A' is transpose of A which is in 
+   Acol_fortemplates[iglobal_fortemplates] */
+int Acol_times_vec_trans(double *alpha, double *x, double *beta, double *y)
+{
+  int i;
+  int ncols = (int) dim_fortemplates[iglobal_fortemplates];
+  double *f = dmalloc(ncols); /* temp array */
+
+  /* compute f = A'*x */
+  SparseMatrixLines_times_vector(Acol_fortemplates[iglobal_fortemplates],
+                                 ncols, x, f);
+  /* y = alpha*f + beta*y */
+  for(i=0; i<ncols; i++)
+    y[i] = (*alpha) * f[i] + (*beta) * y[i];
+
+  free(f);
+  return 0;
+}
+
+
 /* Precon: solves M*x = b for x */
-int psolve(double *x, double *b)
+int psolveLEFT(double *x, double *b)
 {
   /* speed up special Jacobi precon */
   if(precon_fortemplates[iglobal_fortemplates]==Jacobi_Preconditioner_from_DiagM)
@@ -103,6 +125,59 @@ int psolve(double *x, double *b)
   return 0;
 }
 
+/* Precon: solves M'*x = b for x.  M' is transpose of procon matrix M */
+int psolveLEFTtrans(double *x, double *b)
+{
+  /* speed up special Jacobi precon */
+  if(precon_fortemplates[iglobal_fortemplates]==Jacobi_Preconditioner_from_DiagM)
+  {
+    int i;
+
+    SGRID_LEVEL4_Pragma(omp parallel for)
+    for(i=0; i<dim_fortemplates[iglobal_fortemplates]; i++)
+      x[i] = b[i]*DiagMinv_JacobiPrecon[i];
+  }
+  else /* generic case */
+    errorexit("psolveLEFTtrans works only for Jacobi_Preconditioner_from_DiagM");
+
+  return 0;
+}
+
+/* Right Precon: solves M2*x = b for x */
+int psolveRIGHT(double *x, double *b)
+{
+  /* psolveRIGHT is not implemented yet, so use  x = b */
+  int dim = dim_fortemplates[iglobal_fortemplates];
+  int i;
+  for(i=0; i<dim; i++)  x[i] = b[i];
+  return 0;
+}
+
+/* Right Precon: solves M2'*x = b for x.
+   M2' is transpose of right procon matrix M2 */
+int psolveRIGHTtrans(double *x, double *b)
+{
+  /* psolveRIGHTtrans is not implemented yet, so use  x = b */
+  return psolveRIGHT(x, b);
+}
+
+/* use left/right precon */
+int psolveQ(double *x, double *b, char *s, short *slen)
+{
+  if(s[0]=='R')  /* if s="RIGHT" */
+    return psolveRIGHT(x, b);
+  else /* if s="LEFT" */
+    return psolveLEFT(x, b);
+}
+
+/* use left/right precon for transposed matrix */
+int psolveQtrans(double *x, double *b, char *s, short *slen)
+{
+  if(s[0]=='R')  /* if s="RIGHT" */
+    return psolveRIGHTtrans(x, b);
+  else /* if s="LEFT" */
+    return psolveLEFTtrans(x, b);
+}
 
 /* call GMRES from templates */
 int templates_gmres_wrapper(
@@ -160,7 +235,7 @@ int templates_gmres_wrapper(
   if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
   fflush(stdout);
 
-  /* setup global vars and functions needed in matvec and psolve */
+  /* setup global vars and functions needed in matvec and psolveLEFT */
   lop_fortemplates[iglobal_fortemplates]	= lop;
   precon_fortemplates[iglobal_fortemplates]	= precon;
   r_fortemplates[iglobal_fortemplates]		= r;
@@ -176,7 +251,7 @@ int templates_gmres_wrapper(
 #ifdef TEMPLATES
   /* call gmres from templates */
   gmres_(&N, B, X, &RESTRT, WORK, &LDW, H, &LDH, &ITER, &RESID,
-          matvec, psolve, &INFO);
+          matvec, psolveLEFT, &INFO);
 #else
   COMPILETEMPLATES("gmres");
 #endif
@@ -255,7 +330,7 @@ int templates_bicgstab_wrapper(
   if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
   fflush(stdout);
 
-  /* setup global vars and functions needed in matvec and psolve */
+  /* setup global vars and functions needed in matvec and psolveLEFT */
   lop_fortemplates[iglobal_fortemplates]	= lop;
   precon_fortemplates[iglobal_fortemplates]	= precon;
   r_fortemplates[iglobal_fortemplates]		= r;
@@ -270,7 +345,7 @@ int templates_bicgstab_wrapper(
 
 #ifdef TEMPLATES
   /* call bicgstab from templates */
-  bicgstab_(&N, B, X, WORK, &LDW, &ITER, &RESID, matvec, psolve, &INFO);
+  bicgstab_(&N, B, X, WORK, &LDW, &ITER, &RESID, matvec, psolveLEFT, &INFO);
 #else
   COMPILETEMPLATES("bicgstab");
 #endif
@@ -348,7 +423,7 @@ int templates_cgs_wrapper(
   if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
   fflush(stdout);
 
-  /* setup global vars and functions needed in matvec and psolve */
+  /* setup global vars and functions needed in matvec and psolveLEFT */
   lop_fortemplates[iglobal_fortemplates]	= lop;
   precon_fortemplates[iglobal_fortemplates]	= precon;
   r_fortemplates[iglobal_fortemplates]		= r;
@@ -363,8 +438,7 @@ int templates_cgs_wrapper(
 
 #ifdef TEMPLATES
   /* call cgs from templates */
-  cgs_(&N, B, X, WORK, &LDW, &ITER, &RESID,
-          matvec, psolve, &INFO);
+  cgs_(&N, B, X, WORK, &LDW, &ITER, &RESID, matvec, psolveLEFT, &INFO);
 #else
   COMPILETEMPLATES("cgs");
 #endif
@@ -394,10 +468,198 @@ int templates_cgs_wrapper(
 }
 
 
+/* QMR needs the transpose of the matrix A appearing in A x = b */
+/* so get A from lop: */
+void SetMatrixColumns_And_InvDiag(
+       tSparseVector **Acol, tSparseVector **AcolFD, double *DiagAinv, int ncols,
+       void (*lop)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
+       tVarList *r, tVarList *x, 
+       tVarList *c1,tVarList *c2, int pr)
+{
+  tGrid *grid = r->grid;
+  tGrid *grid_bak;
+  int bi;
+  int col, ent;
+  tSparseVector **AcolD;
+  int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
+
+  if(pr) printf("SetMatrixColumns_And_InvDiag\n");
+
+  /* set Acol */                
+  SetMatrixColumns_slowly(Acol, lop, r, x, c1, c2, pr);
+  if(pr&&0) 
+    for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
+
+  /* set another matrix of we want fd precon */
+  if(use_fd)
+  {
+    /* save current grid in grid_bak and then convert grid to fin. diff. */
+    grid_bak = make_empty_grid(grid->nvariables, 0);
+    copy_grid_withoutvars(grid, grid_bak, 0);
+    convert_grid_to_fd(grid);
+    if(pr) printf("Using finite differencing to set matrix DiagAinv...\n");
+
+    /* set AcolFD */                
+    SetMatrixColumns_slowly(AcolFD, lop, r, x, c1, c2, pr);
+    if(pr&&0) 
+      for(col=0; col<ncols; col++) prSparseVector(AcolFD[col]);
+
+    /* restore grid to spectral */
+    copy_grid_withoutvars(grid_bak, grid, 0);
+    free_grid(grid_bak);
+    AcolD = AcolFD;
+  }
+  else /* use spectral matrix */
+    AcolD = Acol;
+
+  /* now set DiagAinv to diagonal of matrix AcolD */
+  for(col=0; col<ncols; col++)
+    for(ent = 0; ent < AcolD[col]->entries; ent++)
+      if(AcolD[col]->pos[ent] == col) 
+      {
+        double DiagA = AcolD[col]->val[ent];
+        if(DiagA==0.0) errorexit("DiagA is singular!!!");
+        DiagAinv[col] = 1.0/DiagA;
+        break;
+      }
+}
+
+/* call QMR from templates */
+int templates_qmr_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  tGrid *grid = b->grid;
+  int nvars=b->n;
+  int ncols;
+  double *DiagMinv_JacobiPrecon_sav;
+  tSparseVector **Acol;
+  tSparseVector **AcolFD;
+  double *DiagAinv;
+  int pr = Getv("GridIterators_verbose", "yes");
+  int i,j;
+  long int N; /* dim of matrix */
+  double *B;
+  double *X;
+  double *WORK;		long int LDW;
+  long int ITER;
+  double RESID;
+  long int INFO=-1;
+  double norm_b = GridL2Norm(b);
+
+  /* set long int vars */
+  N = 0 ;
+  forallboxes(grid,i)  N += grid->box[i]->nnodes;
+  N = (b->n) * N; 
+  LDW = (N) + 1; 
+  ITER = itmax;
+  RESID = tol;
+  /* do we scale RESID? */
+  if(Getv("GridIterators_templates_RESID_mode", "tol/norm(b)") && norm_b>0.0)
+    RESID = RESID / norm_b;
+
+  if(pr) printf("  templates_qmr_wrapper: itmax=%d tol=%.3e "
+                "N=%ld LDW=%ld\n"
+                "  ITER=%ld RESID=%.3e\n",
+                itmax, tol, N, LDW, ITER, RESID);
+
+  /* temporary storage */
+  B = (double *) calloc(N, sizeof(double));
+  X = (double *) calloc(N, sizeof(double));
+  WORK = (double *) calloc(LDW*11, sizeof(double));
+  if(B==NULL || X==NULL || WORK==NULL)
+    errorexit("templates_qmr_wrapper: out of memory for X, B, WORK");
+
+  /* QMR needs the transpose of the matrix A appearing in A x = b */
+  /* so get A from lop: */
+  ncols = (int) N;
+  /* allocate Acol */
+  Acol = AllocateSparseVectorArray(ncols);
+  if(Acol) { if(pr) printf("allocated %d matrix columns for Acol\n", ncols); }
+  else       errorexit("no memory for Acol");
+  /* allocate AcolFD to hold matrix of fd version of lop */
+  AcolFD = AllocateSparseVectorArray(ncols);
+  if(AcolFD) { if(pr) printf("allocated %d matrix columns for AcolFD\n", ncols); }
+  else       errorexit("no memory for AcolFD");
+  /* allocate memory for diagonal of matrix in DiagAinv */
+  DiagAinv = calloc(ncols, sizeof(*DiagAinv));
+
+  /* set the matrix Acol, AcolFD, DiagAinv */
+  SetMatrixColumns_And_InvDiag(Acol, AcolFD, DiagAinv, ncols, 
+                               lop, r, x ,c1,c2, pr);
+
+  /* free AcolFD, because for now we do not need it */
+  FreeSparseVectorArray(AcolFD, ncols);
+  /* save DiagMinv_JacobiPrecon and then set it to DiagAinv */
+  DiagMinv_JacobiPrecon_sav = DiagMinv_JacobiPrecon;
+  DiagMinv_JacobiPrecon = DiagAinv;
+
+  /* increase global var index to store globals in new place in array */
+  iglobal_fortemplates++;
+  if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
+  if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
+  fflush(stdout);
+
+  /* setup global vars and functions needed in matvec and psolveLEFT */
+  lop_fortemplates[iglobal_fortemplates]	= lop;
+  precon_fortemplates[iglobal_fortemplates]	= precon;
+  r_fortemplates[iglobal_fortemplates]		= r;
+  x_fortemplates[iglobal_fortemplates]		= x;
+  c1_fortemplates[iglobal_fortemplates]		= c1;
+  c2_fortemplates[iglobal_fortemplates]		= c2;
+  dim_fortemplates[iglobal_fortemplates]	= N;
+  Acol_fortemplates[iglobal_fortemplates]	= Acol;
+
+  /* setup local B and X */
+  COPY_VL_INTO_ARRAY(b, B);
+  COPY_VL_INTO_ARRAY(x, X);
+
+#ifdef TEMPLATES
+  /* call qmr from templates */
+  qmr_(&N, B, X, WORK, &LDW, &ITER, &RESID,
+       matvec, Acol_times_vec_trans, psolveQ, psolveQtrans, &INFO);
+#else
+  COMPILETEMPLATES("qmr");
+#endif
+  /* decrease global var index since globals are no longer needed */
+  iglobal_fortemplates--;
+  if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
+
+  /* read out vlx and normres */
+  COPY_ARRAY_INTO_VL(X, x);
+  *normres = RESID;
+
+  /* free temporary storage */
+  free(B);
+  free(X);
+  free(WORK);
+
+  /* restore DiagMinv_JacobiPrecon and free matrices */
+  DiagMinv_JacobiPrecon = DiagMinv_JacobiPrecon_sav;
+  FreeSparseVectorArray(Acol, ncols);
+  FreeSparseVectorArray(AcolFD, ncols);
+  free(DiagAinv);
+
+  if(pr) printf("  templates_qmr_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
+                ITER, RESID, INFO);
+  fflush(stdout);
+
+  /* iteration failed */
+  if(INFO<0) return INFO;
+  if(INFO>0) return -ITER;
+  
+  /* success! */
+  return ITER;
+}
+
+
+
 /*************************************************************************/
 /* use one of the wrappers (e.g. templates_gmres_wrapper) as precon for  */
 /* one of the linear solvers in this file (e.g. templates_gmres_wrapper) */
-/* this precon is called by psolve above                                 */
+/* this precon is called by psolveLEFT above                                 */
 /*************************************************************************/
 void templates_Preconditioner_for_templates_solver(tVarList *vlx,
                                                    tVarList *vlr,
@@ -429,7 +691,7 @@ void templates_Preconditioner_for_templates_solver(tVarList *vlx,
 
   if(iglobal_fortemplates<0)
     errorexit("templates_Preconditioner_for_templates_solver "
-              "works only if called from psolve in wrappers_for_templates.c");
+              "works only if called from psolveLEFT in wrappers_for_templates.c");
 
   /* set tol */
   tol = GridL2Norm(vlr)*rtol;
