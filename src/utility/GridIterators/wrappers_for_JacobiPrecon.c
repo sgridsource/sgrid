@@ -125,7 +125,7 @@ int linSolve_with_Jacobi_precon(tVarList *x, tVarList *b,
   return INFO;
 }
 
-/* do a linear solve with bicgstab and precon_Ap_Ai_Ax_UMFPACK */
+/* do a linear solve with bicgstab and Jacobi_Preconditioner_from_DiagM */
 int bicgstab_with_Jacobi_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -136,13 +136,13 @@ int bicgstab_with_Jacobi_precon(tVarList *x, tVarList *b,
   int INFO;
   if(pr) printf("bicgstab_with_Jacobi_precon: using ");
 
-  /* solve A x = b with bicgstab and the Precon precon_Ap_Ai_Ax_UMFPACK */
+  /* solve A x = b with bicgstab and the Precon Jacobi_Preconditioner_from_DiagM */
   INFO = linSolve_with_Jacobi_precon(x, b, r,c1,c2, bicgstab,
                                      itmax,tol,normres, lop);
   return INFO;
 }
 
-/* do a linear solve with templates_gmres_wrapper and precon_Ap_Ai_Ax_UMFPACK */
+/* do a linear solve with templates_gmres_wrapper and Jacobi_Preconditioner_from_DiagM */
 int templates_gmres_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -153,13 +153,13 @@ int templates_gmres_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b,
   int INFO;
   if(pr) printf("templates_gmres_wrapper_with_Jacobi_precon: using ");
 
-  /* solve A x = b with bicgstab and the Precon precon_Ap_Ai_Ax_UMFPACK */
+  /* solve A x = b with GMRES and the Precon Jacobi_Preconditioner_from_DiagM */
   INFO = linSolve_with_Jacobi_precon(x, b, r,c1,c2, templates_gmres_wrapper,
                                      itmax,tol,normres, lop);
   return INFO;
 }
 
-/* do a linear solve with templates_bicgstab_wrapper and precon_Ap_Ai_Ax_UMFPACK */
+/* do a linear solve with templates_bicgstab_wrapper and Jacobi_Preconditioner_from_DiagM */
 int templates_bicgstab_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -170,13 +170,13 @@ int templates_bicgstab_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b,
   int INFO;
   if(pr) printf("templates_bicgstab_wrapper_with_Jacobi_precon: using ");
 
-  /* solve A x = b with bicgstab and the Precon precon_Ap_Ai_Ax_UMFPACK */
+  /* solve A x = b with bicgstab and the Precon Jacobi_Preconditioner_from_DiagM */
   INFO = linSolve_with_Jacobi_precon(x, b, r,c1,c2, templates_bicgstab_wrapper,
                                      itmax,tol,normres, lop);
   return INFO;
 }
 
-/* do a linear solve with templates_cgs_wrapper and precon_Ap_Ai_Ax_UMFPACK */
+/* do a linear solve with templates_cgs_wrapper and Jacobi_Preconditioner_from_DiagM */
 int templates_cgs_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b, 
             tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
@@ -187,8 +187,42 @@ int templates_cgs_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b,
   int INFO;
   if(pr) printf("templates_cgs_wrapper_with_Jacobi_precon: using ");
 
-  /* solve A x = b with bicgstab and the Precon precon_Ap_Ai_Ax_UMFPACK */
+  /* solve A x = b with CGS and the Precon Jacobi_Preconditioner_from_DiagM */
   INFO = linSolve_with_Jacobi_precon(x, b, r,c1,c2, templates_cgs_wrapper,
                                      itmax,tol,normres, lop);
+  return INFO;
+}
+
+/* do a linear solve with templates_qmr_wrapper and Jacobi_Preconditioner_from_DiagM */
+int templates_qmr_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  int pr = Getv("GridIterators_verbose", "yes");
+  int INFO;
+  if(pr) printf("templates_qmr_wrapper_with_Jacobi_precon:\n");
+
+  /* solve A x = b with qmr and the Precon Jacobi_Preconditioner_from_DiagM */
+  INFO = templates_qmr_wrapper(x, b, r,c1,c2, itmax,tol,normres,
+                               lop, Jacobi_Preconditioner_from_DiagM);
+  return INFO;
+}
+
+/* do a linear solve with templates_bicg_wrapper and Jacobi_Preconditioner_from_DiagM */
+int templates_bicg_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  int pr = Getv("GridIterators_verbose", "yes");
+  int INFO;
+  if(pr) printf("templates_bicg_wrapper_with_Jacobi_precon:\n");
+
+  /* solve A x = b with bicg and the Precon Jacobi_Preconditioner_from_DiagM */
+  INFO = templates_bicg_wrapper(x, b, r,c1,c2, itmax,tol,normres,
+                                lop, Jacobi_Preconditioner_from_DiagM);
   return INFO;
 }
