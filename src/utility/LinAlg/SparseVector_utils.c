@@ -64,6 +64,29 @@ void prSparseVector(tSparseVector *SV)
     printf("%d\t%d\t%.16e\n",i, SV->pos[i], SV->val[i]);
 }
 
+/* Allocate memory for a SparseVector array of size n */
+tSparseVector **AllocateSparseVectorArray(int n)
+{
+  int i;
+  tSparseVector **A;
+
+  A = calloc(n, sizeof(*A));
+  if(A!=NULL)
+    for(i=0; i<n; i++)  A[i]=AllocateSparseVector();
+  
+  return A;
+}
+/* free the above SparseVector array of size n */
+void FreeSparseVectorArray(tSparseVector **A, int n)
+{
+  if(A!=NULL)
+  {
+    int i;
+    for(i=0; i<n; i++)  FreeSparseVector(A[i]);
+    free(A);
+  }
+}
+
 /* get component comp  */
 double GetSparseVectorComponent(tSparseVector *SV, int comp)
 {
