@@ -592,6 +592,7 @@ int templates_qmr_wrapper(
 
   /* free AcolFD, because for now we do not need it */
   FreeSparseVectorArray(AcolFD, ncols);
+  AcolFD=NULL;
   /* save DiagMinv_JacobiPrecon and then set it to DiagAinv */
   DiagMinv_JacobiPrecon_sav = DiagMinv_JacobiPrecon;
   DiagMinv_JacobiPrecon = DiagAinv;
@@ -722,6 +723,7 @@ int templates_bicg_wrapper(
 
   /* free AcolFD, because for now we do not need it */
   FreeSparseVectorArray(AcolFD, ncols);
+  AcolFD=NULL;
   /* save DiagMinv_JacobiPrecon and then set it to DiagAinv */
   DiagMinv_JacobiPrecon_sav = DiagMinv_JacobiPrecon;
   DiagMinv_JacobiPrecon = DiagAinv;
