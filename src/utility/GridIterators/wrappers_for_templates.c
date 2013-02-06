@@ -654,6 +654,136 @@ int templates_qmr_wrapper(
   return ITER;
 }
 
+/* call BiCG from templates */
+int templates_bicg_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  tGrid *grid = b->grid;
+  int nvars=b->n;
+  int ncols;
+  double *DiagMinv_JacobiPrecon_sav;
+  tSparseVector **Acol;
+  tSparseVector **AcolFD;
+  double *DiagAinv;
+  int pr = Getv("GridIterators_verbose", "yes");
+  int i,j;
+  long int N; /* dim of matrix */
+  double *B;
+  double *X;
+  double *WORK;		long int LDW;
+  long int ITER;
+  double RESID;
+  long int INFO=-1;
+  double norm_b = GridL2Norm(b);
+
+  /* set long int vars */
+  N = 0 ;
+  forallboxes(grid,i)  N += grid->box[i]->nnodes;
+  N = (b->n) * N; 
+  LDW = (N) + 1; 
+  ITER = itmax;
+  RESID = tol;
+  /* do we scale RESID? */
+  if(Getv("GridIterators_templates_RESID_mode", "tol/norm(b)") && norm_b>0.0)
+    RESID = RESID / norm_b;
+
+  if(pr) printf("  templates_bicg_wrapper: itmax=%d tol=%.3e "
+                "N=%ld LDW=%ld\n"
+                "  ITER=%ld RESID=%.3e\n",
+                itmax, tol, N, LDW, ITER, RESID);
+
+  /* temporary storage */
+  B = (double *) calloc(N, sizeof(double));
+  X = (double *) calloc(N, sizeof(double));
+  WORK = (double *) calloc(LDW*6, sizeof(double));
+  if(B==NULL || X==NULL || WORK==NULL)
+    errorexit("templates_bicg_wrapper: out of memory for X, B, WORK");
+
+  /* QMR needs the transpose of the matrix A appearing in A x = b */
+  /* so get A from lop: */
+  ncols = (int) N;
+  /* allocate Acol */
+  Acol = AllocateSparseVectorArray(ncols);
+  if(Acol) { if(pr) printf("allocated %d matrix columns for Acol\n", ncols); }
+  else       errorexit("no memory for Acol");
+  /* allocate AcolFD to hold matrix of fd version of lop */
+  AcolFD = AllocateSparseVectorArray(ncols);
+  if(AcolFD) { if(pr) printf("allocated %d matrix columns for AcolFD\n", ncols); }
+  else       errorexit("no memory for AcolFD");
+  /* allocate memory for diagonal of matrix in DiagAinv */
+  DiagAinv = calloc(ncols, sizeof(*DiagAinv));
+
+  /* set the matrix Acol, AcolFD, DiagAinv */
+  SetMatrixColumns_And_InvDiag(Acol, AcolFD, DiagAinv, ncols, 
+                               lop, r, x ,c1,c2, pr);
+
+  /* free AcolFD, because for now we do not need it */
+  FreeSparseVectorArray(AcolFD, ncols);
+  /* save DiagMinv_JacobiPrecon and then set it to DiagAinv */
+  DiagMinv_JacobiPrecon_sav = DiagMinv_JacobiPrecon;
+  DiagMinv_JacobiPrecon = DiagAinv;
+
+  /* increase global var index to store globals in new place in array */
+  iglobal_fortemplates++;
+  if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
+  if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
+  fflush(stdout);
+
+  /* setup global vars and functions needed in matvec and psolveLEFT */
+  lop_fortemplates[iglobal_fortemplates]	= lop;
+  precon_fortemplates[iglobal_fortemplates]	= precon;
+  r_fortemplates[iglobal_fortemplates]		= r;
+  x_fortemplates[iglobal_fortemplates]		= x;
+  c1_fortemplates[iglobal_fortemplates]		= c1;
+  c2_fortemplates[iglobal_fortemplates]		= c2;
+  dim_fortemplates[iglobal_fortemplates]	= N;
+  Acol_fortemplates[iglobal_fortemplates]	= Acol;
+
+  /* setup local B and X */
+  COPY_VL_INTO_ARRAY(b, B);
+  COPY_VL_INTO_ARRAY(x, X);
+
+#ifdef TEMPLATES
+  /* call bicg from templates */
+  bicg_(&N, B, X, WORK, &LDW, &ITER, &RESID,
+        matvec, Acol_times_vec_trans, psolveLEFT, psolveLEFTtrans, &INFO);
+#else
+  COMPILETEMPLATES("bicg");
+#endif
+  /* decrease global var index since globals are no longer needed */
+  iglobal_fortemplates--;
+  if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
+
+  /* read out vlx and normres */
+  COPY_ARRAY_INTO_VL(X, x);
+  *normres = RESID;
+
+  /* free temporary storage */
+  free(B);
+  free(X);
+  free(WORK);
+
+  /* restore DiagMinv_JacobiPrecon and free matrices */
+  DiagMinv_JacobiPrecon = DiagMinv_JacobiPrecon_sav;
+  FreeSparseVectorArray(Acol, ncols);
+  FreeSparseVectorArray(AcolFD, ncols);
+  free(DiagAinv);
+
+  if(pr) printf("  templates_bicg_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
+                ITER, RESID, INFO);
+  fflush(stdout);
+
+  /* iteration failed */
+  if(INFO<0) return INFO;
+  if(INFO>0) return -ITER;
+  
+  /* success! */
+  return ITER;
+}
+
 
 
 /*************************************************************************/
