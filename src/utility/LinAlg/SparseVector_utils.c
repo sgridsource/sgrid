@@ -102,6 +102,7 @@ double GetSparseVectorComponent(tSparseVector *SV, int comp)
     tSparseVector **Aline;
     Aline = calloc(nlines, sizeof(*Aline));
     AddToSparseVector(Aline[line], col, value);  */
+/* Note: CAN be used to compute A^T x if A is stored as columns in e.g. Acol */
 void SparseMatrixLines_times_vector(tSparseVector **Aline, int nlines,
                                     double *x, double *f)
 {
@@ -112,12 +113,14 @@ void SparseMatrixLines_times_vector(tSparseVector **Aline, int nlines,
   {
     int j,ent;
     double Aij;
+    int *Aline_i_pos = Aline[i]->pos;
+    double *Aline_i_val = Aline[i]->val;
  
     f[i] = 0.0; 
     for(ent = 0; ent < Aline[i]->entries; ent++)
     {
-       j   = Aline[i]->pos[ent];
-       Aij = Aline[i]->val[ent];
+       j   = Aline_i_pos[ent];
+       Aij = Aline_i_val[ent];
        f[i] += Aij * x[j];
     }
   }
@@ -140,11 +143,13 @@ void vector_times_SparseMatrixLines(double *x, tSparseVector **Aline,
   {
     int j,ent;
     double Akj;
+    int *Aline_k_pos = Aline[k]->pos;
+    double *Aline_k_val = Aline[k]->val;
 
     for(ent = 0; ent < Aline[k]->entries; ent++)
     {
-       j   = Aline[k]->pos[ent];
-       Akj = Aline[k]->val[ent];
+       j   = Aline_k_pos[ent];
+       Akj = Aline_k_val[ent];
        f[j] += x[k] * Akj;
     }
   }
@@ -167,11 +172,13 @@ void SparseMatrixLinesTranspose_times_vector(tSparseVector **Aline, int nlines,
   {
     int j,ent;
     double Aij;
+    int *Aline_i_pos = Aline[i]->pos;
+    double *Aline_i_val = Aline[i]->val;
 
     for(ent = 0; ent < Aline[i]->entries; ent++)
     {
-       j   = Aline[i]->pos[ent];
-       Aij = Aline[i]->val[ent];
+       j   = Aline_i_pos[ent];
+       Aij = Aline_i_val[ent];
        f[j] += Aij * x[i];
     }
   }
