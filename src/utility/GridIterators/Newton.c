@@ -173,11 +173,11 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
   {
     void *p;
     tNewtonStepVars pars[1]; /* create tNewtonStepVars *pars but with memory */
-    double al = 0.0;
+    double al = -0.5;
     double bl = 1e-6;
     double tol = 0.01;
     double lmin, lambda;
-    double fx;  
+    double fx, fa,fb,fc;
     tVarList *vltemp;
     double resb, resc;
 
@@ -190,6 +190,8 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
       return; /* stick with full Newton step if it decreases res */
     }
 
+    if(0) /* old version that never worked is now out! */
+    {
     /* do Newton step only to lambda = bl */
     do_partial_Newton_step(vlu, bl-cl, vldu);
     Fu(vlFu, vlu, vlc1, vlc2);
@@ -208,11 +210,14 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
       vlsetconstant(vldu, 0.0);
       return; /* do Newton step by amount lambda, even though res is worse */
     }
+    /* go back to lambda=0 */
+    do_partial_Newton_step(vlu, -bl, vldu);
+    }
+
     /* save old vlu in vltemp */
     vltemp = AddDuplicateEnable(vlu, "_GridIterators_Newtonstep_temp");
-    do_partial_Newton_step(vlu, -bl, vldu); /* go back to lambda=0 */
     vlcopy(vltemp, vlu);
-            
+
     /* set pars for Newton_residual_of_lambda */
     pars->Fu   = Fu;
     pars->Jdu  = Jdu;
@@ -227,14 +232,26 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
     pars->vltemp = vltemp;
     p = (void *) pars;
 
+    /* bracket the min */
+    mnbrak_with_pointer_to_pars(&al, &bl, &cl, &fa, &fb, &fc,
+                                Newton_residual_of_lambda, p);
+
     /* call brent with Newton_residual_of_lambda to find the lambda=lmin 
        where the res in min */
     fx = brent_with_pointer_to_pars(al, bl, cl, Newton_residual_of_lambda,
                                     tol, &lmin, p);
-    if(lmin < bl) lambda = bl;
-    else          lambda = lmin;
-    if(pr) printf("do_Newton_step:  backtracking to lambda=%g\n", lambda);
-    
+    /* if(lmin < bl) lambda = bl;
+       else          lambda = lmin; */
+    lambda = lmin;
+    if(pr)
+    {
+      printf("do_Newton_step:  mnbrak -> (al,bl,cl)=(%g,%g,%g), "
+             "(fa,fb,fc)=(%.3g,%.3g,%.3g)\n", al,bl,cl, fa,fb,fc);
+      printf("do_Newton_step:  brent tol=%g -> lmin=%g, fx=%.3g\n",
+             tol, lmin, fx);
+      printf("do_Newton_step:  backtracking to lambda=%g\n", lambda);
+    }
+
     /* do reduced Newton step */
     vlcopy(vlu, vltemp);
     do_partial_Newton_step(vlu, lambda, vldu);
