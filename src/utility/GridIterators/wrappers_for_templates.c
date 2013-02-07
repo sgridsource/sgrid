@@ -104,8 +104,7 @@ int psolveLEFT(double *x, double *b)
   if(precon_fortemplates[iglobal_fortemplates]==Jacobi_Preconditioner_from_DiagM)
   {
     int i;
-
-    SGRID_LEVEL4_Pragma(omp parallel for)
+    //SGRID_LEVEL4_Pragma(omp parallel for)
     for(i=0; i<dim_fortemplates[iglobal_fortemplates]; i++)
       x[i] = b[i]*DiagMinv_JacobiPrecon[i];
   }

@@ -105,11 +105,14 @@ double GetSparseVectorComponent(tSparseVector *SV, int comp)
 void SparseMatrixLines_times_vector(tSparseVector **Aline, int nlines,
                                     double *x, double *f)
 {
-  int i,j,ent;
-  double Aij;
+  int i;
 
+  SGRID_LEVEL4_Pragma(omp parallel for)
   for(i=0; i<nlines; i++)
   {
+    int j,ent;
+    double Aij;
+ 
     f[i] = 0.0; 
     for(ent = 0; ent < Aline[i]->entries; ent++)
     {
@@ -128,17 +131,23 @@ void SparseMatrixLines_times_vector(tSparseVector **Aline, int nlines,
 void vector_times_SparseMatrixLines(double *x, tSparseVector **Aline, 
                                     int nlines, double *f)
 {
-  int j,k,ent;
-  double Akj;
+  int k;
 
   for(k=0; k<nlines; k++) f[k] = 0.0;
+
+  SGRID_LEVEL4_Pragma(omp parallel for)
   for(k=0; k<nlines; k++)
+  {
+    int j,ent;
+    double Akj;
+
     for(ent = 0; ent < Aline[k]->entries; ent++)
     {
        j   = Aline[k]->pos[ent];
        Akj = Aline[k]->val[ent];
        f[j] += x[k] * Akj;
     }
+  }
 }
 
 /* matrix times vector for the transpose of Aline.  Aline is made up 
@@ -149,15 +158,21 @@ void vector_times_SparseMatrixLines(double *x, tSparseVector **Aline,
 void SparseMatrixLinesTranspose_times_vector(tSparseVector **Aline, int nlines,
                                              double *x, double *f)
 {
-  int i,j,ent;
-  double Aij;
+  int i;
  
   for(i=0; i<nlines; i++) f[i] = 0.0;
+
+  SGRID_LEVEL4_Pragma(omp parallel for)
   for(i=0; i<nlines; i++)
+  {
+    int j,ent;
+    double Aij;
+
     for(ent = 0; ent < Aline[i]->entries; ent++)
     {
        j   = Aline[i]->pos[ent];
        Aij = Aline[i]->val[ent];
        f[j] += Aij * x[i];
     }
+  }
 }
