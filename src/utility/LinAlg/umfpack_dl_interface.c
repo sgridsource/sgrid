@@ -367,3 +367,43 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
 
   return INFO;
 }
+
+/* solve A x = b with umfpack's umfpack_dl_solve
+   for a matrix that is already saved in
+   LONGINT *Ap, LONGINT *Ai, double *Ax, 
+   with x and b in ordinary double arrays */
+int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
+                                       double *x, double *b, LONGINT nrows,
+                                       int pr)
+{
+  double *null = (double *) NULL;
+  void *Symbolic, *Numeric;
+  int INFO=-6662442;
+  int INFO1, INFO2;
+
+#ifdef UMFPACK
+  /* call umfpack routine */
+  if(0)
+  { printf("umfpack_dl_solve_from_Ap_Ai_Ax_x_b: calling umfpack_dl_solve\n"); fflush(stdout); }
+  INFO1=umfpack_dl_symbolic(nrows, nrows, Ap, Ai, Ax, &Symbolic, null, null);
+  INFO2=umfpack_dl_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  umfpack_dl_free_symbolic(&Symbolic);
+  INFO=umfpack_dl_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
+  umfpack_dl_free_numeric(&Numeric);
+#else
+  errorexit("umfpack_dl_solve_from_Ap_Ai_Ax_x_b: in order to compile with umfpack use MyConfig with\n"
+            "DFLAGS += -DUMFPACK\n"
+            "SPECIALINCS += -I/usr/include/suitesparse\n"
+            "SPECIALLIBS += -lumfpack -lamd -lblas");
+#endif
+  if(pr)
+  { 
+    printf("umfpack_dl_solve_from_Ap_Ai_Ax_x_b: umfpack_dl_solve -> INFO=%d\n", INFO); 
+    fflush(stdout);
+  }
+
+  if(INFO!=0)
+    PrintErrorCodesAndExit;
+
+  return INFO;
+}

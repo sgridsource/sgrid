@@ -50,6 +50,10 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
 void SetMatrixColumns_forSortedVars_slowly(tSparseVector **Acol,
     void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
+void SetMatrixColumns_ForOneVarInOneBox_slowly(tSparseVector **Acol,
+    int vlind, int b,
+    void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
+    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
 
 /* lapack_interface.c */
 int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr);
@@ -89,6 +93,9 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
                                   double dropbelow, int pr);
 int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
                                    tVarList *vlx, tVarList *vlb, int pr);
+int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
+                                       double *x, double *b, LONGINT nrows,
+                                       int pr);
 
 /* SuiteSparseQR_C_interface.c */
 int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
