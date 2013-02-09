@@ -1,6 +1,15 @@
 /* sgrid_GridIterators.h */
 /* Wolfgang Tichy 8/2008 */
 
+/* macro that loops over vars, boxes and subboxes */
+#define forallVarsBoxesAndSubboxes(vlv, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
+  for(vi=0; vi<vlv->n; vi++) \
+  for(bi=0; bi<vlv->grid->nboxes; bi++) \
+  for(sbk=0; sbk<(nsb3); sbk++) \
+  for(sbj=0; sbj<(nsb2); sbj++) \
+  for(sbi=0; sbi<(nsb1); sbi++)
+
+
 /* dot product and L2-Norm over entire grid or box for varlists */
 double GridDotProduct(tVarList *vlu, tVarList *vlv);
 double GridL2Norm(tVarList *vlu);

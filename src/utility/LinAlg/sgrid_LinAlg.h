@@ -54,6 +54,11 @@ void SetMatrixColumns_ForOneVarInOneBox_slowly(tSparseVector **Acol,
     int vlind, int b,
     void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
+void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
+    int vlind, int b, 
+    int sbi, int sbj, int sbk,  int nsb1, int nsb2, int nsb3,
+    void  (*Fx)(tVarList *Fdx, tVarList *dx,  tVarList *c1, tVarList *c2),
+    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr);
 
 /* lapack_interface.c */
 int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr);

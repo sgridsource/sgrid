@@ -278,12 +278,19 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
 {
   tGrid *grid = vlx->grid;
   int bi, vi, blocki;
+  int sbi,sbj,sbk;
+  int nsb1 = 1;
+  int nsb2 = 1;
+  int nsb3 = 1;
 
   /* loop over boxes and vars */
   blocki=0;
-  forallboxes(grid,bi)
+  forallVarsBoxesAndSubboxes(vlx, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
+  //forallboxes(grid,bi)
   {
-    for(vi = 0; vi < vlx->n; vi++)
+    //for(vi = 0; vi < vlx->n; vi++)
+    // loop over subboxes, IDEA: exchange vi and bi loops
+    
     {
       double *x = grid->box[bi]->v[vlx->index[vi]];
       double *b = grid->box[bi]->v[vlb->index[vi]];
@@ -318,6 +325,10 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   int col, ncols, INFO;
   tSparseVector **Acol;
   int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
+  int sbi,sbj,sbk;
+  int nsb1 = 1;
+  int nsb2 = 1;
+  int nsb3 = 1;
 
   if(pr) printf("linSolve_with_BlockJacobi_precon\n");
 
@@ -331,9 +342,11 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   
   /* loop over boxes and vars */
   blocki=0;
-  forallboxes(grid,bi)
+  forallVarsBoxesAndSubboxes(b, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
+  //forallboxes(grid,bi)
   {
-    for(vi = 0; vi < b->n; vi++)
+    //for(vi = 0; vi < b->n; vi++)
+    // loop over subboxes,  IDEA: exchange vi and bi loops
     {
       /* allocate Acol for each block */
       ncols = grid->box[bi]->nnodes;
@@ -351,8 +364,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       }
 
       /* set Acol */
-      SetMatrixColumns_ForOneVarInOneBox_slowly(Acol, vi, bi, 
-                                                lop, r, x, c1, c2, pr);
+      SetMatrixColumns_ForOneVarInOneSubBox_slowly(Acol, vi, bi,
+                                                   sbi,sbj,sbk, nsb1,nsb2,nsb3,
+                                                   lop, r, x, c1, c2, pr);
       if(pr&&0) 
         for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
 
@@ -493,4 +507,3 @@ int templates_bicg_wrapper_with_BlockJacobi_precon(tVarList *x, tVarList *b,
                                           itmax,tol,normres, lop);
   return INFO;
 }
-

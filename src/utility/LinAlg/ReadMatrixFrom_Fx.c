@@ -614,3 +614,131 @@ void SetMatrixColumns_ForOneVarInOneBox_slowly(tSparseVector **Acol,
     fflush(stdout);
   }
 }
+
+/* **************************************************************** */
+/* solve linear Matrix-Equations A x = b  			    */
+/* in one box for one var in varlist vlx                            */
+/* The system of equantions has the form:                           */
+/*         A      x      b                                          */
+/*     ( . . . ) (v0)   (s0)                                        */
+/*     ( . . . ) (v1) = (s1)                                        */
+/*     ( . . . ) (. )   (. )                                        */
+/*     ( . . . ) (. )   (. )                                        */
+/*     ( . . . ) (. )   (. )                                        */
+/* where vlx is comprised of the vars u and v and b is comprised of */
+/* of r and s, and the index 0, 1, ... denotes the grid point.      */
+/* Note the grid points are labeled like this:                      */
+/* 0              = first point in box                              */
+/* box->nnodes-1  =  last point in box                              */
+/* **************************************************************** */
+
+/* set matrix columns Acol[l] of type (tSparseVector *)  */
+/* before we call this routine we need to do this:
+    int ncols;
+    tSparseVector **Acol;
+    ncols=(grid->box->nnodes);
+    Acol=AllocateSparseVectorArray(ncols);
+  */
+/* The index vlind of the var in vlx and the boxindex b are passed in. */
+/* It's very slow!!! since we loop over all points and Fx has to 
+   be called for each of these points!!! */
+void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
+    int vlind, int b, 
+    int sbi, int sbj, int sbk,  int nsb1, int nsb2, int nsb3,
+    void  (*Fx)(tVarList *Fdx, tVarList *dx,  tVarList *c1, tVarList *c2),
+    tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr)
+{
+  tGrid *grid = vlx->grid;
+
+  /* set x to zero */
+  vladd(vlx, 0.0,NULL, 0.0,NULL);
+
+  if(pr)
+  {
+    printf("\n"); prdivider(0);  
+    printf("SetMatrixColumns_ForOneVarInOneSubBox_slowly: var%d, box%d, "
+           "subbox %d/%d,%d/%d,%d/%d\ncol=", 
+           vlind,b, sbi,nsb1,sbj,nsb2,sbk,nsb3);
+  }
+
+  SGRID_LEVEL6_Pragma(omp parallel)
+  {
+    tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
+    tBox *box_p = grid_p->box[b];
+    tVarList *vlFx_p = vlalloc(grid_p);
+    tVarList *vlx_p  = vlalloc(grid_p);
+    tVarList *vlc1_p = vlalloc(grid_p);
+    tVarList *vlc2_p = vlalloc(grid_p);
+    int n1 = box_p->n1;
+    int n2 = box_p->n2;
+    int n3 = box_p->n3;
+    //int si; /* index in subbox: si = sbi + sbj*nsb1 + sbk*nsb1*nsb2 */
+    //int nsi = nsb1*nsb2*nsb3; /* # of subboxes */
+    int i1 = (sbi*n1)/nsb1;
+    int i2 = ((sbi+1)*n1)/nsb1;
+    int j1 = (sbj*n2)/nsb2;
+    int j2 = ((sbj+1)*n2)/nsb2;
+    int k1 = (sbk*n3)/nsb3;
+    int k2 = ((sbk+1)*n3)/nsb3;
+    int i,j,k;
+
+    /* make local copy of grid and var lists */      
+    copy_grid(grid, grid_p, 0);
+    vlpushvl(vlFx_p, vlFx);
+    vlpushvl(vlx_p, vlx);
+    vlpushvl(vlc1_p, vlc1);
+    vlpushvl(vlc2_p, vlc2);
+
+    //if(pr) printf("\ni: %d...%d  j: %d...%d  k:%d...%d\n", i1,i2-1, j1,j2-1, k1,k2-1);
+
+    SGRID_LEVEL6_Pragma(omp for)
+    //for(si=0; si<nsi; si+)
+    for(k=k1; k<k2; k++)
+    for(j=j1; j<j2; j++)
+    for(i=i1; i<i2; i++)
+    {
+      double *x = box_p->v[vlx_p->index[vlind]];
+      int ijk = Index(i,j,k); 
+      int col = Ind_n1n2( (i-i1),(j-j1),(k-k1), (i2-i1),(j2-j1) );
+      int ii,jj,kk;
+
+      //if(pr) { printf("ijk=%d ", ijk); }
+      if(pr) { printf("%d ", col); fflush(stdout);}
+
+      /* put a single 1 into x at point ijk */
+      x[ijk]=1;
+      
+      /* evaluate Fx if x has a single 1 in line=i, in order to
+         compute matrix column col */
+      Fx(vlFx_p, vlx_p, vlc1_p, vlc2_p);
+
+      /* check where in column col there are entries */
+      for(kk=k1; kk<k2; kk++)
+      for(jj=j1; jj<j2; jj++)
+      for(ii=i1; ii<i2; ii++)
+      {
+        double *Fx = box_p->v[vlFx_p->index[vlind]];
+        int iijjkk = Index(ii,jj,kk);
+        int line = Ind_n1n2( (ii-i1),(jj-j1),(kk-k1), (i2-i1),(j2-j1) );
+        if(Fx[iijjkk]!=0)  AddToSparseVector(Acol[col], line, Fx[iijjkk]);
+      }
+
+      /* remove the 1 in x at point i */
+      x[ijk]=0;
+    }
+    /* free local copies */
+    vlfree(vlFx_p);
+    vlfree(vlx_p);
+    vlfree(vlc1_p);
+    vlfree(vlc2_p);
+    free_grid(grid_p);
+  }
+  if(pr)
+  {
+    int ncol = grid->box[b]->nnodes;
+    printf("\nSetMatrixColumns_ForOneVarInOneSubBox_slowly: "
+           "the %d*%d matrix Acol=%p is now set!\n",
+           ncol, ncol, Acol);
+    fflush(stdout);
+  }
+}
