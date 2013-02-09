@@ -13,9 +13,14 @@ double *DiagMinv_JacobiPrecon;
 /* blocks of a block diagonal matrix */
 struct
 {
-  int nblocks;              /* # of blocks */
+  int nblocks; /* # of blocks */
+  int type;    /* 0 means arrays of tSparseVector **, 
+                  1 means UMFPACK Ap,Ai,Ax arrays */
   int *blockdims;           /* array of dims of blocks 0 to nblocks-1 */
   tSparseVector ***Mblock;  /* array of matrices for blocks 0 to nblocks-1 */
+  LONGINT **Ap; /* array of Ap's */ // currently not used
+  LONGINT **Ai; /* array of Ai's */ // currently not used
+  double  **Ax; /* array of Ax's */ // currently not used
 } Blocks_JacobiPrecon;
 
 
@@ -319,6 +324,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   /* allocate memory for blocks in Blocks_JacobiPrecon struct */
   nblocks = (grid->nboxes)*(b->n);
   Blocks_JacobiPrecon.nblocks = nblocks;
+  Blocks_JacobiPrecon.type = 0; /* set type to 0 for now */
   Blocks_JacobiPrecon.blockdims = (int *) calloc(nblocks, sizeof(int));
   Blocks_JacobiPrecon.Mblock 
    = (tSparseVector ***) calloc(nblocks, sizeof(tSparseVector **));
