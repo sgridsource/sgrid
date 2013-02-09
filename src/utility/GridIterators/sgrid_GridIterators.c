@@ -30,6 +30,12 @@ int sgrid_GridIterators()
          "which templates wrapper we use as precon [GMRES,BICGSTAB,CGS]");
   AddPar("GridIterators_Preconditioner_type", "fd",
          "whether we use spectral or finite diff [spectral,fd]");
+  AddPar("GridIterators_Preconditioner_BlockJacobi_nsb1", "1",
+         "number of subboxes for BlockJacobi in X-dir");
+  AddPar("GridIterators_Preconditioner_BlockJacobi_nsb2", "1",
+         "number of subboxes for BlockJacobi in Y-dir");
+  AddPar("GridIterators_Preconditioner_BlockJacobi_nsb3", "1",
+         "number of subboxes for BlockJacobi in Z-dir");
   AddPar("GridIterators_Preconditioner_itmax", "1000",
          "max number of iterations in Preconditioner");
   AddPar("GridIterators_Preconditioner_reltol", "0.001",

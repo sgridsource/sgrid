@@ -9,6 +9,14 @@
   for(sbj=0; sbj<(nsb2); sbj++) \
   for(sbi=0; sbi<(nsb1); sbi++)
 
+#define IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
+  i1 = ((sbi)*n1)/(nsb1); \
+  i2 = (((sbi)+1)*n1)/(nsb1); \
+  j1 = ((sbj)*n2)/(nsb2); \
+  j2 = (((sbj)+1)*n2)/(nsb2); \
+  k1 = ((sbk)*n3)/(nsb3); \
+  k2 = (((sbk)+1)*n3)/(nsb3); \
+
 
 /* dot product and L2-Norm over entire grid or box for varlists */
 double GridDotProduct(tVarList *vlu, tVarList *vlv);

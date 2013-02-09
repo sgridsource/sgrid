@@ -261,3 +261,59 @@ void copy_array_into_vl_outervlloop(double *xa, tVarList *vlx)
       }
     }
 }
+
+/* copy varlistComp In Subbox_into_an array: x = vlx of comp in subbox */
+void copy_varlistCompInSubbox_into_array(tVarList *vlx, int vi, int bi,
+                                         int sbi, int sbj, int sbk,
+                                         int nsb1, int nsb2, int nsb3,
+                                         double *x)
+{
+  tGrid *grid = vlx->grid;
+  tBox *box = grid->box[bi];
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i1,i2, j1,j2, k1,k2; 
+  int i,j,k;
+        
+  IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
+
+  for(k=k1; k<k2; k++)
+  for(j=j1; j<j2; j++)
+  for(i=i1; i<i2; i++)
+  {
+    double *xp = box->v[vlx->index[vi]];
+    int ijk = Index(i,j,k); 
+    int ix  = Ind_n1n2( (i-i1),(j-j1),(k-k1), (i2-i1),(j2-j1) );
+
+    x[ix] = xp[ijk];
+  }
+}
+
+/* copy array into varlistComp In Subbox: vlx of comp in subbox = x */
+void copy_array_into_varlistCompInSubbox(double *x, 
+                                         tVarList *vlx, int vi, int bi,
+                                         int sbi, int sbj, int sbk,
+                                         int nsb1, int nsb2, int nsb3)
+{
+  tGrid *grid = vlx->grid;
+  tBox *box = grid->box[bi];
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i1,i2, j1,j2, k1,k2; 
+  int i,j,k;
+        
+  IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
+
+  for(k=k1; k<k2; k++)
+  for(j=j1; j<j2; j++)
+  for(i=i1; i<i2; i++)
+  {
+    double *xp = box->v[vlx->index[vi]];
+    int ijk = Index(i,j,k); 
+    int ix  = Ind_n1n2( (i-i1),(j-j1),(k-k1), (i2-i1),(j2-j1) );
+
+    xp[ijk] = x[ix];
+  }
+}

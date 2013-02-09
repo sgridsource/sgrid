@@ -258,6 +258,7 @@ void Matrix_BlockJacobi_Solve(tSparseVector **Acol, int ncols,
   double *Ax;
 
   /* count number of entries in sparse matrix */
+  nz = 0;
   for(j = 0; j < ncols; j++) nz+=Acol[j]->entries;
 
   /* allocate memory for Ap,Ai,Ax for matrix */
@@ -279,30 +280,47 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
   tGrid *grid = vlx->grid;
   int bi, vi, blocki;
   int sbi,sbj,sbk;
-  int nsb1 = 1;
-  int nsb2 = 1;
-  int nsb3 = 1;
+  int nsb1 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb1");
+  int nsb2 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb2");
+  int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
 
   /* loop over boxes and vars */
   blocki=0;
   forallVarsBoxesAndSubboxes(vlx, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
-  //forallboxes(grid,bi)
   {
-    //for(vi = 0; vi < vlx->n; vi++)
-    // loop over subboxes, IDEA: exchange vi and bi loops
-    
-    {
-      double *x = grid->box[bi]->v[vlx->index[vi]];
-      double *b = grid->box[bi]->v[vlb->index[vi]];
-      tSparseVector **Acol;
-      int ncols;
+    tBox *box = grid->box[bi];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int i1,i2, j1,j2, k1,k2; 
+    double *x;
+    double *b;
+    tSparseVector **Acol;
+    int ncols;
 
-      /* solve for var vi in box bi */
-      ncols = Blocks_JacobiPrecon.blockdims[blocki];
-      Acol  = Blocks_JacobiPrecon.Mblock[blocki];
-      Matrix_BlockJacobi_Solve(Acol, ncols, x, b);
-      blocki++;
-    }
+    /* allocate mem for x,b */
+    IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
+    x = dmalloc((i2-i1)*(j2-j1)*(k2-k1));
+    b = dmalloc((i2-i1)*(j2-j1)*(k2-k1));
+
+    /* set x,b */
+    copy_varlistCompInSubbox_into_array(vlx, vi, bi,
+                                        sbi,sbj,sbk, nsb1,nsb2,nsb3, x);
+    copy_varlistCompInSubbox_into_array(vlb, vi, bi,
+                                        sbi,sbj,sbk, nsb1,nsb2,nsb3, b);
+    /* solve for var vi in box bi */
+    ncols = Blocks_JacobiPrecon.blockdims[blocki];
+    Acol  = Blocks_JacobiPrecon.Mblock[blocki];
+    Matrix_BlockJacobi_Solve(Acol, ncols, x, b);
+    blocki++;
+
+    /* set vlx, vlb */
+    copy_array_into_varlistCompInSubbox(x, vlx, vi, bi,
+                                        sbi,sbj,sbk, nsb1,nsb2,nsb3);
+    copy_array_into_varlistCompInSubbox(b, vlb, vi, bi,
+                                        sbi,sbj,sbk, nsb1,nsb2,nsb3);
+    /* free arrays */
+    free(x); free(b);
   }
 }
 
@@ -326,14 +344,14 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   tSparseVector **Acol;
   int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
   int sbi,sbj,sbk;
-  int nsb1 = 1;
-  int nsb2 = 1;
-  int nsb3 = 1;
+  int nsb1 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb1");
+  int nsb2 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb2");
+  int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
 
   if(pr) printf("linSolve_with_BlockJacobi_precon\n");
 
   /* allocate memory for blocks in Blocks_JacobiPrecon struct */
-  nblocks = (grid->nboxes)*(b->n);
+  nblocks = (b->n)*(grid->nboxes)*nsb1*nsb2*nsb3;
   Blocks_JacobiPrecon.nblocks = nblocks;
   Blocks_JacobiPrecon.type = 0; /* set type to 0 for now */
   Blocks_JacobiPrecon.blockdims = (int *) calloc(nblocks, sizeof(int));
@@ -343,46 +361,49 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   /* loop over boxes and vars */
   blocki=0;
   forallVarsBoxesAndSubboxes(b, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
-  //forallboxes(grid,bi)
   {
-    //for(vi = 0; vi < b->n; vi++)
-    // loop over subboxes,  IDEA: exchange vi and bi loops
+    tBox *box = grid->box[bi];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    int i1,i2, j1,j2, k1,k2;
+
+
+    /* allocate Acol for each block */
+    IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
+    ncols = (i2-i1)*(j2-j1)*(k2-k1);
+    Acol=AllocateSparseVectorArray(ncols);
+    if(Acol) { if(pr) printf("allocated %d matrix columns\n", ncols); }
+    else       errorexit("no memory for Acol");
+
+    if(use_fd)
     {
-      /* allocate Acol for each block */
-      ncols = grid->box[bi]->nnodes;
-      Acol=AllocateSparseVectorArray(ncols);
-      if(Acol) { if(pr) printf("allocated %d matrix columns\n", ncols); }
-      else       errorexit("no memory for Acol");
-
-      if(use_fd)
-      {
-        /* save current grid in grid_bak and then convert grid to fin. diff. */
-        grid_bak = make_empty_grid(grid->nvariables, 0);
-        copy_grid_withoutvars(grid, grid_bak, 0);
-        convert_grid_to_fd(grid);
-        if(pr) printf("Using finite differencing to set matrix Acol...\n");
-      }
-
-      /* set Acol */
-      SetMatrixColumns_ForOneVarInOneSubBox_slowly(Acol, vi, bi,
-                                                   sbi,sbj,sbk, nsb1,nsb2,nsb3,
-                                                   lop, r, x, c1, c2, pr);
-      if(pr&&0) 
-        for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
-
-      if(use_fd)
-      {
-        /* restore grid to spectral */
-        copy_grid_withoutvars(grid_bak, grid, 0);
-        free_grid(grid_bak);
-      }
-
-      /* set each entry in struct */
-      Blocks_JacobiPrecon.blockdims[blocki] = ncols;
-      Blocks_JacobiPrecon.Mblock[blocki]    = Acol;
-
-      blocki++;
+      /* save current grid in grid_bak and then convert grid to fin. diff. */
+      grid_bak = make_empty_grid(grid->nvariables, 0);
+      copy_grid_withoutvars(grid, grid_bak, 0);
+      convert_grid_to_fd(grid);
+      if(pr) printf("Using finite differencing to set matrix Acol...\n");
     }
+
+    /* set Acol */
+    SetMatrixColumns_ForOneVarInOneSubBox_slowly(Acol, vi, bi,
+                                                 sbi,sbj,sbk, nsb1,nsb2,nsb3,
+                                                 lop, r, x, c1, c2, pr);
+    if(pr&&0) 
+      for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
+
+    if(use_fd)
+    {
+      /* restore grid to spectral */
+      copy_grid_withoutvars(grid_bak, grid, 0);
+      free_grid(grid_bak);
+    }
+
+    /* set each entry in struct */
+    Blocks_JacobiPrecon.blockdims[blocki] = ncols;
+    Blocks_JacobiPrecon.Mblock[blocki]    = Acol;
+
+    blocki++;
   }
   
   /* solve A x = b with lsolver and BlockJacobi_Preconditioner_from_Blocks */

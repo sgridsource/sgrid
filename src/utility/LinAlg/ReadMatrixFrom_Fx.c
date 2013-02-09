@@ -649,16 +649,25 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr)
 {
   tGrid *grid = vlx->grid;
+  tBox *box = grid->box[b];
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i1,i2, j1,j2, k1,k2;
+
+  /* set i1,i2, j1,j2, k1,k2 */
+  IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
+  //if(pr) printf("\ni: %d...%d  j: %d...%d  k:%d...%d\n", i1,i2-1, j1,j2-1, k1,k2-1);
 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
 
   if(pr)
   {
-    printf("\n"); prdivider(0);  
+    prdivider(0);  
     printf("SetMatrixColumns_ForOneVarInOneSubBox_slowly: var%d, box%d, "
            "subbox %d/%d,%d/%d,%d/%d\ncol=", 
-           vlind,b, sbi,nsb1,sbj,nsb2,sbk,nsb3);
+           vlind,b, sbi,nsb1-1, sbj,nsb2-1, sbk,nsb3-1);
   }
 
   SGRID_LEVEL6_Pragma(omp parallel)
@@ -669,17 +678,6 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
     tVarList *vlx_p  = vlalloc(grid_p);
     tVarList *vlc1_p = vlalloc(grid_p);
     tVarList *vlc2_p = vlalloc(grid_p);
-    int n1 = box_p->n1;
-    int n2 = box_p->n2;
-    int n3 = box_p->n3;
-    //int si; /* index in subbox: si = sbi + sbj*nsb1 + sbk*nsb1*nsb2 */
-    //int nsi = nsb1*nsb2*nsb3; /* # of subboxes */
-    int i1 = (sbi*n1)/nsb1;
-    int i2 = ((sbi+1)*n1)/nsb1;
-    int j1 = (sbj*n2)/nsb2;
-    int j2 = ((sbj+1)*n2)/nsb2;
-    int k1 = (sbk*n3)/nsb3;
-    int k2 = ((sbk+1)*n3)/nsb3;
     int i,j,k;
 
     /* make local copy of grid and var lists */      
@@ -689,10 +687,8 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
     vlpushvl(vlc1_p, vlc1);
     vlpushvl(vlc2_p, vlc2);
 
-    //if(pr) printf("\ni: %d...%d  j: %d...%d  k:%d...%d\n", i1,i2-1, j1,j2-1, k1,k2-1);
 
     SGRID_LEVEL6_Pragma(omp for)
-    //for(si=0; si<nsi; si+)
     for(k=k1; k<k2; k++)
     for(j=j1; j<j2; j++)
     for(i=i1; i<i2; i++)
@@ -735,10 +731,10 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
   }
   if(pr)
   {
-    int ncol = grid->box[b]->nnodes;
+    int ncols = (i2-i1)*(j2-j1)*(k2-k1);
     printf("\nSetMatrixColumns_ForOneVarInOneSubBox_slowly: "
-           "the %d*%d matrix Acol=%p is now set!\n",
-           ncol, ncol, Acol);
+           "the %d*%d matrix Acol=%p is now set!\n", ncols,ncols, Acol);
+    prdivider(0);
     fflush(stdout);
   }
 }
