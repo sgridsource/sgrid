@@ -246,30 +246,12 @@ int templates_bicg_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b,
 /* ********************************************************************* */
 
 /* example of a solver for a block */
-void Matrix_BlockJacobi_Solve(tSparseVector **Acol, int ncols, 
-                              double *x, double *b)
+void Matrix_BlockJacobi_Solve(LONGINT *Ap, LONGINT *Ai, double *Ax,
+                              double *x, double *b, int ncols)
 {
   int pr = 0; // Getv("GridIterators_verbose", "yes");
-  int dropbelow = Getd("GridIterators_setABStozero_below");
-  int j;
-  LONGINT nz;
-  LONGINT *Ap;
-  LONGINT *Ai;
-  double *Ax;
 
-  /* count number of entries in sparse matrix */
-  nz = 0;
-  for(j = 0; j < ncols; j++) nz+=Acol[j]->entries;
-
-  /* allocate memory for Ap,Ai,Ax for matrix */
-  allocate_umfpack_dl_matrix(&Ap, &Ai, &Ax, ncols, nz);
-
-  /* set Ap,Ai,Ax and solve */
-  set_umfpack_dl_matrix_from_columns(Ap,Ai,Ax, Acol, ncols, dropbelow, 0);
   umfpack_dl_solve_from_Ap_Ai_Ax_x_b(Ap,Ai,Ax, x, b, ncols, pr);
-
-  /* free Ap,Ai,Ax */
-  free_umfpack_dl_matrix(Ap,Ai,Ax);
 }
 
 /* Blocks_JacobiPrecon contains a block diagonal matrix set with 
@@ -295,8 +277,11 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     int i1,i2, j1,j2, k1,k2; 
     double *x;
     double *b;
-    tSparseVector **Acol;
+    //tSparseVector **Acol;
     int ncols;
+    LONGINT *Ap;
+    LONGINT *Ai;
+    double *Ax;
 
     /* allocate mem for x,b */
     IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
@@ -310,8 +295,11 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
                                         sbi,sbj,sbk, nsb1,nsb2,nsb3, b);
     /* solve for var vi in box bi */
     ncols = Blocks_JacobiPrecon.blockdims[blocki];
-    Acol  = Blocks_JacobiPrecon.Mblock[blocki];
-    Matrix_BlockJacobi_Solve(Acol, ncols, x, b);
+    //Acol  = Blocks_JacobiPrecon.Mblock[blocki];
+    Ap    = Blocks_JacobiPrecon.Ap[blocki];
+    Ai    = Blocks_JacobiPrecon.Ai[blocki];
+    Ax    = Blocks_JacobiPrecon.Ax[blocki];
+    Matrix_BlockJacobi_Solve(Ap,Ai,Ax, x, b, ncols);
     blocki++;
 
     /* set vlx, vlb */
@@ -340,8 +328,8 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   tGrid *grid_bak;
   int bi, vi, blocki, nblocks;
   int pr = Getv("GridIterators_verbose", "yes");
-  int col, ncols, INFO;
-  tSparseVector **Acol;
+  int dropbelow = Getd("GridIterators_setABStozero_below");
+  int INFO;
   int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
   int sbi,sbj,sbk;
   int nsb1 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb1");
@@ -356,7 +344,13 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   Blocks_JacobiPrecon.type = 0; /* set type to 0 for now */
   Blocks_JacobiPrecon.blockdims = (int *) calloc(nblocks, sizeof(int));
   Blocks_JacobiPrecon.Mblock 
-   = (tSparseVector ***) calloc(nblocks, sizeof(tSparseVector **));
+    = (tSparseVector ***) calloc(nblocks, sizeof(tSparseVector **));
+  Blocks_JacobiPrecon.Ap 
+    = (LONGINT **) calloc(nblocks, sizeof(LONGINT *));
+  Blocks_JacobiPrecon.Ai 
+    = (LONGINT **) calloc(nblocks, sizeof(LONGINT *));
+  Blocks_JacobiPrecon.Ax 
+    = (double **) calloc(nblocks, sizeof(double *));
   
   /* loop over boxes and vars */
   blocki=0;
@@ -367,7 +361,12 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     int n2 = box->n2;
     int n3 = box->n3;
     int i1,i2, j1,j2, k1,k2;
-
+    int col, ncols, j;
+    tSparseVector **Acol;
+    LONGINT nz;
+    LONGINT *Ap;
+    LONGINT *Ai;
+    double *Ax;
 
     /* allocate Acol for each block */
     IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
@@ -399,9 +398,25 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       free_grid(grid_bak);
     }
 
+    /* set Ap,Ai,Ax */
+    /* count number of entries in sparse matrix */
+    nz = 0;
+    for(j = 0; j < ncols; j++) nz+=Acol[j]->entries;
+    /* allocate memory for Ap,Ai,Ax for matrix */
+    allocate_umfpack_dl_matrix(&Ap, &Ai, &Ax, ncols, nz);
+    /* set Ap,Ai,Ax and solve */
+    set_umfpack_dl_matrix_from_columns(Ap,Ai,Ax, Acol, ncols, dropbelow, 0);
+
+    /* since Acol is now in Ap,Ai,Ax, we free Acol */
+    FreeSparseVectorArray(Acol, ncols);
+    Acol=NULL;
+
     /* set each entry in struct */
     Blocks_JacobiPrecon.blockdims[blocki] = ncols;
     Blocks_JacobiPrecon.Mblock[blocki]    = Acol;
+    Blocks_JacobiPrecon.Ap[blocki] = Ap;
+    Blocks_JacobiPrecon.Ai[blocki] = Ai;
+    Blocks_JacobiPrecon.Ax[blocki] = Ax;
 
     blocki++;
   }
@@ -414,10 +429,18 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   /* maybe we could save and reuse this matrix for several lin solves,
      if the linear solve succeeds in driving down the residual of lop ???*/
   for(blocki=0; blocki<Blocks_JacobiPrecon.nblocks; blocki++)
+  {
     FreeSparseVectorArray(Blocks_JacobiPrecon.Mblock[blocki],
                           Blocks_JacobiPrecon.blockdims[blocki]);
+    free(Blocks_JacobiPrecon.Ap[blocki]);
+    free(Blocks_JacobiPrecon.Ai[blocki]);
+    free(Blocks_JacobiPrecon.Ax[blocki]);
+  }
   free(Blocks_JacobiPrecon.blockdims);
   free(Blocks_JacobiPrecon.Mblock);
+  free(Blocks_JacobiPrecon.Ap);
+  free(Blocks_JacobiPrecon.Ai);
+  free(Blocks_JacobiPrecon.Ax);
 
   return INFO;
 }
