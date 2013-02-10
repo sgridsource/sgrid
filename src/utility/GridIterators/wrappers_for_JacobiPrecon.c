@@ -6,6 +6,17 @@
 #include "GridIterators.h"
 
 
+
+/* struct that contains all about a matrix that we need for umfpack_dl_solve */
+typedef struct T_UMFPACK_A {
+  LONGINT sys;       /* use sys=UMFPACK_A for a normal solve */
+  LONGINT *Ap;       /* matrix */
+  LONGINT *Ai;
+  double  *Ax;
+  void    *Numeric;  /* computed with umfpack_dl_numeric */
+} tUMFPACK_A;
+
+
 /* global vars */
 /* inverse Diagonal Matrix elements */
 double *DiagMinv_JacobiPrecon;
@@ -18,9 +29,7 @@ struct
                   1 means UMFPACK Ap,Ai,Ax arrays */
   int *blockdims;           /* array of dims of blocks 0 to nblocks-1 */
   tSparseVector ***Mblock;  /* array of matrices for blocks 0 to nblocks-1 */
-  LONGINT **Ap; /* array of Ap's */ // currently not used
-  LONGINT **Ai; /* array of Ai's */ // currently not used
-  double  **Ax; /* array of Ax's */ // currently not used
+  tUMFPACK_A *umfpackA;
 } Blocks_JacobiPrecon;
 
 
@@ -302,16 +311,16 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     /* solve for var vi in box bi */
     ncols = Blocks_JacobiPrecon.blockdims[blocki];
     //Acol  = Blocks_JacobiPrecon.Mblock[blocki];
-    Ap    = Blocks_JacobiPrecon.Ap[blocki];
-    Ai    = Blocks_JacobiPrecon.Ai[blocki];
-    Ax    = Blocks_JacobiPrecon.Ax[blocki];
+    Ap    = Blocks_JacobiPrecon.umfpackA[blocki].Ap;
+    Ai    = Blocks_JacobiPrecon.umfpackA[blocki].Ai;
+    Ax    = Blocks_JacobiPrecon.umfpackA[blocki].Ax;
     Matrix_BlockJacobi_Solve(Ap,Ai,Ax, x, b, ncols);
 
-    /* set vlx, vlb */
+    /* set vlx */
     copy_array_into_varlistCompInSubbox(x, vlx, vi, bi,
                                         sbi,sbj,sbk, nsb1,nsb2,nsb3);
-    copy_array_into_varlistCompInSubbox(b, vlb, vi, bi,
-                                        sbi,sbj,sbk, nsb1,nsb2,nsb3);
+//    copy_array_into_varlistCompInSubbox(b, vlb, vi, bi,
+//                                        sbi,sbj,sbk, nsb1,nsb2,nsb3);
     /* free arrays */
     free(x); free(b);
   }
@@ -350,13 +359,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   Blocks_JacobiPrecon.blockdims = (int *) calloc(nblocks, sizeof(int));
   Blocks_JacobiPrecon.Mblock 
     = (tSparseVector ***) calloc(nblocks, sizeof(tSparseVector **));
-  Blocks_JacobiPrecon.Ap 
-    = (LONGINT **) calloc(nblocks, sizeof(LONGINT *));
-  Blocks_JacobiPrecon.Ai 
-    = (LONGINT **) calloc(nblocks, sizeof(LONGINT *));
-  Blocks_JacobiPrecon.Ax 
-    = (double **) calloc(nblocks, sizeof(double *));
-  
+  Blocks_JacobiPrecon.umfpackA
+    = (tUMFPACK_A *) calloc(nblocks, sizeof(tUMFPACK_A));
+
   /* loop over boxes and vars */
   blocki=0;
   forallVarsBoxesAndSubboxes(b, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
@@ -419,9 +424,11 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     /* set each entry in struct */
     Blocks_JacobiPrecon.blockdims[blocki] = ncols;
     Blocks_JacobiPrecon.Mblock[blocki]    = Acol;
-    Blocks_JacobiPrecon.Ap[blocki] = Ap;
-    Blocks_JacobiPrecon.Ai[blocki] = Ai;
-    Blocks_JacobiPrecon.Ax[blocki] = Ax;
+    Blocks_JacobiPrecon.umfpackA[blocki].sys = 0;
+    Blocks_JacobiPrecon.umfpackA[blocki].Ap  = Ap;
+    Blocks_JacobiPrecon.umfpackA[blocki].Ai  = Ai;
+    Blocks_JacobiPrecon.umfpackA[blocki].Ax  = Ax;
+    Blocks_JacobiPrecon.umfpackA[blocki].Numeric = NULL;
 
     blocki++;
   }
@@ -437,15 +444,14 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   {
     FreeSparseVectorArray(Blocks_JacobiPrecon.Mblock[blocki],
                           Blocks_JacobiPrecon.blockdims[blocki]);
-    free(Blocks_JacobiPrecon.Ap[blocki]);
-    free(Blocks_JacobiPrecon.Ai[blocki]);
-    free(Blocks_JacobiPrecon.Ax[blocki]);
+    free(Blocks_JacobiPrecon.umfpackA[blocki].Ap);
+    free(Blocks_JacobiPrecon.umfpackA[blocki].Ai);
+    free(Blocks_JacobiPrecon.umfpackA[blocki].Ax);
+    umfpack_dl_free_numeric(&(Blocks_JacobiPrecon.umfpackA[blocki].Numeric));
   }
   free(Blocks_JacobiPrecon.blockdims);
   free(Blocks_JacobiPrecon.Mblock);
-  free(Blocks_JacobiPrecon.Ap);
-  free(Blocks_JacobiPrecon.Ai);
-  free(Blocks_JacobiPrecon.Ax);
+  free(Blocks_JacobiPrecon.umfpackA);
 
   return INFO;
 }
