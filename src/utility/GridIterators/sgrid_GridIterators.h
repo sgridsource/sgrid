@@ -1,6 +1,7 @@
 /* sgrid_GridIterators.h */
 /* Wolfgang Tichy 8/2008 */
 
+
 /* macro that loops over vars, boxes and subboxes */
 #define forallVarsBoxesAndSubboxes(vlv, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
   for(vi=0; vi<vlv->n; vi++) \
@@ -9,6 +10,7 @@
   for(sbj=0; sbj<(nsb2); sbj++) \
   for(sbi=0; sbi<(nsb1); sbi++)
 
+/* gives index we need to loop over in a subbox, e.g.: i1 <= i < i2 */
 #define IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
   i1 = ((sbi)*n1)/(nsb1); \
   i2 = (((sbi)+1)*n1)/(nsb1); \

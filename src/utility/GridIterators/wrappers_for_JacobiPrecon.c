@@ -260,14 +260,16 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
                                             tVarList *vlc1, tVarList *vlc2)
 {
   tGrid *grid = vlx->grid;
-  int bi, vi, blocki;
+  int bi, vi;
   int sbi,sbj,sbk;
   int nsb1 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb1");
   int nsb2 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb2");
   int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
 
-  /* loop over boxes and vars */
-  blocki=0;
+  /* loop over vars, boxes and subboxes */
+  /* we want: #pragma omp parallel for collapse(5) 
+     but icc 10.1 says: syntax error in omp clause */
+  SGRID_TOPLEVEL_Pragma(omp parallel for collapse(5))
   forallVarsBoxesAndSubboxes(vlx, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
   {
     tBox *box = grid->box[bi];
@@ -282,6 +284,10 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     LONGINT *Ap;
     LONGINT *Ai;
     double *Ax;
+    /* blocki = sbi + nsb1 * sbj + nsb1*nsb2 * sbk
+                + nsb1*nsb2*nsb3 * bi + nsb1*nsb2*nsb3*(grid->nboxes) * vi */
+    int blocki = sbi + nsb1 * (sbj + nsb2 * (sbk + 
+                 nsb3 * (bi + (grid->nboxes) * vi)));
 
     /* allocate mem for x,b */
     IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
@@ -300,7 +306,6 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     Ai    = Blocks_JacobiPrecon.Ai[blocki];
     Ax    = Blocks_JacobiPrecon.Ax[blocki];
     Matrix_BlockJacobi_Solve(Ap,Ai,Ax, x, b, ncols);
-    blocki++;
 
     /* set vlx, vlb */
     copy_array_into_varlistCompInSubbox(x, vlx, vi, bi,
