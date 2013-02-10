@@ -60,6 +60,12 @@
 #define SGRID_LEVEL6_Pragma(x)
 #endif
 
+#ifdef TOPLEVEL_Pragmas
+#define SGRID_TOPLEVEL_Pragma(x)  _Pragma ( #x )
+#else
+#define SGRID_TOPLEVEL_Pragma(x)
+#endif
+
 
 /* snap effect for grid coordinates */
 #define dequaleps 1e-10
