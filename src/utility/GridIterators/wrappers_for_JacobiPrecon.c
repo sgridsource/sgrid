@@ -355,7 +355,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   }
 
   /* loop over boxes and vars */
+#ifndef LEVEL6_Pragmas
   SGRID_TOPLEVEL_Pragma(omp parallel for)
+#endif
   forallVarsBoxesAndSubboxes_defIndices(b, blocki, vi,bi, sbi,sbj,sbk,
                                         nsb1,nsb2,nsb3)
   {
