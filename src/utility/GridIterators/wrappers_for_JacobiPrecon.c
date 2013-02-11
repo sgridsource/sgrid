@@ -263,18 +263,15 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
                                             tVarList *vlc1, tVarList *vlc2)
 {
   tGrid *grid = vlx->grid;
-  int bi, vi;
-  int sbi,sbj,sbk;
   int nsb1 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb1");
   int nsb2 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb2");
   int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
+  int blocki;
 
   /* loop over vars, boxes and subboxes */
-  /* we want: #pragma omp parallel for collapse(5) 
-     but icc 10.1 says: syntax error in omp clause */
-  //SGRID_TOPLEVEL_Pragma(omp parallel for collapse(5))
   SGRID_TOPLEVEL_Pragma(omp parallel for)
-  forallVarsBoxesAndSubboxes(vlx, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
+  forallVarsBoxesAndSubboxes_defIndices(vlx, blocki, vi,bi, sbi,sbj,sbk,
+                                        nsb1,nsb2,nsb3)
   {
     tBox *box = grid->box[bi];
     int n1 = box->n1;
@@ -283,13 +280,12 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     int i1,i2, j1,j2, k1,k2; 
     double *x;
     double *b;
-    //tSparseVector **Acol;
     int ncols;
     tUMFPACK_A umfpackA;
     /* blocki = sbi + nsb1 * sbj + nsb1*nsb2 * sbk
-                + nsb1*nsb2*nsb3 * bi + nsb1*nsb2*nsb3*(grid->nboxes) * vi */
+                + nsb1*nsb2*nsb3 * bi + nsb1*nsb2*nsb3*(grid->nboxes) * vi 
     int blocki = sbi + nsb1 * (sbj + nsb2 * (sbk + 
-                 nsb3 * (bi + (grid->nboxes) * vi)));
+                 nsb3 * (bi + (grid->nboxes) * vi))); */
 
     /* allocate mem for x,b */
     IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
@@ -310,11 +306,9 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     /* set vlx */
     copy_array_into_varlistCompInSubbox(x, vlx, vi, bi,
                                         sbi,sbj,sbk, nsb1,nsb2,nsb3);
-//    copy_array_into_varlistCompInSubbox(b, vlb, vi, bi,
-//                                        sbi,sbj,sbk, nsb1,nsb2,nsb3);
     /* free arrays */
     free(x); free(b);
-  }
+  } End_forallVarsBoxesAndSubboxes_defIndices
 }
 
 
@@ -331,12 +325,11 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
 {
   tGrid *grid = b->grid;
   tGrid *grid_bak;
-  int i, bi, vi, blocki, nblocks;
+  int i, blocki, nblocks;
   int pr = Getv("GridIterators_verbose", "yes");
   int dropbelow = Getd("GridIterators_setABStozero_below");
   int INFO;
   int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
-  int sbi,sbj,sbk;
   int nsb1 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb1");
   int nsb2 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb2");
   int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
@@ -354,8 +347,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     = (tUMFPACK_A *) calloc(nblocks, sizeof(tUMFPACK_A));
 
   /* loop over boxes and vars */
-  blocki=0;
-  forallVarsBoxesAndSubboxes(b, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
+  SGRID_TOPLEVEL_Pragma(omp parallel for)
+  forallVarsBoxesAndSubboxes_defIndices(b, blocki, vi,bi, sbi,sbj,sbk,
+                                        nsb1,nsb2,nsb3)
   {
     tBox *box = grid->box[bi];
     int n1 = box->n1;
@@ -373,8 +367,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
     ncols = (i2-i1)*(j2-j1)*(k2-k1);
     Acol=AllocateSparseVectorArray(ncols);
-    if(Acol) { if(pr) printf("allocated %d matrix columns\n", ncols); }
-    else       errorexit("no memory for Acol");
+    if(Acol) { if(pr) printf(" allocated %d matrix columns for block%d\n",
+                             ncols, blocki); }
+    else       errorexit(" no memory for Acol");
 
     if(use_fd)
     {
@@ -382,13 +377,15 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       grid_bak = make_empty_grid(grid->nvariables, 0);
       copy_grid_withoutvars(grid, grid_bak, 0);
       convert_grid_to_fd(grid);
-      if(pr) printf("Using finite differencing to set matrix Acol...\n");
+      if(pr)
+        printf(" Using finite differencing to set matrix Acol for block%d...\n",
+               blocki);
     }
 
     /* set Acol */
     SetMatrixColumns_ForOneVarInOneSubBox_slowly(Acol, vi, bi,
                                                  sbi,sbj,sbk, nsb1,nsb2,nsb3,
-                                                 lop, r, x, c1, c2, pr);
+                                                 lop, r, x, c1, c2, 0);
     if(pr&&0) 
       for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
 
@@ -420,15 +417,18 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     Blocks_JacobiPrecon.umfpackA[blocki].Ai  = Ai;
     Blocks_JacobiPrecon.umfpackA[blocki].Ax  = Ax;
     Blocks_JacobiPrecon.umfpackA[blocki].Numeric = NULL; /* it's set below */
-
-    blocki++;
-  }
+  } End_forallVarsBoxesAndSubboxes_defIndices
+  printf("linSolve_with_BlockJacobi_precon: created %d blocks.\n", nblocks);
 
   /* set numeric part of each umfpackA */
   SGRID_TOPLEVEL_Pragma(omp parallel for)            
-  for(i=0; i<blocki; i++)
+  for(i=0; i<nblocks; i++)
+  {
+    printf(" umfpack_dl_numeric_from_tUMFPACK_A in block%d...\n", i);
+    fflush(stdout);
     umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
                                        Blocks_JacobiPrecon.blockdims[i], 0);
+  }
 
   /* solve A x = b with lsolver and BlockJacobi_Preconditioner_from_Blocks */
   INFO = lsolver(x, b, r,c1,c2, itmax,tol,normres, lop, 

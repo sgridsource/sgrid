@@ -425,22 +425,26 @@ int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
   INFO1=umfpack_dl_symbolic(nrows, nrows,
                             umfpackA->Ap, umfpackA->Ai, umfpackA->Ax,
                             &Symbolic, null, null);
+  if(pr)
+  { 
+    printf("umfpack_dl_numeric_from_tUMFPACK_A: umfpack_dl_symbolic -> INFO1=%d\n", INFO1);
+    fflush(stdout);
+  }
   INFO2=umfpack_dl_numeric(umfpackA->Ap, umfpackA->Ai, umfpackA->Ax,
                            Symbolic, &Numeric, null, null);
   umfpackA->Numeric = Numeric;
   umfpack_dl_free_symbolic(&Symbolic);
+  if(pr)
+  { 
+    printf("umfpack_dl_numeric_from_tUMFPACK_A: umfpack_dl_numeric  -> INFO2=%d\n", INFO2);
+    fflush(stdout);
+  }
 #else
   errorexit("umfpack_dl_numeric_from_tUMFPACK_A: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
-  if(pr)
-  { 
-    printf("umfpack_dl_numeric_from_tUMFPACK_A: umfpack_dl_symbolic -> INFO1=%d\n", INFO1);
-    printf("umfpack_dl_numeric_from_tUMFPACK_A: umfpack_dl_numeric  -> INFO2=%d\n", INFO2);
-    fflush(stdout);
-  }
 
   if(INFO1!=0 || INFO2!=0)
   {

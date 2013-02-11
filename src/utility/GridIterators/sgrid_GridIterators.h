@@ -3,12 +3,19 @@
 
 
 /* macro that loops over vars, boxes and subboxes */
-#define forallVarsBoxesAndSubboxes(vlv, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
-  for(vi=0; vi<vlv->n; vi++) \
-  for(bi=0; bi<vlv->grid->nboxes; bi++) \
-  for(sbk=0; sbk<(nsb3); sbk++) \
-  for(sbj=0; sbj<(nsb2); sbj++) \
-  for(sbi=0; sbi<(nsb1); sbi++)
+#define forallVarsBoxesAndSubboxes_defIndices(vlv, blocki, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
+  for((blocki)=0; (blocki)<(nsb1)*(nsb2)*(nsb3)*(grid->nboxes)*((vlv)->n); (blocki)++) { \
+   int acu_, vi, bi, sbk, sbj, sbi; \
+   vi   = (blocki)/((nsb1)*(nsb2)*(nsb3)*((vlv)->grid->nboxes)); \
+   acu_ = (blocki) - (nsb1)*(nsb2)*(nsb3)*((vlv)->grid->nboxes) * vi; \
+   bi   = acu_/((nsb1)*(nsb2)*(nsb3)); \
+   acu_ = acu_ - (nsb1)*(nsb2)*(nsb3) * bi; \
+   sbk  = acu_/((nsb1)*(nsb2)); \
+   acu_ = acu_ - (nsb1)*(nsb2) * sbk; \
+   sbj  = acu_/(nsb1); \   
+   sbi  = acu_ - (nsb1) * sbj;
+/* to end the above marco use this: */
+#define End_forallVarsBoxesAndSubboxes_defIndices }
 
 /* gives index we need to loop over in a subbox, e.g.: i1 <= i < i2 */
 #define IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
