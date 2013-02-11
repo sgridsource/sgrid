@@ -7,8 +7,6 @@
 
 #ifdef UMFPACK
 #include "umfpack.h"
-#define umfpack_dl_free_Numeric umfpack_dl_free_numeric
-LONGINT umfpackA_sys = UMFPACK_A;
 #endif
 
 /* global vars */
@@ -412,7 +410,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     /* set each entry in struct */
     Blocks_JacobiPrecon.blockdims[blocki] = ncols;
     Blocks_JacobiPrecon.Mblock[blocki]    = Acol;
-    Blocks_JacobiPrecon.umfpackA[blocki].sys = umfpackA_sys;
+#ifdef UMFPACK
+    Blocks_JacobiPrecon.umfpackA[blocki].sys = UMFPACK_A;
+#endif
     Blocks_JacobiPrecon.umfpackA[blocki].Ap  = Ap;
     Blocks_JacobiPrecon.umfpackA[blocki].Ai  = Ai;
     Blocks_JacobiPrecon.umfpackA[blocki].Ax  = Ax;
@@ -444,7 +444,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ap);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ai);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ax);
-    umfpack_dl_free_Numeric(&(Blocks_JacobiPrecon.umfpackA[blocki].Numeric));
+#ifdef UMFPACK
+    umfpack_dl_free_numeric(&(Blocks_JacobiPrecon.umfpackA[blocki].Numeric));
+#endif
   }
   free(Blocks_JacobiPrecon.blockdims);
   free(Blocks_JacobiPrecon.Mblock);
