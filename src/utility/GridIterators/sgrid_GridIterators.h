@@ -4,7 +4,7 @@
 
 /* macro that loops over vars, boxes and subboxes */
 #define forallVarsBoxesAndSubboxes_defIndices(vlv, blocki, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
-  for((blocki)=0; (blocki)<(nsb1)*(nsb2)*(nsb3)*(grid->nboxes)*((vlv)->n); (blocki)++) { \
+  for(blocki=0; (blocki)<(nsb1)*(nsb2)*(nsb3)*(grid->nboxes)*((vlv)->n); (blocki)++) { \
    int acu_, vi, bi, sbk, sbj, sbi; \
    vi   = (blocki)/((nsb1)*(nsb2)*(nsb3)*((vlv)->grid->nboxes)); \
    acu_ = (blocki) - (nsb1)*(nsb2)*(nsb3)*((vlv)->grid->nboxes) * vi; \
@@ -12,7 +12,7 @@
    acu_ = acu_ - (nsb1)*(nsb2)*(nsb3) * bi; \
    sbk  = acu_/((nsb1)*(nsb2)); \
    acu_ = acu_ - (nsb1)*(nsb2) * sbk; \
-   sbj  = acu_/(nsb1); \   
+   sbj  = acu_/(nsb1); \
    sbi  = acu_ - (nsb1) * sbj;
 /* to end the above marco use this: */
 #define End_forallVarsBoxesAndSubboxes_defIndices }
