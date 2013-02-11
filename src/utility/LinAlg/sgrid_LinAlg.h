@@ -19,6 +19,15 @@ typedef struct tSV
   double *val;    /* val[i] contains value at position pos[i] */
 } tSparseVector;
 
+/* struct that contains all about a matrix that we need for umfpack_dl_solve */
+typedef struct T_UMFPACK_A {
+  LONGINT sys;       /* use sys=UMFPACK_A for a normal solve */
+  LONGINT *Ap;       /* matrix */
+  LONGINT *Ai;
+  double  *Ax;
+  void    *Numeric;  /* computed with umfpack_dl_numeric */
+} tUMFPACK_A;
+
 
 /* FUNCTIONS */
       
@@ -101,6 +110,10 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
 int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
                                        double *x, double *b, LONGINT nrows,
                                        int pr);
+int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
+                                       LONGINT nrows, int pr);
+int umfpack_dl_solve_from_tUMFPACK_A_x_b(tUMFPACK_A umfpackA,
+                                         double *x, double *b, int pr);
 
 /* SuiteSparseQR_C_interface.c */
 int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,

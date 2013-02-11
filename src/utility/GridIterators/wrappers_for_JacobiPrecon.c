@@ -5,17 +5,11 @@
 #include "sgrid.h"
 #include "GridIterators.h"
 
-
-
-/* struct that contains all about a matrix that we need for umfpack_dl_solve */
-typedef struct T_UMFPACK_A {
-  LONGINT sys;       /* use sys=UMFPACK_A for a normal solve */
-  LONGINT *Ap;       /* matrix */
-  LONGINT *Ai;
-  double  *Ax;
-  void    *Numeric;  /* computed with umfpack_dl_numeric */
-} tUMFPACK_A;
-
+#ifdef UMFPACK
+#include "umfpack.h"
+#define umfpack_dl_free_Numeric umfpack_dl_free_numeric
+LONGINT umfpackA_sys = UMFPACK_A;
+#endif
 
 /* global vars */
 /* inverse Diagonal Matrix elements */
@@ -255,12 +249,12 @@ int templates_bicg_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b,
 /* ********************************************************************* */
 
 /* example of a solver for a block */
-void Matrix_BlockJacobi_Solve(LONGINT *Ap, LONGINT *Ai, double *Ax,
+void Matrix_BlockJacobi_Solve(tUMFPACK_A umfpackA,
                               double *x, double *b, int ncols)
 {
   int pr = 0; // Getv("GridIterators_verbose", "yes");
 
-  umfpack_dl_solve_from_Ap_Ai_Ax_x_b(Ap,Ai,Ax, x, b, ncols, pr);
+  umfpack_dl_solve_from_tUMFPACK_A_x_b(umfpackA, x, b, pr);
 }
 
 /* Blocks_JacobiPrecon contains a block diagonal matrix set with 
@@ -278,7 +272,8 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
   /* loop over vars, boxes and subboxes */
   /* we want: #pragma omp parallel for collapse(5) 
      but icc 10.1 says: syntax error in omp clause */
-  SGRID_TOPLEVEL_Pragma(omp parallel for collapse(5))
+  //SGRID_TOPLEVEL_Pragma(omp parallel for collapse(5))
+  SGRID_TOPLEVEL_Pragma(omp parallel for)
   forallVarsBoxesAndSubboxes(vlx, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3)
   {
     tBox *box = grid->box[bi];
@@ -290,9 +285,7 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     double *b;
     //tSparseVector **Acol;
     int ncols;
-    LONGINT *Ap;
-    LONGINT *Ai;
-    double *Ax;
+    tUMFPACK_A umfpackA;
     /* blocki = sbi + nsb1 * sbj + nsb1*nsb2 * sbk
                 + nsb1*nsb2*nsb3 * bi + nsb1*nsb2*nsb3*(grid->nboxes) * vi */
     int blocki = sbi + nsb1 * (sbj + nsb2 * (sbk + 
@@ -311,10 +304,8 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     /* solve for var vi in box bi */
     ncols = Blocks_JacobiPrecon.blockdims[blocki];
     //Acol  = Blocks_JacobiPrecon.Mblock[blocki];
-    Ap    = Blocks_JacobiPrecon.umfpackA[blocki].Ap;
-    Ai    = Blocks_JacobiPrecon.umfpackA[blocki].Ai;
-    Ax    = Blocks_JacobiPrecon.umfpackA[blocki].Ax;
-    Matrix_BlockJacobi_Solve(Ap,Ai,Ax, x, b, ncols);
+    umfpackA = Blocks_JacobiPrecon.umfpackA[blocki];
+    Matrix_BlockJacobi_Solve(umfpackA, x, b, ncols);
 
     /* set vlx */
     copy_array_into_varlistCompInSubbox(x, vlx, vi, bi,
@@ -340,7 +331,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
 {
   tGrid *grid = b->grid;
   tGrid *grid_bak;
-  int bi, vi, blocki, nblocks;
+  int i, bi, vi, blocki, nblocks;
   int pr = Getv("GridIterators_verbose", "yes");
   int dropbelow = Getd("GridIterators_setABStozero_below");
   int INFO;
@@ -424,15 +415,21 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     /* set each entry in struct */
     Blocks_JacobiPrecon.blockdims[blocki] = ncols;
     Blocks_JacobiPrecon.Mblock[blocki]    = Acol;
-    Blocks_JacobiPrecon.umfpackA[blocki].sys = 0;
+    Blocks_JacobiPrecon.umfpackA[blocki].sys = umfpackA_sys;
     Blocks_JacobiPrecon.umfpackA[blocki].Ap  = Ap;
     Blocks_JacobiPrecon.umfpackA[blocki].Ai  = Ai;
     Blocks_JacobiPrecon.umfpackA[blocki].Ax  = Ax;
-    Blocks_JacobiPrecon.umfpackA[blocki].Numeric = NULL;
+    Blocks_JacobiPrecon.umfpackA[blocki].Numeric = NULL; /* it's set below */
 
     blocki++;
   }
-  
+
+  /* set numeric part of each umfpackA */
+  SGRID_TOPLEVEL_Pragma(omp parallel for)            
+  for(i=0; i<blocki; i++)
+    umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
+                                       Blocks_JacobiPrecon.blockdims[i], 0);
+
   /* solve A x = b with lsolver and BlockJacobi_Preconditioner_from_Blocks */
   INFO = lsolver(x, b, r,c1,c2, itmax,tol,normres, lop, 
                  BlockJacobi_Preconditioner_from_Blocks);
@@ -447,7 +444,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ap);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ai);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ax);
-    umfpack_dl_free_numeric(&(Blocks_JacobiPrecon.umfpackA[blocki].Numeric));
+    umfpack_dl_free_Numeric(&(Blocks_JacobiPrecon.umfpackA[blocki].Numeric));
   }
   free(Blocks_JacobiPrecon.blockdims);
   free(Blocks_JacobiPrecon.Mblock);
