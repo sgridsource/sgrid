@@ -376,7 +376,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     ncols = (i2-i1)*(j2-j1)*(k2-k1);
     Acol=AllocateSparseVectorArray(ncols);
     if(Acol) { if(pr) printf(" allocated %d matrix columns for block%d\n",
-                             ncols, blocki); }
+                             ncols, blocki); fflush(stdout); }
     else       errorexit(" no memory for Acol");
 
     /* set Acol */
