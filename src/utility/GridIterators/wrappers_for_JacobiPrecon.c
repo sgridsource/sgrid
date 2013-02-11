@@ -344,6 +344,16 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   Blocks_JacobiPrecon.umfpackA
     = (tUMFPACK_A *) calloc(nblocks, sizeof(tUMFPACK_A));
 
+  /* convert grid to fin. diff.? */
+  if(use_fd)
+  {
+    /* save current grid in grid_bak and then convert grid to fin. diff. */
+    grid_bak = make_empty_grid(grid->nvariables, 0);
+    copy_grid_withoutvars(grid, grid_bak, 0);
+    convert_grid_to_fd(grid);
+    if(pr) printf(" Using finite differencing to set all matrix blocks.\n");
+  }
+
   /* loop over boxes and vars */
   SGRID_TOPLEVEL_Pragma(omp parallel for)
   forallVarsBoxesAndSubboxes_defIndices(b, blocki, vi,bi, sbi,sbj,sbk,
@@ -369,30 +379,12 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
                              ncols, blocki); }
     else       errorexit(" no memory for Acol");
 
-    if(use_fd)
-    {
-      /* save current grid in grid_bak and then convert grid to fin. diff. */
-      grid_bak = make_empty_grid(grid->nvariables, 0);
-      copy_grid_withoutvars(grid, grid_bak, 0);
-      convert_grid_to_fd(grid);
-      if(pr)
-        printf(" Using finite differencing to set matrix Acol for block%d...\n",
-               blocki);
-    }
-
     /* set Acol */
     SetMatrixColumns_ForOneVarInOneSubBox_slowly(Acol, vi, bi,
                                                  sbi,sbj,sbk, nsb1,nsb2,nsb3,
                                                  lop, r, x, c1, c2, 0);
     if(pr&&0) 
       for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
-
-    if(use_fd)
-    {
-      /* restore grid to spectral */
-      copy_grid_withoutvars(grid_bak, grid, 0);
-      free_grid(grid_bak);
-    }
 
     /* set Ap,Ai,Ax */
     /* count number of entries in sparse matrix */
@@ -419,6 +411,12 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     Blocks_JacobiPrecon.umfpackA[blocki].Numeric = NULL; /* it's set below */
   } End_forallVarsBoxesAndSubboxes_defIndices
   printf("linSolve_with_BlockJacobi_precon: created %d blocks.\n", nblocks);
+  if(use_fd)
+  {
+    /* restore grid to spectral */
+    copy_grid_withoutvars(grid_bak, grid, 0);
+    free_grid(grid_bak);
+  }
 
   /* set numeric part of each umfpackA */
   SGRID_TOPLEVEL_Pragma(omp parallel for)            
