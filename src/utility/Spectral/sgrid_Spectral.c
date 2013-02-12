@@ -16,6 +16,11 @@ int sgrid_Spectral(void)
   AddFun(POST_FINALIZE_GRID, free_FFTW3_plans, 
          "free the global FFTW3 plans in FFTs_for_sgrid.c");
 
+  /* parameters */
+  AddPar("FFTW3_planner_flags", "FFTW_ESTIMATE FFTW_UNALIGNED",
+         "FFTW planner flags we use. Possible values are in the pars FFTW_*"
+         "(see function add_special_FFTW3_pars)");
+  add_special_FFTW3_pars();
   AddPar("Spectral_second_deriv_order", "123",
          "order in which mixed second derivs are taken "
          "[123,132,213,231,312,321]");

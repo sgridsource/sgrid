@@ -345,6 +345,34 @@ void numrec_cosft2(double y[], int n, int isign)
 /* FFTW3 transforms                                                  */
 /*********************************************************************/
 #ifdef FFTW3
+/* function to add special FFTW3 pars */
+void add_special_FFTW3_pars(void)
+{
+  char str[1000];
+  unsigned int flag;
+
+  /* how we make FFTW3 plans */
+  /* pars that contain values of FFTW3 planner flags */
+  flag  = FFTW_MEASURE;         snprintf(str, 999, "%d", flag);
+  AddPar("FFTW_MEASURE",         str, "value of FFTW_MEASURE");
+  flag  = FFTW_DESTROY_INPUT;   snprintf(str, 999, "%d", flag);
+  AddPar("FFTW_DESTROY_INPUT",   str, "value of FFTW_DESTROY_INPUT");
+  flag  = FFTW_UNALIGNED;       snprintf(str, 999, "%d", flag);
+  AddPar("FFTW_UNALIGNED",       str, "value of FFTW_UNALIGNED");
+  flag  = FFTW_CONSERVE_MEMORY; snprintf(str, 999, "%d", flag);
+  AddPar("FFTW_CONSERVE_MEMORY", str, "value of FFTW_CONSERVE_MEMORY");
+  flag  = FFTW_EXHAUSTIVE;      snprintf(str, 999, "%d", flag);
+  AddPar("FFTW_EXHAUSTIVE",      str, "value of FFTW_EXHAUSTIVE");
+  flag  = FFTW_PRESERVE_INPUT;  snprintf(str, 999, "%d", flag);
+  AddPar("FFTW_PRESERVE_INPUT",  str, "value of FFTW_PRESERVE_INPUT");
+  flag  = FFTW_PATIENT;         snprintf(str, 999, "%d", flag);
+  AddPar("FFTW_PATIENT",         str, "value of FFTW_PATIENT");
+  flag  = FFTW_ESTIMATE;        snprintf(str, 999, "%d", flag);
+  AddPar("FFTW_ESTIMATE",        str, "value of FFTW_ESTIMATE");
+  //flag  = FFTW_WISDOM_ONLY;     snprintf(str, 999, "%d", flag);
+  //AddPar("FFTW_WISDOM_ONLY",     str, "value of FFTW_WISDOM_ONLY");
+}
+
 /* initialize global plan arrays for the first time */
 int init_FFTW3_plans(tGrid* grid)
 {
@@ -361,6 +389,8 @@ int reinit_FFTW3_plans(tGrid* grid)
 {
   int b;
   int N, Nmax=1;
+  unsigned flags;
+  char *flagstr;
 
   /* find max N on grid */
   for(b=0; b<Geti("nboxes"); b++)
@@ -393,9 +423,19 @@ int reinit_FFTW3_plans(tGrid* grid)
     FFTW_REDFT01_1d_plan = (fftw_plan *) realloc(FFTW_REDFT01_1d_plan, sizeof(fftw_plan) * (Nmax+1));
   }
 
-  /* make plans */
-  printf("init_FFTW3_plans: planning for N=1,...,%d\n", Nmax);
+  /* figure out FFTW planner flags we will use */
+  printf("reinit_FFTW3_plans: planning for N=1,...,%d with flags:\n", Nmax);
+  flags = 0;
+  NextEntry(0);
+  while( ( flagstr=NextEntry(Gets("FFTW3_planner_flags")) ) != NULL)
+  {
+    printf("%s ", flagstr);
+    flags = flags | Geti(flagstr); 
+  }
+  printf("=> flags=%d\n", flags);
   fflush(stdout);
+
+  /* make plans */
   for(N=1; N<=Nmax; N++)
   {
     int Nc = ( N / 2 ) + 1;
@@ -404,15 +444,15 @@ int reinit_FFTW3_plans(tGrid* grid)
     double *c = malloc(sizeof(double) * N);
 
     FFTW3_dft_r2c_1d_plan[N] = 
-      fftw_plan_dft_r2c_1d(N, u, cco, FFTW_ESTIMATE | FFTW_UNALIGNED);
+      fftw_plan_dft_r2c_1d(N, u, cco, flags);
     FFTW3_dft_c2r_1d_plan[N] =
-      fftw_plan_dft_c2r_1d(N, cco, u, FFTW_ESTIMATE | FFTW_UNALIGNED);
+      fftw_plan_dft_c2r_1d(N, cco, u, flags);
     FFTW_REDFT00_1d_plan[N] =
-      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT00, FFTW_ESTIMATE | FFTW_UNALIGNED);
+      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT00, flags);
     FFTW_REDFT10_1d_plan[N] =
-      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT10, FFTW_ESTIMATE | FFTW_UNALIGNED);
+      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT10, flags);
     FFTW_REDFT01_1d_plan[N] =
-      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT01, FFTW_ESTIMATE | FFTW_UNALIGNED);
+      fftw_plan_r2r_1d(N, u, c, FFTW_REDFT01, flags);
 
     free(c);
     free(u);
@@ -559,6 +599,7 @@ void four_FFTW3_error(void)
             "SPECIALLIBS += -L$(FFTW3DIR)/lib -lfftw3\n"
             "SPECIALLIBS += -lfftw3");
 }
+void add_special_FFTW3_pars(void) {return;}
 int init_FFTW3_plans(tGrid* grid) {return 0;}
 int reinit_FFTW3_plans(tGrid* grid) {return 0;}
 int free_FFTW3_plans(tGrid* grid) {return 0;}

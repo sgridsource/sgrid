@@ -124,6 +124,7 @@ void cheb_eval_onZeros_numrecFFT(double c[], double u[], int n);
 void cheb_eval_onExtrema_numrecFFT(double c[], double u[], int N);
 void four_coeffs_FFTW3(double *c, double *u, int n);
 void four_eval_FFTW3(double *c, double *u, int n);
+void add_special_FFTW3_pars(void);
 int init_FFTW3_plans(tGrid* grid);
 int reinit_FFTW3_plans(tGrid* grid);
 int free_FFTW3_plans(tGrid* grid);
