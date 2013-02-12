@@ -115,7 +115,8 @@ int allocate_and_init_tSPQR_A_struct(tSPQR_A *SPQR, LONGINT ncols,
   SPQR->QR = NULL;        /* need to set this later */  
   SPQR->cc = (void *) cc;
 #else
-  SPQR->sys      = 0;
+  SPQR->sys      = 1;
+  SPQR->method   = 0;
   SPQR->ordering = 7;
   SPQR->tol      = -2;
   SPQR->A  = NULL;
