@@ -29,7 +29,8 @@ int sgrid_GridIterators()
   AddPar("GridIterators_templates_as_Preconditioner", "GMRES",
          "which templates wrapper we use as precon [GMRES,BICGSTAB,CGS]");
   AddPar("GridIterators_Preconditioner_type", "fd",
-         "whether we use spectral or finite diff [spectral,fd]");
+         "whether we use spectral or finite diff [spectral,fd], "
+         "plus if UMFPACK or SPQR [UMFPACK,SPQR] is used for BlockJacobi");
   AddPar("GridIterators_Preconditioner_BlockJacobi_nsb1", "1",
          "number of subboxes for BlockJacobi in X-dir");
   AddPar("GridIterators_Preconditioner_BlockJacobi_nsb2", "1",
