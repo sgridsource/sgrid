@@ -424,21 +424,27 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       Ap = (LONGINT *) A->p;
       Ai = (LONGINT *) A->i;
       Ax = (double *)  A->x;
+      /* set Ap,Ai,Ax inside SPQR.A */
+      set_umfpack_dl_matrix_from_columns(Ap,Ai,Ax, Acol, ncols, dropbelow, 0);
 #else
       allocate_and_init_tSPQR_A_struct(&SPQR, ncols, nz, 1);
-      allocate_umfpack_dl_matrix(&Ap, &Ai, &Ax, ncols, nz);
 #endif
+      /* now let them point to NULL again,
+         so nothing bad happens if we free them below! */
+      Ap = NULL;
+      Ai = NULL;
+      Ax = NULL;
     }
     else
     {
       SPQR.A = NULL; /* this signals that nothing is in the SPQR struct */
       allocate_umfpack_dl_matrix(&Ap, &Ai, &Ax, ncols, nz);
-    }
-    
-    /* set Ap,Ai,Ax */
-    set_umfpack_dl_matrix_from_columns(Ap,Ai,Ax, Acol, ncols, dropbelow, 0);
 
-    /* since Acol is now in Ap,Ai,Ax, we free Acol */
+      /* set Ap,Ai,Ax */
+      set_umfpack_dl_matrix_from_columns(Ap,Ai,Ax, Acol, ncols, dropbelow, 0);
+    }
+
+    /* since Acol is now in Ap,Ai,Ax or SPQR we free Acol */
     FreeSparseVectorArray(Acol, ncols);
     Acol=NULL;
 
