@@ -107,7 +107,8 @@ int allocate_and_init_tSPQR_A_struct(tSPQR_A *SPQR, LONGINT ncols,
   A = cholmod_l_allocate_sparse(ncols,ncols, nz, sorted,
                                 packed, stype, xtype, cc);
   /* set local SPQR struct */
-  SPQR->sys      = SPQR_RX_EQUALS_B;
+  SPQR->sys      = SPQR_RETX_EQUALS_B;
+  SPQR->method   = SPQR_QTX;
   SPQR->ordering = SPQR_ORDERING_DEFAULT;
   SPQR->tol      = SPQR_DEFAULT_TOL;
   SPQR->A  = (void *) A;
@@ -302,7 +303,7 @@ int SuiteSparseQR_solve_from_tSPQR_A_x_b(tSPQR_A SPQR_A,
   SuiteSparseQR_C_factorization *QR = (SuiteSparseQR_C_factorization *) SPQR_A.QR;
   cholmod_sparse *A  = (cholmod_sparse *) SPQR_A.A;
   cholmod_common *cc = (cholmod_common *) SPQR_A.cc;
-  cholmod_dense *X, *B;
+  cholmod_dense *X, *B, *QtB;
 
   /* figure out number of lines */
   nlines = A->nrow; 
@@ -327,7 +328,12 @@ int SuiteSparseQR_solve_from_tSPQR_A_x_b(tSPQR_A SPQR_A,
   }
 
   /* Solve, using prviously computed QR */
-  X = SuiteSparseQR_C_solve(SPQR_A.sys, QR, B, cc);
+
+  /* 1. multiply: QtB = Q^T B */
+  QtB = SuiteSparseQR_C_qmult(SPQR_A.method, QR, B,   cc);
+  /* 2. solve: X = E R^{-1} Q^T B */
+  X   = SuiteSparseQR_C_solve(SPQR_A.sys,    QR, QtB, cc);
+
   INFO=cc->status;
   if(pr || INFO!=0)
   { 
@@ -351,6 +357,7 @@ int SuiteSparseQR_solve_from_tSPQR_A_x_b(tSPQR_A SPQR_A,
   /* free X, B */
   cholmod_l_free_dense(&X, cc);
   cholmod_l_free_dense(&B, cc);
+  cholmod_l_free_dense(&QtB, cc);
 
 #else
   CompileSuiteSparseQR;

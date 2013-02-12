@@ -31,7 +31,8 @@ typedef struct T_UMFPACK_A {
 /* struct that contains all about a matrix, that we need for
    SuiteSparseQR_C_solve */
 typedef struct T_SPQR_A {
-  LONGINT sys;      /* default: SPQR_RX_EQUALS_B */
+  LONGINT sys;      /* default: SPQR_RETX_EQUALS_B */
+  LONGINT method;   /* default: SPQR_QTX */
   LONGINT ordering; /* default: SPQR_ORDERING_DEFAULT */
   double  tol;      /* default: SPQR_DEFAULT_TOL */
   void *A;  /* covert to: cholmod_sparse *A; */
