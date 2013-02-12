@@ -9,20 +9,30 @@
 #include "umfpack.h"
 #endif
 
+#ifdef SUITESPARSEQR
+#include "SuiteSparseQR_C.h"
+#endif
+
+
+/* blocks of a block diagonal matrix */
+typedef struct TBlocks_JacobiPrecon
+{
+  int nblocks; /* # of blocks */
+  int type;    /* 0 means arrays of tSparseVector **, 
+                  1 means UMFPACK, 2 means SPQR */
+  int *blockdims;           /* array of dims of blocks 0 to nblocks-1 */
+  tSparseVector ***Mblock;  /* array of matrices for blocks 0 to nblocks-1 */
+  tUMFPACK_A *umfpackA;  /* struct containing all needed for umfpack */
+  tSPQR_A *SPQR;         /* struct containing all needed for SPQR*/
+} tBlocks_JacobiPrecon;
+
+
 /* global vars */
 /* inverse Diagonal Matrix elements */
 double *DiagMinv_JacobiPrecon;
 
 /* blocks of a block diagonal matrix */
-struct
-{
-  int nblocks; /* # of blocks */
-  int type;    /* 0 means arrays of tSparseVector **, 
-                  1 means UMFPACK Ap,Ai,Ax arrays */
-  int *blockdims;           /* array of dims of blocks 0 to nblocks-1 */
-  tSparseVector ***Mblock;  /* array of matrices for blocks 0 to nblocks-1 */
-  tUMFPACK_A *umfpackA;
-} Blocks_JacobiPrecon;
+tBlocks_JacobiPrecon Blocks_JacobiPrecon;
 
 
 /* Diag contains the diagonal of a matrix set with SetMatrixColumns_slowly */
@@ -247,12 +257,15 @@ int templates_bicg_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b,
 /* ********************************************************************* */
 
 /* example of a solver for a block */
-void Matrix_BlockJacobi_Solve(tUMFPACK_A umfpackA,
+void Matrix_BlockJacobi_Solve(tBlocks_JacobiPrecon Blocks, int i,
                               double *x, double *b, int ncols)
 {
   int pr = 0; // Getv("GridIterators_verbose", "yes");
 
-  umfpack_dl_solve_from_tUMFPACK_A_x_b(umfpackA, x, b, pr);
+  if(Blocks.type==2)
+    SuiteSparseQR_solve_from_tSPQR_A_x_b(Blocks.SPQR[i], x, b, pr);                                             
+  else
+    umfpack_dl_solve_from_tUMFPACK_A_x_b(Blocks.umfpackA[i], x, b, pr);
 }
 
 /* Blocks_JacobiPrecon contains a block diagonal matrix set with 
@@ -290,16 +303,14 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     x = dmalloc((i2-i1)*(j2-j1)*(k2-k1));
     b = dmalloc((i2-i1)*(j2-j1)*(k2-k1));
 
-    /* set x,b */
-    copy_varlistCompInSubbox_into_array(vlx, vi, bi,
-                                        sbi,sbj,sbk, nsb1,nsb2,nsb3, x);
+    /* set b */
     copy_varlistCompInSubbox_into_array(vlb, vi, bi,
                                         sbi,sbj,sbk, nsb1,nsb2,nsb3, b);
     /* solve for var vi in box bi */
     ncols = Blocks_JacobiPrecon.blockdims[blocki];
     //Acol  = Blocks_JacobiPrecon.Mblock[blocki];
     umfpackA = Blocks_JacobiPrecon.umfpackA[blocki];
-    Matrix_BlockJacobi_Solve(umfpackA, x, b, ncols);
+    Matrix_BlockJacobi_Solve(Blocks_JacobiPrecon, blocki, x, b, ncols);
 
     /* set vlx */
     copy_array_into_varlistCompInSubbox(x, vlx, vi, bi,
@@ -331,18 +342,26 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   int nsb1 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb1");
   int nsb2 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb2");
   int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
+  int type;
+  
+  if(Getv("GridIterators_Preconditioner_type", "SPQR")) /* use SPQR */
+    type=2;
+  else /* use umfpack */
+    type=1;
 
   if(pr) printf("linSolve_with_BlockJacobi_precon\n");
 
   /* allocate memory for blocks in Blocks_JacobiPrecon struct */
   nblocks = (b->n)*(grid->nboxes)*nsb1*nsb2*nsb3;
   Blocks_JacobiPrecon.nblocks = nblocks;
-  Blocks_JacobiPrecon.type = 0; /* set type to 0 for now */
+  Blocks_JacobiPrecon.type = type;
   Blocks_JacobiPrecon.blockdims = (int *) calloc(nblocks, sizeof(int));
   Blocks_JacobiPrecon.Mblock 
     = (tSparseVector ***) calloc(nblocks, sizeof(tSparseVector **));
   Blocks_JacobiPrecon.umfpackA
     = (tUMFPACK_A *) calloc(nblocks, sizeof(tUMFPACK_A));
+  Blocks_JacobiPrecon.SPQR
+    = (tSPQR_A *) calloc(nblocks, sizeof(tSPQR_A));
 
   /* convert grid to fin. diff.? */
   if(use_fd)
@@ -372,6 +391,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     LONGINT *Ap;
     LONGINT *Ai;
     double *Ax;
+    tSPQR_A SPQR;
 
     /* allocate Acol for each block */
     IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
@@ -392,9 +412,30 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     /* count number of entries in sparse matrix */
     nz = 0;
     for(j = 0; j < ncols; j++) nz+=Acol[j]->entries;
+
     /* allocate memory for Ap,Ai,Ax for matrix */
-    allocate_umfpack_dl_matrix(&Ap, &Ai, &Ax, ncols, nz);
-    /* set Ap,Ai,Ax and solve */
+    if(Blocks_JacobiPrecon.type==2) /* if we use SPQR */
+    {
+#ifdef SUITESPARSEQR
+      cholmod_sparse *A;
+      allocate_and_init_tSPQR_A_struct(&SPQR, ncols, nz, 0);
+      /* make Ap,Ai,Ax point inside SPQR.A */
+      A  = (cholmod_sparse *) SPQR.A;
+      Ap = (LONGINT *) A->p;
+      Ai = (LONGINT *) A->i;
+      Ax = (double *)  A->x;
+#else
+      allocate_and_init_tSPQR_A_struct(&SPQR, ncols, nz, 1);
+      allocate_umfpack_dl_matrix(&Ap, &Ai, &Ax, ncols, nz);
+#endif
+    }
+    else
+    {
+      SPQR.A = NULL; /* this signals that nothing is in the SPQR struct */
+      allocate_umfpack_dl_matrix(&Ap, &Ai, &Ax, ncols, nz);
+    }
+    
+    /* set Ap,Ai,Ax */
     set_umfpack_dl_matrix_from_columns(Ap,Ai,Ax, Acol, ncols, dropbelow, 0);
 
     /* since Acol is now in Ap,Ai,Ax, we free Acol */
@@ -404,6 +445,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     /* set each entry in struct */
     Blocks_JacobiPrecon.blockdims[blocki] = ncols;
     Blocks_JacobiPrecon.Mblock[blocki]    = Acol;
+
 #ifdef UMFPACK
     Blocks_JacobiPrecon.umfpackA[blocki].sys = UMFPACK_A;
 #endif
@@ -411,6 +453,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     Blocks_JacobiPrecon.umfpackA[blocki].Ai  = Ai;
     Blocks_JacobiPrecon.umfpackA[blocki].Ax  = Ax;
     Blocks_JacobiPrecon.umfpackA[blocki].Numeric = NULL; /* it's set below */
+
+    Blocks_JacobiPrecon.SPQR[blocki] = SPQR; /* the QR inside this is set below */
+
   } End_forallVarsBoxesAndSubboxes_defIndices
   printf("linSolve_with_BlockJacobi_precon: created %d blocks.\n", nblocks);
   if(use_fd)
@@ -420,14 +465,23 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     free_grid(grid_bak);
   }
 
-  /* set numeric part of each umfpackA */
+  /* set numeric part of each umfpackA or SPQR */
   SGRID_TOPLEVEL_Pragma(omp parallel for)            
   for(i=0; i<nblocks; i++)
   {
-    printf(" umfpack_dl_numeric_from_tUMFPACK_A in block%d...\n", i);
-    fflush(stdout);
-    umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
-                                       Blocks_JacobiPrecon.blockdims[i], 0);
+    if(Blocks_JacobiPrecon.type==2) /* if we use SPQR */
+    {
+      printf(" SuiteSparseQR_C_factorize_tSPQR_A in block%d...\n", i);
+      fflush(stdout);
+      SuiteSparseQR_C_factorize_tSPQR_A(&(Blocks_JacobiPrecon.SPQR[i]), 0);
+    }
+    else
+    {
+      printf(" umfpack_dl_numeric_from_tUMFPACK_A in block%d...\n", i);
+      fflush(stdout);
+      umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
+                                         Blocks_JacobiPrecon.blockdims[i], 0);
+    }
   }
 
   /* solve A x = b with lsolver and BlockJacobi_Preconditioner_from_Blocks */
@@ -447,10 +501,12 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
 #ifdef UMFPACK
     umfpack_dl_free_numeric(&(Blocks_JacobiPrecon.umfpackA[blocki].Numeric));
 #endif
+    free_tSPQR_A_struct(&(Blocks_JacobiPrecon.SPQR[blocki]));
   }
   free(Blocks_JacobiPrecon.blockdims);
   free(Blocks_JacobiPrecon.Mblock);
   free(Blocks_JacobiPrecon.umfpackA);
+  free(Blocks_JacobiPrecon.SPQR);
 
   return INFO;
 }

@@ -28,6 +28,18 @@ typedef struct T_UMFPACK_A {
   void    *Numeric;  /* computed with umfpack_dl_numeric */
 } tUMFPACK_A;
 
+/* struct that contains all about a matrix, that we need for
+   SuiteSparseQR_C_solve */
+typedef struct T_SPQR_A {
+  LONGINT sys;      /* default: SPQR_RX_EQUALS_B */
+  LONGINT ordering; /* default: SPQR_ORDERING_DEFAULT */
+  double  tol;      /* default: SPQR_DEFAULT_TOL */
+  void *A;  /* covert to: cholmod_sparse *A; */
+  void *QR; /* covert to: SuiteSparseQR_C_factorization *QR; */
+  void *cc; /* covert to: cholmod_common *cc; */
+} tSPQR_A;
+
+
 
 /* FUNCTIONS */
       
@@ -119,3 +131,9 @@ int umfpack_dl_solve_from_tUMFPACK_A_x_b(tUMFPACK_A umfpackA,
 int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
                                      tVarList *vlx, tVarList *vlb,
                                      double dropbelow, int pr);
+int allocate_and_init_tSPQR_A_struct(tSPQR_A *SPQR, LONGINT nrows, 
+                                     LONGINT nz, int pr);
+int free_tSPQR_A_struct(tSPQR_A *SPQR_A);
+int SuiteSparseQR_C_factorize_tSPQR_A(tSPQR_A *SPQR_A, int pr);
+int SuiteSparseQR_solve_from_tSPQR_A_x_b(tSPQR_A SPQR_A,
+                                         double *x, double *b, int pr);

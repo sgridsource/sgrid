@@ -26,6 +26,17 @@
 #define PrintErrorCodesAndExit  errorexit("SuiteSparseQR is not compiled in")
 #endif
 
+#define CompileSuiteSparseQR \
+  errorexit("In order to compile with SuiteSparseQR use\n" \
+            "MyConfig with\n" \
+            "DFLAGS += -DSUITESPARSEQR\n" \
+            "SPECIALINCS += -I/usr/include/suitesparse\n" \
+            "SPECIALLIBS += -lspqr -lcholmod\n" \
+            "you may also need something like\n" \
+            "CLINKER = g++\n" \
+            "or\n" \
+            "CLINKER = icpc\n")
+
 
 /***************************************************************************/
 /* some helper routines                                                    */
@@ -74,6 +85,73 @@ cholmod_sparse *get_cholmod_sparse_fromAcolumns(tSparseVector **Acol,
   return A;
 }
 #endif
+
+/* allocate and init a tSPQR_A struct, 
+   needs to be freed later with free_tSPQR_A_struct */
+int allocate_and_init_tSPQR_A_struct(tSPQR_A *SPQR, LONGINT ncols, 
+                                     LONGINT nz, int pr)
+{
+  int sorted = 1; /* we sort row indices in each column */
+  int packed = 1; /* we use the packed format */
+  int stype = 0;  /* we have an unsymmetric matrix */
+#ifdef SUITESPARSEQR
+  int xtype = CHOLMOD_REAL; /* our matrix has real numbers as entries */
+  cholmod_sparse *A;
+  cholmod_common *cc;
+  
+  /* init cc */
+  cc = (cholmod_common *) malloc(sizeof(cholmod_common));
+  cholmod_l_start(cc);
+
+  /* get mem for matrix A */
+  A = cholmod_l_allocate_sparse(ncols,ncols, nz, sorted,
+                                packed, stype, xtype, cc);
+  /* set local SPQR struct */
+  SPQR->sys      = SPQR_RX_EQUALS_B;
+  SPQR->ordering = SPQR_ORDERING_DEFAULT;
+  SPQR->tol      = SPQR_DEFAULT_TOL;
+  SPQR->A  = (void *) A;
+  SPQR->QR = NULL;        /* need to set this later */  
+  SPQR->cc = (void *) cc;
+#else
+  SPQR->sys      = 0;
+  SPQR->ordering = 7;
+  SPQR->tol      = -2;
+  SPQR->A  = NULL;
+  SPQR->QR = NULL;
+  SPQR->cc = NULL;
+#endif
+  if(pr)
+  { 
+    printf("allocate_and_init_tSPQR_A_struct: "
+           "A=%p QR=%p cc=%p\n", SPQR->A, SPQR->QR, SPQR->cc);
+    fflush(stdout);
+  }
+  return 0;
+}
+
+/* free a tSPQR_A struct */
+int free_tSPQR_A_struct(tSPQR_A *SPQR_A)
+{
+#ifdef SUITESPARSEQR
+  cholmod_sparse *A  = (cholmod_sparse *) SPQR_A->A;
+  cholmod_common *cc = (cholmod_common *) SPQR_A->cc;
+  SuiteSparseQR_C_factorization *QR 
+    = (SuiteSparseQR_C_factorization *) SPQR_A->QR;
+
+  if(SPQR_A->A !=NULL)
+  {
+    /* free everything and finish CHOLMOD */
+    SuiteSparseQR_C_free(&QR, cc);
+    cholmod_l_free_sparse(&A, cc);
+    cholmod_l_finish(cc);
+    free(cc);
+  }
+  return 0;
+#else
+  return -1;
+#endif
+}
 
 /***************************************************************************/
 /* main solver routines                                                    */
@@ -169,15 +247,113 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
   cholmod_l_finish(cc);
 
 #else
-  errorexit("SuiteSparseQR_solve_fromAcolumns: in order to compile with SuiteSparseQR use\n"
-            "MyConfig with\n"
-            "DFLAGS += -DSUITESPARSEQR\n"
-            "SPECIALINCS += -I/usr/include/suitesparse\n"
-            "SPECIALLIBS += -lspqr -lcholmod\n"
-            "you may also need something like\n"
-            "CLINKER = g++\n"
-            "or\n"
-            "CLINKER = icpc\n");
+  CompileSuiteSparseQR;
+#endif
+  return INFO;
+}
+
+
+/* get QR factorization and put it into tSPQR_A struct */
+int SuiteSparseQR_C_factorize_tSPQR_A(tSPQR_A *SPQR_A, int pr)
+{
+  int INFO=-1;
+#ifdef SUITESPARSEQR
+  cholmod_sparse *A  = (cholmod_sparse *) SPQR_A->A;
+  cholmod_common *cc = (cholmod_common *) SPQR_A->cc;
+  SuiteSparseQR_C_factorization *QR 
+                       = (SuiteSparseQR_C_factorization *) SPQR_A->QR;
+
+  if(!cholmod_l_check_sparse(A, cc) || pr)
+  {
+    printf("SuiteSparseQR_C_factorize_tSPQR_A: input is:\n"
+           "A=%p QR=%p cc=%p cc->status=%d\n", A, QR, cc, cc->status);
+    cholmod_l_print_sparse(A, "A", cc);
+  }
+
+  QR = SuiteSparseQR_C_factorize(SPQR_A->ordering, SPQR_A->tol, A, cc);
+  SPQR_A->QR = (void *) QR;
+  INFO=cc->status;
+  if(pr || INFO!=0)
+  { 
+    printf("SuiteSparseQR_C_factorize_tSPQR_A: output is:\n"
+           "A=%p QR=%p cc=%p cc->status=%d\n", A, QR, cc, cc->status);
+    printf("SuiteSparseQR_C_factorize_tSPQR_A -> INFO=%d\n", INFO);
+    fflush(stdout);
+  }
+  if(INFO!=0)
+    PrintErrorCodesAndExit;
+#else
+  CompileSuiteSparseQR;
+#endif
+  return INFO;
+}
+
+/* solve A x = b with umfpack's SuiteSparseQR's SuiteSparseQR_C_solve 
+   for a matrix that is already saved in tSPQR_A SPQR_A with SPQR_A.QR already
+   set with prior calls to SuiteSparseQR_C_factorize_tSPQR_A
+   with x and b in ordinary double arrays */
+int SuiteSparseQR_solve_from_tSPQR_A_x_b(tSPQR_A SPQR_A,
+                                         double *x, double *b, int pr)
+{
+  int i;
+  int INFO=-6662442;
+  int nlines;
+#ifdef SUITESPARSEQR
+  SuiteSparseQR_C_factorization *QR = (SuiteSparseQR_C_factorization *) SPQR_A.QR;
+  cholmod_sparse *A  = (cholmod_sparse *) SPQR_A.A;
+  cholmod_common *cc = (cholmod_common *) SPQR_A.cc;
+  cholmod_dense *X, *B;
+
+  /* figure out number of lines */
+  nlines = A->nrow; 
+
+  /* allocate X, B */
+  B = cholmod_l_allocate_dense(nlines,1, nlines, A->xtype, cc);
+
+  /* set B = b */
+  for(i=0; i<nlines; i++)
+  {
+     double *Bx = (double *) B->x;
+     Bx[i] = b[i];
+  }
+  if(!cholmod_l_check_dense(B ,cc))
+    errorexit("cholmod_l_check_dense(B, cc) failed");
+  if(pr)
+  {
+    printf("SuiteSparseQR_solve_from_tSPQR_A_x_b: input is:\n"
+           "A=%p QR=%p cc=%p cc->status=%d B=%p\n", A, QR, cc, cc->status, B);
+    cholmod_l_print_sparse(A, "A", cc);
+    cholmod_l_print_dense(B, "B", cc);
+  }
+
+  /* Solve, using prviously computed QR */
+  X = SuiteSparseQR_C_solve(SPQR_A.sys, QR, B, cc);
+  INFO=cc->status;
+  if(pr || INFO!=0)
+  { 
+    printf("SuiteSparseQR_solve_from_tSPQR_A_x_b: output is:\n"
+           "A=%p QR=%p cc=%p cc->status=%d B=%p => X=%p\n",
+           A, QR, cc, cc->status, B, X);
+    cholmod_l_print_dense(X, "X", cc);
+    printf(" -> INFO=%d\n", INFO);
+    fflush(stdout);
+  }
+  if(INFO!=0)
+    PrintErrorCodesAndExit;
+
+  /* set x = X */
+  for(i=0; i<nlines; i++)
+  {
+    double *Xx = (double *) X->x;
+    x[i] = Xx[i];
+  }
+
+  /* free X, B */
+  cholmod_l_free_dense(&X, cc);
+  cholmod_l_free_dense(&B, cc);
+
+#else
+  CompileSuiteSparseQR;
 #endif
   return INFO;
 }
