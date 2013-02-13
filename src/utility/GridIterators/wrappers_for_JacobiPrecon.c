@@ -256,7 +256,7 @@ int templates_bicg_wrapper_with_Jacobi_precon(tVarList *x, tVarList *b,
 /* Block diagonal Preconditioners                                        */
 /* ********************************************************************* */
 
-/* example of a solver for a block */
+/* solver for one block */
 void Matrix_BlockJacobi_Solve(tBlocks_JacobiPrecon Blocks, int i,
                               double *x, double *b, int ncols)
 {
@@ -268,8 +268,8 @@ void Matrix_BlockJacobi_Solve(tBlocks_JacobiPrecon Blocks, int i,
     umfpack_dl_solve_from_tUMFPACK_A_x_b(Blocks.umfpackA[i], x, b, pr);
 }
 
-/* Blocks_JacobiPrecon contains a block diagonal matrix set with 
-   SetMatrixColumns_ForOneVarInOneBox_slowly */
+/* Blocks_JacobiPrecon contains a block diagonal matrix set with
+   SetMatrixColumns_ForOneVarInOneSubBox_slowly */
 void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
                                             tVarList *vlc1, tVarList *vlc2)
 {
@@ -279,7 +279,7 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
   int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
   int blocki;
 
-  /* loop over vars, boxes and subboxes */
+  /* loop over vars, boxes and subboxes, i.e. the blocks we have */
   SGRID_TOPLEVEL_Pragma(omp parallel for)
   forallVarsBoxesAndSubboxes_defIndices(vlx, blocki, vi,bi, sbi,sbj,sbk,
                                         nsb1,nsb2,nsb3)
@@ -292,7 +292,6 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     double *x;
     double *b;
     int ncols;
-    tUMFPACK_A umfpackA;
     /* blocki = sbi + nsb1 * sbj + nsb1*nsb2 * sbk
                 + nsb1*nsb2*nsb3 * bi + nsb1*nsb2*nsb3*(grid->nboxes) * vi 
     int blocki = sbi + nsb1 * (sbj + nsb2 * (sbk + 
@@ -306,10 +305,10 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
     /* set b */
     copy_varlistCompInSubbox_into_array(vlb, vi, bi,
                                         sbi,sbj,sbk, nsb1,nsb2,nsb3, b);
-    /* solve for var vi in box bi */
+    /* solve for var vi in box bi in subbox sbi,sbj,sbk,
+       i.e. solve for x in this block */
     ncols = Blocks_JacobiPrecon.blockdims[blocki];
     //Acol  = Blocks_JacobiPrecon.Mblock[blocki];
-    umfpackA = Blocks_JacobiPrecon.umfpackA[blocki];
     Matrix_BlockJacobi_Solve(Blocks_JacobiPrecon, blocki, x, b, ncols);
 
     /* set vlx */
@@ -321,8 +320,9 @@ void BlockJacobi_Preconditioner_from_Blocks(tVarList *vlx, tVarList *vlb,
 }
 
 
-/* do a linear solve with Jacobi_Preconditioner_from_DiagM, where global
-   DiagMinv_JacobiPrecon is set by temporarily switching to finite differencing */
+/* do a linear solve with BlockJacobi_Preconditioner_from_Blocks, where global
+   Blocks_JacobiPrecon contains the blocks. The blocks can be set 
+   by temporarily switching to finite differencing */
 int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b, 
      tVarList *r, tVarList *c1,tVarList *c2,
      int (*lsolver)(tVarList *, tVarList *, tVarList *, tVarList *,tVarList *,
@@ -397,23 +397,25 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
     ncols = (i2-i1)*(j2-j1)*(k2-k1);
     Acol=AllocateSparseVectorArray(ncols);
-    if(Acol) { if(pr) printf(" allocated %d matrix columns for block%d\n",
+    if(Acol) { if(0) printf(" allocated %d matrix columns for block%d\n",
                              ncols, blocki); fflush(stdout); }
     else       errorexit(" no memory for Acol");
 
     /* set Acol */
+    if(pr) 
+      printf(" setting %d matrix columns for block%d...\n", ncols, blocki);
+    fflush(stdout);
     SetMatrixColumns_ForOneVarInOneSubBox_slowly(Acol, vi, bi,
                                                  sbi,sbj,sbk, nsb1,nsb2,nsb3,
                                                  lop, r, x, c1, c2, 0);
     if(pr&&0) 
       for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
 
-    /* set Ap,Ai,Ax */
     /* count number of entries in sparse matrix */
     nz = 0;
     for(j = 0; j < ncols; j++) nz+=Acol[j]->entries;
 
-    /* allocate memory for Ap,Ai,Ax for matrix */
+    /* allocate memory for matrix and set UMFPACK's Ap,Ai,Ax or SPQR's A */
     if(Blocks_JacobiPrecon.type==2) /* if we use SPQR */
     {
 #ifdef SUITESPARSEQR
@@ -429,7 +431,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
 #else
       allocate_and_init_tSPQR_A_struct(&SPQR, ncols, nz, 1);
 #endif
-      /* now let them point to NULL again,
+      /* now let Ap,Ai,Ax point to NULL again,
          so nothing bad happens if we free them below! */
       Ap = NULL;
       Ai = NULL;
