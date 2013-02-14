@@ -43,10 +43,11 @@ typedef struct T_SPQR_A {
 /* struct that contains all info about one block made of var vi in box bi
    in subbox with coords sbi,sbj,sbk */
 typedef struct T_VarBoxSubboxIndices {
-  int vi;
-  int bi;
-  int sbi;   int sbj;   int sbk;
-  int nsb1;  int nsb2;  int nsb3;
+  int vli;  /* index in varlist */
+  int bi;   /* box index */
+  int sbi;   int sbj;   int sbk;   /* subbox coords */
+  int nsb1;  int nsb2;  int nsb3;  /* # of subboxes */
+  int vari; /* index of sgrid global var i.e. with name VarName(vari) */
 } tVarBoxSubboxIndices;
 
 
