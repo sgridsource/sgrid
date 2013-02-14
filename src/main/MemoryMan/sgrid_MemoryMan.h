@@ -93,6 +93,11 @@ typedef struct tVARLIST {
   double time;
   int n;
   int *index;
+  void *vlPars; /* A pointer that is usually NULL, but can point to some
+                   object that contains special extra pars or info. This
+                   pointer is not touched by the funcs in variables.c (such
+                   as vlduplicate, vlcopy, vlfree, ...). So the user has 
+                   to manage it: e.g. free it, before calling vlfree. */
 } tVarList;
 
 

@@ -257,6 +257,7 @@ tVarList *vlalloc(tGrid *grid)
   u = calloc(1, sizeof(tVarList));
   u->grid = grid;
   if(grid) u->time = grid->time;
+  u->vlPars = NULL; /* set special pointer to NULL */
   return u;
 } 
 
