@@ -654,6 +654,17 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
   int n2 = box->n2;
   int n3 = box->n3;
   int i1,i2, j1,j2, k1,k2;
+  tVarBoxSubboxIndices blockinfo[1];
+  
+  /* set block info */
+  blockinfo->vi = vlind;
+  blockinfo->bi = b;
+  blockinfo->sbi = sbi;
+  blockinfo->sbj = sbj;
+  blockinfo->sbk = sbk;
+  blockinfo->nsb1 = nsb1;
+  blockinfo->nsb2 = nsb2;
+  blockinfo->nsb3 = nsb3;
 
   /* set i1,i2, j1,j2, k1,k2 */
   IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
@@ -686,6 +697,10 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
     vlpushvl(vlx_p, vlx);
     vlpushvl(vlc1_p, vlc1);
     vlpushvl(vlc2_p, vlc2);
+
+    /* put block info into vlx_p, can be used by func Fx below to
+       loop only over relevant block */
+    vlx_p->vlPars = (void *) blockinfo;
 
     /* loop over subbox */
     SGRID_LEVEL6_Pragma(omp for)

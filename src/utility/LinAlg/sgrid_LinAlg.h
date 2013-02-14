@@ -40,6 +40,14 @@ typedef struct T_SPQR_A {
   void *cc; /* covert to: cholmod_common *cc; */
 } tSPQR_A;
 
+/* struct that contains all info about one block made of var vi in box bi
+   in subbox with coords sbi,sbj,sbk */
+typedef struct T_VarBoxSubboxIndices {
+  int vi;
+  int bi;
+  int sbi;   int sbj;   int sbk;
+  int nsb1;  int nsb2;  int nsb3;
+} tVarBoxSubboxIndices;
 
 
 /* FUNCTIONS */
