@@ -670,8 +670,9 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
   IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
   //if(pr) printf("\ni: %d...%d  j: %d...%d  k:%d...%d\n", i1,i2-1, j1,j2-1, k1,k2-1);
 
-  /* set x to zero */
-  vladd(vlx, 0.0,NULL, 0.0,NULL);
+  /* set x to zero, and call Fx to initialize all to zero in Fx */
+  vlsetconstant(vlx, 0.0);
+  Fx(vlFx, vlx, vlc1, vlc2);
 
   if(pr)
   {
@@ -744,6 +745,10 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
     vlfree(vlc2_p);
     free_grid(grid_p);
   }
+  /* set x to zero, and call Fx to initialize all to zero in Fx */
+  vlsetconstant(vlx, 0.0);
+  Fx(vlFx, vlx, vlc1, vlc2);
+
   if(pr)
   {
     int ncols = (i2-i1)*(j2-j1)*(k2-k1);
