@@ -659,10 +659,6 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
   IndexRangesInSubbox(i1,i2, j1,j2, k1,k2, sbi,sbj,sbk, nsb1,nsb2,nsb3);
   //if(pr) printf("\ni: %d...%d  j: %d...%d  k:%d...%d\n", i1,i2-1, j1,j2-1, k1,k2-1);
 
-  /* set x to zero, and call Fx to initialize all to zero in Fx */
-  vlsetconstant(vlx, 0.0);
-  Fx(vlFx, vlx, vlc1, vlc2);
-
   if(pr)
   {
     prdivider(0);  
@@ -702,6 +698,10 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
     blockinfo->vari = vlx_p->index[vlind];
     vlx_p->vlPars = (void *) blockinfo;
 
+    /* set x to zero, and call Fx to initialize all to zero in Fx */
+    vlsetconstant(vlx_p, 0.0);
+    Fx(vlFx_p, vlx_p, vlc1_p, vlc2_p);
+
     /* loop over subbox */
     SGRID_LEVEL6_Pragma(omp for)
     for(i=i1; i<i2; i++) /* do i loop first since usually i2-i1 > k2-k1 */
@@ -734,7 +734,7 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
         if(Fx[iijjkk]!=0)  AddToSparseVector(Acol[col], line, Fx[iijjkk]);
       }
 
-      /* remove the 1 in x at point i */
+      /* remove the 1 in x at point ijk */
       x[ijk]=0;
     }
     /* free local copies */
@@ -744,9 +744,6 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
     vlfree(vlc2_p);
     free_grid(grid_p);
   }
-  /* set x to zero, and call Fx to initialize all to zero in Fx */
-  vlsetconstant(vlx, 0.0);
-  Fx(vlFx, vlx, vlc1, vlc2);
 
   if(pr)
   {
