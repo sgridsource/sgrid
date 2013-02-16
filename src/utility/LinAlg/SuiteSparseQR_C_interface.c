@@ -270,6 +270,7 @@ int SuiteSparseQR_C_factorize_tSPQR_A(tSPQR_A *SPQR_A, int pr)
     printf("SuiteSparseQR_C_factorize_tSPQR_A: input is:\n"
            "A=%p QR=%p cc=%p cc->status=%d\n", A, QR, cc, cc->status);
     cholmod_l_print_sparse(A, "A", cc);
+    fflush(stdout);
   }
 
   QR = SuiteSparseQR_C_factorize(SPQR_A->ordering, SPQR_A->tol, A, cc);
@@ -277,9 +278,9 @@ int SuiteSparseQR_C_factorize_tSPQR_A(tSPQR_A *SPQR_A, int pr)
   INFO=cc->status;
   if(pr || INFO!=0)
   { 
-    printf("SuiteSparseQR_C_factorize_tSPQR_A: output is:\n"
-           "A=%p QR=%p cc=%p cc->status=%d\n", A, QR, cc, cc->status);
-    printf("SuiteSparseQR_C_factorize_tSPQR_A -> INFO=%d\n", INFO);
+    printf(" SuiteSparseQR_C_factorize_tSPQR_A: output is:\n"
+           " A=%p QR=%p cc=%p cc->status=%d => INFO=%d\n",
+           A, QR, cc, cc->status, INFO);
     fflush(stdout);
   }
   if(INFO!=0)
