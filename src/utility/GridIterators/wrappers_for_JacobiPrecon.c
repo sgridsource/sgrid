@@ -473,8 +473,10 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     free_grid(grid_bak);
   }
 
-  /* set numeric part of each umfpackA or SPQR */
-  SGRID_TOPLEVEL_Pragma(omp parallel for)            
+  /* do LU or QR factorization with umfpackA or SPQR */
+#ifndef MEMORY_EFFICIENT
+  SGRID_TOPLEVEL_Pragma(omp parallel for)
+#endif
   for(i=0; i<nblocks; i++)
   {
     if(Blocks_JacobiPrecon.type==2) /* if we use SPQR */
