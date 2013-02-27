@@ -30,8 +30,10 @@ timer["starting tensorrules.m"]
 (* set number of dimensions
    the default is 3, resulting in 1,2,3
    if dimension variable is set to 4, start at 0, resulting in 0,1,2,3
+   if dimension variable is set to 2, start at 1 end at 2, resulting in 1,2
 *)
 If [TensorEquationsDim === 4, imin = 0, imin = 1]
+If [TensorEquationsDim === 2, imax = 2, imax = 3]
 
 
 (**************************************************************************)
@@ -49,8 +51,8 @@ If [TensorEquationsDim === 4, imin = 0, imin = 1]
 *)
 
 (* compute determinant and inverse *)
-(* the number of dimensions can be 3d or 4d *)
-matrixarray[g_] := Array[g, {4-imin,4-imin}, {imin,imin}]
+(* the number of dimensions can be 3d, 4d or 2d *)
+matrixarray[g_] := Array[g, {imax-imin+1,imax-imin+1}, {imin,imin}]
 matrixdet[g_] := Det[matrixarray[g]]
 matrixinv[g_, a_Integer, b_Integer] :=
   Inverse[matrixarray[g]] [[a-imin+1, b-imin+1]]

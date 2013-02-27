@@ -13,8 +13,10 @@
 (* set number of dimensions
    the default is 3, resulting in 1,2,3
    if dimension variable is set to 4, start at 0, resulting in 0,1,2,3
+   if dimension variable is set to 2, start at 1 end at 2, resulting in 1,2
 *)
 If [TensorEquationsDim === 4, imin = 0, imin = 1]
+If [TensorEquationsDim === 2, imax = 2, imax = 3]
 
 
 (*************************************************************************)
@@ -23,18 +25,18 @@ If [TensorEquationsDim === 4, imin = 0, imin = 1]
 expcontraction = {
   s_[a___,b_Symbol,c___,d_Symbol,e___] \
     t_[f___,b_Symbol,g___] u_[h___,d_Symbol,i___] ->
-    Sum[s[a,b,c,d,e] t[f,b,g] u[h,d,i], {b,imin,3}, {d,imin,3}],
+    Sum[s[a,b,c,d,e] t[f,b,g] u[h,d,i], {b,imin,imax}, {d,imin,imax}],
 
   s_[a___,b_Symbol,c___] t_[d___,b_Symbol,e___] ->
-    Sum[s[a,b,c] t[d,b,e], {b,imin,3}]
+    Sum[s[a,b,c] t[d,b,e], {b,imin,imax}]
 }
 
 
 (* careful: Union sorts, so apply to elements for which this is ok or wanted *)
-expfreesort[x_,a_Symbol] := Union[Flatten[Table[x, {a,imin,3}]]]
+expfreesort[x_,a_Symbol] := Union[Flatten[Table[x, {a,imin,imax}]]]
 expfreesort[x_,{a_Symbol}] := expfreesort[x,a]
 expfreesort[x_,{a_Symbol,b__}] := 
-  Union[Flatten[Table[expfreesort[x,{b}], {a,imin,3}]]]
+  Union[Flatten[Table[expfreesort[x,{b}], {a,imin,imax}]]]
 
 expexpsign = -x_ :> x
 expfreeexp[x_Symbol] := x
