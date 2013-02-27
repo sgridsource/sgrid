@@ -20,6 +20,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
   /* name of coordinates, could be made variable */
   char *coord[3]  = {"x", "y", "z"};
   char *coord4[4] = {"t", "x", "y", "z"};
+  char *coord2[2] = {"1", "2"}; /* for 2d tensors with 2 coords e.g. Y,Z */
   int i, j, k, l;
   int n = 0;
   char *tensorindices = strdup(t);
@@ -269,6 +270,36 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
       sym[3*n+l] *= -1;
       ilist[n] = calloc(ilistSTRLEN, sizeof(char));
       sprintf(ilist[n++], "%s%s%s%s", coord4[i], coord4[j], coord[k], coord[l]);
+    }
+  }
+
+  /* 2d indices 1,2 */
+  if (strcmp(tensorindices, "q") == 0) {
+    for (i = 0; i < 2; i++) {
+      sym[3*n+i] *= -1;
+      ilist[n] = calloc(ilistSTRLEN, sizeof(char));
+      sprintf(ilist[n++], "%s", coord2[i]);
+    }
+  }
+  
+  if (strcmp(tensorindices, "qr") == 0) {
+    for (i = 0; i < 2; i++)
+    for (j = 0; j < 2; j++) {
+      sym[3*n+i] *= -1; 
+      sym[3*n+j] *= -1;
+      ilist[n] = calloc(ilistSTRLEN, sizeof(char));
+      sprintf(ilist[n++], "%s%s", coord2[i], coord2[j]);
+    }
+  }
+
+  if(strcmp(tensorindices, "qr+rq") == 0 ||
+     strcmp(tensorindices, "(qr)" ) == 0) {
+    for (i = 0; i < 2; i++)
+    for (j = i; j < 2; j++) {
+      sym[3*n+i] *= -1; 
+      sym[3*n+j] *= -1;
+      ilist[n] = calloc(ilistSTRLEN, sizeof(char));
+      sprintf(ilist[n++], "%s%s", coord2[i], coord2[j]);
     }
   }
 
