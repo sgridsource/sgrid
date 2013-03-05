@@ -303,6 +303,19 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
     }
   }
 
+  if(strcmp(tensorindices, "qrs+rqs") == 0 ||
+     strcmp(tensorindices, "(qr)s" ) == 0) {
+    for (i = 0; i < 2; i++)
+    for (j = i; j < 2; j++) 
+    for (k = 0; k < 2; k++) {
+      sym[3*n+i] *= -1; 
+      sym[3*n+j] *= -1;
+      sym[3*n+k] *= -1;
+      ilist[n] = calloc(ilistSTRLEN, sizeof(char));
+      sprintf(ilist[n++], "%s%s%s", coord2[i], coord2[j], coord2[k]);
+    }
+  }
+
   /* error */
   if (n == 0) {
     printf("Error in index string %s.\n", tensorindices);
