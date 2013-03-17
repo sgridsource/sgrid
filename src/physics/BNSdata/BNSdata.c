@@ -4794,6 +4794,23 @@ if(0) /* not working */
   if(it>itmax)
     printf("BNSdata_solve warning: *** Too many steps! ***\n");
 
+  /* do we want to do a final ell. solve for some vars? */
+  if( strlen(Gets("BNSdata_FinalEllSolveVars"))>0 )
+  {
+    double time = grid->time;
+    /* write grid once more (at time=-0.1), since we have not written yet */
+    grid->time = -0.1;
+    printf("Final elliptic solve at grid->time = -0.1\n");
+    write_grid(grid);
+    BNSdata_analyze(grid);
+    grid->time = time;
+
+    BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, tol,
+                                        &normresnonlin, linear_solver, 1,
+                                        Gets("BNSdata_FinalEllSolveVars"));
+    BNSdata_verify_solution(grid);
+  }
+
   /* now we have intial data, set time=0 */
   grid->time = 0.0;
 

@@ -274,6 +274,8 @@ int sgrid_BNSdata()
          "how often we do the extra Sigma solve");
   AddPar("BNSdata_SigmaSolve_tolFac", "0",
          "use solver for Sigma if norm(Sigma_Err) >= norm(Rest_Err) * tolFac");
+  AddPar("BNSdata_FinalEllSolveVars", "", "vars for which do another elliptic "
+         "solve after all other iterations are done. E.g. BNSdata_Psi");
   AddPar("BNSdata_linSolver", "UMFPACK", 
          "linear solver used [LAPACK,templates_GMRES,bicgstab,UMFPACK]");
   AddPar("BNSdata_linSolver_itmax", "20", "max num of linSolver iterations");
