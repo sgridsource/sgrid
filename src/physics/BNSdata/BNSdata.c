@@ -4784,7 +4784,7 @@ if(0) /* not working */
     Newton_tol = max2(normresnonlin*NewtTolFac, tol*NewtTolFac);
 
     /* write current iteration if we are not done yet and increase counters */
-    if(it<=itmax)
+    if(it<itmax)
     {
       write_grid(grid);
       BNSdata_analyze(grid);
@@ -4800,11 +4800,11 @@ if(0) /* not working */
     double time = grid->time;
     /* write grid once more (at time=-0.1), since we have not written yet */
     grid->time = -0.1;
-    printf("Final elliptic solve at grid->time = -0.1\n");
     write_grid(grid);
     BNSdata_analyze(grid);
-    grid->time = time;
 
+    /* ell. solve */
+    printf("Final elliptic solve at grid->time = -0.1\n");
     BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, tol,
                                         &normresnonlin, linear_solver, 1,
                                         Gets("BNSdata_FinalEllSolveVars"));
@@ -4818,6 +4818,7 @@ if(0) /* not working */
     totalerr1 = normresnonlin_without_BNSdata_Sigma_inbox12(grid);
     printf(" with Sigma_Err=0 in box1/2: real residual = %e\n", totalerr1);
     prdivider(1);  fflush(stdout);
+    grid->time = time; /* restore grid->time */
   }
 
   /* now we have intial data, set time=0 */
