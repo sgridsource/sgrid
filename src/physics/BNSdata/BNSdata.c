@@ -4763,7 +4763,7 @@ if(0) /* not working */
 
     /* Set VolAvSigma1/2 so that the next ell. solves all try to 
        achieve a certain Volume Average for BNSdata_Sigma. This also
-       results in residuals do not take into account the arbitrary 
+       results in residuals that do not take into account the arbitrary 
        constant that can be added to BNSdata_Sigma. */
     set_BNSdata_desired_VolAvSigma12_toMinBCerr(grid, Ind("BNSdata_Sigma"));
 
