@@ -4808,7 +4808,16 @@ if(0) /* not working */
     BNS_Eqn_Iterator_for_vars_in_string(grid, Newton_itmax, tol,
                                         &normresnonlin, linear_solver, 1,
                                         Gets("BNSdata_FinalEllSolveVars"));
+    /* print residuals */
     BNSdata_verify_solution(grid);
+    printf("Final elliptic solve:\n(%s) residual = %e\n",
+           Gets("BNSdata_FinalEllSolveVars"), normresnonlin);
+    F_BNSdata(vlFu, vlu, vluDerivs, vlJdu);
+    normresnonlin = GridL2Norm(vlFu);
+    printf("After final elliptic solve: vlu residual = %e\n", normresnonlin);
+    totalerr1 = normresnonlin_without_BNSdata_Sigma_inbox12(grid);
+    printf(" with Sigma_Err=0 in box1/2: real residual = %e\n", totalerr1);
+    prdivider(1);  fflush(stdout);
   }
 
   /* now we have intial data, set time=0 */
