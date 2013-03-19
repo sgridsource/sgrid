@@ -35,13 +35,19 @@ int read_next_xyz_from_pointsfile(FILE *in, double *x, double *y, double *z)
 
 
 /* interpolate ADM initial data onto points listed in pointsfile */
+/* Note: here we check extra pars that are not introduced in sgrid_BNSdata.c :
+   BNSdata_Interpolate_pointsfile = some_file_name
+   BNSdata_Interpolate_verbose = no # yes
+   BNSdata_Interpolate_make_finer_grid2_forXYZguess = yes # no
+   BNSdata_Interpolate_max_xyz_diff = 1e-8
+   The last 3 are just for debugging. Their values are set e.g. by bam. */
 int BNS_Interpolate_ADMvars(tGrid *grid)
 {
-  int pr=0;
+  int pr=GetvLax("BNSdata_Interpolate_verbose", "yes");
   FILE *in, *out;
   char *pointsfile;
   char *outfile;
-  tGrid *grid2;
+  tGrid *grid2=NULL;
   double x,y,z, val;
   double gxx=-1e300;
   double X,Y,Z;
@@ -81,13 +87,19 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
   forallboxes(grid, b)
     spec_Coeffs_varlist(grid->box[b], vlu, vlc);
 
-  /* make a finer grid2 so that nearest_b_XYZ_of_xyz_inboxlist used
-     with grid2 finds points that are closer to the correct point. */
-  /* use 40 points in A,B and leave point number in other directions. */
-  printf(" making finer grid2 to get a good guess for X,Y,Z ...\n");
-  fflush(stdout);
-  grid2 = make_grid_with_sigma_pm(grid, 40, 
-                                        grid->box[1]->n3, grid->box[5]->n1);
+  /* pick grid2 used to get guess for X,Y,Z */
+  if(GetvLax("BNSdata_Interpolate_make_finer_grid2_forXYZguess", "no"))
+    grid2 = grid;
+  else
+  {
+    /* make a finer grid2 so that nearest_b_XYZ_of_xyz_inboxlist used
+       with grid2 finds points that are closer to the correct point. */
+    printf(" making finer grid2 to get a good guess for X,Y,Z ...\n");
+    fflush(stdout);
+    /* use 40 points in A,B and leave point number in other directions. */
+    grid2 = make_grid_with_sigma_pm(grid, 40, 
+                                    grid->box[1]->n3, grid->box[5]->n1);
+  }
 
   /* filenames */
   pointsfile = Gets("BNSdata_Interpolate_pointsfile");
@@ -134,7 +146,6 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
       Y=y;
       Z=z;
     }
-    
     if(pr) printf("guess:  b=%d (X,Y,Z)=(%g,%g,%g)  nearest ind=%d\n", b, X,Y,Z, ind);
 
     /* get X,Y,Z, b of x,y,z */
@@ -146,6 +157,25 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
       printf("error: b=%d (X,Y,Z)=(%g,%g,%g)\n", b, X,Y,Z); 
       errorexit("could not find point");
     }
+    if( GetsLax("BNSdata_Interpolate_max_xyz_diff")!=0 )
+    {
+      double tol= Getd("BNSdata_Interpolate_max_xyz_diff");
+      tBox *box = grid->box[b];
+      double xg = box->x_of_X[1]((void *) box, -1, X,Y,Z);
+      double yg = box->x_of_X[2]((void *) box, -1, X,Y,Z);
+      double zg = box->x_of_X[3]((void *) box, -1, X,Y,Z);
+      double diff = sqrt( (x-xg)*(x-xg) + (y-yg)*(y-yg) + (z-zg)*(z-zg) );
+      if(diff>tol)
+      {
+        printf("point: {x,y,z}={%.12g,%.12g,%.12g}\n", x,y,z);
+        printf("error: b=%d {X,Y,Z}={%.12g,%.12g,%.12g}\n", b, X,Y,Z); 
+        printf(" -> {x(X,Y,Z), y(X,Y,Z), z(X,Y,Z)}="
+               "{%.12g, %.12g, %.12g}\n", xg,yg,zg);
+        fflush(stdout);
+        errorexit("x(X,Y,Z), y(X,Y,Z), z(X,Y,Z) are wrong");
+      }
+    }
+
     /* interpolate vlu (using coeffs in vlc) to X,Y,Z in box b */
     for(j=0; j<vlc->n; j++)
     {
@@ -190,8 +220,8 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
     }
   }
   
-  /* remove grid2 */
-  free_grid(grid2);
+  /* remove grid2, if it does not point to grid itself */
+  if(grid2 != grid) free_grid(grid2);
 
   /* close files */
   fclose(out);
