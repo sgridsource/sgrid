@@ -161,18 +161,25 @@ int BNS_Interpolate_ADMvars(tGrid *grid)
     {
       double tol= Getd("BNSdata_Interpolate_max_xyz_diff");
       tBox *box = grid->box[b];
-      double xg = box->x_of_X[1]((void *) box, -1, X,Y,Z);
-      double yg = box->x_of_X[2]((void *) box, -1, X,Y,Z);
-      double zg = box->x_of_X[3]((void *) box, -1, X,Y,Z);
-      double diff = sqrt( (x-xg)*(x-xg) + (y-yg)*(y-yg) + (z-zg)*(z-zg) );
+      double xs,ys,zs, diff;
+
+      if(box->x_of_X[1]==NULL) { xs=X;  ys=Y;  zs=Z; }
+      else
+      {
+        xs = box->x_of_X[1]((void *) box, -1, X,Y,Z);
+        ys = box->x_of_X[2]((void *) box, -1, X,Y,Z);
+        zs = box->x_of_X[3]((void *) box, -1, X,Y,Z);
+      }
+      diff = sqrt( (x-xs)*(x-xs) + (y-ys)*(y-ys) + (z-zs)*(z-zs) );
       if(diff>tol)
       {
-        printf("point: {x,y,z}={%.12g,%.12g,%.12g}\n", x,y,z);
-        printf("error: b=%d {X,Y,Z}={%.12g,%.12g,%.12g}\n", b, X,Y,Z); 
-        printf(" -> {x(X,Y,Z), y(X,Y,Z), z(X,Y,Z)}="
-               "{%.12g, %.12g, %.12g}\n", xg,yg,zg);
+        printf("error: b=%d {X,Y,Z}={%.15g,%.15g,%.15g}\n", b, X,Y,Z);
+        printf("=> {xs,ys,zs}={x(X,Y,Z), y(X,Y,Z), z(X,Y,Z)} with:\n");
+        printf(" {xs,ys,zs}={%.15g,%.15g,%.15g}\n", xs,ys,zs);
+        printf("BUT {x,y,z}={%.15g,%.15g,%.15g}\n", x,y,z);
+        printf(" diff=%.15g\n", diff);
         fflush(stdout);
-        errorexit("x(X,Y,Z), y(X,Y,Z), z(X,Y,Z) are wrong");
+        errorexit("x(X,Y,Z), y(X,Y,Z), z(X,Y,Z) are wrong!");
       }
     }
 
