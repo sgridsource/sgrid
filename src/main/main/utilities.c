@@ -23,6 +23,14 @@ void prdivider(int n)
 }
 
 
+/* get current time in seconds */
+double getTimeIn_s()
+{
+  double t_in_s = clock();
+  t_in_s = t_in_s/CLOCKS_PER_SEC;
+  return t_in_s;
+}
+
 /* print current time */
 void prTimeIn_s(char *comment)
 {

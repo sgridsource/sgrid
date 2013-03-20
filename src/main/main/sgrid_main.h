@@ -151,6 +151,7 @@ void errorexiti(char *file, int line, char *s, int i);
 void yo(void);
 void Yo(double x);
 void prdivider(int n);
+double getTimeIn_s();
 void prTimeIn_s(char *comment);
 double min2(double x, double y);
 double min3(double x, double y, double z);
