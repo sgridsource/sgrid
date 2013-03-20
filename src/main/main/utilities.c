@@ -7,6 +7,9 @@
 #include "main.h"
 
 
+/* global vars for timing */
+double time_in_s_at_sgrid_start; /* set in main.c */
+
 
 
 /* debug */
@@ -26,13 +29,28 @@ void prdivider(int n)
 /* get current time in seconds */
 double getTimeIn_s()
 {
-  double t_in_s = clock();
-  t_in_s = t_in_s/CLOCKS_PER_SEC;
+  double t_in_s = time(NULL) - time_in_s_at_sgrid_start;
   return t_in_s;
 }
 
 /* print current time */
 void prTimeIn_s(char *comment)
+{
+  double t_in_s = time(NULL) - time_in_s_at_sgrid_start;
+  printf("%s%.2fs\n", comment, t_in_s);
+  fflush(stdout);
+}
+
+/* get current CPU clock time in seconds */
+double getClockTimeIn_s()
+{
+  double t_in_s = clock();
+  t_in_s = t_in_s/CLOCKS_PER_SEC;
+  return t_in_s;
+}
+
+/* print current CPU clock time */
+void prClockTimeIn_s(char *comment)
 {
   double t_in_s = clock();
   t_in_s = t_in_s/CLOCKS_PER_SEC;

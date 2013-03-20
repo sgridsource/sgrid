@@ -414,7 +414,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     if(Getv("GridIterators_verbose", "very"))
     {
       char name[1000];
-      snprintf(name, 999, "%s/Jacobi_precon_block%d_%gs.mtx",
+      snprintf(name, 999, "%s/Jacobi_precon_block%d_%.0fs.mtx",
                Gets("outdir"), blocki, getTimeIn_s());
       write_SparseVectorArray_inMatrixMarketFormat(name, Acol,ncols, 1);
     }

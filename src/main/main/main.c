@@ -5,6 +5,9 @@
 #include "main.h"
 
 
+/* global var that contains time (in s) at the start of sgrid */
+extern double time_in_s_at_sgrid_start;
+
 
 /* initialize libraries 
    the automatically generated file calls the initializers for each module
@@ -26,6 +29,7 @@ int main(int argc, char **argv)
 {
   tGrid *g;
 
+  time_in_s_at_sgrid_start = getTimeIn_s();
   read_command_line(argc, argv);
   parse_parameter_file(Gets("parameterfile"));
   parse_command_line_options();
