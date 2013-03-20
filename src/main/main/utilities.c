@@ -26,8 +26,9 @@ void prdivider(int n)
 /* print current time */
 void prTimeIn_s(char *comment)
 {
-  double t_in_s = clock()/CLOCKS_PER_SEC;
-  printf("%s%g\n", comment, t_in_s);
+  double t_in_s = clock();
+  t_in_s = t_in_s/CLOCKS_PER_SEC;
+  printf("%s%gs\n", comment, t_in_s);
   fflush(stdout);
 }
 
