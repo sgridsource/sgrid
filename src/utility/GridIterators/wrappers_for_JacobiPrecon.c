@@ -410,7 +410,14 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     SetMatrixColumns_ForOneVarInOneSubBox_slowly(Acol, vi, bi,
                                                  sbi,sbj,sbk, nsb1,nsb2,nsb3,
                                                  lop, r, x, c1, c2, 0);
-    if(pr&&0) prSparseVectorArray(Acol,ncols); 
+    if(pr&&0) prSparseVectorArray(Acol,ncols);
+    if(Getv("GridIterators_verbose", "very"))
+    {
+      char name[1000];
+      snprintf(name, 999, "%s/Jacobi_precon_block%d_%gs.mtx",
+               Gets("outdir"), blocki, getTimeIn_s());
+      write_SparseVectorArray_inMatrixMarketFormat(name, Acol,ncols, 1);
+    }
 
     /* count number of entries in sparse matrix */
     nz = 0;

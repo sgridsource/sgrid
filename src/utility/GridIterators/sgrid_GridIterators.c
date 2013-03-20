@@ -14,7 +14,7 @@ int sgrid_GridIterators()
   AddFun(PRE_GRID, Init_Newton, "initialize Newton");
 
   /* global parameter */
-  AddPar("GridIterators_verbose", "yes", "talk about it");
+  AddPar("GridIterators_verbose", "yes", "talk about it [yes,no,yes very]");
   AddPar("GridIterators_GMRES_restart", "max", 
          "Restart parameter for GMRES[some #,max");
   AddPar("GridIterators_setABStozero_below", "0", 
