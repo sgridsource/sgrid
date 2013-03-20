@@ -373,6 +373,8 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     if(pr) printf(" Using finite differencing to set all matrix blocks.\n");
   }
 
+  if(pr) prTimeIn_s("Time BEFORE setting up blocks: ");
+
   /* loop over boxes and vars */
 #ifndef LEVEL6_Pragmas
   SGRID_TOPLEVEL_Pragma(omp parallel for)
@@ -408,8 +410,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     SetMatrixColumns_ForOneVarInOneSubBox_slowly(Acol, vi, bi,
                                                  sbi,sbj,sbk, nsb1,nsb2,nsb3,
                                                  lop, r, x, c1, c2, 0);
-    if(pr&&0) 
-      for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
+    if(pr&&0) prSparseVectorArray(Acol,ncols); 
 
     /* count number of entries in sparse matrix */
     nz = 0;
@@ -465,13 +466,19 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     Blocks_JacobiPrecon.SPQR[blocki] = SPQR; /* the QR inside this is set below */
 
   } End_forallVarsBoxesAndSubboxes_defIndices
-  printf("linSolve_with_BlockJacobi_precon: created %d blocks.\n", nblocks);
+  if(pr)
+  {
+    printf("linSolve_with_BlockJacobi_precon: created %d blocks.\n", nblocks);
+    prTimeIn_s("Time AFTER setting up blocks: ");
+  }
   if(use_fd)
   {
     /* restore grid to spectral */
     copy_grid_withoutvars(grid_bak, grid, 0);
     free_grid(grid_bak);
   }
+
+  if(pr) prTimeIn_s("Time BEFORE LU or QR factorization: ");
 
   /* do LU or QR factorization with umfpackA or SPQR */
 #ifndef MEMORY_EFFICIENT
@@ -493,6 +500,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
                                          Blocks_JacobiPrecon.blockdims[i], 0);
     }
   }
+  if(pr) prTimeIn_s("Time AFTER LU or QR factorization: ");
 
   /* solve A x = b with lsolver and BlockJacobi_Preconditioner_from_Blocks */
   INFO = lsolver(x, b, r,c1,c2, itmax,tol,normres, lop, 
