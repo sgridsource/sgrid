@@ -145,8 +145,8 @@ int write_SparseVectorArray_inMatrixMarketFormat(char *filename,
 
     for(i=0; i<A[j]->entries; i++)
     {
-      if(isAcol) { row=A[j]->pos[i];  col=j; }
-      else       { row=j;             col=A[j]->pos[i]; }
+      if(isAcol) { row=A[j]->pos[i]+1;  col=j+1; }
+      else       { row=j+1;             col=A[j]->pos[i]+1; }
       fprintf(fp, "%d %d %.15g\n", row,col, A[j]->val[i]);
     }
   }
