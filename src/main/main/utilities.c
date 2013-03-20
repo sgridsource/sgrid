@@ -1,6 +1,8 @@
 /* utilities.c */
 /* Wolfgang Tichy, April 2005  &  Bernd Bruegmann, 12/99 */
 
+#include <time.h>
+
 #include "sgrid.h"
 #include "main.h"
 
@@ -21,6 +23,13 @@ void prdivider(int n)
 }
 
 
+/* print current time */
+void prTimeIn_s(char *comment)
+{
+  double t_in_s = clock()/CLOCKS_PER_SEC;
+  printf("%s%g\n", comment, t_in_s);
+  fflush(stdout);
+}
 
 
 /* minimum and maximum, also works for integers in most places */
