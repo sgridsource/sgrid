@@ -87,6 +87,76 @@ void FreeSparseVectorArray(tSparseVector **A, int n)
   }
 }
 
+/* print a SparseVector array */
+void prSparseVectorArray(tSparseVector **A, int n)
+{
+  int i;
+
+  printf("SparseVectorArray containing %d sparse vectors:\n", n);
+  for(i=0; i<n; i++) 
+  {
+    printf("sparse vector %d:\n", i);
+    prSparseVector(A[i]);
+  }
+}
+
+/* write a SparseVector array in Matrix Market Exchange Format:
+   if isAcol=1 we assume matrix is made up of sparse column vectors
+   otherwise we assume matrix is made up of sparse row vectors */
+int write_SparseVectorArray_inMatrixMarketFormat(char *filename,
+                                                 tSparseVector **A, int n,
+                                                 int isAcol)
+{
+  FILE *fp;
+  int i,j, nz, maxpos, ncols, nrows;
+
+  /* open file */
+  fp = fopen(filename, "a");
+  if(!fp) { printf("failed opening %s\n", filename);  return -1; }
+
+  /* count number of entries, and find max pos in sparse matrix */
+  nz=0; maxpos=0;
+  for(j=0; j<n; j++)
+  {
+    int entries=A[j]->entries;
+
+    nz+=entries;
+    for(i=0; i<entries; i++)
+      if( A[j]->pos[i] > maxpos)  maxpos=A[j]->pos[i];
+  }
+  if(isAcol) { ncols=n; nrows=maxpos+1; }
+  else       { nrows=n; ncols=maxpos+1; }
+
+  /* write header */
+  fprintf(fp, "%%%%MatrixMarket matrix coordinate real general\n");
+  fprintf(fp, "%% Written by write_SparseVectorArray_inMatrixMarketFormat\n");
+  fprintf(fp, "%% filename=%s\n", filename);
+  fprintf(fp, "%% A=%p\n", A);
+  fprintf(fp, "%% n=%d\n", n);
+  fprintf(fp, "%% isAcol=%d\n", isAcol);
+  fprintf(fp, "%% This is a %dx%d matrix with %d nonzeros\n", ncols,nrows, nz);
+  fprintf(fp, "%% BEGIN_matrix:\n");
+  fprintf(fp, "%d %d %d\n", ncols,nrows, nz);
+
+  /* loop over vectors */
+  for(j=0; j<n; j++)
+  {
+    int row,col;
+
+    for(i=0; i<A[j]->entries; i++)
+    {
+      if(isAcol) { row=A[j]->pos[i];  col=j; }
+      else       { row=j;             col=A[j]->pos[i]; }
+      fprintf(fp, "%d %d %.15g\n", row,col, A[j]->val[i]);
+    }
+  }
+    
+  /* close file */
+  fclose(fp);
+  
+  return 0;
+}
+
 /* get component comp  */
 double GetSparseVectorComponent(tSparseVector *SV, int comp)
 {
