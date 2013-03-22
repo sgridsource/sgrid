@@ -261,6 +261,11 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
   }
   /* reset du to zero */
   vlsetconstant(vldu, 0.0);
+
+  /* call Jdu with vldu=0, 
+     which hopefully resets all derivs of vldu to zero */
+  if(Getv("GridIterators_Newton_EndOfStep", "Jdu"))
+    Jdu(vlres, vldu, vld1, vld2);
 }
 
 /* Newton startup initialization */

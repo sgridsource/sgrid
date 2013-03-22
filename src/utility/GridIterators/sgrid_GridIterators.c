@@ -22,6 +22,8 @@ int sgrid_GridIterators()
          "is below this value [any positive number]");
   AddPar("GridIterators_Newtonstep", "full",
          "how we take Newton steps [full,backtrack]");
+  AddPar("GridIterators_Newton_EndOfStep", "Jdu",
+         "what we do at end of Newton step [Jdu]");
   AddPar("GridIterators_templates_RESID_mode", "tol/norm(b)",
          "how we compute input RESID from tol [tol/norm(b),tol]");
   AddPar("GridIterators_UMFPACK_version", "di",
