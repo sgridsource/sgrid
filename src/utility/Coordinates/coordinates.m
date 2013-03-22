@@ -20,7 +20,7 @@ Toxyzrule[1] = r -> Sqrt[x^2 + y^2 + z^2];
 Toxyzrule[2] = thm ->ArcCos[z/Sqrt[x^2 + y^2 + z^2]] - PI/N;
 Toxyzrule[3] = phi -> ArcTan[y/x];
 
-CFunctionFile = "coordtrans_"<>CoordTransfName<>".c";
+CFunctionFile = "coordinates_"<>CoordTransfName<>".c";
 
 IncludeAndDefine[] := Module[{},
 
