@@ -50,6 +50,34 @@ double Arg_plus(double x, double y)
   return arg;
 }
 
+/* 1st derivs of Arg(x,y) and also Arg_plus(x,y) */
+double dArgdx(double x, double y)
+{
+  return -y/(x*x + y*y);
+}
+double dArgdy(double x, double y)
+{
+  return x/(x*x + y*y);
+}
+
+/* 2nd derivs of Arg(x,y) and also Arg_plus(x,y) */
+double ddArgdxdx(double x, double y)
+{
+  double r2 = x*x + y*y;
+  return 2.0*x*y/(r2*r2);
+}
+double ddArgdxdy(double x, double y)
+{
+  double r2 = x*x + y*y;
+  return 2.0*y*y/(r2*r2) - 1.0/r2;
+}
+double ddArgdydy(double x, double y)
+{
+  double r2 = x*x + y*y;
+  return -2.0*x*y/(r2*r2);
+}
+
+
 /* Re, Im, Arg, and Abs of tanh(z)=tanh(x+iy) */
 double Retanh(double x, double y)
 {

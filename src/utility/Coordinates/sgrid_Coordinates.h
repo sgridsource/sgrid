@@ -23,6 +23,11 @@ void coordinateDependentFilter(tVarList *unew);
 /* from ComplexFunctions.c */
 double Arg(double x, double y);
 double Arg_plus(double x, double y);
+double dArgdx(double x, double y);
+double dArgdy(double x, double y);
+double ddArgdxdx(double x, double y);
+double ddArgdxdy(double x, double y);
+double ddArgdydy(double x, double y);
 double Retanh(double x, double y);
 double Imtanh(double x, double y);
 double Argtanh(double x, double y);
