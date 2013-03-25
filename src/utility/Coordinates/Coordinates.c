@@ -32,9 +32,15 @@
 double  (*Coordinates_AnsorgNS_sigmap)(tBox *box, int ind, double B, double phi);
 double (*Coordinates_AnsorgNS_dsigmap_dB)(tBox *box, int ind, double B, double phi);
 double (*Coordinates_AnsorgNS_dsigmap_dphi)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_ddsigmap_dBdB)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_ddsigmap_dBdphi)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_ddsigmap_dphidphi)(tBox *box, int ind, double B, double phi);
 double  (*Coordinates_AnsorgNS_sigmam)(tBox *box, int ind, double B, double phi);
 double (*Coordinates_AnsorgNS_dsigmam_dB)(tBox *box, int ind, double B, double phi);
 double (*Coordinates_AnsorgNS_dsigmam_dphi)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_ddsigmam_dBdB)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_ddsigmam_dBdphi)(tBox *box, int ind, double B, double phi);
+double (*Coordinates_AnsorgNS_ddsigmam_dphidphi)(tBox *box, int ind, double B, double phi);
 /* Coordinates_AnsorgNS_b is value of x if A=1 in AnsorgNS0/3 */
 int Coordinates_AnsorgNS_b_ParIndex; /* index of par Coordinates_AnsorgNS_b */
 
