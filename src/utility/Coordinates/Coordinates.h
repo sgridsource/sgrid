@@ -22,6 +22,11 @@ void coordinateDependentFilter_Spherical(tBox *box, tVarList *unew);
 void dXdx_from_dxdX(double dXdx[4][4], double dxdX[4][4]);
 void ddXdxdx_from_dXdx_ddxdXdX(double ddXdxdx[4][4][4],
                                double dXdx[4][4], double ddxdXdX[4][4][4]);
+void dxdX_from_dxdU_dUdX(double dxdX[4][4],
+                         double dxdU[4][4], double dUdX[4][4]);
+void ddxdXdX_from_dxdU_dUdX_ddxdUdU_ddUdXdX(double ddxdXdX[4][4][4],
+                         double dxdU[4][4], double dUdX[4][4],
+                         double ddxdUdU[4][4][4], double ddUdXdX[4][4][4]);
 
 /* Some trivial functions */
 double zero_of_xyz(void *aux, int ind, double X, double Y, double Z);
@@ -329,3 +334,7 @@ double ddZ_dxdz_generic(void *aux, int ind, double X, double Y, double Z);
 double ddZ_dydy_generic(void *aux, int ind, double X, double Y, double Z);
 double ddZ_dydz_generic(void *aux, int ind, double X, double Y, double Z);
 double ddZ_dzdz_generic(void *aux, int ind, double X, double Y, double Z);
+
+/* from math */
+void xyz_dxyz_ddxyz_of_AnsorgXRphi_XRphi(tBox *box, int ind, double X, double R, double phi, double xyz[4],double dxyz[4][4],double ddxyz[4][4][4]);
+void XRphi_dXRphi_ddXRphi_of_AnsorgNS0_ABphi(tBox *box, int ind, double A, double B, double phi, double XRphi[4],double dXRphi[4][4],double ddXRphi[4][4][4]);
