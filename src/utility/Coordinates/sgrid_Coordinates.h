@@ -34,6 +34,16 @@ double Argtanh(double x, double y);
 double Abstanh(double x, double y);
 double Argsech(double x, double y);
 double Abssech(double x, double y);
+double dArgtanhdx(double x, double y);
+double dArgtanhdy(double x, double y);
+double ddArgtanhdxdx(double x, double y);
+double ddArgtanhdxdy(double x, double y);
+double ddArgtanhdydy(double x, double y);
+double dAbstanhdx(double x, double y);
+double dAbstanhdy(double x, double y);
+double ddAbstanhdxdx(double x, double y);
+double ddAbstanhdxdy(double x, double y);
+double ddAbstanhdydy(double x, double y);
 
 /* from findXYZ_of_xyz.c */
 int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
