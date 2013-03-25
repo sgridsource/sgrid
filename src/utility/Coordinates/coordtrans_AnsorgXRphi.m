@@ -134,8 +134,9 @@ prxOfX := Module[{xOfXYZ, fs, rs},
     rs = StringForm["return ``;\n", CForm[xOfXYZ]];
     pr[fs];
     pr["{\n"];
+    pr[CCodeAtBeginning];
     prspecialVars[NspecialVarsxOfX];
-    pr[CCodeBeforeReturn];
+    pr[CCodeBeforeReturnValues];
     pr[rs];
     pr["}\n\n"];
     Print[fs];
@@ -161,8 +162,9 @@ prdxdX := Module[{dxdX, fs, rs},
       rs = StringForm["return ``;\n", CForm[dxdX[i,j]]];
       pr[fs];
       pr["{\n"];
+      pr[CCodeAtBeginning];
       prspecialVars[NspecialVarsdxdX];
-      pr[CCodeBeforeReturn];
+      pr[CCodeBeforeReturnValues];
       pr[rs];
       pr["}\n\n"];
       Print[fs];
@@ -190,8 +192,9 @@ prddxdXdX := Module[{ddxdXdX, fs, rs},
         rs = StringForm["return ``;\n", CForm[ddxdXdX[i,j,k]]];
         pr[fs];
         pr["{\n"];
+        pr[CCodeAtBeginning];
         prspecialVars[NspecialVarsddxdXdX];
-        pr[CCodeBeforeReturn];
+        pr[CCodeBeforeReturnValues];
         pr[rs];
         pr["}\n\n"];
         Print[fs];
