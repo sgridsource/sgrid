@@ -64,6 +64,9 @@ int sgrid_Coordinates(void)
     AddVar("Coordinates_AnsorgNS_sigma_pm",       "", "sigma_{+-}");
     AddVar("Coordinates_AnsorgNS_dsigma_pm_dB",   "", "d/dB sigma_{+-}");
     AddVar("Coordinates_AnsorgNS_dsigma_pm_dphi", "", "d/dphi sigma_{+-}");
+    AddVar("Coordinates_AnsorgNS_ddsigma_pm_dBdB",    "", "(d/dB)^2 sigma_{+-}");
+    AddVar("Coordinates_AnsorgNS_ddsigma_pm_dBdphi",  "", "d/dB d/dphi sigma_{+-}");
+    AddVar("Coordinates_AnsorgNS_ddsigma_pm_dphidphi","", "(d/dphi)^2 sigma_{+-}");
   }
 
   return 0;

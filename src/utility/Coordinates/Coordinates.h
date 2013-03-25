@@ -234,12 +234,12 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
 double ddphi_dydy_AnsorgNS(void *aux, int ind, double A, double B, double phi);
 double ddphi_dydz_AnsorgNS(void *aux, int ind, double A, double B, double phi);
 double ddphi_dzdz_AnsorgNS(void *aux, int ind, double A, double B, double phi);
-double AnsorgNS_sigmap(tBox *box, int ind, double B, double phi);
-double AnsorgNS_dsigmap_dB(tBox *box, int ind, double B, double phi);
-double AnsorgNS_dsigmap_dphi(tBox *box, int ind, double B, double phi);
-double AnsorgNS_sigmam(tBox *box, int ind, double B, double phi);
-double AnsorgNS_dsigmam_dB(tBox *box, int ind, double B, double phi);
-double AnsorgNS_dsigmam_dphi(tBox *box, int ind, double B, double phi);
+double AnsorgNS_sigma_pm(tBox *box, int ind, double B, double phi);
+double AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi);
+double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi);
+double AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi);
+double AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi);
+double AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double phi);
 double AnsorgNS_sigma_p_one(tBox *box, int ind, double B, double phi);
 double AnsorgNS_dsigma_zero(tBox *box, int ind, double B, double phi);
 double AnsorgNS_sigma_m_one(tBox *box, int ind, double B, double phi);

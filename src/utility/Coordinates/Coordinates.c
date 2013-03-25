@@ -507,6 +507,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       int isigma      = Ind("Coordinates_AnsorgNS_sigma_pm");
       int isigma_dB   = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
       int isigma_dphi = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+      int isigma_dBdB    = Ind("Coordinates_AnsorgNS_ddsigma_pm_dBdB");
+      int isigma_dBdphi  = Ind("Coordinates_AnsorgNS_ddsigma_pm_dBdphi");
+      int isigma_dphidphi= Ind("Coordinates_AnsorgNS_ddsigma_pm_dphidphi");
 
       forallboxes(grid, b)
       {
@@ -518,17 +521,33 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         if(box->v[isigma] == NULL)
           errorexit("Coordinates: the var Coordinates_AnsorgNS_sigma_pm "
                     "has to be set in POST_GRID.");
+        enablevar_inbox(box, isigma_dB);
+        enablevar_inbox(box, isigma_dphi);
+        enablevar_inbox(box, isigma_dBdB);
+        enablevar_inbox(box, isigma_dBdphi);
+        enablevar_inbox(box, isigma_dphidphi);
         if(pr) printf("  box%d: using %s to compute\n  %s and %s\n", b, 
                 VarName(isigma), VarName(isigma_dB), VarName(isigma_dphi));
         spec_Deriv1(box, 2, box->v[isigma], box->v[isigma_dB]);
         spec_Deriv1(box, 3, box->v[isigma], box->v[isigma_dphi]);
+        if(pr) printf("  %s, %s,\n  %s\n", VarName(isigma_dBdB),
+                VarName(isigma_dBdphi), VarName(isigma_dphidphi));
+        spec_Deriv2(box, 2, box->v[isigma], box->v[isigma_dBdB]);
+        spec_Deriv1(box, 3, box->v[isigma_dB], box->v[isigma_dBdphi]);
+        spec_Deriv2(box, 3, box->v[isigma], box->v[isigma_dphidphi]);
       }
-      Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigmap;
-      Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigmap_dB;
-      Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigmap_dphi;
-      Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigmam;
-      Coordinates_AnsorgNS_dsigmam_dB   = AnsorgNS_dsigmam_dB;
-      Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigmam_dphi;
+      Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigma_pm;
+      Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigma_pm_dB;
+      Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigma_pm_dphi;
+      Coordinates_AnsorgNS_ddsigmap_dBdB     = AnsorgNS_ddsigma_pm_dBdB;
+      Coordinates_AnsorgNS_ddsigmap_dBdphi   = AnsorgNS_ddsigma_pm_dBdphi;
+      Coordinates_AnsorgNS_ddsigmap_dphidphi = AnsorgNS_ddsigma_pm_dphidphi;
+      Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigma_pm;
+      Coordinates_AnsorgNS_dsigmam_dB   = AnsorgNS_dsigma_pm_dB;
+      Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigma_pm_dphi;
+      Coordinates_AnsorgNS_ddsigmam_dBdB     = AnsorgNS_ddsigma_pm_dBdB;
+      Coordinates_AnsorgNS_ddsigmam_dBdphi   = AnsorgNS_ddsigma_pm_dBdphi;
+      Coordinates_AnsorgNS_ddsigmam_dphidphi = AnsorgNS_ddsigma_pm_dphidphi;
     }
     else
     {
@@ -2835,7 +2854,7 @@ void ddABphi_ddxyz_AnsorgNS(tBox *box, int ind, int domain,
 }
 
 /* Ansorg's sigma_{+-} computed from var sigma_pm */
-double AnsorgNS_sigmap(tBox *box, int ind, double B, double phi)
+double AnsorgNS_sigma_pm(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
   static int isig;
@@ -2849,7 +2868,7 @@ double AnsorgNS_sigmap(tBox *box, int ind, double B, double phi)
     return spec_interpolate(box, c, 0.0,B,phi);
   }
 }
-double AnsorgNS_dsigmap_dB(tBox *box, int ind, double B, double phi)
+double AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
   static int isig;
@@ -2863,7 +2882,7 @@ double AnsorgNS_dsigmap_dB(tBox *box, int ind, double B, double phi)
     return spec_interpolate(box, c, 0.0,B,phi);
   }
 }
-double AnsorgNS_dsigmap_dphi(tBox *box, int ind, double B, double phi)
+double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
   static int isig;
@@ -2877,12 +2896,12 @@ double AnsorgNS_dsigmap_dphi(tBox *box, int ind, double B, double phi)
     return spec_interpolate(box, c, 0.0,B,phi);
   }
 }
-double AnsorgNS_sigmam(tBox *box, int ind, double B, double phi)
+double AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
   static int isig;
 
-  if(firstcall) isig = Ind("Coordinates_AnsorgNS_sigma_pm");  
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_ddsigma_pm_dBdB");
   if(ind>=0) return box->v[isig][ind];
   else
   {
@@ -2891,12 +2910,12 @@ double AnsorgNS_sigmam(tBox *box, int ind, double B, double phi)
     return spec_interpolate(box, c, 0.0,B,phi);
   }
 }
-double AnsorgNS_dsigmam_dB(tBox *box, int ind, double B, double phi)
+double AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
   static int isig;
 
-  if(firstcall) isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_ddsigma_pm_dBdphi");
   if(ind>=0) return box->v[isig][ind];
   else
   {
@@ -2905,12 +2924,12 @@ double AnsorgNS_dsigmam_dB(tBox *box, int ind, double B, double phi)
     return spec_interpolate(box, c, 0.0,B,phi);
   }
 }
-double AnsorgNS_dsigmam_dphi(tBox *box, int ind, double B, double phi)
+double AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
   static int isig;
 
-  if(firstcall) isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+  if(firstcall) isig = Ind("Coordinates_AnsorgNS_ddsigma_pm_dphidphi");
   if(ind>=0) return box->v[isig][ind];
   else
   {
