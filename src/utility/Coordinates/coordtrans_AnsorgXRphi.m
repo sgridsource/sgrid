@@ -1,11 +1,14 @@
 (* Mathematica utility to make C-functions for coord transform *)
 
 CoordTransfName = "AnsorgXRphi";
-FuncArgs = "void *aux, int ind, double X, double R, double phi";
+FuncArgs = "tBox *box, int ind, double X, double R, double phi";
 
-CCodeBeforeReturn =
-"/* tBox *box = (tBox *) aux; */
-if(XsqrPlusRsqr==0.0) XsqrPlusRsqr=dequaleps*dequaleps*dequaleps;\n";
+CCodeAtBeginning = 
+"double b = GetCachedNumValByParIndex(Coordinates_AnsorgNS_b_ParIndex);
+";
+
+CCodeBeforeReturnValues =
+"if(XsqrPlusRsqr==0.0) XsqrPlusRsqr=dequaleps*dequaleps*dequaleps;\n";
 
 (* some rules *)
 POW2Rule    = Power[XXX_,2]  -> pow2[XXX];
@@ -75,8 +78,14 @@ IncludeAndDefine[] := Module[{},
   pr["#define Cot(x)     (1.0/tan((double) (x)))\n"];
   pr["#define pow2(x)    ((x)*(x))\n"];
   pr["#define pow2inv(x) (1.0/((x)*(x)))\n"];
-  pr["#define Cal(x,y,z) ((x)?(y):(z))\n\n"];
-  pr["\n\n\n"];
+  pr["#define Cal(x,y,z) ((x)?(y):(z))\n"];
+  pr["\n\n"];
+];
+
+GlobalVars[] := Module[{},
+
+  pr["extern int Coordinates_AnsorgNS_b_ParIndex;\n"];
+  pr["\n\n"];
 ];
 
 
@@ -192,12 +201,84 @@ prddxdXdX := Module[{ddxdXdX, fs, rs},
   pr["\n\n\n"];
 ];
 
+(* module for one combned function with all derivs *)
+prxyzdxdXddxdXdX := Module[{ddxdXdX, fs, rs},
+  pr["/* func with trafo and 1st and 2nd derivs */\n"];
+  fs = StringForm["void ``````_d``````_dd``````_of_``_``````(``, double ``````[4],double d``````[4][4],double dd``````[4][4][4])\n",
+                  x[1],x[2],x[3], x[1],x[2],x[3], x[1],x[2],x[3], 
+                  CoordTransfName, X[1],X[2],X[3], 
+                  FuncArgs, x[1],x[2],x[3], x[1],x[2],x[3], x[1],x[2],x[3]];
+  Print[fs];
+  pr[fs];
+  pr["{\n"];
+  pr[CCodeAtBeginning];
+  prspecialVars[NspecialVarsddxdXdX];
+  pr[CCodeBeforeReturnValues];
+  pr["\n"];
+  pr["/* coord transforms */\n"];
+  For[i = 1, i <= 3, i++,
+    xOfXYZ = x[i] /. ToXYZrule[i];
+    For[k = 1, k <= NspecialRulesxOfX, k++,
+      xOfXYZ = xOfXYZ /. specialRule[k];
+    ];
+    xOfXYZ = xOfXYZ /. SomeRules;
+    xOfXYZ = xOfXYZ /. Power[XXX_,-2] -> pow2inv[XXX];
+    xOfXYZ = N[xOfXYZ] /. -1.*XXX_ :> -XXX;
+    rs = StringForm["``````[``] = ``;\n", x[1],x[2],x[3], i, CForm[xOfXYZ]];
+    pr[rs];
+  ];
+  pr["\n"];
+  pr["/* 1st derivs */\n"];
+  For[i = 1, i <= 3, i++,
+    For[j = 1, j <= 3, j++,
+      fs = StringForm["double d``_``_d``(``)\n",
+                      x[i], CoordTransfName, X[j], FuncArgs];
+      dxdX[i,j] = D[ x[i] /. ToXYZrule[i], X[j] ];
+      For[k = 1, k <= NspecialRulesdxdX, k++,
+        dxdX[i,j] = dxdX[i,j] /. specialRule[k];
+      ];
+      dxdX[i,j] = dxdX[i,j] /. SomeRules;
+      dxdX[i,j] = Simplify[PowerExpand[Simplify[ dxdX[i,j] ]]];
+      dxdX[i,j] = Simplify[ dxdX[i,j] ];
+      dxdX[i,j] = N[ dxdX[i,j], 20 ] /. -1.*XXX_ :> -XXX;
+      rs = StringForm["d``````[``][``] = ``;\n", 
+                      x[1],x[2],x[3], i,j, CForm[dxdX[i,j]]];
+      pr[rs];
+    ];
+  ];
+  pr["\n"];
+  pr["/* 2nd derivs */\n"];
+  For[i = 1, i <= 3, i++,
+    For[j = 1, j <= 3, j++,
+      For[k = j, k <= 3, k++,
+        ddxdXdX[i,j,k] = D[ x[i] /. ToXYZrule[i], X[j],X[k] ];
+        For[n = 1, n <= NspecialRulesddxdXdX, n++,
+          ddxdXdX[i,j,k] = ddxdXdX[i,j,k] /. specialRule[n];
+        ];
+        ddxdXdX[i,j,k] = ddxdXdX[i,j,k] /. SomeRules;
+        ddxdXdX[i,j,k] = Simplify[PowerExpand[Simplify[ ddxdXdX[i,j,k] ]]];
+        ddxdXdX[i,j,k] = Simplify[ ddxdXdX[i,j,k] ];
+        ddxdXdX[i,j,k] = N[ ddxdXdX[i,j,k], 20 ] /. -1.*XXX_ :> -XXX;
+        rs = StringForm["dd``````[``][``][``] = ``;\n", x[1],x[2],x[3], i,j,k,
+                        CForm[ddxdXdX[i,j,k]]];
+        pr[rs];
+      ];
+    ];
+  ];
+  pr["}\n\n"];
+];
+
+
 (***************************************************************************)
 (* write functions *)
 IncludeAndDefine[];
+GlobalVars[];
+(*
 prxOfX;
 prdxdX;
 prddxdXdX;
+*)
+prxyzdxdXddxdXdX;
 
 (***************************************************************************)
 (* count operations *)
