@@ -45,6 +45,7 @@ X[3] = phi;
 
 (* how X,R,phi relate to our new coords *)
 Ap = A;
+(* we assume that Cp[1,phi] is independent of phi!!! *)
 ToXYZrule[1] = x[1] -> (1-Ap)*(ReCpOfBphi[B,phi] - B*ReCpOf1phi) +
                         B*Cos[(1-Ap)*ArgCpOf1phi] + Ap*(1-B);
 ToXYZrule[2] = x[2] -> (1-Ap)*(ImCpOfBphi[B,phi] - B*ImCpOf1phi) + 
@@ -179,12 +180,6 @@ GlobalVars[] := Module[{},
   pr["extern double (*Coordinates_AnsorgNS_ddsigmap_dBdB)(tBox *box, int ind, double B, double phi);\n"];
   pr["extern double (*Coordinates_AnsorgNS_ddsigmap_dBdphi)(tBox *box, int ind, double B, double phi);\n"];
   pr["extern double (*Coordinates_AnsorgNS_ddsigmap_dphidphi)(tBox *box, int ind, double B, double phi);\n"];
-  pr["extern double (*Coordinates_AnsorgNS_sigmam)(tBox *box, int ind, double B, double phi);\n"];
-  pr["extern double (*Coordinates_AnsorgNS_dsigmam_dB)(tBox *box, int ind, double B, double phi);\n"];
-  pr["extern double (*Coordinates_AnsorgNS_dsigmam_dphi)(tBox *box, int ind, double B, double phi);\n"];
-  pr["extern double (*Coordinates_AnsorgNS_ddsigmam_dBdB)(tBox *box, int ind, double B, double phi);\n"];
-  pr["extern double (*Coordinates_AnsorgNS_ddsigmam_dBdphi)(tBox *box, int ind, double B, double phi);\n"];
-  pr["extern double (*Coordinates_AnsorgNS_ddsigmam_dphidphi)(tBox *box, int ind, double B, double phi);\n"];
   pr["\n\n"];
 ];
 
