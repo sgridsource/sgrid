@@ -61,7 +61,8 @@ int sgrid_Coordinates(void)
          "shift B by 0.5/((1+N mod 2)*N) [no,yes]");
   AddPar("Coordinates_AnsorgNS_version", "AnsorgNS", "version we use" 
          " AnsorgNS -> old version in Coordinates.c, "
-         "NAnsorgNS -> new version in Coordinates_AnsorgNS.c and coordtrans_AnsorgNS?.m]");
+         "NAnsorgNS -> new version in Coordinates_AnsorgNS.c and coordtrans_AnsorgNS?.m, "
+         "DDAnsorgNS -> like AnsorgNS but add some 2nd derivs from NAnsorgNS");
   if(Getv("Coordinates_AnsorgNS_sigma_pm_vars", "yes"))
   {
     AddVar("Coordinates_AnsorgNS_sigma_pm",       "", "sigma_{+-}");
