@@ -338,3 +338,35 @@ double ddZ_dzdz_generic(void *aux, int ind, double X, double Y, double Z);
 /* from math */
 void xyz_dxyz_ddxyz_of_AnsorgXRphi_XRphi(tBox *box, int ind, double X, double R, double phi, double xyz[4],double dxyz[4][4],double ddxyz[4][4][4]);
 void XRphi_dXRphi_ddXRphi_of_AnsorgNS0_ABphi(tBox *box, int ind, double A, double B, double phi, double XRphi[4],double dXRphi[4][4],double ddXRphi[4][4][4]);
+
+/* from Coordinates_AnsorgNS.c */
+double   x_of_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double   y_of_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double   z_of_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dA_dx_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dA_dy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dA_dz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dB_dx_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dB_dy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dB_dz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dphi_dx_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dphi_dy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  dphi_dz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddA_dxdx_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddA_dxdy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddA_dxdz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddA_dydy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddA_dydz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddA_dzdz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddB_dxdx_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddB_dxdy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddB_dxdz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddB_dydy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddB_dydz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddB_dzdz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddphi_dxdx_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddphi_dxdy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddphi_dxdz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddphi_dydy_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddphi_dydz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
+double  ddphi_dzdz_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);
