@@ -380,22 +380,6 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dphi_dy_AnsorgNS0;
       box->dX_dx[3][3] = dphi_dz_AnsorgNS0;
 
-/*
-      box->x_of_X[1] = x_of_NAnsorgNS0;
-      box->x_of_X[2] = y_of_NAnsorgNS0;
-      box->x_of_X[3] = z_of_NAnsorgNS0;
-
-      box->dX_dx[1][1] = dA_dx_NAnsorgNS0;
-      box->dX_dx[1][2] = dA_dy_NAnsorgNS0;
-      box->dX_dx[1][3] = dA_dz_NAnsorgNS0;
-      box->dX_dx[2][1] = dB_dx_NAnsorgNS0;
-      box->dX_dx[2][2] = dB_dy_NAnsorgNS0;
-      box->dX_dx[2][3] = dB_dz_NAnsorgNS0;
-      box->dX_dx[3][1] = dphi_dx_NAnsorgNS0;
-      box->dX_dx[3][2] = dphi_dy_NAnsorgNS0;
-      box->dX_dx[3][3] = dphi_dz_NAnsorgNS0;
-*/
-      
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
 
@@ -412,20 +396,36 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->ddX_dxdx[2][2][2] = ddB_dydy_NAnsorgNS0;
       box->ddX_dxdx[2][2][3] = ddB_dydz_NAnsorgNS0;
       box->ddX_dxdx[2][3][3] = ddB_dzdz_NAnsorgNS0;
-/*
-      box->ddX_dxdx[3][1][1] = ddphi_dxdx_NAnsorgNS0;
-      box->ddX_dxdx[3][1][2] = ddphi_dxdy_NAnsorgNS0;
-      box->ddX_dxdx[3][1][3] = ddphi_dxdz_NAnsorgNS0;
-      box->ddX_dxdx[3][2][2] = ddphi_dydy_NAnsorgNS0;
-      box->ddX_dxdx[3][2][3] = ddphi_dydz_NAnsorgNS0;
-      box->ddX_dxdx[3][3][3] = ddphi_dzdz_NAnsorgNS0;
-*/
+
       box->ddX_dxdx[3][1][1] = zero_of_xyz;
       box->ddX_dxdx[3][1][2] = zero_of_xyz;
       box->ddX_dxdx[3][1][3] = zero_of_xyz;
       box->ddX_dxdx[3][2][2] = ddphi_dydy_AnsorgNS;
       box->ddX_dxdx[3][2][3] = ddphi_dydz_AnsorgNS;
       box->ddX_dxdx[3][3][3] = ddphi_dzdz_AnsorgNS;
+
+      if(Getv("Coordinates_AnsorgNS_version","NAnsorgNS"))
+      {
+        box->x_of_X[1] = x_of_NAnsorgNS0;
+        box->x_of_X[2] = y_of_NAnsorgNS0;
+        box->x_of_X[3] = z_of_NAnsorgNS0;
+  
+        box->dX_dx[1][1] = dA_dx_NAnsorgNS0;
+        box->dX_dx[1][2] = dA_dy_NAnsorgNS0;
+        box->dX_dx[1][3] = dA_dz_NAnsorgNS0;
+        box->dX_dx[2][1] = dB_dx_NAnsorgNS0;
+        box->dX_dx[2][2] = dB_dy_NAnsorgNS0;
+        box->dX_dx[2][3] = dB_dz_NAnsorgNS0;
+        box->dX_dx[3][1] = dphi_dx_NAnsorgNS0;
+        box->dX_dx[3][2] = dphi_dy_NAnsorgNS0;
+        box->dX_dx[3][3] = dphi_dz_NAnsorgNS0;
+        box->ddX_dxdx[3][1][1] = ddphi_dxdx_NAnsorgNS0;
+        box->ddX_dxdx[3][1][2] = ddphi_dxdy_NAnsorgNS0;
+        box->ddX_dxdx[3][1][3] = ddphi_dxdz_NAnsorgNS0;
+        box->ddX_dxdx[3][2][2] = ddphi_dydy_NAnsorgNS0;
+        box->ddX_dxdx[3][2][3] = ddphi_dydz_NAnsorgNS0;
+        box->ddX_dxdx[3][3][3] = ddphi_dzdz_NAnsorgNS0;
+      }
     }
     else if( Getv(str, "AnsorgNS1") )
     {
