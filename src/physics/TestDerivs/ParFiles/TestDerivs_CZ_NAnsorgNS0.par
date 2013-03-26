@@ -1,0 +1,50 @@
+#storage_verbose = yes
+
+physics = ADMvars TestDerivs
+
+TestDerivs_useDD = no # yes # no
+
+nboxes = 1
+
+n1  = 12
+n2  = 12
+n3  = 8
+
+iterate_parameters = yes
+iterate_parameter1 = n1 12 18 24 # 30
+iterate_parameter2 = n2 12 18 24 # 30
+iterate_parameter3 = n3 8  12 16 # 20
+
+
+box0_Coordinates = AnsorgNS0
+Coordinates_AnsorgNS_version = NAnsorgNS
+Coordinates_AnsorgNS_sigma_pm_vars = yes
+#Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis = zero
+
+box0_basis1 = ChebExtrema
+box0_min1 = 0
+box0_max1 = 0.85
+
+box0_basis2 = ChebZeros
+box0_min2 = 0
+box0_max2 = 1
+
+box0_basis3 = Fourier
+box0_min3 = 0
+box0_max3 = 2*pi
+
+0douttime	= 0.1
+0doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
+0doutputall	= yes
+
+1douttime	= 0.1
+1doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi Coordinates_AnsorgNS_ddsigma_pm_dBdB Coordinates_AnsorgNS_ddsigma_pm_dBdphi Coordinates_AnsorgNS_ddsigma_pm_dphidphi
+1doutputall	= yes
+
+2douttime	= 0.1
+2doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi Coordinates_AnsorgNS_ddsigma_pm_dBdB Coordinates_AnsorgNS_ddsigma_pm_dBdphi Coordinates_AnsorgNS_ddsigma_pm_dphidphi
+2doutputall	= yes
+
+outputX0_box0 = 0
+outputY0_box0 = 0
+outputZ0_box0 = 0
