@@ -575,18 +575,13 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         spec_Deriv2(box, 3, box->v[isigma], box->v[isigma_dphidphi]);
         if(Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis","zero"))
         {
-          int n1 = box->n1;
-          int n2 = box->n2;
-          int n3 = box->n3;
-          int i,j,k;
-          /* loop over all points with B=0,1 */
-          for(k=0; k<n3; k++)
-          for(j=0; j<n2; j+=n1-1) /* only B=0 and B=1 */
-          for(i=0; i<n1; i++)
+          int iB = Ind("Y");
+          int i;
+          forallpoints(box,i)
           {
-            int ind = Index(i,j,k);
-            box->v[isigma_dphi][ind]     = 0.0;
-            box->v[isigma_dphidphi][ind] = 0.0;
+            double B = box->v[iB][i];
+            if(B==0.0 || B==1.0) /* set to zero only at B=0 and B=1 */
+              box->v[isigma_dphi][i] = box->v[isigma_dphidphi][i] = 0.0;
           }
         } /* end if */
       }
