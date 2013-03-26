@@ -554,9 +554,15 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigma_p_one;
       Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigma_zero;
       Coordinates_AnsorgNS_dsigmap_dphi = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_ddsigmap_dBdB     = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_ddsigmap_dBdphi   = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_ddsigmap_dphidphi = AnsorgNS_dsigma_zero;
       Coordinates_AnsorgNS_sigmam       = AnsorgNS_sigma_m_one;
       Coordinates_AnsorgNS_dsigmam_dB   = AnsorgNS_dsigma_zero;
       Coordinates_AnsorgNS_dsigmam_dphi = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_ddsigmam_dBdB     = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_ddsigmam_dBdphi   = AnsorgNS_dsigma_zero;
+      Coordinates_AnsorgNS_ddsigmam_dphidphi = AnsorgNS_dsigma_zero;
     }
   }
   /* read index of par Coordinates_AnsorgNS_b */
