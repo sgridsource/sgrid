@@ -30,9 +30,12 @@ int Set_Test_Coordinates_AnsorgNS_sigma_pm(tGrid *grid)
 
     snprintf(str, 999, "box%d_Coordinates", b);
     if( strstr(Gets(str), "AnsorgNS")==NULL ) continue;
-    if(b<=1) { sig1 = 1.0;  c1=0.40; }
-    else     { sig1 = -1.0; c1=0.30; }
-    printf("Setting %s in box%d\n", VarName(isigma), b);
+    if( strstr(Gets(str), "AnsorgNS2") || strstr(Gets(str), "AnsorgNS3") )
+    { sig1 = -1.0;  c1=0.30; }
+    else
+    { sig1 = +1.0;  c1=0.40; }
+    printf("Setting %s in box%d:  sig1=%g c1=%g\n",
+           VarName(isigma), b, sig1, c1);
     enablevar_inbox(box, isigma);
     sigma = box->v[isigma];
 
