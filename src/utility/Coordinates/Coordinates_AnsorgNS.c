@@ -63,8 +63,13 @@ void xyz_dxyz_ddxyz_of_AnsorgNS_ABphi(tBox *box, int ind, int domain,
 
   /* get XRphi(A,B,phi) */
   if(domain==0)
+  {
+    if(B==0.0)      B = dequaleps;
+    else if(B==1.0) B-= dequaleps;
+    if(A==1.0) A-= dequaleps;
     XRphi_dXRphi_ddXRphi_of_AnsorgNS0_ABphi(box, ind, A,B,phi, XRphi,
                                             dXRphi_dABphi, ddXRphi_ddABphi);
+  }
 /*
 FIXME!!! : we need this:
 
