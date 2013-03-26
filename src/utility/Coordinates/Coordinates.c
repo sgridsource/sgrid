@@ -573,6 +573,22 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         spec_Deriv2(box, 2, box->v[isigma], box->v[isigma_dBdB]);
         spec_Deriv1(box, 3, box->v[isigma_dB], box->v[isigma_dBdphi]);
         spec_Deriv2(box, 3, box->v[isigma], box->v[isigma_dphidphi]);
+        if(Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis","zero"))
+        {
+          int n1 = box->n1;
+          int n2 = box->n2;
+          int n3 = box->n3;
+          int i,j,k;
+          /* loop over all points with B=0,1 */
+          for(k=0; k<n3; k++)
+          for(j=0; j<n2; j+=n1-1) /* only B=0 and B=1 */
+          for(i=0; i<n1; i++)
+          {
+            int ind = Index(i,j,k);
+            box->v[isigma_dphi][ind]     = 0.0;
+            box->v[isigma_dphidphi][ind] = 0.0;
+          }
+        } /* end if */
       }
       Coordinates_AnsorgNS_sigmap       = AnsorgNS_sigma_pm;
       Coordinates_AnsorgNS_dsigmap_dB   = AnsorgNS_dsigma_pm_dB;
@@ -2933,10 +2949,16 @@ double AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi)
 double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
-  static int isig;
+  static int isig, dsig_dphi_zero_OnAxis;
 
-  if(firstcall) isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+  if(firstcall)
+  {
+    isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
+    dsig_dphi_zero_OnAxis = 
+      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis","zero");
+  }
   if(ind>=0) return box->v[isig][ind];
+  if( (B==0.0 || B==1.0) && dsig_dphi_zero_OnAxis ) return 0.0;
   else
   {
     double *c = box->v[Ind("Temp1")];
@@ -2975,10 +2997,16 @@ double AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi)
 double AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
-  static int isig;
+  static int isig, dsig_dphi_zero_OnAxis;
 
-  if(firstcall) isig = Ind("Coordinates_AnsorgNS_ddsigma_pm_dphidphi");
+  if(firstcall)
+  {
+    isig = Ind("Coordinates_AnsorgNS_ddsigma_pm_dphidphi");
+    dsig_dphi_zero_OnAxis = 
+      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis","zero");
+  }
   if(ind>=0) return box->v[isig][ind];
+  if( (B==0.0 || B==1.0) && dsig_dphi_zero_OnAxis ) return 0.0;
   else
   {
     double *c = box->v[Ind("Temp1")];
