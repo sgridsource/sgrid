@@ -17,7 +17,7 @@ iterate_parameter3 = n3 8  12 16 # 20
 
 
 box0_Coordinates = AnsorgNS2
-Coordinates_AnsorgNS_version = AnsorgNS
+Coordinates_AnsorgNS_version = AnsorgNS DDAnsorgNS
 Coordinates_AnsorgNS_sigma_pm_vars = yes
 #Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis = zero
 
