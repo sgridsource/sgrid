@@ -341,6 +341,7 @@ void XRphi_dXRphi_ddXRphi_of_AnsorgNS0_ABphi(tBox *box, int ind, double A, doubl
 void XRphi_dXRphi_ddXRphi_of_AnsorgNS1_ABphi(tBox *box, int ind, double A, double B, double phi, double XRphi[4],double dXRphi[4][4],double ddXRphi[4][4][4]);
 void XRphi_dXRphi_ddXRphi_of_AnsorgNS2_ABphi(tBox *box, int ind, double A, double B, double phi, double XRphi[4],double dXRphi[4][4],double ddXRphi[4][4][4]);
 void XRphi_dXRphi_ddXRphi_of_AnsorgNS3_ABphi(tBox *box, int ind, double A, double B, double phi, double XRphi[4],double dXRphi[4][4],double ddXRphi[4][4][4]);
+void ABphi_dABphi_ddABphi_of_Bfunc_AfBfPhi(tBox *box, int ind, double Af, double Bf, double Phi, double ABphi[4],double dABphi[4][4],double ddABphi[4][4][4]);
 
 /* from Coordinates_AnsorgNS.c */
 double   x_of_NAnsorgNS0(void *aux, int ind, double A, double B, double phi);

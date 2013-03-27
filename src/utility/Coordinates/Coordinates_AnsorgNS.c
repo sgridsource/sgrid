@@ -106,6 +106,38 @@ void xyz_dxyz_ddxyz_of_AnsorgNS_ABphi(tBox *box, int ind, int domain,
                                          ddxyz_ddXRphi, ddXRphi_ddABphi);
 }
 
+/* Coord. trafo and its derivs for domain 0,1,2,3, but with extra trafo
+   ABphi_dABphi_ddABphi_of_Bfunc_AfBfPhi in coordtrans_Bfunc.m */
+void xyz_dxyz_ddxyz_of_AnsorgNS_AfBfPhi(tBox *box, int ind, int domain, 
+                      double Af, double Bf, double Phi,
+                      double xyz[4], double dxyz[4][4], double ddxyz[4][4][4])
+{
+  double A,B,phi;
+  double ABphi[4];
+  double dABphi_dAfBfPhi[4][4];
+  double ddABphi_ddAfBfPhi[4][4][4];
+  double dxyz_dABphi[4][4];
+  double ddxyz_ddABphi[4][4][4];
+
+  /* get ABphi(Af,Bf,Phi) */
+  ABphi_dABphi_ddABphi_of_Bfunc_AfBfPhi(box, ind, Af,Bf,Phi, ABphi,
+                                        dABphi_dAfBfPhi,ddABphi_ddAfBfPhi);
+  A = ABphi[1];
+  B = ABphi[2];
+  phi = ABphi[3];
+
+  /* get xyz(A,B,phi) */
+  xyz_dxyz_ddxyz_of_AnsorgNS_ABphi(box, ind, domain, A,B,phi,
+                                   xyz, dxyz_dABphi, ddxyz_ddABphi);
+  /* get dxyz=dxyz_dAfBfPhi */
+  dxdX_from_dxdU_dUdX(dxyz, dxyz_dABphi, dABphi_dAfBfPhi);
+
+  /* get ddxyz=ddxyz_ddAfBfPhi */
+  ddxdXdX_from_dxdU_dUdX_ddxdUdU_ddUdXdX(ddxyz, dxyz_dABphi, dABphi_dAfBfPhi,
+                                         ddxyz_ddABphi, ddABphi_ddAfBfPhi);
+}
+
+
 /* Coord. trafo with inverted derivs */
 void xyz_dABphi_ddABphi_of_AnsorgNS(tBox *box, int ind, int domain,
                   double A, double B, double phi,
@@ -118,6 +150,10 @@ void xyz_dABphi_ddABphi_of_AnsorgNS(tBox *box, int ind, int domain,
   /* get xyz, dxyz_dABphi, ddxyz_ddABphi */
   xyz_dxyz_ddxyz_of_AnsorgNS_ABphi(box, ind, domain, A,B,phi,
                                    xyz, dxyz_dABphi, ddxyz_ddABphi);
+  /* we can use xyz_dxyz_ddxyz_of_AnsorgNS_AfBfPhi instead of
+     xyz_dxyz_ddxyz_of_AnsorgNS_ABphi */
+//  xyz_dxyz_ddxyz_of_AnsorgNS_AfBfPhi(box, ind, domain, A,B,phi,
+//                                   xyz, dxyz_dABphi, ddxyz_ddABphi);
   /* invert derivs */
   dXdx_from_dxdX(dABphi_dxyz, dxyz_dABphi);
   ddXdxdx_from_dXdx_ddxdXdX(ddABphi_ddxyz, dABphi_dxyz, ddxyz_ddABphi);

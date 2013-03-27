@@ -6,7 +6,8 @@ OBJS := sgrid_$(NAME).o $(NAME).o cartesianDerivs.o doubleCovering.o\
 	coordFilters.o ComplexFunctions.o transfDerivs.o findXYZ_of_xyz.o\
 	Coordinates_AnsorgNS.o coordtrans_AnsorgXRphi.o\
 	coordtrans_AnsorgNS0.o coordtrans_AnsorgNS1.o\
-	coordtrans_AnsorgNS2.o coordtrans_AnsorgNS3.o
+	coordtrans_AnsorgNS2.o coordtrans_AnsorgNS3.o\
+	coordtrans_Bfunc.o
 
 include $(TOP)/Makefile.subdirs
 
@@ -24,3 +25,6 @@ coordtrans_AnsorgNS2.c: coordtrans_AnsorgNS2.m
 
 coordtrans_AnsorgNS3.c: coordtrans_AnsorgNS3.m
 	math < coordtrans_AnsorgNS3.m > /dev/null
+
+coordtrans_Bfunc.c: coordtrans_Bfunc.m
+	math < coordtrans_Bfunc.m > /dev/null
