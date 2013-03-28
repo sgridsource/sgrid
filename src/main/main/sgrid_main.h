@@ -107,6 +107,7 @@ char *GetnameInd(int i);
 tParameter *GetPointerTo_pbd();
 int GetnParameters();
 double GetCachedNumValByParIndex(int i);
+int GetCachedBoolValByParIndex(int i);
 int GetParIndex(char *name);
 void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache);
 void print_parameter_database();
