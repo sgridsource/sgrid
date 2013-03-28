@@ -3031,17 +3031,29 @@ void ddABphi_ddxyz_AnsorgNS(tBox *box, int ind, int domain,
 double AnsorgNS_sigma_pm(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
-  static int isig;
+  static int isig, dsig_dphi_ZeroOnAxis;
 
   if(firstcall)
   {
     isig = Ind("Coordinates_AnsorgNS_sigma_pm");
+    dsig_dphi_ZeroOnAxis = 
+      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis","yes");
     firstcall = 0;
   }
   if(ind>=0) return box->v[isig][ind];
   else
   {
-    double *c = box->v[Ind("Temp1")];
+    double *c;
+    if(dsig_dphi_ZeroOnAxis)
+    {
+      double *Y = box->v[Ind("Y")];
+      int n1 = box->n1;
+      int n2 = box->n2;
+      int mJ = Index(0,n2-1,0);
+      if(B==1.0 && Y[mJ]==1.0) return box->v[isig][mJ];
+      if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
+    }
+    c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
     return spec_interpolate(box, c, 0.0,B,phi);
   }
@@ -3049,17 +3061,29 @@ double AnsorgNS_sigma_pm(tBox *box, int ind, double B, double phi)
 double AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
-  static int isig;
+  static int isig, dsig_dphi_ZeroOnAxis;
 
   if(firstcall)
   {
     isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dB");
+    dsig_dphi_ZeroOnAxis = 
+      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis","yes");
     firstcall = 0;
   }
   if(ind>=0) return box->v[isig][ind];
   else
   {
-    double *c = box->v[Ind("Temp1")];
+    double *c;
+    if(dsig_dphi_ZeroOnAxis)
+    {
+      double *Y = box->v[Ind("Y")];
+      int n1 = box->n1;
+      int n2 = box->n2;
+      int mJ = Index(0,n2-1,0);
+      if(B==1.0 && Y[mJ]==1.0) return box->v[isig][mJ];
+      if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
+    }
+    c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
     return spec_interpolate(box, c, 0.0,B,phi);
   }
@@ -3088,17 +3112,29 @@ double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
 double AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
-  static int isig;
+  static int isig, dsig_dphi_ZeroOnAxis;
 
   if(firstcall)
   {
     isig = Ind("Coordinates_AnsorgNS_ddsigma_pm_dBdB");
+    dsig_dphi_ZeroOnAxis = 
+      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis","yes");
     firstcall = 0;
   }
   if(ind>=0) return box->v[isig][ind];
   else
   {
-    double *c = box->v[Ind("Temp1")];
+    double *c;
+    if(dsig_dphi_ZeroOnAxis)
+    {
+      double *Y = box->v[Ind("Y")];
+      int n1 = box->n1;
+      int n2 = box->n2;
+      int mJ = Index(0,n2-1,0);
+      if(B==1.0 && Y[mJ]==1.0) return box->v[isig][mJ];
+      if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
+    }
+    c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
     return spec_interpolate(box, c, 0.0,B,phi);
   }
@@ -3106,17 +3142,29 @@ double AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi)
 double AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi)
 {
   static int firstcall=1;
-  static int isig;
+  static int isig, dsig_dphi_ZeroOnAxis;
 
   if(firstcall)
   {
     isig = Ind("Coordinates_AnsorgNS_ddsigma_pm_dBdphi");
+    dsig_dphi_ZeroOnAxis = 
+      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis","yes");
     firstcall = 0;
   }
   if(ind>=0) return box->v[isig][ind];
   else
   {
-    double *c = box->v[Ind("Temp1")];
+    double *c;
+    if(dsig_dphi_ZeroOnAxis)
+    {
+      double *Y = box->v[Ind("Y")];
+      int n1 = box->n1;
+      int n2 = box->n2;
+      int mJ = Index(0,n2-1,0);
+      if(B==1.0 && Y[mJ]==1.0) return box->v[isig][mJ];
+      if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
+    }
+    c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
     return spec_interpolate(box, c, 0.0,B,phi);
   }
