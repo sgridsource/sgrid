@@ -71,8 +71,8 @@ int sgrid_Coordinates(void)
     AddVar("Coordinates_AnsorgNS_ddsigma_pm_dBdB",    "", "(d/dB)^2 sigma_{+-}");
     AddVar("Coordinates_AnsorgNS_ddsigma_pm_dBdphi",  "", "d/dB d/dphi sigma_{+-}");
     AddVar("Coordinates_AnsorgNS_ddsigma_pm_dphidphi","", "(d/dphi)^2 sigma_{+-}");
-    AddPar("Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis", "calculate",
-           "how set dsigma_pm_dphi and ddsigma_pm_dphidphi [zero,calculate]");
+    AddPar("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis", "no", "whether "
+           "dsigma_pm_dphi and ddsigma_pm_dphidphi are 0 on x-axis [no,yes]");
   }
 
   return 0;

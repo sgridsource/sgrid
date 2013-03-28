@@ -688,7 +688,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         spec_Deriv2(box, 2, box->v[isigma], box->v[isigma_dBdB]);
         spec_Deriv1(box, 3, box->v[isigma_dB], box->v[isigma_dBdphi]);
         spec_Deriv2(box, 3, box->v[isigma], box->v[isigma_dphidphi]);
-        if(Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis","zero"))
+        if(Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis","yes"))
         {
           int iB = Ind("Y");
           int i;
@@ -3065,7 +3065,7 @@ double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
   {
     isig = Ind("Coordinates_AnsorgNS_dsigma_pm_dphi");
     dsig_dphi_zero_OnAxis = 
-      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis","zero");
+      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis","yes");
   }
   if(ind>=0) return box->v[isig][ind];
   if( (B==0.0 || B==1.0) && dsig_dphi_zero_OnAxis ) return 0.0;
@@ -3113,7 +3113,7 @@ double AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double phi)
   {
     isig = Ind("Coordinates_AnsorgNS_ddsigma_pm_dphidphi");
     dsig_dphi_zero_OnAxis = 
-      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_OnAxis","zero");
+      Getv("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis","yes");
   }
   if(ind>=0) return box->v[isig][ind];
   if( (B==0.0 || B==1.0) && dsig_dphi_zero_OnAxis ) return 0.0;
