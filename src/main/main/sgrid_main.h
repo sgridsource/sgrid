@@ -86,6 +86,7 @@ typedef struct {
   char *value;
   char *description;
   double numericalvalue; /* some pars are pure numbers, we cache them here */
+  int booleanvalue; /* some pars are true/false, we cache them here as 1/0 */
 } tParameter;
 void makeparameter(char *name, char *value, char *description);
 void AddPar(char *name, char *value, char *description);

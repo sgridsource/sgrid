@@ -29,6 +29,7 @@ void makeparameter(char *name, char *value, char *description);
 void printparameters(void);
 void translatevalue(char **value);
 int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
+int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
 
 
 
@@ -167,6 +168,7 @@ void makeparameter(char *name, char *value, char *description)
     strcpy(p->value, value);
     translatevalue(&p->value);
     set_numericalvalue_byIndex(pdb, npdb-1, npdb);
+    set_booleanvalue_byIndex(pdb, npdb-1, npdb);
   } else {
     free(p->description);
   }
@@ -191,6 +193,7 @@ void setparameter(char *name, char *value)
   p->value = strdup(value);
   translatevalue(&p->value);
   set_numericalvalue_byIndex(p, 0, 1);
+  set_booleanvalue_byIndex(p, 0, 1);
 }
 
 
@@ -250,6 +253,34 @@ int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
     pdb1[ind].numericalvalue = atof(pdb1[ind].value);
   else
     errorexit("set_numericalvalue_byIndex: index out of range");
+
+  return 1;
+}
+
+/* Write the boolean (int) value of the par with index ind into the 
+   par cache. 
+   Note: we keep the boolean values of each par in a cache */
+int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
+{
+  if(pdb1!=NULL && ind>=0 && ind<npdb1max)
+  {
+    char *par = pdb1[ind].value;
+    int boolval=atoi(par); /* try to read integer value */
+
+    if(strstr(par, "yes")) boolval=1;
+    if(strstr(par, "Yes")) boolval=1;
+    if(strstr(par, "YES")) boolval=1;
+    if(strstr(par, "on")) boolval=1;
+    if(strstr(par, "On")) boolval=1;
+    if(strstr(par, "ON")) boolval=1;
+    if(strstr(par, "true")) boolval=1;
+    if(strstr(par, "True")) boolval=1;
+    if(strstr(par, "TRUE")) boolval=1;
+    
+    pdb1[ind].booleanvalue = boolval;
+  }
+  else
+    errorexit("set_booleanvalue_byIndex: index out of range");
 
   return 1;
 }
@@ -461,6 +492,12 @@ int GetnParameters()
 double GetCachedNumValByParIndex(int i)
 {
   return pdb[i].numericalvalue;
+}
+
+/* get the cached boolean value by Index */
+int GetCachedBoolValByParIndex(int i)
+{
+  return pdb[i].booleanvalue;
 }
 
 /* get the par Index */
