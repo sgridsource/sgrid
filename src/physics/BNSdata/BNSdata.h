@@ -93,6 +93,8 @@ void BNSdata_filter_Vars(tGrid *grid, int it);
 void set_Var_to_Val_if_below_limit_or_inbox12(tGrid *grid, int vi, 
                                               double Val, double lim);
 void set_Var_to_Val_atA0(tGrid *grid, int vi, double Val);
+void debug_Coordinates_AnsorgNS_sigma_pm_B01(tGrid *grid, int dom, char *label);
+void debug_Coordinates_AnsorgNS_sigma_pm_B01_dom03(tGrid *grid, char *label);
 
 /* from BNS_Interpolate_ADMvars.c */
 int BNS_Interpolate_ADMvars(tGrid *grid);

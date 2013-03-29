@@ -1697,6 +1697,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[innerdom]->v[isigma][Index(i,j,k)] =
         gridnew->box[outerdom]->v[isigma][Index(i,j,k)] =
                         gridnew->box[innerdom]->v[isigma][Index(0,j,0)];
+// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "1");
 
   /* smooth domain shape with low pass filter */
   if(Getv("BNSdata_domainshape_filter", "LowPassInB"))
@@ -1709,17 +1710,21 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       for(j=0; j<n2; j++)
         for(i=0; i<n1; i++) sigout[Index(i,j,k)] = sigin[Index(i,j,k)];
   }
+// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "2");
   if(Getv("BNSdata_domainshape_filter", "LowPassInB_dsigma_pm_dB_01_EQ_0"))
     BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(gridnew, innerdom);
+// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "3");
 
   /* minimize dsigma/dB at B=1 on gridnew */
   if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
     minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(gridnew, innerdom);
+// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "4");
 
   /* set dsigma/dB to zero at B=0 and B=1 by modifying sigma at the
      points j=1 and j=K=n2-2 */
   if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
     set_dsigma_pm_dB_toZero_atB01(gridnew, innerdom);
+// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "5");
 
   /* compute derivs of sigma in both domains */
   spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
@@ -1730,6 +1735,7 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
               gridnew->box[outerdom]->v[isigma_dB]);
   spec_Deriv1(gridnew->box[outerdom], 3, gridnew->box[outerdom]->v[isigma],
               gridnew->box[outerdom]->v[isigma_dphi]);
+// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "6");
 }
 
 /* function to minimize in minimize_dsigma_pm_dB_1 */
@@ -3669,3 +3675,46 @@ errorexit("BNSgrid_set_allVars_onLeft_equalmasses is untested. "
   BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_By"), -1);
   BNSgrid_set_Var_equalmasses_sym(grid, 3, Ind("BNSdata_Bz"), 1);
 }
+
+/* ************************************************************************* */
+/* some funcs for debugging */
+/* ************************************************************************* */
+
+/* function to test uniqueness of sigma at B=0,1 */
+void debug_Coordinates_AnsorgNS_sigma_pm_B01(tGrid *grid, int dom, char *label)
+{
+  int n1 = grid->box[dom]->n1;
+  int n2 = grid->box[dom]->n2;
+  int n3 = grid->box[dom]->n3;
+  int j,k;
+  int J = n2-1;
+  int troubleB0=0;
+  int troubleB1=0;
+  int isigma = Ind("Coordinates_AnsorgNS_sigma_pm");
+  double *sig=grid->box[dom]->v[isigma];
+
+  for(k=1; k<n3; k++)
+  {
+    if(sig[Index(0,0,k)] != sig[Index(0,0,0)])  troubleB0=1;
+    if(sig[Index(0,J,k)] != sig[Index(0,J,0)])  troubleB1=1;
+  }
+  if(troubleB0)
+
+  {
+    printf("%s (dom=%d, j=%d):\n", label, dom, 0);
+    for(k=0; k<n3; k++) 
+      printf("sig[Index(0,0,%d)]=%.18g\n", k, sig[Index(0,0,k)]);
+  }
+  if(troubleB1)
+  {
+    printf("%s (dom=%d, j=J=%d):\n", label, dom, J);
+    for(k=0; k<n3; k++) 
+      printf("sig[Index(0,J,%d)]=%.18g\n", k, sig[Index(0,J,k)]);
+  }
+}  
+/* call debug_Coordinates_AnsorgNS_sigma_pm_B01 with dom=0,3 */
+void debug_Coordinates_AnsorgNS_sigma_pm_B01_dom03(tGrid *grid, char *label)
+{
+  debug_Coordinates_AnsorgNS_sigma_pm_B01(grid, 0, label);
+  debug_Coordinates_AnsorgNS_sigma_pm_B01(grid, 3, label);
+}  
