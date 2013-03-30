@@ -1933,6 +1933,10 @@ void filter_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, int innerdom)
     printf(" dsigma_pm_dB01=0 on grid with n2=%d in"
            " reset_Coordinates_AnsorgNS_sigma_pm\n",
            Geti("BNSdata_domainshape_filter_nfB"));
+  if(Getv("BNSdata_domainshape_filter", "LowPassInB_dsigma_pm_dBphi_01_EQ_0"))
+    printf(" dsigma_pm_dB01=dsigma_pm_dphi01=0 on grid with n2=%d in"
+           " reset_Coordinates_AnsorgNS_sigma_pm\n",
+           Geti("BNSdata_domainshape_filter_nfB"));
   if(Getv("BNSdata_domainshape_filter", "keep_sigma_pm_B1"))
     printf(" kept previous sigma_pm at B=1 inside"
            " reset_Coordinates_AnsorgNS_sigma_pm\n");

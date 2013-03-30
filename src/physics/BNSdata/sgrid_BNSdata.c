@@ -253,7 +253,8 @@ int sgrid_BNSdata()
   AddPar("BNSdata_domainshape_filter", "no", 
          "how/if we filter domainshape sigma_pm [no,Bphi2/3,min_dsigma_pm_dB_1"
          ",dsigma_pm_dB_01_EQ_0,keep_sigma_pm_B1,LowPassInB"
-         ",LowPassInB_dsigma_pm_dB_01_EQ_0] "
+         ",LowPassInB_dsigma_pm_dB_01_EQ_0"
+         ",LowPassInB_dsigma_pm_dBphi_01_EQ_0] "
          "Bphi2/3 means use 2/3 rule in B- and phi-dir, "
          "dsigma_pm_dB_01_EQ_0 sets B-deriv of sigma_pm to zero at B=0 and " 
          "B=1 (inside reset_Coordinates_AnsorgNS_sigma_pm), "

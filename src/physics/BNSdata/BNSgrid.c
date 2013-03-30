@@ -69,6 +69,7 @@ void m02_VectorFunc(int n, double *vec, double *fvec);
 void minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(tGrid *grid, int innerdom);
 void set_dsigma_pm_dB_toZero_atB01(tGrid *grid, int innerdom);
 void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom);
+void BNSdata_LowPassFilter_with_dsigma_pm_dBphi_01_EQ0(tGrid *grid,int innerdom);
 
 
 
@@ -1697,7 +1698,6 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
         gridnew->box[innerdom]->v[isigma][Index(i,j,k)] =
         gridnew->box[outerdom]->v[isigma][Index(i,j,k)] =
                         gridnew->box[innerdom]->v[isigma][Index(0,j,0)];
-// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "1");
 
   /* smooth domain shape with low pass filter */
   if(Getv("BNSdata_domainshape_filter", "LowPassInB"))
@@ -1710,21 +1710,19 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
       for(j=0; j<n2; j++)
         for(i=0; i<n1; i++) sigout[Index(i,j,k)] = sigin[Index(i,j,k)];
   }
-// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "2");
   if(Getv("BNSdata_domainshape_filter", "LowPassInB_dsigma_pm_dB_01_EQ_0"))
     BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(gridnew, innerdom);
-// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "3");
+  if(Getv("BNSdata_domainshape_filter", "LowPassInB_dsigma_pm_dBphi_01_EQ_0"))
+    BNSdata_LowPassFilter_with_dsigma_pm_dBphi_01_EQ0(gridnew, innerdom);
 
   /* minimize dsigma/dB at B=1 on gridnew */
   if(Getv("BNSdata_domainshape_filter", "min_dsigma_pm_dB_1"))
     minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(gridnew, innerdom);
-// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "4");
 
   /* set dsigma/dB to zero at B=0 and B=1 by modifying sigma at the
      points j=1 and j=K=n2-2 */
   if(Getv("BNSdata_domainshape_filter", "dsigma_pm_dB_01_EQ_0"))
     set_dsigma_pm_dB_toZero_atB01(gridnew, innerdom);
-// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "5");
 
   /* compute derivs of sigma in both domains */
   spec_Deriv1(gridnew->box[innerdom], 2, gridnew->box[innerdom]->v[isigma],
@@ -1735,8 +1733,9 @@ void reset_Coordinates_AnsorgNS_sigma_pm(tGrid *grid, tGrid *gridnew,
               gridnew->box[outerdom]->v[isigma_dB]);
   spec_Deriv1(gridnew->box[outerdom], 3, gridnew->box[outerdom]->v[isigma],
               gridnew->box[outerdom]->v[isigma_dphi]);
-// debug_Coordinates_AnsorgNS_sigma_pm_B01(gridnew, innerdom, "6");
 }
+
+
 
 /* function to minimize in minimize_dsigma_pm_dB_1 */
 double func_to_min_dsigma_pm_dB_1(double *sigp_1phi)
@@ -2162,8 +2161,10 @@ tGrid *make_dummygrid_for_sigma_pm(tGrid *grid, int nAB, int nphi)
 
 /* make grid with less points in B-dir and use 
    minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi, set_dsigma_pm_dB_toZero_atB01
-   to filter domainshape */
-void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
+   to filter domainshape. If dsigdphi_01_EQ0=1 also ensure that
+   dsigma_pm_dphi_01 = 0 */
+void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0_control_dsigma_pm_dphi_01
+     (tGrid *grid, int innerdom, int dsigdphi_01_EQ0)
 {
   int outerdom;
   tGrid *grid2;
@@ -2175,7 +2176,7 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
 
   if(innerdom==0)      outerdom=1;
   else if(innerdom==3) outerdom=2;  
-  else errorexit("BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0: "
+  else errorexit("BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0_control_dsigma_pm_dphi_01: "
                  "innerdom is not 0 or 3");
 
   /* make a new smaller grid with n2 = nfB */
@@ -2183,6 +2184,11 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
 
   /* apply functions to set dsigma_pm_dB=0 at B=0,1 on grid2 */
   minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi(grid2, innerdom);
+  /* NOTE: minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi results in
+     dsigma_pm_dphi_1 = 0. */
+  /* ensure that dsigma_pm_dphi_01 = 0 */
+  if(dsigdphi_01_EQ0)
+    BNS_averageVar_on_axis(grid2, isigma, innerdom);
   set_dsigma_pm_dB_toZero_atB01(grid2, innerdom);
 
   /* copy coeffs from grid2 onto grid */
@@ -2223,8 +2229,28 @@ void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
     spec_synthesis1(box, 2, box->v[isigma], c);
   }
 
+  /* ensure that dsigma_pm_dphi_01 = 0 */
+  if(dsigdphi_01_EQ0)
+    BNS_averageVar_on_axis(grid, isigma, innerdom);
+
   /* free grid2 */
   free_grid(grid2);  
+}
+
+/* make grid with less points in B-dir and use 
+   minimize_dsigma_pm_dB_1_ByAdjusting_sigp_1phi, set_dsigma_pm_dB_toZero_atB01
+   to filter domainshape */
+void BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0(tGrid *grid, int innerdom)
+{
+  BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0_control_dsigma_pm_dphi_01
+  (grid, innerdom, 0);
+}
+/* same as BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0, but also make
+   dsigma_pm_dphi_01 = 0 */
+void BNSdata_LowPassFilter_with_dsigma_pm_dBphi_01_EQ0(tGrid *grid,int innerdom)
+{
+  BNSdata_LowPassFilter_with_dsigma_pm_dB_01_EQ0_control_dsigma_pm_dphi_01
+  (grid, innerdom, 1);
 }
 
 
@@ -3227,6 +3253,40 @@ void BNS_enforce_uniqueness_on_axis(tVarList *vlu)
   } /* end forallboxes */
 }
 
+/* enforce uniqueness on axis by averaging value for all phi on the axis */
+void BNS_averageVar_on_axis(tGrid *grid, int vind, int innerdom)
+{
+  int b;
+  int outerdom;
+
+  if(innerdom==0)      outerdom=1;
+  else if(innerdom==3) outerdom=2;  
+  else errorexit("BNSdata_filter_with2o3rule_inBphi: "
+                 "innerdom is not 0 or 3");
+
+  /* loop over boxes */
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int n1=box->n1;
+    int n2=box->n2;
+    int n3=box->n3;
+    int i,j,k;
+    double *var = box->v[vind];
+
+    /* do nothing if we are in the wrong box */
+    if(b!=innerdom && b!=outerdom) continue;
+
+    /* loop over rho=0 boundary and ensure uniqueness */
+    for(j=0; j<n2; j=j+n2-1)  /* <-- B=0 and B=1 */
+    for(i=0; i<n1; i++)       /* <-- all A */
+    {
+      double sum=0.0;
+      for(k=0; k<n3; k++) sum += var[Index(i,j,k)];   /* get sum */
+      for(k=0; k<n3; k++) var[Index(i,j,k)] = sum/n3; /* set var to average */
+    }
+  }
+}    
 
 /* compute weighted average of the new q2 on grid2 and the old q1 on grid1 
    at a point X2,Y2,Z2 in grid2 coords */
