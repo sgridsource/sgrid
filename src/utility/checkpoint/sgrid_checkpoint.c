@@ -27,7 +27,7 @@ int sgrid_checkpoint(void)
 	 "run for that much beyond previous checkpoint");
   AddPar("checkpoint_no_read_parlist",
          "checkpoint finaltime iterations outdir parameterfile "
-         "checkpoint_no_read_parlist",
+         "iterate_parameters checkpoint_no_read_parlist",
 	 "list of parameters that are not read from checkpoint");
 
   AddPar("checkpoint_variables", "auto",

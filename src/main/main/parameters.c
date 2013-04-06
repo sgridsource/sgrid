@@ -522,13 +522,14 @@ int iterate_parameters(void)
   if (!Getv("iterate_parameters", "yes")) {
 
     /* return 1 for first call, but 0 for second call, which exits sgrid */
-    if (ncall == 1) 
+    if (ncall < 0) 
       return 0;
-    ncall = 1;
+    ncall = -1;
     return 1;
   }
 
   /* so we want to iterate */
+  if(ncall<0) ncall=0;
   printf("\n");
   prdivider(0);
   printf("Iterating parameters:\n");
