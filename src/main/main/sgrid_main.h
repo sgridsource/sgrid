@@ -15,6 +15,13 @@
 /* Indices */
 #define Index(i,j,k) ((i)+n1*((j)+n2*(k)))
 #define Ind_n1n2(i,j,k,n1,n2) ((i)+(n1)*((j)+(n2)*(k)))
+/* ijk = i + n1*j + n1*n2*k, thus:
+   ijk/(n1*n2) = k 
+   (ijk - n1*n2*k)/n1 = j
+   (ijk - n1*n2*k - n1*j ) = i   */
+#define kOfInd_n1n2(ijk,n1,n2)        ((ijk)/((n1)*(n2)))
+#define jOfInd_n1n2_k(ijk,n1,n2,k)    (((ijk) - (n1)*(n2)*(k))/(n1))
+#define iOfInd_n1n2_jk(ijk,n1,n2,j,k) ((ijk) - (n1)*(n2)*(k) - (n1)*(j))
 #define forallijk(i,j,k) \
   for (k = 0; k < n3; k++) \
   for (j = 0; j < n2; j++) \
