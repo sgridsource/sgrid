@@ -163,19 +163,18 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
   tVarList *vlres, tVarList *vld1, tVarList *vld2,
   int pr)
 {
-  double cl = 1.0;
-
   /* do full Newton step */
-  do_partial_Newton_step(vlu, cl, vldu);
+  do_partial_Newton_step(vlu, 1.0, vldu);
 
   /* do we use backtracking? */
   if(Getv("GridIterators_Newtonstep", "backtrack"))
   {
     void *p;
     tNewtonStepVars pars[1]; /* create tNewtonStepVars *pars but with memory */
-    double al = -0.5;
-    double bl = 1e-6;
-    double tol = 0.01;
+    double al = -1.1;
+    double bl = -0.5;
+    double cl = -0.0;
+    double tol = 0.0001;
     double lmin, lambda;
     double fx, fa,fb,fc;
     tVarList *vltemp;
@@ -192,6 +191,9 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
 
     if(0) /* old version that never worked is now out! */
     {
+    al = -0.5;
+    bl = 1e-6;
+    cl = 1.0;
     /* do Newton step only to lambda = bl */
     do_partial_Newton_step(vlu, bl-cl, vldu);
     Fu(vlFu, vlu, vlc1, vlc2);
