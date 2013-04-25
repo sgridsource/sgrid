@@ -183,10 +183,11 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
     /* res of full Newton step */
     Fu(vlFu, vlu, vlc1, vlc2);
     resc = norm2(vlFu);
-    if(resc<oldres)
+    if(resc<oldres && !Getv("GridIterators_Newtonstep", "optimal"))
     {
       vlsetconstant(vldu, 0.0); 
-      return; /* stick with full Newton step if it decreases res */
+      return; /* stick with full Newton step if it decreases res
+                 and optimal is off */
     }
 
     if(0) /* old version that never worked is now out! */

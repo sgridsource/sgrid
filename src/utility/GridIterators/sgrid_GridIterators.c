@@ -21,7 +21,7 @@ int sgrid_GridIterators()
          "some numbers will be set equal to 0 if their magnitude "
          "is below this value [any positive number]");
   AddPar("GridIterators_Newtonstep", "full",
-         "how we take Newton steps [full,backtrack]");
+         "how we take Newton steps [full,backtrack [optimal]]");
   AddPar("GridIterators_Newton_EndOfStep", "Jdu",
          "what we do at end of Newton step [Jdu]");
   AddPar("GridIterators_templates_RESID_mode", "tol/norm(b)",
