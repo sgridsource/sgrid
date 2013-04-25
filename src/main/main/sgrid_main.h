@@ -78,6 +78,7 @@
 #define dequaleps 1e-10
 #define dless(a,b) ((a)<(b)-dequaleps)
 #define dequal(a,b) (!(dless(a,b)||dless(b,a)))
+#define dgreater(a,b) ((a)>(b)+dequaleps)
 
 /* approx. <= and >= with dequaleps tolerance */
 #define dlesseq(a,b) ( (a)<(b)+dequaleps )
