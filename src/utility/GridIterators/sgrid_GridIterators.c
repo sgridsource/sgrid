@@ -6,7 +6,7 @@
 
 
 
-int sgrid_GridIterators() 
+int sgrid_GridIterators(void) 
 {
   printf("Adding GridIterators\n");
 

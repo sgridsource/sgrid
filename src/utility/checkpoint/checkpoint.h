@@ -8,7 +8,7 @@ int checkpoint_checkforfiles(char *suffix);
 int checkpoint_checkifrestart(tGrid* grid);
 FILE *checkpoint_openfiles(char *suffix);
 tVarList *checkpoint_varlist(tGrid *grid);
-void checkpoint_copy_output();
+void checkpoint_copy_output(void);
 
 void checkpoint_read(tGrid *grid);
 void checkpoint_read_ParsAndIterations_local(tGrid *grid, FILE *fp);

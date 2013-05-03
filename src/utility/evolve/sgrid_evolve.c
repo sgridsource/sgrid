@@ -7,7 +7,7 @@
 
 
 
-int sgrid_evolve() 
+int sgrid_evolve(void) 
 {
   printf("Adding evolve\n");
 

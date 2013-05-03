@@ -478,12 +478,12 @@ char *GetnameInd(int i)
   return 0;
 }
 
-tParameter *GetPointerTo_pbd()
+tParameter *GetPointerTo_pbd(void)
 {
   return pdb;
 }
 
-int GetnParameters()
+int GetnParameters(void)
 {
   return npdb;
 }
@@ -610,7 +610,7 @@ void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache)
   }
 }
 /* print entire parameter database */
-void print_parameter_database()
+void print_parameter_database(void)
 {
   print_pdb_i1_i2(pdb, 0, npdb-1, 0,0);
 }

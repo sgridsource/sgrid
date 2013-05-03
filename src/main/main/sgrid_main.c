@@ -6,7 +6,7 @@
 
 
 
-int sgrid_main() 
+int sgrid_main(void) 
 {
   printf("Adding main\n");
 

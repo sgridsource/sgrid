@@ -27,7 +27,7 @@ void prdivider(int n)
 
 
 /* get current time in seconds */
-double getTimeIn_s()
+double getTimeIn_s(void)
 {
   double t_in_s = time(NULL) - time_in_s_at_sgrid_start;
   return t_in_s;
@@ -42,7 +42,7 @@ void prTimeIn_s(char *comment)
 }
 
 /* get current CPU clock time in seconds */
-double getClockTimeIn_s()
+double getClockTimeIn_s(void)
 {
   double t_in_s = clock();
   t_in_s = t_in_s/CLOCKS_PER_SEC;

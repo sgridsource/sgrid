@@ -6,7 +6,7 @@
 
 
 
-int sgrid_MemoryMan() 
+int sgrid_MemoryMan(void) 
 {
   int nboxes;
   int b;

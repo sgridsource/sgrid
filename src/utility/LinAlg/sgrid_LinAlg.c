@@ -5,7 +5,7 @@
 #include "LinAlg.h"
 
 
-int sgrid_LinAlg() 
+int sgrid_LinAlg(void) 
 {
   /* if (!Getv("physics", "LinAlg")) return; */
   printf("Adding LinAlg\n");

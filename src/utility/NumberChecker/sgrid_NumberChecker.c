@@ -6,7 +6,7 @@
 
 
 
-int sgrid_NumberChecker() 
+int sgrid_NumberChecker(void)
 {
   printf("Adding NumberChecker\n");
 

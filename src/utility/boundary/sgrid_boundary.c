@@ -13,7 +13,7 @@ tPointList *ExcisionBoundaryPointList;
 tPointList *boxBoundaryPointList;
 
 
-int sgrid_boundary() 
+int sgrid_boundary(void) 
 {
   printf("Adding boundary\n");
 

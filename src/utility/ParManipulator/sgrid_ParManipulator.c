@@ -6,7 +6,7 @@
 
 
 
-int sgrid_ParManipulator() 
+int sgrid_ParManipulator(void) 
 {
   printf("Adding ParManipulator\n");
 

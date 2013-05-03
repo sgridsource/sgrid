@@ -5,8 +5,8 @@ void parse_parameter_file(char *parfile);
 int iterate_parameters(void);
 
 int read_command_line(int argc, char **argv);
-int parse_command_line_options();
-int make_output_directory();
+int parse_command_line_options(void);
+int make_output_directory(void);
 int initialize_grid(tGrid *g);
 int evolve_grid(tGrid *grid);
 int finalize_grid(tGrid *g);

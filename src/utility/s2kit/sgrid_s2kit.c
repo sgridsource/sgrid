@@ -5,7 +5,7 @@
 #include "s2kit.h"
 
 
-int sgrid_s2kit() 
+int sgrid_s2kit(void)
 {
   /* if (!Getv("physics", "s2kit")) return; */
   printf("Adding s2kit\n");

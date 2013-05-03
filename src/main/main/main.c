@@ -139,7 +139,7 @@ int read_command_line(int argc, char **argv)
   return 0;
 }
 
-int make_output_directory()
+int make_output_directory(void)
 {
   char *outdir  = Gets("outdir");
   char *outdirp = (char *) calloc(strlen(outdir)+40, sizeof(char));
@@ -166,7 +166,7 @@ int make_output_directory()
 
 
 /* go through options and act accordingly */
-int parse_command_line_options()
+int parse_command_line_options(void)
 {
   char *optionstr;
   char *str1;

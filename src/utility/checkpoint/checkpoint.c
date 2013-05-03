@@ -204,7 +204,7 @@ int checkpoint_checkifrestart(tGrid* grid)
 
 /* copy output from previous run into current location so that all
    additional output can continue/append where we left off */
-void checkpoint_copy_output()
+void checkpoint_copy_output(void)
 {
   char *suffix = "_previous";
   char *current = Gets("outdir");

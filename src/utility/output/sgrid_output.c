@@ -6,7 +6,7 @@
 
 
 
-int sgrid_output() 
+int sgrid_output(void)
 {
   int nboxes = Geti("nboxes");
   int b;
