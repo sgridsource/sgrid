@@ -209,7 +209,8 @@ int WT_newton(double *x, int n, int *check,
     if (test < TOLX) FREERETURN
   }
   /* nrerror("MAXITS exceeded in newt"); */
-  FREERETURNERROR
+  /* FREERETURNERROR */
+  FREERETURN
 }
 #undef FREERETURNERROR
 
