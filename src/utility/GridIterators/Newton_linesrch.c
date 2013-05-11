@@ -75,19 +75,28 @@ int linSol_for_Newton_linesrch(int n, double *b, double *dx,
 {
   tNewtonArgs *p =  (tNewtonArgs *) par;
   int ret;
-  double normres;
+  double res;
 
   /* copy x,b into vldu,vlFu. NOTE: dx[1...n] not dx[0...n-1] */
   COPY_ARRAY_INTO_VL(dx+1, p->vldu);
   COPY_ARRAY_INTO_VL(b+1,  p->vlFu);
 
   /* get current norm */
-  normres = norm2(p->vlFu);
-  if(p->pr) printf("Newton_linesrch:  Newton residual = %e\n", normres);
-                  
+  res = norm2(p->vlFu);
+  if(p->pr) printf("Newton_linesrch:  Newton residual = %e\n", res);
+
   /* call linear solver */
+  res=0;
+  if(p->pr)
+  {
+    prdivider(0);
+    printf("linSol_for_Newton_linesrch: itmax=%d tol=%e\n", itmax,
+    tol);
+  }
   ret = p->linSolver(p->vldu, p->vlFu, p->vlres, p->vld1, p->vld2,
-                     itmax, tol, &normres, p->Jdu, p->Precon);
+                     itmax, tol, &res, p->Jdu, p->Precon);
+  if(p->pr)
+    printf("linSol_for_Newton_linesrch: ret=%d res=%e\n", ret, res);
 
   /* set dx array */
   COPY_VL_INTO_ARRAY(p->vldu, dx+1);
@@ -194,5 +203,7 @@ int Newton_linesrch(
   if(inewton<0 || check)
     printf("Newton_linesrch warning: inewton=%d  check=%d\n", inewton, check);
 
+  /* mem for x */
+  free(x);
   return inewton;
 }
