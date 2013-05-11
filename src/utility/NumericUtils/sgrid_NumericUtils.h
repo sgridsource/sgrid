@@ -28,6 +28,16 @@ void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[],
           double hi[], double lo[], double *vb, double *vi);
 void newton_lnsrch_get_fvec_by_lininterp(int n, double vec[], 
           double vb[], double vi[], double *fvec, double fvb[], double fvi[]);
+int WT_newton(double *x, int n, int *check,
+        void (*F_x)(int, double *x, double *Fx, void *par),
+        void (*J_x_dx)(int, double *dx, double *Jdx, double *x, void *par),
+        void *par, int MAXITS, double TOLF,
+        int (*linSol)(int n, double *b, double *dx,
+            void (*Jdx)(int, double *, double *, double *, void *),
+            int (*precon)(int n, double *b, double *dx, double *x, void *par),
+            double *x, void *par, int itmax, double tol),
+        int (*precon)(int n, double *b, double *dx, double *x, void *par),
+        int linitmax, double lintolfac);
 
 /* 1D root finding with bracketing */
 int zbrac_P(double (*func)(double,void *par), double *x1, double *x2, void *par);

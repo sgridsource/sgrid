@@ -159,9 +159,14 @@ int WT_newton(double *x, int n, int *check,
 
 
     /* get tol for linear solver using the precon */
-    precon(n, newton_linesrch_fvec, p, x, par);
+    /* precon(n, newton_linesrch_fvec, p, x, par);
+       test=0.0;
+       for(i=1;i<=n;i++) if(p[i]>test) test=fabs(p[i]);
+       lintol = test*lintolfac; */
+    /* get tol for linear solver using newton_linesrch_fvec */
     test=0.0;
-    for(i=1;i<=n;i++) if(p[i]>test) test=fabs(p[i]);
+    for(i=1;i<=n;i++) 
+      if(newton_linesrch_fvec[i]>test) test=fabs(newton_linesrch_fvec[i]);
     lintol = test*lintolfac;
 
     /* find p from linear solver */
