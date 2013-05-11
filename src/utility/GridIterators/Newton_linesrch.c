@@ -190,7 +190,7 @@ int Newton_linesrch(
   /* get residual */
   Fu(vlFu, vlu, vlc1, vlc2);
   res = norm2(vlFu);
-  if(pr) printf("Newton_linesrch: Residual after %d Newton steps:"
+  if(pr) printf("Newton_linesrch: after %d steps"
                 "  Newton residual = %e\n", inewton, res);
 
   /* warn if we didn't converge */
