@@ -80,7 +80,7 @@ void WT_linesrch(int n, double xold[], double fold,
         if (a == 0.0) tmplam = -slope/(2.0*b);
         else {
           disc=b*b-3.0*a*slope;
-          if (disc<0.0) nrerror("Roundoff problem in lnsrch_double.");
+          if (disc<0.0) nrerror("Roundoff problem in WT_linesrch.");
           else tmplam=(-b+sqrt(disc))/(3.0*a);
         }
         if (tmplam>0.5*alam)
