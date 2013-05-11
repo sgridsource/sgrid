@@ -38,14 +38,14 @@ void F_x_for_Newton_linesrch(int n, double *x, double *Fx, void *par)
 {
   tNewtonArgs *p =  (tNewtonArgs *) par;
 
-  /* copy x into vlu */
-  COPY_ARRAY_INTO_VL(x, p->vlu);
+  /* copy x into vlu. NOTE: x[1...n] not x[0...n-1] */
+  COPY_ARRAY_INTO_VL(x+1, p->vlu);
 
   /* call func Fu */
-  p->Fu(p->vlFu, p->vlu, p->vlc1, p->vlc1);
+  p->Fu(p->vlFu, p->vlu, p->vlc1, p->vlc2);
 
   /* set Fx array */
-  COPY_VL_INTO_ARRAY(p->vlFu, Fx);
+  COPY_VL_INTO_ARRAY(p->vlFu, Fx+1);
 }
 
 /* Jacobian of vector function times dx (evaluated at x) */
@@ -54,15 +54,17 @@ void J_x_dx_for_Newton_linesrch(int n, double *dx, double *Jdx,
 {
   tNewtonArgs *p =  (tNewtonArgs *) par;
 
-  /* copy dx,x into vldu,vlu */
-  COPY_ARRAY_INTO_VL(dx, p->vldu);
-  COPY_ARRAY_INTO_VL(x,  p->vlu);
+  errorexit("J_x_dx_for_Newton_linesrch should never be called");
+
+  /* copy dx,x into vldu,vlu. NOTE: x[1...n] not x[0...n-1] */
+  COPY_ARRAY_INTO_VL(dx+1, p->vldu);
+  COPY_ARRAY_INTO_VL(x+1,  p->vlu);
 
   /* call func Fu */
-  p->Jdu(p->vlJdu, p->vldu, p->vld1, p->vld1);
+  p->Jdu(p->vlJdu, p->vldu, p->vld1, p->vld2);
 
   /* set Jdx array */
-  COPY_VL_INTO_ARRAY(p->vlJdu, Jdx);
+  COPY_VL_INTO_ARRAY(p->vlJdu, Jdx+1);
 }
 
 /* linear solver */
@@ -75,8 +77,9 @@ int linSol_for_Newton_linesrch(int n, double *b, double *dx,
   int ret;
   double normres;
 
-  /* copy b into vlFu */
-  COPY_ARRAY_INTO_VL(b, p->vlFu);
+  /* copy x,b into vldu,vlFu. NOTE: dx[1...n] not dx[0...n-1] */
+  COPY_ARRAY_INTO_VL(dx+1, p->vldu);
+  COPY_ARRAY_INTO_VL(b+1,  p->vlFu);
 
   /* get current norm */
   normres = norm2(p->vlFu);
@@ -87,8 +90,8 @@ int linSol_for_Newton_linesrch(int n, double *b, double *dx,
                      itmax, tol, &normres, p->Jdu, p->Precon);
 
   /* set dx array */
-  COPY_VL_INTO_ARRAY(p->vldu, dx);
-
+  COPY_VL_INTO_ARRAY(p->vldu, dx+1);
+  //printf("dx[666+1]=%g\n", dx[666+1]);
   return ret;
 }
 
@@ -157,11 +160,11 @@ int Newton_linesrch(
   forallboxes(grid,i)  n += grid->box[i]->nnodes;
   n = (vlFu->n) * n;
 
-  /* make array for x */
-  x = (double *) calloc(n, sizeof(double));
+  /* make array for x. NOTE: x[1...n] not x[0...n-1] */
+  x = (double *) calloc(n+1, sizeof(double));
 
-  /* copy vl_u into x array */
-  COPY_VL_INTO_ARRAY(vlu, x);
+  /* copy vlu into x array. NOTE: x[1...n] not x[0...n-1] */
+  COPY_VL_INTO_ARRAY(vlu, x+1);
 
   /* solve with Newton-Raphson iterations: */
   if(pr) printf("Newton_linesrch:  starting Newton iterations, itmax=%d tol=%g\n",
@@ -172,6 +175,9 @@ int Newton_linesrch(
                       J_x_dx_for_Newton_linesrch, par, itmax, tol,
                       linSol_for_Newton_linesrch, precon_for_Newton_linesrch,
                       linSolv_itmax, linSolv_tolFac);
+  /* copy x array into vlu. NOTE: x[1...n] not x[0...n-1] */
+  COPY_ARRAY_INTO_VL(x+1, vlu);
+
   /* get residual */
   Fu(vlFu, vlu, vlc1, vlc2);
   res = norm2(vlFu);
