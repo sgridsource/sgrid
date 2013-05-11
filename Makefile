@@ -43,13 +43,18 @@ OFLAGS = -O2
 libpaths = src/main/MemoryMan src/utility/ParManipulator
 libpaths += src/utility/output src/utility/evolve
 libpaths += src/utility/Coordinates src/utility/Spectral
-libpaths += src/utility/NumericUtils src/utility/NumberChecker
+libpaths += src/utility/NumberChecker
 libpaths += src/utility/checkpoint
 
 # --------------------------------------------------------------------------
 # the user choses the libraries and some options in the file MyConfig
 include MyConfig
 
+# --------------------------------------------------------------------------
+# some more libraries are currently required, those need to be last
+libpaths += src/utility/NumericUtils
+
+# --------------------------------------------------------------------------
 # set CXX and CLINKER to CC if they are not set in MyConfig
 ifeq ($(CXX),)
 CXX = $(CC)
