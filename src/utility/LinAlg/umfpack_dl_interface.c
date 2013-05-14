@@ -7,7 +7,7 @@
 
 #ifdef UMFPACK
 #include "umfpack.h"
-#define PrintErrorCodesAndExit  \
+#define PrintErrorCodes  \
   { printf("umfpack_dl_symbolic returned INFO1=%d\n", INFO1); \
     printf("umfpack_dl_numeric returned INFO2=%d\n", INFO2);  \
     printf("umfpack_dl_solve returned INFO=%d\n", INFO); \
@@ -23,12 +23,14 @@
     printf(" UMFPACK_ERROR_invalid_system=%d\n", UMFPACK_ERROR_invalid_system); \
     printf("for more info do:\n"); \
     printf(" grep UMFPACK_ERROR /usr/include/suitesparse/umfpack.h\n"); \
-    fflush(stdout); \
-    if(INFO<0) errorexiti("umfpack_dl_solve: dl_solve returned INFO=%d", INFO); }
+    fflush(stdout); }
 #else
-#define PrintErrorCodesAndExit  errorexit("umfpack is not compiled in")
+#define PrintErrorCodes  errorexit("umfpack is not compiled in")
 #endif
 
+#define PrintErrorCodesAndExit  \
+  { PrintErrorCodes; \
+    if(INFO<0) errorexiti("umfpack_dl_solve: dl_solve returned INFO=%d", INFO); }
 
 /***************************************************************************/
 /* some helper routines                                                    */
@@ -219,6 +221,7 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
   if(pr) printf("umfpack_dl_solve_fromAcolumns: %ld entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
+  INFO1=INFO2=INFO=-6662442;
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
@@ -240,8 +243,8 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
     fflush(stdout);
   }
 
-  if(INFO!=0)
-    PrintErrorCodesAndExit;
+  if(INFO!=0) PrintErrorCodesAndExit;
+  if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
   /* set vlx = x */
   if(pr)
@@ -314,6 +317,7 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
       }
   }
 
+  INFO1=INFO2=INFO=-6662442;
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
@@ -335,8 +339,8 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
     fflush(stdout);
   }
 
-  if(INFO!=0)
-    PrintErrorCodesAndExit;
+  if(INFO!=0) PrintErrorCodesAndExit;
+  if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
   /* set vlx = x */
   if(pr)
@@ -378,9 +382,9 @@ int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
 {
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
-  int INFO=-6662442;
-  int INFO1, INFO2;
+  int INFO, INFO1, INFO2;
 
+  INFO1=INFO2=INFO=-6662442;
 #ifdef UMFPACK
   /* call umfpack routine */
   if(0)
@@ -402,8 +406,8 @@ int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
     fflush(stdout);
   }
 
-  if(INFO!=0)
-    PrintErrorCodesAndExit;
+  if(INFO!=0) PrintErrorCodesAndExit;
+  if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
   return INFO;
 }
@@ -449,7 +453,7 @@ int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
   if(INFO1!=0 || INFO2!=0)
   {
     int INFO=0;
-    PrintErrorCodesAndExit;
+    PrintErrorCodes;
   }
   return INFO2;
 }

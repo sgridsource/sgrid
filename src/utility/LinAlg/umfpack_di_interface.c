@@ -7,7 +7,7 @@
 
 #ifdef UMFPACK
 #include "umfpack.h"
-#define PrintErrorCodesAndExit  \
+#define PrintErrorCodes  \
   { printf("umfpack_di_symbolic returned INFO1=%d\n", INFO1); \
     printf("umfpack_di_numeric returned INFO2=%d\n", INFO2);  \
     printf("umfpack_di_solve returned INFO=%d\n", INFO); \
@@ -23,12 +23,14 @@
     printf(" UMFPACK_ERROR_invalid_system=%d\n", UMFPACK_ERROR_invalid_system); \
     printf("for more info do:\n"); \
     printf(" grep UMFPACK_ERROR /usr/include/suitesparse/umfpack.h\n"); \
-    fflush(stdout); \
-    if(INFO<0) errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO); }
+    fflush(stdout); }
 #else
-#define PrintErrorCodesAndExit  errorexit("umfpack is not compiled in")
+#define PrintErrorCodes  errorexit("umfpack is not compiled in")
 #endif
 
+#define PrintErrorCodesAndExit  \
+  { PrintErrorCodes; \
+    if(INFO<0) errorexiti("umfpack_dl_solve: dl_solve returned INFO=%d", INFO); }
 
 /***************************************************************************/
 /* some helper routines                                                    */
@@ -241,8 +243,8 @@ int umfpack_di_solve_fromAlines(tSparseVector **Aline, tVarList *vlx,
     fflush(stdout);
   }
 
-  if(INFO!=0)
-    PrintErrorCodesAndExit;
+  if(INFO!=0) PrintErrorCodesAndExit;
+  if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
   /* set vlx = x */
   if(pr)
@@ -359,8 +361,8 @@ int umfpack_di_solve_forSortedVars_fromAlines(tSparseVector **Aline,
     fflush(stdout);
   }
 
-  if(INFO!=0)
-    PrintErrorCodesAndExit;
+  if(INFO!=0) PrintErrorCodesAndExit;
+  if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
   /* set vlx = x */
   if(pr)
@@ -473,8 +475,8 @@ int umfpack_di_solve_fromAcolumns(tSparseVector **Acol,
     fflush(stdout);
   }
 
-  if(INFO!=0)
-    PrintErrorCodesAndExit;
+  if(INFO!=0) PrintErrorCodesAndExit;
+  if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
   /* set vlx = x */
   if(pr)
@@ -588,8 +590,8 @@ int umfpack_di_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
     fflush(stdout);
   }
 
-  if(INFO!=0)
-    PrintErrorCodesAndExit;
+  if(INFO!=0) PrintErrorCodesAndExit;
+  if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
   /* set vlx = x */
   if(pr)
@@ -685,8 +687,8 @@ int umfpack_di_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
     fflush(stdout);
   }
 
-  if(INFO!=0)
-    PrintErrorCodesAndExit;
+  if(INFO!=0) PrintErrorCodesAndExit;
+  if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
   /* set vlx = x */
   if(pr)
