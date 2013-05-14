@@ -294,7 +294,7 @@ int SuiteSparseQR_C_factorize_tSPQR_A(tSPQR_A *SPQR_A, int pr)
   return INFO;
 }
 
-/* solve A x = b with umfpack's SuiteSparseQR's SuiteSparseQR_C_solve 
+/* solve A x = b with SuiteSparseQR's SuiteSparseQR_C_solve 
    for a matrix that is already saved in tSPQR_A SPQR_A with SPQR_A.QR already
    set with prior calls to SuiteSparseQR_C_factorize_tSPQR_A
    with x and b in ordinary double arrays */
