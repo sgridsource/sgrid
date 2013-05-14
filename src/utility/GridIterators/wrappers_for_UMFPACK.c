@@ -216,8 +216,14 @@ int UMFPACK_solve_wrapper(tVarList *x, tVarList *b,
 
   /* set Acol */                
   SetMatrixColumns_slowly(Acol, lop, r, x, c1, c2, pr);
-  if(pr&&0) 
-    for(col=0; col<ncols; col++) prSparseVector(Acol[col]);
+  if(pr&&0) prSparseVectorArray(Acol,ncols);
+  if(Getv("GridIterators_verbose", "very"))
+  {
+    char name[1000];
+    snprintf(name, 999, "%s/lop_matrix_%.0fs.mtx",
+             Gets("outdir"), getTimeIn_s());
+    write_SparseVectorArray_inMatrixMarketFormat(name, Acol,ncols, 1);
+  }
 
   /* solve A x = b with umfpack */
   if(Getv("GridIterators_UMFPACK_version", "di"))
