@@ -7,7 +7,7 @@
 
 #ifdef SUITESPARSEQR
 #include "SuiteSparseQR_C.h"
-#define PrintErrorCodesAndExit  \
+#define PrintErrorCodes  \
   { printf("CHOLMOD returned INFO=%d\n", INFO); \
     printf("some common return values:\n"); \
     printf(" CHOLMOD_OK=%d\n", CHOLMOD_OK); \
@@ -20,11 +20,14 @@
     printf(" CHOLMOD_DSMALL=%d\n", CHOLMOD_DSMALL); \
     printf("for more info do:\n"); \
     printf(" grep CHOLMOD_ /usr/include/suitesparse/cholmod_core.h\n"); \
-    fflush(stdout); \
-    if(INFO<0) errorexiti("CHOLMOD returned INFO=%d", INFO); }
+    fflush(stdout); }
 #else
-#define PrintErrorCodesAndExit  errorexit("SuiteSparseQR is not compiled in")
+#define PrintErrorCodes  errorexit("SuiteSparseQR is not compiled in")
 #endif
+
+#define PrintErrorCodesAndExit  \
+  { PrintErrorCodes; \
+    if(INFO<0) errorexiti("CHOLMOD returned INFO=%d", INFO); }
 
 #define CompileSuiteSparseQR \
   errorexit("In order to compile with SuiteSparseQR use\n" \

@@ -30,7 +30,7 @@
 
 #define PrintErrorCodesAndExit  \
   { PrintErrorCodes; \
-    if(INFO<0) errorexiti("umfpack_dl_solve: dl_solve returned INFO=%d", INFO); }
+    if(INFO<0) errorexiti("umfpack_di_solve: di_solve returned INFO=%d", INFO); }
 
 /***************************************************************************/
 /* some helper routines                                                    */
