@@ -23,9 +23,8 @@ typedef struct tNEWTONSTEPVARS {
 
 /* function pointer that is called before the linear solver,
    if it does not point to NULL */
-int (*Newton_do_before_linSolver)(tGrid *grid, int inewton, int lin_its, 
-                                  double lin_normres, double normres,
-                                  double lambda);
+int (*Newton_do_before_linSolver)(tGrid *grid, tNewtonResults inp,
+                                  tNewtonArgPointers out);
 
 /* funcs */
 void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu);
@@ -59,8 +58,10 @@ int Newton(
   tGrid *grid = vlFu->grid;
   int i, j, inewton, b;
   double res, lin_normres = 0;
-  double lambda = 0.0;
   int lin_its = 0;
+  double lambda = 0.0;
+  tNewtonResults before_lin_in;
+  tNewtonArgPointers before_lin_out;
   
   /* solve with Newton-Raphson iterations: */
   if(pr) printf("Newton:  starting Newton iterations, itmax=%d tol=%g\n",
@@ -84,9 +85,10 @@ int Newton(
 
     /* user defined function that is called before the linear solver,
        if it does not point to NULL */
+    before_lin_in.lambda = lambda;
+    before_lin_out.linSolver = &linSolver;
     if(Newton_do_before_linSolver != NULL)
-      Newton_do_before_linSolver(grid, inewton, lin_its, lin_normres, 
-                                 *normres, lambda);
+      Newton_do_before_linSolver(grid, before_lin_in, before_lin_out);
 
     /* solve linear equation */
     lin_its=linSolver(vldu, vlFu, vlres, vld1, vld2, 

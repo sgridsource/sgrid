@@ -27,6 +27,21 @@
   k2 = (((sbk)+1)*n3)/(nsb3); \
 
 
+/* structure we use to store results of a Newton step */
+typedef struct tNEWTONRESULTS {
+  double lambda;
+} tNewtonResults;
+
+/* structure we use to store pointers to varlists and funcs */
+typedef struct tNEWTONARGPOINTERS {
+  int (**linSolver)(tVarList *vl_du, tVarList *vl_Fu, 
+                   tVarList *vl_res, tVarList *vl_d1, tVarList *vl_d2,
+                   int lin_itmax, double lin_tol, double *lin_normres,
+	           void (*J_du)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	           void (*lin_precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+} tNewtonArgPointers;
+
+
 /* dot product and L2-Norm over entire grid or box for varlists */
 double GridDotProduct(tVarList *vlu, tVarList *vlv);
 double GridL2Norm(tVarList *vlu);
