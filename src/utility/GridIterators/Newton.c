@@ -28,7 +28,7 @@ int (*Newton_do_before_linSolver)(tGrid *grid, tNewtonResults inp,
 
 /* funcs */
 void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu);
-void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
+double do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
   void  (*Fu)(tVarList *vl_Fu,  tVarList *vl_u,  tVarList *vl_c1, tVarList *vl_c2),
   void (*Jdu)(tVarList *vl_Jdu, tVarList *vl_du, tVarList *vl_d1, tVarList *vl_d2),
   tVarList *vlFu,  tVarList *vlc1, tVarList *vlc2,
@@ -100,8 +100,8 @@ int Newton(
 
     /* do Newton step: u^{n+1} = u^{n} - du */
     /* do_partial_Newton_step(vlu, 1.0, vldu); */
-    do_Newton_step(vlu, vldu, res, Fu, Jdu,
-                   vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
+    lambda = do_Newton_step(vlu, vldu, res, Fu, Jdu,
+                            vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
 
     /* sync vlu. sync is not needed if du is synced */
     /* bampi_vlsynchronize(vlu); */
@@ -162,13 +162,15 @@ double Newton_residual_of_lambda(double lambda, void *p)
 }
 
 /* do one Newton step and with backtracking if needed */
-void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
+double do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
   void  (*Fu)(tVarList *vl_Fu,  tVarList *vl_u,  tVarList *vl_c1, tVarList *vl_c2),
   void (*Jdu)(tVarList *vl_Jdu, tVarList *vl_du, tVarList *vl_d1, tVarList *vl_d2),
   tVarList *vlFu,  tVarList *vlc1, tVarList *vlc2,
   tVarList *vlres, tVarList *vld1, tVarList *vld2,
   int pr)
 {
+  double lambda = 0.0;
+
   /* do full Newton step */
   do_partial_Newton_step(vlu, 1.0, vldu);
 
@@ -181,7 +183,7 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
     double bl = -0.5;
     double cl = -0.0;
     double tol = 0.0001;
-    double lmin, lambda;
+    double lmin;
     double fx, fa,fb,fc;
     tVarList *vltemp;
     double resb, resc;
@@ -192,8 +194,8 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
     if(resc<oldres && !Getv("GridIterators_Newtonstep", "optimal"))
     {
       vlsetconstant(vldu, 0.0); 
-      return; /* stick with full Newton step if it decreases res
-                 and optimal is off */
+      return lambda; /* stick with full Newton step if it decreases res
+                        and optimal is off */
     }
 
     if(0) /* old version that never worked is now out! */
@@ -217,7 +219,7 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
       }
       do_partial_Newton_step(vlu, lambda-bl, vldu);
       vlsetconstant(vldu, 0.0);
-      return; /* do Newton step by amount lambda, even though res is worse */
+      return lambda; /* do Newton step by amount lambda, even though res is worse */
     }
     /* go back to lambda=0 */
     do_partial_Newton_step(vlu, -bl, vldu);
@@ -275,6 +277,8 @@ void do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
      which hopefully resets all derivs of vldu to zero */
   if(Getv("GridIterators_Newton_EndOfStep", "Jdu"))
     Jdu(vlres, vldu, vld1, vld2);
+
+  return lambda;
 }
 
 /* Newton startup initialization */
