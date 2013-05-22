@@ -1,0 +1,47 @@
+===========================
+Compute corotating configs:
+===========================
+for the 1st paper [Class.Quant.Grav.26:175018,2009] with 
+corotating configurations I mostly used:
+BNSdata_adjust = keep_xmax always print_current_xmax
+
+This means:
+===========
+0. set up initial guess:
+-choose rest masses m01 and m02
+-choose fields as TOV, maybe with initial shift as in gr-qc/0007028v2
+-find constants C1 and C2 in integrated Euler eqn for each star
+-integrated Euler eqn for corot is:  h = -C u^0
+-in my fist paper I use q instead of h
+-the specific enthalpy h is proportional to q:  h = (n+1)q + 1
+-n is in exponent of EOS: P = kappa rho0^(1+1/n), usually I use n=1
+-use PN guess for Omega and xCM
+-find and save x_max1 and x_max2, i.e. max of q along x-axis (line connecting
+ the 2 stars)
+
+Iterate:
+--------
+1. solve elliptic eqns for each variable one after another, in this order:
+BNSdata_Psi BNSdata_Bx BNSdata_By BNSdata_Bz BNSdata_alphaP
+
+2. update u =(BNSdata_Psi BNSdata_Bx BNSdata_By BNSdata_Bz BNSdata_alphaP)
+by using:
+ u_new = (1-w) u_old + w u_ell
+where w=0.2 and u_ell is what we have from elliptic solve in 1.
+
+3. choose Omega and xCM such that dq/dx|x_max1/2 = 0
+where:
+-here x_max1/2 are max of q along x-axis (line connecting the 2 stars) from
+ the previous iteration
+-q and dq/dx|x_max are computed from the integrated Euler eqn using u_new
+-we do not change C1/2 in this step at all.
+-my function that does all this is called adjust_Omega_xCM_keep_dqdxmax_eq_0
+
+4. adjust constants C1 and C2 in integrated Euler eqn
+-define rest mass m01/2 as in Eq. 41. This is a function of C1/2.
+-choose C1/2 such that m01/2 is the same as before. 
+-my function that does all this is called adjust_C1_C2_q_keep_restmasses
+
+5. if residuals are not low enough go back to 1.
+
+All this is described in Class.Quant.Grav.26:175018,2009 in Sec 3.3.
