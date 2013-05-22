@@ -45,3 +45,12 @@ where:
 5. if residuals are not low enough go back to 1.
 
 All this is described in Class.Quant.Grav.26:175018,2009 in Sec 3.3.
+
+--------------------------------------------------------------------------
+
+For my 3rd paper (Phys. Rev. D 86, 064024 (2012)) with spins I changed this
+algorithm slightly. The only necessary change was in step 3. 
+I now use Eq. (29) of Phys. Rev. D 86, 064024 (2012) instead of 
+dq/dx|x_max1/2 = 0. This is described in Sec. III of Phys. Rev. D 86, 064024
+(2012).
+
