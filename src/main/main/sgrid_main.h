@@ -128,6 +128,7 @@ void free_pdb(tParameter *pdb1, int npdb1);
 /* skeleton.c */
 enum
 {
+  POST_PARAMETERS,
   PRE_GRID,
   POST_GRID,
   PRE_INITIALDATA,

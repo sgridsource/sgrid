@@ -37,6 +37,7 @@ int main(int argc, char **argv)
   initialize_libraries();
 
   while (iterate_parameters()) {
+    RunFun(POST_PARAMETERS, 0); /* hook for funs right after iterate_parameters */
     RunFun(PRE_GRID, 0);  /* hook for special grid preparation */
     g = make_grid(1);
     RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
