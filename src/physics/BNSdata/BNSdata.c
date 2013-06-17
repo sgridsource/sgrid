@@ -4892,6 +4892,10 @@ int BNSdata_analyze(tGrid *grid)
   double xout1, xin1, xin2, xout2;
   double M_ADM, J_ADM, Jx_ADM,Jy_ADM,Jz_ADM, m01, m02;
   double Jx_ADM1,Jy_ADM1,Jz_ADM1, Jx_ADM2,Jy_ADM2,Jz_ADM2;
+  double Px_ADM1,Py_ADM1,Pz_ADM1, Px_ADM2,Py_ADM2,Pz_ADM2;
+  double Px_ADM,Py_ADM,Pz_ADM;
+  /* double rx_1, rx_2;
+     double Sx_ADM1,Sy_ADM1,Sz_ADM1, Sx_ADM2,Sy_ADM2,Sz_ADM2; */
   double *M_ADM_ofA;
   double M_ADM_in0, M_ADM_in3, M_ADM_in1, M_ADM_in2; 
   int iX = Ind("X");
@@ -4938,6 +4942,23 @@ int BNSdata_analyze(tGrid *grid)
   m01 = GetInnerRestMass(grid, 0);
   m02 = GetInnerRestMass(grid, 3);
 
+  /* compute ADM mom. */
+  if(0)
+  {
+  BNS_set_P_ADM_VolInt_integrand(grid, itemp1,itemp2,itemp3);
+  Px_ADM1 = InnerVolumeIntegral(grid, 0, itemp1);
+  Py_ADM1 = InnerVolumeIntegral(grid, 0, itemp2);
+  Pz_ADM1 = InnerVolumeIntegral(grid, 0, itemp3);
+  Px_ADM2 = InnerVolumeIntegral(grid, 3, itemp1);
+  Py_ADM2 = InnerVolumeIntegral(grid, 3, itemp2);
+  Pz_ADM2 = InnerVolumeIntegral(grid, 3, itemp3);
+  Px_ADM = Px_ADM1 + Px_ADM2;
+  Py_ADM = Py_ADM1 + Py_ADM2;
+  Pz_ADM = Pz_ADM1 + Pz_ADM2;
+  printf("Px_ADM1=%.9g Py_ADM1=%.9g Pz_ADM1=%.9g "
+         "Px_ADM2=%.9g Py_ADM2=%.9g Pz_ADM2=%.9g\n",
+         Px_ADM1,Py_ADM1,Pz_ADM1, Px_ADM2,Py_ADM2,Pz_ADM2);
+  }
   /* compute ADM ang. mom. */
   BNS_set_J_ADM_VolInt_integrand(grid, itemp1,itemp2,itemp3);
   Jx_ADM1 = InnerVolumeIntegral(grid, 0, itemp1);
@@ -5041,6 +5062,27 @@ int BNSdata_analyze(tGrid *grid)
          "                 at (x,y,z)=(%.11g,%.11g,%.11g)\n",
          global_qmax2, bi2, glob_xmax2,glob_ymax2,glob_zmax2);
 
+  /* compute spin estimates: 
+     J_ADM1 = L_ADM1 + S_ADM1,  
+     L_ADM1 = r_1 x P_ADM1,  
+     S_ADM1 = J_ADM1 - L_ADM1,
+     where rx_1 = xmax1-x_CM,  ry_1 = rz_1 = 0  */
+  /* Note: this does not work, because we need to use the star's CM and
+           and not the point where q is max! */
+  /*
+  rx_1 = xmax1-x_CM;
+  Sx_ADM1 = Jx_ADM1 - 0;
+  Sy_ADM1 = Jy_ADM1 - 0; 
+  Sz_ADM1 = Jz_ADM1 - rx_1*Py_ADM1;
+  rx_2 = xmax2-x_CM;
+  Sx_ADM2 = Jx_ADM2 - 0;
+  Sy_ADM2 = Jy_ADM2 - 0; 
+  Sz_ADM2 = Jz_ADM2 - rx_2*Py_ADM2;
+  printf("Sx_ADM1=%.9g Sy_ADM1=%.9g Sz_ADM1=%.9g "
+         "Sx_ADM2=%.9g Sy_ADM2=%.9g Sz_ADM2=%.9g\n",
+         Sx_ADM1,Sy_ADM1,Sz_ADM1, Sx_ADM2,Sy_ADM2,Sz_ADM2);
+  */
+
   /* compute TOV */
   TOV_init(P_core1, kappa, Gamma, 0,
            &TOV_rf_surf1, &TOV_m1, &TOV_Phic1, &TOV_Psic1, &TOV_m01);
@@ -5076,6 +5118,12 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   for(i=b1n1-1; i>=b1n1-5 && i>=0; i--)
     fprintf(fp, "MpADM[%d]\t%.19g\t(A=%.16g  x=%.16g)\n", i, M_ADM_ofA[i],
             grid->box[1]->v[iX][i], grid->box[1]->v[ix][i]);
+  fprintf(fp, "Jx_ADM\t\t%.19g\n", Jx_ADM);
+  fprintf(fp, "Jy_ADM\t\t%.19g\n", Jy_ADM);
+  fprintf(fp, "Jz_ADM\t\t%.19g\n", Jz_ADM);
+  /* fprintf(fp, "Px_ADM\t\t%.19g\n", Px_ADM);
+     fprintf(fp, "Py_ADM\t\t%.19g\n", Py_ADM);
+     fprintf(fp, "Pz_ADM\t\t%.19g\n", Pz_ADM); */
   fprintf(fp, "\n");
   fprintf(fp, "(m1/R)_inf\t%.19g\n", TOV_m1/TOV_r_surf1);
   fprintf(fp, "(m01/R)_inf\t%.19g\n", m01/TOV_r_surf1);
@@ -5083,6 +5131,12 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   fprintf(fp, "xmax1\t\t%+.19g\n", xmax1);
   fprintf(fp, "xout1\t\t%+.19g\n", xout1);
   fprintf(fp, "qmax1\t\t%.19g\n", qmax1);
+  /* fprintf(fp, "Sx_ADM1\t\t%.19g\n", Sx_ADM1);
+     fprintf(fp, "Sy_ADM1\t\t%.19g\n", Sy_ADM1);
+     fprintf(fp, "Sz_ADM1\t\t%.19g\n", Sz_ADM1);
+     fprintf(fp, "Px_ADM1\t\t%.19g\n", Px_ADM1);
+     fprintf(fp, "Py_ADM1\t\t%.19g\n", Py_ADM1);
+     fprintf(fp, "Pz_ADM1\t\t%.19g\n", Pz_ADM1); */
   fprintf(fp, "\n");
   fprintf(fp, "(m2/R)_inf\t%.19g\n", TOV_m2/TOV_r_surf2);
   fprintf(fp, "(m02/R)_inf\t%.19g\n", m02/TOV_r_surf2);
@@ -5090,6 +5144,12 @@ TOV_m1,TOV_r_surf1, TOV_Psis1);
   fprintf(fp, "xmax2\t\t%+.19g\n", xmax2);
   fprintf(fp, "xout2\t\t%+.19g\n", xout2);
   fprintf(fp, "qmax2\t\t%.19g\n", qmax2);
+  /* fprintf(fp, "Sx_ADM2\t\t%.19g\n", Sx_ADM2);
+     fprintf(fp, "Sy_ADM2\t\t%.19g\n", Sy_ADM2);
+     fprintf(fp, "Sz_ADM2\t\t%.19g\n", Sz_ADM2);
+     fprintf(fp, "Px_ADM2\t\t%.19g\n", Px_ADM2);
+     fprintf(fp, "Py_ADM2\t\t%.19g\n", Py_ADM2);
+     fprintf(fp, "Pz_ADM2\t\t%.19g\n", Pz_ADM2); */
   fprintf(fp, "\n");
   fprintf(fp, "BNSdata_b\t%.19g\n", BNSdata_b);
   fprintf(fp, "sigp_00\t\t%+.19g\n", sigp_00);
