@@ -260,7 +260,7 @@ double do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
              "(fa,fb,fc)=(%.3g,%.3g,%.3g)\n", al,bl,cl, fa,fb,fc);
       printf("do_Newton_step:  brent tol=%g -> lmin=%g, fx=%.3g\n",
              tol, lmin, fx);
-      printf("do_Newton_step:  backtracking to lambda=%g\n", lambda);
+      printf("do_Newton_step:  backtracking by lambda=%g\n", lambda);
     }
 
     /* do reduced Newton step */
