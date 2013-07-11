@@ -235,9 +235,9 @@ void BNS_set_wB(tGrid *grid, int star, double xc,double yc,double zc)
         else              Att1 = 1.0;
 
         /* omega cross r-rc */
-        vx = ( omegay1* (z-zc) - omegaz1* (y-yc) )*Att1;
-        vy = ( omegaz1* (x-xc) - omegax1* (z-zc) )*Att1;
-        vz = ( omegax1* (y-yc) - omegay1* (x-xc) )*Att1;
+        vx = ( omegay* (z-zc) - omegaz* (y-yc) )*Att1;
+        vy = ( omegaz* (x-xc) - omegax* (z-zc) )*Att1;
+        vz = ( omegax* (y-yc) - omegay* (x-xc) )*Att1;
         /* 1/u0^2 ~ alpha2 - Psi4 delta[b,c] (beta[b] + vR[b]) (beta[c] + vR[c]),*/
         /* u0 = 1.0/sqrt(fabs(exp(2*Phi1) - Psi4*(vx*vx + vy*vy + vz*vz))); */
 
