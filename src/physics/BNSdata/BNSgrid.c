@@ -348,8 +348,11 @@ int set_boxsizes(tGrid *grid)
   else
     xCM = Getd("BNSdata_x_CM");
   if(Getv("BNSdata_Omega", "estimate"))
+  {
     Omega = sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
                  (-5*nu + 8*nu*nu)/(8*DoM5)            )/(m01+m02);
+    if(nu<=0.0) Omega=0.0;
+  }
   else if(Getv("BNSdata_Omega", "estimate_from_desired_m0"))
   {
     double m1 = Getd("BNSdata_desired_m01");
@@ -361,10 +364,10 @@ int set_boxsizes(tGrid *grid)
     nu = (m1*m2)/pow(m1+m2, 2.0);
     Omega = sqrt( 64*DoM3/pow(1 + 2*DoM, 6) +nu/DoM4 +
                  (-5*nu + 8*nu*nu)/(8*DoM5)            )/(m01+m02);
+    if(nu<=0.0) Omega=0.0;
   }
   else
     Omega = Getd("BNSdata_Omega");
-  if(nu<=0.0) Omega=0.0;
   Setd("BNSdata_x_CM", xCM);
   Setd("BNSdata_Omega", Omega);
   printf(" BNSdata_x_CM and BNSdata_Omega are now set to:\n");
