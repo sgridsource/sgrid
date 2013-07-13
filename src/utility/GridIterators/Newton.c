@@ -191,84 +191,55 @@ double do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
     /* res of full Newton step */
     Fu(vlFu, vlu, vlc1, vlc2);
     resc = norm2(vlFu);
-    if(resc<oldres && !Getv("GridIterators_Newtonstep", "optimal"))
-    {
-      vlsetconstant(vldu, 0.0); 
-      return lambda; /* stick with full Newton step if it decreases res
-                        and optimal is off */
-    }
 
-    if(0) /* old version that never worked is now out! */
+    /* backtrack only if Newton step increases res or optimal is on */
+    if(resc>=oldres || Getv("GridIterators_Newtonstep", "optimal"))
     {
-    al = -0.5;
-    bl = 1e-6;
-    cl = 1.0;
-    /* do Newton step only to lambda = bl */
-    do_partial_Newton_step(vlu, bl-cl, vldu);
-    Fu(vlFu, vlu, vlc1, vlc2);
-    resb = norm2(vlFu);
-    if(resb>=oldres)
-    { /* errorexit("do_Newton_step: (res at bl) > (res at 0)"); */
-      lambda = 1e-4;
+      /* save old vlu in vltemp */
+      vltemp = AddDuplicateEnable(vlu, "_GridIterators_Newtonstep_temp");
+      vlcopy(vltemp, vlu);
+
+      /* set pars for Newton_residual_of_lambda */
+      pars->Fu   = Fu;
+      pars->Jdu  = Jdu;
+      pars->vlFu = vlFu;
+      pars->vlu  = vlu;
+      pars->vlc1 = vlc1;
+      pars->vlc2 = vlc2;
+      pars->vlres= vlres;
+      pars->vldu = vldu;
+      pars->vld1 = vld1;
+      pars->vld2 = vld2;
+      pars->vltemp = vltemp;
+      p = (void *) pars;
+
+      /* bracket the min */
+      mnbrak_with_pointer_to_pars(&al, &bl, &cl, &fa, &fb, &fc,
+                                  Newton_residual_of_lambda, p);
+
+      /* call brent with Newton_residual_of_lambda to find the lambda=lmin 
+         where the res in min */
+      fx = brent_with_pointer_to_pars(al, bl, cl, Newton_residual_of_lambda,
+                                      tol, &lmin, p);
+      /* if(lmin < bl) lambda = bl;
+         else          lambda = lmin; */
+      lambda = lmin;
       if(pr)
       {
-        printf("do_Newton_step: Warning: "
-               "(res at lambda=bl=%g) > (res at lambda=0)\n", bl);
-        printf("do_Newton_step: trying to escape local min. with "
-               "lambda=%g\n", lambda);
+        printf("do_Newton_step:  mnbrak -> (al,bl,cl)=(%g,%g,%g), "
+               "(fa,fb,fc)=(%.3g,%.3g,%.3g)\n", al,bl,cl, fa,fb,fc);
+        printf("do_Newton_step:  brent tol=%g -> lmin=%g, fx=%.3g\n",
+               tol, lmin, fx);
+        printf("do_Newton_step:  backtracking by lambda=%g\n", lambda);
       }
-      do_partial_Newton_step(vlu, lambda-bl, vldu);
-      vlsetconstant(vldu, 0.0);
-      return lambda; /* do Newton step by amount lambda, even though res is worse */
+
+      /* do reduced Newton step */
+      vlcopy(vlu, vltemp);
+      do_partial_Newton_step(vlu, lambda, vldu);
+
+      /* free varlist vltemp */
+      vlfree(vltemp);
     }
-    /* go back to lambda=0 */
-    do_partial_Newton_step(vlu, -bl, vldu);
-    }
-
-    /* save old vlu in vltemp */
-    vltemp = AddDuplicateEnable(vlu, "_GridIterators_Newtonstep_temp");
-    vlcopy(vltemp, vlu);
-
-    /* set pars for Newton_residual_of_lambda */
-    pars->Fu   = Fu;
-    pars->Jdu  = Jdu;
-    pars->vlFu = vlFu;
-    pars->vlu  = vlu;
-    pars->vlc1 = vlc1;
-    pars->vlc2 = vlc2;
-    pars->vlres= vlres;
-    pars->vldu = vldu;
-    pars->vld1 = vld1;
-    pars->vld2 = vld2;
-    pars->vltemp = vltemp;
-    p = (void *) pars;
-
-    /* bracket the min */
-    mnbrak_with_pointer_to_pars(&al, &bl, &cl, &fa, &fb, &fc,
-                                Newton_residual_of_lambda, p);
-
-    /* call brent with Newton_residual_of_lambda to find the lambda=lmin 
-       where the res in min */
-    fx = brent_with_pointer_to_pars(al, bl, cl, Newton_residual_of_lambda,
-                                    tol, &lmin, p);
-    /* if(lmin < bl) lambda = bl;
-       else          lambda = lmin; */
-    lambda = lmin;
-    if(pr)
-    {
-      printf("do_Newton_step:  mnbrak -> (al,bl,cl)=(%g,%g,%g), "
-             "(fa,fb,fc)=(%.3g,%.3g,%.3g)\n", al,bl,cl, fa,fb,fc);
-      printf("do_Newton_step:  brent tol=%g -> lmin=%g, fx=%.3g\n",
-             tol, lmin, fx);
-      printf("do_Newton_step:  backtracking by lambda=%g\n", lambda);
-    }
-
-    /* do reduced Newton step */
-    vlcopy(vlu, vltemp);
-    do_partial_Newton_step(vlu, lambda, vldu);
-
-    /* free varlist vltemp */
-    vlfree(vltemp);
   }
   /* reset du to zero */
   vlsetconstant(vldu, 0.0);
