@@ -89,3 +89,6 @@ double brent_with_pointer_to_pars(double ax, double bx, double cx,
 /* Multidim. Minimization */
 void powell(double p[], double **xi, int n, double ftol, int *iter,
 	    double *fret, double (*func)(double []));
+
+/* Random numbers */
+double RND(void);
