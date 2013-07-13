@@ -169,17 +169,24 @@ void do_random_Newton_step(tVarList *vlu, double eps, tVarList *vldu)
   tGrid *grid = vlu->grid;
   int i, j, b;
   double uav = norm2(vlu);
+  char str[1000];
 
-  for(j = 0; j < vlu->n; j++)
-    forallboxes(grid,b)
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+
+    for(j = 0; j < vlu->n; j++)
     {
-      tBox *box = grid->box[b];
       double *u  = box->v[vlu ->index[j]]; 
       double *du = box->v[vldu->index[j]]; 
 
       forallpoints(box,i)
         u[i] += uav*eps*(RND()-0.5)*2.0; /* u^{n+1} = u^{n} + uav*eps*r */
     }
+    /* make sure vlu is unique */
+    snprintf(str, 999, "box%d_Coordinates", box->b);
+    if(Getv(str, "SphericalDF"))  reset_doubleCoveredPoints(vlu);
+  }
 }
 
 /* function for brent, which gives Newton residual as a function of 
