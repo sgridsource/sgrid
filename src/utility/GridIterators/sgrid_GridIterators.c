@@ -26,7 +26,7 @@ int sgrid_GridIterators(void)
          "what we do if we end up in local min [donothing,escapeMin]");
   AddPar("GridIterators_Newton_minstep", "0.05", "how close we can get "
          "to not stepping at all, before we try to escape.");
-  AddPar("GridIterators_Newton_randomstepsize", "0.1",
+  AddPar("GridIterators_Newton_randomstepsize", "0.001",
          "size by which we change u if we do a random step");
   AddPar("GridIterators_Newton_EndOfStep", "Jdu",
          "what we do at end of Newton step [Jdu]");
