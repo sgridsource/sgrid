@@ -28,6 +28,7 @@ int (*Newton_do_before_linSolver)(tGrid *grid, tNewtonResults inp,
 
 /* funcs */
 void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu);
+void do_random_Newton_step(tVarList *vlu, double eps, tVarList *vldu);
 double do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
   void  (*Fu)(tVarList *vl_Fu,  tVarList *vl_u,  tVarList *vl_c1, tVarList *vl_c2),
   void (*Jdu)(tVarList *vl_Jdu, tVarList *vl_du, tVarList *vl_d1, tVarList *vl_d2),
@@ -103,6 +104,16 @@ int Newton(
     lambda = do_Newton_step(vlu, vldu, res, Fu, Jdu,
                             vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
 
+    /* do random Newton step if we seem to be caught in a local min, i.e.
+       if we get too close to lambda=-1 */
+    if(Getv("GridIterators_Newton_atlocalMin","escapeMin"))
+    {
+      double ms = Getd("GridIterators_Newton_minstep");
+      double eps = Getd("GridIterators_Newton_randomstepsize");
+
+      if(fabs(lambda+1.0)<ms) do_random_Newton_step(vlu, eps, vldu);
+    }
+
     /* sync vlu. sync is not needed if du is synced */
     /* bampi_vlsynchronize(vlu); */
 
@@ -147,13 +158,14 @@ void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu)
     }
 }
 
-/* random Newton step: u^{n+1} = u^{n} (1+eps*r),
+/* random Newton step: u^{n+1} = u^{n} + uav * eps*r,
    where r is random in [-1,1] and eps<1 */
 void do_random_Newton_step(tVarList *vlu, double eps, tVarList *vldu)
 {
   tGrid *grid = vlu->grid;
   int i, j, b;
-  
+  double uav = norm2(vlu);
+
   for(j = 0; j < vlu->n; j++)
     forallboxes(grid,b)
     {
@@ -162,7 +174,7 @@ void do_random_Newton_step(tVarList *vlu, double eps, tVarList *vldu)
       double *du = box->v[vldu->index[j]]; 
 
       forallpoints(box,i)
-        u[i] *= (1.0 + eps*(RND()-0.5)*2.0); /* u^{n+1} = u^{n} (1+eps*r) */
+        u[i] += uav*eps*(RND()-0.5)*2.0; /* u^{n+1} = u^{n} + uav*eps*r */
     }
 }
 
