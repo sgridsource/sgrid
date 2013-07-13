@@ -110,8 +110,12 @@ int Newton(
     {
       double ms = Getd("GridIterators_Newton_minstep");
       double eps = Getd("GridIterators_Newton_randomstepsize");
-
-      if(fabs(lambda+1.0)<ms) do_random_Newton_step(vlu, eps, vldu);
+      if(fabs(lambda+1.0)<ms)
+      {
+        printf("lambda=%g ==> taking random Newton step of size eps=%g\n",
+               lambda, eps);
+        do_random_Newton_step(vlu, eps, vldu);
+      }
     }
 
     /* sync vlu. sync is not needed if du is synced */
