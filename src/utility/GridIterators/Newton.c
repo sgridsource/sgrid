@@ -147,6 +147,25 @@ void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu)
     }
 }
 
+/* random Newton step: u^{n+1} = u^{n} (1+eps*r),
+   where r is random in [-1,1] and eps<1 */
+void do_random_Newton_step(tVarList *vlu, double eps, tVarList *vldu)
+{
+  tGrid *grid = vlu->grid;
+  int i, j, b;
+  
+  for(j = 0; j < vlu->n; j++)
+    forallboxes(grid,b)
+    {
+      tBox *box = grid->box[b];
+      double *u  = box->v[vlu ->index[j]]; 
+      double *du = box->v[vldu->index[j]]; 
+
+      forallpoints(box,i)
+        u[i] *= (1.0 + eps*(RND()-0.5)*2.0); /* u^{n+1} = u^{n} (1+eps*r) */
+    }
+}
+
 /* function for brent, which gives Newton residual as a function of 
    lambda only */
 double Newton_residual_of_lambda(double lambda, void *p)
