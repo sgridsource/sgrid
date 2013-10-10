@@ -36,7 +36,7 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_orbitfile", "orbit.t",
          "filename for evolved orbital parameters");
   AddPar("PN_CircularOrbit_GWs_orbitfile_format", "S/m^2",
-         "format used in orbitfile [S/m^2,yvec,Add_E_J]");
+         "format used in orbitfile [S/m^2,yvec,Add_E_J,Add_Eb/mu_L/Mmu]");
   AddPar("PN_CircularOrbit_GWs_lmax", "6", "max l mode we compute");
   AddPar("PN_CircularOrbit_GWs_sphere_Lmax", "13",
          "max l mode we can represent on grid. We need Lmax>=lmax");
@@ -66,7 +66,7 @@ int sgrid_PN_CircularOrbit_GWs()
            "see cases in func_to_minimize_for_numrec(p)");
   }
 
-  AddPar("PN_CircularOrbit_GWs_omega", "0.01", "initial orbital frequency * m");
+  AddPar("PN_CircularOrbit_GWs_omega", "0.01", "initial orbital frequency * M");
   AddPar("PN_CircularOrbit_GWs_m1", "0.5", "mass of particle 1");
   AddPar("PN_CircularOrbit_GWs_m2", "0.5", "mass of particle 2");
   AddPar("PN_CircularOrbit_GWs_chi1x", "0", "initial S1x/m1^2");

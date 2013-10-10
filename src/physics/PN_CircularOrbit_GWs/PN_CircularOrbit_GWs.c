@@ -130,6 +130,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   double phi_h = Getd("PN_CircularOrbit_GWs_phi_h");
   int EOM_type;
   double Etot, Jx,Jy,Jz;
+  double M, mu, eta;   /* total mass, reduced mass, eta=mu/m */
+  double Eb, Lx,Ly,Lz; /* binding energy, orbital ang. mom. */ 
 
   /* set EOM_type from pars */
   if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","TaylorT4_bug")) 
@@ -216,6 +218,10 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   for(i=0; i<=11; i++)
     printf("yvec[%d] = %g\n", i, yvec[i]);
 */
+  /* mass terms */
+  M  = m1 + m2;
+  mu = m1*m2/M;
+  eta = mu/M;   
 
   /* print header in orbit file */
   if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "S/m^2"))
@@ -227,6 +233,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
                      "  Lnx  Lny  Lnz  Phi");
   if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "Add_E_J"))
     fprintf(out_orb, "  E  Jx  Jy  Jz");
+  if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "Add_Eb/mu_L/Mmu"))
+    fprintf(out_orb, "  Eb/mu  Lx/(M*mu)  Ly/(M*mu)  Lz/(M*mu)");
   if(theta_h>=0.0) fprintf(out_orb, "  {h+,hx}(%g,%g)\n", theta_h, phi_h);
   else             fprintf(out_orb, "\n");
 
@@ -271,9 +279,6 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     /* if(EOM_type==Kidder1995 || EOM_type==BuonannoEtAl2003) */
     if(1)
     {
-      double m  = m1 + m2;
-      double mu = m1*m2/m;
-      double eta= mu/m;   
       double r = yvec[0];
       double sxomsqr1 = yvec[2]/(m1*m1);	/* sx1 /m1^2 */
       double syomsqr1 = yvec[3]/(m1*m1);	/* sy1 /m1^2 */
@@ -284,11 +289,12 @@ int PN_CircularOrbit_GWs(tGrid *grid)
       double LNhatx = yvec[8];	/* Lnx */
       double LNhaty = yvec[9];	/* Lny */
       double LNhatz = yvec[10];	/* Lnz */
+      double m = M;             /* total mass M */
       double mor = m/r;		/* m/r */
       double LNhat_dot_somsqr1; /* LNhat . s1/m1^2 */
       double LNhat_dot_somsqr2; /* LNhat . s2/m2^2 */
       double somsqr1_dot_somsqr2; /* s1 . s2 / (m1 m2)^2 */
-      double Lterm1, Lx,Ly,Lz, Eb;
+      double Lterm1;
 
       /* some dot products */
       LNhat_dot_somsqr1 = LNhatx*sxomsqr1 + LNhaty*syomsqr1 + LNhatz*szomsqr1;
@@ -338,7 +344,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
                 because I have no seperate expressions for it*/
       if(EOM_type==BuonannoEtAl2003 || EOM_type==TaylorT4)
       {
-        double Momega = yvec[1]*m;
+        double Momega = yvec[1]*M;
         double E2PN, E3PN;
         double Seff_x,Seff_y,Seff_z, LNhat_dot_Seff;
 
@@ -362,7 +368,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
                ( -675.0/64.0 + (34445.0/576-(205.0/96.0)*PI*PI)*eta
                  -(155.0/96.0)*eta*eta - (35.0/5184.0)*eta*eta*eta
                )*Momega*Momega;
-        Etot = m + E3PN;
+        Eb = E3PN;
+        Etot = M + Eb;
       }
     }
 
@@ -379,6 +386,9 @@ int PN_CircularOrbit_GWs(tGrid *grid)
       for(i=0; i<=11; i++) fprintf(out_orb, "  %+.16e", yvec[i]);
     if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "Add_E_J"))
       fprintf(out_orb, "  %+.16e  %+.16e  %+.16e  %+.16e", Etot, Jx,Jy,Jz);
+    if(Getv("PN_CircularOrbit_GWs_orbitfile_format", "Add_Eb/mu_L/Mmu"))
+      fprintf(out_orb, "  %+.16e  %+.16e  %+.16e  %+.16e",
+              Eb/mu, Lx/(M*mu),Ly/(M*mu),Lz/(M*mu));
     if(theta_h>=0.0)
     {
       double hplus, hcross;
