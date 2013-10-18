@@ -370,25 +370,25 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
   }
   else if(EOM_type==Kidder1995_v2cut)
   {
-    double a2 = -c2 + v2cut;
+    double B2 = 1.0/v2cut;
+    double a2 = -c2 + B2;
     double a3 = -(c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5);
-    double a4 = c6*0 - c7*S1_dot_S2 + c8*Ln_cap_dot_S1*Ln_cap_dot_S2 +
-                a2*v2cut;
+    double a4 = c6*0 - c7*S1_dot_S2 + c8*Ln_cap_dot_S1*Ln_cap_dot_S2 + a2*B2;
     /* Evo of Omega, Kidder1995 with v2cut */
-    dydx[1] = c1*y[1]*y[1]*v5*(1 - v2cut*V2)*
+    dydx[1] = c1*y[1]*y[1]*v5*(1 - B2*V2)*
               (1.0 + a2*V2 + a3*V3 + a4*V4);
   }
   else if(EOM_type==BuonannoEtAl2003_v2cut)
   {
-    double a2 = -c2 + v2cut;
+    double B2 = 1.0/v2cut;
+    double a2 = -c2 + B2;
     double a3 = -(c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5);
-    double a4 = c6 - c7*S1_dot_S2 + c8*Ln_cap_dot_S1*Ln_cap_dot_S2 +
-                a2*v2cut;
-    double a5 = -c9 + a3*v2cut;
-    double a6 = c10 + c11 + c12 - c13*log(16.0*v2) + a4*v2cut;
-    double a7 = c14 + a5*v2cut;
+    double a4 = c6 - c7*S1_dot_S2 + c8*Ln_cap_dot_S1*Ln_cap_dot_S2 + a2*B2;
+    double a5 = -c9 + a3*B2;
+    double a6 = c10 + c11 + c12 - c13*log(16.0*v2) + a4*B2;
+    double a7 = c14 + a5*B2;
     /* Evo of Omega, BuonannoEtAl2003_v2cut */
-    dydx[1] = c1*y[1]*y[1]*v5*(1 - v2cut*V2)*
+    dydx[1] = c1*y[1]*y[1]*v5*(1 - B2*V2)*
               (1.0 + a2*V2 + a3*V3 + a4*V4 + a5*V5 + a6*V6 + a7*V7);
   }
   else
