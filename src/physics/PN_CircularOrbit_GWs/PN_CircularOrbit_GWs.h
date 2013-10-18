@@ -9,7 +9,9 @@ enum
   TaylorT4_bug,     /* M. Boyle: this old T4 from SpEC has a bug  */
   TaylorT4,         /* Taylor T4 as used in SpEC */
   Kidder1995_v2cut,       /* Kidder1995 with v^2 cut */
-  BuonannoEtAl2003_v2cut  /* BuonannoEtAl2003 with v^2 cut */
+  BuonannoEtAl2003_v2cut, /* BuonannoEtAl2003 with v^2 cut */
+  Kidder1995_v6cut,       /* Kidder1995 with v^6 cut */
+  BuonannoEtAl2003_v6cut  /* BuonannoEtAl2003 with v^6 cut */
 };
 
 
