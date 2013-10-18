@@ -7,7 +7,9 @@ enum
   Kidder1995,       /* as in Kidder, PRD 52, 821 (1995) */
   BuonannoEtAl2003, /* Petr's implementation */
   TaylorT4_bug,     /* M. Boyle: this old T4 from SpEC has a bug  */
-  TaylorT4          /* Taylor T4 as used in SpEC */
+  TaylorT4,         /* Taylor T4 as used in SpEC */
+  Kidder1995_v2cut,       /* Kidder1995 with v^2 cut */
+  BuonannoEtAl2003_v2cut  /* BuonannoEtAl2003 with v^2 cut */
 };
 
 

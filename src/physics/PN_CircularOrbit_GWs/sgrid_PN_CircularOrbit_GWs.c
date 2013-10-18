@@ -87,7 +87,8 @@ int sgrid_PN_CircularOrbit_GWs()
 
   /* pick EOM used */
   AddPar("PN_CircularOrbit_GWs_OrbitEOMtype", "BuonannoEtAl2003",
-         "[Kidder1995,BuonannoEtAl2003,TaylorT4]");
+         "[Kidder1995,BuonannoEtAl2003,TaylorT4,Kidder1995_v2cut,"
+         "BuonannoEtAl2003_v2cut]");
 
   /* flags for trajectories: if 1 include this PN term in EOM: */
   AddPar("PN_CircularOrbit_GWs_OrbitOv1", "1", "if 1 include O(v)^1 terms in EOM");
@@ -101,6 +102,8 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_OrbitOLS2", "1", "if 1 include O(LS)^2 terms in EOM");
   AddPar("PN_CircularOrbit_GWs_OrbitOLS3", "1", "if 1 include O(LS)^3 terms in EOM");
   AddPar("PN_CircularOrbit_GWs_OrbitOSS1", "1", "if 1 include O(SS)^1 terms in EOM");
+  AddPar("PN_CircularOrbit_GWs_Orbitv2cutoff", "0.52",
+         "value of v^2 at which domega/dt=0");
   
   /* flags for wave amplitudes: if 1 include this PN term in h_ij: */
   AddPar("PN_CircularOrbit_GWs_AmpOv1", "1", "if 1 include O(v)^1 in Amp");

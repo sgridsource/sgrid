@@ -14,7 +14,8 @@ double c1, c2, c3, c4, c5, c6, c7, c8, c9,
        c10, c11, c12, c13, c14, c15, c16,  
        c17, c18, c19, c20;
 /* flags (0 or 1) that decide which order of v=om^{1/3} we include */
-int f1, f2, f3, f4, f5, f6, f7;  
+int f1, f2, f3, f4, f5, f6, f7;
+double v2cut;
 int OLS1, OLS2, OLS3, OSS1;
 int EOM_type; /* types of EOM from PN_CircularOrbit_GWs.h */
 
@@ -66,6 +67,10 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
     EOM_type=TaylorT4;
   else if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","Kidder1995"))
     EOM_type=Kidder1995;
+  else if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","Kidder1995_v2cut"))
+    EOM_type=Kidder1995_v2cut;
+  else if(Getv("PN_CircularOrbit_GWs_OrbitEOMtype","BuonannoEtAl2003_v2cut"))
+    EOM_type=BuonannoEtAl2003_v2cut;
   else
     EOM_type=BuonannoEtAl2003;
 
@@ -77,6 +82,10 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
   f5 = Geti("PN_CircularOrbit_GWs_OrbitOv5"); /* order v^5 */
   f6 = Geti("PN_CircularOrbit_GWs_OrbitOv6"); /* order v^6 */
   f7 = Geti("PN_CircularOrbit_GWs_OrbitOv7"); /* order v^7 */
+
+  /* term we can put into EOM to stop omega from growing */
+  v2cut = Getd("PN_CircularOrbit_GWs_Orbitv2cutoff");
+
   /* spin-orbit and spin-spin flags to decide which order in LS and SS
      we incluide in EOM */
   OLS1 = Geti("PN_CircularOrbit_GWs_OrbitOLS1");
@@ -358,6 +367,29 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
                                + c6*V4 * 0
                                - c7*S1_dot_S2*V4 
                                + c8*Ln_cap_dot_S1*Ln_cap_dot_S2*V4 );
+  }
+  else if(EOM_type==Kidder1995_v2cut)
+  {
+    double a2 = -c2 + v2cut;
+    double a3 = -(c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5);
+    double a4 = c6*0 - c7*S1_dot_S2 + c8*Ln_cap_dot_S1*Ln_cap_dot_S2 +
+                a2*v2cut;
+    /* Evo of Omega, Kidder1995 with v2cut */
+    dydx[1] = c1*y[1]*y[1]*v5*(1 - v2cut*V2)*
+              (1.0 + a2*V2 + a3*V3 + a4*V4);
+  }
+  else if(EOM_type==BuonannoEtAl2003_v2cut)
+  {
+    double a2 = -c2 + v2cut;
+    double a3 = -(c3*Ln_cap_dot_S1 + c4*Ln_cap_dot_S2 - c5);
+    double a4 = c6 - c7*S1_dot_S2 + c8*Ln_cap_dot_S1*Ln_cap_dot_S2 +
+                a2*v2cut;
+    double a5 = -c9 + a3*v2cut;
+    double a6 = c10 + c11 + c12 - c13*log(16.0*v2) + a4*v2cut;
+    double a7 = c14 + a5*v2cut;
+    /* Evo of Omega, BuonannoEtAl2003_v2cut */
+    dydx[1] = c1*y[1]*y[1]*v5*(1 - v2cut*V2)*
+              (1.0 + a2*V2 + a3*V3 + a4*V4 + a5*V5 + a6*V6 + a7*V7);
   }
   else
   {
