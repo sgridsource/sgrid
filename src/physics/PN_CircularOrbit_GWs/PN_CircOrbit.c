@@ -15,7 +15,7 @@ double c1, c2, c3, c4, c5, c6, c7, c8, c9,
        c17, c18, c19, c20;
 /* flags (0 or 1) that decide which order of v=om^{1/3} we include */
 int f1, f2, f3, f4, f5, f6, f7;
-double v2cut, cutoffP, v6cut;
+double v2cut, cutoffP, v2trans, v6cut;
 int OLS1, OLS2, OLS3, OSS1;
 int EOM_type; /* types of EOM from PN_CircularOrbit_GWs.h */
 
@@ -89,7 +89,8 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
 
   /* term we can put into EOM to stop omega from growing */
   v2cut = Getd("PN_CircularOrbit_GWs_Orbitv2cutoff");
-  cutoffP = Getd("PN_CircularOrbit_GWs_OrbitcutoffP");
+  v2trans = Getd("PN_CircularOrbit_GWs_Orbitv2trans");
+  cutoffP = Getd("PN_CircularOrbit_GWs_OrbittransP");
   v6cut = Getd("PN_CircularOrbit_GWs_Orbitv6cutoff");
 
   /* spin-orbit and spin-spin flags to decide which order in LS and SS
@@ -393,12 +394,22 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
     double a5 = -c9 + a3*B2;
     double a6 = c10 + c11 + c12 - c13*log(16.0*v2) + a4*B2;
     double a7 = c14 + a5*B2;
-    double AA = cutoffP; /* 6600; */
-    double BB = B2;
+    /* Note: a2*V2 + a3*V3 + a4*V4 + a5*V5 + a6*V6 + a7*V7 
+              = tanh(e2*V2 + e3*V3 + e4*V4 + e5*V5 + e6*V6 + e7*V7)
+       if: */
+    double e2 = a2;
+    double e3 = a3;
+    double e4 = a4;
+    double e5 = a5;
+    double e6 = a6 + e2*e2*e2/3.0;
+    double e7 = a7 + e2*e2*e3;
+    double AA = cutoffP;
+    double BB = 1.0/(v2trans*v2trans);
+    double CC = BB*BB*BB*BB*BB;
     /* Evo of Omega, BuonannoEtAl2003_v2cut */
     dydx[1] = c1*y[1]*y[1]*v5*(1 - B2*V2)*
-              (1.0 + a2*V2 + a3*V3 + a4*V4 + a5*V5 + a6*V6 + a7*V7 + 
-               AA*(1-BB*v2)*(1-BB*v2)*v6*V2);
+              (1.0 + tanh(e2*V2 + e3*V3 + e4*V4 + e5*V5 + e6*V6 + e7*V7) +
+               AA*(1-BB*v2)*(1-BB*v2) * CC*v6*v2*V2);
   }
   else if(EOM_type==Kidder1995_v6cut)
   {

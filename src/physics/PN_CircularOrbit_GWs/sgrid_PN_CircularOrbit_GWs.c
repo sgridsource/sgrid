@@ -102,9 +102,10 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_OrbitOLS2", "1", "if 1 include O(LS)^2 terms in EOM");
   AddPar("PN_CircularOrbit_GWs_OrbitOLS3", "1", "if 1 include O(LS)^3 terms in EOM");
   AddPar("PN_CircularOrbit_GWs_OrbitOSS1", "1", "if 1 include O(SS)^1 terms in EOM");
-  AddPar("PN_CircularOrbit_GWs_Orbitv2cutoff", "0.6",
+  AddPar("PN_CircularOrbit_GWs_Orbitv2cutoff", "0.651",
          "value of v at which domega/dt=0");
-  AddPar("PN_CircularOrbit_GWs_OrbitcutoffP", "0", "par to place v2cutoff");
+  AddPar("PN_CircularOrbit_GWs_Orbitv2trans", "0.614", "v2 to transition to v2cutoff");
+  AddPar("PN_CircularOrbit_GWs_OrbittransP", "85", "par to place v2trans");
   AddPar("PN_CircularOrbit_GWs_Orbitv6cutoff", "0.6",
          "value of v at which domega/dt=0");
   
