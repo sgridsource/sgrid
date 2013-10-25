@@ -394,7 +394,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     if(theta_h>=0.0)
     {
       double hplus, hcross;
-      compute_hcross_hplus(yvec, &hcross, &hplus, D, theta_h, phi_h, m1, m2);
+      compute_hcross_hplus(time, yvec, &hcross, &hplus, D, theta_h, phi_h, m1, m2, NULL);
       fprintf(out_orb, "  %+.16e  %+.16e", hplus, hcross);
     }
     fprintf(out_orb, "\n");
@@ -426,6 +426,7 @@ void compute_hplus_hcross_on_sphere(tBox *box, int hpind, int hxind,
   /* double *Xp = box->v[Ind("X")]; */
   double *Yp = box->v[Ind("Y")];
   double *Zp = box->v[Ind("Z")];
+  double time = box->grid->time;
 
   /* compute hplus and hcross */
   for(k=0; k<n3; k++)  
@@ -441,7 +442,7 @@ void compute_hplus_hcross_on_sphere(tBox *box, int hpind, int hxind,
     phi   = Zp[ijk];
 
     /* compute hplus and hcross, and put them on radial points imin<=i<=imax */
-    compute_hcross_hplus(yvec, &hcross, &hplus, D, theta, phi, m1, m2);
+    compute_hcross_hplus(time, yvec, &hcross, &hplus, D, theta, phi, m1, m2, NULL);
     if(imax>=n1) errorexit("compute_hplus_hcross_on_sphere: imax>=n1");
     for(i=imin; i<=imax; i++)
     {

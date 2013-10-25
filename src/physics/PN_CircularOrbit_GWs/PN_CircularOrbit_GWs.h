@@ -44,7 +44,7 @@ void output_sYlmModes_of_PN_H(char *outname, double time,
 void PN_CircOrbit_compute_constants(double m1_in, double m2_in);
 double PN_CircOrbit_compute_r(double y[]);
 void PN_CircOrbit_xodeint(double m1_in, double m2_in, double t1, double t2, double ystart_in[]);
-void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, double theta, double phi, double m1, double m2);
+void compute_hcross_hplus(double time, double y[], double *hcross, double *hplus, double D, double theta, double phi, double m1, double m2, void *pars);
 
 /* funcs in minimize_PN-NR_diff.c */
 int minimize_PN_NR_diff(tGrid *grid);

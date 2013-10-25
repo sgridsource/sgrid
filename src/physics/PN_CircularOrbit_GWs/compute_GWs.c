@@ -7,7 +7,7 @@ void compute_P1Qc(double lambda[], double n[], double theta, double phi, double 
 void compute_P15Qc(double y[], double lambda[], double n[], double theta, double phi, double **P15Q, double deltam, double m1, double m2, double nu);
 void compute_P2QSSc(double y[], double n[], double theta, double phi, double **P2QSSc, double m1, double m2);
 
-void compute_hcross_hplus(double y[], double *hcross, double *hplus, double D, double theta, double phi, double m1, double m2)
+void compute_hcross_hplus(double time, double y[], double *hcross, double *hplus, double D, double theta, double phi, double m1, double m2, void *pars)
 {
   int i,j;
   double r, deltam, m, nu;   
