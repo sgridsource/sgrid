@@ -242,6 +242,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   printf("computing h+, hx at different times:\n");
   for(time=t1; (dt>0)&&(time<=t2) || (dt<0)&&(time>=t2); time+=dt)
   {
+    /* set grid->time so that any other output gets correct time label */
+    grid->time=time;
     printf("time = %.15g\n", time);
 
     /* see if we want Psi4 as well */
@@ -402,8 +404,6 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     tf=time+dt;
     PN_CircOrbit_xodeint(m1, m2, ti, tf, yvec);
   }
-  /* set time to last time so that any other output get correct time label */
-  grid->time=time-dt;
   fclose(out_orb);
   return 0;
 }
