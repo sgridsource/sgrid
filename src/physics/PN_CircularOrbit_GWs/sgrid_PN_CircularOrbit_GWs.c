@@ -114,6 +114,8 @@ int sgrid_PN_CircularOrbit_GWs()
   AddPar("PN_CircularOrbit_GWs_AmpOv2", "1", "if 1 include O(v)^2 in Amp");
   AddPar("PN_CircularOrbit_GWs_AmpOv3", "1", "if 1 include O(v)^3 in Amp");
   AddPar("PN_CircularOrbit_GWs_AmpOv4", "0", "if 1 include O(v)^4 in Amp");
+  AddPar("PN_CircularOrbit_GWs_vdamp",  "0.52", "v to start damping");
+  AddPar("PN_CircularOrbit_GWs_taudamp", "12", "damping timescale/M");
 
   return 0;
 }

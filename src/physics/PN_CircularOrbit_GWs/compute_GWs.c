@@ -2,6 +2,8 @@
 
 #include "sgrid.h"
 
+extern double vdamp, tsdamp, taudamp;
+
 void compute_P05Qc(double lambda[], double n[], double theta, double phi, double **P05Q, double deltam, double m);
 void compute_P1Qc(double lambda[], double n[], double theta, double phi, double **P1Q, double deltam, double m, double Delta[], double nu);
 void compute_P15Qc(double y[], double lambda[], double n[], double theta, double phi, double **P15Q, double deltam, double m1, double m2, double nu);
@@ -10,7 +12,7 @@ void compute_P2QSSc(double y[], double n[], double theta, double phi, double **P
 void compute_hcross_hplus(double time, double y[], double *hcross, double *hplus, double D, double theta, double phi, double m1, double m2, void *pars)
 {
   int i,j;
-  double r, deltam, m, nu;   
+  double r, deltam, m, nu;
   double
     *es1, 
     *es2, 
@@ -161,6 +163,9 @@ void compute_hcross_hplus(double time, double y[], double *hcross, double *hplus
 //         printf("%s %3d \n","i:", i);
 //         printf("%s%3d \n","j:",j);          
         h[i][j] = 2.0*(m1*m2)/D/y[0]*h[i][j];
+
+        /* change h_ij to emulate ringdown */
+        h[i][j] /= ( 1.0 + exp( (time-tsdamp)/(taudamp*m) ) ); 
     }
   }
 //printf("%s\n","after hij"); 

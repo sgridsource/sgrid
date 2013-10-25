@@ -16,6 +16,7 @@ double c1, c2, c3, c4, c5, c6, c7, c8, c9,
 /* flags (0 or 1) that decide which order of v=om^{1/3} we include */
 int f1, f2, f3, f4, f5, f6, f7;
 double v2cut, cutoffP, v2trans, v6cut;
+double vdamp, tsdamp, taudamp;
 int OLS1, OLS2, OLS3, OSS1;
 int EOM_type; /* types of EOM from PN_CircularOrbit_GWs.h */
 
@@ -93,6 +94,10 @@ void PN_CircOrbit_compute_constants(double m1_in, double m2_in)
   cutoffP = Getd("PN_CircularOrbit_GWs_OrbittransP");
   v6cut = Getd("PN_CircularOrbit_GWs_Orbitv6cutoff");
 
+  /* value of v and damping time scale for waves after merger */
+  vdamp = Getd("PN_CircularOrbit_GWs_vdamp");
+  taudamp = Getd("PN_CircularOrbit_GWs_taudamp");
+
   /* spin-orbit and spin-spin flags to decide which order in LS and SS
      we incluide in EOM */
   OLS1 = Geti("PN_CircularOrbit_GWs_OrbitOLS1");
@@ -123,6 +128,10 @@ void PN_CircOrbit_derivs(double x,double y[],double dydx[])
   v6  = v3*v3;             // mw^2
   v7  = v6*v1;	           // mw^7/3
   oov1 = 1.0/v1;           // mw^-1/3
+
+  /* set tsdamp to time where v1 first reaches vdamp */
+  if(v1>=vdamp && tsdamp >= 1e100) tsdamp = x;
+  /* printf("x=%g  v1=%g  tsdamp=%g\n", x, v1, tsdamp); */
 
   /* set some powers of v to zero according to flags */
   V1 = v1*f1;

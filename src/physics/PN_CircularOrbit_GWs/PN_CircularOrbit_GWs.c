@@ -23,6 +23,8 @@ Then I can use spec_2dIntegral over this var to compute the real part
 of all modes.
 */                         
 
+extern double tsdamp;
+
 
 /* setup initial boxsizes */
 int PN_CircularOrbit_GWs_set_boxsize(tGrid *grid)
@@ -199,6 +201,26 @@ int PN_CircularOrbit_GWs(tGrid *grid)
   dt = Getd("PN_CircularOrbit_GWs_dt");
   if(t1>t2) dt=-dt;
 
+  /* initialize tsdamp */
+  tsdamp = 1e100;
+  yvec[1] = Getd("PN_CircularOrbit_GWs_omega")/(m1+m2); // initial orbital frequency
+  yvec[2] = chi1x*m1*m1;  // S1x not Scap1! S1 = hi1*m1^2*Scap1
+  yvec[3] = chi1y*m1*m1;  // S1y
+  yvec[4] = chi1z*m1*m1;  // S1z
+  yvec[5] = chi2x*m2*m2;  // S2x
+  yvec[6] = chi2y*m2*m2;  // S2y
+  yvec[7] = chi2z*m2*m2;  // S2z 
+  yvec[8] = Getd("PN_CircularOrbit_GWs_Lnx");  // Lnx
+  yvec[9] = Getd("PN_CircularOrbit_GWs_Lny");  // Lny
+  yvec[10]= Getd("PN_CircularOrbit_GWs_Lnz");  // Lnz
+  yvec[11]= Getd("PN_CircularOrbit_GWs_Phi");  // Phi orbital phase         
+  /* initialize yvec[0] */
+  PN_CircOrbit_compute_constants(m1, m2);
+  yvec[0] = PN_CircOrbit_compute_r(yvec);
+  PN_CircOrbit_xodeint(m1, m2, t1, t2, yvec); /* this will find and set tsdamp */
+  printf("tsdamp=%g\n", tsdamp);
+
+  /* initialize yvec */
   yvec[0] = 0.0;  // you don't need to initialize this field it will be used as the storage of the separation
   yvec[1] = Getd("PN_CircularOrbit_GWs_omega")/(m1+m2); // initial orbital frequency
   yvec[2] = chi1x*m1*m1;  // S1x not Scap1! S1 = hi1*m1^2*Scap1
@@ -252,7 +274,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
       /* compute Psi4 and hplus and hcross */
       compute_FDpsi4_and_hplus_hcross_on_sphere(box, Re_Psi4ind, Im_Psi4ind,
                                                 hpind, hxind, yvec, D,m1,m2,
-                                                0, dt*0.001, 0,n1-1, 1);
+                                                time, dt*0.001, 0,n1-1, 1);
       /* get modes of Psi4 */
       compute_sYlmModes_of_H(box, Re_Psi4ind, Im_Psi4ind,
                              Re_sYlmind, Im_sYlmind, lmax,
@@ -484,7 +506,7 @@ void compute_FDpsi4_and_hplus_hcross_on_sphere(tBox *box,
   /* use 2nd order fin diff in time */
   /* put H(t) = h+ - i hx at i=1 */ 
   compute_hplus_hcross_on_sphere(box, hpind, hxind, yvec, D,m1,m2, 1,1, 0);
-  
+
   /* set yvec at -dt */
   PN_CircOrbit_xodeint(m1, m2, t, t-dt, yvec); 
   /* put H(t-dt) = h+ - i hx at i=0 */ 
