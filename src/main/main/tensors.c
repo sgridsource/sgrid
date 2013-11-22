@@ -339,7 +339,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
       sym[3*n+i] *= -1;  /* FIXME: these syms probably need to be changed */
       sym[3*n+j] *= -1;
       ilist[n] = calloc(ilistSTRLEN, sizeof(char));
-      sprintf(ilist[n++], "%s%s", coord[i], coord[j]);
+      sprintf(ilist[n++], "%s%s", coord[i], coord2[j]);
     }
   }
 
@@ -351,7 +351,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
       sym[3*n+j] *= -1;
       sym[3*n+k] *= -1;
       ilist[n] = calloc(ilistSTRLEN, sizeof(char));
-      sprintf(ilist[n++], "%s%s%s", coord[i], coord[j], coord[k]);
+      sprintf(ilist[n++], "%s%s%s", coord[i], coord2[j], coord2[k]);
     }
   }
   
@@ -364,7 +364,7 @@ void tensorindexlist(char *t, int *nilist, char **ilist, int *sym)
       sym[3*n+j] *= -1;
       sym[3*n+k] *= -1;
       ilist[n] = calloc(ilistSTRLEN, sizeof(char));
-      sprintf(ilist[n++], "%s%s%s", coord[i], coord[j], coord[k]);
+      sprintf(ilist[n++], "%s%s%s", coord[i], coord2[j], coord2[k]);
     }
   }
 
