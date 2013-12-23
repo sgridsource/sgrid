@@ -6856,6 +6856,7 @@ double BNSdata_find_position_of_qmax(tGrid *grid, int *bi,
   }
   
   /* make sure Y is inside bounding box */
+  box = grid->box[*bi];
   if( Xvec[1]<box->bbox[0] ||
       Xvec[1]>box->bbox[1] ||
       Xvec[2]<box->bbox[2] ||
