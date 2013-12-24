@@ -84,6 +84,7 @@ double min_in_1d_array(double *f, int n, int *imin)
   int i;   
   double fmin=f[0];
 
+  *imin=0;
   for(i=1; i<n; i++)
     if(f[i]<fmin) 
     {
@@ -98,6 +99,7 @@ double max_in_1d_array(double *f, int n, int *imax)
   int i;   
   double fmax=f[0];
 
+  *imax=0;
   for(i=1; i<n; i++)
     if(f[i]>fmax) 
     {
