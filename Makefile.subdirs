@@ -31,7 +31,7 @@ OBJSWITHPATH = $(addprefix $(OBJDIR)/,$(OBJS))
 # note that $@ is the matched target
 
 $(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
-	ar rucs $@ $(OBJSWITHPATH)
+	$(AR) rucs $@ $(OBJSWITHPATH)
 
 
 # secondary target: build object files

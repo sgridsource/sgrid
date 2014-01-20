@@ -18,6 +18,7 @@ EXECDIR = $(TOP)/exe
 CC = gcc	# gcc or icc
 CXX =		# g++ or icc
 CLINKER = # will be used only in src/main/main/Makefile for linking
+AR = ar		# ar command we use to build library from object files
 
 INCS = -I$(TOP)/src/main/main
 LIBS = -L$(TOP)/lib
