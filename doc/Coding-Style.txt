@@ -37,3 +37,7 @@ tParameter *make_empty_pdb(int npdb1max)
   return pdb1;
 }
 ---
+
+To ensure code quality one should run tests before and after changes
+--------------------------------------------------------------------
+one can e.g. use floatdiff to see how much the output changes
