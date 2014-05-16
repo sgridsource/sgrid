@@ -1,0 +1,39 @@
+In sgrid we use standard C99 code and functions. We avoid operating specific
+function calls. Since there is no real documentation we rely on nicely
+written code with plenty of comments.
+
+For readable code formatting we use:
+-----------------------------------
+*2 spaces for indentation
+*no more than 80 characters per line
+*1 empty line to separate blocks
+*function names that say what the function does
+*a comment with a description for every function
+*comments wherever helpful
+*error messages and/or exits if an operation can fail
+
+An example for acceptable formatting is this little function:
+---
+/* Make an empty par database of max length npdb1max.
+   Usage: pdb2 = make_empty_pdb(npdbmax); */
+tParameter *make_empty_pdb(int npdb1max)
+{
+  int i;
+  tParameter *pdb1;
+
+  /* allocate array for pdb1 */
+  pdb1 = (tParameter *) calloc(npdb1max, sizeof(tParameter));
+  if(!pdb1) errorexit("make_empty_pdb: out of memory");
+
+  /* set all entries to NULL */
+  for(i=0; i<npdb1max; i++)
+  {
+    pdb1[i].name  = NULL;
+    pdb1[i].value = NULL;
+    pdb1[i].description = NULL;
+    pdb1[i].numericalvalue = 0.0;
+  }
+
+  return pdb1;
+}
+---
