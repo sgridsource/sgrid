@@ -14,20 +14,13 @@ clean up variable/function/directory names
 
 documentation
 
-Checkpointing
-
 
 
 
 Medium
 ------
 
-Bin for gauge in ICN et al so that each evolution library doesn't have
-to do it by itself
-
 Output for 2d and 3d with subsampling
-
-Write an interpolator that e.g. would allow to integrate over a sphere.
 
 Add basic calculator to parameter parser, e.g.
 parameter = parameter/2
@@ -46,27 +39,3 @@ e.g. #define errorexit(s) errorexit(s,__FILE__)
 ------------------------------------------------------------------------------
 On hold
 -------
-
-extract ADM mass, momentum, spin
-wave extraction
--> handled by Cactus/HDF5 interface right now
-
-FishEye (by-passed by FMR for now)
-
-Output for all refinement levels simultaneously
-(currently handled for 1d by Nina's scripts)
-
-Kerr-Schild binary black hole data
-(this project is on hold, now working on spectral thin-sandwich solver)
-
-Radiative boundary: add monopole
-(wait until we see problem with wave extraction)
-
-Optimization:
-- worth the effort to go to local variable groups?
-  In principle, yes, but not worth the effort.
-  Should look at optimization ones code reaches more stable state.
-- Introduce synchronization for tensors and variable lists. The
-  interface is already there, but there is just a loop over single
-  variable synchs. Benchmark performance.
-

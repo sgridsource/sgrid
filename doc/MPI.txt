@@ -1,10 +1,8 @@
+Sgrid does not use MPI yet, it only uses OpenMP!
+------------------------------------------------
 
-Comments on using MPI with BAM
-------------------------------
-
-Currently BAM is being used with LAM/MPI version 6.5.6, or with MPICH
-on manifold.astro.psu.edu. Look at sgrid/Makefile and sgrid/doc/MyConfig.example
-to find out how other MPI versions can be used.
+Comments on using MPI in BAM which may be helpful
+-------------------------------------------------
 
 Even though some wrappers are already in the code to allow compilation
 without MPI, this is incomplete.
@@ -14,42 +12,3 @@ The bottom line is:
   (note that you can test multiprocessor code on single processors)
 - you have to edit the main Makefile to put in the paths to find your version
   of MPI
-
-
-
-Using LAM
----------
-
-Read
-  man lam
-
-LAM requires a demon to run. On a dual processor workstation you can use
-  lamboot -v myhost.txt
-where myhost.txt is a textfile containing the line
-  myhostname 2
-You can have several machines listed here to build MPI worlds from
-several machines or nodes in a cluster.
-
-Sometimes the LAM demon gets killed, say when your code dies due to a bug.
-You will have to call lamboot again.
-
-To explicitly stop the LAM demon, use
-  lamhalt -v
-This command will tell you if there wasn't a LAM demon running.
-
-To clean up after MPI bugs, use
-  lamclean -v
-
-
-
-RedHat 9 and LAM
-----------------
-
-On the gravity workstations, add the following to MyConfig:
-
-MPIDIR = /usr/local/lam-7.0.2
-MPIDIRL = -L$(MPIDIR)/lib
-MPIDIRI = -I$(MPIDIR)/include
-MPILIBS = -lmpi -llam -lpthread
-
-Note the extra -lpthread and the reference to a newer version of lam.
