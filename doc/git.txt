@@ -1,0 +1,52 @@
+General tips about using git:
+-----------------------------
+
+# to start a new repo, got inside the dir and do
+git init
+
+# use bare repos on the central server, you start them with
+git init --bare
+
+# get repo sgrid.git from titan (works for any other repo you can access)
+git clone ssh://titan/home/wolf/Archives/sgrid.git
+
+# check status of what commit will do
+git status
+
+# make changes to some files and then put them into the local repo
+git add -u
+git status
+git commit .
+
+# Add .gitignore in a dir to let git ignore some files in there.
+# .gitignore simply contains the file names (one per line).
+# if .gitignore contains * use:
+git add -f .gitignore 
+
+# push changes to central server (--dry-run with dry run it doesn't do it)
+git status
+git push --dry-run
+git push
+
+# if I accidentally delete filename.txt I can get it back with one of those:
+git checkout -- .
+git checkout -- filename.txt
+
+# check if something has changed on server
+git remote show origin
+
+# pull from central server. This does a fetch and then a merge.
+git pull
+
+# fetch from server
+# unlike pull this only fetches, we need to use "git merge" later
+git fetch
+git status
+#   ^ might say something like this:
+# "Your branch is behind 'origin/master' by 2 commits, and can be
+#  fast-forwarded."
+# to get a log and diff about these commits type:
+git log master...origin/master
+git diff master origin/master
+# to merge changes into my working copy do:
+git merge origin/master
