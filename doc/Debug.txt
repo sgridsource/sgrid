@@ -8,7 +8,8 @@ Tips on debugging
 
    Run the test suites before commits
 
-   Use floatdiff to check diffs before and after a code modification
+   Use floatdiff (see in sgrid/utilities) to check diffs before and after 
+   a code modification
 
 
 2. If you do have a bug:

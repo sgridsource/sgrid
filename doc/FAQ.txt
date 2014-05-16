@@ -19,3 +19,12 @@ sed s/old/new/ filename
 Thinning out output directories:
 
 find ./orbit* -name "bssn_*" -exec rm {} \;
+
+-----------------------------------------------------------------------------
+How can I check that the code still produces the same output?
+
+-run old code: sgrid name.par
+-change code and recompile code
+-run new code: sgrid name.par
+-use floatdiff
+floatdiff -rt 1e-9 name name_previous
