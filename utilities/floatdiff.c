@@ -39,7 +39,7 @@ floatdiff looks for numbers with a c in the middle and also for ---
 #include <ctype.h>
 #include <sys/wait.h>
 /* #include "wolfio.h" */   /* commented out because of next line */
-#include "myfunc/wolfio.c"  /* include some funcs directly instead of using makefile */
+#include "../src/utility/checkpoint/wolfio.c"  /* include some funcs directly instead of using makefile */
 
 
 int main(int argc, char *argv[])
