@@ -604,7 +604,7 @@ void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache)
   for(i=i1; i<=i2; i++)
   {
     if(pr_ind) printf("#%d# ", i);
-    if(pr_ind) printf("|%g| ", pdb[i].numericalvalue);
+    if(pr_cache) printf("|%g|%d| ", pdb[i].numericalvalue, pdb[i].booleanvalue);
     printf("%s:\n", pdb[i].description);
     printf("%s = %s\n", pdb[i].name, pdb[i].value);
   }
@@ -641,6 +641,7 @@ void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
     p2[i].value = strdup(pdb1[i].value);
     p2[i].description = strdup(pdb1[i].description);
     p2[i].numericalvalue = pdb1[i].numericalvalue;
+    p2[i].booleanvalue = pdb1[i].booleanvalue;
     if(!p2[i].name || !p2[i].value || !p2[i].description)
       errorexit("create_copy_of_pdb1_in_pdb2: out of memory");
   }
@@ -665,6 +666,7 @@ tParameter *make_empty_pdb(int npdb1max)
     pdb1[i].value = NULL;
     pdb1[i].description = NULL;
     pdb1[i].numericalvalue = 0.0;
+    pdb1[i].booleanvalue = 0;
   }
 
   return pdb1;
@@ -693,6 +695,7 @@ void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2)
     strcpy(pdb2[i].value, pdb1[i].value);
     strcpy(pdb2[i].description, pdb1[i].description);
     pdb2[i].numericalvalue = pdb1[i].numericalvalue;
+    pdb2[i].booleanvalue = pdb1[i].booleanvalue;
   }
 }
 
