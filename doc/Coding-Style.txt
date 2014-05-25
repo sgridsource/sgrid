@@ -4,7 +4,7 @@ written code with plenty of comments.
 
 For readable code formatting we use:
 -----------------------------------
-*2 spaces for indentation
+*2 spaces for indentation, no tabs!
 *no more than 80 characters per line
 *1 empty line to separate blocks
 *function names that say what the function does
@@ -40,4 +40,4 @@ tParameter *make_empty_pdb(int npdb1max)
 
 To ensure code quality one should run tests before and after changes
 --------------------------------------------------------------------
-one can e.g. use floatdiff to see how much the output changes
+one can e.g. use floatdiff (sgrid/utilities) to see how much the output changes
