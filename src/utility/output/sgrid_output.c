@@ -15,7 +15,11 @@ int sgrid_output(void)
 
   /* functions */
   AddFun(OUTPUT, write_grid, "write data to files");
+
   /* variables */
+  AddVar("output_temp1", "", "temporary variable(for vol. integrals)");
+  AddVar("output_temp2", "", "temporary variable(for vol. integrals)");
+  AddVar("output_temp3", "", "temporary variable(for vol. integrals)");
 
   /* parameters */
   AddPar("0doutiter", "-1", "when to output based on iterations");

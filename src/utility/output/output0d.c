@@ -45,14 +45,22 @@ void output0d_boxvar(tBox *box, char *name)
   double max, min, rms, meanAbs, mean, VolInt;
   double Vol, Int;
   double (*VolIntegral)(tBox *box, double *u, double *U)=NULL;
-  double *temp1  = box->v[Ind("temp1")];
-  double *temp2  = box->v[Ind("temp2")];
-  double *VolJac = box->v[Ind("temp3")]; /* Jacobian or volume element */
+  double *temp1;
+  double *temp2;
+  double *VolJac; /* Jacobian or volume element */
   double *var    = box->v[Ind(name)];
   int i;
   double time=box->grid->time;
 
   if(var==NULL) return;
+
+  /* temp storage for vol. integrals */
+  enablevar_inbox(box, Ind("output_temp1"));
+  enablevar_inbox(box, Ind("output_temp2"));
+  enablevar_inbox(box, Ind("output_temp3"));
+  temp1  = box->v[Ind("output_temp1")];
+  temp2  = box->v[Ind("output_temp2")];
+  VolJac = box->v[Ind("output_temp3")]; /* Jacobian or volume element */
 
   /* find max and min of var */
   max = min = var[0];
@@ -100,6 +108,7 @@ void output0d_boxvar(tBox *box, char *name)
           
   /* compute volume */
   Vol=VolIntegral(box, VolJac, temp2);
+  if(Vol==0.0) Vol=1.0;  /* since we later divide by Vol */
 
   /* integrate var^2 and compute rms */
   forallpoints(box ,i) temp1[i] = var[i]*var[i]*VolJac[i];
@@ -115,7 +124,7 @@ void output0d_boxvar(tBox *box, char *name)
   forallpoints(box ,i) temp1[i] = var[i]*VolJac[i];
   VolInt = VolIntegral(box, temp1, temp2);
   mean = VolInt/Vol;
-  
+
   /* output max, min, rms, meanAbs, mean, VolInt */
   snprintf(filename, 999, "%s/%s_max.%d", Gets("outdir"), name, box->b);
   output0d_value(filename, time, max);
