@@ -1,0 +1,26 @@
+# Ian Hinder's NRAR tool:
+-------------------------
+The NRARAnalysis code and a README are available at
+https://bitbucket.org/ianhinder/nraranalysis
+The code processes NR data in the Numerical Relativity Data Format into
+radially-extrapolated strain waveforms along with error estimates, as used
+in the NRAR paper.
+
+
+# My C codes that might help with GWs:
+--------------------------------------
+adjustIntConsts.c
+Amp_Phase.c
+bam2lean.c
+blendWaveforms.c
+ConvertOldSphereData.c
+ConvertOldSphereData_quadrant.c
+ecc_from_sep.c
+h+hx2psi.c
+InterpolateToUniformStep.c
+psi2h+hx.c
+psi_Amp_Phase_omega_ecc.c
+psi_omega_Amp_Phase.c
+remove_repeated_times.c
+sep_Phase_omega_ecc.c
+transform_column.c
