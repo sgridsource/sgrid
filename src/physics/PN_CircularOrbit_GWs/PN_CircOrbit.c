@@ -535,11 +535,11 @@ void PN_CircOrbit_xodeint(double m1_in, double m2_in, double t1, double t2, doub
   int i,nbad,nok;
   int kmax, kount;
   double dxsav, *xp, **yp;
+  double x1 = t1,
+         x2 = t2;
   double eps = 1.0e-9,
-         h1 = 0.01,
-         hmin = 0.0, 
-         x1 = t1,
-         x2 = t2,
+         h1 = fabs(x2-x1)*1e-4,
+         hmin = h1*1e-10, 
          *ystart;
 
   ystart = dvector(1,N);
