@@ -3,9 +3,9 @@
 
 
 
-/* LongInt contains the long integer type used. For umfpack it must be 
-   the same as SuiteSparse_long, which is a 64 bit integer on 64 
-   bit linux, or any LP64 system */
+/* LONGINT contains the long integer type used. For umfpack it must be 
+   the same as SuiteSparse_long, which is a 64 bit integer on 64 bit linux,
+   or any LP64 system. We use long because it has 64 bit on any LP64 system */
 #define LONGINT long
 
 
