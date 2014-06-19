@@ -1,0 +1,72 @@
+# MyConfig.example
+#
+# The file MyConfig is included verbatim in the Makefile to determine which 
+# special libraries will be included in the build.
+
+# ------------------------------------------------------------------------
+# here are simple examples for libraries, they may be mutually exclusive
+
+# black hole evolution
+libpaths += src/physics/ModeComputer
+libpaths += src/physics/PN_CircularOrbit_GWs
+libpaths += src/physics/ADMvars
+#libpaths += src/physics/SingleBH
+#libpaths += src/physics/BSSN
+libpaths += src/utility/s2kit
+libpaths += src/utility/GridIterators
+libpaths += src/utility/LinAlg
+#libpaths += src/physics/Poisson
+#libpaths += src/physics/BNSdata
+libpaths += src/Projects/RealisticBBH
+libpaths += src/utility/boundary
+#libpaths += src/physics/ScalarWave
+
+# ------------------------------------------------------------------------
+# override various options in the Makefile
+
+# name and directory for the executable
+EXEC = sgrid
+EXECDIR = $(TOP)/exe
+
+# pick a C compiler, only gcc and icc have been tested, gcc is the default
+CC = opencc # /opt/open64-5.0/bin/opencc # pathcc # gcc # icc
+CLINKER = openCC # openf90
+
+# optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
+OFLAGS = -Ofast -mp # -Ofast -mp # -g -Wall # -O2
+DFLAGS += -DNONICOFUNCS
+
+# use OpenMP pragmas of LEVEL6 or LEVEL3,4 or TOP LEVEL
+#DFLAGS += -DLEVEL6_Pragmas # -DLEVEL3_Pragmas -DLEVEL4_Pragmas 
+DFLAGS += -DTOPLEVEL_Pragmas -DMEMORY_EFFICIENT # -DLEVEL6_Pragmas
+
+
+DFLAGS += -DUMFPACK -DSUITESPARSEQR
+SPECIALINCS += -I/usr/include/suitesparse
+#SPECIALLIBS += -lumfpack -lamd # -lblas
+SPECIALLIBS += /usr/lib/libumfpack.a /usr/lib/libamd.a 
+SPECIALLIBS += /usr/lib/libspqr.a /usr/lib/libcholmod.a /usr/lib/libcolamd.a
+#SPECIALLIBS += -L/usr/lib/gcc/x86_64-linux-gnu/4.7 -lgfortran
+##SPECIALLIBS += -L/opt/gcc-4.3.6/lib64 -lgfortran
+
+DFLAGS += -DTEMPLATES
+#TEMPLATESDIR = /home/wolf/Packages/dctemplates
+TEMPLATESDIR = /home/wolf/Packages/dctemplates_extBlasLapack
+SPECIALLIBS += -L$(TEMPLATESDIR) -literatortemplates 
+# -L$(TEMPLATESDIR)/F2CLIBS -lI77 -lF77 # -lblas -llapack -lgfortran
+
+DFLAGS += -DFFTW3
+FFTW3DIR = /opt/fftw-3.3.3
+SPECIALINCS += -I$(FFTW3DIR)/include
+#SPECIALLIBS += -L$(FFTW3DIR)/lib -lfftw3
+SPECIALINCS += /opt/fftw-3.3.3/lib/libfftw3.a
+#SPECIALLIBS += -lfftw3
+
+# use AMD's acml. This contains 64 bit blas and lapack
+#SPECIALLIBS += -L/opt/acml5.3.0/open64_64_fma4_mp/lib -lacml_mp \
+#-lfortran -lffio # -lm # -lrt # -ldl # -lopenmp
+# all mp shared lib versions do give wrong numbers
+SPECIALLIBS += /opt/acml5.3.0/open64_64_fma4/lib/libacml.a -lfortran -lffio
+
+#DFLAGS += -DLAPACK
+#SPECIALLIBS += -llapack # -lefence
