@@ -479,7 +479,7 @@ int ZIB_pcg_wrapper(
   opt->tol = RESID;
   opt->maxiter = itmax;
   opt->i_max = RESTRT;
-  opt->termcheck = CheckEachIter;
+  opt->convcheck = Relative; // Absolute;
 
   opt->errorlevel = Minimum;
   opt->monitorlevel = Minimum; // None;
@@ -498,11 +498,8 @@ int ZIB_pcg_wrapper(
 
 #ifdef ZIBLINSOLVERS
   /* call ZIBpcg solver, and decide on which side we use precon */
-  /* no precon is: ZIBpcg(N, X, &ZIBmatvec, NULL,NULL, B, opt,info); */
+  /* no precon is: ZIBpcg(N, X, &ZIBmatvec, NULL, B, opt,info); */
   ZIBpcg(N, X, &ZIBmatvec, &ZIBpsolveLEFT, B, opt,info);
-  /* ZIBpcg computes P*x (where P is the precon). So to get x we need to
-     apply P^{-1} to x */
-  ZIBpsolveLEFT(N, X, X); /* this works because X can be overwritten in place */
 #else
   COMPILEZIBLINSOLVERS("ZIBpcg");
 #endif
