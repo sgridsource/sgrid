@@ -56,9 +56,9 @@ void ZIBmatvec(int n, double *x, double *y)
   /* compute r = A*x */
   COPY_ARRAY_INTO_VL(x, x_forZIB[iglobal_forZIB]);
   lop_forZIB[iglobal_forZIB](r_forZIB[iglobal_forZIB],
-                                         x_forZIB[iglobal_forZIB],
-                                         c1_forZIB[iglobal_forZIB],
-                                         c2_forZIB[iglobal_forZIB]);
+                             x_forZIB[iglobal_forZIB],
+                             c1_forZIB[iglobal_forZIB],
+                             c2_forZIB[iglobal_forZIB]);
   /* copy r into y */
   COPY_VL_INTO_ARRAY(r_forZIB[iglobal_forZIB], y);
 }
@@ -68,12 +68,10 @@ void ZIBmatvec(int n, double *x, double *y)
    Acol_forZIB[iglobal_forZIB] */
 void ZIBAcol_times_vec_trans(int n, double *x, double *y)
 {
-  int i;
   int ncols = (int) dim_forZIB[iglobal_forZIB];
 
   /* compute y = A'*x */
-  SparseMatrixLines_times_vector(Acol_forZIB[iglobal_forZIB],
-                                 ncols, x, y);
+  SparseMatrixLines_times_vector(Acol_forZIB[iglobal_forZIB], ncols, x, y);
 }
 
 
@@ -101,9 +99,10 @@ void ZIBpsolveLEFT(int n, double *b, double *x)
        b is in r_forZIB[iglobal_forZIB] */
     COPY_ARRAY_INTO_VL(b, r_forZIB[iglobal_forZIB]);
     precon_forZIB[iglobal_forZIB](x_forZIB[iglobal_forZIB],
-                        r_forZIB[iglobal_forZIB],
-                        c1_forZIB[iglobal_forZIB],
-                        c2_forZIB[iglobal_forZIB]);
+//    Preconditioner_I(x_forZIB[iglobal_forZIB],
+                                  r_forZIB[iglobal_forZIB],
+                                  c1_forZIB[iglobal_forZIB],
+                                  c2_forZIB[iglobal_forZIB]);
 
     /* copy x_forZIB[iglobal_forZIB] into x */
     COPY_VL_INTO_ARRAY(x_forZIB[iglobal_forZIB], x);
@@ -160,6 +159,8 @@ int ZIB_gmres_wrapper(
 {
   tGrid *grid = b->grid;
   int pr = Getv("GridIterators_verbose", "yes");
+  int leftprecon = Getv("GridIterators_GMRES_PreconSide", "left");
+  int rightprecon = Getv("GridIterators_GMRES_PreconSide", "right");
   int N; /* dim of matrix */
   double *B;
   double *X;
@@ -184,8 +185,8 @@ int ZIB_gmres_wrapper(
     RESID = RESID / norm_b;
 
   if(pr) prTimeIn_s("Time BEFORE ZIBgmres: ");
-  if(pr) printf("  ZIB_gmres_wrapper: itmax=%d tol=%.3e "
-                "N=%d RESID=%.3e  RESTRT=%d\n",
+  if(pr) printf("  ZIB_gmres_wrapper: itmax=%d tol=%.3e\n"
+                "                     N=%d RESID=%.3e RESTRT=%d\n",
                 itmax, tol, N, RESID, RESTRT);
   
   /* temporary storage */
@@ -237,9 +238,18 @@ int ZIB_gmres_wrapper(
   }
 
 #ifdef ZIBLINSOLVERS
-  /* call gmres solver */
-//  ZIBgmres(N, X, &ZIBmatvec, &ZIBpsolveLEFT,NULL, B, opt,info);
-  ZIBgmres(N, X, &ZIBmatvec, NULL,&ZIBpsolveLEFT, B, opt,info);
+  /* call ZIBgmres solver, and decide on which side we use precon */
+  /* no precon is: ZIBgmres(N, X, &ZIBmatvec, NULL,NULL, B, opt,info); */
+  if(leftprecon && rightprecon)
+    ZIBgmres(N, X, &ZIBmatvec, &ZIBpsolveLEFT,&ZIBpsolveLEFT, B, opt,info);
+  else if(leftprecon)
+    ZIBgmres(N, X, &ZIBmatvec, NULL,&ZIBpsolveLEFT, B, opt,info);
+  else if(rightprecon)
+    ZIBgmres(N, X, &ZIBmatvec, &ZIBpsolveLEFT,NULL, B, opt,info);
+  /* ZIBgmres computes P*x (where P is the precon). So to get x we need to
+     apply P^{-1} to x */
+  if(leftprecon)  ZIBpsolveLEFT(N, X, X); /* this works because X can be overwritten in place */
+  if(rightprecon) ZIBpsolveLEFT(N, X, X); /* this works because X can be overwritten in place */
 #else
   COMPILEZIBLINSOLVERS("ZIBgmres");
 #endif
