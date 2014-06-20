@@ -320,7 +320,7 @@ int ZIB_gbit_wrapper(
 
   if(pr) prTimeIn_s("Time BEFORE ZIBgbit: ");
   if(pr) printf("  ZIB_gbit_wrapper: itmax=%d tol=%.3e\n"
-                "                     N=%d RESID=%.3e RESTRT=%d\n",
+                "                    N=%d RESID=%.3e RESTRT=%d\n",
                 itmax, tol, N, RESID, RESTRT);
   
   /* temporary storage */
@@ -445,7 +445,7 @@ int ZIB_pcg_wrapper(
 
   if(pr) prTimeIn_s("Time BEFORE ZIBpcg: ");
   if(pr) printf("  ZIB_pcg_wrapper: itmax=%d tol=%.3e\n"
-                "                     N=%d RESID=%.3e RESTRT=%d\n",
+                "                   N=%d RESID=%.3e RESTRT=%d\n",
                 itmax, tol, N, RESID, RESTRT);
   
   /* temporary storage */
