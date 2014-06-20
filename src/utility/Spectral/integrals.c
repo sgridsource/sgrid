@@ -21,7 +21,7 @@ void spec_Integral1(tBox *box, int direc, double *u, double *U)
   void (*eval_onPoints)(double *,double *, int)=NULL;
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
-  int imethod, chebmeth=1, fourmeth=2;
+  int imethod=-42, chebmeth=1, fourmeth=2;
 
   get_spec_functionpointers(box, direc, &get_coeffs, &coeffs_of_deriv,
                             &coeffs_of_2ndderiv, &coeffs_of_int, &eval_onPoints,
@@ -189,7 +189,7 @@ void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U)
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
   double *pX = box->v[Ind("X")];
-  int imethod, chebmeth=1, fourmeth=2;
+  int imethod=-42, chebmeth=1, fourmeth=2;
 
   /* do phi integral */
   spec_Integral1(box, 3, u, U);
@@ -279,7 +279,7 @@ void spec_sphericalDF2dIntegral_at_radial_index_i(tBox *box,
   void (*filter_coeffs)(double *, int, int)=NULL;
   double (*basisfunc)(void *aux, double a, double b, int k, int N, double X)=NULL;
   double *pX = box->v[Ind("X")];
-  int imethod, chebmeth=1, fourmeth=2;
+  int imethod=-42, chebmeth=1, fourmeth=2;
 
   /* do phi integral */
   spec_Integral1(box, 3, u, U);
