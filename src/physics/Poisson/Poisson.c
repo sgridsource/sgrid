@@ -230,6 +230,10 @@ int Poisson_solve(tGrid *grid)
     linear_solver=templates_gmres_wrapper_with_SOR_precon;
   else if(Getv("Poisson_linSolver", "SOR"))
     linear_solver=SOR_Iterator;
+  else if(Getv("Poisson_linSolver", "templates_GMRES_with_BlockJacobi_precon"))
+    linear_solver=templates_gmres_wrapper_with_BlockJacobi_precon;
+  else if(Getv("Poisson_linSolver", "ZIB_GMRES_with_BlockJacobi_precon"))
+    linear_solver=ZIB_gmres_wrapper_with_BlockJacobi_precon;
   else
     errorexit("Poisson_solve: unknown Poisson_linSolver");
 
