@@ -661,3 +661,39 @@ int ZIB_gmres_wrapper_with_BlockJacobi_precon(tVarList *x, tVarList *b,
                                           itmax,tol,normres, lop);
   return INFO;
 }
+
+/* do a linear solve with ZIB_gbit_wrapper and BlockJacobi_Preconditioner_from_Blocks */
+int ZIB_gbit_wrapper_with_BlockJacobi_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  int pr = Getv("GridIterators_verbose", "yes");
+  int INFO;
+  if(pr) printf("ZIB_gbit_wrapper_with_BlockJacobi_precon: using ");
+
+  /* solve A x = b with GMRES and the Precon BlockJacobi_Preconditioner_from_Blocks */
+  INFO = linSolve_with_BlockJacobi_precon(x, b, r,c1,c2,
+                                          ZIB_gbit_wrapper,
+                                          itmax,tol,normres, lop);
+  return INFO;
+}
+
+/* do a linear solve with ZIB_pcg_wrapper and BlockJacobi_Preconditioner_from_Blocks */
+int ZIB_pcg_wrapper_with_BlockJacobi_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  int pr = Getv("GridIterators_verbose", "yes");
+  int INFO;
+  if(pr) printf("ZIB_pcg_wrapper_with_BlockJacobi_precon: using ");
+
+  /* solve A x = b with GMRES and the Precon BlockJacobi_Preconditioner_from_Blocks */
+  INFO = linSolve_with_BlockJacobi_precon(x, b, r,c1,c2,
+                                          ZIB_pcg_wrapper,
+                                          itmax,tol,normres, lop);
+  return INFO;
+}

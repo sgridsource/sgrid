@@ -211,6 +211,16 @@ int ZIB_gmres_wrapper_with_BlockJacobi_precon(tVarList *x, tVarList *b,
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int ZIB_gbit_wrapper_with_BlockJacobi_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int ZIB_pcg_wrapper_with_BlockJacobi_precon(tVarList *x, tVarList *b, 
+            tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
 
 /* from WTsolver.c */
 int WTsolver(tVarList *vlx, tVarList *vlb, 
@@ -255,6 +265,16 @@ int SuiteSparseQR_solve_wrapper(tVarList *x, tVarList *b,
 
 /* wrappers for ZIB_linSolvers */
 int ZIB_gmres_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int ZIB_gbit_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int ZIB_pcg_wrapper(
             tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
