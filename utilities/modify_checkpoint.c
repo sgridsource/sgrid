@@ -52,7 +52,6 @@ void writevariable(FILE *out, char *infostr, int ndata, double *data)
 /* main prog. */
 int main(int argc, char *argv[])
 {
-  int tcol;
   FILE *in;
   FILE *out;
   char str[STRLEN];
@@ -70,7 +69,7 @@ int main(int argc, char *argv[])
   data = (double *) calloc(10, sizeof(double));
   
   printf("# modify_checkpoint \n");
-  if(argc<3 || argc>9)  
+  if(argc<3 || argc>12)  
   {
    printf("# usage: modify_checkpoint [-P pname val] [-V vname -M m -A a] in.0 ou.0\n");
    printf("# options: -P pname val    set par \"pname\" to \"val\"\n");
@@ -142,11 +141,13 @@ int main(int argc, char *argv[])
      return -1;
    }
   }
-
   //printf("i=%d argc=%d\n", i, argc);
 
-  /* info about colmuns */
-  if(varname!=NULL) printf("# modifying variable %s\n", varname);
+  /* info about what we do */
+  if(parname!=NULL) 
+    printf("# modifying parameter:\n# %s = %s\n", parname, parval);
+  if(varname!=NULL)
+    printf("# modifying variable %s\n", varname);
 
   /* open file in */
   printf("# input file: %s",argv[i]);
@@ -171,7 +172,6 @@ int main(int argc, char *argv[])
   /* find $BEGIN_variables:  */
   while(fscanline(in,str)!=EOF)
   {
-
     //printf("|%s|\n", str);
     /* break if we get to BEGIN_variables: */
     if(strstr(str, "$BEGIN_variables:")!=NULL)
