@@ -35,7 +35,8 @@ int readvariable(FILE *in, char *infostr, int *ndata, double **data)
     
   /* read var data */
   fread(*data, sizeof(double), *ndata, in);
-      
+  fscanline(in, infostr+strlen(infostr)+1); /* read \n after var data */
+
   return 1;
 }
 
@@ -71,12 +72,11 @@ int main(int argc, char *argv[])
   printf("# modify_checkpoint \n");
   if(argc<3 || argc>9)  
   {
-   printf("# usage: modify_checkpoint [-P pname -S str] [-V vname -M m -A a] in.0 ou.0\n");
-   printf("# options: -P pname  modify parameter \"pname\"\n");
-   printf("#          -S str    set to \"str\"\n");
-   printf("#          -V vname  modify variable \"vname\"\n");
-   printf("#          -M m      multiply by \"m\"\n");
-   printf("#          -A a      add \"a\"\n");
+   printf("# usage: modify_checkpoint [-P pname val] [-V vname -M m -A a] in.0 ou.0\n");
+   printf("# options: -P pname val    set par \"pname\" to \"val\"\n");
+   printf("#          -V vname        modify variable \"vname\"\n");
+   printf("#          -M m            multiply by \"m\"\n");
+   printf("#          -A a            add \"a\"\n");
    printf("# examples:\n");
    printf("# modify_checkpoint -V gxx -A 0.5 checkpoint.0 out.0\n");
    return -1;
@@ -96,21 +96,13 @@ int main(int argc, char *argv[])
 
    if( (strcmp(astr+1,"P")==0) )
    {
-     if(i>=argc-1) 
+     if(i>=argc-2) 
      {
-       printf("no parname after -P\n");
+       printf("no parname and parvalue after -P\n");
        return -1;
      }
      parname=argv[i+1];
      i++;
-   }
-   else if( (strcmp(astr+1,"S")==0) )
-   {
-     if(i>=argc-1) 
-     {
-       printf("argument a is needed after -S\n");
-       return -1;
-     }
      parval=argv[i+1];
      i++;
    }
@@ -179,6 +171,8 @@ int main(int argc, char *argv[])
   /* find $BEGIN_variables:  */
   while(fscanline(in,str)!=EOF)
   {
+
+    //printf("|%s|\n", str);
     /* break if we get to BEGIN_variables: */
     if(strstr(str, "$BEGIN_variables:")!=NULL)
     {
@@ -186,10 +180,11 @@ int main(int argc, char *argv[])
       break;
     }
     /* modify pars ??? */
-    if(strstr(str, parname)==str)
+    if(parname!=NULL) if(strstr(str, parname)==str)
     {
       astr = str + strlen(parname)+3; /* let astr point to old parval */
-      sprintf(astr, "%s", parval);    /* insert new parval */
+      if(parval!=NULL)
+        sprintf(astr, "%s", parval);    /* insert new parval */
     }
 
     /* add line with str to file out */
@@ -198,11 +193,12 @@ int main(int argc, char *argv[])
 
   /* read, modify and write a variable */
   while(readvariable(in, infostr, &ndata, &data))
-  { 
+  {
+    //printf("%s\nndata=%d data[0]=%g\n", infostr, ndata, data[0]);
     /* get variable name in str3 */
     sscanf(infostr, "%s%s%s", str1, str2, str3);
     /* modify var if it's varname */
-    if(strcmp(str3, varname)==0)
+    if(varname!=NULL) if(strcmp(str3, varname)==0)
       for(i=0; i<ndata; i++)
       {
         /* multiply */
