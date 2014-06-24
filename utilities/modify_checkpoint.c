@@ -60,10 +60,10 @@ int main(int argc, char *argv[])
   char str3[STRLEN];
   char infostr[STRLEN];
   double *data=NULL;
-  int i;
+  int i, ndata;
   char *astr;
   double number, add, mul;
-  char *varname;
+  char *varname, *parname, *parval;
 
   /* mem for var data */
   data = (double *) calloc(10, sizeof(double));
@@ -71,12 +71,14 @@ int main(int argc, char *argv[])
   printf("# modify_checkpoint \n");
   if(argc<3 || argc>9)  
   {
-   printf("# usage: modify_checkpoint [-V name] [-M m] [-A a] in.0 out.0\n");
-   printf("# options: -V name  modify variable \"name\"\n");
-   printf("#          -M m     multiply by \"m\"\n");
-   printf("#          -A a     add \"a\"\n");
+   printf("# usage: modify_checkpoint [-P pname -S str] [-V vname -M m -A a] in.0 ou.0\n");
+   printf("# options: -P pname  modify parameter \"pname\"\n");
+   printf("#          -S str    set to \"str\"\n");
+   printf("#          -V vname  modify variable \"vname\"\n");
+   printf("#          -M m      multiply by \"m\"\n");
+   printf("#          -A a      add \"a\"\n");
    printf("# examples:\n");
-   printf("# modify_checkpoint -V gxx -A 25.13274122871834 checkpoint.0 l\n");
+   printf("# modify_checkpoint -V gxx -A 0.5 checkpoint.0 out.0\n");
    return -1;
   }
 
@@ -84,13 +86,35 @@ int main(int argc, char *argv[])
   add=0.0;
   mul=1.0;
   varname=NULL;
+  parname=NULL;
+  parval=NULL;
 
   /* parse command line options, which start with - */
   for(i=1; (i<argc)&&(argv[i][0] == '-'); i++)
   {
    astr = argv[i];
 
-   if( (strcmp(astr+1,"V")==0) )
+   if( (strcmp(astr+1,"P")==0) )
+   {
+     if(i>=argc-1) 
+     {
+       printf("no parname after -P\n");
+       return -1;
+     }
+     parname=argv[i+1];
+     i++;
+   }
+   else if( (strcmp(astr+1,"S")==0) )
+   {
+     if(i>=argc-1) 
+     {
+       printf("argument a is needed after -S\n");
+       return -1;
+     }
+     parval=argv[i+1];
+     i++;
+   }
+   else if( (strcmp(astr+1,"V")==0) )
    {
      if(i>=argc-1) 
      {
@@ -132,7 +156,6 @@ int main(int argc, char *argv[])
   /* info about colmuns */
   if(varname!=NULL) printf("# modifying variable %s\n", varname);
 
-  
   /* open file in */
   printf("# input file: %s",argv[i]);
   in=fopen(argv[i],"r");
@@ -157,10 +180,20 @@ int main(int argc, char *argv[])
   while(fscanline(in,str)!=EOF)
   {
     /* break if we get to BEGIN_variables: */
-    if(strstr(str, "BEGIN_variables:")!=NULL) break;
-    
+    if(strstr(str, "$BEGIN_variables:")!=NULL)
+    {
+      fprintf(out, "%s\n", str);
+      break;
+    }
     /* modify pars ??? */
-    // if(strstr(str, "parname")==str)  do_someting
+    if(strstr(str, parname)==str)
+    {
+      astr = str + strlen(parname)+3; /* let astr point to old parval */
+      sprintf(astr, "%s", parval);    /* insert new parval */
+    }
+
+    /* add line with str to file out */
+    fprintf(out, "%s\n", str);
   }
 
   /* read, modify and write a variable */
@@ -183,7 +216,7 @@ int main(int argc, char *argv[])
   }
 
   /* write $END_variables */
-  fprintf(out, "$END_variables\n\n", );
+  fprintf(out, "$END_variables\n\n");
 
   /* close files, free memory and return */
   fclose(in);
