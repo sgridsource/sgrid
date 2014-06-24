@@ -180,7 +180,9 @@ int main(int argc, char *argv[])
       break;
     }
     /* modify pars ??? */
-    if(parname!=NULL) if(strstr(str, parname)==str)
+    sscanf(str, "%s", str1);
+    //printf("%s|%s|%s\n",str,str1,parname);
+    if(parname!=NULL) if(strcmp(str1, parname)==0)
     {
       astr = str + strlen(parname)+3; /* let astr point to old parval */
       if(parval!=NULL)

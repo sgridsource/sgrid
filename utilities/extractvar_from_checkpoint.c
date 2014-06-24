@@ -161,17 +161,18 @@ int main(int argc, char *argv[])
     if(strstr(str, "$BEGIN_variables:")!=NULL) break;
 
     /* read 3 box pars */
-    if(strstr(str, bn1)==str)
+    sscanf(str, "%s", str1);
+    if(strcmp(str1, bn1)==0)
     {
       astr = str + strlen(bn1)+3; /* let astr point to parval */
       n1=atoi(astr);
     }
-    if(strstr(str, bn2)==str)
+    if(strcmp(str1, bn2)==0)
     {
       astr = str + strlen(bn1)+3; /* let astr point to parval */
       n2=atoi(astr);
     }
-    if(strstr(str, bn3)==str)
+    if(strcmp(str1, bn3)==0)
     {
       astr = str + strlen(bn1)+3; /* let astr point to parval */
       n3=atoi(astr);
@@ -186,10 +187,10 @@ int main(int argc, char *argv[])
     /* get variable name in str1 and box ind in str2 */
     sscanf(infostr, "%s%s%s%s%s%s%s", str3, str3, str1, str3, str3, str3, str2);
     bi = atoi(str2);
-
+    //printf("str1=%s str2=%s\n", str1, str2);
     /* dump var if it's varname */
     if(strcmp(str1, varname)==0)
-      if(bi=boxi)
+      if(bi==boxi)
       {
         dumpvariable(out, varname, time, boxi, n1,n2,n3, data);
         break;
