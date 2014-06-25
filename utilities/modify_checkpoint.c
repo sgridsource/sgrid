@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   double *data=NULL;
   int i, ndata;
   char *astr;
-  double number, add, mul;
+  double add, mul;
   char *varname, *parname, *parval;
 
   /* mem for var data */
@@ -100,6 +100,11 @@ int main(int argc, char *argv[])
        printf("no parname and parvalue after -P\n");
        return -1;
      }
+     if(parname!=NULL)
+     {
+       printf("only one -P argument is allowed\n");
+       return -1;
+     }
      parname=argv[i+1];
      i++;
      parval=argv[i+1];
@@ -110,6 +115,11 @@ int main(int argc, char *argv[])
      if(i>=argc-1) 
      {
        printf("no varname after -V\n");
+       return -1;
+     }
+     if(varname!=NULL)
+     {
+       printf("only one -V argument is allowed\n");
        return -1;
      }
      varname=argv[i+1];
