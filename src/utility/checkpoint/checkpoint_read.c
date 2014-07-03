@@ -90,7 +90,11 @@ void checkpoint_read_ParsAndIterations_local(tGrid *grid, FILE *fp)
   int bmin,bmax;
   int numberofpars, parsread;
 
-  if (1) printf("reading parameters and iterations from checkpoint file:\n");
+  if(1)
+  {
+    printf("reading parameters and iterations from checkpoint file:\n");
+    prTimeIn_s("WallTime: ");
+  }
 
   /* read one line text header, check with "head -1 checkpoint.0" */
   if(fgotonext(fp, "$BEGIN_checkpoint_header:") == EOF)
@@ -152,6 +156,7 @@ void checkpoint_read_ParsAndIterations_local(tGrid *grid, FILE *fp)
     }
     parsread++;
   }
+  prTimeIn_s("WallTime: ");
   printf("  read %d parameters\n", parsread);
 }
 
@@ -167,7 +172,11 @@ void checkpoint_read_Vars_local(tGrid *grid, FILE *fp)
   int pr = 0;
   char varname[10000], value[10000];
 
-  if (1) printf("reading variables from checkpoint file:\n");
+  if(1)
+  {
+    printf("reading variables from checkpoint file:\n");
+    prTimeIn_s("WallTime: ");
+  }
   if(fgotonext(fp, "$BEGIN_variables:") == EOF)
     errorexit("$BEGIN_variables: is missing!");  
   
@@ -222,7 +231,11 @@ void checkpoint_read_Vars_local(tGrid *grid, FILE *fp)
     }
   }
   /* info */
-  if (1) printf("read boxes %d to %d, %d variables, %d doubles, %d MB\n",
+  if(1)
+  {
+    prTimeIn_s("WallTime: ");
+    printf("read boxes %d to %d, %d variables, %d doubles, %d MB\n",
 		0, grid->nboxes-1, nv, nall, 
 		(int)(nall * sizeof(double) / 1000000));
+  }
 }

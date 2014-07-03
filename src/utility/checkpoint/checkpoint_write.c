@@ -40,6 +40,7 @@ void checkpoint_write(tGrid *g)
       if (!fp) errorexits("failed opening %s", filename_new);
 
       /* now we are ready to go! */
+      prTimeIn_s("WallTime: ");
       checkpoint_write_local(g, fp);
 
       /* done */
@@ -51,12 +52,14 @@ void checkpoint_write(tGrid *g)
 
   /* Move filename_new to filename, but only after we are sure
      all has been written.                                       */
+  prTimeIn_s("WallTime: ");
   fp = fopen(filename_new, "rb");
   if(fp)
   {
     fclose(fp);
     system3("mv -f", filename_new, filename); 
   }
+  prTimeIn_s("WallTime: ");
   
   /* clean up */
   free(filename_new);

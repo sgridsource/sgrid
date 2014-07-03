@@ -45,6 +45,7 @@ int checkpoint(tGrid *grid)
       printf("checkpoint restart: read files\n");
       checkpoint_read(grid);
       checkpoint_copy_output();
+      prTimeIn_s("WallTime: ");
       Sets("checkpoint", "yes");
 
       /* run for that much longer */
