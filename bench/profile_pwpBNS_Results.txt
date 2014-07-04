@@ -1,0 +1,106 @@
+sgrid git version baaa683d25bc269138d3369265191e09610af9fa
+BNSdata git version 4b3a15d3d080bafad0c6216da81fd1099b92be72
+parfile: pwpBNS.par
+
+I oprofiled 2 things for n1=n2=16 without OpenMP on titan:
+----------------------------------------------------------
+1. templates_gmres_wrapper for Psi solve
+ When the screen showed "templates_gmres_wrapper: itmax=100000 ..." I typed
+ opcontrol --start
+ When the screen showed "templates_gmres_wrapper: ITER=..." I typed
+ opcontrol --stop
+
+2. adjust_C1_C2_q_keep_restmasses
+ When the screen showed "adjust_C1_C2_q_keep_restmasses: ..." I typed
+ opcontrol --start
+ When the screen showed "new: BNSdata_C1=..." I typed
+ opcontrol --stop
+
+==========================================================
+
+1. Results for templates_gmres_wrapper
+--------------------------------------
+opreport
+CPU: Core 2, speed 2000 MHz (estimated)
+Counted CPU_CLK_UNHALTED events (Clock cycles when not halted) with a unit mask of 0x00 (Unhalted core cycles) count 100000
+CPU_CLK_UNHALT...|
+  samples|      %|
+------------------
+  3183026 74.1291 libumfpack.so.5.4.0
+   758980 17.6758 sgrid
+   179197  4.1733 libblas.so.3gf.0
+    68820  1.6027 no-vmlinux
+    63961  1.4896 libimf.so
+    31453  0.7325 libc-2.11.3.so
+     6505  0.1515 oprofiled
+   ...
+opreport -l exe/sgrid
+CPU: Core 2, speed 2000 MHz (estimated)
+Counted CPU_CLK_UNHALTED events (Clock cycles when not halted) with a unit mask of 0x00 (Unhalted core cycles) count 100000
+samples  %        symbol name
+288317   38.0866  matrix_times_vector
+244453   32.2922  BNS_CTS
+74310     9.8163  spec_interpolate
+47635     6.2926  cart_partials
+30987     4.0934  spec_Deriv1
+23370     3.0872  get_memline
+10352     1.3675  BNS_polytrope_EoS_of_hm1
+8908      1.1767  Ind
+7295      0.9637  cheb_basisfunc
+3210      0.4240  set_BNSdata_Sigma_BC
+2456      0.3244  set_BNSdata_BCs
+2446      0.3231  four_basisfunc
+1764      0.2330  Getv
+1672      0.2209  copy_array_into_varlist
+1212      0.1601  Getd
+1207      0.1594  copy_varlist_into_array
+839       0.1108  set_d_dz_at_rhoEQzero_AnsorgNS
+771       0.1018  copy_varlistCompInSubbox_into_array
+732       0.0967  spec_Deriv2
+
+
+2. Results for adjust_C1_C2_q_keep_restmasses
+---------------------------------------------
+opreport
+CPU: Core 2, speed 2000 MHz (estimated)
+Counted CPU_CLK_UNHALTED events (Clock cycles when not halted) with a unit mask of 0x00 (Unhalted core cycles) count 100000
+CPU_CLK_UNHALT...|
+  samples|      %|
+------------------
+  6628182 90.8829 sgrid
+   441792  6.0577 libc-2.11.3.so
+   131367  1.8013 libimf.so
+    75479  1.0349 no-vmlinux
+    12575  0.1724 oprofiled
+opreport -l exe/sgrid
+CPU: Core 2, speed 2000 MHz (estimated)
+Counted CPU_CLK_UNHALTED events (Clock cycles when not halted) with a unit mask of 0x00 (Unhalted core cycles) count 100000
+samples  %        symbol name
+5143971  77.7275  matrix_times_vector
+487106    7.3604  get_memline
+445632    6.7337  put_memline
+177699    2.6851  spec_interpolate
+122222    1.8468  spec_analysis1
+91720     1.3859  copy_grid
+29542     0.4464  min2
+16771     0.2534  Getv
+14756     0.2230  Ind
+14094     0.2130  cheb_basisfunc
+9537      0.1441  Geti
+7461      0.1127  four_basisfunc
+7438      0.1124  Getd
+4164      0.0629  Abstanh
+3241      0.0490  AnsorgNS_sigma_pm
+2467      0.0373  x_of_AnsorgNS3
+2434      0.0368  newton_linesrch_itsP
+2265      0.0342  x_of_AnsorgNS0
+2264      0.0342  ludcmp
+2148      0.0325  Argtanh
+2143      0.0324  fd_jacobianP
+
+==========================================================
+
+So we need to parallelize the use of:
+ matrix_times_vector
+ BNS_CTS
+Maybe we could use SGRID_LEVEL3_Pragma.
