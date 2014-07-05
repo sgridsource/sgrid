@@ -3043,19 +3043,23 @@ double AnsorgNS_sigma_pm(tBox *box, int ind, double B, double phi)
   if(ind>=0) return box->v[isig][ind];
   else
   {
-    double *c;
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *c = (double*) malloc(n1*n2*n3 * sizeof(double));
+    double interp;
+
     if(dsig_dphi_ZeroOnAxis)
     {
       double *Y = box->v[Ind("Y")];
-      int n1 = box->n1;
-      int n2 = box->n2;
       int mJ = Index(0,n2-1,0);
       if(B==1.0 && Y[mJ]==1.0) return box->v[isig][mJ];
       if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
     }
-    c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, 0.0,B,phi);
+    free(c);
+    return interp;
   }
 }
 double AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi)
@@ -3073,19 +3077,23 @@ double AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi)
   if(ind>=0) return box->v[isig][ind];
   else
   {
-    double *c;
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *c = (double*) malloc(n1*n2*n3 * sizeof(double));
+    double interp;
+
     if(dsig_dphi_ZeroOnAxis)
     {
       double *Y = box->v[Ind("Y")];
-      int n1 = box->n1;
-      int n2 = box->n2;
       int mJ = Index(0,n2-1,0);
       if(B==1.0 && Y[mJ]==1.0) return box->v[isig][mJ];
       if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
     }
-    c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, 0.0,B,phi);
+    free(c);
+    return interp;
   }
 }
 double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
@@ -3104,9 +3112,15 @@ double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
   if( (B==0.0 || B==1.0) && dsig_dphi_ZeroOnAxis ) return 0.0;
   else
   {
-    double *c = box->v[Ind("Temp1")];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *c = (double*) malloc(n1*n2*n3 * sizeof(double));
+    double interp;
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, 0.0,B,phi);
+    free(c);
+    return interp;
   }
 }
 double AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi)
@@ -3124,19 +3138,23 @@ double AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi)
   if(ind>=0) return box->v[isig][ind];
   else
   {
-    double *c;
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *c = (double*) malloc(n1*n2*n3 * sizeof(double));
+    double interp;
+
     if(dsig_dphi_ZeroOnAxis)
     {
       double *Y = box->v[Ind("Y")];
-      int n1 = box->n1;
-      int n2 = box->n2;
       int mJ = Index(0,n2-1,0);
       if(B==1.0 && Y[mJ]==1.0) return box->v[isig][mJ];
       if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
     }
-    c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, 0.0,B,phi);
+    free(c);
+    return interp;
   }
 }
 double AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi)
@@ -3154,19 +3172,23 @@ double AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi)
   if(ind>=0) return box->v[isig][ind];
   else
   {
-    double *c;
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *c = (double*) malloc(n1*n2*n3 * sizeof(double));
+    double interp;
+
     if(dsig_dphi_ZeroOnAxis)
     {
       double *Y = box->v[Ind("Y")];
-      int n1 = box->n1;
-      int n2 = box->n2;
       int mJ = Index(0,n2-1,0);
       if(B==1.0 && Y[mJ]==1.0) return box->v[isig][mJ];
       if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
     }
-    c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, 0.0,B,phi);
+    free(c);
+    return interp;
   }
 }
 double AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double phi)
@@ -3185,9 +3207,15 @@ double AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double phi)
   if( (B==0.0 || B==1.0) && dsig_dphi_ZeroOnAxis ) return 0.0;
   else
   {
-    double *c = box->v[Ind("Temp1")];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *c = (double*) malloc(n1*n2*n3 * sizeof(double));
+    double interp;
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, 0.0,B,phi);
+    free(c);
+    return interp;
   }
 }
 
