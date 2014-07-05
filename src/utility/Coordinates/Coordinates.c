@@ -2066,6 +2066,11 @@ double ddzs_dzdz_tan_stretch(void *aux, int ind, double xs, double ys, double zs
 /* (A,B,phi) -> (X,R,phi)=C -> (x,rho,phi)=c -> (x,y,z)			*/
 /* we may skip over (x,rho,phi)... */
 
+/* xyz_of_AnsorgNS and dABphi_dxyz_AnsorgNS are thread safe themselves, but
+   they call Coordinates_AnsorgNS_sigmap/m. 
+   If Coordinates_AnsorgNS_sigmap/m points to AnsorgNS_sigma_pm as usual,
+   the result is not thread safe, because the AnsorgNS_sigma_pm ... are not
+   thread safe, since they all write into the same var Temp1. */
 
 /* compute (x,y,z) from (A,BB,ph) and save result to speed up
    repeated calls */
