@@ -678,7 +678,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         enablevar_inbox(box, isigma_dBdB);
         enablevar_inbox(box, isigma_dBdphi);
         enablevar_inbox(box, isigma_dphidphi);
-        enablevar_inbox(box, Ind("Temp1")); /* needed in AnsorgNS_sigma_pm... */
+        /* enablevar_inbox(box, Ind("Temp1")); not needed in AnsorgNS_sigma_pm... */
         if(pr) printf("  box%d: using %s to compute\n  %s and %s\n", b, 
                 VarName(isigma), VarName(isigma_dB), VarName(isigma_dphi));
         spec_Deriv1(box, 2, box->v[isigma], box->v[isigma_dB]);
