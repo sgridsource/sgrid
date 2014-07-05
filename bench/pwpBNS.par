@@ -1,0 +1,122 @@
+# poly 1.4M-1.4M
+physics = ADMvars BNSdata
+
+BNSdata_EoS_type  = pwp
+BNSdata_kappa	  = 0.0894818512471156 
+BNSdata_n	  = 2.80171728459242 0.407166123778502 0.497265042267529 2.35294117647059
+BNSdata_pwp_rho0  = 0.000184169317535571 0.000812122620454233 0.00162039765972611
+BNSdata_b	  = 30
+BNSdata_Omega_init = estimate # estimate_from_desired_m0
+BNSdata_x_CM_init  = estimate
+BNSdata_iterate_m0	= no # yes
+BNSdata_m01		= 1.5267272
+BNSdata_m02		= 1.5267272
+BNSdata_init_m01	= 1.2
+BNSdata_init_m02	= 1.2
+BNSdata_m0change	= 0.08
+BNSdata_desired_m01	= 1.5267272
+BNSdata_desired_m02	= 1.5267272
+BNSdata_rotationstate1 = rotation
+BNSdata_rotationstate2 = rotation
+BNSdata_omegaz1 = 0.000
+BNSdata_omegaz2 = 0.000
+
+BNSdata_EllSolver_method	= BNS_ordered_Eqn_Iterator
+BNSdata_SmoothSigma		= no # yes
+BNSdata_SmoothSigmaRegion	= 0.2
+BNSdata_SigmaSolve_tolFac	= 1 # 0.1
+BNSdata_extraSigmaSolve_every	= 6
+BNSdata_extraSigmaSolve_fac	= 1.1
+BNSdata_InnerToOuterSigmaTransition = C1 # C0 C1 C2
+BNSdata_set_desired_VolAvSigmas	= yes
+BNSdata_CTS_Eqs_Iteration_order	= BNSdata_Psi BNSdata_Bx BNSdata_By BNSdata_Bz BNSdata_alphaP
+GridIterators_UMFPACK_version	= dl
+GridIterators_verbose           = yes
+BNSdata_linSolver		= templates_GMRES_with_BlockJacobi_precon # UMFPACK
+BNSdata_linSolver_tolFac	= 1e-12
+BNSdata_linSolver_itmax		= 100000
+GridIterators_GMRES_restart = 20000
+##GridIterators_templates_RESID_mode = tol
+GridIterators_Preconditioner_type = spectral # fd
+#GridIterators_Preconditioner_BlockJacobi_nsb1 = 2 # 1
+#GridIterators_Preconditioner_BlockJacobi_nsb2 = 2 # 1
+#GridIterators_Preconditioner_BlockJacobi_nsb3 = 1 # 1
+
+BNSdata_guess 			= initialize_from_checkpoint TOVproduct # TaniguchiShift # TOV # TOVaverage
+BNSdata_esw			= 0.4
+BNSdata_esw1			= 1 # 0.4
+BNSdata_allow_esw1_first_at	= 0 # 15
+BNSdata_Sigma_esw		= 0.2 # 0.4
+BNSdata_Sigma_esw1		= 1
+BNSdata_allow_Sigma_esw1_first_at = -1 # 0
+BNSdata_adjust_first_at		= 0 # 8
+BNSdata_adjust			= forcebalance always ## reset_xmax_if_problem print_current_xmax
+BNSdata_adjust_mintol		= 1e-4
+BNSdata_itmax			= 30 # 199 # 30
+BNSdata_tol			= 1e-8
+BNSdata_analyze_xmax		= print_xmax
+BNSdata_center_new_q		= no # center_xyz # center_yz
+BNSdata_center_new_q_fac	= 0.1 # 1 # 0.5
+BNSdata_center_new_q_first_at	= 20 # 5
+BNSdata_uniqueness_on_axis	= yes
+BNSdata_domainshape_filter	= LowPassInB_dsigma_pm_dBphi_01_EQ_0 # LowPassInB_dsigma_pm_dB_01_EQ_0 # min_dsigma_pm_dB_1 dsigma_pm_dB_01_EQ_0 # no # Bphi2/3
+BNSdata_set_negative_q		= zero
+BNSdata_set_q_atA0		= zero
+
+Coordinates_AnsorgNS_sigma_pm_vars = yes
+Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis = yes
+BNSdata_grid = 4ABphi_2xyz
+BNSdata_box0_Amax = 0.75
+BNSdata_box3_Amax = 0.75
+nboxes = 6
+n1 = 20
+n2 = 20
+n3 = 8
+BNSdata_2xyz_n = 12
+
+checkpoint		= yes
+checkpoint_restart_it	= 0
+checkpoint_variables	= all # auto
+
+iterate_parameters = yes
+iterate_parameter1 = n1  16 18 20 22 24 26 30 36 42
+iterate_parameter2 = n2  16 18 20 22 24 26 30 36 42
+#iterate_parameter3 = BNSdata_2xyz_n  12 14 16 18 20 22 
+
+
+finaltime = 0
+
+0doutiter	= 1
+0doutput	= BNSdata_Sigmax BNSdata_wBx BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err ham momx trK dtrK_dt normham normmomx
+0doutputall	= yes
+0doutput_VolumeIntegralJacobian = one
+ADMvars_normalizedConstraints = yes
+
+#1doutiter	= 1
+1doutput	= BNSdata_q BNSdata_qx BNSdata_qg BNSdata_Sigma BNSdata_Sigmax BNSdata_wBx BNSdata_VRx BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi alpha betax psi gxx Kxx rho jx Sxx ham momx trK dtrK_dt BNSdata_surface_sigma_pm
+1doutputall	= yes
+
+#2doutiter	= 1
+2doutput	= BNSdata_q BNSdata_qx BNSdata_qg BNSdata_Sigma BNSdata_Sigmax BNSdata_wBx BNSdata_VRx BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm ham momx trK dtrK_dt x y z X Y Z Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx BNSdata_temp1 BNSdata_temp2 BNSdata_temp3 BNSdata_A BNSdata_B BNSdata_phi BNSdata_surface_sigma_pm
+2doutputall	= yes
+
+#3doutiter	= 1
+#3doutput	= BNSdata_q BNSdata_Sigma BNSdata_Sigmax BNSdata_wBx BNSdata_VRx BNSdata_Psi BNSdata_Bx BNSdata_alphaP BNSdata_Psi_Err BNSdata_Bx_Err BNSdata_alphaP_Err BNSdata_Sigma_Err Coordinates_AnsorgNS_sigma_pm ham momx trK dtrK_dt x y z X Y Z Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx BNSdata_temp1 BNSdata_temp2 BNSdata_temp3 BNSdata_A BNSdata_B BNSdata_phi
+#3doutputall	= yes
+
+outputY0_box2 = 1
+outputY0_box3 = 1
+
+outputReplaceXby_box0 = x
+outputReplaceYby_box0 = y
+outputReplaceZby_box0 = z
+outputReplaceXby_box1 = x
+outputReplaceYby_box1 = y
+outputReplaceZby_box1 = z
+outputReplaceXby_box2 = x
+outputReplaceYby_box2 = y
+outputReplaceZby_box2 = z
+outputReplaceXby_box3 = x
+outputReplaceYby_box3 = y
+outputReplaceZby_box3 = z
+
