@@ -61,3 +61,26 @@ time ./sgrid KS2.par
 real	13m53.455s
 user	13m51.632s
 sys	0m1.452s
+
+===========================================================================
+
+NEW Results (6.7.2014):
+-----------------------
+sgrid benchmark results (on titan) with KS2.par
+grid: n1 x n2 x n3 = 193 x 16 x 12
+-------------------------------------------------------------------------------
+
+Compiled without CBLAS using sgrid's old matrix_times_vector with icc -O3:
+time ../exe/sgrid KS2.par
+real	13m1.486s
+user	13m0.501s
+sys	0m0.632s
+
+Compiled without CBLAS using sgrid's new (11495315f3fad87...) 
+matrix_times_vector with icc -O3:
+time ../exe/sgrid KS2.par
+real	10m17.813s
+user	10m16.783s
+sys	0m0.656s
+
+==> SO my NEW matrix_times_vector is FASTER than CBLAS!!!
