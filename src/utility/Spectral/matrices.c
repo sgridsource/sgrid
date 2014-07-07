@@ -35,13 +35,13 @@ void matrix_times_vector(double *M, double *u, double *Mu, int n)
 /* this is just a matrix multiplication Mu = M u */
 void matrix_times_vector(double *M, double *u, double *Mu, int n)
 {
-  int i,j;
-  double sum;
+  int i;
+  double *M_i = M; /* we'll increment M_i so that matrix M_i[j] = M_{ij} */
 
-  for(i=0; i<n; i++)
+  for(i=0; i<n; i++, M_i+=n)
   {
-    double *M_i = M + n*i; /* matrix M_i[j] = M_{ij} */
-    sum=0.0;
+    int j;
+    double sum=0.0;
     /* for(j=0; j<n; j++)  sum += M[n*i + j] * u[j]; */
     for(j=0; j<n; j++)  sum += M_i[j] * u[j];
     Mu[i] = sum;
