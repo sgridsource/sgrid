@@ -219,10 +219,12 @@ int UMFPACK_solve_wrapper(tVarList *x, tVarList *b,
   if(pr&&0) prSparseVectorArray(Acol,ncols);
   if(Getv("GridIterators_verbose", "very"))
   {
+    static unsigned long int id=0;
     char name[1000];
-    snprintf(name, 999, "%s/lop_matrix_%.0fs.mtx",
-             Gets("outdir"), getTimeIn_s());
+    snprintf(name, 999, "%s/lop_matrix%lu_%.0fs.mtx",
+             Gets("outdir"), id, getTimeIn_s());
     write_SparseVectorArray_inMatrixMarketFormat(name, Acol,ncols, 1);
+    id++;
   }
 
   /* solve A x = b with umfpack */
