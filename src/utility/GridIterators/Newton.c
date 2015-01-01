@@ -61,6 +61,7 @@ int Newton(
   double res, lin_normres = 0;
   int lin_its = 0;
   double lambda = 0.0;
+  double ms = Getd("GridIterators_Newton_minstep");
   tNewtonResults before_lin_in;
   tNewtonArgPointers before_lin_out;
   
@@ -104,17 +105,23 @@ int Newton(
     lambda = do_Newton_step(vlu, vldu, res, Fu, Jdu,
                             vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
 
-    /* do random Newton step if we seem to be caught in a local min, i.e.
-       if we get too close to lambda=-1 */
-    if(Getv("GridIterators_Newton_atlocalMin","escapeMin"))
+    /* do we seem to be caught in a local min, i.e. close to lambda=-1 ? */
+    if(fabs(lambda+1.0)<ms)
     {
-      double ms = Getd("GridIterators_Newton_minstep");
-      double eps = Getd("GridIterators_Newton_randomstepsize");
-      if(fabs(lambda+1.0)<ms)
+      printf("lambda=%g : we may be stuck in a local minimum!\n", lambda);
+
+      /* do random Newton step if we seem to be caught in a local min */
+      if(Getv("GridIterators_Newton_atlocalMin","escapeMin"))
       {
-        printf("lambda=%g ==> taking random Newton step of size eps=%g\n",
-               lambda, eps);
+        double eps = Getd("GridIterators_Newton_randomstepsize");
+        printf(" ==> taking random Newton step of size eps=%g\n", eps);
         do_random_Newton_step(vlu, eps, vldu);
+      }
+      /* quit iterations by setting inewton = itmax */
+      if(Getv("GridIterators_Newton_atlocalMin","quit"))
+      {
+        inewton = itmax;
+        printf(" ==> quitting (by going to step %d)\n", inewton+1);
       }
     }
 
