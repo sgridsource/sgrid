@@ -135,12 +135,13 @@ int Newton(
         {
           char *linSolvers = Gets("GridIterators_Newton_linSolvers");
           char *word = cmalloc(strlen(linSolvers)+1);
+          int p0 = linSolverPos;
           linSolverPos = sscan_word_at_p(linSolvers, linSolverPos, word);
           if(linSolverPos != EOF)
           {
             printf(" ==> retrying with %s\n", word);
-            printf("     (at char %d in GridIterators_Newton_linSolvers)\n",
-                   linSolverPos);
+            printf("     (char %d-%d in GridIterators_Newton_linSolvers)\n",
+                   p0, linSolverPos);
             linSolverOK=0;
             linSolver1 = get_linSolver_by_name(word);
           }
