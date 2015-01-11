@@ -64,7 +64,9 @@ int Newton(
   double ms = Getd("GridIterators_Newton_minstep");
   tNewtonResults before_lin_in;
   tNewtonArgPointers before_lin_out;
-  
+  tLinSolver linSolver1;
+  int linSolverOK, linSolverPos;
+
   /* solve with Newton-Raphson iterations: */
   if(pr) printf("Newton:  starting Newton iterations, itmax=%d tol=%g\n",
                 itmax, tol);
@@ -92,38 +94,60 @@ int Newton(
     if(Newton_do_before_linSolver != NULL)
       Newton_do_before_linSolver(grid, before_lin_in, before_lin_out);
 
-    /* solve linear equation */
-    lin_its=linSolver(vldu, vlFu, vlres, vld1, vld2, 
-                      linSolv_itmax, 
-                      max2( (*normres)*linSolv_tolFac, linSolv_tol ),
-                      &lin_normres,
-	              Jdu, linPrecon);
-    /* if(pr) printf("Newton: after linSolver: %e\n",lin_normres); */
-
-    /* do Newton step: u^{n+1} = u^{n} - du */
-    /* do_partial_Newton_step(vlu, 1.0, vldu); */
-    lambda = do_Newton_step(vlu, vldu, res, Fu, Jdu,
-                            vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
-
-    /* do we seem to be caught in a local min, i.e. close to lambda=-1 ? */
-    if(fabs(lambda+1.0)<ms)
+    /* Call some linear solver and do Newton step as needed.
+       We can switch the linear solver if step fails. */
+    linSolver1 = linSolver; /* try first with linSolver passed in to Newton */
+    linSolverPos = 0;       /* position of next linSolver in GridIterators_Newton_linSolvers */
+    do /* loop while !linSolverOK */
     {
-      printf("lambda=%g : we may be stuck in a local minimum!\n", lambda);
+      /* solve linear equation */
+      lin_its=linSolver1(vldu, vlFu, vlres, vld1, vld2, linSolv_itmax, 
+                         max2( (*normres)*linSolv_tolFac, linSolv_tol ),
+                         &lin_normres, Jdu, linPrecon);
+      if(lin_its>=0) linSolverOK=1;
+      /* if(pr) printf("Newton: after linSolver: %e\n",lin_normres); */
 
-      /* do random Newton step if we seem to be caught in a local min */
-      if(Getv("GridIterators_Newton_atlocalMin","escapeMin"))
+      /* do Newton step: u^{n+1} = u^{n} - du */
+      /* do_partial_Newton_step(vlu, 1.0, vldu); */
+      lambda = do_Newton_step(vlu, vldu, res, Fu, Jdu,
+                              vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
+
+      /* do we seem to be caught in a local min, i.e. close to lambda=-1 ? */
+      if(fabs(lambda+1.0)<ms)
       {
-        double eps = Getd("GridIterators_Newton_randomstepsize");
-        printf(" ==> taking random Newton step of size eps=%g\n", eps);
-        do_random_Newton_step(vlu, eps, vldu);
+        printf("lambda=%g : we may be stuck in a local minimum!\n", lambda);
+
+        /* do random Newton step if we seem to be caught in a local min */
+        if(Getv("GridIterators_Newton_atlocalMin","escapeMin"))
+        {
+          double eps = Getd("GridIterators_Newton_randomstepsize");
+          printf(" ==> taking random Newton step of size eps=%g\n", eps);
+          do_random_Newton_step(vlu, eps, vldu);
+        }
+        /* quit iterations by setting inewton = itmax */
+        if(Getv("GridIterators_Newton_atlocalMin","quit"))
+        {
+          inewton = itmax;
+          printf(" ==> quitting (by going to step %d)\n", inewton+1);
+        }
+        /* try another linSolver */
+        if(Getv("GridIterators_Newton_atlocalMin","AltLinSolver"))
+        {
+          char *linSolvers = Gets("GridIterators_Newton_linSolvers");
+          char *word = cmalloc(strlen(linSolvers)+1);
+          linSolverPos = sscan_word_at_p(linSolvers, linSolverPos, word);
+          if(linSolverPos != EOF)
+          {
+            printf(" ==> retrying with %s\n", word);
+            printf("     (at char %d in GridIterators_Newton_linSolvers)\n",
+                   linSolverPos);
+            linSolverOK=0;
+            linSolver1 = get_linSolver_by_name(word);
+          }
+          free(word);
+        }
       }
-      /* quit iterations by setting inewton = itmax */
-      if(Getv("GridIterators_Newton_atlocalMin","quit"))
-      {
-        inewton = itmax;
-        printf(" ==> quitting (by going to step %d)\n", inewton+1);
-      }
-    }
+    } while(!linSolverOK);
 
     /* sync vlu. sync is not needed if du is synced */
     /* bampi_vlsynchronize(vlu); */
@@ -308,4 +332,74 @@ int Init_Newton(tGrid *grid)
   Newton_do_before_linSolver = NULL;
 
   return 0;
+}
+
+/* get linear solver function pointer from string */
+tLinSolver get_linSolver_by_name(char *name)
+{
+  tLinSolver linear_solver=NULL;
+
+  /* choose linear solver */
+  if(strcmp(name, "bicgstab")==0)
+    linear_solver=bicgstab;
+  else if(strcmp(name, "bicgstab_with_fd_UMFPACK_precon")==0)
+    linear_solver=bicgstab_with_fd_UMFPACK_precon;
+  else if(strcmp(name, "LAPACK_dgesv_wrapper")==0)
+    linear_solver=LAPACK_dgesv_wrapper;
+  else if(strcmp(name, "templates_gmres_wrapper")==0)
+    linear_solver=templates_gmres_wrapper;
+  else if(strcmp(name, "templates_gmres_wrapper_with_fd_UMFPACK_precon")==0)
+    linear_solver=templates_gmres_wrapper_with_fd_UMFPACK_precon;
+  else if(strcmp(name, "templates_bicgstab_wrapper")==0)
+    linear_solver=templates_bicgstab_wrapper;
+  else if(strcmp(name, "templates_bicgstab_wrapper_with_fd_UMFPACK_precon")==0)
+    linear_solver=templates_bicgstab_wrapper_with_fd_UMFPACK_precon;
+  else if(strcmp(name, "templates_cgs_wrapper")==0)
+    linear_solver=templates_cgs_wrapper;
+  else if(strcmp(name, "templates_cgs_wrapper_with_fd_UMFPACK_precon")==0)
+    linear_solver=templates_cgs_wrapper_with_fd_UMFPACK_precon;
+  else if(strcmp(name, "UMFPACK_solve_wrapper")==0)
+    linear_solver=UMFPACK_solve_wrapper;
+  else if(strcmp(name, "SuiteSparseQR_solve_wrapper")==0)
+    linear_solver=SuiteSparseQR_solve_wrapper;
+  else if(strcmp(name, "UMFPACK_solve_forSortedVars_wrapper")==0)
+    linear_solver=UMFPACK_solve_forSortedVars_wrapper;
+  else if(strcmp(name, "bicgstab_with_Jacobi_precon")==0)
+    linear_solver=bicgstab_with_Jacobi_precon;
+  else if(strcmp(name, "templates_gmres_wrapper_with_Jacobi_precon")==0)
+    linear_solver=templates_gmres_wrapper_with_Jacobi_precon;
+  else if(strcmp(name, "templates_gmres_wrapper_with_BlockJacobi_precon")==0)
+    linear_solver=templates_gmres_wrapper_with_BlockJacobi_precon;
+  else if(strcmp(name, "templates_bicgstab_wrapper_with_Jacobi_precon")==0)
+    linear_solver=templates_bicgstab_wrapper_with_Jacobi_precon;
+  else if(strcmp(name, "templates_cgs_wrapper_with_Jacobi_precon")==0)
+    linear_solver=templates_cgs_wrapper_with_Jacobi_precon;
+  else if(strcmp(name, "templates_qmr_wrapper_with_Jacobi_precon")==0)
+    linear_solver=templates_qmr_wrapper_with_Jacobi_precon;
+  else if(strcmp(name, "templates_bicg_wrapper_with_Jacobi_precon")==0)
+    linear_solver=templates_bicg_wrapper_with_Jacobi_precon;
+  else if(strcmp(name, "templates_bicgstab_wrapper_with_BlockJacobi_precon")==0)
+    linear_solver=templates_bicgstab_wrapper_with_BlockJacobi_precon;
+  else if(strcmp(name, "ZIB_gmres_wrapper_with_BlockJacobi_precon")==0)
+    linear_solver=ZIB_gmres_wrapper_with_BlockJacobi_precon;
+  else if(strcmp(name, "ZIB_gbit_wrapper_with_BlockJacobi_precon")==0)
+    linear_solver=ZIB_gbit_wrapper_with_BlockJacobi_precon;
+  else if(strcmp(name, "ZIB_pcg_wrapper_with_BlockJacobi_precon")==0)
+    linear_solver=ZIB_pcg_wrapper_with_BlockJacobi_precon;
+  else if(strcmp(name, "templates_qmr_wrapper")==0)
+    linear_solver=templates_qmr_wrapper;
+  else if(strcmp(name, "templates_bicg_wrapper")==0)
+    linear_solver=templates_bicg_wrapper;
+  else if(strcmp(name, "bicgstab_with_SOR_precon")==0)
+    linear_solver=bicgstab_with_SOR_precon;
+  else if(strcmp(name, "templates_gmres_wrapper_with_SOR_precon")==0)
+    linear_solver=templates_gmres_wrapper_with_SOR_precon;
+  else if(strcmp(name, "templates_bicgstab_wrapper_with_SOR_precon")==0)
+    linear_solver=templates_bicgstab_wrapper_with_SOR_precon;
+  else if(strcmp(name, "templates_cgs_wrapper_with_SOR_precon")==0)
+    linear_solver=templates_cgs_wrapper_with_SOR_precon;
+  else
+    errorexit("InitRealisticBBH: unknown RealisticBBH_linSolver");
+
+  return linear_solver;
 }
