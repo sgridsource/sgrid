@@ -48,6 +48,7 @@ int sgrid_Coordinates(void)
          "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");
   AddPar("Coordinates_newtTOLF", "1e-10", "newton tolerence");
   AddPar("Coordinates_newtMAXITS", "100000", "max. newton iterations");
+  AddPar("Coordinates_useDD", "no", "if we use DD in D_and_DD_Of_S..");
   AddPar("compactSphericalDF_r0", "-1", "radius r at xi=0");
   AddPar("tan_stretch_s", "0", "how much we stretch [0,Xmax]");
   AddPar("Coordinates_Spherical3_c",  "5",
