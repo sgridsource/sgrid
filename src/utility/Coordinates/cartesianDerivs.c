@@ -821,7 +821,7 @@ void allDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab)
 
 
 /* wrapper for 1st and 2nd derivs of Sab */
-void D_and_DD_Of_Sab(tBox *box, int i_Sab, int i_dSabc, int i_ddSabcd)
+void D_and_DD_of_Sab(tBox *box, int i_Sab, int i_dSabc, int i_ddSabcd)
 {
   if(Getv("Coordinates_useDD","no"))
     FirstAndSecondDerivsOf_Sab(box, i_Sab, i_dSabc, i_ddSabcd);
@@ -829,7 +829,7 @@ void D_and_DD_Of_Sab(tBox *box, int i_Sab, int i_dSabc, int i_ddSabcd)
     allDerivsOf_Sab(box, i_Sab, i_dSabc, i_ddSabcd);
 }
 /* wrapper for 1st and 2nd derivs of Sa */
-void D_and_DD_Of_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc)
+void D_and_DD_of_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc)
 {
   if(Getv("Coordinates_useDD","no"))
     FirstAndSecondDerivsOf_Sa(box, i_Sa, i_dSab, i_ddSabc);
@@ -837,7 +837,7 @@ void D_and_DD_Of_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc)
     allDerivsOf_Sa(box, i_Sa, i_dSab, i_ddSabc);
 }
 /* wrapper for 1st and 2nd derivs of S */
-void D_and_DD_Of_S(tBox *box, int i_S, int i_dSa, int i_ddSab)
+void D_and_DD_of_S(tBox *box, int i_S, int i_dSa, int i_ddSab)
 {
   if(Getv("Coordinates_useDD","no"))
     FirstAndSecondDerivsOf_S(box, i_S, i_dSa, i_ddSab);
