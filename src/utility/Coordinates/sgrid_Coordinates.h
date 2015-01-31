@@ -13,6 +13,22 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
                       double *u11, double *u12, double *u13,
                       double *u22, double *u23, double *u33 );
 
+/* Helper functions to set partial derivatives of a symmetric tensor */
+void FirstDerivsOf_Sab(tBox *box, int i_Sab, int i_dSabc);
+void FirstAndSecondDerivsOf_Sab(tBox *box, int i_Sab,
+                                int i_dSabc, int i_ddSabcd);
+void allDerivsOf_Sab(tBox *box, int i_Sab, int i_dSabc, int i_ddSabcd);
+
+/* Helper functions to set partial derivatives of a vector */
+void FirstDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab);
+void FirstAndSecondDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc);
+void allDerivsOf_Sa(tBox *box, int i_Sa, int i_dSab, int i_ddSabc);
+
+/* Helper functions to set partial derivatives of a scalar */
+void FirstDerivsOf_S(tBox *box, int i_S, int i_dSa);
+void FirstAndSecondDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab);
+void allDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab);
+
 /* doubleCovering.c */
 void reset_doubleCoveredPoints(tVarList *unew);
 void copy_to_doubleCoveredPoints_SphericalDF(tBox *box, int vind);
