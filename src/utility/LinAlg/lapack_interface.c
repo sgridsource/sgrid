@@ -64,6 +64,7 @@ int lapack_dgesv(tSparseVector **Aline, tVarList *vlx, tVarList *vlb, int pr)
     }
   }
 
+  INFO=-6662442;
 #ifdef LAPACK
   /* call lapack routine */
   if(pr) printf("lapack_dgesv: calling lapack's dgesv\n");

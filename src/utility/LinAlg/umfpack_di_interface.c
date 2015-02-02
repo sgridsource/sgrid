@@ -222,6 +222,7 @@ int umfpack_di_solve_fromAlines(tSparseVector **Aline, tVarList *vlx,
   if(pr) printf("umfpack_di_solve_fromAlines: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
+  INFO1=INFO2=INFO=-6662442;
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
@@ -340,6 +341,7 @@ int umfpack_di_solve_forSortedVars_fromAlines(tSparseVector **Aline,
   if(pr) printf("umfpack_di_solve_forSortedVars_fromAlines: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
+  INFO1=INFO2=INFO=-6662442;
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
@@ -454,6 +456,7 @@ int umfpack_di_solve_fromAcolumns(tSparseVector **Acol,
   if(pr) printf("umfpack_di_solve_fromAcolumns: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
+  INFO1=INFO2=INFO=-6662442;
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
@@ -569,6 +572,7 @@ int umfpack_di_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   if(pr) printf("umfpack_di_solve_forSortedVars_fromAcolumns: %d entries of magnitude <= %g were dropped\n",
                 nz-Ap[nlines], dropbelow);
 
+  INFO1=INFO2=INFO=-6662442;
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
@@ -666,6 +670,7 @@ int umfpack_di_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
       }
   }
 
+  INFO1=INFO2=INFO=-6662442;
 #ifdef UMFPACK
   /* call umfpack routine */
   if(pr)
