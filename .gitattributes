@@ -1,0 +1,11 @@
+*.h	text=auto
+*.hpp	text=auto
+*.c	text=auto
+*.cc	text=auto
+*.cpp	text=auto
+*.m	text=auto
+*.txt	text=auto
+*.tex	text=auto
+*.bib	text=auto
+*.bbl	text=auto
+*.par	text=auto
