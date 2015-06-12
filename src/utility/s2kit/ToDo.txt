@@ -1,0 +1,6 @@
+FixMe:
+------
+all the functions in s2kit_primitive.h , e.g.
+extern void vec_add( double * , double * , double * , int ) ;
+are declared "external". I think this does not make sense and it does not
+compile with the IBM Blue Gene/Q compiler bgxlc.
