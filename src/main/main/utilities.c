@@ -6,6 +6,9 @@
 #include "sgrid.h"
 #include "main.h"
 
+/* for POSIX.1-2001 mkdir function */
+#include <sys/stat.h>
+#include <sys/types.h>
 
 /* global vars for timing */
 double time_in_s_at_sgrid_start; /* set in main.c */
@@ -199,6 +202,12 @@ int system3(char *s1, char *s2, char *s3)
       status = remove(s3);
       printf("ANSI C call: %s\n", command);
     }
+  }
+  else if( strcmp(s1,"mkdir")== 0 ) /* use POSIX.1-2001 mkdir function */
+  {
+    sprintf(command, "mkdir(\"%s\", S_IRWXU | S_IRWXG);", s2);
+    status = mkdir(s2, S_IRWXU | S_IRWXG);
+    printf("POSIX.1-2001 call: %s\n", command);
   }
   else /* use system */
   { 
