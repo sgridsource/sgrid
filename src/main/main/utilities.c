@@ -183,7 +183,7 @@ int system3(char *s1, char *s2, char *s3)
   {
     sprintf(command, "rename(\"%s\", \"%s\");", s2, s3);
     status = rename(s2, s3);
-    printf("ANSI C call:  %s\n", command);
+    printf("ANSI C call: %s\n", command);
   }
   else if( strcmp(s1,"rm -rf")==0 && 0 ) /* use remove */
   {
@@ -191,21 +191,23 @@ int system3(char *s1, char *s2, char *s3)
     {
       sprintf(command, "remove(\"%s\");", s2);
       status = remove(s2); /* Note: remove fails if dir is not empty */
-      printf("ANSI C call:  %s\n", command);
+      printf("ANSI C call: %s\n", command);
     }
     if(strlen(s3)>0)
     {
       sprintf(command, "remove(\"%s\");", s3);
       status = remove(s3);
-      printf("ANSI C call:  %s\n", command);
+      printf("ANSI C call: %s\n", command);
     }
   }
   else /* use system */
   { 
     sprintf(command, "%s %s %s", s1, s2, s3);
     status = system(command);
-    printf("System call:  %s\n", command);
+    printf("System call: %s\n", command);
   }
+  
+  if(status!=0) printf(" -> WARNING: Return value = %d\n", status);
   return status;
 }
 
