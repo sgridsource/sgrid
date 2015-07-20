@@ -171,6 +171,35 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
 }
 
 
+/* make a copy of a file in some dir */
+int copy_file_into_dir(char *fname, const *dir)
+{
+  FILE *in, *out;
+  char newname[1000];
+  char ch;
+  int i;
+
+  /* open source file */
+  in = fopen(fname, "rb");
+  if(!in) errorexits("failed opening %s", fname);
+
+  /* find / in fname */
+  for(i=strlen(fname)-1; i>=0; i--) if(fname[i]=='/') break;
+  snprintf(newname, 999, "%s/%s", dir, fname+i+1);
+
+  /* open destination file */
+  out = fopen(fname, "wb");
+  if(!out) errorexits("failed opening %s", newname);
+
+  /* copy char by char */
+  while( (ch=fgetc(in)) != EOF)
+    fputc(ch, out);
+
+  fclose(out);
+  fclose(in);  
+}
+
+
 /* ugh, but how universal are those built in functions? */
 int system2(char *s1, char *s2) 
 {
