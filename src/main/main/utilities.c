@@ -171,22 +171,17 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
 }
 
 
-/* make a copy of a file in some dir */
-int copy_file_into_dir(char *fname, const *dir)
+/* make copy of a file: cp fname newname */
+int copy_file(char *fname, char *newname)
 {
   FILE *in, *out;
-  char newname[10000];
-  int i, ch;
+  int ch;
 
-  printf("copy_file_into_dir(%s, %s);\n", fname, dir);
+  printf("copy_file(%s, %s);\n", fname, newname);
 
   /* open source file */
   in = fopen(fname, "rb");
   if(!in) errorexits("failed opening %s", fname);
-
-  /* find / in fname */
-  for(i=strlen(fname)-1; i>=0; i--) if(fname[i]=='/') break;
-  snprintf(newname, 9999, "%s/%s", dir, fname+i+1);
 
   /* open destination file */
   out = fopen(fname, "wb");
@@ -199,6 +194,20 @@ int copy_file_into_dir(char *fname, const *dir)
   fclose(out);
   fclose(in);
   return 0;
+}
+
+
+/* make a copy of a file in some dir */
+int copy_file_into_dir(char *fname, const *dir)
+{
+  char newname[10000];
+  int i;
+
+  /* find / in fname, to determine filename without dirname */
+  for(i=strlen(fname)-1; i>=0; i--) if(fname[i]=='/') break;
+  snprintf(newname, 9999, "%s/%s", dir, fname+i+1);
+
+  return copy_file(fname, newname);
 }
 
 

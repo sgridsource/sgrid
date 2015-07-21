@@ -159,7 +159,8 @@ int make_output_directory(void)
 
   /* make output directory, save parfile */
   system2("mkdir", outdir);
-  system3("cp", Gets("parameterfile"), outdir);
+  /* system3("cp", Gets("parameterfile"), outdir); */
+  copy_file_into_dir(Gets("parameterfile"), outdir);
 
   free(outdirp);
   return 0;
