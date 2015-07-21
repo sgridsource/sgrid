@@ -6,9 +6,10 @@
 #include "sgrid.h"
 #include "main.h"
 
-/* for POSIX.1-2001 mkdir function */
+/* for POSIX.1-2001 mkdir function and opendir function */
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <dirent.h>
 
 /* global vars for timing */
 double time_in_s_at_sgrid_start; /* set in main.c */
@@ -210,6 +211,51 @@ int copy_file_into_dir(char *fname, const *dir)
   return copy_file(fname, newname);
 }
 
+/* use opendir to scan through dir and remove the entire dir */
+int remove_dir(char *which_dir)
+{
+  DIR           *d;
+  struct dirent *dir;
+  char file[1000];
+  struct stat s;
+  
+  d = opendir(which_dir);
+  if(d)
+  {
+    while ((dir = readdir(d)) != NULL)
+    {
+      /* exclude . and .. directories */
+      if( strcmp( dir->d_name, "." ) == 0 || strcmp( dir->d_name, ".." ) == 0)
+        continue;
+
+      snprintf(file, 999, "./%s/%s", which_dir, dir->d_name);
+      //printf("*"); //print * for every deleted file
+
+      if(opendir(file)!=NULL) remove_dir(file);
+      else
+      {
+        if(remove(file) != 0)
+        {
+          //printf("\n%s\n", file);
+          //perror("Remove failed");
+          closedir(d);
+          return -2;
+        }
+      }
+    } /* end of while loop */
+
+    closedir(d);
+
+    /* delete directory */
+    if(remove(which_dir) != 0)
+    {
+      //printf("%s\n", which_dir);
+      //perror("Remove failed");
+      return -1;
+    }
+  }
+  return 0;
+}
 
 /* ugh, but how universal are those built in functions? */
 int system2(char *s1, char *s2) 
@@ -232,15 +278,13 @@ int system3(char *s1, char *s2, char *s3)
   {
     if(strlen(s2)>0)
     {
-      sprintf(command, "remove(\"%s\");", s2);
-      status = remove(s2); /* Note: remove fails if dir is not empty */
-      printf("ANSI C call: %s\n", command);
+      status = remove_dir(s2);
+      printf("remove_dir(\"%s\");\n");
     }
     if(strlen(s3)>0)
     {
-      sprintf(command, "remove(\"%s\");", s3);
-      status = remove(s3);
-      printf("ANSI C call: %s\n", command);
+      status = remove_dir(s3);
+      printf("remove_dir(\"%s\");\n");
     }
   }
   else if( strcmp(s1,"mkdir")== 0 ) /* use POSIX.1-2001 mkdir function */
