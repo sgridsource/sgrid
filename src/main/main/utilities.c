@@ -274,7 +274,7 @@ int system3(char *s1, char *s2, char *s3)
     status = rename(s2, s3);
     printf("ANSI C call: %s\n", command);
   }
-  else if( strcmp(s1,"rm -rf")==0 && 0 ) /* use remove */
+  else if( strcmp(s1,"rm -rf")==0 ) /* use remove */
   {
     if(strlen(s2)>0)
     {
