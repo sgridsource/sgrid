@@ -177,7 +177,7 @@ int copy_file(char *fname, char *newname)
   FILE *in, *out;
   int ch;
 
-  printf("copy_file(%s, %s);\n", fname, newname);
+  printf("copy_file(\"%s\", \"%s\");\n", fname, newname);
 
   /* open source file */
   in = fopen(fname, "rb");
