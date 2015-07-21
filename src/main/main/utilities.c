@@ -199,7 +199,7 @@ int copy_file(char *fname, char *newname)
 
 
 /* make a copy of a file in some dir */
-int copy_file_into_dir(char *fname, const *dir)
+int copy_file_into_dir(char *fname, char *dir)
 {
   char newname[10000];
   int i;
