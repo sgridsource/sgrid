@@ -184,7 +184,7 @@ int copy_file(char *fname, char *newname)
   if(!in) errorexits("failed opening %s", fname);
 
   /* open destination file */
-  out = fopen(fname, "wb");
+  out = fopen(newname, "wb");
   if(!out) errorexits("failed opening %s", newname);
 
   /* copy char by char */
