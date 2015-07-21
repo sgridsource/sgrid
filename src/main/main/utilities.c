@@ -176,7 +176,9 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
 int copy_file(char *fname, char *newname)
 {
   FILE *in, *out;
-  int ch;
+  void *buffer;
+  size_t BUFSIZE=16777216; /* 16MiB */
+  size_t bcount;
 
   printf("copy_file(\"%s\", \"%s\");\n", fname, newname);
 
@@ -189,14 +191,22 @@ int copy_file(char *fname, char *newname)
   if(!out) errorexits("failed opening %s", newname);
 
   /* copy char by char */
-  while( (ch=fgetc(in)) != EOF)
-    fputc(ch, out);
+  /* while( (ch=fgetc(in)) != EOF)
+       fputc(ch, out);             */
+  buffer = calloc(BUFSIZE , sizeof(char));
+  if(!buffer)
+    errorexiti("copy_file: out of memory for buffer (%d chars)", BUFSIZE);
+  do
+  {
+    bcount = fread(buffer, sizeof(char), BUFSIZE, in);
+    fwrite(buffer, sizeof(char), bcount, out);
+  } while(bcount==BUFSIZE);
+  free(buffer);
 
   fclose(out);
   fclose(in);
   return 0;
 }
-
 
 /* make a copy of a file in some dir */
 int copy_file_into_dir(char *fname, char *dir)
