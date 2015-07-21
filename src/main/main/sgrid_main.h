@@ -178,6 +178,7 @@ double min3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
                         int *ai, int *imin);
 double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int n2,
                         int *ai, int *imax);
+int copy_file_into_dir(char *fname, const *dir);
 int system2(char *s1, char *s2);
 int system3(char *s1, char *s2, char *s3);
 double *dmalloc(int n);

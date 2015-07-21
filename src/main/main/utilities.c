@@ -175,9 +175,10 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
 int copy_file_into_dir(char *fname, const *dir)
 {
   FILE *in, *out;
-  char newname[1000];
-  char ch;
-  int i;
+  char newname[10000];
+  int i, ch;
+
+  printf("copy_file_into_dir(%s, %s);\n", fname, dir);
 
   /* open source file */
   in = fopen(fname, "rb");
@@ -185,7 +186,7 @@ int copy_file_into_dir(char *fname, const *dir)
 
   /* find / in fname */
   for(i=strlen(fname)-1; i>=0; i--) if(fname[i]=='/') break;
-  snprintf(newname, 999, "%s/%s", dir, fname+i+1);
+  snprintf(newname, 9999, "%s/%s", dir, fname+i+1);
 
   /* open destination file */
   out = fopen(fname, "wb");
@@ -196,7 +197,8 @@ int copy_file_into_dir(char *fname, const *dir)
     fputc(ch, out);
 
   fclose(out);
-  fclose(in);  
+  fclose(in);
+  return 0;
 }
 
 
