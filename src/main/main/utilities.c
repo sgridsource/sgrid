@@ -279,12 +279,12 @@ int system3(char *s1, char *s2, char *s3)
     if(strlen(s2)>0)
     {
       status = remove_dir(s2);
-      printf("remove_dir(\"%s\");\n");
+      printf("remove_dir(\"%s\");\n", s2);
     }
     if(strlen(s3)>0)
     {
       status = remove_dir(s3);
-      printf("remove_dir(\"%s\");\n");
+      printf("remove_dir(\"%s\");\n", s3);
     }
   }
   else if( strcmp(s1,"mkdir")== 0 ) /* use POSIX.1-2001 mkdir function */
