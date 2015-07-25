@@ -149,6 +149,12 @@ int make_output_directory(void)
   strcpy(outdirp, outdir);
   strcat(outdirp, "_previous");
 
+  /* check if a shell is available to execute commands later */
+  /* NOTE: system2 and system3 are smart enough to do "mkdir", "rm -rf" 
+           and "mv" even without a shell by using POSIX calls. */
+  if(system("")==0)
+    printf("WARNING: system("")=0 => cannot execute shell commands!\n");
+
   /* check if we remove outdir_previous */
   if(!GetvLax("sgrid_options", "--keep_previous"))
   {
