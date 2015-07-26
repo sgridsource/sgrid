@@ -339,6 +339,7 @@ int construct_argv(char *str, char ***argv)
 /* run a command, without a shell */
 int system_emu(const char *command)
 {
+  char *com = strdup(command); /* duplicate since construct_argv modifies its args */
   int ret, status;
   printf("system_emu: running command:\n%s\n", command);
 
@@ -347,7 +348,6 @@ int system_emu(const char *command)
   if(cpid==0) /* child process */
   {
     char **argv;
-    char *com = strdup(command); /* duplicate since construct_argv modifies its args */
     construct_argv(com, &argv);
     ret = execv(argv[0], argv);
     printf("*** WARNING: command not found, (execv returned %d) ***\n", ret);
@@ -359,6 +359,7 @@ int system_emu(const char *command)
     status = WEXITSTATUS(ret);
   }
   if(status!=0) printf(" -> WARNING: Return value = %d\n", status);
+  free(com);
   return status;
 }
 
