@@ -6,10 +6,13 @@
 #include "sgrid.h"
 #include "main.h"
 
-/* for POSIX.1-2001 mkdir function and opendir function */
+/* for POSIX.1-2001 mkdir, opendir, fork, wait functions */
+#include <unistd.h>     /* for fork */
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
+#include <sys/types.h>  /* for pid_t */
+#include <sys/wait.h>   /* for wait */
+#include <dirent.h>     /* for opendir */
+
 
 /* global vars for timing */
 double time_in_s_at_sgrid_start; /* set in main.c */
@@ -310,6 +313,51 @@ int system3(char *s1, char *s2, char *s3)
     printf("System call: %s\n", command);
   }
   
+  if(status!=0) printf(" -> WARNING: Return value = %d\n", status);
+  return status;
+}
+
+/* construct an argv array from a string and return number of args */
+int construct_argv(char *str, char ***argv)
+{
+  char *str1, *token, *saveptr;
+  int count;
+
+  *argv = NULL;
+  for(count=0, str1=str; ; count++, str1=NULL)
+  {
+    *argv = (char **) realloc(*argv, sizeof(char *)*(count+1));
+    token = strtok_r(str1, " ", &saveptr);
+    //printf("token=%p:%s\n", token,token);
+    (*argv)[count] = token;
+    if(token == NULL) break;
+  }
+  //printf("saveptr=%p:%s\n", saveptr,saveptr);
+  return count;
+}
+
+/* run a command, without a shell */
+int system_emu(const char *command)
+{
+  int ret, status;
+  printf("system_emu: running command:\n%s\n", command);
+
+  /* Spawn a child to run the program. */
+  pid_t cpid = fork();
+  if(cpid==0) /* child process */
+  {
+    char **argv;
+    char *com = strdup(command); /* duplicate since construct_argv modifies its args */
+    construct_argv(com, &argv);
+    ret = execv(argv[0], argv);
+    printf("*** WARNING: command not found, (execv returned %d) ***\n", ret);
+    exit(127); /* exit child, only if execv fails */
+  }
+  else /* cpid!=0; parent process */
+  {
+    waitpid(cpid, &ret, 0); /* wait for child to exit */
+    status = WEXITSTATUS(ret);
+  }
   if(status!=0) printf(" -> WARNING: Return value = %d\n", status);
   return status;
 }

@@ -153,7 +153,10 @@ int make_output_directory(void)
   /* NOTE: system2 and system3 are smart enough to do "mkdir", "rm -rf"
            and "mv" even without a shell by using POSIX calls. */
   if(system(NULL)==0)
+  {
     printf("WARNING: system(NULL)=0 => cannot execute shell commands!\n");
+    printf("         Consider using system_emu.\n");
+  }
 
   /* check if we remove outdir_previous */
   if(!GetvLax("sgrid_options", "--keep_previous"))
