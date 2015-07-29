@@ -341,11 +341,17 @@ int system_emu(const char *command)
 {
   char *com = strdup(command); /* duplicate since construct_argv modifies its args */
   int ret, status;
+  pid_t cpid;
   printf("system_emu: running command:\n%s\n", command);
 
   /* Spawn a child to run the program. */
-  pid_t cpid = fork();
-  if(cpid==0) /* child process */
+  cpid = fork();
+  if(cpid<0) /* fork failed */
+  {
+    printf("*** WARNING: fork failed! ***\n");
+    status = ret = -911;
+  }
+  else if(cpid==0) /* child process */
   {
     char **argv;
     construct_argv(com, &argv);
@@ -355,8 +361,14 @@ int system_emu(const char *command)
   }
   else /* cpid!=0; parent process */
   {
-    waitpid(cpid, &ret, 0); /* wait for child to exit */
-    status = WEXITSTATUS(ret);
+    int wret = waitpid(cpid, &ret, 0); /* wait for child to exit */
+    if(wret<0)
+    {
+      printf("*** WARNING: waitpid failed! ***\n");
+      status = ret = -42;
+    }  
+    else
+      status = WEXITSTATUS(ret);
   }
   if(status!=0) printf(" -> WARNING: Return value = %d\n", status);
   free(com);
