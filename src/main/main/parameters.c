@@ -719,3 +719,10 @@ void free_pdb(tParameter *pdb1, int npdb1)
   free_pdb_contents(pdb1, npdb1);
   free(pdb1);
 }
+
+/* free the global parameter database pdb and set npdb=0 */
+void free_global_parameter_database_contents(void)
+{
+  free_pdb_contents(pdb, npdb);
+  npdb = 0;
+}

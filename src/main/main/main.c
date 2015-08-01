@@ -48,6 +48,7 @@ int main(int argc, char **argv)
     makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
     Sets("outdir_previous_iteration", Gets("outdir"));
   }
+  free_global_parameter_database_contents(); /* free strings in parameter database pdb */
   return 0;
 }
 
