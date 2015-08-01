@@ -1,8 +1,10 @@
 /* variables.c */
 /* Wolfgang Tichy, April 2005 */
 
-
 #include "sgrid.h"
+
+/* global var that tells us how often we have restarted sgrid */
+extern int sgrid_restarts;
 
 
 typedef struct {
@@ -51,17 +53,25 @@ void AddVar(char *name, char *tensorindices, char *description)
   tensorindexlist(tensorindices, &nilist, ilist, sym);
 
   /* for each tensor index */
-  for (j = 0; j < nilist; j++) {
-
+  for (j = 0; j < nilist; j++)
+  {
     /* construct name of variable */
     snprintf(fullname, 100, "%s%s", name, ilist[j]);
-    printf("  variable  %s\n", fullname);
-    if (0) printf("%13s%s%s\n", ss[sym[3*j]], ss[sym[3*j+1]], ss[sym[3*j+2]]);
 
     /* make sure that this variable does not exist yet */
-    for (i = 0; i < nvdb; i++) 
-      if (!strcmp(vdb[i].name, fullname))
-	errorexits("AddVar: variable \"%s\" already exists\n", fullname);
+    for(i = 0; i < nvdb; i++)
+      if(!strcmp(vdb[i].name, fullname))
+        break; /* this var is there already */
+
+    if(i < nvdb) /* we found a var that exist already */
+      if(sgrid_restarts==0)
+        errorexits("AddVar: variable \"%s\" already exists\n", fullname);
+      else
+        continue; /* jump to next var if sgrid_restarts!=0 */
+
+    /* print name of variable */
+    printf("  variable  %s\n", fullname);
+    if (0) printf("%13s%s%s\n", ss[sym[3*j]], ss[sym[3*j+1]], ss[sym[3*j+2]]);
 
     /* variable does not exist, so add a new element to data base */
     vdb = (tVar *) realloc(vdb, sizeof(tVar)*(nvdb+1));

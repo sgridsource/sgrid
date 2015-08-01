@@ -5,13 +5,12 @@
 #include "main.h"
 
 
-/* global var that contains time (in s) at the start of sgrid */
-extern double time_in_s_at_sgrid_start;
+/* global var that tells us how often we have restarted sgrid */
+int sgrid_restarts;
 
 
 /* initialize libraries 
-   the automatically generated file calls the initializers for each module
-*/
+   the automatically generated file calls the initializers for each module */
 void initialize_libraries(void)
 {
   prdivider(0);
@@ -22,37 +21,112 @@ void initialize_libraries(void)
 
 
 
-
 /**************************************************************************/
 /* main */
 int main(int argc, char **argv) 
 {
   tGrid *g;
+  int restart;
+  int largc; char **largv;
 
-  time_in_s_at_sgrid_start = getTimeIn_s();
-  read_command_line(argc, argv);
-  parse_parameter_file(Gets("parameterfile"));
-  parse_command_line_options();
-  make_output_directory();
-  initialize_libraries();
+  /* sgrid can restart itself, if we start it like this:
+     sgrid --argsfile args.txt
+     The file args.txt contains lines with sgrid args (parfile and options).
+     sgrid will go through these lines and run with each line. If there
+     is more than one line it will restart. */
+  for(sgrid_restarts=0, restart=1;  restart;  sgrid_restarts++)
+  {
+    char buffer[5000];
+    restart = get_next_argument_line(argc, argv, buffer, &largc, &largv);
 
-  while (iterate_parameters()) {
-    RunFun(POST_PARAMETERS, 0); /* hook for funs right after iterate_parameters */
-    RunFun(PRE_GRID, 0);  /* hook for special grid preparation */
-    g = make_grid(1);
-    RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
-    initialize_grid(g);
-    evolve_grid(g);
-    finalize_grid(g);
-    RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
-    makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
-    Sets("outdir_previous_iteration", Gets("outdir"));
-  }
-  free_global_parameter_database_contents(); /* free strings in parameter database pdb */
+    if(sgrid_restarts>0) /* check if this a restart, i.e. not first run */
+    {
+      if(restart==0) break; /* stop if no more command line args */
+      prdivider(0);         /* otherwise print info */
+      printf("*** sgrid restart %d ***\n", sgrid_restarts);
+      printf("This is fragile: All static C-vars are unchanged on restart! Vars and Funs\n"
+             "are also unchanged! This is wrong if certain Pars change on restart!\n");
+    }
+    
+    /* start the main parts of sgrid: */
+    initTimeIn_s();
+    read_command_line(largc, largv);
+    parse_parameter_file(Gets("parameterfile"));
+    parse_command_line_options();
+    make_output_directory();
+    initialize_libraries();
+
+    iterate_parameters(0); /* start of new iteration */
+    while(iterate_parameters(1))
+    {
+      RunFun(POST_PARAMETERS, 0); /* hook for funs right after iterate_parameters */
+      RunFun(PRE_GRID, 0);  /* hook for special grid preparation */
+      g = make_grid(1);
+      RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
+      initialize_grid(g);
+      evolve_grid(g);
+      finalize_grid(g);
+      RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
+      makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
+      Sets("outdir_previous_iteration", Gets("outdir"));
+    }
+    free_global_parameter_database_contents(); /* free strings in parameter database pdb */
+    /* NOTE: currently we do not free vdb in variables.c */
+    /*       we also do not free fps in skeleton.c */
+  } /* end sgrid_restarts loop */
   return 0;
 }
 
 
+
+/* get multiple command lines from a file and return the args in 
+   largc, largv */
+int get_next_argument_line(int argc, char **argv, char *buffer,
+                           int *largc, char ***largv)
+{
+  static FILE *fp=NULL;
+  char *argsfile;
+  char line[5000];
+  char *str = buffer;
+  int ret;
+
+  /* default is to just return argc,argv in largc,largv */
+  *largc = argc;
+  *largv = argv;
+
+  /* do nothing if we are not in multiple command line mode */
+  if(argc!=3) return 0;
+  if(strcmp(argv[1], "--argsfile")!=0) return 0;
+
+  argsfile = argv[2];
+  printf("Reading multiple command line arguments from file %s\n", argsfile);
+
+  /* open argsfile  */
+  if(fp==NULL) fp = fopen(argsfile, "r");
+  if(fp==NULL)
+  {
+    printf("Could not open file \"%s\"\n", argsfile);
+    errorexit("");
+  }
+
+  /* get one line from argsfile */
+  do
+  {
+    ret = fscanline(fp, line);
+    if(ret==EOF) { fclose(fp); fp=NULL; return 0;}
+    if(ret>0) if(line[0]=='#') ret=0; /* skip lines starting with # */
+  } while(ret==0);
+
+  /* str = argv[0] + line */
+  strcpy(str, argv[0]);
+  strcat(str, " ");
+  strcat(str, line);
+
+  /* set largc,largv pointers from str */
+  *largc = construct_argv(str, largv);
+
+  return 1;
+}
 
 
 /* read command line */
@@ -69,9 +143,11 @@ int read_command_line(int argc, char **argv)
     printf("Welcome to sgrid.\n");
     printf("Usage:  sgrid name.par\n");
     printf("or:     sgrid name.par options and extra arguments\n");
+    printf("or:     sgrid --argsfile args.txt\n");
     printf("\n");
     printf("options: --keep_previous           do not touch name_previous\n");
     printf("         --modify-par:\"P=v\"        set par P to value v\n");
+    printf("         --argsfile                read sgrid args from file\n");
     printf(" all options must start with --\n"); 
     exit(0);
   }

@@ -32,6 +32,12 @@ void prdivider(int n)
   fflush(stdout);
 }
 
+/* initialize time_in_s_at_sgrid_start */
+void initTimeIn_s(void)
+{
+  double t_in_s = time(NULL);
+  time_in_s_at_sgrid_start = t_in_s;
+}
 
 /* get current time in seconds */
 double getTimeIn_s(void)
@@ -318,6 +324,7 @@ int system3(char *s1, char *s2, char *s3)
 }
 
 /* construct an argv array from a string and return number of args */
+/* NOTE: str is modified and used as mem for argv! */
 int construct_argv(char *str, char ***argv)
 {
   char *str1, *token, *saveptr;

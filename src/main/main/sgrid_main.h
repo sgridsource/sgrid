@@ -124,6 +124,7 @@ void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
 tParameter *make_empty_pdb(int npdb1max);
 void copy_pdb(tParameter *pdb1, int npdb1, tParameter *pdb2);
 void free_pdb(tParameter *pdb1, int npdb1);
+void free_global_parameter_database_contents(void);
 
 /* skeleton.c */
 enum
@@ -162,6 +163,7 @@ void errorexiti(char *file, int line, char *s, int i);
 void yo(void);
 void Yo(double x);
 void prdivider(int n);
+void initTimeIn_s(void);
 double getTimeIn_s(void);
 void prTimeIn_s(char *comment);
 double min2(double x, double y);

@@ -6,6 +6,9 @@
 #include "sgrid.h"
 #include "main.h"
 
+/* global var that tells us how often we have restarted sgrid */
+extern int sgrid_restarts;
+
 
 typedef struct tTODO {
   struct tTODO *next;
@@ -17,10 +20,12 @@ tTodo *fps[NFUNCTIONS];
 
 
 
-
 void AddFun(int step, int (*f)(tGrid *), char *name)
 {
   tTodo *t;
+
+  /* do not add func again if this is a restart of sgrid */
+  if(sgrid_restarts>0) return;
 
   if (1) printf("  function  %s\n", name);
 

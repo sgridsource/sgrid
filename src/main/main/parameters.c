@@ -26,6 +26,7 @@ int npdb, npdbmax = 1000;
 tParameter *findparameter(char *name, int fatal);
 void setparameter(char *name, char *value);
 void makeparameter(char *name, char *value, char *description);
+void printparameter(tParameter *p);
 void printparameters(void);
 void translatevalue(char **value);
 int set_numericalvalue_byIndex(tParameter *pdb1, int ind, int npdb1max);
@@ -286,6 +287,11 @@ int set_booleanvalue_byIndex(tParameter *pdb1, int ind, int npdb1max)
 }
 
 
+void printparameter(tParameter *p)
+{
+  printf("%16s = %-16s,  %s\n                 = %g  ->  %d\n",
+  p->name, p->value, p->description,  p->numericalvalue, p->booleanvalue);
+}
 
 /* print parameters */
 void printparameters(void)
@@ -509,7 +515,7 @@ int GetParIndex(char *name)
 
 
 /**************************************************************************/
-int iterate_parameters(void)
+int iterate_parameters(int next)
 {
   static int ncall = 0;
   tParameter *p;
@@ -517,6 +523,9 @@ int iterate_parameters(void)
   char iterpar[100] = "iterate_parameter1";
   char newoutdir[10000], *outdirp;
   int i, j, l;
+
+  /* reset ncall to zero if next=0 */
+  if(next==0) { ncall=0;  return 0; }
 
   /* the default is that we don't want to iterate */
   if (!Getv("iterate_parameters", "yes")) {
