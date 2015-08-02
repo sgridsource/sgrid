@@ -117,7 +117,8 @@ void checkpoint_write_local(tGrid *g, FILE *fp)
 	  /* write */
 	  fprintf(fp, "$variable = %s : box = %d , box->nnodes = %d\n",
 	          VarName(i), b, box->nnodes);
-	  fwrite(box->v[i], sizeof(double), box->nnodes, fp);
+	  /* fwrite(box->v[i], sizeof(double), box->nnodes, fp); */
+	  fwrite_double_little(box->v[i], box->nnodes, fp);
           fprintf(fp, "\n");
 
 	  n += box->nnodes;
@@ -144,7 +145,8 @@ void checkpoint_write_local(tGrid *g, FILE *fp)
 	  /* write */
 	  fprintf(fp, "$variable = %s : box = %d , box->nnodes = %d\n",
 	          VarName(i), b, box->nnodes);
-	  fwrite(box->v[i], sizeof(double), box->nnodes, fp);
+	  /* fwrite(box->v[i], sizeof(double), box->nnodes, fp); */
+	  fwrite_double_little(box->v[i], box->nnodes, fp);
           fprintf(fp, "\n");
 
 	  n += box->nnodes;
