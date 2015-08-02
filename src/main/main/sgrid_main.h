@@ -244,3 +244,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a);
 
 tVarList *VLPtrEnable1(tGrid *grid, char *varname);
 void VLDisableFree(tVarList *vl);
+
+/* endianIO.c */
+size_t fwrite_double_little(const double *buf, size_t nmemb, FILE *fp);
+size_t fread_double_little(double *buf, size_t nmemb, FILE *fp);
