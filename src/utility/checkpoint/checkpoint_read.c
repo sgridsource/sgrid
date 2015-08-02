@@ -214,7 +214,8 @@ void checkpoint_read_Vars_local(tGrid *grid, FILE *fp)
     if(ilax>=0 && box->v[i] != 0)
     {
       /* read */
-      fread(box->v[i], sizeof(double), nnodes_on_l, fp);
+      /* fread(box->v[i], sizeof(double), nnodes_on_l, fp); */
+      fread_double_little(box->v[i], nnodes_on_l, fp);
 
       nv++;
       n += nnodes_on_l;
