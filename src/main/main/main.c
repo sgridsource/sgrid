@@ -38,7 +38,11 @@ int main(int argc, char **argv)
      sgrid --argsfile args.txt
      The file args.txt contains lines with sgrid args (parfile and options).
      sgrid will go through these lines and run with each line. If there
-     is more than one line it will restart. */
+     is more than one line it will restart. If sgrid is compiled with
+     DFLAGS += -DUSEMPI
+     and we have several MPI processes, each process will do a different
+     line. Lines will be equally divided among MPI processes. E.g. proc0
+     will do every third line if there are 3 MPI proceesses. */
   sgrid_restarts=0;
   do
   {
