@@ -2,7 +2,7 @@
 
 NAME := main
 
-OBJS := sgrid_main.o main.o parameters.o skeleton.o tensors.o utilities.o variables.o endianIO.o
+OBJS := sgrid_main.o main.o parameters.o skeleton.o tensors.o utilities.o variables.o endianIO.o sgrid_MPI.o
 
 
 # main is special, so we do not use Makefile.subdirs here

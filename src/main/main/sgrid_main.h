@@ -248,3 +248,10 @@ void VLDisableFree(tVarList *vl);
 /* endianIO.c */
 size_t fwrite_double_little(const double *buf, size_t nmemb, FILE *fp);
 size_t fread_double_little(double *buf, size_t nmemb, FILE *fp);
+
+/* sgrid_MPI.c */
+int sgrid_MPI_Init(int *pargc, char ***pargv);
+int sgrid_MPI_Finalize(void);
+int sgrid_MPI_rank(void);
+int sgrid_MPI_size(void);  
+int bampi_barrier(void);
