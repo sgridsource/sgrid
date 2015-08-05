@@ -48,7 +48,7 @@ int sgrid_MPI_size(void)
 }
 
 /* barrier */
-int bampi_barrier(void)
+int sgrid_MPI_barrier(void)
 {
   int ret=0;
 #ifdef USEMPI

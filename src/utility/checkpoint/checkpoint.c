@@ -232,13 +232,13 @@ void checkpoint_copy_output(void)
   /* wait here to make sure proc0 has copied all there is */
   sgrid_mpi_barrier();
          
-  /* redirect stdout and stderr for multiprocessor jobs */
-  if (!processor0)
+  /* redirect stdout and stderr for MPI jobs */
+  /* this block really does something when MPI is on */
+  if (sgrid_MPI_rank()>0)
   {
     char s[1000], f[100];
-
-    sprintf(f, "%%s/stdout.%%0%dd", (int) log10(sgrid_mpi_size())+1);
-    sprintf(s, f, current, sgrid_mpi_rank());
+    sprintf(f, "%%s/stdout.%%0%dd", (int) log10(sgrid_MPI_size())+1);
+    sprintf(s, f, current, sgrid_MPI_rank());
     freopen(s, "a", stdout);
     freopen(s, "a", stderr);
   }

@@ -254,4 +254,4 @@ int sgrid_MPI_Init(int *pargc, char ***pargv);
 int sgrid_MPI_Finalize(void);
 int sgrid_MPI_rank(void);
 int sgrid_MPI_size(void);  
-int bampi_barrier(void);
+int sgrid_MPI_barrier(void);
