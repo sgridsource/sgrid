@@ -42,7 +42,7 @@ int main(int argc, char **argv)
      DFLAGS += -DUSEMPI
      and we have several MPI processes, each process will do a different
      line. Lines will be equally divided among MPI processes. E.g. proc0
-     will do every third line if there are 3 MPI proceesses. */
+     will do every third line if there are 3 MPI processes. */
   sgrid_restarts=0;
   do
   {
