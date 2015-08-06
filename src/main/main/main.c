@@ -105,7 +105,7 @@ int get_next_argument_line(int argc, char **argv, char *buffer,
                            int *largc, char ***largv, int *lnum)
 {
   static FILE *fp=NULL;
-  static arglinenum=0; /* contains line number of args we read */
+  static int arglinenum=0; /* contains line number of args we read */
   char *argsfile;
   char line[5000];
   char *str = buffer;
