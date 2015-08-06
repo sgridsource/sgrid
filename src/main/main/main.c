@@ -52,7 +52,8 @@ int main(int argc, char **argv)
     /* do nothing at all if rank>0 and there is no line */
     if( sgrid_MPI_rank()>0 && restart==0 ) break;
     /* continue with next line if this line is not for this rank */
-    if( (lnum+sgrid_MPI_rank()) % sgrid_MPI_size() != 0 ) continue;
+    if( sgrid_MPI_rank()>lnum ) continue;
+    if( (lnum-sgrid_MPI_rank()) % sgrid_MPI_size() != 0 ) continue;
 
     if(sgrid_restarts>0) /* check if this a restart, i.e. not first run */
     {
