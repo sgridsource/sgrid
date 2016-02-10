@@ -70,6 +70,8 @@ rfile = argvs[0]
 for rfile in argvs:
     print('Reading', rfile)
     with open(rfile, 'rb') as f:
+        ntheta = 0
+        nphi = 0
         while True:
             line = f.readline()
             if not line:
@@ -143,6 +145,11 @@ for rfile in argvs:
                 ndat = ndat + len(li)
                 if ndat >= npoints:
                     readdata = 0
+
+    # check if we read data
+    if npoints == 0:
+        print('  Error no data found!')
+        continue
 
     # now that we have read all data, give some info
     print('# gridfunction =', gridfunction)
