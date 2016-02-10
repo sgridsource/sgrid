@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-# bamSphDF_to_tgraph.py - add theta- and phi-coordinates to bam sphere
-# output files.
+# quadrantSymFix.py - fix output bug in old bam waves, assuming quadrant
+# symmetry in region 0<theta<pi/4, phi>pi .
 
 from __future__ import print_function
 
