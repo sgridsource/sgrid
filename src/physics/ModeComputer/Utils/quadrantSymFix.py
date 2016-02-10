@@ -57,7 +57,7 @@ def getparameter(line, par):
 
 if len(sys.argv) < 2:
     print('quadrantSymFix.py:')
-    print('add theta- and phi-coordinates to bam sphere output files.\n')
+    print('fix sphere output bug in old bam waves by assuming quadrant symmetry\n')
     print('Usage:')
     print('quadrantSymFix.py file1 file2 ...')
     exit(0)
