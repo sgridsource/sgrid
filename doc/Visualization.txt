@@ -1,0 +1,16 @@
+Visualization of 0D, 1D and 2D output
+-------------------------------------
+Usually sgrid outputs ASCII text files for 0D, 1D and 2D output (with file
+name endings like .X0 or .XY0). They can be plotted with e.g. gnuplot or
+ygraph. However, it is more comfortable to use tgraph form
+https://github.com/wofti/tgraph
+for this.
+
+Visualization of 3D output
+-------------------------- 
+sgrid can also output 3D data either in VTK legacy format or in sgrid's
+own binary format. To visualize it, we can use programs like ParaView or
+xyzgraph which comes with bam. We can also get 1D or 2D slices of the 3D
+data by using the utilities
+sgrid/utilities/sgrid3d_to_1d.c    sgrid/utilities/sgrid3d_to_2d.c
+These slices can then be plotted with tgraph.
