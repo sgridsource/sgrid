@@ -1,8 +1,10 @@
 /* Poisson2.c */
 /* Wolfgang Tichy 2016 */
 
-/* Example module, where we solve two Poisson equations:
-   the eqs are in F_Poisson2 and the linearized versions are in J_Poisson2 */
+/* Example module, where we solve two Poisson equations for Psi and Chi:
+   The eqs are in F_Poisson2 and the linearized versions are in J_Poisson2 .
+   The domain is a spherical shell. Psi and Chi are equal to different
+   constants on the inner and outer shell boundary. */
 
 #include "sgrid.h"
 #include "Poisson2.h"
