@@ -236,7 +236,6 @@ int remove_dir(char *which_dir)
   DIR           *d;
   struct dirent *dir;
   char file[1000];
-  struct stat s;
   
   d = opendir(which_dir);
   if(d)
