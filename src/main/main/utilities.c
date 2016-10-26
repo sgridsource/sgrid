@@ -447,26 +447,32 @@ void *pmalloc(int n)
 
 void errorexit(char *file, int line, char *s) 
 {
+  fflush(stdout);
   fprintf(stderr, "Error: %s  ", s);
   fprintf(stderr, "(%s, line %d)\n", file, line);
+  fflush(stderr);
   sgrid_MPI_Finalize();
   exit(1);
 }
 
 void errorexits(char *file, int line, char *s, char *t)
 {
+  fflush(stdout);
   fprintf(stderr, "Error: ");
   fprintf(stderr, s, t);
   fprintf(stderr, "  (%s, line %d)\n", file, line);
+  fflush(stderr);
   sgrid_MPI_Finalize();
   exit(1);
 }
 
 void errorexiti(char *file, int line, char *s, int i)
 {
+  fflush(stdout);
   fprintf(stderr, "Error: ");
   fprintf(stderr, s, i);
   fprintf(stderr, "  (%s, line %d)\n", file, line);
+  fflush(stderr);
   sgrid_MPI_Finalize();
   exit(1);
 }
