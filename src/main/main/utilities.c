@@ -381,6 +381,23 @@ int system_emu(const char *command)
   return status;
 }
 
+/* Lock a file from current file position to the end. The lock will be
+   released when the file is closed.
+   fd is a file descriptor open for writing. */
+int lock_curr_til_EOF(FILE *out)
+{
+  int fd = fileno(out); /* get file dscriptor */
+  if(fd==-1) return fd; /* return -1 on error */
+  return lockf(fd, F_LOCK, 0);
+}
+/* Unlock a file from current file position to the end.
+   fd is a file descriptor open for writing. */
+int unlock_curr_til_EOF(FILE *out)
+{
+  int fd = fileno(out); /* get file dscriptor */
+  if(fd==-1) return fd; /* return -1 on error */
+  return lockf(fd, F_ULOCK, 0);
+}
 
 
 /* preliminary ... */
