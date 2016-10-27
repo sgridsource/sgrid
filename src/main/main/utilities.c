@@ -374,7 +374,8 @@ int system_emu(const char *command)
       status = ret = -42;
     }  
     else
-      status = WEXITSTATUS(ret);
+      status = ret;
+    //printf("wret=%d  ret=%d  status=%d\n", wret, ret, status);
   }
   if(status!=0) printf(" -> WARNING: Return value = %d\n", status);
   free(com);
