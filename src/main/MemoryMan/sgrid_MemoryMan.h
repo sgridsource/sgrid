@@ -71,9 +71,9 @@ typedef struct tBOX {
   int ibbox[6];	/* global bounding box in index range */
 } tBox;
 
-/* several boxs make up a numerical grid */
+/* several boxes make up a numerical grid */
 typedef struct tGRID {
-  tBox **box;	/* list of pointers to boxs */
+  tBox **box;	/* list of pointers to boxes */
   int nboxes;	/* number of boxes */
   int nvariables;	/* number of variables */
   int iteration;	/* number of iterations */
