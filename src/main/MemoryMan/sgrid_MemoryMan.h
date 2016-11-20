@@ -81,6 +81,20 @@ typedef struct tGRID {
   double dt;	/* time step */
 } tGrid;
 
+/* Note: To include info about which boxes touch or overlap tGrid
+could also contain info about transitions between boxes:
+  tTransition **trans;  // list of pointers to transitions
+  int ntrans;           // number of transitions
+where
+typedef struct tFACE {
+  int b;  // index of box on which face is located
+  int f;  // face index. Runs from 0 to 5 like bbox (for each box)
+} tFace;
+typedef struct tTRANSITION {
+  tFace f0, f1;  // the 2 faces that coincide
+                 // if f1.f<0, f0 coincides only with interior of box f1.b
+} tTransition;
+*/
 
 
 
