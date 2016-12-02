@@ -29,7 +29,7 @@ void AddFun(int step, int (*f)(tGrid *), char *name)
 
   if (1) printf("  function  %s\n", name);
 
-  if (!fps[step]) fps[step] = (tTodo *) calloc(sizeof(tTodo), 1);
+  if (!fps[step]) fps[step] = (tTodo *) calloc(1, sizeof(tTodo));
 
   for (t = fps[step]; t->next; t = t->next);
   t->next = (tTodo *) calloc(1, sizeof(tTodo));
