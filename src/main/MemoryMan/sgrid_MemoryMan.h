@@ -88,12 +88,15 @@ could also contain info about BCs for boxes:
 where
 // tBface is a part of a box face where we use the same BC
 typedef struct tBFACE {
-  tBox *box; // box on which Bface is located
-  int f;     // face index, runs from 0 to 5 like bbox (for each box)
-  double brect[4]; // bounding rectangle: brect[i]={min1,max1,min2,max2}[i]
-  int ibrect[4]; // bound rect ind ranges: ibrect[i]={min1,max1+1,min2,max2+1}[i]
+  tBox *box;  // box on which Bface is located
+  int f;      // face index, runs from 0 to 5 like bbox (for each box)
+  double brect[4]; // bounding rectangle: brect[n]={min1,max1,min2,max2}[n]
+  int ibrect[4];   // bound rect ind ranges (inds are e.g. i1=j, i2=k if f=1):
+                   // ibrect[n]={min1,max1+1,min2,max2+1}[n], N2=max2+1-min2
+  double *n[3];    // normal of face at i1,i2 in Cartesian coords:
+                   // e.g. nx=n[1][i1-min1 + N2*(i2-min2)] (needs calloc)
   tBox *obox;      // other box that touches or overlaps
-  int of;          // touching face of other box (if they are touching)
+  int   of;        // touching face of other box (if they are touching)
   int ioX,ioY,ioZ; // ind of vars in this box that contain coords in other box
   int overlap        : 1;  // 1 if tBface overlaps with other box
   int touch          : 1;  // 1 if tBface touches other face
