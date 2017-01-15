@@ -81,19 +81,29 @@ typedef struct tGRID {
   double dt;	/* time step */
 } tGrid;
 
-/* Note: To include info about which boxes touch or overlap tGrid
-could also contain info about transitions between boxes:
-  tTransition **trans;  // list of pointers to transitions
-  int ntrans;           // number of transitions
+/* Note: To include info about which boxes touch or overlap tBox
+could also contain info about BCs for boxes:
+  struct tBFACE **bface;  // list of pointers to tBface
+  int nbfaces;            // number of Bfaces on this box
 where
-typedef struct tFACE {
-  int b;  // index of box on which face is located
-  int f;  // face index. Runs from 0 to 5 like bbox (for each box)
-} tFace;
-typedef struct tTRANSITION {
-  tFace f0, f1;  // the 2 faces that coincide
-                 // if f1.f<0, f0 coincides only with interior of box f1.b
-} tTransition;
+// tBface is a part of a box face where we use the same BC
+typedef struct tBFACE {
+  tBox *box; // box on which Bface is located
+  int f;     // face index, runs from 0 to 5 like bbox (for each box)
+  double brect[4]; // bounding rectangle: brect[i]={min1,max1,min2,max2}[i]
+  int ibrect[4]; // bound rect ind ranges: ibrect[i]={min1,max1+1,min2,max2+1}[i]
+  tBox *obox;      // other box that touches or overlaps
+  int of;          // touching face of other box (if they are touching)
+  int ioX,ioY,ioZ; // ind of vars in this box that contain coords in other box
+  int overlap        : 1;  // 1 if tBface overlaps with other box
+  int touch          : 1;  // 1 if tBface touches other face
+  int touch_same1    : 1;  // 1 if coord1 of points in touching faces is same 
+  int touch_same2    : 1;  // 1 if coord2 of points in touching faces is same
+  int outerbound     : 1;  // 1 if outer boundary
+  int innerbound     : 1;  // 1 if inner boundary
+  int setfield       : 1;  // 1 if we set field
+  int setnormalderiv : 1;  // 1 if we set normal derivs of field
+} tBface;
 */
 
 
