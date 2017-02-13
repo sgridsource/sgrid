@@ -21,5 +21,7 @@ int sgrid_main(void)
   AddPar("iterations", "0", "number of grid iterations");
   AddPar("finaltime", "0", "iterate until grid reaches this time");
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
+
+  AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
   return 0;
 }

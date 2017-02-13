@@ -435,8 +435,16 @@ void *pmalloc(int n)
 }
 
 
+/********************************************/
+/* Functions that have to do with errorexit */
+/********************************************/
 
-
+/* function that selects how we exit inside errorexit */
+void finalexit(int ec)
+{
+  if(Getv("errorexit", "abort"))  abort();
+  else                            exit(ec);
+}
 
 /* the one function every program should have */
 /* note that sgrid_main.h defines a macro so that the user does not have
@@ -453,7 +461,7 @@ void errorexit(char *file, int line, char *s)
   fprintf(stderr, "(%s, line %d)\n", file, line);
   fflush(stderr);
   sgrid_MPI_Finalize();
-  exit(1);
+  finalexit(1);
 }
 
 void errorexits(char *file, int line, char *s, char *t)
@@ -464,7 +472,7 @@ void errorexits(char *file, int line, char *s, char *t)
   fprintf(stderr, "  (%s, line %d)\n", file, line);
   fflush(stderr);
   sgrid_MPI_Finalize();
-  exit(1);
+  finalexit(1);
 }
 
 void errorexiti(char *file, int line, char *s, int i)
@@ -475,7 +483,7 @@ void errorexiti(char *file, int line, char *s, int i)
   fprintf(stderr, "  (%s, line %d)\n", file, line);
   fflush(stderr);
   sgrid_MPI_Finalize();
-  exit(1);
+  finalexit(1);
 }
 
 /* do not write functions beyond this line because the undef/define 
