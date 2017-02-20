@@ -1,6 +1,6 @@
-In sgrid we use standard C99 code and functions. We avoid operating specific
-function calls. Since there is no real documentation we rely on nicely
-written code with plenty of comments.
+In sgrid we use standard C99 code and functions. We avoid operating system
+specific function calls. Since there is no real documentation we rely on
+nicely written code with plenty of comments.
 
 For readable code formatting we use:
 -----------------------------------
