@@ -55,9 +55,13 @@ In general we may need some info:
 (gdb) info variables
 (gdb) info symbol 0x7ffff66dae40
 
-Sometimes we are left with a core file. This can be loaded with
-
-(gdb) <fill this in>
+Sometimes we are left with a core file. This can be loaded with:
+================================================================
+gdb /home1/00304/tg455767/sgrid/exe/sgrid core.46702
+(gdb) bt
+Note: On most systems core files seem to be off bt default, but e.g. on
+      stampede I could activate them by typing:
+ulimit -c 6000000
 
 --------
 
