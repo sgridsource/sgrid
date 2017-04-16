@@ -72,26 +72,28 @@ int rtsafe_itsP(double *x0,
     else
       xh=rts;
 
-    /* test if Newton step is possible */
+    /* test if Newton step could be possible */
     if( !isfinite(df) )
       bisect = 1;
     else 
-      bisect = (((rts-xh)*df-f)*((rts-xl)*df-f) > 0.0) ||
-               (fabs(2.0*f) > fabs(dxold*df));
-    if(bisect) /* Bisection step */
-    {
-      dxold=dx;
-      dx=0.5*(xh-xl);
-      rts=xl+dx;
-      if(xl == rts) { *x0=rts; return j; }
-    }
-    else /* Newton step */
+      bisect = (fabs(2.0*f) > fabs(dxold*df));
+
+    if(bisect==0) /* try Newton step */
     {
       dxold=dx;
       dx=f/df;
       temp=rts;
       rts -= dx;
       if(temp == rts) { *x0=rts; return j; }
+      /* check if Newton step brings us outside interval */
+      if( (rts-xh)*(rts-xl) > 0.0 ) { bisect=1; rts=temp; dx=dxold; }
+    }
+    if(bisect) /* Bisection step */
+    {
+      dxold=dx;
+      dx=0.5*(xh-xl);
+      rts=xl+dx;
+      if(xl == rts) { *x0=rts; return j; }
     }
     /* check accuracy goal */
     if(fabs(dx) < xacc) { *x0=rts; return j; }
