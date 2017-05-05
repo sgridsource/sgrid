@@ -382,6 +382,10 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
     g_new->box[b]->TransformType2 = g_old->box[b]->TransformType2;
     g_new->box[b]->TransformType3 = g_old->box[b]->TransformType3;
 
+    /* copy attributes of boxes */
+    for(i = 0; i < NATTRIBS; i++)
+    g_new->box[b]->Attrib[i] = g_old->box[b]->Attrib[i];
+
     /* copy diff., filter matrices, ..., and all other arrays */
     for (i = 0; i < n1*n1; i++, ijk++)
     {

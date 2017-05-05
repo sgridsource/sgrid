@@ -1,6 +1,8 @@
 /* sgrid_MemoryMan.h */
 /* Wolfgang Tichy, April 2005 */
 
+/* number of attributes a box can have */
+#define NATTRIBS 10
 
 /*************************************************************************/
 /* basic structures */
@@ -64,11 +66,13 @@ typedef struct tBOX {
   void (*filter_coeffs1)(double *, int, int);
   void (*filter_coeffs2)(double *, int, int);
   void (*filter_coeffs3)(double *, int, int);
-  int TransformType1;
-  int TransformType2;
+  int TransformType1; /* If we use FFT and which FFT we use */
+  int TransformType2; /* all 3 from set_TransformType_flags_inbox(tBox *box) */
   int TransformType3;
   double bbox[6];	/* global bounding box */
-  int ibbox[6];	/* global bounding box in index range */
+  int ibbox[6];	        /* global bounding box in index range */
+  int Attrib[NATTRIBS]; /* Each box can have attributes. They are usually set
+                           and used inside certain modules/Projects. */
 } tBox;
 
 /* several boxes make up a numerical grid */
