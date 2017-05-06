@@ -47,17 +47,7 @@
 
 
 /**************************************************************************/
-/* point lists */
-typedef struct tPL
-{
-  tGrid  *grid;  /* grid to which points belong */
-  int *npoints;  /* npoints[b] = number of points in list in box b */
-  int **point;   /* point[b] = array containing indices of all the points 
-                    in the list in box b */
-  int *blist;    /* list of boxes in which we have points */
-  int nblist;    /* number of boxes in blist */
-} tPointList;
-
+/* loops over point lists */
 
 /* loop over all points ijk in all boxes in list pointlist */
 #define forPointList(pointlist, boxindex, pi , ijk) \

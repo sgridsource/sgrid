@@ -67,7 +67,7 @@ int boxlist_boxneighbors(tBox *box, int **blist)
   int i, i2, n=0;
   for(i=0; i<box->nbfaces; i++)
   {
-    int nb = box->bface[i]->obox->b; // get neighbor index nb
+    int nb = box->bface[i]->ob; // get neighbor index nb
     int addnb = 1;
     // add nb only if it is not already in blist
     for(i2=0; i2<n; i2++) if((*blist)[i2]==nb) { addnb=0; break; }

@@ -73,6 +73,8 @@ typedef struct tBOX {
   int ibbox[6];	        /* global bounding box in index range */
   int Attrib[NATTRIBS]; /* Each box can have attributes. They are usually set
                            and used inside certain modules/Projects. */
+  struct tBFACE **bface;  // list of pointers to tBface
+  int nbfaces;            // number of Bfaces on this box
 } tBox;
 
 /* several boxes make up a numerical grid */
@@ -85,32 +87,43 @@ typedef struct tGRID {
   double dt;	/* time step */
 } tGrid;
 
-/* Note: To include info about which boxes touch or overlap tBox
-could also contain info about BCs for boxes:
+/* point lists */
+typedef struct tPL
+{
+  tGrid  *grid;  /* grid to which points belong */
+  int *npoints;  /* npoints[b] = number of points in list in box b */
+  int **point;   /* point[b] = array containing indices of all the points 
+                    in the list in box b */
+  int *blist;    /* list of boxes in which we have points */
+  int nblist;    /* number of boxes in blist */
+} tPointList;
+
+/* Note: To include info about which boxes touch or overlap, tBox
+         also contains info about BCs for boxes:
   struct tBFACE **bface;  // list of pointers to tBface
   int nbfaces;            // number of Bfaces on this box
-where
-// tBface is a part of a box face where we use the same BC
+where tBface is a part of a box face that touches or overlaps at most one
+other box. We use the same BC on all of tBface. */
 typedef struct tBFACE {
-  tBox *box;  // box on which Bface is located
-  int f;      // face, runs from 0 to 5 like bbox (for each box)
-  int fi;     // face index: 0 <= fi < nbfaces
+  tGrid *grid; // grid in which our boxface is
+  int b;       // index of box on which Bface is located
+  int f;       // face, runs from 0 to 5 like bbox (for each box)
+  int fi;      // face index: 0 <= fi < nbfaces
   tPointList *fpts; // list of points on face, access w. forPointList_inbox
    // The normal vector is n^i_{a}=dx^i/dX^a, e.g. X^1=const face has n^i_{1}
    // dx^i/dX^a can be obtained from dX^a/dx^i using dXdx_from_dxdX
-  tBox *obox;      // other box that touches or overlaps
-  int   ofi;       // face index of other box (if they are touching)
+  int ob;          // ind. of other box that touches or overlaps, -1 if none
+  int ofi;         // face index of other box (if they are touching)
   int ioX,ioY,ioZ; // ind of vars in this box that contain coords in other box
-  int overlap        : 1;  // 1 if tBface overlaps with other box
-  int touch          : 1;  // 1 if tBface touches other face
-  int touch_same1    : 1;  // 1 if coord1 of points in touching faces is same 
-  int touch_same2    : 1;  // 1 if coord2 of points in touching faces is same
-  int outerbound     : 1;  // 1 if outer boundary
-  int innerbound     : 1;  // 1 if inner boundary
-  int setfield       : 1;  // 1 if we set field
-  int setnormalderiv : 1;  // 1 if we set normal derivs of field
+//  int overlap        : 1;  // 1 if tBface overlaps with other box
+//  int touch          : 1;  // 1 if tBface touches other face
+//  int touch_same1    : 1;  // 1 if coord1 of points in touching faces is same 
+//  int touch_same2    : 1;  // 1 if coord2 of points in touching faces is same
+//  int outerbound     : 1;  // 1 if outer boundary
+//  int innerbound     : 1;  // 1 if inner boundary
+//  int setfield       : 1;  // 1 if we set field
+//  int setnormalderiv : 1;  // 1 if we set normal derivs of field
 } tBface;
-*/
 
 
 
@@ -165,6 +178,10 @@ void printmatrix(double *M, int n);
 /* storage.c */
 tGrid *alloc_grid(int nboxes, int nvariables);
 void make_box(tGrid *g, tBox *box, int l);
+int add_empty_bface(tBox *box, int f);
+tBface *duplicate_bface_without_fpts_for_grid(tBface *bface0, tGrid *grid);
+tBface *duplicate_bface_for_grid(tBface *bface0, tGrid *grid);
+void free_bface(tBface *bface);
 void free_box(tBox *box);
 void free_grid_only(tGrid *g);
 void free_grid(tGrid *g);
@@ -189,6 +206,8 @@ tPointList *AllocatePointList(tGrid *grid);
 void AddToPointList(tPointList *PL, int boxindex, int newpoint);
 void FreePointList(tPointList *PL);
 void prPointList(tPointList *PL);
+tPointList *DuplicatePointList_for_grid(tPointList *PL0, tGrid *grid);
+tPointList *DuplicatePointList(tPointList *PL0);
 
 /* boxlists.c */
 void pr_boxlist(int *blist, int n);

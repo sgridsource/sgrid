@@ -151,6 +151,76 @@ tNode *alloc_nodes(tBox *box, int nnodes)
 }  
 
 
+/* add a bface to a box, f denotes the box face (0 to 5),
+   return index in bface list */
+int add_empty_bface(tBox *box, int f)
+{
+  int fi = box->nbfaces; /* add bface in this pos. in bface list */
+  void *ret;
+
+  /* increase size of bface list */
+  ret = realloc( box->bface, (sizeof( *(box->bface) ))*(fi+1) );
+  if(ret==NULL)  errorexit("add_bface: not enough memory for box->bface");
+  box->bface = ret;
+
+  /* mem for new bface */
+  ret = calloc( 1, sizeof( *(box->bface[fi]) ) );
+  if(ret==NULL) errorexit("add_bface: not enough memory for box->bface[n]");
+  /* add new bface */
+  box->bface[fi] = ret;
+  box->nbfaces = fi+1;
+
+  /* set some bface info */
+  box->bface[fi]->grid = box->grid;
+  box->bface[fi]->b    = box->b;
+  box->bface[fi]->f    = f;
+  box->bface[fi]->fi   = fi;
+  box->bface[fi]->ob   = -1; /* other box is not known yet */
+  return fi;
+}
+
+/* duplicate bface without pointlist fpts */
+tBface *duplicate_bface_without_fpts_for_grid(tBface *bface0, tGrid *grid)
+{
+  tBface *bface;
+  void *ret;
+  if(bface0==NULL) return NULL;
+
+  /* mem for new bface */
+  ret = calloc( 1, sizeof( *(bface) ) );
+  if(ret==NULL)
+    errorexit("duplicate_bface_without_fpts_for_grid: not enough memory");
+  bface = ret;
+
+  /* make a shallow copy of the struct */
+  *bface = *bface0;
+  /* now set grid pointer */
+  bface->grid = grid;
+  /* remove pointer to bface0->fpts */
+  bface->fpts = NULL;
+  
+  return bface;
+}
+
+/* duplicate bface with pointlist fpts */
+tBface *duplicate_bface_for_grid(tBface *bface0, tGrid *grid)
+{
+  tBface *bface = duplicate_bface_without_fpts_for_grid(bface0, grid);
+  /* copy fpts */
+  bface->fpts = DuplicatePointList_for_grid(bface0->fpts, grid);
+  return bface;
+}
+
+/* free a bface */
+void free_bface(tBface *bface)
+{
+  if(bface!=NULL)
+  {
+    /* free the point lists of the faces */ 
+    FreePointList(bface->fpts);
+    free(bface);
+  }
+}
 
 /* free box, currently leaves grid untouched */
 void free_box(tBox *box) 
@@ -181,7 +251,10 @@ void free_box(tBox *box)
   free(box->Int1);
   free(box->Int2);
   free(box->Int3);
-  
+
+  for(i=0; i < box->nbfaces; i++)  free_bface(box->bface[i]);
+  free(box->bface);
+
   free(box);
 }
 
