@@ -388,8 +388,11 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
 
     /* copy bfaces */
     for(i = 0; i < g_old->box[b]->nbfaces; i++)
-      g_new->box[b]->bface[i] 
+    {
+      add_empty_bface(g_new->box[b], -1);
+      g_new->box[b]->bface[i]
        = duplicate_bface_for_grid(g_old->box[b]->bface[i], g_new);
+    }
 
     /* copy diff., filter matrices, ..., and all other arrays */
     for (i = 0; i < n1*n1; i++, ijk++)

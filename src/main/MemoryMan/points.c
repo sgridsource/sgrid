@@ -85,19 +85,23 @@ void prPointList(tPointList *PL)
 {
   int i;
   int boxindex;
-  
-  printf("PointList=%p  PointList->grid=%p\n", PL, PL->grid);
-  pr_boxlist(PL->blist, PL->nblist);  
-  forallboxes(PL->grid,boxindex)
+  if(PL!=NULL)
   {
-     printf("PointList->npoints[%d]=%d  ", boxindex, PL->npoints[boxindex]);
-     printf("PointList->point[%d]=%p\n", boxindex, PL->point[boxindex]);
-  
-     printf("*(PointList->point[%d]) = ", boxindex);
-     for(i=0; i<PL->npoints[boxindex]; i++)
-       printf("%d ",PL->point[boxindex][i]);
-     printf("\n");
+    printf("PointList=%p  PointList->grid=%p\n", PL, PL->grid);
+    forallboxes(PL->grid,boxindex)
+    {
+      //if(PL->point[boxindex]==NULL) continue;
+      printf("PointList->npoints[%d]=%d  ", boxindex, PL->npoints[boxindex]);
+      printf("PointList->point[%d]=%p\n", boxindex, PL->point[boxindex]);
+
+      printf("*(PointList->point[%d]) = ", boxindex);
+      for(i=0; i<PL->npoints[boxindex]; i++)
+        printf("%d ",PL->point[boxindex][i]);
+      printf("\n");
+    }
+    pr_boxlist(PL->blist, PL->nblist);
   }
+  else printf("PointList=%p\n", PL);
 }
 
 /* return a duplicate of PL0 but put grid into it */

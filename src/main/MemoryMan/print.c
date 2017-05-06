@@ -57,7 +57,7 @@ void printbfaces(tBox *box)
     printf("b%d f%d fi%d  ob%d ofi%d  oXi,oYi,oZi=(%d,%d,%d)\n",
             bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
             bface->oXi,bface->oYi,bface->oZi);
-    printf("grid=%p  fpts=%p\n", bface->grid, bface->fpts);
+    printf("     fpts=%p  grid=%p\n", bface->fpts, bface->grid);
     prPointList(bface->fpts);
   }
 }
