@@ -95,7 +95,7 @@ typedef struct tBFACE {
   tBox *box;  // box on which Bface is located
   int f;      // face, runs from 0 to 5 like bbox (for each box)
   int fi;     // face index: 0 <= fi < nbfaces
-  tPointList *fpoints; // list of points on face, access w. forPointList_inbox
+  tPointList *fpts; // list of points on face, access w. forPointList_inbox
    // The normal vector is n^i_{a}=dx^i/dX^a, e.g. X^1=const face has n^i_{1}
    // dx^i/dX^a can be obtained from dX^a/dx^i using dXdx_from_dxdX
   tBox *obox;      // other box that touches or overlaps
@@ -189,3 +189,11 @@ tPointList *AllocatePointList(tGrid *grid);
 void AddToPointList(tPointList *PL, int boxindex, int newpoint);
 void FreePointList(tPointList *PL);
 void prPointList(tPointList *PL);
+
+/* boxlists.c */
+void pr_boxlist(int *blist, int n);
+int addto_boxlist(int bi, int **blist, int n);
+int boxlist_fromAttrib(tGrid *grid, int iAttr, int AttrVal, int **blist);
+int boxlist2_ifAttrib(tGrid *grid, int *blist1, int n1,
+                      int iAttr, int AttrVal, int **blist2);
+int boxlist_boxneighbors(tBox *box, int **blist);

@@ -24,7 +24,8 @@ tPointList *AllocatePointList(tGrid *grid)
  PL->grid=grid;
  PL->npoints=calloc(grid->nboxes, sizeof( *(PL->npoints) ) );
  PL->point  =calloc(grid->nboxes, sizeof( *(PL->point) ) );
-
+ PL->blist = NULL;
+ PL->nblist= 0;
  forallboxes(grid,boxindex)
  {
    PL->npoints[boxindex] = 0;
@@ -49,6 +50,15 @@ void AddToPointList(tPointList *PL, int boxindex, int newpoint)
  PL->point[boxindex]=ret;
  PL->point[boxindex][PL->npoints[boxindex]]=newpoint;
  PL->npoints[boxindex]++;
+
+ ret=realloc(PL->blist, ( sizeof(*(PL->blist)) )*(PL->nblist+255));
+ if(ret==NULL) 
+   errorexit("AddToPointList: not enough memory for PL->blist");
+ PL->blist  = ret;
+ //printf("PL->blist=%p\n", PL->blist);
+ //printf("ret=%p\n", ret);
+ //printf("%d\n",( sizeof(*(PL->blist)) )*(PL->nblist+255));
+ PL->nblist = addto_boxlist(boxindex, &(PL->blist), PL->nblist);
 }
 
 
@@ -64,6 +74,7 @@ void FreePointList(tPointList *PL)
 
    free(PL->npoints);
    free(PL->point);
+   free(PL->blist);
    free(PL);
  }
 }
@@ -76,7 +87,7 @@ void prPointList(tPointList *PL)
   int boxindex;
   
   printf("PointList=%p  PointList->grid=%p\n", PL, PL->grid);
-  
+  pr_boxlist(PL->blist, PL->nblist);  
   forallboxes(PL->grid,boxindex)
   {
      printf("PointList->npoints[%d]=%d  ", boxindex, PL->npoints[boxindex]);
