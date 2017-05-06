@@ -51,7 +51,7 @@ void AddToPointList(tPointList *PL, int boxindex, int newpoint)
  PL->point[boxindex][PL->npoints[boxindex]]=newpoint;
  PL->npoints[boxindex]++;
 
- ret=realloc(PL->blist, ( sizeof(*(PL->blist)) )*(PL->nblist+255));
+ ret=realloc(PL->blist, ( sizeof(*(PL->blist)) )*(PL->nblist+2));
  if(ret==NULL) 
    errorexit("AddToPointList: not enough memory for PL->blist");
  PL->blist  = ret;
