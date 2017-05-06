@@ -114,7 +114,7 @@ typedef struct tBFACE {
    // dx^i/dX^a can be obtained from dX^a/dx^i using dXdx_from_dxdX
   int ob;          // ind. of other box that touches or overlaps, -1 if none
   int ofi;         // face index of other box (if they are touching)
-  int ioX,ioY,ioZ; // ind of vars in this box that contain coords in other box
+  int oXi,oYi,oZi; // ind of vars in this box that contain coords in other box
 //  int overlap        : 1;  // 1 if tBface overlaps with other box
 //  int touch          : 1;  // 1 if tBface touches other face
 //  int touch_same1    : 1;  // 1 if coord1 of points in touching faces is same 
@@ -173,6 +173,7 @@ void printvar_inbox(tBox *box, char *name);
 void printvar(tGrid *grid, char *name);
 void printVarList(tVarList *vl);
 void printmatrix(double *M, int n);
+void printbfaces(tBox *box);
 
 
 /* storage.c */

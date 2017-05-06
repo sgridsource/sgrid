@@ -46,6 +46,22 @@ void printnode(tNode *n)
   printf("\n");
 }
 
+void printbfaces(tBox *box)
+{
+  int i;
+  printf("box->b=%d\n", box->b);
+  for(i=0; i<box->nbfaces; i++)
+  {
+    tBface *bface = box->bface[i];
+    printf("bface[%d]: ", i, bface[i]);
+    printf("b%d f%d fi%d  ob%d ofi%d  oXi,oYi,oZi=(%d,%d,%d)\n",
+            bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
+            bface->oXi,bface->oYi,bface->oZi);
+    printf("grid=%p  fpts=%p\n", bface->grid, bface->fpts);
+    prPointList(bface->fpts);
+  }
+}
+
 void printmatrix(double *M, int n)
 {
   int i,j;
