@@ -353,6 +353,7 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
       for (j = 0; j < 4; j++)
       {
         b_new->dX_dx[i][j] = b_old->dX_dx[i][j];
+        b_new->dx_dX[i][j] = b_old->dx_dX[i][j];
         for (k = 0; k < 4; k++)
           b_new->ddX_dxdx[i][j][k] = b_old->ddX_dxdx[i][j][k];
       }

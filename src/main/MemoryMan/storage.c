@@ -90,6 +90,7 @@ tBox *alloc_box(tGrid *g, int b, int n1, int n2, int n3)
     for(j=0;j<4;j++)
     {
       box->dX_dx[i][j] = NULL;
+      box->dx_dX[i][j] = NULL;
       for(k=0;k<4;k++)
         box->ddX_dxdx[i][j][k] = NULL;
     }
