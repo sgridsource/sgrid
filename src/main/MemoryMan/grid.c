@@ -320,16 +320,19 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
   /* copy box contents */
   for(b=0; b<g_new->nboxes ; b++)
   {
+    tBox *b_new = g_new->box[b];
+    tBox *b_old = g_old->box[b];
+
     /* copy values of bounding boxes */
     for(i=0; i<6; i++)
     {
-      g_new->box[b]->bbox[i]  = g_old->box[b]->bbox[i];
-      g_new->box[b]->ibbox[i] = g_old->box[b]->ibbox[i];
+      b_new->bbox[i]  = b_old->bbox[i];
+      b_new->ibbox[i] = b_old->ibbox[i];
     }
 
-    n1 = g_new->box[b]->n1;
-    n2 = g_new->box[b]->n2;
-    n3 = g_new->box[b]->n3;
+    n1 = b_new->n1;
+    n2 = b_new->n2;
+    n3 = b_new->n3;
 
     /* copy nodes */
     ijk = 0;
@@ -338,89 +341,88 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
         for (i = 0; i < n1; i++, ijk++)
         {
           /* copy nodes */
-          g_new->box[b]->node[ijk].i    = g_old->box[b]->node[ijk].i;	
-          g_new->box[b]->node[ijk].type = g_old->box[b]->node[ijk].type;
+          b_new->node[ijk].i    = b_old->node[ijk].i;	
+          b_new->node[ijk].type = b_old->node[ijk].type;
         }
 
     /* copy function pointers */
     for (i = 0; i < 4; i++, ijk++)
     {
-      g_new->box[b]->x_of_X[i]    = g_old->box[b]->x_of_X[i];
-      g_new->box[b]->Sing_d_dx[i] = g_old->box[b]->Sing_d_dx[i];
+      b_new->x_of_X[i]    = b_old->x_of_X[i];
+      b_new->Sing_d_dx[i] = b_old->Sing_d_dx[i];
       for (j = 0; j < 4; j++)
       {
-        g_new->box[b]->dX_dx[i][j] = g_old->box[b]->dX_dx[i][j];
+        b_new->dX_dx[i][j] = b_old->dX_dx[i][j];
         for (k = 0; k < 4; k++)
-          g_new->box[b]->ddX_dxdx[i][j][k] = g_old->box[b]->ddX_dxdx[i][j][k];
+          b_new->ddX_dxdx[i][j][k] = b_old->ddX_dxdx[i][j][k];
       }
     }
-    g_new->box[b]->basis1 = g_old->box[b]->basis1;
-    g_new->box[b]->basis2 = g_old->box[b]->basis2;
-    g_new->box[b]->basis3 = g_old->box[b]->basis3;
+    b_new->basis1 = b_old->basis1;
+    b_new->basis2 = b_old->basis2;
+    b_new->basis3 = b_old->basis3;
 
     /* copy FT func pointers */
-    g_new->box[b]->get_coeffs1 = g_old->box[b]->get_coeffs1;
-    g_new->box[b]->get_coeffs2 = g_old->box[b]->get_coeffs2;
-    g_new->box[b]->get_coeffs3 = g_old->box[b]->get_coeffs3;
-    g_new->box[b]->coeffs_of_deriv1 = g_old->box[b]->coeffs_of_deriv1;
-    g_new->box[b]->coeffs_of_deriv2 = g_old->box[b]->coeffs_of_deriv2;
-    g_new->box[b]->coeffs_of_deriv3 = g_old->box[b]->coeffs_of_deriv3;
-    g_new->box[b]->coeffs_of_2ndderiv1 = g_old->box[b]->coeffs_of_2ndderiv1;
-    g_new->box[b]->coeffs_of_2ndderiv2 = g_old->box[b]->coeffs_of_2ndderiv2;
-    g_new->box[b]->coeffs_of_2ndderiv3 = g_old->box[b]->coeffs_of_2ndderiv3;
-    g_new->box[b]->coeffs_of_int1 = g_old->box[b]->coeffs_of_int1;
-    g_new->box[b]->coeffs_of_int2 = g_old->box[b]->coeffs_of_int2;
-    g_new->box[b]->coeffs_of_int3 = g_old->box[b]->coeffs_of_int3;
-    g_new->box[b]->eval_onPoints1 = g_old->box[b]->eval_onPoints1;
-    g_new->box[b]->eval_onPoints2 = g_old->box[b]->eval_onPoints2;
-    g_new->box[b]->eval_onPoints3 = g_old->box[b]->eval_onPoints3;
-    g_new->box[b]->filter_coeffs1 = g_old->box[b]->filter_coeffs1;
-    g_new->box[b]->filter_coeffs2 = g_old->box[b]->filter_coeffs2;
-    g_new->box[b]->filter_coeffs3 = g_old->box[b]->filter_coeffs3;
+    b_new->get_coeffs1 = b_old->get_coeffs1;
+    b_new->get_coeffs2 = b_old->get_coeffs2;
+    b_new->get_coeffs3 = b_old->get_coeffs3;
+    b_new->coeffs_of_deriv1 = b_old->coeffs_of_deriv1;
+    b_new->coeffs_of_deriv2 = b_old->coeffs_of_deriv2;
+    b_new->coeffs_of_deriv3 = b_old->coeffs_of_deriv3;
+    b_new->coeffs_of_2ndderiv1 = b_old->coeffs_of_2ndderiv1;
+    b_new->coeffs_of_2ndderiv2 = b_old->coeffs_of_2ndderiv2;
+    b_new->coeffs_of_2ndderiv3 = b_old->coeffs_of_2ndderiv3;
+    b_new->coeffs_of_int1 = b_old->coeffs_of_int1;
+    b_new->coeffs_of_int2 = b_old->coeffs_of_int2;
+    b_new->coeffs_of_int3 = b_old->coeffs_of_int3;
+    b_new->eval_onPoints1 = b_old->eval_onPoints1;
+    b_new->eval_onPoints2 = b_old->eval_onPoints2;
+    b_new->eval_onPoints3 = b_old->eval_onPoints3;
+    b_new->filter_coeffs1 = b_old->filter_coeffs1;
+    b_new->filter_coeffs2 = b_old->filter_coeffs2;
+    b_new->filter_coeffs3 = b_old->filter_coeffs3;
     /* copy type of FT */
-    g_new->box[b]->TransformType1 = g_old->box[b]->TransformType1;
-    g_new->box[b]->TransformType2 = g_old->box[b]->TransformType2;
-    g_new->box[b]->TransformType3 = g_old->box[b]->TransformType3;
+    b_new->TransformType1 = b_old->TransformType1;
+    b_new->TransformType2 = b_old->TransformType2;
+    b_new->TransformType3 = b_old->TransformType3;
 
     /* copy attributes of boxes */
     for(i = 0; i < NATTRIBS; i++)
-      g_new->box[b]->Attrib[i] = g_old->box[b]->Attrib[i];
+      b_new->Attrib[i] = b_old->Attrib[i];
 
     /* copy bfaces */
-    for(i = 0; i < g_old->box[b]->nbfaces; i++)
+    for(i = 0; i < b_old->nbfaces; i++)
     {
-      add_empty_bface(g_new->box[b], -1);
-      g_new->box[b]->bface[i]
-       = duplicate_bface_for_grid(g_old->box[b]->bface[i], g_new);
+      add_empty_bface(b_new, -1);
+      b_new->bface[i] = duplicate_bface_for_grid(b_old->bface[i], g_new);
     }
 
     /* copy diff., filter matrices, ..., and all other arrays */
     for (i = 0; i < n1*n1; i++, ijk++)
     {
-      g_new->box[b]->D1[i]  = g_old->box[b]->D1[i];
-      g_new->box[b]->DD1[i] = g_old->box[b]->DD1[i];
-      g_new->box[b]->F1[i]  = g_old->box[b]->F1[i];
-      g_new->box[b]->Mcoeffs1[i] = g_old->box[b]->Mcoeffs1[i];
-      g_new->box[b]->Meval1[i]   = g_old->box[b]->Meval1[i];
-      g_new->box[b]->Int1[i]     = g_old->box[b]->Int1[i];
+      b_new->D1[i]  = b_old->D1[i];
+      b_new->DD1[i] = b_old->DD1[i];
+      b_new->F1[i]  = b_old->F1[i];
+      b_new->Mcoeffs1[i] = b_old->Mcoeffs1[i];
+      b_new->Meval1[i]   = b_old->Meval1[i];
+      b_new->Int1[i]     = b_old->Int1[i];
     }
     for (j = 0; j < n2*n2; j++)
     {
-      g_new->box[b]->D2[j]  = g_old->box[b]->D2[j];
-      g_new->box[b]->DD2[j] = g_old->box[b]->DD2[j];
-      g_new->box[b]->F2[j]  = g_old->box[b]->F2[j];
-      g_new->box[b]->Mcoeffs2[j] = g_old->box[b]->Mcoeffs2[j];
-      g_new->box[b]->Meval2[j]   = g_old->box[b]->Meval2[j];
-      g_new->box[b]->Int2[j]     = g_old->box[b]->Int2[j];
+      b_new->D2[j]  = b_old->D2[j];
+      b_new->DD2[j] = b_old->DD2[j];
+      b_new->F2[j]  = b_old->F2[j];
+      b_new->Mcoeffs2[j] = b_old->Mcoeffs2[j];
+      b_new->Meval2[j]   = b_old->Meval2[j];
+      b_new->Int2[j]     = b_old->Int2[j];
     }
     for (k = 0; k < n3*n3; k++)
     {
-      g_new->box[b]->D3[k]  = g_old->box[b]->D3[k];
-      g_new->box[b]->DD3[k] = g_old->box[b]->DD3[k];
-      g_new->box[b]->F3[k]  = g_old->box[b]->F3[k];
-      g_new->box[b]->Mcoeffs3[k] = g_old->box[b]->Mcoeffs3[k];
-      g_new->box[b]->Meval3[k]   = g_old->box[b]->Meval3[k];
-      g_new->box[b]->Int3[k]     = g_old->box[b]->Int3[k];
+      b_new->D3[k]  = b_old->D3[k];
+      b_new->DD3[k] = b_old->DD3[k];
+      b_new->F3[k]  = b_old->F3[k];
+      b_new->Mcoeffs3[k] = b_old->Mcoeffs3[k];
+      b_new->Meval3[k]   = b_old->Meval3[k];
+      b_new->Int3[k]     = b_old->Int3[k];
     }
   }
   if(pr) printgrid(g_new);
