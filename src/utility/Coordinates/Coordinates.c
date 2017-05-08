@@ -427,6 +427,16 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         box->ddX_dxdx[3][2][3] = ddphi_dydz_NAnsorgNS0;
         box->ddX_dxdx[3][3][3] = ddphi_dzdz_NAnsorgNS0;
       }
+      /* inverse derivatives */
+      box->dx_dX[1][1] = dx_dA_IAnsorgNS0;
+      box->dx_dX[1][2] = dx_dB_IAnsorgNS0;
+      box->dx_dX[1][3] = dx_dp_IAnsorgNS0;
+      box->dx_dX[2][1] = dy_dA_IAnsorgNS0;
+      box->dx_dX[2][2] = dy_dB_IAnsorgNS0;
+      box->dx_dX[2][3] = dy_dp_IAnsorgNS0;
+      box->dx_dX[3][1] = dz_dA_IAnsorgNS0;
+      box->dx_dX[3][2] = dz_dB_IAnsorgNS0;
+      box->dx_dX[3][3] = dz_dp_IAnsorgNS0;
     }
     else if( Getv(str, "AnsorgNS1") )
     {
@@ -492,6 +502,16 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         box->ddX_dxdx[3][2][3] = ddphi_dydz_NAnsorgNS1;
         box->ddX_dxdx[3][3][3] = ddphi_dzdz_NAnsorgNS1;
       }
+      /* inverse derivatives */
+      box->dx_dX[1][1] = dx_dA_IAnsorgNS1;
+      box->dx_dX[1][2] = dx_dB_IAnsorgNS1;
+      box->dx_dX[1][3] = dx_dp_IAnsorgNS1;
+      box->dx_dX[2][1] = dy_dA_IAnsorgNS1;
+      box->dx_dX[2][2] = dy_dB_IAnsorgNS1;
+      box->dx_dX[2][3] = dy_dp_IAnsorgNS1;
+      box->dx_dX[3][1] = dz_dA_IAnsorgNS1;
+      box->dx_dX[3][2] = dz_dB_IAnsorgNS1;
+      box->dx_dX[3][3] = dz_dp_IAnsorgNS1;
     }
     else if( Getv(str, "AnsorgNS2") )
     {
@@ -557,6 +577,16 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         box->ddX_dxdx[3][2][3] = ddphi_dydz_NAnsorgNS2;
         box->ddX_dxdx[3][3][3] = ddphi_dzdz_NAnsorgNS2;
       }
+      /* inverse derivatives */
+      box->dx_dX[1][1] = dx_dA_IAnsorgNS2;
+      box->dx_dX[1][2] = dx_dB_IAnsorgNS2;
+      box->dx_dX[1][3] = dx_dp_IAnsorgNS2;
+      box->dx_dX[2][1] = dy_dA_IAnsorgNS2;
+      box->dx_dX[2][2] = dy_dB_IAnsorgNS2;
+      box->dx_dX[2][3] = dy_dp_IAnsorgNS2;
+      box->dx_dX[3][1] = dz_dA_IAnsorgNS2;
+      box->dx_dX[3][2] = dz_dB_IAnsorgNS2;
+      box->dx_dX[3][3] = dz_dp_IAnsorgNS2;
     }
     else if( Getv(str, "AnsorgNS3") )
     {
@@ -622,6 +652,16 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
         box->ddX_dxdx[3][2][3] = ddphi_dydz_NAnsorgNS3;
         box->ddX_dxdx[3][3][3] = ddphi_dzdz_NAnsorgNS3;
       }
+      /* inverse derivatives */
+      box->dx_dX[1][1] = dx_dA_IAnsorgNS3;
+      box->dx_dX[1][2] = dx_dB_IAnsorgNS3;
+      box->dx_dX[1][3] = dx_dp_IAnsorgNS3;
+      box->dx_dX[2][1] = dy_dA_IAnsorgNS3;
+      box->dx_dX[2][2] = dy_dB_IAnsorgNS3;
+      box->dx_dX[2][3] = dy_dp_IAnsorgNS3;
+      box->dx_dX[3][1] = dz_dA_IAnsorgNS3;
+      box->dx_dX[3][2] = dz_dB_IAnsorgNS3;
+      box->dx_dX[3][3] = dz_dp_IAnsorgNS3;
     }
     else
       errorexit("Coordinates: unknown coordinates...");
