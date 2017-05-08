@@ -32,6 +32,12 @@
   for(k=(p), j = 0; j < (n2); j++) \
     for(     i = 0; i < (n1); i++)
 
+/* same as forplane1/2/3, but we can specify the plane number N */
+#define  forplaneN(N, i,j,k, n1,n2,n3, p) \
+  for(k=(p)*((N)==3); ( k<(n3) ) && ( ( k==(p) ) || (N)!=3 ); k++) \
+  for(j=(p)*((N)==2); ( j<(n2) ) && ( ( j==(p) ) || (N)!=2 ); j++) \
+  for(i=(p)*((N)==1); ( i<(n1) ) && ( ( i==(p) ) || (N)!=1 ); i++)
+
 /* loop over planes smoothly without any jumping in i,j or k */
 #define  forplane1_nojump(i,j,k, n1,n2,n3, p) \
   for(i=(p), k = 0; k < (n3); k++) \
