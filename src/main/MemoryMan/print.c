@@ -53,7 +53,7 @@ void printbfaces(tBox *box)
   for(i=0; i<box->nbfaces; i++)
   {
     tBface *bface = box->bface[i];
-    printf("bface[%d]: ", i, bface[i]);
+    printf("bface[%d]: ", i);
     printf("b%d f%d fi%d  ob%d ofi%d  oXi,oYi,oZi=(%d,%d,%d)\n",
             bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
             bface->oXi,bface->oYi,bface->oZi);
