@@ -38,6 +38,12 @@
   for(j=(p)*((N)==2); ( j<(n2) ) && ( ( j==(p) ) || (N)!=2 ); j++) \
   for(i=(p)*((N)==1); ( i<(n1) ) && ( ( i==(p) ) || (N)!=1 ); i++)
 
+/* same as forplaneN, but omit edges */
+#define  forinnerplaneN(N, i,j,k, n1,n2,n3, p) \
+  for(k=1+((p)-1)*((N)==3); ( k<(n3)-((N)!=3) ) && ( ( k==(p) ) || (N)!=3 ); k++) \
+  for(j=1+((p)-1)*((N)==2); ( j<(n2)-((N)!=2) ) && ( ( j==(p) ) || (N)!=2 ); j++) \
+  for(i=1+((p)-1)*((N)==1); ( i<(n1)-((N)!=1) ) && ( ( i==(p) ) || (N)!=1 ); i++)
+
 /* loop over planes smoothly without any jumping in i,j or k */
 #define  forplane1_nojump(i,j,k, n1,n2,n3, p) \
   for(i=(p), k = 0; k < (n3); k++) \
