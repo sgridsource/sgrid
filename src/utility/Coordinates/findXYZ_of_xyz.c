@@ -39,13 +39,18 @@ void xyz_VectorFuncP(int n, double *XYZvec, double *fvec, void *p)
   fvec[1] = xg-desired_x;
   fvec[2] = yg-desired_y;
   fvec[3] = zg-desired_z;
+  //printf("X,Y,Z=%g,%g,%g\n", XYZvec[1],XYZvec[2],XYZvec[3]);
+  //printf("%g,%g,%g  xg,yg,zg=%g,%g,%g\n", fvec[1],fvec[2],fvec[3], xg,yg,zg);
 }
 
 /* find X,Y,Z from x,y,z (Note: X,Y,Z also contains initial guess) */
 int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                 double x, double y, double z)
 {
+  double tol = Getd("Coordinates_newtTOLF");
   double XYZvec[4];
+  double fvec[4];
+  double err, r;
   t_grid_box_desired_xyz_struct pars[1];
   int check, stat;
 
@@ -69,13 +74,23 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
       
   /* do newton_linesrch_itsP iterations: */
   stat = newton_linesrch_itsP(XYZvec, 3, &check, xyz_VectorFuncP, (void *) pars,
-                              Geti("Coordinates_newtMAXITS"),
-                              Getd("Coordinates_newtTOLF") );
+                              Geti("Coordinates_newtMAXITS"), tol);
   *X = XYZvec[1];
   *Y = XYZvec[2];
   *Z = XYZvec[3];
 
-  if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+  //if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+
+  /* get error in x,y,z */
+  xyz_VectorFuncP(3, XYZvec, fvec, (void *) pars); /* overwrites XYZvec */
+  err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
+  r = sqrt(x*x + y*y + z*z);
+  if(r>0.0)  err = err/r;
+  if(err>tol && stat>=0)
+  { //printf("fail!!!\n");
+    stat = -stat;
+  }
+  //printf("XYZ_of_xyz: err=%g tol=%g check=%d stat=%d\n",err, tol check, stat);
   return stat-check;
 }
 
@@ -128,6 +143,9 @@ int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
 
     X1=*X; Y1=*Y; Z1=*Z;
     stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
+
+if(!finite(X1) || !finite(Y1) || !finite(Z1))
+errorexit("not fin");
     if(stat<0) continue;
     if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
     if(dless(Y1,box->bbox[2]) || dless(box->bbox[3],Y1)) continue;

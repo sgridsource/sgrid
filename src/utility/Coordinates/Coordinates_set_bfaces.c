@@ -238,7 +238,8 @@ int set_bfaces_on_boxface(tBox *box, int f)
 
   /* look for points in other boxes just outside this box */
   p = ( (n1-1)*(dir==1) + (n2-1)*(dir==2) + (n3-1)*(dir==3) )*(f%2);
-  forinnerplaneN(dir, i,j,k, n1,n2,n3, p)
+  //forinnerplaneN(dir, i,j,k, n1,n2,n3, p)
+  forplaneN(dir, i,j,k, n1,n2,n3, p)
   {
     int ijk = Index(i,j,k);
     double X = pX[ijk];
@@ -311,10 +312,10 @@ int set_bfaces_on_boxface(tBox *box, int f)
         }
       }
     }
-    /* if we find a point we add it to the bface with the correct ob */
+    /* if we find a point we add it to the bface with the correct ob and f */
     if(ob>=0)
       for(fi=0; fi<box->nbfaces; fi++)
-        if(box->bface[fi]->ob == ob) 
+        if(box->bface[fi]->ob == ob && box->bface[fi]->f == f)
         {
           add_point_to_bface_inbox(box, fi, ijk, f);
           break;
