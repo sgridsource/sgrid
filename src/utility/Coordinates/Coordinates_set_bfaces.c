@@ -5,6 +5,52 @@
 #include "Coordinates.h"
 
 
+/* find box size L of smallest box */
+double smallest_box_size(tGrid *grid)
+{
+  int var_x = Ind("x");
+  int var_y = Ind("y");
+  int var_z = Ind("z");
+  int var_X = Ind("X");
+  int var_Y = Ind("Y");
+  int var_Z = Ind("Z");
+  int i;
+  double dx,dy,dz;
+  double L=1e300;
+  forallboxes(grid, i)
+  {
+    tBox *boxi = grid->box[i];
+    double *pX = boxi->v[var_X];
+    double *pY = boxi->v[var_Y];
+    double *pZ = boxi->v[var_Z];
+    double *px = boxi->v[var_x];
+    double *py = boxi->v[var_y];
+    double *pz = boxi->v[var_z];
+    int n1 = boxi->n1;
+    int n2 = boxi->n2;
+    int n3 = boxi->n3;
+    double Li;
+
+    i = Index(n1,n2,n3);
+    if(px!=NULL)
+    {
+      dx = px[i]-px[0];
+      dy = py[i]-py[0];
+      dz = pz[i]-pz[0];
+    }
+    else
+    {
+      dx = pX[i]-pX[0];
+      dy = pY[i]-pY[0];
+      dz = pZ[i]-pZ[0];
+    }
+    Li = sqrt(dx*dx + dy*dy + dz*dz);
+    if(Li<L) L=Li;
+  }
+  return L;
+}
+
+
 /* determine which box faces touch or overlap other boxes, returns extface */
 /* extface[f]=1 means face f is external, i.e. needs BC */
 void find_external_faces_of_box(tBox *box, int *extface)
@@ -21,7 +67,6 @@ void find_external_faces_of_box(tBox *box, int *extface)
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
-  int periodic[3];
   int d, dir;     /* we use dir = d+1 */ 
   int i,j,k, p, f;
   char str[1000];
@@ -29,30 +74,30 @@ void find_external_faces_of_box(tBox *box, int *extface)
   int nob; /* number of other boxes */
   int ob, oi;
   double oX,oY,oZ;
-  double eps = dequaleps*1e5;
-  
+  double L, dL;
+  double eps = dequaleps*1e3;
+
+  /* mark faces in periodic dirs with not external, i.e. extface[f]=0  */
+  for(f=0; f<6; f++)
+  {
+    if(box->periodic[1+f/2])  extface[f]=0;
+    else                      extface[f]=1;
+  }
+
+  /* do nothing else if this is a Cartesian box */
+  if(box->x_of_X[1]==NULL) return;
+
+  /* find box size L of smallest box */
+  L = smallest_box_size(grid);
+  dL = L*eps;
+
   /* make oblist that contains all boxes */
   nob=0;
   forallboxes(grid, i) if(i!=b) nob=addto_boxlist(i, &oblist, nob);
 
-  /* check for periodic dirs */
-  for(d=0; d<3; d++)
-  {
-    snprintf(str, 999, "box%d_basis%d", b, d+1);
-    if( Getv(str, "Fourier") )  periodic[d]=1;
-    else                        periodic[d]=0;
-  }
-  /* mark faces in periodic dirs with not external, i.e. extface[f]=0  */
-  for(f=0; f<6; f++)
-  {
-    if(periodic[f/2])  extface[f]=0;
-    else               extface[f]=1;
-  }
-
   /* go over directions */
   for(d=0; d<3; d++)
   {
-    double dL = (box->bbox[2*d+1] - box->bbox[2*d])*eps;
     dir = d+1;
 
     /* go over faces, but not edges */
@@ -80,7 +125,8 @@ void find_external_faces_of_box(tBox *box, int *extface)
         double x = box->v[var_x][ijk];
         double y = box->v[var_y][ijk];
         double z = box->v[var_z][ijk];
-        double ox,oy,oz, Nx,Ny,Nz, Nmag, dx,dy,dz;
+        double ox,oy,oz, Nx,Ny,Nz, Nmag, dx,dy,dz, dist;
+        int li, ret;
 
         /* pick one of X,Y,Z on boundary */
         if(dir==1) X = box->bbox[f];
@@ -99,17 +145,32 @@ void find_external_faces_of_box(tBox *box, int *extface)
         ox = x + dx;
         oy = y + dy;
         oz = z + dz;
+//printf("b%d dir%d  p%d, f%d, i,j,k=%d,%d,%d\n", b, dir, p, f, i,j,k);
+//printf(" Nx,Ny,Nz=%g,%g,%g Nmag=%g\n", Nx,Ny,Nz, Nmag);
+//printf(" x,y,z=%g,%g,%g ox,oy,oz=%g,%g,%g\n", x,y,z, ox,oy,oz);
+//printf(" dx,dy,dz=%g,%g,%g\n", dx,dy,dz);
         /* find point in other boxes */
-        nearest_b_XYZ_of_xyz_inboxlist(grid, oblist,nob, 
-                                       &ob, &oi, &oX,&oY,&oZ, ox,oy,oz);
-printf("Nx,Ny,Nz=%g,%g,%g Nmag=%g\n", Nx,Ny,Nz, Nmag);
-printf("b%d dir%d  p%d, f%d, i,j,k=%d,%d,%d\n", b, dir, p, f, i,j,k);
-printf("b=%d x,y,z=%g,%g,%g ox,oy,oz=%g,%g,%g\n",
-b, x,y,z, ox,oy,oz);
-printf("ob=%d oi=%d oX,oY,oZ=%g,%g,%g\n", ob, oi, oX,oY,oZ);
-        ob=b_XYZ_of_xyz_inboxlist(grid, oblist,nob, &oX,&oY,&oZ, ox,oy,oz);
-printf("ob=%d oX,oY,oZ=%g,%g,%g\n", ob, oX,oY,oZ);
-
+        for(li=0; li<nob; li++)
+        {
+          int bi = oblist[li];
+          tBox *obox = grid->box[bi];
+          dist = nearestXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
+          dist = sqrt(dist);
+          if(dist<0.5*L)
+          {
+            ret=XYZ_of_xyz(obox, &oX,&oY,&oZ, ox,oy,oz);
+            if(ret>=0)
+            {
+              if(!(obox->periodic[1]))
+                if(dless(oX,obox->bbox[0]) || dless(obox->bbox[1],oX)) continue;
+              if(!(obox->periodic[2]))
+                if(dless(oY,obox->bbox[2]) || dless(obox->bbox[3],oY)) continue;
+              if(!(obox->periodic[3]))
+                if(dless(oZ,obox->bbox[4]) || dless(obox->bbox[5],oZ)) continue;
+              ob=obox->b;
+            }
+          }
+        }
         /* if we find one point in another box this face is external */
         if(ob>=0) 
         { i=n1; j=n2; k=n3; } /* leave plane loop if face is external*/
@@ -136,27 +197,33 @@ int set_bfaces_on_boxface(tBox *box, int f)
   int var_X = Ind("X");
   int var_Y = Ind("Y");
   int var_Z = Ind("Z");
+  double *pX = box->v[var_X];
+  double *pY = box->v[var_Y];
+  double *pZ = box->v[var_Z];
+  double *px = box->v[var_x];
+  double *py = box->v[var_y];
+  double *pz = box->v[var_z];
   int b = box->b;
   int nbfaces;
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
   int d, dir;     /* we use dir = d+1 */ 
-  int i,j,k, p, fi;
+  int i,j,k, p, fi, li;
   int *oblist = calloc(grid->nboxes,sizeof(int)); /* list that contains other boxes*/
   int nob; /* number of other boxes */
   int ob, oi;
   double oX,oY,oZ;
-  double eps = dequaleps*1000.0;
-  double dL;
+  double eps = dequaleps*1e3;
+  double L, dL;
   int s = 2*(f%2) - 1; /* direction of normal vector s=+-1 */
 
   d = f/2;
   dir = d+1;
-  dL = (box->bbox[2*d+1] - box->bbox[2*d])*eps;
 
-  /* mark other box as non-existent by default */
-  ob = -1;
+  /* find box size L of smallest box */
+  L = smallest_box_size(grid);
+  dL = L*eps;
 
   /* make oblist that contains all boxes except b,
      and add one bface for each of the other boxes */
@@ -174,12 +241,10 @@ int set_bfaces_on_boxface(tBox *box, int f)
   forinnerplaneN(dir, i,j,k, n1,n2,n3, p)
   {
     int ijk = Index(i,j,k);
-    double X = box->v[var_X][ijk];
-    double Y = box->v[var_Y][ijk];
-    double Z = box->v[var_Z][ijk];
-    double x = box->v[var_x][ijk];
-    double y = box->v[var_y][ijk];
-    double z = box->v[var_z][ijk];
+    double X = pX[ijk];
+    double Y = pY[ijk];
+    double Z = pZ[ijk];
+    double x,y,z;
     double ox,oy,oz, Nx,Ny,Nz, Nmag, dx,dy,dz;
 
     /* pick one of X,Y,Z on boundary */
@@ -187,10 +252,28 @@ int set_bfaces_on_boxface(tBox *box, int f)
     if(dir==2) Y = box->bbox[f];
     if(dir==3) Z = box->bbox[f];
 
+    if(box->x_of_X[1]==NULL) /* this is a Cartesian box */
+    {
+      x=X;
+      y=Y;
+      z=Z;
+      /* normal vector */ 
+      Nx = (dir==1);
+      Ny = (dir==2);
+      Nz = (dir==3);
+    }
+    else
+    {
+      x=px[ijk];
+      y=py[ijk];
+      z=pz[ijk];
+      /* normal vector */
+      if(box->dx_dX[1][dir]==NULL) errorexit("we need box->dx_dX[1][dir]");
+      Nx = box->dx_dX[1][dir](box, ijk, X,Y,Z);
+      Ny = box->dx_dX[2][dir](box, ijk, X,Y,Z);
+      Nz = box->dx_dX[3][dir](box, ijk, X,Y,Z);
+    }
     /* use normal vector to find point ox,oy,oz slightly outside box */
-    Nx = box->dx_dX[1][dir](box, ijk, X,Y,Z);
-    Ny = box->dx_dX[2][dir](box, ijk, X,Y,Z);
-    Nz = box->dx_dX[3][dir](box, ijk, X,Y,Z);
     Nmag = sqrt(Nx*Nx + Ny*Ny + Nz*Nz);
     dx = s*Nx*dL;
     dy = s*Ny*dL;
@@ -200,14 +283,34 @@ int set_bfaces_on_boxface(tBox *box, int f)
     oy = y + dy;
     oz = z + dz;
 
-if(j==0 || j==n2-1) continue;
+    /* mark other box as non-existent by default */
+    ob = -1;
 
     /* find point in other boxes */
-    nearest_b_XYZ_of_xyz_inboxlist(grid, oblist,nob, 
-                                   &ob, &oi, &oX,&oY,&oZ, ox,oy,oz);
-//printf("");
-
-    ob=b_XYZ_of_xyz_inboxlist(grid, oblist,nob, &oX,&oY,&oZ, ox,oy,oz);
+    for(li=0; li<nob; li++)
+    {
+      int bi = oblist[li];
+      int ret;
+      tBox *obox = grid->box[bi];
+      double dist = nearestXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
+      dist = sqrt(dist);
+//printf("  bi=%d dist=%g ob=%d oi=%d oX,oY,oZ=%g,%g,%g\n",
+//bi,dist, ob, oi, oX,oY,oZ);
+      if(dist<0.5*L)
+      {
+        ret=XYZ_of_xyz(obox, &oX,&oY,&oZ, ox,oy,oz);
+        if(ret>=0)
+        {
+          if(!(obox->periodic[1]))
+            if(dless(oX,obox->bbox[0]) || dless(obox->bbox[1],oX)) continue;
+          if(!(obox->periodic[2]))
+            if(dless(oY,obox->bbox[2]) || dless(obox->bbox[3],oY)) continue;
+          if(!(obox->periodic[3]))
+            if(dless(oZ,obox->bbox[4]) || dless(obox->bbox[5],oZ)) continue;
+          ob=obox->b;
+        }
+      }
+    }
     /* if we find a point we add it to the bface with the correct ob */
     if(ob>=0)
       for(fi=0; fi<box->nbfaces; fi++)
@@ -215,7 +318,7 @@ if(j==0 || j==n2-1) continue;
         {
           add_point_to_bface_inbox(box, fi, ijk, f);
           break;
-        } 
+        }
   }
 
   /* look for empty bfaces and remove them */
@@ -238,14 +341,14 @@ int Coordinates_set_bfaces(tGrid *grid)
   forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
-    int extface[6]; /* extface[f]=1 means face f is external, i.e. needs BC */
+    int extface[6];  /* extface[f]=1  means face f is external, i.e. needs BC */
     int f;
 
     /* find all external faces of box */
     find_external_faces_of_box(box, extface);
     if(pr)
     {
-      printf("  external faces in box%d: ", b);
+      printf("external faces on box%d: ", b);
       for(f=0; f<6; f++) if(extface[f]) printf(" %d", f);
       printf("\n");
     }
@@ -258,6 +361,6 @@ int Coordinates_set_bfaces(tGrid *grid)
       printbfaces(box);
     }
   }
-
+exit(88);
   return 0;
 }
