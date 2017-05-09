@@ -193,6 +193,8 @@ int add_point_to_bface_inbox(tBox *box, int fi, int ijk, int f)
     bface->fpts = AllocatePointList(box->grid);
   /* add point ijk */
   AddToPointList(bface->fpts, box->b, ijk);
+  /* check if we have more than one face on this bface */
+  if(bface->f!=f) bface->f = -1;
   return fi;
 }
 
