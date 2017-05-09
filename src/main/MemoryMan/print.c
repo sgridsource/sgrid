@@ -48,7 +48,7 @@ void printnode(tNode *n)
 
 void printbfaces(tBox *box)
 {
-  int i;
+  int i, np;
   printf("box->b=%d\n", box->b);
   for(i=0; i<box->nbfaces; i++)
   {
@@ -57,8 +57,10 @@ void printbfaces(tBox *box)
     printf("b%d f%d fi%d  ob%d ofi%d  oXi,oYi,oZi=(%d,%d,%d)\n",
             bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
             bface->oXi,bface->oYi,bface->oZi);
-    printf("     fpts=%p  grid=%p\n", bface->fpts, bface->grid);
-    prPointList(bface->fpts);
+    if(bface->fpts==NULL) np = 0;
+    else                  np = bface->fpts->npoints[box->b];
+    printf("     fpts=%p (%d points)  grid=%p\n", bface->fpts, np, bface->grid);
+    //prPointList(bface->fpts);
   }
 }
 

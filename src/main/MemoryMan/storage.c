@@ -180,6 +180,22 @@ int add_empty_bface(tBox *box, int f)
   return fi;
 }
 
+/* add a point ijk on face f to a bface with index fi, returns fi */
+/* if called with fi<0, it first calls add_empty_bface and returns the new fi */
+int add_point_to_bface_inbox(tBox *box, int fi, int ijk, int f)
+{
+  tBface *bface;
+  /* make new bface when needed */
+  if(fi<0) fi = add_empty_bface(box, f);
+  bface = box->bface[fi];
+  /* make PointList id needed */
+  if(bface->fpts==NULL)
+    bface->fpts = AllocatePointList(box->grid);
+  /* add point ijk */
+  AddToPointList(bface->fpts, box->b, ijk);
+  return fi;
+}
+
 /* duplicate bface without pointlist fpts */
 tBface *duplicate_bface_without_fpts_for_grid(tBface *bface0, tGrid *grid)
 {
@@ -221,6 +237,47 @@ void free_bface(tBface *bface)
     FreePointList(bface->fpts);
     free(bface);
   }
+}
+
+/* remove a bface with index fi from a box, return number of bfaces removed */
+int remove_bface(tBox *box, int fi)
+{
+  void *ret;
+  int nbfaces = box->nbfaces;
+  int i;
+
+  /* return 0 if bface does not exist */
+  if(fi<0 || fi>=nbfaces) return 0;
+
+  /* free the bface */
+  free_bface(box->bface[fi]);
+
+  /* shift bfaces behind fi one position to the front */
+  for(i=fi; i<nbfaces-1; i++)  box->bface[i] = box->bface[i+1];
+
+  /* reduce size of bface list */
+  nbfaces--;
+  ret = realloc( box->bface, (sizeof( *(box->bface) ))*(nbfaces) );
+  if(ret==NULL)  errorexit("remove_bface: not enough memory for box->bface");
+  box->bface = ret;
+  box->nbfaces = nbfaces;
+
+  return 1;
+}
+
+/* look for empty bfaces and remove them */
+int remove_bfaces_with_NULL_ftps(tBox *box)
+{
+  int n, fi;
+  n=0;
+  for(fi=0; fi<box->nbfaces; fi++)
+    if(box->bface[fi]->fpts == NULL)
+    {
+      int r = remove_bface(box, fi); /* this decreases box->nbfaces */
+      fi=fi-r;  /* go back by one in fi so that for-loop covers fi again */
+      n++;      /* count number of bfaces removed */
+    }
+  return n;
 }
 
 /* free box, currently leaves grid untouched */
