@@ -253,7 +253,11 @@ int remove_bface(tBox *box, int fi)
   free_bface(box->bface[fi]);
 
   /* shift bfaces behind fi one position to the front */
-  for(i=fi; i<nbfaces-1; i++)  box->bface[i] = box->bface[i+1];
+  for(i=fi; i<nbfaces-1; i++)
+  {
+    box->bface[i] = box->bface[i+1];
+    box->bface[i]->fi = i;
+  }
 
   /* reduce size of bface list */
   nbfaces--;
