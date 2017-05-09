@@ -317,7 +317,7 @@ int newton_linesrch_itsP(double x[], int n, int *check,
 		 void (*vecfuncP)(int, double [], double [], void *par),
 		 void *par);
 	void lubksb(double **a, int n, int *indx, double b[]);
-	void ludcmp(double **a, int n, int *indx, double *d);
+	int ludcmpSing(double **a, int n, int *indx, double *d);
 	int i,j,*indx;
 	int its=0;
 	double d,den,f,fold,stpmax,sum,temp,test,**fjac,*g,*p,*xold;
@@ -348,8 +348,19 @@ int newton_linesrch_itsP(double x[], int n, int *check,
 		for (i=1;i<=n;i++) xold[i]=x[i];
 		fold=f;
 		for (i=1;i<=n;i++) p[i] = -newton_linesrch_fvec[i];
-		ludcmp(fjac,n,indx,&d);
-		lubksb(fjac,n,indx,p);
+                /* now p contains RHS of fjac[i][j] dx[i] = -fvec[i] = p[i] */
+		i = ludcmpSing(fjac,n,indx,&d);
+		if(i) /* matrix fjac has all zeros in row i */
+		{ /* throw away all off-diag elements if fjac is singlar */
+                  int k;
+                  for(k=1; k<=n; k++)
+                  {
+                    double fjac_kk=fjac[k][k];
+                    if(fjac_kk!=0.0)  p[k] = p[k]/fjac[k][k];
+                    else              p[k] = 0.0;
+                  }
+		}
+		else lubksb(fjac,n,indx,p);
 		linesrchP(n,xold,fold,g,p,x,&f,stpmax,check,
 		         f_to_minimize_in_linesrchP, 
 		         newton_linesrch_fvec, vecfuncP, par);
