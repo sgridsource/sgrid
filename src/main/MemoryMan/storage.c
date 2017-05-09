@@ -186,7 +186,7 @@ int add_point_to_bface_inbox(tBox *box, int fi, int ijk, int f)
 {
   tBface *bface;
   /* make new bface when needed */
-  if(fi<0) fi = add_empty_bface(box, f);
+  if(fi<0 || fi>=box->nbfaces) fi = add_empty_bface(box, f);
   bface = box->bface[fi];
   /* make PointList id needed */
   if(bface->fpts==NULL)

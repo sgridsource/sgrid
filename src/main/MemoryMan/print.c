@@ -54,7 +54,7 @@ void printbfaces(tBox *box)
   {
     tBface *bface = box->bface[i];
     printf("bface[%d]: ", i);
-    printf("b%d f%d fi%d  ob%d ofi%d  oXi,oYi,oZi=(%d,%d,%d)\n",
+    printf("b%d f%d fi%d  ob%d ofi%d  oXi=%d oYi=%d oZi=%d\n",
             bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
             bface->oXi,bface->oYi,bface->oZi);
     if(bface->fpts==NULL) np = 0;
