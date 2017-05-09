@@ -7,7 +7,7 @@ OBJS := sgrid_$(NAME).o $(NAME).o cartesianDerivs.o doubleCovering.o\
 	Coordinates_AnsorgNS.o coordtrans_AnsorgXRphi.o\
 	coordtrans_AnsorgNS0.o coordtrans_AnsorgNS1.o\
 	coordtrans_AnsorgNS2.o coordtrans_AnsorgNS3.o\
-	coordtrans_Bfunc.o
+	coordtrans_Bfunc.o Coordinates_set_bfaces.o
 
 include $(TOP)/Makefile.subdirs
 

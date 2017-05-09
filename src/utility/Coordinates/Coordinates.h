@@ -11,6 +11,9 @@ double dX_dx(int i, int m, int dXd,
 double ddX_dxdx(int i, int m, int n, int ddXdd,
                 tBox *box, int ind, double X, double Y, double Z);
 
+/* from Coordinates_set_bfaces.c */
+int Coordinates_set_bfaces(tGrid *grid);
+
 /* from doubleCovering.c */
 void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);
 

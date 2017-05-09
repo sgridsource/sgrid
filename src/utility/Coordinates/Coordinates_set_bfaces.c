@@ -124,6 +124,8 @@ printf("ob=%d oX,oY,oZ=%g,%g,%g\n", ob, oX,oY,oZ);
 
 
 /* find and set all bfaces on an external box face f */
+/* The idea is to loop over the box faces and then move out using the Cartesian
+   normal vectors. Then we check if we are in an other box. */
 int set_bfaces_on_boxface(tBox *box, int f)
 {
   tGrid *grid = box->grid;
