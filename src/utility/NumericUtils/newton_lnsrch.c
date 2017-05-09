@@ -349,8 +349,8 @@ int newton_linesrch_itsP(double x[], int n, int *check,
 		fold=f;
 		for (i=1;i<=n;i++) p[i] = -newton_linesrch_fvec[i];
                 /* now p contains RHS of fjac[i][j] dx[i] = -fvec[i] = p[i] */
-		i = ludcmpSing(fjac,n,indx,&d);
-		if(i) /* matrix fjac has all zeros in row i */
+		j = ludcmpSing(fjac,n,indx,&d);
+		if(j) /* matrix fjac has all zeros in col j (or row -j) */
 		{ /* throw away all off-diag elements if fjac is singlar */
                   int k;
                   for(k=1; k<=n; k++)
