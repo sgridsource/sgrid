@@ -89,6 +89,7 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
   /* fill in connectivity and coordinates of nodes */
   for(b=0; b<nboxes ; b++)
   {
+    int dir;
     char str[1000];
   
     box = g->box[b];
@@ -108,6 +109,14 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
     box->bbox[4] = Getd(str);
     snprintf(str, 999, "box%d_max3", b);
     box->bbox[5] = Getd(str);
+
+    /* check for periodic dirs */
+    for(dir=1; dir<4; dir++)
+    {
+      snprintf(str, 999, "box%d_basis%d", b, dir);
+      if( Getv(str, "Fourier") )  box->periodic[dir]=1;
+      else                        box->periodic[dir]=0;
+    }
     
     n1 = box->n1;
     n2 = box->n2;
@@ -385,6 +394,9 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
     b_new->TransformType1 = b_old->TransformType1;
     b_new->TransformType2 = b_old->TransformType2;
     b_new->TransformType3 = b_old->TransformType3;
+    /* copy periodic info */
+    for(i = 0; i < 4; i++)
+       b_new->periodic[i] = b_old->periodic[i];
 
     /* copy attributes of boxes */
     for(i = 0; i < NATTRIBS; i++)

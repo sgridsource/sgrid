@@ -262,7 +262,8 @@ int remove_bface(tBox *box, int fi)
   /* reduce size of bface list */
   nbfaces--;
   ret = realloc( box->bface, (sizeof( *(box->bface) ))*(nbfaces) );
-  if(ret==NULL)  errorexit("remove_bface: not enough memory for box->bface");
+  if(ret==NULL && nbfaces!=0)
+    errorexit("remove_bface: not enough memory for box->bface");
   box->bface = ret;
   box->nbfaces = nbfaces;
 

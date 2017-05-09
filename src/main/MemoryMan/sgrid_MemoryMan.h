@@ -70,6 +70,7 @@ typedef struct tBOX {
   int TransformType1; /* If we use FFT and which FFT we use */
   int TransformType2; /* all 3 from set_TransformType_flags_inbox(tBox *box) */
   int TransformType3;
+  int periodic[4];      /* periodic[1]=1 means direction1 is periodic */
   double bbox[6];	/* global bounding box */
   int ibbox[6];	        /* global bounding box in index range */
   int Attrib[NATTRIBS]; /* Each box can have attributes. They are usually set
