@@ -4,6 +4,7 @@
 #include "sgrid.h"
 #include "Coordinates.h"
 
+#define EPS dequaleps*1e3
 
 /* find box size L of smallest box */
 double smallest_box_size(tGrid *grid)
@@ -75,7 +76,6 @@ void find_external_faces_of_box(tBox *box, int *extface)
   int ob, oi;
   double oX,oY,oZ;
   double L, dL;
-  double eps = dequaleps*1e3;
 
   /* mark faces in periodic dirs with not external, i.e. extface[f]=0  */
   for(f=0; f<6; f++)
@@ -89,7 +89,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
 
   /* find box size L of smallest box */
   L = smallest_box_size(grid);
-  dL = L*eps;
+  dL = L*EPS;
 
   /* make oblist that contains all boxes */
   nob=0;
@@ -155,6 +155,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
           int bi = oblist[li];
           tBox *obox = grid->box[bi];
           dist = nearestXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
+          //dist = nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
           dist = sqrt(dist);
           if(dist<0.5*L)
           {
@@ -214,7 +215,6 @@ int set_bfaces_on_boxface(tBox *box, int f)
   int nob; /* number of other boxes */
   int ob, oi;
   double oX,oY,oZ;
-  double eps = dequaleps*1e3;
   double L, dL;
   int s = 2*(f%2) - 1; /* direction of normal vector s=+-1 */
 
@@ -223,7 +223,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
 
   /* find box size L of smallest box */
   L = smallest_box_size(grid);
-  dL = L*eps;
+  dL = L*EPS;
 
   /* make oblist that contains all boxes except b,
      and add one bface for each of the other boxes */
@@ -294,6 +294,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
       int ret;
       tBox *obox = grid->box[bi];
       double dist = nearestXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
+      //double dist = nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
       dist = sqrt(dist);
 //printf("  bi=%d dist=%g ob=%d oi=%d oX,oY,oZ=%g,%g,%g\n",
 //bi,dist, ob, oi, oX,oY,oZ);
