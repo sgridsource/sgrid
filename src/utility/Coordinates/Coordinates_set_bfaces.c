@@ -128,15 +128,10 @@ void find_external_faces_of_box(tBox *box, int *extface)
         double ox,oy,oz, Nx,Ny,Nz, Nmag, dx,dy,dz, dist;
         int li, ret;
 
-        /* pick one of X,Y,Z on boundary */
-        if(dir==1) X = box->bbox[f];
-        if(dir==2) Y = box->bbox[f];
-        if(dir==3) Z = box->bbox[f];
-
         /* use normal vector to find point ox,oy,oz slightly outside box */
-        Nx = box->dx_dX[1][dir](box, -1, X,Y,Z);
-        Ny = box->dx_dX[2][dir](box, -1, X,Y,Z);
-        Nz = box->dx_dX[3][dir](box, -1, X,Y,Z);
+        Nx = box->dx_dX[1][dir](box, ijk, X,Y,Z);
+        Ny = box->dx_dX[2][dir](box, ijk, X,Y,Z);
+        Nz = box->dx_dX[3][dir](box, ijk, X,Y,Z);
         Nmag = sqrt(Nx*Nx + Ny*Ny + Nz*Nz);
         dx = s*Nx*dL;
         dy = s*Ny*dL;
@@ -157,17 +152,18 @@ void find_external_faces_of_box(tBox *box, int *extface)
         if(ret>=0)
         {
           if(!(box->periodic[1]))
-            if(dless(oX,box->bbox[0]) || dless(box->bbox[1],oX)) ret=-1;
+            if(oX < box->bbox[0] || box->bbox[1] < oX) ret=-1;
           if(!(box->periodic[2]))
-            if(dless(oY,box->bbox[2]) || dless(box->bbox[3],oY)) ret=-1;
+            if(oY < box->bbox[2] || box->bbox[3] < oY) ret=-1;
           if(!(box->periodic[3]))
-            if(dless(oZ,box->bbox[4]) || dless(box->bbox[5],oZ)) ret=-1;
+            if(oZ < box->bbox[4] || box->bbox[5] < oZ) ret=-1;
         }
         dist=sqrt(x*x + y*y + z*z);
         if(ret>=0 && dist<1e60) /* point is in this box and x,y,z is not inf  */
         {
 //printf("%g ", dist);
-printf("%d %d %d x,y,z=%g,%g,%g dx,dy,dz=%g,%g,%g\n", i,j,k, x,y,z, dx,dy,dz);
+//printf("%d %d %d x,y,z=%g,%g,%g dx,dy,dz=%g,%g,%g\n", i,j,k, x,y,z, dx,dy,dz);
+printf("%d %d %d x,y,z=%g,%g,%g Nx,Ny,Nz=%g,%g,%g\n", i,j,k, x,y,z, Nx,Ny,Nz);
           extface[f]=0; /* mark face as not external */
           goto endplaneloop; /* break; does not work for nested loop */
         }
@@ -271,11 +267,6 @@ int set_bfaces_on_boxface(tBox *box, int f)
     double x,y,z;
     double ox,oy,oz, Nx,Ny,Nz, Nmag, dx,dy,dz;
 
-    /* pick one of X,Y,Z on boundary */
-    if(dir==1) X = box->bbox[f];
-    if(dir==2) Y = box->bbox[f];
-    if(dir==3) Z = box->bbox[f];
-
     if(box->x_of_X[1]==NULL) /* this is a Cartesian box */
     {
       x=X;
@@ -293,9 +284,9 @@ int set_bfaces_on_boxface(tBox *box, int f)
       z=pz[ijk];
       /* normal vector */
       if(box->dx_dX[1][dir]==NULL) errorexit("we need box->dx_dX[1][dir]");
-      Nx = box->dx_dX[1][dir](box, -1, X,Y,Z);
-      Ny = box->dx_dX[2][dir](box, -1, X,Y,Z);
-      Nz = box->dx_dX[3][dir](box, -1, X,Y,Z);
+      Nx = box->dx_dX[1][dir](box, ijk, X,Y,Z);
+      Ny = box->dx_dX[2][dir](box, ijk, X,Y,Z);
+      Nz = box->dx_dX[3][dir](box, ijk, X,Y,Z);
     }
     /* use normal vector to find point ox,oy,oz slightly outside box */
     Nmag = sqrt(Nx*Nx + Ny*Ny + Nz*Nz);
