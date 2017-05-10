@@ -244,6 +244,43 @@ double nearest_b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
   return rmin;
 }
 
+/* find nearest X,Y,Z inside (i.e. away from boundary) box from x,y,z */
+double nearestinnerXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
+                              double x, double y, double z)
+{
+  int i,j,k, ijk;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  double *pX = box->v[Ind("X")];
+  double *pY = box->v[Ind("Y")];
+  double *pZ = box->v[Ind("Z")];
+  double *px = box->v[Ind("x")];
+  double *py = box->v[Ind("y")];
+  double *pz = box->v[Ind("z")];
+  double dxi, dyi, dzi, r, rmin=-1.0;
+
+  for(k=1; k<n3-1; k++)
+  for(j=1; j<n2-1; j++)
+  for(i=1; i<n1-1; i++)
+  {
+    ijk = Index(i,j,k);
+    dxi = px[ijk] - x;
+    dyi = py[ijk] - y;
+    dzi = pz[ijk] - z;
+    r = dxi*dxi + dyi*dyi + dzi*dzi;
+    if(r<=rmin || rmin<0.0 )
+    {
+      rmin = r;
+      *ind = ijk;
+      *X = pX[ijk];
+      *Y = pY[ijk];
+      *Z = pZ[ijk];
+    }
+  }
+  return rmin;
+}
+
 /* find nearest X,Y,Z in grid-plane from x,y,z */
 double nearestXYZ_of_xyz_inplane(tBox *box, int *ind, 
                                  double *X, double *Y, double *Z,
