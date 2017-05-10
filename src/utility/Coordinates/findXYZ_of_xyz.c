@@ -92,9 +92,9 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
     stat = -stat;
   }
 
-  if(check && stat>=0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+  if(check || stat<0)
+    printf("XYZ_of_xyz: check=%d stat=%d err=%g\n", check, stat, err);
 
-  //printf("XYZ_of_xyz: err=%g tol=%g check=%d stat=%d\n",err, tol check, stat);
   return stat-check;
 }
 

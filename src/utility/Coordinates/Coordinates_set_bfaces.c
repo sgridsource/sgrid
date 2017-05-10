@@ -335,10 +335,14 @@ int set_bfaces_on_boxface(tBox *box, int f)
 int Coordinates_set_bfaces(tGrid *grid)
 {
   int pr = Getv("Coordinates_verbose", "yes");
+  int maxits = Geti("Coordinates_newtMAXITS"); /* save par */
   int b;
 
   if(pr) printf("Coordinates_set_bfaces:\n");
 
+  /* reduce iteration number in newton_linesrch_itsP
+     and then loop over boxes */
+  Seti("Coordinates_newtMAXITS", 75);
   forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
@@ -361,7 +365,13 @@ int Coordinates_set_bfaces(tGrid *grid)
     {
       printbfaces(box);
     }
+//prPointList(box->bface[0]->fpts);
+//prPointList(box->bface[1]->fpts);
+//prPointList(box->bface[2]->fpts);
+//exit(77);
   }
+  /* restore Coordinates_newtMAXITS */
+  Seti("Coordinates_newtMAXITS", maxits);
 exit(88);
   return 0;
 }

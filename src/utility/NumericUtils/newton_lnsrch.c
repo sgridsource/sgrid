@@ -352,6 +352,7 @@ int newton_linesrch_itsP(double x[], int n, int *check,
 		j = ludcmpSing(fjac,n,indx,&d);
 		if(j) /* matrix fjac has all zeros in col j (or row -j) */
 		{ /* throw away all off-diag elements if fjac is singlar */
+                  /*
                   int k;
                   for(k=1; k<=n; k++)
                   {
@@ -359,7 +360,35 @@ int newton_linesrch_itsP(double x[], int n, int *check,
                     if(fjac_kk!=0.0)  p[k] = p[k]/fjac_kk;
                     else              p[k] = 0.0;
                   }
-		}
+                  */
+                  int k,l;
+                  double ma;
+                  int *idx=ivector(1,n);
+                  for(l=1; l<=n; l++) idx[l]=0;
+                  for(l=1; l<=n; l++)
+                  {
+                    for(ma=0.0, k=1; k<=n; k++)
+                    {
+                      int li, fl;
+                      double ffkl=fabs(fjac[k][l]);
+                      if(ffkl>ma)
+                      {
+                        for(fl=1, li=1; li<l; li++)
+                          if(idx[li]==k) { fl=0; break; }
+                        if(fl) // if k is not in idx yet, mark max & put k into idx
+                        {
+                          ma = ffkl;
+                          idx[l] = k;
+                        }
+                      }
+                    }
+                    // now we have max ma in fjac[k][l], where k = idx[l]
+                    k = idx[l];
+                    if(k>0) p[l] = p[l]/fjac[k][l];
+                    else    p[l] = 0.0;
+                  } // end l-loop
+                  free_ivector(idx,1,n);
+		} /* end Sing. tretment */
 		else lubksb(fjac,n,indx,p);
 		linesrchP(n,xold,fold,g,p,x,&f,stpmax,check,
 		         f_to_minimize_in_linesrchP, 
