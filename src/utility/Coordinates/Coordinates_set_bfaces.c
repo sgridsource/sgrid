@@ -349,6 +349,11 @@ int Coordinates_set_bfaces(tGrid *grid)
     int extface[6];  /* extface[f]=1  means face f is external, i.e. needs BC */
     int f;
 
+    /* When not Cartesian, check if dx/dX exists */
+    if(box->x_of_X[1]!=NULL)
+      if(box->dx_dX[1][1]==NULL)
+        errorexiti("Coordinates_set_bfaces: dx_dX[1][1]==NULL in box%d", b);
+
     /* find all external faces of box */
     find_external_faces_of_box(box, extface);
     if(pr)
