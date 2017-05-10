@@ -86,10 +86,14 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
   r = sqrt(x*x + y*y + z*z);
   if(r>0.0)  err = err/r;
-  if(err>tol && stat>=0)
-  { //printf("fail!!!\n");
+  if(err>1e-5 && stat>=0)
+  {
+    //printf("XYZ_of_xyz: newton_linesrch_itsP failed! err=%g\n", err);
     stat = -stat;
   }
+
+  if(check && stat>=0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+
   //printf("XYZ_of_xyz: err=%g tol=%g check=%d stat=%d\n",err, tol check, stat);
   return stat-check;
 }
