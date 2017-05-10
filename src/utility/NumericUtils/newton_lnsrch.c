@@ -356,7 +356,7 @@ int newton_linesrch_itsP(double x[], int n, int *check,
                   for(k=1; k<=n; k++)
                   {
                     double fjac_kk=fjac[k][k];
-                    if(fjac_kk!=0.0)  p[k] = p[k]/fjac[k][k];
+                    if(fjac_kk!=0.0)  p[k] = p[k]/fjac_kk;
                     else              p[k] = 0.0;
                   }
 		}
