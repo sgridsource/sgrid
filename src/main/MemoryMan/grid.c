@@ -114,10 +114,12 @@ int set_BoxStructures_fromPars(tGrid *g, int pr)
     for(dir=1; dir<4; dir++)
     {
       snprintf(str, 999, "box%d_basis%d", b, dir);
-      if( Getv(str, "Fourier") )  box->periodic[dir]=1;
-      else                        box->periodic[dir]=0;
+      if( Getv(str, "Fourier") || Getv(str, "fd2_periodic") )
+        box->periodic[dir]=1;
+      else
+        box->periodic[dir]=0;
     }
-    
+
     n1 = box->n1;
     n2 = box->n2;
     n3 = box->n3;
