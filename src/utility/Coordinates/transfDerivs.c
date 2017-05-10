@@ -148,7 +148,7 @@ double check_box_dx_dX(tBox *box, double X, double Y, double Z)
 
   if(box->dx_dX[1][1]==NULL)
   {
-    printf("box->dx_dX[1][1]==NULL\n", norm);
+    printf("box->dx_dX[1][1]==NULL\n");
     return -1.0;
   }
 
