@@ -136,3 +136,54 @@ void ddxdXdX_from_dxdU_dUdX_ddxdUdU_ddUdXdX(double ddxdXdX[4][4][4],
     ddxdXdX[i][m][n] = sum1 + sum2;
   }
 }
+
+
+/* check box->dx_dX[k][l] at point in box */
+double check_box_dx_dX(tBox *box, double X, double Y, double Z)
+{
+  double sum, temp, norm;
+  int k, l;
+  double dXdx[4][4];
+  double dxdX[4][4];
+
+  if(box->dx_dX[1][1]==NULL)
+  {
+    printf("box->dx_dX[1][1]==NULL\n", norm);
+    return -1.0;
+  }
+
+  /* get dxdX */
+  for(k=1; k<=3; k++)
+  for(l=1; l<=3; l++)
+    dxdX[k][l] = box->dx_dX[k][l](box, -1, X,Y,Z);
+
+  /* compute inverse dXdx from dxdX */
+  dXdx_from_dxdX(dXdx, dxdX);
+
+  /* compare dXdx and box->dX_dx[k][l] */
+  printf("box->dX_dx[k][l]:\n");
+  for(k=1; k<=3; k++)
+  {
+    for(l=1; l<=3; l++)
+      printf("  %+.16e", box->dX_dx[k][l](box, -1, X,Y,Z));
+    printf("\n");
+  }
+  printf("dXdx[k][l], i.e. inverse of box->dx_dX[k][l]:\n");
+  for(k=1; k<=3; k++)
+  {
+    for(l=1; l<=3; l++)
+      printf("  %+.16e", dXdx[k][l]);
+    printf("\n");
+  }
+
+  sum=0.0;
+  for(k=1; k<=3; k++)
+  for(l=1; l<=3; l++)
+  {
+    temp = dXdx[k][l] - box->dX_dx[k][l](box, -1, X,Y,Z);
+    sum += temp*temp;
+  }
+  norm = sqrt(sum);
+  printf("L2-diff = %g\n", norm);
+  return norm;
+}

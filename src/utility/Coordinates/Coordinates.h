@@ -30,6 +30,7 @@ void dxdX_from_dxdU_dUdX(double dxdX[4][4],
 void ddxdXdX_from_dxdU_dUdX_ddxdUdU_ddUdXdX(double ddxdXdX[4][4][4],
                          double dxdU[4][4], double dUdX[4][4],
                          double ddxdUdU[4][4][4], double ddUdXdX[4][4][4]);
+double check_box_dx_dX(tBox *box, double X, double Y, double Z);
 
 /* Some trivial functions */
 double zero_of_xyz(void *aux, int ind, double X, double Y, double Z);
