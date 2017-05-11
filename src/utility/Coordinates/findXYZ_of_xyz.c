@@ -49,8 +49,8 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
 {
   double tol = Getd("Coordinates_newtTOLF");
   double XYZvec[4];
-  double fvec[4];
-  double err, r;
+  //double fvec[4];
+  //double err, r;
   t_grid_box_desired_xyz_struct pars[1];
   int check, stat;
 
@@ -81,19 +81,23 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
 
   //if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
 
-  /* get error in x,y,z */
-  xyz_VectorFuncP(3, XYZvec, fvec, (void *) pars); /* overwrites XYZvec */
-  err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
-  r = sqrt(x*x + y*y + z*z);
-  if(r>0.0)  err = err/r;
-  if(err>1e-5 && stat>=0)
-  {
-    //printf("XYZ_of_xyz: newton_linesrch_itsP failed! err=%g\n", err);
-    stat = -stat;
-  }
+//  /* get error in x,y,z */
+//  xyz_VectorFuncP(3, XYZvec, fvec, (void *) pars); /* overwrites XYZvec */
+//  err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
+//  r = sqrt(x*x + y*y + z*z);
+//  if(r>0.0)  err = err/r;
+//  if(err>1e-5 && stat>=0)
+//  {
+//    //printf("XYZ_of_xyz: newton_linesrch_itsP failed! err=%g\n", err);
+//    stat = -stat;
+//  }
 
   if(check || stat<0)
-    printf("XYZ_of_xyz: check=%d stat=%d err=%g\n", check, stat, err);
+  {
+    //printf("XYZ_of_xyz: check=%d stat=%d err=%g\n", check, stat, err);
+    printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+    printf("            in box%d at x=%g y=%g z=%g\n", box->b, x,y,z);
+  }
 
   return stat-check;
 }
@@ -148,8 +152,8 @@ int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
     X1=*X; Y1=*Y; Z1=*Z;
     stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
 
-if(!finite(X1) || !finite(Y1) || !finite(Z1))
-errorexit("not fin");
+//if(!finite(X1) || !finite(Y1) || !finite(Z1))
+//errorexit("not finite");
     if(stat<0) continue;
     if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
     if(dless(Y1,box->bbox[2]) || dless(box->bbox[3],Y1)) continue;
@@ -278,6 +282,63 @@ double nearestinnerXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double 
       *Z = pZ[ijk];
     }
   }
+  return rmin;
+}
+
+/* find the faces a point X,Y,Z is on, face[2]=1 if X,Y,Z is on face2  */
+int XYZ_on_face(tBox *box, int *face, double X, double Y, double Z)
+{
+  double XYZ[4];
+  double *bb=box->bbox;
+  int f;
+  int nf;
+
+  /* init */
+  XYZ[1]=X;
+  XYZ[2]=Y;
+  XYZ[3]=Z;
+  for(f=0; f<6; f++) face[f]=0;
+
+  /* find all faces we are on */
+  for(nf=0, f=0; f<6; f++)
+  {
+    int d=f/2;
+    int dir=1+d;
+    if(dequal(XYZ[dir],bb[f])) { face[f]=1; nf++; }
+  }
+  return nf; /* number of faces point is on */
+}
+
+/* find guess is nearest X,Y,Z in box from x,y,z */
+double guessXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
+                       double x, double y, double z)
+{
+  double rmin = nearestXYZ_of_xyz(box, ind, X,Y,Z, x,y,z);
+  int face[6];
+
+  /* if we are on a face, move away a bit */
+  if(XYZ_on_face(box, face, *X,*Y,*Z))
+  {
+    int f, d;
+    double *bb = box->bbox;
+    double LX[4];
+    double dX[4];
+    for(d=0; d<3; d++)
+    {
+      LX[1+d] = bb[2*d+1]-bb[2*d];
+      dX[1+d] = 0.0;
+    }
+
+    for(f=0; f<6; f++)
+      if(face[f])
+      {
+        dX[1+f/2] = (1e-6 * LX[1+f/2]) * (1-2*(f%2));
+      }
+    *X += dX[1];
+    *Y += dX[2];
+    *Z += dX[3];
+  }
+
   return rmin;
 }
 
