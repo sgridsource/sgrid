@@ -83,6 +83,9 @@ double nearest_b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
                             double x, double y, double z);
 double nearestinnerXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
                               double x, double y, double z);
+int XYZ_on_face(tBox *box, int *face, double X, double Y, double Z);
+double guessXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
+                       double x, double y, double z);
 double nearestXYZ_of_xyz_inplane(tBox *box, int *ind, 
                                  double *X, double *Y, double *Z,
                                  double x, double y, double z,
