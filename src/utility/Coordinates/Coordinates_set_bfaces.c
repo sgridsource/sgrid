@@ -6,8 +6,11 @@
 
 #define EPS dequaleps*1e3
 
-/* find box size L of smallest box */
-double smallest_box_size(tGrid *grid)
+#define LESS(a, b) ((a) < (b) - EPS*L )
+
+
+/* find box size L of box */
+double find_box_size(tBox *box)
 {
   int var_x = Ind("x");
   int var_y = Ind("y");
@@ -15,37 +18,70 @@ double smallest_box_size(tGrid *grid)
   int var_X = Ind("X");
   int var_Y = Ind("Y");
   int var_Z = Ind("Z");
-  int i;
+  int i,j,n, ind[8];
   double dx,dy,dz;
-  double L=1e300;
-  forallboxes(grid, i)
-  {
-    tBox *boxi = grid->box[i];
-    double *pX = boxi->v[var_X];
-    double *pY = boxi->v[var_Y];
-    double *pZ = boxi->v[var_Z];
-    double *px = boxi->v[var_x];
-    double *py = boxi->v[var_y];
-    double *pz = boxi->v[var_z];
-    int n1 = boxi->n1;
-    int n2 = boxi->n2;
-    int n3 = boxi->n3;
-    double Li;
+  double sum, L;
+  double *pX = box->v[var_X];
+  double *pY = box->v[var_Y];
+  double *pZ = box->v[var_Z];
+  double *px = box->v[var_x];
+  double *py = box->v[var_y];
+  double *pz = box->v[var_z];
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int m1 = n1-1;
+  int m2 = n2-1;
+  int m3 = n3-1;
 
-    i = Index(n1,n2,n3);
+  ind[0] = Index( 0, 0, 0);
+  ind[1] = Index(m1, 0, 0);
+  ind[2] = Index( 0,m2, 0);
+  ind[3] = Index(m1,m2, 0);
+  ind[4] = Index( 0, 0,m3);
+  ind[5] = Index(m1, 0,m3);
+  ind[6] = Index( 0,m2,m3);
+  ind[7] = Index(m1,m2,m3);
+
+//for(i=0; i<8; i++)
+//printf("i%d %4d x=%g y=%g z=%g  X=%g Y=%g Z=%g\n",
+//i, ind[i], px[ind[i]], py[ind[i]], pz[ind[i]],
+//pX[ind[i]], pY[ind[i]], pZ[ind[i]]);
+
+  sum=0.0;
+  n=0;
+  for(i=1; i<8; i++)
+  for(j=0; j<i; j++)
+  {
     if(px!=NULL)
     {
-      dx = px[i]-px[0];
-      dy = py[i]-py[0];
-      dz = pz[i]-pz[0];
+      dx = px[ind[i]]-px[ind[j]];
+      dy = py[ind[i]]-py[ind[j]];
+      dz = pz[ind[i]]-pz[ind[j]];
     }
     else
     {
-      dx = pX[i]-pX[0];
-      dy = pY[i]-pY[0];
-      dz = pZ[i]-pZ[0];
+      dx = pX[ind[i]]-pX[ind[j]];
+      dy = pY[ind[i]]-pY[ind[j]];
+      dz = pZ[ind[i]]-pZ[ind[j]];
     }
-    Li = sqrt(dx*dx + dy*dy + dz*dz);
+    sum += dx*dx + dy*dy + dz*dz;
+    n++;
+  }
+
+  L = sqrt(sum/n);
+  return L;
+}
+
+/* find box size L of smallest box */
+double smallest_box_size(tGrid *grid)
+{
+  int i;
+  double L=1e300;
+  forallboxes(grid, i)
+  {
+    tBox *box = grid->box[i];
+    double Li = find_box_size(box);
     if(Li<L) L=Li;
   }
   return L;
@@ -128,10 +164,15 @@ void find_external_faces_of_box(tBox *box, int *extface)
         double ox,oy,oz, Nx,Ny,Nz, Nmag, dx,dy,dz, dist;
         int li, ret;
 
+        /* pick one of X,Y,Z on boundary */
+        if(dir==1) X = box->bbox[f];
+        if(dir==2) Y = box->bbox[f];
+        if(dir==3) Z = box->bbox[f];
+
         /* use normal vector to find point ox,oy,oz slightly outside box */
-        Nx = box->dx_dX[1][dir](box, ijk, X,Y,Z);
-        Ny = box->dx_dX[2][dir](box, ijk, X,Y,Z);
-        Nz = box->dx_dX[3][dir](box, ijk, X,Y,Z);
+        Nx = box->dx_dX[1][dir](box, -1, X,Y,Z);
+        Ny = box->dx_dX[2][dir](box, -1, X,Y,Z);
+        Nz = box->dx_dX[3][dir](box, -1, X,Y,Z);
         Nmag = sqrt(Nx*Nx + Ny*Ny + Nz*Nz);
         dx = s*Nx*dL;
         dy = s*Ny*dL;
@@ -163,7 +204,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
         {
 //printf("%g ", dist);
 //printf("%d %d %d x,y,z=%g,%g,%g dx,dy,dz=%g,%g,%g\n", i,j,k, x,y,z, dx,dy,dz);
-printf("%d %d %d x,y,z=%g,%g,%g Nx,Ny,Nz=%g,%g,%g\n", i,j,k, x,y,z, Nx,Ny,Nz);
+//printf("%d %d %d x,y,z=%g,%g,%g Nx,Ny,Nz=%g,%g,%g\n", i,j,k, x,y,z, Nx,Ny,Nz);
           extface[f]=0; /* mark face as not external */
           goto endplaneloop; /* break; does not work for nested loop */
         }
@@ -264,8 +305,14 @@ int set_bfaces_on_boxface(tBox *box, int f)
     double X = pX[ijk];
     double Y = pY[ijk];
     double Z = pZ[ijk];
+    int face[6];
     double x,y,z;
     double ox,oy,oz, Nx,Ny,Nz, Nmag, dx,dy,dz;
+
+    /* pick one of X,Y,Z on boundary */
+    if(dir==1) X = box->bbox[f];
+    if(dir==2) Y = box->bbox[f];
+    if(dir==3) Z = box->bbox[f];
 
     if(box->x_of_X[1]==NULL) /* this is a Cartesian box */
     {
@@ -282,11 +329,28 @@ int set_bfaces_on_boxface(tBox *box, int f)
       x=px[ijk];
       y=py[ijk];
       z=pz[ijk];
+
+
       /* normal vector */
       if(box->dx_dX[1][dir]==NULL) errorexit("we need box->dx_dX[1][dir]");
-      Nx = box->dx_dX[1][dir](box, ijk, X,Y,Z);
-      Ny = box->dx_dX[2][dir](box, ijk, X,Y,Z);
-      Nz = box->dx_dX[3][dir](box, ijk, X,Y,Z);
+      Nx = box->dx_dX[1][dir](box, -1, X,Y,Z);
+      Ny = box->dx_dX[2][dir](box, -1, X,Y,Z);
+      Nz = box->dx_dX[3][dir](box, -1, X,Y,Z);
+
+      /* if we are also on another face add a bit of the normal as well */
+      if(XYZ_on_face(box, face, X,Y,Z))
+      {
+        int ff;
+        face[f]=0; /* remove current face */
+        for(ff=0; ff<6; ff++)
+          if(face[ff])
+          {
+            int dir = 1+ff/2;
+            Nx += 0.1 * ( box->dx_dX[1][dir](box, -1, X,Y,Z) );
+            Ny += 0.1 * ( box->dx_dX[2][dir](box, -1, X,Y,Z) );
+            Nz += 0.1 * ( box->dx_dX[3][dir](box, -1, X,Y,Z) );
+          }
+      }
     }
     /* use normal vector to find point ox,oy,oz slightly outside box */
     Nmag = sqrt(Nx*Nx + Ny*Ny + Nz*Nz);
@@ -309,12 +373,14 @@ int set_bfaces_on_boxface(tBox *box, int f)
       int bi = oblist[li];
       int ret;
       tBox *obox = grid->box[bi];
-      double dist = nearestXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
-      //double dist = nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
+      double osize = find_box_size(obox);
+      double dist = nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
+      //double dist = guessXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
       dist = sqrt(dist);
+//printf("o%dsize=%g ", obox->b, osize);
 //printf("  bi=%d dist=%g ob=%d oi=%d oX,oY,oZ=%g,%g,%g\n",
 //bi,dist, ob, oi, oX,oY,oZ);
-      if(dist<0.5*L)
+      if(dist<osize)
       {
         ret=XYZ_of_xyz(obox, &oX,&oY,&oZ, ox,oy,oz);
         if(ret>=0)
@@ -325,6 +391,22 @@ int set_bfaces_on_boxface(tBox *box, int f)
             if(dless(oY,obox->bbox[2]) || dless(obox->bbox[3],oY)) continue;
           if(!(obox->periodic[3]))
             if(dless(oZ,obox->bbox[4]) || dless(obox->bbox[5],oZ)) continue;
+          /*
+          if(!(obox->periodic[1]))
+            if(oX < obox->bbox[0] || obox->bbox[1] < oX) continue;
+          if(!(obox->periodic[2]))
+            if(oY < obox->bbox[2] || obox->bbox[3] < oY) continue;
+          if(!(obox->periodic[3]))
+            if(oZ < obox->bbox[4] || obox->bbox[5] < oZ) continue;
+          */
+          /*
+          if(!(obox->periodic[1]))
+            if(LESS(oX,obox->bbox[0]) || LESS(obox->bbox[1],oX)) continue;
+          if(!(obox->periodic[2]))
+            if(LESS(oY,obox->bbox[2]) || LESS(obox->bbox[3],oY)) continue;
+          if(!(obox->periodic[3]))
+            if(LESS(oZ,obox->bbox[4]) || LESS(obox->bbox[5],oZ)) continue;
+          */
           ob=obox->b;
         }
       }
@@ -366,6 +448,21 @@ int Coordinates_set_bfaces(tGrid *grid)
     int extface[6];  /* extface[f]=1  means face f is external, i.e. needs BC */
     int f;
 
+/*
+tBox *obox=grid->box[5];
+int oi;
+double oX,oY,oZ, ox,oy,oz;
+oX=0.08; oY=1e-10; oZ=0;
+ox=25.839;
+oy=0.0;
+oz=0;//1e-7;
+printf("L=%g\n", find_box_size(obox));
+nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
+printf("G ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
+XYZ_of_xyz(obox, &oX,&oY,&oZ, ox,oy,oz);
+printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
+//exit(78);
+*/
     //check_box_dx_dX(box, 0.1, 0.2, 0.3);
 
     /* When not Cartesian, check if dx/dX exists */
