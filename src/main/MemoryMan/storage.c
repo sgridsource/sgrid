@@ -177,6 +177,7 @@ int add_empty_bface(tBox *box, int f)
   box->bface[fi]->f    = f;
   box->bface[fi]->fi   = fi;
   box->bface[fi]->ob   = -1; /* other box is not known yet */
+  box->bface[fi]->ofi  = -1; /* fi in other box is not known yet */
   return fi;
 }
 
