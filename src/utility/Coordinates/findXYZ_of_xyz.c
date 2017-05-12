@@ -143,6 +143,11 @@ int recover_if_start_on_singularity(tBox *box,
 
   /* find faces */
   nf = XYZ_on_face(box, face, *X,*Y,*Z);
+  /* remove face in periodic dirs */
+  for(i=0; i<6; i++)
+    if(face[i] && box->periodic[1+i/2]) { face[i] = 0; nf--; }
+
+  /* find dirs with sing. */
   for(i=1; i<=3; i++) dir[i]=0;
   if(face[0] || face[1])      dir[1]=1;
   else if(face[2] || face[3]) dir[2]=1;
@@ -155,7 +160,7 @@ int recover_if_start_on_singularity(tBox *box,
     for(i=1; i<=3; i++)  zc[j] = zc[j] && si->dx_dX[i][j] == '0';
 
   /* catch some cases (so far only the ones for AnsorgNS) */
-  if(nf==1)
+  if(1)
   {
     if(dir[1])
     {
