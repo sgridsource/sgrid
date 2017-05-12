@@ -369,6 +369,7 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
           b_new->ddX_dxdx[i][j][k] = b_old->ddX_dxdx[i][j][k];
       }
     }
+    b_new->isSing = b_old->isSing;
     b_new->basis1 = b_old->basis1;
     b_new->basis2 = b_old->basis2;
     b_new->basis3 = b_old->basis3;

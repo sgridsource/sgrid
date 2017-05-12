@@ -382,6 +382,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
 
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+      box->isSing = isSing_AnsorgNS03;
 
       if(Getv("Coordinates_AnsorgNS_version","DDAnsorgNS"))
       {
@@ -457,6 +458,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+      box->isSing = isSing_AnsorgNS12;
 
       if(Getv("Coordinates_AnsorgNS_version","DDAnsorgNS"))
       {
@@ -532,6 +534,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+      box->isSing = isSing_AnsorgNS12;
 
       if(Getv("Coordinates_AnsorgNS_version","DDAnsorgNS"))
       {
@@ -607,6 +610,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       
       box->Sing_d_dx[2] = set_d_dy_at_rhoEQzero_AnsorgNS;
       box->Sing_d_dx[3] = set_d_dz_at_rhoEQzero_AnsorgNS;
+      box->isSing = isSing_AnsorgNS03;
 
       if(Getv("Coordinates_AnsorgNS_version","DDAnsorgNS"))
       {
