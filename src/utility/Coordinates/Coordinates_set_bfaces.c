@@ -429,6 +429,53 @@ int set_bfaces_on_boxface(tBox *box, int f)
 }
 
 
+/* figure out how each bface is connected to other bfaces */
+int set_ofi_in_all_bfaces(tGrid *grid)
+{
+  int b;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int fi, ob, ofi;
+
+    for(fi=0; fi<box->nbfaces; fi++)
+    {
+      tBox *obox;
+      ob = box->bface[fi]->ob;
+      obox = grid->box[ob];
+      for(ofi=0; ofi<obox->nbfaces; ofi++)
+      {
+        /* check if other box ob refers to this box b */
+        if(obox->bface[ofi]->ob == b)
+        {
+          /* if set box->bface[fi]->ofi=ofi if nothing is in there */
+          if(box->bface[fi]->ofi == -1 || box->bface[fi]->ofi == ofi)
+            box->bface[fi]->ofi=ofi;
+          /* if one other was already there use bits */
+          else if(box->bface[fi]->ofi >= 0)
+          {
+            int c = box->bface[fi]->ofi;
+            unsigned int cbt = 1<<(c+1);
+            int n = ofi;
+            unsigned int nbt = 1<<(n+1);
+            int r = cbt | nbt;
+            box->bface[fi]->ofi=-r;
+          }
+          /* if several were there already use bits */
+          else
+          {
+            unsigned int cbt = -box->bface[fi]->ofi;
+            unsigned int nbt = 1<<(ofi+1);
+            int r = cbt | nbt;
+            box->bface[fi]->ofi=-r;
+          }
+        } /* end if */
+      }/* end ofi loop */
+    }
+  } /* end box loop */
+  return 0;
+}
+
 
 /* set bfaces for each box on the grid */
 int Coordinates_set_bfaces(tGrid *grid)
@@ -448,6 +495,7 @@ int Coordinates_set_bfaces(tGrid *grid)
     int extface[6];  /* extface[f]=1  means face f is external, i.e. needs BC */
     int f;
 
+    free_all_bfaces(box);
 /*
 tBox *obox=grid->box[5];
 int oi;
@@ -493,6 +541,10 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
   }
   /* restore Coordinates_newtMAXITS */
   Seti("Coordinates_newtMAXITS", maxits);
+
+  /* set ofi in each bface */
+  set_ofi_in_all_bfaces(grid);
+
 exit(88);
   return 0;
 }

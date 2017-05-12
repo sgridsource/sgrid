@@ -94,3 +94,6 @@ int X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z);
 int b_X_of_x_forgiven_YZ(tGrid *grid, double *X, double x, double Y, double Z);
 int b_X_of_x_forgiven_YZ_inboxlist(tGrid *grid, int *blist, int nb, 
                                    double *X, double x, double Y, double Z);
+
+/* from Coordinates_set_bfaces.c */
+int set_ofi_in_all_bfaces(tGrid *grid);
