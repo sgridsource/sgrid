@@ -14,6 +14,12 @@ double ddX_dxdx(int i, int m, int n, int ddXdd,
 /* from Coordinates_set_bfaces.c */
 int Coordinates_set_bfaces(tGrid *grid);
 
+/* Singularities.c */
+int isSing_AnsorgNS12(void *aux, double X, double Y, double Z,
+                      int update, tSingInfo *si);
+int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
+                      int update, tSingInfo *si);
+
 /* from doubleCovering.c */
 void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);
 

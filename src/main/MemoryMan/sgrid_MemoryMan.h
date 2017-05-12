@@ -4,6 +4,19 @@
 /* number of attributes a box can have */
 #define NATTRIBS 10
 
+
+/*************************************************************************/
+/* auxilliary types and structures we need to define early */
+
+/* struct that contains info about a coordinate singularity */
+/* We store chars here:
+   {'0', '.', 'i', 'n'} means {0, nonzero, +/-inf, nan }  */
+typedef struct tSINGINFO {
+  char x[4];        /* info about Cart. coords */
+  char dx_dX[4][4]; /* and their derivs */
+} tSingInfo;
+
+
 /*************************************************************************/
 /* basic structures */
 
@@ -34,6 +47,7 @@ typedef struct tBOX {
   void (*Sing_d_dx[4])(void *aux, void *v, void *v1, void *v2, void *v3);  /* func to compute d/dx_m_{cart} at singular points */
   double (*ddX_dxdx[4][4][4])(void *aux, int ind, double X, double Y, double Z); /* d^2X_l_{spec}/(dx_m_{cart} dx_n_{cart}) */
   double (*dx_dX[4][4])(void *aux, int ind, double X, double Y, double Z);	    /* dX_l_{cart}/dx_m_{spec} */
+  int (*isSing)(void *aux, double X, double Y, double Z, int update, tSingInfo *si); /* indicates if there is a sing. at X,Y,Z */
   double *F1;		/* filter matrix for direction 1 */
   double *F2;		/* filter matrix for direction 2 */
   double *F3;		/* filter matrix for direction 3 */
@@ -126,6 +140,7 @@ typedef struct tBFACE {
 //  int setfield       : 1;  // 1 if we set field
 //  int setnormalderiv : 1;  // 1 if we set normal derivs of field
 } tBface;
+
 
 
 
