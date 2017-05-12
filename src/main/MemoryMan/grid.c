@@ -405,11 +405,9 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
       b_new->Attrib[i] = b_old->Attrib[i];
 
     /* copy bfaces: free all in b_new and then duplicate b_old */
-    for(i=0; i < b_new->nbfaces; i++)
-      free_bface(b_new->bface[i]);
+    free_all_bfaces(b_new);
     b_new->nbfaces = b_old->nbfaces;
-    b_new->bface = realloc( b_new->bface,
-                          (sizeof( *(b_new->bface) ))*(b_new->nbfaces) );
+    b_new->bface = calloc(b_new->nbfaces, sizeof( *(b_new->bface) ));
     if(b_new->bface==NULL)
       errorexit("copy_grid_withoutvars: not enough memory for box->bface");
     for(i = 0; i < b_old->nbfaces; i++)

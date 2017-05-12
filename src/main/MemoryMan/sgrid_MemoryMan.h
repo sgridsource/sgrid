@@ -186,6 +186,7 @@ int add_point_to_bface_inbox(tBox *box, int fi, int ijk, int f);
 tBface *duplicate_bface_without_fpts_for_grid(tBface *bface0, tGrid *grid);
 tBface *duplicate_bface_for_grid(tBface *bface0, tGrid *grid);
 void free_bface(tBface *bface);
+void free_all_bfaces(tBox *box);
 int remove_bface(tBox *box, int fi);
 int remove_bfaces_with_NULL_ftps(tBox *box);
 void free_box(tBox *box);

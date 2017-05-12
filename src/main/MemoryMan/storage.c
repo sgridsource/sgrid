@@ -242,6 +242,16 @@ void free_bface(tBface *bface)
   }
 }
 
+/* free all bfaces in box */
+void free_all_bfaces(tBox *box)
+{
+  int i;
+  for(i=0; i<box->nbfaces; i++)  free_bface(box->bface[i]);
+  free(box->bface);
+  box->bface = NULL;
+  box->nbfaces = 0;
+}
+
 /* remove a bface with index fi from a box, return number of bfaces removed */
 int remove_bface(tBox *box, int fi)
 {
@@ -318,8 +328,7 @@ void free_box(tBox *box)
   free(box->Int2);
   free(box->Int3);
 
-  for(i=0; i < box->nbfaces; i++)  free_bface(box->bface[i]);
-  free(box->bface);
+  free_all_bfaces(box);
 
   free(box);
 }
