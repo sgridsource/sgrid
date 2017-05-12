@@ -52,6 +52,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   //double fvec[4];
   //double err, r;
   t_grid_box_desired_xyz_struct pars[1];
+  tSingInfo si[1];
   int check, stat;
 
   if(box->x_of_X[1]==NULL)
@@ -62,6 +63,33 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   pars->desired_y = y;
   pars->desired_z = z;
 
+  /* test if X,Y,Z are at singularity */
+  stat=0;
+  if(box->isSing!=NULL)  stat = box->isSing((void *) box, *X,*Y,*Z, 1, si);
+  if(stat) /* if yes, try something: */
+  {
+    double fvec[4];
+    double err, r;
+
+    stat = recover_if_start_on_singularity(box, X,Y,Z, x,y,z, si);
+    /* check if error is ok */
+    XYZvec[1] = *X;
+    XYZvec[2] = *Y;
+    XYZvec[3] = *Z;
+    xyz_VectorFuncP(3, XYZvec, fvec, (void *) pars);
+    err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
+    r = sqrt(x*x + y*y + z*z);
+    if(r>0.0)  err = err/r;
+    if(err>tol*10.0 && stat>=0)
+    {
+      printf("XYZ_of_xyz: recover_if_start_on_singularity failed: err=%g\n",
+             err);
+      printf("X=%g Y=%g Z=%g\n", *X,*Y,*Z);
+      stat = -stat;
+    }
+    return stat;
+  }
+
   /* bad initial guess */
   /* XYZvec[1] = (box->bbox[0] + box->bbox[1]) * 0.5;
      XYZvec[2] = (box->bbox[2] + box->bbox[3]) * 0.5;
@@ -71,7 +99,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   XYZvec[1] = *X;
   XYZvec[2] = *Y;
   XYZvec[3] = *Z;
-      
+
   /* do newton_linesrch_itsP iterations: */
   stat = newton_linesrch_itsP(XYZvec, 3, &check, xyz_VectorFuncP, (void *) pars,
                               Geti("Coordinates_newtMAXITS"), tol);
@@ -82,7 +110,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   //if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
 
 //  /* get error in x,y,z */
-//  xyz_VectorFuncP(3, XYZvec, fvec, (void *) pars); /* overwrites XYZvec */
+//  xyz_VectorFuncP(3, XYZvec, fvec, (void *) pars);
 //  err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
 //  r = sqrt(x*x + y*y + z*z);
 //  if(r>0.0)  err = err/r;
@@ -100,6 +128,78 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   }
 
   return stat-check;
+}
+
+/* do something if we start on a coordinate singularity */
+int recover_if_start_on_singularity(tBox *box,
+        double *X, double *Y, double *Z,
+        double x, double y, double z, tSingInfo *si)
+{
+  int stat;
+  int face[6]; /* face where sing. is located, e.g. face[2]=1 => face2 */
+  int dir[4];  /* direction info */
+  int zc[4];   /* cols with zeros, e.g. zc[3]=1 => col3 has all zeros */
+  int nf, i, j;
+
+  /* find faces */
+  nf = XYZ_on_face(box, face, *X,*Y,*Z);
+  for(i=1; i<=3; i++) dir[i]=0;
+  if(face[0] || face[1])      dir[1]=1;
+  else if(face[2] || face[3]) dir[2]=1;
+  else if(face[4] || face[5]) dir[3]=1;
+  else errorexit("singularity should be on one of the faces");
+
+  /* check which cols in dx_dX have only zeros */
+  zc[1] = zc[2] = zc[3] = 1;
+  for(j=1; j<=3; j++)
+    for(i=1; i<=3; i++)  zc[j] = zc[j] && si->dx_dX[i][j] == '0';
+
+  /* catch some cases (so far only the ones for AnsorgNS) */
+  if(nf==1)
+  {
+    if(dir[1])
+    {
+      prSingInfo(si);
+      printf("X=%g Y=%g Z=%g\n", *X,*Y,*Z);
+      printf(" dir[1]=%d dir[2]=%d dir[3]=%d\n", dir[1], dir[2], dir[3]);
+      printf("  zc[1]=%d  zc[2]=%d  zc[3]=%d\n", zc[1], zc[2], zc[3]);
+
+      if(zc[3])
+      {
+        if(si->dx_dX[2][1] == '.')
+          errorexit("implement Y_of_x_forgiven_XZ(box, Y, x, *X,*Z);");
+        else if(si->dx_dX[2][2] == '.')
+          errorexit("implement Y_of_y_forgiven_XZ(box, Y, y, *X,*Z);");
+        else if(si->dx_dX[2][3] == '.')
+          errorexit("implement Y_of_z_forgiven_XZ(box, Y, z, *X,*Z);");
+      }
+    }
+    else if(dir[2])
+    {
+      if(zc[3])
+      {
+        if(si->dx_dX[1][1] == '.')
+          stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
+        else if(si->dx_dX[1][2] == '.')
+          errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
+        else if(si->dx_dX[1][3] == '.')
+          errorexit("implement X_of_z_forgiven_YZ(box, X, z, *Y,*Z);");
+      }
+    }
+    else if(dir[3])
+    {
+      if(zc[2])
+      {
+        if(si->dx_dX[1][1] == '.')
+          stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
+        else if(si->dx_dX[1][2] == '.')
+          errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
+        else if(si->dx_dX[1][3] == '.')
+          errorexit("implement X_of_z_forgiven_YZ(box, X, z, *Y,*Z);");
+      }
+    }
+  }
+  return stat;
 }
 
 /* find X,Y,Z from x,y,z (Note: X,Y,Z also contains initial guess)

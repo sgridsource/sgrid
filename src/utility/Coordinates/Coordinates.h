@@ -15,10 +15,15 @@ double ddX_dxdx(int i, int m, int n, int ddXdd,
 int Coordinates_set_bfaces(tGrid *grid);
 
 /* Singularities.c */
+void prSingInfo(tSingInfo *si);
 int isSing_AnsorgNS12(void *aux, double X, double Y, double Z,
                       int update, tSingInfo *si);
 int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
                       int update, tSingInfo *si);
+/* from findXYZ_of_xyz.c */
+int recover_if_start_on_singularity(tBox *box,
+        double *X, double *Y, double *Z,
+        double x, double y, double z, tSingInfo *si);
 
 /* from doubleCovering.c */
 void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);

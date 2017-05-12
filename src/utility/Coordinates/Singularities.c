@@ -5,6 +5,21 @@
 #include "Coordinates.h"
 
 
+/* print tSingInfo */
+void prSingInfo(tSingInfo *si)
+{
+  int i,j;
+  printf("si->x[j] = ");
+  for(j=1; j<=3; j++) printf("%c ", si->x[j]);
+  printf("\n");
+  printf("si->dx_dX[i][j] =\n");
+  for(i=1; i<=3; i++)
+  {
+    for(j=1; j<=3; j++) printf("%c ", si->dx_dX[i][j]);
+    printf("\n");
+  }
+}
+
 /* set SingInfo for domains 1 and 2 of AnsorgNS */
 int isSing_AnsorgNS12(void *aux, double X, double Y, double Z,
                       int update, tSingInfo *si)
@@ -41,7 +56,8 @@ int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
   int sing=0;
   int i;
 
-  if( dequal(X, 0.0) || dequal(X, 1.0) )
+  /* X=0 is deactivated, because we don't use grids where X=0 */
+  if( 0 && (dequal(X, 0.0) || dequal(X, 1.0)) )
   {
     if(update)
     {
