@@ -404,12 +404,16 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
     for(i = 0; i < NATTRIBS; i++)
       b_new->Attrib[i] = b_old->Attrib[i];
 
-    /* copy bfaces */
+    /* copy bfaces: free all in b_new and then duplicate b_old */
+    for(i=0; i < b_new->nbfaces; i++)
+      free_bface(b_new->bface[i]);
+    b_new->nbfaces = b_old->nbfaces;
+    b_new->bface = realloc( b_new->bface,
+                          (sizeof( *(b_new->bface) ))*(b_new->nbfaces) );
+    if(b_new->bface==NULL)
+      errorexit("copy_grid_withoutvars: not enough memory for box->bface");
     for(i = 0; i < b_old->nbfaces; i++)
-    {
-      add_empty_bface(b_new, -1);
       b_new->bface[i] = duplicate_bface_for_grid(b_old->bface[i], g_new);
-    }
 
     /* copy diff., filter matrices, ..., and all other arrays */
     for (i = 0; i < n1*n1; i++, ijk++)
