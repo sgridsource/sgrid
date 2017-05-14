@@ -36,6 +36,17 @@ tPointList *AllocatePointList(tGrid *grid)
  return PL;
 }
 
+/* add bi to blist (if not already in it), returns n+1 if bi is new */
+int addto_blist(int bi, int *blist, int n)
+{
+  int i;
+  int addbi=1;
+  /* add bi only if it is not already in blist */
+  for(i=0; i<n; i++) if(blist[i]==bi) { addbi=0; break; }
+  //printf(" n=%d\n",n);
+  if(addbi) { blist[n] = bi; n++; }
+  return n;
+}
 
 /* add one point to a PointList on box boxindex */
 void AddToPointList(tPointList *PL, int boxindex, int newpoint)
@@ -58,7 +69,7 @@ void AddToPointList(tPointList *PL, int boxindex, int newpoint)
  //printf("PL->blist=%p\n", PL->blist);
  //printf("ret=%p\n", ret);
  //printf("%d\n",( sizeof(*(PL->blist)) )*(PL->nblist+255));
- PL->nblist = addto_boxlist(boxindex, &(PL->blist), PL->nblist);
+ PL->nblist = addto_blist(boxindex, PL->blist, PL->nblist);
 }
 
 
@@ -87,7 +98,8 @@ void prPointList(tPointList *PL)
   int boxindex;
   if(PL!=NULL)
   {
-    printf("PointList=%p  PointList->grid=%p\n", PL, PL->grid);
+    printf("PointList=%p  PointList->grid=%p  PointList->nblist=%d\n",
+           PL, PL->grid, PL->nblist);
     forallboxes(PL->grid,boxindex)
     {
       //if(PL->point[boxindex]==NULL) continue;
@@ -99,7 +111,6 @@ void prPointList(tPointList *PL)
         printf("%d ",PL->point[boxindex][i]);
       printf("\n");
     }
-    pr_boxlist(PL->blist, PL->nblist);
   }
   else printf("PointList=%p\n", PL);
 }

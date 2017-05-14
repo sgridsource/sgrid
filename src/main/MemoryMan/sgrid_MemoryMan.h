@@ -232,9 +232,12 @@ tPointList *DuplicatePointList_for_grid(tPointList *PL0, tGrid *grid);
 tPointList *DuplicatePointList(tPointList *PL0);
 
 /* boxlists.c */
-void pr_boxlist(int *blist, int n);
-int addto_boxlist(int bi, int **blist, int n);
-int boxlist_fromAttrib(tGrid *grid, int iAttr, int AttrVal, int **blist);
-int boxlist2_ifAttrib(tGrid *grid, int *blist1, int n1,
-                      int iAttr, int AttrVal, int **blist2);
-int boxlist_boxneighbors(tBox *box, int **blist);
+/* use lists with int entries */
+#define TYP int
+#include "list_templates.h"
+#undef TYP
+void pr_boxlist(intList *bl);
+int boxlist_fromAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl);
+int boxlist2_ifAttrib(tGrid *grid, intList *bl1,
+                      int iAttr, int AttrVal, intList *bl2);
+int boxlist_neighbors(tBox *box, intList *bl);

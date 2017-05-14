@@ -6,73 +6,57 @@
 #include "MemoryMan.h"
 
 
-/* ******************************************************************** */
-/* WT: Here are some utility routines to use box primitive lists        */
-/* We could make this more sphisticated like the point lists in point.c */
-/* Note: the caller must make surte there is memory for these blists!   */
-/* ******************************************************************** */
+/* ************************************************************************* */
+/* WT: Here are some utility routines to use box lists of type intList       */
+/* ************************************************************************* */
 
-void pr_boxlist(int *blist, int n)
+void pr_boxlist(intList *bl)
 {
   int i;
-  printf("%d boxes:", n);
-  for(i=0; i<n; i++) printf(" %d", blist[i]);
+  printf("%d boxes:", bl->n);
+  for(i=0; i<bl->n; i++) printf(" %d", bl->e[i]);
   printf("\n");
 }
 
-/* add bi to boxlist (if not already in it), returns n+1 if bi is new */
-int addto_boxlist(int bi, int **blist, int n)
-{
-  int i;
-  int addbi=1;
-  /* add bi only if it is not already in blist */
-  for(i=0; i<n; i++) if((*blist)[i]==bi) { addbi=0; break; }
-  //printf(" n=%d\n",n);
-  if(addbi) { (*blist)[n] = bi; n++; }
-  return n;
-}                      
-
-/* return number of boxes n and list blist with boxes that have an 
+/* return number of boxes n and list bl with boxes that have an
    attribute Attrib[iAttr] with value AttrVal. */
-int boxlist_fromAttrib(tGrid *grid, int iAttr, int AttrVal, int **blist)
+int boxlist_fromAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl)
 {
-  int b, n=0;
+  int b;
   forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
-    if(box->Attrib[iAttr] == AttrVal) { (*blist)[n] = b; n++; }
+    if(box->Attrib[iAttr] == AttrVal)  push_intList(bl, b);
   }
-  return n;
+  return bl->n;
 }
 
-/* return number of boxes n2 and list blist2 with boxes that have an 
-   attribute Attrib[iAttr] with value AttrVal and are in blist1. */
-int boxlist2_ifAttrib(tGrid *grid, int *blist1, int n1,
-                      int iAttr, int AttrVal, int **blist2)
+/* return number of boxes n and list bl2 with boxes that have an
+   attribute Attrib[iAttr] with value AttrVal and are in bl1. */
+int boxlist2_ifAttrib(tGrid *grid, intList *bl1,
+                      int iAttr, int AttrVal, intList *bl2)
 {
-  int i, n2=0;
-  for(i=0; i<n1; i++)
+  int i;
+  for(i=0; i<bl1->n; i++)
   {
-    int b = blist1[i];
+    int b = bl1->e[i];
     tBox *box = grid->box[b];
-    if(box->Attrib[iAttr] == AttrVal) { (*blist2)[n2] = b; n2++; }
+    if(box->Attrib[iAttr] == AttrVal)  push_intList(bl2, b);
   }
-  return n2;
+  return bl2->n;
 }
 
-/*
-// make blist of all neighbors of box, return list len in n
-int boxlist_boxneighbors(tBox *box, int **blist)
+/* make list bl of all neighbors of box, return list len */
+int boxlist_neighbors(tBox *box, intList *bl)
 {
-  int i, i2, n=0;
+  int i, i2;
   for(i=0; i<box->nbfaces; i++)
   {
     int nb = box->bface[i]->ob; // get neighbor index nb
     int addnb = 1;
     // add nb only if it is not already in blist
-    for(i2=0; i2<n; i2++) if((*blist)[i2]==nb) { addnb=0; break; }
-    if(addnb) { (*blist)[n] = b; n++; }
+    for(i2=0; i2<bl->n; i2++) if(bl->e[i2]==nb) { addnb=0; break; }
+    if(addnb) push_intList(bl, nb);
   }
-  return n;
+  return bl->n;
 }                      
-*/
