@@ -107,8 +107,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
   int d, dir;     /* we use dir = d+1 */ 
   int i,j,k, p, f;
   char str[1000];
-  int *oblist = calloc(grid->nboxes,sizeof(int)); /* list that contains other boxes*/
-  int nob; /* number of other boxes */
+  intList *obl = alloc_intList(); /* list that contains other boxes*/
   int ob, oi;
   double oX,oY,oZ;
   double L, dL;
@@ -127,9 +126,8 @@ void find_external_faces_of_box(tBox *box, int *extface)
   L = smallest_box_size(grid);
   dL = L*EPS;
 
-  /* make oblist that contains all boxes */
-  nob=0;
-  forallboxes(grid, i) if(i!=b) nob=addto_boxlist(i, &oblist, nob);
+  /* make obl that contains all boxes */
+  forallboxes(grid, i) if(i!=b) unionof_intList(obl, i);
 
   /* go over directions */
   for(d=0; d<3; d++)
@@ -210,9 +208,9 @@ void find_external_faces_of_box(tBox *box, int *extface)
         }
 
         /* find point in other boxes */
-        for(li=0; li<nob; li++)
+        for(li=0; li<obl->n; li++)
         {
-          int bi = oblist[li];
+          int bi = obl->e[li];
           tBox *obox = grid->box[bi];
           dist = nearestXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
           //dist = nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
@@ -241,7 +239,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
     }
   } /* end loop over directions */
 
-  free(oblist);
+  free_intList(obl);
 }
 
 
@@ -271,8 +269,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
   int n3 = box->n3;
   int d, dir;     /* we use dir = d+1 */ 
   int i,j,k, p, fi, li;
-  int *oblist = calloc(grid->nboxes,sizeof(int)); /* list that contains other boxes*/
-  int nob; /* number of other boxes */
+  intList *obl = alloc_intList(); /* list that contains other boxes*/
   int ob, oi;
   double oX,oY,oZ;
   double L, dL;
@@ -285,12 +282,11 @@ int set_bfaces_on_boxface(tBox *box, int f)
   L = smallest_box_size(grid);
   dL = L*EPS;
 
-  /* make oblist that contains all boxes except b,
+  /* make obl that contains all boxes except b,
      and add one bface for each of the other boxes */
-  nob=0;
   forallboxes(grid, i) if(i!=b)
   {
-    nob=addto_boxlist(i, &oblist, nob);
+    unionof_intList(obl, i);
     /* add one empty bface for each other box */
     fi = add_empty_bface(box, f);
     box->bface[fi]->ob = i;
@@ -368,9 +364,9 @@ int set_bfaces_on_boxface(tBox *box, int f)
     ob = -1;
 
     /* find point in other boxes */
-    for(li=0; li<nob; li++)
+    for(li=0; li<obl->n; li++)
     {
-      int bi = oblist[li];
+      int bi = obl->e[li];
       int ret;
       tBox *obox = grid->box[bi];
       double osize = find_box_size(obox);
@@ -424,7 +420,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
   /* look for empty bfaces and remove them */
   remove_bfaces_with_NULL_ftps(box);
 
-  free(oblist);
+  free_intList(obl);
   return nbfaces;
 }
 
@@ -534,10 +530,6 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
     {
       printbfaces(box);
     }
-//prPointList(box->bface[0]->fpts);
-//prPointList(box->bface[1]->fpts);
-//prPointList(box->bface[2]->fpts);
-//exit(77);
   }
   /* restore Coordinates_newtMAXITS */
   Seti("Coordinates_newtMAXITS", maxits);
@@ -545,6 +537,13 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
   /* set ofi in each bface */
   set_ofi_in_all_bfaces(grid);
 
+  if(pr) forallboxes(grid, b) printbfaces(grid->box[b]);
+
+prPointList(grid->box[3]->bface[0]->fpts);
+prPointList(grid->box[3]->bface[1]->fpts);
+prPointList(grid->box[4]->bface[0]->fpts);
+prPointList(grid->box[4]->bface[4]->fpts);
+exit(77);
 exit(88);
   return 0;
 }
