@@ -166,6 +166,8 @@ int recover_if_start_on_singularity(tBox *box,
     {
       prSingInfo(si);
       printf("X=%g Y=%g Z=%g\n", *X,*Y,*Z);
+      for(i=0; i<6; i++) printf("face[%d]=%d ", i, face[i]);
+      printf(" nf=%d\n", nf);
       printf(" dir[1]=%d dir[2]=%d dir[3]=%d\n", dir[1], dir[2], dir[3]);
       printf("  zc[1]=%d  zc[2]=%d  zc[3]=%d\n", zc[1], zc[2], zc[3]);
 
@@ -174,7 +176,7 @@ int recover_if_start_on_singularity(tBox *box,
         if(si->dx_dX[2][1] == '.')
           errorexit("implement Y_of_x_forgiven_XZ(box, Y, x, *X,*Z);");
         else if(si->dx_dX[2][2] == '.')
-          errorexit("implement Y_of_y_forgiven_XZ(box, Y, y, *X,*Z);");
+          Y_of_y_forgiven_XZ(box, Y, y, *X, *Z);
         else if(si->dx_dX[2][3] == '.')
           errorexit("implement Y_of_z_forgiven_XZ(box, Y, z, *X,*Z);");
       }
@@ -632,4 +634,52 @@ int b_X_of_x_forgiven_YZ_inboxlist(tGrid *grid, int *blist, int nb,
     return bi; /* return box index if success */
   }
   return -bi-10000;  /* make sure it's never 0 */
+}
+
+/* function to be passed into newton_linesrch_itsP by Y_of_y_forgiven_XZ */
+void y_VectorFuncP_XZ(int n, double *XYZvec, double *fvec, void *p)
+{
+  t_grid_box_desired_xyz_struct *pars;
+  tBox *box;
+  double desired_y;
+  double yg;
+  int ind=-1; /* works only if the x_of_X[i] don't use ind */
+
+  /* get pars */
+  pars = (t_grid_box_desired_xyz_struct *) p;
+  box = pars->box;
+  desired_y = pars->desired_y;
+
+  yg = box->x_of_X[2]((void *) box, ind, XYZvec[2],XYZvec[1],XYZvec[3]);
+  fvec[1] = yg-desired_y;
+}
+
+/* find Y from y for a given X,Z (Note: Y also contains initial guess) */
+int Y_of_y_forgiven_XZ(tBox *box, double *Y, double y, double X, double Z)
+{
+  double XYZvec[4];
+  t_grid_box_desired_xyz_struct pars[1];
+  int check, stat;
+
+  if(box->x_of_X[1]==NULL)  { *Y = y;  return 0; }
+
+  pars->box = box;
+  pars->desired_y = y;
+
+  /* initial guess supplied by caller */
+  XYZvec[1] = *Y;
+
+  /* X,Z are fixed */
+  XYZvec[2] = X;
+  XYZvec[3] = Z;
+
+  /* do newton_linesrch_itsP iterations: */
+  stat = newton_linesrch_itsP(XYZvec, 1, &check, y_VectorFuncP_XZ,
+                              (void *) pars,
+                              Geti("Coordinates_newtMAXITS"),
+                              Getd("Coordinates_newtTOLF") );
+  *Y = XYZvec[1];
+
+  if(check || stat<0) printf("Y_of_y_forgiven_XZ: check=%d stat=%d\n", check, stat);
+  return stat-check;
 }
