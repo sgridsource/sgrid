@@ -71,7 +71,8 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
     double fvec[4];
     double err, r;
 
-    stat = recover_if_start_on_singularity(box, X,Y,Z, x,y,z, si);
+    stat = recover_if_start_on_singularity(box, X,Y,Z, x,y,z,
+                                           (void *) pars, tol, si);
     /* check if error is ok */
     XYZvec[1] = *X;
     XYZvec[2] = *Y;
@@ -130,29 +131,52 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   return stat-check;
 }
 
+/* check error in x,y,z, write it into *err */
+int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
+            double x, double y, double z,
+            void *p, double tol, tSingInfo *si, double *err)
+{
+  int stat;
+  double XYZvec[4];
+  double fvec[4];
+  double r;
+
+  XYZvec[1] = *X;
+  XYZvec[2] = *Y;
+  XYZvec[3] = *Z;
+  xyz_VectorFuncP(3, XYZvec, fvec, p);
+  *err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
+  r = sqrt(x*x + y*y + z*z);
+  if(r>0.0)  *err = *err/r;
+  if(*err>tol*10.0)
+  {
+    printf("XYZ_of_xyz: check_xyz_error: *err=%g\n", *err);
+    printf("X=%g Y=%g Z=%g\n", *X,*Y,*Z);
+    stat = -1;
+  }
+  else
+    stat=1;
+
+  return stat;
+}
+
 /* do something if we start on a coordinate singularity */
 int recover_if_start_on_singularity(tBox *box,
         double *X, double *Y, double *Z,
-        double x, double y, double z, tSingInfo *si)
+        double x, double y, double z, void *p, double tol, tSingInfo *si)
 {
-  int stat;
-  int face[6]; /* face where sing. is located, e.g. face[2]=1 => face2 */
+  double err;
+  int stat = -1;
   int dir[4];  /* direction info */
   int zc[4];   /* cols with zeros, e.g. zc[3]=1 => col3 has all zeros */
   int nf, i, j;
 
-  /* find faces */
-  nf = XYZ_on_face(box, face, *X,*Y,*Z);
-  /* remove face in periodic dirs */
-  for(i=0; i<6; i++)
-    if(face[i] && box->periodic[1+i/2]) { face[i] = 0; nf--; }
-
   /* find dirs with sing. */
   for(i=1; i<=3; i++) dir[i]=0;
-  if(face[0] || face[1])      dir[1]=1;
-  else if(face[2] || face[3]) dir[2]=1;
-  else if(face[4] || face[5]) dir[3]=1;
-  else errorexit("singularity should be on one of the faces");
+  if(si->f[0] || si->f[1]) dir[1]=1;
+  if(si->f[2] || si->f[3]) dir[2]=1;
+  if(si->f[4] || si->f[5]) dir[3]=1;
+//  else errorexit("singularity should be on one of the si->fs");
 
   /* check which cols in dx_dX have only zeros */
   zc[1] = zc[2] = zc[3] = 1;
@@ -160,52 +184,62 @@ int recover_if_start_on_singularity(tBox *box,
     for(i=1; i<=3; i++)  zc[j] = zc[j] && si->dx_dX[i][j] == '0';
 
   /* catch some cases (so far only the ones for AnsorgNS) */
-  if(1)
+  if(dir[1] && stat<0)
   {
-    if(dir[1])
-    {
-      prSingInfo(si);
-      printf("X=%g Y=%g Z=%g\n", *X,*Y,*Z);
-      for(i=0; i<6; i++) printf("face[%d]=%d ", i, face[i]);
-      printf(" nf=%d\n", nf);
-      printf(" dir[1]=%d dir[2]=%d dir[3]=%d\n", dir[1], dir[2], dir[3]);
-      printf("  zc[1]=%d  zc[2]=%d  zc[3]=%d\n", zc[1], zc[2], zc[3]);
+    //prSingInfo(si);
+    //printf("X=%g Y=%g Z=%g\n", *X,*Y,*Z);
+    //for(i=0; i<6; i++) printf("si->f[%d]=%d ", i, si->f[i]);
+    //printf(" nf=%d\n", nf);
+    //printf(" dir[1]=%d dir[2]=%d dir[3]=%d\n", dir[1], dir[2], dir[3]);
+    //printf("  zc[1]=%d  zc[2]=%d  zc[3]=%d\n", zc[1], zc[2], zc[3]);
 
-      if(zc[3])
-      {
-        if(si->dx_dX[2][1] == '.')
-          errorexit("implement Y_of_x_forgiven_XZ(box, Y, x, *X,*Z);");
-        else if(si->dx_dX[2][2] == '.')
-          Y_of_y_forgiven_XZ(box, Y, y, *X, *Z);
-        else if(si->dx_dX[2][3] == '.')
-          errorexit("implement Y_of_z_forgiven_XZ(box, Y, z, *X,*Z);");
-      }
-    }
-    else if(dir[2])
+    if(zc[3])
     {
-      if(zc[3])
+      if(si->dx_dX[2][1] == '.')
+        errorexit("implement Y_of_x_forgiven_XZ(box, Y, x, *X,*Z);");
+      else if(si->dx_dX[2][2] == '.')
       {
-        if(si->dx_dX[1][1] == '.')
-          stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
-        else if(si->dx_dX[1][2] == '.')
-          errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
-        else if(si->dx_dX[1][3] == '.')
-          errorexit("implement X_of_z_forgiven_YZ(box, X, z, *Y,*Z);");
+        stat = Y_of_y_forgiven_XZ(box, Y, y, *X, *Z);
+        if(stat>=0)
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, &err);
       }
-    }
-    else if(dir[3])
-    {
-      if(zc[2])
-      {
-        if(si->dx_dX[1][1] == '.')
-          stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
-        else if(si->dx_dX[1][2] == '.')
-          errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
-        else if(si->dx_dX[1][3] == '.')
-          errorexit("implement X_of_z_forgiven_YZ(box, X, z, *Y,*Z);");
-      }
+      else if(si->dx_dX[2][3] == '.')
+        errorexit("implement Y_of_z_forgiven_XZ(box, Y, z, *X,*Z);");
     }
   }
+  if(dir[2] && stat<0)
+  {
+    if(zc[3])
+    {
+      if(si->dx_dX[1][1] == '.')
+      {
+        stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
+        if(stat>=0)
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, &err);
+      }
+      else if(si->dx_dX[1][2] == '.')
+        errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
+      else if(si->dx_dX[1][3] == '.')
+        errorexit("implement X_of_z_forgiven_YZ(box, X, z, *Y,*Z);");
+    }
+  }
+  if(dir[3] && stat<0)
+  {
+    if(zc[2])
+    {
+      if(si->dx_dX[1][1] == '.')
+      {
+        stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
+        if(stat>=0)
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, &err);
+      }
+      else if(si->dx_dX[1][2] == '.')
+        errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
+      else if(si->dx_dX[1][3] == '.')
+        errorexit("implement X_of_z_forgiven_YZ(box, X, z, *Y,*Z);");
+    }
+  }
+  //printf("rec: stat=%d\n", stat);
   return stat;
 }
 
@@ -654,6 +688,8 @@ void y_VectorFuncP_XZ(int n, double *XYZvec, double *fvec, void *p)
 
   yg = box->x_of_X[2]((void *) box, ind, XYZvec[2],XYZvec[1],XYZvec[3]);
   fvec[1] = yg-desired_y;
+printf("XYZvec[1]=%g yg=%g fvec[1]=%g\n", XYZvec[1], yg, fvec[1]);
+
 }
 
 /* find Y from y for a given X,Z (Note: Y also contains initial guess) */
