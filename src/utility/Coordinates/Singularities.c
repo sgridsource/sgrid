@@ -9,6 +9,9 @@
 void prSingInfo(tSingInfo *si)
 {
   int i,j;
+  printf("si->f[j]= ");
+  for(j=0; j<6; j++) printf("%d ", si->f[j]);
+  printf("\n");
   printf("si->x[j] = ");
   for(j=1; j<=3; j++) printf("%c ", si->x[j]);
   printf("\n");
@@ -31,6 +34,9 @@ int isSing_AnsorgNS12(void *aux, double X, double Y, double Z,
   {
     if(update)
     {
+      for(i=0; i<6; i++) si->f[i] = 0;
+      si->f[2+dequal(Y, 1.0)] = 1;
+
       si->x[1] = '.';
       si->x[2] = si->x[3] = '0';
 
@@ -57,10 +63,12 @@ int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
   int i;
 
   /* X=0 is deactivated, because we don't use grids where X=0 */
-  if( 0 && (dequal(X, 0.0) || dequal(X, 1.0)) )
+  if( 0 && dequal(X, 0.0) )
   {
     if(update)
     {
+      for(i=1; i<6; i++) si->f[i] = 0;
+      si->f[0] = 1;
       for(i=1; i<=3; i++)   si->dx_dX[i][1] = '.';
       for(i=1; i<=3; i++) { si->dx_dX[i][2] = si->dx_dX[i][3] = '0'; }
     }
@@ -70,6 +78,9 @@ int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
   {
     if(update)
     {
+      for(i=0; i<6; i++) si->f[i] = 0;
+      si->f[2+dequal(Y, 1.0)] = 1;
+
       si->dx_dX[1][1] = '.';
       si->dx_dX[2][1] = si->dx_dX[3][1] = '0';
       if(!sing)
