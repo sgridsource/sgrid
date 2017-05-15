@@ -263,7 +263,6 @@ int set_bfaces_on_boxface(tBox *box, int f)
   double *py = box->v[var_y];
   double *pz = box->v[var_z];
   int b = box->b;
-  int nbfaces;
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
@@ -421,7 +420,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
   remove_bfaces_with_NULL_ftps(box);
 
   free_intList(obl);
-  return nbfaces;
+  return box->nbfaces;
 }
 
 
