@@ -49,8 +49,6 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
 {
   double tol = Getd("Coordinates_newtTOLF");
   double XYZvec[4];
-  //double fvec[4];
-  //double err, r;
   t_grid_box_desired_xyz_struct pars[1];
   tSingInfo si[1];
   int check, stat;
@@ -68,25 +66,16 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   if(box->isSing!=NULL)  stat = box->isSing((void *) box, *X,*Y,*Z, 1, si);
   if(stat) /* if yes, try something: */
   {
-    double fvec[4];
-    double err, r;
+    double err;
 
     stat = recover_if_start_on_singularity(box, X,Y,Z, x,y,z,
-                                           (void *) pars, tol, si);
+                                           (void *) pars, tol, si, &err);
     /* check if error is ok */
-    XYZvec[1] = *X;
-    XYZvec[2] = *Y;
-    XYZvec[3] = *Z;
-    xyz_VectorFuncP(3, XYZvec, fvec, (void *) pars);
-    err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
-    r = sqrt(x*x + y*y + z*z);
-    if(r>0.0)  err = err/r;
-    if(err>tol*10.0 && stat>=0)
+    if(stat<0)
     {
       printf("XYZ_of_xyz: recover_if_start_on_singularity failed: err=%g\n",
              err);
-      printf("X=%g Y=%g Z=%g\n", *X,*Y,*Z);
-      stat = -stat;
+      printf("X=%g Y=%g Z=%g  x=%g y=%g z=%g\n", *X,*Y,*Z, x,y,z);
     }
     return stat;
   }
@@ -148,10 +137,11 @@ int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
   *err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
   r = sqrt(x*x + y*y + z*z);
   if(r>0.0)  *err = *err/r;
-  if(*err>tol*10.0)
+  if(*err>tol*100.0)
   {
-    printf("XYZ_of_xyz: check_xyz_error: *err=%g\n", *err);
-    printf("X=%g Y=%g Z=%g\n", *X,*Y,*Z);
+    printf("check_xyz_error: box->b=%d *err=%g\n", box->b, *err);
+    printf("X=%g Y=%g Z=%g  x=%g y=%g z=%g\n", *X,*Y,*Z, x,y,z);
+    prSingInfo(si);
     stat = -1;
   }
   else
@@ -162,10 +152,9 @@ int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
 
 /* do something if we start on a coordinate singularity */
 int recover_if_start_on_singularity(tBox *box,
-        double *X, double *Y, double *Z,
-        double x, double y, double z, void *p, double tol, tSingInfo *si)
+        double *X, double *Y, double *Z, double x, double y, double z,
+        void *p, double tol, tSingInfo *si, double *err)
 {
-  double err;
   int stat = -1;
   int dir[4];  /* direction info */
   int zc[4];   /* cols with zeros, e.g. zc[3]=1 => col3 has all zeros */
@@ -201,7 +190,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = Y_of_y_forgiven_XZ(box, Y, y, *X, *Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, &err);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err);
       }
       else if(si->dx_dX[2][3] == '.')
         errorexit("implement Y_of_z_forgiven_XZ(box, Y, z, *X,*Z);");
@@ -215,7 +204,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, &err);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err);
       }
       else if(si->dx_dX[1][2] == '.')
         errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
@@ -231,7 +220,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, &err);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err);
       }
       else if(si->dx_dX[1][2] == '.')
         errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");

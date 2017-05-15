@@ -22,8 +22,8 @@ int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
                       int update, tSingInfo *si);
 /* from findXYZ_of_xyz.c */
 int recover_if_start_on_singularity(tBox *box,
-        double *X, double *Y, double *Z,
-        double x, double y, double z, void *p, double tol, tSingInfo *si);
+        double *X, double *Y, double *Z, double x, double y, double z,
+        void *p, double tol, tSingInfo *si, double *err);
 
 /* from doubleCovering.c */
 void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);
