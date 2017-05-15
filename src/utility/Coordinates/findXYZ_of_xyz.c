@@ -249,7 +249,7 @@ int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
 {
   double X1,Y1,Z1;
   int stat, i;
-  int bi = -1;
+  int bi = 0;
   tBox *box;
 
   for(i=0; i<nb; i++)
@@ -613,7 +613,7 @@ int b_X_of_x_forgiven_YZ_inboxlist(tGrid *grid, int *blist, int nb,
 {
   double X1;
   int stat, i;
-  int bi = -1;
+  int bi = 0;
 
   for(i=0; i<nb; i++)
   {
