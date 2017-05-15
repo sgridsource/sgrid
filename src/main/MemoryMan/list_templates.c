@@ -39,6 +39,17 @@ void FN(free,LIST(TYP))(LIST(TYP) *u)
   }
 } 
 
+/* clear a list */
+void FN(clear,LIST(TYP))(LIST(TYP) *u)
+{
+  if (u)
+  {
+    if(u->e) free(u->e);
+    u->e = NULL;
+    u->n = 0;
+  }
+}
+
 /* add an entry to a list */
 void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi)
 {

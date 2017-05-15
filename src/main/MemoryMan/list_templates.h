@@ -35,6 +35,7 @@ typedefLIST(TYP);
 /* from list_templates.c */
 LIST(TYP) *FN(alloc,LIST(TYP))(void);
 void FN(free,LIST(TYP))(LIST(TYP) *u);
+void FN(clear,LIST(TYP))(LIST(TYP) *u);
 void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi);
 void FN(pushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
 void FN(unionof,LIST(TYP))(LIST(TYP) *v, TYP vi);
