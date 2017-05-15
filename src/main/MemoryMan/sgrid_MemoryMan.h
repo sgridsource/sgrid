@@ -237,7 +237,8 @@ tPointList *DuplicatePointList(tPointList *PL0);
 #include "list_templates.h"
 #undef TYP
 void pr_boxlist(intList *bl);
-int boxlist_fromAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl);
-int boxlist2_ifAttrib(tGrid *grid, intList *bl1,
-                      int iAttr, int AttrVal, intList *bl2);
-int boxlist_neighbors(tBox *box, intList *bl);
+int bladd_ifAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl);
+int bladd_ifnotAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl);
+int bl2_ifAttrib(tGrid *grid, intList *bl1, int iAttr, int AttrVal, intList *bl2);
+int bl2_ifnotAttrib(tGrid *grid, intList *bl1, int iAttr, int AttrVal, intList *bl2);
+int bladd_neighbors(tBox *box, intList *bl);

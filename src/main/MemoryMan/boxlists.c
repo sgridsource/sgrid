@@ -6,9 +6,9 @@
 #include "MemoryMan.h"
 
 
-/* ************************************************************************* */
-/* WT: Here are some utility routines to use box lists of type intList       */
-/* ************************************************************************* */
+/* ****************************************************************************** */
+/* WT: Here are some utility routines to use box lists (bl) of type intList       */
+/* ****************************************************************************** */
 
 void pr_boxlist(intList *bl)
 {
@@ -20,7 +20,7 @@ void pr_boxlist(intList *bl)
 
 /* return number of boxes n and list bl with boxes that have an
    attribute Attrib[iAttr] with value AttrVal. */
-int boxlist_fromAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl)
+int bladd_ifAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl)
 {
   int b;
   forallboxes(grid, b)
@@ -31,10 +31,22 @@ int boxlist_fromAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl)
   return bl->n;
 }
 
-/* return number of boxes n and list bl2 with boxes that have an
+/* return number of boxes n and list bl with boxes that do not have an
+   attribute Attrib[iAttr] with value AttrVal. */
+int bladd_ifnotAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl)
+{
+  int b;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    if(box->Attrib[iAttr] != AttrVal)  push_intList(bl, b);
+  }
+  return bl->n;
+}
+
+/* return number of boxes and list bl2 with boxes that have an
    attribute Attrib[iAttr] with value AttrVal and are in bl1. */
-int boxlist2_ifAttrib(tGrid *grid, intList *bl1,
-                      int iAttr, int AttrVal, intList *bl2)
+int bl2_ifAttrib(tGrid *grid, intList *bl1, int iAttr, int AttrVal, intList *bl2)
 {
   int i;
   for(i=0; i<bl1->n; i++)
@@ -46,8 +58,22 @@ int boxlist2_ifAttrib(tGrid *grid, intList *bl1,
   return bl2->n;
 }
 
+/* return number of boxes and list bl2 with boxes that do not have an
+   attribute Attrib[iAttr] with value AttrVal and are in bl1. */
+int bl2_ifnotAttrib(tGrid *grid, intList *bl1, int iAttr, int AttrVal, intList *bl2)
+{
+  int i;
+  for(i=0; i<bl1->n; i++)
+  {
+    int b = bl1->e[i];
+    tBox *box = grid->box[b];
+    if(box->Attrib[iAttr] != AttrVal)  push_intList(bl2, b);
+  }
+  return bl2->n;
+}
+
 /* make list bl of all neighbors of box, return list len */
-int boxlist_neighbors(tBox *box, intList *bl)
+int bladd_neighbors(tBox *box, intList *bl)
 {
   int i, i2;
   for(i=0; i<box->nbfaces; i++)
