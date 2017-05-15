@@ -14,6 +14,7 @@
 typedef struct tSINGINFO {
   char x[4];        /* info about Cart. coords */
   char dx_dX[4][4]; /* and their derivs */
+  int f[6];         /* face sing. is on (runs from 0 to 5 like bbox) */
 } tSingInfo;
 
 
