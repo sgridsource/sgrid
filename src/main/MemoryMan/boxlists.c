@@ -86,3 +86,44 @@ int bladd_neighbors(tBox *box, intList *bl)
   }
   return bl->n;
 }                      
+
+/* make list bl of all neighbors of box, return list len */
+int bladd_neighbors_of_neighbors(tBox *box, intList *bl)
+{
+  int i, i2;
+
+  intList *bln  = alloc_intList();
+  intList *bln2 = alloc_intList();
+  intList *blnn = alloc_intList();
+
+  /* neigbors of box */
+  bladd_neighbors(box, bln);
+
+  /* go over neighbors in bln */
+  for(i=0; i<bln->n; i++)
+  {
+    tBox *box2 = box->grid->box[i]; /* a neigbor box */
+
+    /* put neighbors of box2 into bln2 */
+    clear_intList(bln2);
+    bladd_neighbors(box2, bln2);
+
+    /* add all in bln2 to blnn */
+    unionpushlist_intList(blnn, bln2);
+  }
+
+  /* remove all neigbors in bln from blnn */
+  droplist_intList(blnn, bln);
+
+  /* drop box from list blnn */
+  drop_intList(blnn, box->b);
+
+  /* add all next nearest neighbors in blnn to bl */
+  pushlist_intList(bl, blnn);
+
+  free_intList(blnn);
+  free_intList(bln2);
+  free_intList(bln);
+
+  return bl->n;
+}

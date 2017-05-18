@@ -38,9 +38,11 @@ void FN(free,LIST(TYP))(LIST(TYP) *u);
 void FN(clear,LIST(TYP))(LIST(TYP) *u);
 void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi);
 void FN(pushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
-void FN(unionof,LIST(TYP))(LIST(TYP) *v, TYP vi);
+void FN(unionpush,LIST(TYP))(LIST(TYP) *v, TYP vi);
+void FN(unionpushlist,LIST(TYP))(LIST(TYP) *u, LIST(TYP) *v);
 void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi);
 void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n);
+void FN(droplist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
 LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v);
 /* e.g.: if TYP = int 
    LIST(TYP) FN(alloc,LIST(TYP))(void)

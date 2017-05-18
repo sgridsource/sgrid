@@ -71,13 +71,20 @@ void FN(pushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
 }
 
 /* add to list (if not already in it) */
-void FN(unionof,LIST(TYP))(LIST(TYP) *v, TYP vi)
+void FN(unionpush,LIST(TYP))(LIST(TYP) *v, TYP vi)
 {
   int i;
-  int addbi=1;
-  /* add bi only if it is not already in blist */
-  for(i=0; i<v->n; i++) if(v->e[i]==vi) { addbi=0; break; }
-  FN(push,LIST(TYP))(v, vi);
+  int addvi=1;
+  /* add vi only if it is not already in blist */
+  for(i=0; i<v->n; i++) if(v->e[i]==vi) { addvi=0; break; }
+  if(addvi) FN(push,LIST(TYP))(v, vi);
+}
+
+/* v = union(v, u): add all of u to list v (if not already in v) */
+void FN(unionpushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
+{
+  int i;
+  for(i=0; i<u->n; i++) FN(unionpush,LIST(TYP))(v, u->e[i]);
 }
 
 /* drop an entry from a variable list */
@@ -104,6 +111,13 @@ void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n)
     v->n = 0;
   else
     v->n -= n;
+}
+
+/* drop all in u from v */
+void FN(droplist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
+{
+  int i;
+  for(i=0; i<u->n; i++) FN(drop,LIST(TYP))(v, u->e[i]);
 }
 
 /* duplicate a list */

@@ -243,3 +243,4 @@ int bladd_ifnotAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl);
 int bl2_ifAttrib(tGrid *grid, intList *bl1, int iAttr, int AttrVal, intList *bl2);
 int bl2_ifnotAttrib(tGrid *grid, intList *bl1, int iAttr, int AttrVal, intList *bl2);
 int bladd_neighbors(tBox *box, intList *bl);
+int bladd_neighbors_of_neighbors(tBox *box, intList *bl);

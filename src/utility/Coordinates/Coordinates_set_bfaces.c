@@ -127,7 +127,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
   dL = L*EPS;
 
   /* make obl that contains all boxes */
-  forallboxes(grid, i) if(i!=b) unionof_intList(obl, i);
+  forallboxes(grid, i) if(i!=b) unionpush_intList(obl, i);
 
   /* go over directions */
   for(d=0; d<3; d++)
@@ -285,7 +285,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
      and add one bface for each of the other boxes */
   forallboxes(grid, i) if(i!=b)
   {
-    unionof_intList(obl, i);
+    unionpush_intList(obl, i);
     /* add one empty bface for each other box */
     fi = add_empty_bface(box, f);
     box->bface[fi]->ob = i;
