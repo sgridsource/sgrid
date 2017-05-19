@@ -102,7 +102,7 @@ int bladd_neighbors_of_neighbors(tBox *box, intList *bl)
   /* go over neighbors in bln */
   for(i=0; i<bln->n; i++)
   {
-    tBox *box2 = box->grid->box[i]; /* a neigbor box */
+    tBox *box2 = box->grid->box[bln->e[i]]; /* a neighbor box */
 
     /* put neighbors of box2 into bln2 */
     clear_intList(bln2);
