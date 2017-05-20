@@ -417,7 +417,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
   }
 
   /* look for empty bfaces and remove them */
-  remove_bfaces_with_NULL_ftps(box);
+  remove_bfaces_with_NULL_fpts(box);
 
   free_intList(obl);
   return box->nbfaces;

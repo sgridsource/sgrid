@@ -284,7 +284,7 @@ int remove_bface(tBox *box, int fi)
 }
 
 /* look for empty bfaces and remove them */
-int remove_bfaces_with_NULL_ftps(tBox *box)
+int remove_bfaces_with_NULL_fpts(tBox *box)
 {
   int n, fi;
   n=0;
