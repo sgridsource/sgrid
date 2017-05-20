@@ -442,8 +442,8 @@ void *pmalloc(int n)
 /* function that selects how we exit inside errorexit */
 void finalexit(int ec)
 {
-  if(Getv("errorexit", "abort"))  abort();
-  else                            exit(ec);
+  if(GetvLax("errorexit", "abort"))  abort();
+  else                               exit(ec);
 }
 
 /* the one function every program should have */
