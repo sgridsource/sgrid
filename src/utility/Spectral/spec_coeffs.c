@@ -4,6 +4,15 @@
 #include "sgrid.h"
 #include "Spectral.h"
 
+/* If sel=1: loop over j and set k=p. If sel=2: loop over k and set j=p */
+#define forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,duline,n1, sel, p)\
+  {\
+    double *(uline)  = (double*)  malloc((n1) * sizeof(double));\
+    double *(duline) = (double*)  malloc((n1) * sizeof(double));\
+    for(k=(p)*((sel)==1); ( k<(n3) ) && ( ( k==(p) ) || (sel)!=1 ); k++)\
+    for(j=(p)*((sel)==2); ( j<(n2) ) && ( ( j==(p) ) || (sel)!=2 ); j++)
+/* end this loop with: end_forLines_free2Lines(uline,duline) */
+
 
 
 /* init a n1*n1 matrix M used to compute coeffs */
@@ -352,6 +361,226 @@ void spec_synthesis1(tBox *box, int direc, double *u, double *c)
     errorexit("spec_synthesis1: possible values for direction direc are 1,2,3.");
 }
 
+
+/* get the coeffs c of 3d var u in direction direc, but only within plane N
+   at plane index p */
+void spec_analysis1_inplaneN(tBox *box, int direc, int N, int p,
+                             double *u, double *c)
+{
+  double *M;
+  void (*get_coeffs)(double *,double *, int);
+  int i,j,k, sel;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+
+  /* exit if input pars do not make sense */
+  if(N>3 || N<1)
+    errorexit("spec_analysis1_inplaneN: "
+              "possible values for plane N are 1,2,3.");
+  if(direc==N)
+     errorexit("spec_analysis1_inplaneN: direc must not be equal to N");
+
+  /* find sel to select if we loop over first or second index var (j or k)
+     in forLines_alloc2Lines_selectloop */
+  if(direc+N == 5)
+    sel = 1;
+  else if(direc+N == 3)
+    sel = 2;
+  else
+  {
+    if(N==3) sel = 1;
+    else     sel = 2;
+  }
+
+  /* M and get_coeffs */
+  if(direc==1)      { M=box->Mcoeffs1; get_coeffs=box->get_coeffs1; }
+  else if(direc==2) { M=box->Mcoeffs2; get_coeffs=box->get_coeffs2; }
+  else              { M=box->Mcoeffs3; get_coeffs=box->get_coeffs3; }
+
+  if(direc==1)
+  {
+    if(box->TransformType1)
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,cline,n1, sel,p)
+      {
+        get_memline(u, uline, 1, j, k, n1, n2, n3);
+        get_coeffs(cline, uline, n1-1);
+        put_memline(c, cline, 1, j, k, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+    else
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,cline,n1, sel,p)
+      {
+        get_memline(u, uline, 1, j, k, n1, n2, n3);
+        matrix_times_vector(M, uline, cline, n1);
+        put_memline(c, cline, 1, j, k, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+  }
+  else if(direc==2)
+  {
+    if(box->TransformType2)
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(i,k, n1,n3, uline,cline,n2, sel,p)
+      {
+        get_memline(u, uline, 2, i, k, n1, n2, n3);
+        get_coeffs(cline, uline, n2-1);
+        put_memline(c, cline, 2, i, k, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+    else
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(i,k, n1,n3, uline,cline,n2, sel,p)
+      {
+        get_memline(u, uline, 2, i, k, n1, n2, n3);
+        matrix_times_vector(M, uline, cline, n2);
+        put_memline(c, cline, 2, i, k, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+  }
+  else if(direc==3)
+  {
+    if(box->TransformType3)
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(i,j, n1,n2, uline,cline,n3, sel,p)
+      {
+        get_memline(u, uline, 3, i, j, n1, n2, n3);
+        get_coeffs(cline, uline, n3-1);
+        put_memline(c, cline, 3, i, j, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+    else
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(i,j, n1,n2, uline,cline,n3, sel,p)
+      {
+        get_memline(u, uline, 3, i, j, n1, n2, n3);
+        matrix_times_vector(M, uline, cline, n3);
+        put_memline(c, cline, 3, i, j, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+  }
+  else
+    errorexit("spec_analysis1_inplaneN: "
+              "possible values for direction direc are 1,2,3.");
+}
+
+/* compute the 3d var u from the coeffs c in direction direc,
+   but only within plane N at plane index p */
+void spec_synthesis1_inplaneN(tBox *box, int direc, int N, int p,
+                              double *u, double *c)
+{
+  double *M;
+  void (*eval_onPoints)(double *,double *, int);
+  int i,j,k, sel;
+  int n1=box->n1;
+  int n2=box->n2;
+  int n3=box->n3;
+
+  /* exit if input pars do not make sense */
+  if(N>3 || N<1)
+    errorexit("spec_synthesis1_inplaneN: "
+              "possible values for plane N are 1,2,3.");
+  if(direc==N)
+     errorexit("spec_synthesis1_inplaneN: direc must not be equal to N");
+
+  /* find sel to select if we loop over first or second index var (j or k)
+     in forLines_alloc2Lines_selectloop */
+  if(direc+N == 5)
+    sel = 1;
+  else if(direc+N == 3)
+    sel = 2;
+  else
+  {
+    if(N==3) sel = 1;
+    else     sel = 2;
+  }
+
+  /* M and eval_onPoints */
+  if(direc==1)      { M=box->Meval1; eval_onPoints=box->eval_onPoints1; }
+  else if(direc==2) { M=box->Meval2; eval_onPoints=box->eval_onPoints2; }
+  else              { M=box->Meval3; eval_onPoints=box->eval_onPoints3; }
+
+  if(direc==1)
+  {
+    if(box->TransformType1)
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,cline,n1, sel,p)
+      {
+        get_memline(c, cline, 1, j, k, n1, n2, n3);
+        eval_onPoints(cline, uline, n1-1);
+        put_memline(u, uline, 1, j, k, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+    else
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,cline,n1, sel,p)
+      {
+        get_memline(c, cline, 1, j, k, n1, n2, n3);
+        matrix_times_vector(M, cline, uline, n1);
+        put_memline(u, uline, 1, j, k, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+  }
+  else if(direc==2)
+  {
+    if(box->TransformType2)
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(i,k, n1,n3, uline,cline,n2, sel,p)
+      {
+        get_memline(c, cline, 2, i, k, n1, n2, n3);
+        eval_onPoints(cline, uline, n2-1);
+        put_memline(u, uline, 2, i, k, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+    else
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(i,k, n1,n3, uline,cline,n2, sel,p)
+      {
+        get_memline(c, cline, 2, i, k, n1, n2, n3);
+        matrix_times_vector(M, cline, uline, n2);
+        put_memline(u, uline, 2, i, k, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+  }
+  else if(direc==3)
+  {
+    if(box->TransformType3)
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(i,j, n1,n2, uline,cline,n3, sel,p)
+      {
+        get_memline(c, cline, 3, i, j, n1, n2, n3);
+        eval_onPoints(cline, uline, n3-1);
+        put_memline(u, uline, 3, i, j, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+    else
+    {
+      SGRID_LEVEL3_Pragma(omp parallel for)
+      forLines_alloc2Lines_selectloop(i,j, n1,n2, uline,cline,n3, sel,p)
+      {
+        get_memline(c, cline, 3, i, j, n1, n2, n3);
+        matrix_times_vector(M, cline, uline, n3);
+        put_memline(u, uline, 3, i, j, n1, n2, n3);
+      } end_forLines_free2Lines(uline,cline)
+    }
+  }
+  else
+    errorexit("spec_synthesis1_inplaneN: "
+              "possible values for direction direc are 1,2,3.");
+}
 
 
 /* check if N is a power of 2 */

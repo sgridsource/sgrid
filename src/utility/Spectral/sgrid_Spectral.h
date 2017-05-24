@@ -73,6 +73,10 @@ void spec_analysis1_diffmatrix(tBox *box, int direc, double *M, double *u, doubl
 void spec_synthesis1_diffmatrix(tBox *box, int direc, double *M, double *u, double *c);
 void spec_analysis1(tBox *box, int direc, double *u, double *c);
 void spec_synthesis1(tBox *box, int direc, double *u, double *c);
+void spec_analysis1_inplaneN(tBox *box, int direc, int N, int p,
+                             double *u, double *c);
+void spec_synthesis1_inplaneN(tBox *box, int direc, int N, int p,
+                              double *u, double *c);
 void set_TransformType_flags_inbox(tBox *box);
 void init_spec_functionpointers(tBox *box);
 void get_spec_functionpointers(tBox *box, int direc,
