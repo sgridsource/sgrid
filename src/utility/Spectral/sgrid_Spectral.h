@@ -108,6 +108,10 @@ void spec_sphericalDF2dIntegral_at_radial_index_i(tBox *box, double *u, double *
 void spec_Coeffs(tBox *box, double *u, double *c);
 void spec_Eval(tBox *box, double *u, double *c);
 double spec_interpolate(tBox *box, double *c, double X, double Y, double Z);
+void spec_Coeffs_inplaneN(tBox *box, int N, int p, double *u, double *c);
+void spec_Eval_inplaneN(tBox *box, int N, int p, double *u, double *c);
+double spec_interpolate_inplaneN(tBox *box, int N, int p, double *c,
+                                 double X1, double X2);
 void spec_Coeffs_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
 void spec_Eval_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
 void spec_interpolate_Var_from_grid2_to_grid1(tGrid *grid1, tGrid *grid2,

@@ -130,6 +130,119 @@ double spec_interpolate(tBox *box, double *c, double X, double Y, double Z)
 }
 
 
+/* get coeffs c of var u in plane N with index p */
+void spec_Coeffs_inplaneN(tBox *box, int N, int p, double *u, double *c)
+{
+  /* get c calling spec_analysis1_inplaneN in both directions */
+  if(N==3)
+  {
+    spec_analysis1_inplaneN(box, 1, N,p, u, c);
+    spec_analysis1_inplaneN(box, 2, N,p, c, c);
+  }
+  else if(N==2)
+  {
+    spec_analysis1_inplaneN(box, 1, N,p, u, c);
+    spec_analysis1_inplaneN(box, 3, N,p, c, c);
+  }
+  else if(N==1)
+  {
+    spec_analysis1_inplaneN(box, 2, N,p, u, c);
+    spec_analysis1_inplaneN(box, 3, N,p, c, c);
+  }
+  else
+    errorexit("spec_Coeffs_inplaneN: N must be 1, 2, or 3.");
+}
+
+/* get var u from coeffs c in plane N with index p */
+void spec_Eval_inplaneN(tBox *box, int N, int p, double *u, double *c)
+{
+  /* get c calling spec_synthesis1_inplaneN in both directions */
+  if(N==3)
+  {
+    spec_synthesis1_inplaneN(box, 1, N,p, u, c);
+    spec_synthesis1_inplaneN(box, 2, N,p, u, u);
+  }
+  else if(N==2)
+  {
+    spec_synthesis1_inplaneN(box, 1, N,p, u, c);
+    spec_synthesis1_inplaneN(box, 3, N,p, u, u);
+  }
+  else if(N==1)
+  {
+    spec_synthesis1_inplaneN(box, 2, N,p, u, c);
+    spec_synthesis1_inplaneN(box, 3, N,p, u, u);
+  }
+  else
+    errorexit("spec_Eval_inplaneN: N must be 1, 2, or 3.");
+}
+
+/* use coeffs c in plane N with index p to interpolate to (X1,X2) = (X,Y), (X,Z) or
+   (Y,Z) in this plane. This is 2d interpolation.
+   [set coeffs c of u by calling spec_Coeffs_inplaneN(box, N,p, u, c); ]   */
+double spec_interpolate_inplaneN(tBox *box, int N, int p, double *c,
+                                 double X1, double X2)
+{
+  double *B1;
+  double *B2;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i,j,k;
+  double sum=0.0;
+  double a1=box->bbox[0];
+  double b1=box->bbox[1];
+  double a2=box->bbox[2];
+  double b2=box->bbox[3];
+  double a3=box->bbox[4];
+  double b3=box->bbox[5];
+
+  if(box->basis1==NULL || box->basis2==NULL || box->basis3==NULL)
+    errorexiti("spec_interpolate_inplaneN: box%d: one box->basis1/2/3 is NULL",box->b);
+
+  /* allocate memory for B1/2 */
+  B1 = (double*) malloc(n1 * sizeof(double));
+  B2 = (double*) malloc(n2 * sizeof(double));
+
+  /* set basis func values at X1,X2 */
+  if(N==3)
+  {
+    for(i = n1-1; i >=0; i--)  B1[i]=box->basis1((void *) box, a1,b1, i,n1, X1);
+    for(j = n2-1; j >=0; j--)  B2[j]=box->basis2((void *) box, a2,b2, j,n2, X2);
+
+    /* interpolate to X,Y */
+    forplane3(i,j,k, n1,n2,n3, p)
+      sum += c[Index(i,j,k)] * B1[i] * B2[j];
+  }
+  else if(N==2)
+  {
+    for(i = n1-1; i >=0; i--)  B1[i]=box->basis1((void *) box, a1,b1, i,n1, X1);
+    for(k = n3-1; k >=0; k--)  B2[k]=box->basis3((void *) box, a3,b3, k,n3, X2);
+
+    /* interpolate to X,Z */
+    forplane2(i,j,k, n1,n2,n3, p)
+      sum += c[Index(i,j,k)] * B1[i] * B2[k];
+  }
+  else if(N==1)
+  {
+    for(j = n2-1; j >=0; j--)  B1[j]=box->basis2((void *) box, a2,b2, j,n2, X1);
+    for(k = n3-1; k >=0; k--)  B2[k]=box->basis3((void *) box, a3,b3, k,n3, X2);
+
+    /* interpolate to Y,Z */
+    forplane1(i,j,k, n1,n2,n3, p)
+      sum += c[Index(i,j,k)] * B1[j] * B2[k];
+  }
+  else
+    errorexit("spec_interpolate_inplaneN: N must be 1, 2, or 3.");
+
+  /* free memory for B1/2 */
+  free(B2);
+  free(B1);
+
+  return sum;
+}
+
+
+
 /* get vlc=c_ijk of varlist vlu in box */
 void spec_Coeffs_varlist(tBox *box, tVarList *vlu, tVarList *vlc)
 {
