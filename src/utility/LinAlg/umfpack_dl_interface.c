@@ -234,17 +234,18 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
   umfpack_dl_free_symbolic(&Symbolic);
   INFO=umfpack_dl_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_dl_free_numeric(&Numeric);
+  if(pr)
+  {
+    printf("  Info[UMFPACK_RCOND]=%g\n", Info[UMFPACK_RCOND]);
+    printf("umfpack_dl_solve_fromAcolumns: umfpack_dl_solve -> INFO=%d\n", INFO);
+    fflush(stdout);
+  }
 #else
   errorexit("umfpack_dl_solve_fromAcolumns: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
-  if(pr)
-  { 
-    printf("umfpack_dl_solve_fromAcolumns: umfpack_dl_solve -> INFO=%d\n", INFO); 
-    fflush(stdout);
-  }
 
   if(INFO!=0) PrintErrorCodesAndExit;
   if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
@@ -333,17 +334,18 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
   umfpack_dl_free_symbolic(&Symbolic);
   INFO=umfpack_dl_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_dl_free_numeric(&Numeric);
+  if(pr)
+  {
+    printf("  Info[UMFPACK_RCOND]=%g\n", Info[UMFPACK_RCOND]);
+    printf("umfpack_dl_solve_from_Ap_Ai_Ax: umfpack_dl_solve -> INFO=%d\n", INFO);
+    fflush(stdout);
+  }
 #else
   errorexit("umfpack_dl_solve_from_Ap_Ai_Ax: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
-  if(pr)
-  { 
-    printf("umfpack_dl_solve_from_Ap_Ai_Ax: umfpack_dl_solve -> INFO=%d\n", INFO); 
-    fflush(stdout);
-  }
 
   if(INFO!=0) PrintErrorCodesAndExit;
   if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
@@ -403,17 +405,18 @@ int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
   umfpack_dl_free_symbolic(&Symbolic);
   INFO=umfpack_dl_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_dl_free_numeric(&Numeric);
+  if(pr)
+  {
+    printf("  Info[UMFPACK_RCOND]=%g\n", Info[UMFPACK_RCOND]);
+    printf("umfpack_dl_solve_from_Ap_Ai_Ax_x_b: umfpack_dl_solve -> INFO=%d\n", INFO);
+    fflush(stdout);
+  }
 #else
   errorexit("umfpack_dl_solve_from_Ap_Ai_Ax_x_b: in order to compile with umfpack use MyConfig with\n"
             "DFLAGS += -DUMFPACK\n"
             "SPECIALINCS += -I/usr/include/suitesparse\n"
             "SPECIALLIBS += -lumfpack -lamd -lblas");
 #endif
-  if(pr)
-  { 
-    printf("umfpack_dl_solve_from_Ap_Ai_Ax_x_b: umfpack_dl_solve -> INFO=%d\n", INFO); 
-    fflush(stdout);
-  }
 
   if(INFO!=0) PrintErrorCodesAndExit;
   if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
@@ -449,7 +452,8 @@ int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
   umfpackA->Numeric = Numeric;
   umfpack_dl_free_symbolic(&Symbolic);
   if(pr)
-  { 
+  {
+    printf("  Info[UMFPACK_RCOND]=%g\n", Info[UMFPACK_RCOND]);
     printf("umfpack_dl_numeric_from_tUMFPACK_A: umfpack_dl_numeric  -> INFO2=%d\n", INFO2);
     fflush(stdout);
   }
