@@ -179,8 +179,11 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
   LONGINT *Ap;
   LONGINT *Ai;
   double *Ax;
+#ifdef UMFPACK
+  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
+#endif
   int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_dl_solve_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
@@ -288,8 +291,11 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
   int nlines=0;
   double *x;
   double *b;
+#ifdef UMFPACK
+  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
+#endif
   int INFO, INFO1, INFO2;
 
   /* figure out number of lines */
@@ -380,12 +386,15 @@ int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
                                        double *x, double *b, LONGINT nrows,
                                        int pr)
 {
+  int INFO=-6662442;
+  int INFO1=-6662442;
+  int INFO2=-6662442;
+
+#ifdef UMFPACK
+  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
-  int INFO, INFO1, INFO2;
 
-  INFO1=INFO2=INFO=-6662442;
-#ifdef UMFPACK
   /* call umfpack routine */
   if(0)
   { printf("umfpack_dl_solve_from_Ap_Ai_Ax_x_b: calling umfpack_dl_solve\n"); fflush(stdout); }
@@ -418,13 +427,14 @@ int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
 int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
                                        LONGINT nrows, int pr)
 {
-  double *null = (double *) NULL;
-  void *Symbolic;
-  void *Numeric;
   int INFO1=-6662442;
   int INFO2=-6662442;
 
 #ifdef UMFPACK
+  double Info[UMFPACK_INFO];
+  double *null = (double *) NULL;
+  void *Symbolic, *Numeric;
+
   /* call umfpack routine */
   INFO1=umfpack_dl_symbolic(nrows, nrows,
                             umfpackA->Ap, umfpackA->Ai, umfpackA->Ax,
@@ -465,10 +475,12 @@ int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
 int umfpack_dl_solve_from_tUMFPACK_A_x_b(tUMFPACK_A umfpackA,
                                          double *x, double *b, int pr)
 {
-  double *null = (double *) NULL;
   int INFO=-6662442;
 
 #ifdef UMFPACK
+  double Info[UMFPACK_INFO];
+  double *null = (double *) NULL;
+
   /* call umfpack routine */
   INFO=umfpack_dl_solve(UMFPACK_A, umfpackA.Ap, umfpackA.Ai, umfpackA.Ax,
                         x, b, umfpackA.Numeric, null, null);

@@ -178,8 +178,11 @@ int umfpack_di_solve_fromAlines(tSparseVector **Aline, tVarList *vlx,
   int *Ap;
   int *Ai;
   double *Ax;
+#ifdef UMFPACK
+  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
+#endif
   int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_di_solve_fromAlines: setting sparse matrix\n"); fflush(stdout); }
@@ -295,8 +298,11 @@ int umfpack_di_solve_forSortedVars_fromAlines(tSparseVector **Aline,
   int *Ap;
   int *Ai;
   double *Ax;
+#ifdef UMFPACK
+  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
+#endif
   int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_di_solve_forSortedVars_fromAlines: setting sparse matrix\n"); fflush(stdout); }
@@ -414,8 +420,11 @@ int umfpack_di_solve_fromAcolumns(tSparseVector **Acol,
   int *Ap;
   int *Ai;
   double *Ax;
+#ifdef UMFPACK
+  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
+#endif
   int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_di_solve_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
@@ -528,8 +537,11 @@ int umfpack_di_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   int *Ap;
   int *Ai;
   double *Ax;
+#ifdef UMFPACK
+  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
+#endif
   int INFO, INFO1, INFO2;
 
   if(pr) { printf("umfpack_di_solve_forSortedVars_fromAcolumns: setting sparse matrix\n"); fflush(stdout); }
@@ -641,8 +653,11 @@ int umfpack_di_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
   int nlines=0;
   double *x;
   double *b;
+#ifdef UMFPACK
+  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
+#endif
   int INFO, INFO1, INFO2;
 
   /* figure out number of lines */
