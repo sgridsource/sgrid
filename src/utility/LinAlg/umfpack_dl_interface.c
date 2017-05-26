@@ -230,7 +230,7 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
   if(pr)
   { printf("umfpack_dl_solve_fromAcolumns: calling umfpack_dl_solve\n"); fflush(stdout); }
   INFO1=umfpack_dl_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO2=umfpack_dl_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO2=umfpack_dl_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, Info);
   umfpack_dl_free_symbolic(&Symbolic);
   INFO=umfpack_dl_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_dl_free_numeric(&Numeric);
@@ -329,7 +329,7 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
   if(pr)
   { printf("umfpack_dl_solve_from_Ap_Ai_Ax: calling umfpack_dl_solve\n"); fflush(stdout); }
   INFO1=umfpack_dl_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO2=umfpack_dl_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO2=umfpack_dl_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, Info);
   umfpack_dl_free_symbolic(&Symbolic);
   INFO=umfpack_dl_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_dl_free_numeric(&Numeric);
@@ -399,7 +399,7 @@ int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
   if(0)
   { printf("umfpack_dl_solve_from_Ap_Ai_Ax_x_b: calling umfpack_dl_solve\n"); fflush(stdout); }
   INFO1=umfpack_dl_symbolic(nrows, nrows, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO2=umfpack_dl_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO2=umfpack_dl_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, Info);
   umfpack_dl_free_symbolic(&Symbolic);
   INFO=umfpack_dl_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_dl_free_numeric(&Numeric);
@@ -445,7 +445,7 @@ int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
     fflush(stdout);
   }
   INFO2=umfpack_dl_numeric(umfpackA->Ap, umfpackA->Ai, umfpackA->Ax,
-                           Symbolic, &Numeric, null, null);
+                           Symbolic, &Numeric, null, Info);
   umfpackA->Numeric = Numeric;
   umfpack_dl_free_symbolic(&Symbolic);
   if(pr)

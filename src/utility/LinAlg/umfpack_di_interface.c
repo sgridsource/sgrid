@@ -231,7 +231,7 @@ int umfpack_di_solve_fromAlines(tSparseVector **Aline, tVarList *vlx,
   if(pr)
   { printf("umfpack_di_solve_fromAlines: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, Info);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
@@ -353,7 +353,7 @@ int umfpack_di_solve_forSortedVars_fromAlines(tSparseVector **Aline,
   if(pr)
   { printf("umfpack_di_solve_forSortedVars_fromAlines: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, Info);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
@@ -471,7 +471,7 @@ int umfpack_di_solve_fromAcolumns(tSparseVector **Acol,
   if(pr)
   { printf("umfpack_di_solve_fromAcolumns: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, Info);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
@@ -590,7 +590,7 @@ int umfpack_di_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   if(pr)
   { printf("umfpack_di_solve_forSortedVars_fromAcolumns: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, Info);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
@@ -691,7 +691,7 @@ int umfpack_di_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
   if(pr)
   { printf("umfpack_di_solve_from_Ap_Ai_Ax: calling umfpack_di_solve\n"); fflush(stdout); }
   INFO1=umfpack_di_symbolic(nlines, nlines, Ap, Ai, Ax, &Symbolic, null, null);
-  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, null);
+  INFO2=umfpack_di_numeric(Ap, Ai, Ax, Symbolic, &Numeric, null, Info);
   umfpack_di_free_symbolic(&Symbolic);
   INFO=umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, Numeric, null, null);
   umfpack_di_free_numeric(&Numeric);
