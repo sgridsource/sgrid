@@ -241,6 +241,52 @@ double spec_interpolate_inplaneN(tBox *box, int N, int p, double *c,
   return sum;
 }
 
+/* use coeffs c along a line in direction dir at index
+   (i1,i2) = (j,k), (i,k), or (i,j)
+   to interpolate to X3 = X, Y, or Z along this same line.
+   This is 1d interpolation.
+   [set coeffs c of u by calling spec_analysis1 or spec_analysis1_inplaneN ] */
+double spec_interpolate_in_dir_at_i1_i2(tBox *box, int dir, int i1, int i2,
+                                        double *c, double X3)
+{
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int i,j,k;
+  double sum=0.0;
+  double a1=box->bbox[0];
+  double b1=box->bbox[1];
+  double a2=box->bbox[2];
+  double b2=box->bbox[3];
+  double a3=box->bbox[4];
+  double b3=box->bbox[5];
+
+  if(box->basis1==NULL || box->basis2==NULL || box->basis3==NULL)
+    errorexiti("spec_interpolate_in_dir_at_i1_i2: box%d: one box->basis1/2/3 is NULL",box->b);
+
+  if(dir==1)
+  {
+    /* interpolate to X */
+    for(i = n1-1; i >=0; i--)
+      sum += c[Index(i,i1,i2)] * box->basis1((void *) box, a1,b1, i,n1, X3);
+  }
+  else if(dir==2)
+  {
+    /* interpolate to Y */
+    for(j = n2-1; j >=0; j--)
+      sum += c[Index(i1,j,i2)] * box->basis2((void *) box, a2,b2, j,n2, X3);
+  }
+  else if(dir==3)
+  {
+    /* interpolate to Z */
+    for(k = n3-1; k >=0; k--)
+      sum += c[Index(i1,i2,k)] * box->basis3((void *) box, a3,b3, k,n3, X3);
+  }
+  else
+    errorexit("spec_interpolate_in_dir_at_i1_i2: dir must be 1, 2, or 3.");
+
+  return sum;
+}
 
 
 /* get vlc=c_ijk of varlist vlu in box */

@@ -112,6 +112,8 @@ void spec_Coeffs_inplaneN(tBox *box, int N, int p, double *u, double *c);
 void spec_Eval_inplaneN(tBox *box, int N, int p, double *u, double *c);
 double spec_interpolate_inplaneN(tBox *box, int N, int p, double *c,
                                  double X1, double X2);
+double spec_interpolate_in_dir_at_i1_i2(tBox *box, int dir, int i1, int i2,
+                                        double *c, double X3);
 void spec_Coeffs_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
 void spec_Eval_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
 void spec_interpolate_Var_from_grid2_to_grid1(tGrid *grid1, tGrid *grid2,
