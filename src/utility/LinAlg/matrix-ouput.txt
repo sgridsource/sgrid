@@ -1,0 +1,14 @@
+The function
+write_SparseVectorArray_inMatrixMarketFormat
+in SparseVector_utils.c can output sparse matrices in MatrixMarket Format.
+
+It is used in e.g. src/utility/GridIterators/wrappers_for_UMFPACK.c if we set
+GridIterators_verbose = yes very
+
+This produces files of the form lop_matrix2_13s.mtx . Such matrices can be
+loaded into octave with the included mmread.m :
+octave
+A1 = mmread("t3/lop_matrix2_13s.mtx")
+cond(A1)
+
+The last line prints the condition number of the matrix.
