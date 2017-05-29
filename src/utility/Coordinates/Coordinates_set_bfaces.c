@@ -627,6 +627,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
 
         /* should we set fields or their nomral derivs? */
         if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
+        else                            obface->setnormalderiv = 0;
       }
       else
         continue; /* nothing touches */
