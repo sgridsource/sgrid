@@ -126,20 +126,20 @@ typedef struct tBFACE {
   int b;       // index of box on which Bface is located
   int f;       // face, runs from 0 to 5 like bbox (for each box)
   int fi;      // face index: 0 <= fi < nbfaces
-  tPointList *fpts; // list of points on face, access w. forPointList_inbox
+  tPointList *fpts; // list of points on/near face, access w. forPointList_inbox
    // The normal vector is n^i_{a}=dx^i/dX^a, e.g. X^1=const face has n^i_{1}
    // dx^i/dX^a can be obtained from dX^a/dx^i using dXdx_from_dxdX
   int ob;          // ind. of other box that touches or overlaps, -1 if none
   int ofi;         // face index of other box (if they are touching)
   int oXi,oYi,oZi; // ind of vars in this box that contain coords in other box
-//  int overlap        : 1;  // 1 if tBface overlaps with other box
-//  int touch          : 1;  // 1 if tBface touches other face
-//  int touch_same1    : 1;  // 1 if coord1 of points in touching faces is same 
-//  int touch_same2    : 1;  // 1 if coord2 of points in touching faces is same
-//  int outerbound     : 1;  // 1 if outer boundary
-//  int innerbound     : 1;  // 1 if inner boundary
-//  int setfield       : 1;  // 1 if we set field
-//  int setnormalderiv : 1;  // 1 if we set normal derivs of field
+  int fpts_off_face  : 1;  // 1 if points in fpts are not in face (e.g. ChebZeros)
+  int touch          : 1;  // 1 if tBface only touches other face
+  int touch_sameX    : 1;  // 1 if X-coord of points in touching faces is same
+  int touch_sameY    : 1;  // 1 if Y-ccord of points in touching faces is same
+  int touch_sameZ    : 1;  // 1 if Z-ccord of points in touching faces is same
+  int outerbound     : 1;  // 1 if bface is outer grid boundary (e.g. infinity)
+  int innerbound     : 1;  // 1 if bface is inner boundary (e.g. horizon)
+  int setnormalderiv : 1;  // 1 if we set normal derivs of field and not field itself
 } tBface;
 
 
