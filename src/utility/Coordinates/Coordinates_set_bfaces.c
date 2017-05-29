@@ -533,8 +533,9 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
   /* restore Coordinates_newtMAXITS */
   Seti("Coordinates_newtMAXITS", maxits);
 
-  /* set ofi in each bface */
+  /* set ofi and bit fields for all bfaces */
   set_ofi_in_all_bfaces(grid);
+  set_bits_in_all_bfaces(grid);
 
   if(pr) forallboxes(grid, b) printbfaces(grid->box[b]);
 
@@ -544,5 +545,114 @@ prPointList(grid->box[4]->bface[0]->fpts);
 prPointList(grid->box[4]->bface[4]->fpts);
 exit(77);
 exit(88);
+  return 0;
+}
+
+
+/* set bit fields in bfaces for each box on the grid */
+int set_bits_in_all_bfaces(tGrid *grid)
+{
+  int iX = Ind("X");
+  int iY = iX+1;
+  int iZ = iX+2;
+  int b;
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *X = box->v[iX];
+    double *Y = box->v[iY];
+    double *Z = box->v[iZ];
+    int fi;
+
+    /* loop over bfaces */
+    for(fi=0; fi<box->nbfaces; fi++)
+    {
+      tBface *bface = box->bface[fi];
+      int ob  = bface->ob;
+      int ofi = bface->ofi;
+      int oXi = bface->oXi;
+      int oYi = bface->oYi;
+      int oZi = bface->oZi;
+      tBox *obox = NULL;
+      tBface *obface = NULL;
+      int touch, sameX, sameY, sameZ;
+      int pi, ind;
+
+      if(ob<0)  continue; /* do nothing if there is no other box at this bface */
+      if(ofi<0) continue; /* do nothing if there not one face index in other box */
+
+      /* other box and corresponding bface */
+      obox = grid->box[ob];
+      obface = obox->bface[ofi];
+
+      if(obface->ofi < 0) continue; /* nothing if not one face index */
+
+      /* if we get here there are two bfaces that may touch */
+
+      /* mark as touching if bbox values agree */
+      if( dequal(box->bbox[bface->f], obox->bbox[obface->f]) )
+      {
+        double bX,bY,bZ;
+        int i,j,k, off_face;
+        int f = bface->f;
+        int dir = 1 + f/2;
+
+        bface->touch = 1; /* we are touching */
+
+        /* is point list in fpts on face? */
+        i=j=k = off_face = 0;
+        if(dir==1)
+        {
+          i = ( (n1-1) )*(f%2);
+          bX = X[Index(i,j,k)];
+          if( !dequal(bX, box->bbox[bface->f]) ) off_face=1;
+        }
+        else if(dir==2)
+        {
+          j = ( (n2-1) )*(f%2);
+          bY = Y[Index(i,j,k)];
+          if( !dequal(bY, box->bbox[bface->f]) ) off_face=1;
+        }
+        else /* dir=3 */
+        {
+          k = ( (n3-1) )*(f%2);
+          bZ = Z[Index(i,j,k)];
+          if( !dequal(bZ, box->bbox[bface->f]) ) off_face=1;
+        }
+        bface->fpts_off_face = off_face;
+
+        /* should we set fields or their nomral derivs? */
+        if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
+      }
+      else
+        continue; /* nothing touches */
+
+      /* do nothing if boxes have a different number of grid points */
+      if(box->nnodes != obox->nnodes) continue;
+
+      /* loop over bface, and check which coords agree */
+      sameX = sameY = sameZ = 1;
+      forPointList_inbox(bface->fpts, box, pi, ind)
+      {
+        double *oX = obox->v[iX];
+        double *oY = obox->v[iY];
+        double *oZ = obox->v[iZ];
+        // if( ind >= obox->nnodes )  { sameX = sameY = sameZ = 0;  break; }
+        if( !dequal(oX[ind], X[ind]) ) sameX = 0;
+        if( !dequal(oY[ind], Y[ind]) ) sameY = 0;
+        if( !dequal(oZ[ind], Z[ind]) ) sameZ = 0;
+//printf("b=%d ob=%d  %d%d%d\n", b,ob, sameX,sameY,sameZ);
+        if( !(sameX || sameY || sameZ) ) break;
+      }
+      bface->touch_sameX = sameX;
+      bface->touch_sameY = sameY;
+      bface->touch_sameZ = sameZ;
+    }
+  }
+
   return 0;
 }

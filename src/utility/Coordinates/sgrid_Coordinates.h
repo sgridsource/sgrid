@@ -99,3 +99,4 @@ int Y_of_y_forgiven_XZ(tBox *box, double *Y, double y, double X, double Z);
 
 /* from Coordinates_set_bfaces.c */
 int set_ofi_in_all_bfaces(tGrid *grid);
+int set_bits_in_all_bfaces(tGrid *grid);

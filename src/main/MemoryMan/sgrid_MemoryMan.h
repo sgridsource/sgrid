@@ -137,9 +137,9 @@ typedef struct tBFACE {
   int touch_sameX    : 1;  // 1 if X-coord of points in touching faces is same
   int touch_sameY    : 1;  // 1 if Y-ccord of points in touching faces is same
   int touch_sameZ    : 1;  // 1 if Z-ccord of points in touching faces is same
-  int outerbound     : 1;  // 1 if bface is outer grid boundary (e.g. infinity)
-  int innerbound     : 1;  // 1 if bface is inner boundary (e.g. horizon)
   int setnormalderiv : 1;  // 1 if we set normal derivs of field and not field itself
+  int innerbound     : 1;  // 1 if bface is inner boundary (e.g. horizon)
+  int outerbound     : 1;  // 1 if bface is outer grid boundary (e.g. infinity)
 } tBface;
 
 

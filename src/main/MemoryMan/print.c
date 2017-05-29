@@ -54,9 +54,13 @@ void printbfaces(tBox *box)
   {
     tBface *bface = box->bface[i];
     printf("bface[%d]: ", i);
-    printf("b%d f%d fi%d  ob%d ofi%d  oXi=%d oYi=%d oZi=%d\n",
+    printf("b%d f%d fi%d  ob%d ofi%d  oXi=%d oYi=%d oZi=%d  ",
             bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
             bface->oXi,bface->oYi,bface->oZi);
+     printf("bits=%d%d%d%d%d%d%d%d\n",
+            -bface->fpts_off_face,  -bface->touch,
+            -bface->touch_sameX,    -bface->touch_sameX, -bface->touch_sameX,
+            -bface->setnormalderiv, -bface->outerbound,  -bface->innerbound);
     if(bface->fpts==NULL) np = 0;
     else                  np = bface->fpts->npoints[box->b];
     printf("     fpts=%p (%d points)  grid=%p\n", bface->fpts, np, bface->grid);
