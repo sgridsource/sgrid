@@ -443,7 +443,7 @@ int set_ofi_in_all_bfaces(tGrid *grid)
         /* check if other box ob refers to this box b */
         if(obox->bface[ofi]->ob == b)
         {
-          /* if set box->bface[fi]->ofi=ofi if nothing is in there */
+          /* set box->bface[fi]->ofi=ofi if nothing else is in there */
           if(box->bface[fi]->ofi == -1 || box->bface[fi]->ofi == ofi)
             box->bface[fi]->ofi=ofi;
           /* if one other was already there use bits */
