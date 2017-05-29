@@ -78,9 +78,13 @@ int bladd_neighbors(tBox *box, intList *bl)
   int i, i2;
   for(i=0; i<box->nbfaces; i++)
   {
-    int nb = box->bface[i]->ob; // get neighbor index nb
-    int addnb = 1;
-    // add nb only if it is not already in blist
+    int nb, addnb;
+
+    nb = box->bface[i]->ob; /* get neighbor index nb */
+    if(nb<0) continue;      /* do nothing if there is no neighbor */
+
+    /* add nb only if it is not already in blist */
+    addnb = 1;
     for(i2=0; i2<bl->n; i2++) if(bl->e[i2]==nb) { addnb=0; break; }
     if(addnb) push_intList(bl, nb);
   }
