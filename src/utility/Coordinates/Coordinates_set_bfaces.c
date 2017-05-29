@@ -634,6 +634,9 @@ int set_bits_in_all_bfaces(tGrid *grid)
       /* do nothing if boxes have a different number of grid points */
       if(box->nnodes != obox->nnodes) continue;
 
+      /* do nothing if bface->fpts is NULL */
+      if(bface->fpts == NULL) continue;
+
       /* loop over bface, and check which coords agree */
       sameX = sameY = sameZ = 1;
       forPointList_inbox(bface->fpts, box, pi, ind)
