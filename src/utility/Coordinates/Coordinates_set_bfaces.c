@@ -437,6 +437,7 @@ int set_ofi_in_all_bfaces(tGrid *grid)
     {
       tBox *obox;
       ob = box->bface[fi]->ob;
+      if(ob<0) continue; /* do nothing if there is no other box */
       obox = grid->box[ob];
       for(ofi=0; ofi<obox->nbfaces; ofi++)
       {

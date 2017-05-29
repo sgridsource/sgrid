@@ -60,7 +60,7 @@ void printbfaces(tBox *box)
      printf("bits=%d%d%d%d%d%d%d%d\n",
             -bface->fpts_off_face,  -bface->touch,
             -bface->touch_sameX,    -bface->touch_sameX, -bface->touch_sameX,
-            -bface->setnormalderiv, -bface->outerbound,  -bface->innerbound);
+            -bface->setnormalderiv, -bface->innerbound,  -bface->outerbound);
     if(bface->fpts==NULL) np = 0;
     else                  np = bface->fpts->npoints[box->b];
     printf("     fpts=%p (%d points)  grid=%p\n", bface->fpts, np, bface->grid);
