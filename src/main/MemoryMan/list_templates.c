@@ -131,3 +131,12 @@ LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v)
 
   return u;
 }
+
+/* return 1 if vi is in list v */
+int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi)
+{
+  int i;
+  int in=0;
+  for(i=0; i<v->n; i++) if(v->e[i]==vi) { in=1; break; }
+  return in;
+}

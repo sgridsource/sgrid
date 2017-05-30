@@ -44,6 +44,7 @@ void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi);
 void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n);
 void FN(droplist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
 LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v);
+int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi);
 /* e.g.: if TYP = int 
    LIST(TYP) FN(alloc,LIST(TYP))(void)
    becomes
