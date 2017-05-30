@@ -582,6 +582,10 @@ int set_bits_in_all_bfaces(tGrid *grid)
       tBface *obface = NULL;
       int touch, sameX, sameY, sameZ;
       int pi, ind;
+      double *oX;
+      double *oY;
+      double *oZ;
+      int of, od;
 
       if(ob<0)  continue; /* do nothing if there is no other box at this bface */
       if(ofi<0) continue; /* do nothing if there not one face index in other box */
@@ -640,17 +644,27 @@ int set_bits_in_all_bfaces(tGrid *grid)
       if(bface->fpts == NULL) continue;
 
       /* loop over bface, and check which coords agree */
+      oX = obox->v[iX];
+      oY = obox->v[iY];
+      oZ = obox->v[iZ];
+      of = obface->f;
+      od = 1+of/2;
       sameX = sameY = sameZ = 1;
       forPointList_inbox(bface->fpts, box, pi, ind)
       {
-        double *oX = obox->v[iX];
-        double *oY = obox->v[iY];
-        double *oZ = obox->v[iZ];
-        // if( ind >= obox->nnodes )  { sameX = sameY = sameZ = 0;  break; }
-        if( !dequal(oX[ind], X[ind]) ) sameX = 0;
-        if( !dequal(oY[ind], Y[ind]) ) sameY = 0;
-        if( !dequal(oZ[ind], Z[ind]) ) sameZ = 0;
-//printf("b=%d ob=%d  %d%d%d\n", b,ob, sameX,sameY,sameZ);
+        int ok = kOfInd_n1n2(ind, n1,n2);
+        int oj = jOfInd_n1n2_k(ind, n1,n2, ok);
+        int oi = iOfInd_n1n2_jk(ind, n1,n2, oj,ok);
+        int oind;
+
+        if(od==1)      oi = ( (obox->n1-1) )*(of%2);
+        else if(od==2) oj = ( (obox->n2-1) )*(of%2);
+        else if(od==3) ok = ( (obox->n3-1) )*(of%2);
+        oind = Ind_n1n2(oi,oj,ok, obox->n1,obox->n2);
+
+        if( !dequal(oX[oind], X[ind]) ) sameX = 0;
+        if( !dequal(oY[oind], Y[ind]) ) sameY = 0;
+        if( !dequal(oZ[oind], Z[ind]) ) sameZ = 0;
         if( !(sameX || sameY || sameZ) ) break;
       }
       bface->touch_sameX = sameX;
