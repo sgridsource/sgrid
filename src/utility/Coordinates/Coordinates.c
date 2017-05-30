@@ -925,7 +925,7 @@ int compute_xyz_dXYZdxyz_ddXYZddxyz(tGrid *grid)
         box->v[var_x][ind] = box->x_of_X[1]((void *) box, ind, X,Y,Z);
         box->v[var_y][ind] = box->x_of_X[2]((void *) box, ind, X,Y,Z);
         box->v[var_z][ind] = box->x_of_X[3]((void *) box, ind, X,Y,Z);
-        
+
         /* compute dXdx, dXdy, ... */
         if( box->v[dXd] != NULL )
           for(j=1; j<=3; j++)
@@ -3107,7 +3107,7 @@ double AnsorgNS_sigma_pm(tBox *box, int ind, double B, double phi)
     }
     c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    return spec_interpolate(box, c, box->bbox[0],B,phi);
   }
 }
 double AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi)
@@ -3137,7 +3137,7 @@ double AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi)
     }
     c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    return spec_interpolate(box, c, box->bbox[0],B,phi);
   }
 }
 double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
@@ -3158,7 +3158,7 @@ double AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
   {
     double *c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    return spec_interpolate(box, c, box->bbox[0],B,phi);
   }
 }
 double AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi)
@@ -3188,7 +3188,7 @@ double AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi)
     }
     c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    return spec_interpolate(box, c, box->bbox[0],B,phi);
   }
 }
 double AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi)
@@ -3218,7 +3218,7 @@ double AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi)
     }
     c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    return spec_interpolate(box, c, box->bbox[0],B,phi);
   }
 }
 double AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double phi)
@@ -3239,7 +3239,7 @@ double AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double phi)
   {
     double *c = box->v[Ind("Temp1")];
     spec_Coeffs(box, box->v[isig], c);
-    return spec_interpolate(box, c, 0.0,B,phi);
+    return spec_interpolate(box, c, box->bbox[0],B,phi);
   }
 }
 
@@ -3277,7 +3277,7 @@ double tsafe_AnsorgNS_sigma_pm(tBox *box, int ind, double B, double phi)
       if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
     }
     spec_Coeffs(box, box->v[isig], c);
-    interp = spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, box->bbox[0],B,phi);
     free(c);
     return interp;
   }
@@ -3311,7 +3311,7 @@ double tsafe_AnsorgNS_dsigma_pm_dB(tBox *box, int ind, double B, double phi)
       if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
     }
     spec_Coeffs(box, box->v[isig], c);
-    interp = spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, box->bbox[0],B,phi);
     free(c);
     return interp;
   }
@@ -3338,7 +3338,7 @@ double tsafe_AnsorgNS_dsigma_pm_dphi(tBox *box, int ind, double B, double phi)
     double *c = (double*) malloc(n1*n2*n3 * sizeof(double));
     double interp;
     spec_Coeffs(box, box->v[isig], c);
-    interp = spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, box->bbox[0],B,phi);
     free(c);
     return interp;
   }
@@ -3372,7 +3372,7 @@ double tsafe_AnsorgNS_ddsigma_pm_dBdB(tBox *box, int ind, double B, double phi)
       if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
     }
     spec_Coeffs(box, box->v[isig], c);
-    interp = spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, box->bbox[0],B,phi);
     free(c);
     return interp;
   }
@@ -3406,7 +3406,7 @@ double tsafe_AnsorgNS_ddsigma_pm_dBdphi(tBox *box, int ind, double B, double phi
       if(B==0.0 && Y[0]==0.0)  return box->v[isig][0];
     }
     spec_Coeffs(box, box->v[isig], c);
-    interp = spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, box->bbox[0],B,phi);
     free(c);
     return interp;
   }
@@ -3433,7 +3433,7 @@ double tsafe_AnsorgNS_ddsigma_pm_dphidphi(tBox *box, int ind, double B, double p
     double *c = (double*) malloc(n1*n2*n3 * sizeof(double));
     double interp;
     spec_Coeffs(box, box->v[isig], c);
-    interp = spec_interpolate(box, c, 0.0,B,phi);
+    interp = spec_interpolate(box, c, box->bbox[0],B,phi);
     free(c);
     return interp;
   }
