@@ -46,25 +46,31 @@ void printnode(tNode *n)
   printf("\n");
 }
 
+void printbface(tBface *bface)
+{
+  int np;
+  printf("b%d f%d fi%d  ob%d ofi%d  oXi=%d oYi=%d oZi=%d  ",
+          bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
+          bface->oXi,bface->oYi,bface->oZi);
+  printf("bits=%d%d%d%d%d%d%d%d\n",
+         -bface->fpts_off_face,  -bface->touch,
+         -bface->touch_sameX,    -bface->touch_sameY, -bface->touch_sameZ,
+         -bface->setnormalderiv, -bface->innerbound,  -bface->outerbound);
+  if(bface->fpts==NULL) np = 0;
+  else                  np = bface->fpts->npoints[bface->b];
+  printf("     fpts=%p (%d points)  grid=%p\n", bface->fpts, np, bface->grid);
+  //prPointList(bface->fpts);
+}
+
 void printbfaces(tBox *box)
 {
-  int i, np;
+  int i;
   printf("box->b=%d\n", box->b);
   for(i=0; i<box->nbfaces; i++)
   {
     tBface *bface = box->bface[i];
     printf("bface[%d]: ", i);
-    printf("b%d f%d fi%d  ob%d ofi%d  oXi=%d oYi=%d oZi=%d  ",
-            bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
-            bface->oXi,bface->oYi,bface->oZi);
-     printf("bits=%d%d%d%d%d%d%d%d\n",
-            -bface->fpts_off_face,  -bface->touch,
-            -bface->touch_sameX,    -bface->touch_sameX, -bface->touch_sameX,
-            -bface->setnormalderiv, -bface->innerbound,  -bface->outerbound);
-    if(bface->fpts==NULL) np = 0;
-    else                  np = bface->fpts->npoints[box->b];
-    printf("     fpts=%p (%d points)  grid=%p\n", bface->fpts, np, bface->grid);
-    //prPointList(bface->fpts);
+    printbface(bface);
   }
 }
 

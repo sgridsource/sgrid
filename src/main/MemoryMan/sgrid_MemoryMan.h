@@ -191,6 +191,7 @@ void printvar_inbox(tBox *box, char *name);
 void printvar(tGrid *grid, char *name);
 void printVarList(tVarList *vl);
 void printmatrix(double *M, int n);
+void printbface(tBface *bface);
 void printbfaces(tBox *box);
 
 
