@@ -595,7 +595,7 @@ int X_of_x_forgiven_YZ(tBox *box, double *X, double x, double Y, double Z)
                               Getd("Coordinates_newtTOLF") );
   *X = XYZvec[1];
 
-  if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+  if(check || stat<0) printf("X_of_x_forgiven_YZ: check=%d stat=%d\n", check, stat);
   return stat-check;
 }
 
