@@ -3107,6 +3107,11 @@ void force_Bphi_inside_box(tBox *box, double *B, double *phi)
 {
   double twopi = 2*PI;
   int rotphi = 0;
+
+  /* get B into (-1,1] assuming period of 2 */
+  *B = BaseAngle(*B, 2.0, -1.0);
+
+  /* get B into [0,1] */
   if(*B < 0.0)      { *B = -(*B);     rotphi = rotphi^1; }
   else if(*B > 1.0) { *B = *B - 1.0;  rotphi = rotphi^1; }
 
@@ -3134,7 +3139,7 @@ double interpolate_isig_using_box_with_original_sigma_pm(tBox *box, int isig,
   if(tsafe)  c = malloc(n1*n2*n3 * sizeof(double));
   else       c = ibox->v[Ind("Temp1")];
 
-//  force_Bphi_inside_box(ibox, &B, &phi);
+  //force_Bphi_inside_box(ibox, &B, &phi);
 
   spec_Coeffs(ibox, ibox->v[isig], c);
   interp = spec_interpolate(ibox, c, ibox->bbox[0],B,phi);
