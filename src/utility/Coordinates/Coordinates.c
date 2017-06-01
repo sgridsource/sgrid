@@ -3139,6 +3139,16 @@ double interpolate_isig_using_box_with_original_sigma_pm(tBox *box, int isig,
   if(tsafe)  c = malloc(n1*n2*n3 * sizeof(double));
   else       c = ibox->v[Ind("Temp1")];
 
+  /* If B is outside [ ibox->bbox[2], ibox->bbox[3] ], spec_interpolate results
+     in NAN, because the basis functions do not work. So one may try to avoid this
+     with force_Bphi_inside_box(ibox, &B, &phi);
+     But it seems that when sigma is NAN in some places,
+       sigp_Bphi = Coordinates_AnsorgNS_sigmap(box, ind, B, phi);
+     in xyz_of_AnsorgNS is NAN, which makes xyz_of_AnsorgNS return a very
+     large y (or z). This large y (or z) seems beneficial for newton_linesrch_itsP.
+     So for now, and to be compatible with the past, we do not use
+     force_Bphi_inside_box(ibox, &B, &phi). Note however, that even for the old
+     4ABphi_2xyz, newton_linesrch_itsP steps outside of B = [0,1] !!!  */
   //force_Bphi_inside_box(ibox, &B, &phi);
 
   spec_Coeffs(ibox, ibox->v[isig], c);
