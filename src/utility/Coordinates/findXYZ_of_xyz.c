@@ -104,8 +104,11 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
     printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
     printf("            in box%d at x=%g y=%g z=%g\n", box->b, x,y,z);
     stat2 = check_xyz_error(box, X,Y,Z, x,y,z, (void *) pars, tol, NULL, &err, 1);
-    if(stat2==1) { stat =  abs(stat); check=0; }
-    else           stat = -abs(stat)-1;
+    if(check)
+    {
+      if(stat2==1) { stat =  abs(stat); check=0; }
+      else           stat = -abs(stat)-1;
+    }
   }
 
   return stat-check;
