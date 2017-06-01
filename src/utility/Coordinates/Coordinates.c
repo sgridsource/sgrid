@@ -3138,6 +3138,10 @@ double interpolate_isig_using_box_with_original_sigma_pm(tBox *box, int isig,
 
   spec_Coeffs(ibox, ibox->v[isig], c);
   interp = spec_interpolate(ibox, c, ibox->bbox[0],B,phi);
+  /* plane interpolation should be faster!!! */
+  //spec_Coeffs_inplaneN(ibox, 1,0, ibox->v[isig], c);
+  //interp = spec_interpolate_inplaneN(ibox, 1,0, c, B,phi);
+
 if(0 && !finite(interp))
 {
 printf("box->b=%d\n", box->b);
