@@ -41,6 +41,7 @@ void copy_to_doubleCoveredPoints_SphericalDF(tBox *box, int vind);
 void coordinateDependentFilter(tVarList *unew);
 
 /* from ComplexFunctions.c */
+double BaseAngle(double p, double peri, double p0);
 double Arg(double x, double y);
 double Arg_plus(double x, double y);
 double dArgdx(double x, double y);

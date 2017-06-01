@@ -6,6 +6,15 @@
 
 #define pow2(x)    ((x)*(x))
 
+/* assume periodicity of period peri and return number in [p0,peri] */
+double BaseAngle(double p, double peri, double p0)
+{
+  double d = p - p0;
+  double w = floor(d/peri);
+  double b = d - w*peri;
+  return p0 + b;
+}
+
 /* Arg function of z = x + iy : return value in (-PI,PI] */
 double Arg(double x, double y)
 {
