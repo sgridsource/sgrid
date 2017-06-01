@@ -63,18 +63,15 @@ num = 0.0;
     /* printf("Checking for INF or NAN in %s\n", varname); */
     ivar= Ind(varname);
     var = box->v[ivar]; 
+
+    if(var==NULL)
+    {
+      printf("pointer to %s is NULL in box%d grid=%p\n", VarName(ivar), b, grid);
+      continue;
+    }
  
     forallpoints(box,ijk)
     {
-      if(var==NULL) 
-      {
-        printf("pointer to %s is NULL at ijk=%d: x=%g y=%g z=%g "
-               "box%d grid=%p X=%g Y=%g Z=%g\n",
-               VarName(ivar),ijk,x[ijk],y[ijk],z[ijk],
-  	       b, grid, X[ijk], Y[ijk], Z[ijk]); 
-        continue;
-      }
-        
       if( !finite(var[ijk]) ) 
       {
         if(messageflag==0)
