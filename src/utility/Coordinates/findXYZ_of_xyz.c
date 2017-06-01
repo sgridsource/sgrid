@@ -103,7 +103,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
     int stat2;
     //printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
     //printf("            in box%d at x=%g y=%g z=%g\n", box->b, x,y,z);
-    stat2 = check_xyz_error(box, X,Y,Z, x,y,z, (void *) pars, tol, NULL, &err, 0);
+    stat2 = check_xyz_error(box, X,Y,Z, x,y,z, (void *) pars, tol, NULL, &err, 1);
     if(stat2==1) { stat =  abs(stat); check=0; }
     else           stat = -abs(stat)-1;
   }
@@ -132,8 +132,12 @@ int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
   {
     if(pr)
     {
+      t_grid_box_desired_xyz_struct *pars = (t_grid_box_desired_xyz_struct *) p;
       printf("check_xyz_error: box->b=%d *err=%g\n", box->b, *err);
       printf("X=%g Y=%g Z=%g  x=%g y=%g z=%g\n", *X,*Y,*Z, x,y,z);
+      printf("fvec[1]=%g fvec[2]=%g fvec[3]=%g\n", fvec[1], fvec[2], fvec[3]);
+      printf("pars->desired_x=%g pars->desired_y=%g pars->desired_z=%g\n",
+             pars->desired_x, pars->desired_y, pars->desired_z);
       prSingInfo(si);
     }
     stat = -1;
