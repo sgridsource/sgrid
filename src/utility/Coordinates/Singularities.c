@@ -9,7 +9,10 @@
 void prSingInfo(tSingInfo *si)
 {
   int i,j;
-  printf("si->f[j]= ");
+
+  if(si==NULL) { printf("si = NULL\n"); return; }
+
+  printf("si->f[j] = ");
   for(j=0; j<6; j++) printf("%d ", si->f[j]);
   printf("\n");
   printf("si->x[j] = ");

@@ -97,24 +97,15 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   *Y = XYZvec[2];
   *Z = XYZvec[3];
 
-  //if(check || stat<0) printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
-
-//  /* get error in x,y,z */
-//  xyz_VectorFuncP(3, XYZvec, fvec, (void *) pars);
-//  err = sqrt(fvec[1]*fvec[1] + fvec[2]*fvec[2] + fvec[3]*fvec[3]);
-//  r = sqrt(x*x + y*y + z*z);
-//  if(r>0.0)  err = err/r;
-//  if(err>1e-5 && stat>=0)
-//  {
-//    //printf("XYZ_of_xyz: newton_linesrch_itsP failed! err=%g\n", err);
-//    stat = -stat;
-//  }
-
   if(check || stat<0)
   {
-    //printf("XYZ_of_xyz: check=%d stat=%d err=%g\n", check, stat, err);
-    printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
-    printf("            in box%d at x=%g y=%g z=%g\n", box->b, x,y,z);
+    double err;
+    int stat2;
+    //printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
+    //printf("            in box%d at x=%g y=%g z=%g\n", box->b, x,y,z);
+    stat2 = check_xyz_error(box, X,Y,Z, x,y,z, (void *) pars, tol, NULL, &err, 0);
+    if(stat2==1) { stat =  abs(stat); check=0; }
+    else           stat = -abs(stat)-1;
   }
 
   return stat-check;
@@ -123,7 +114,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
 /* check error in x,y,z, write it into *err */
 int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
             double x, double y, double z,
-            void *p, double tol, tSingInfo *si, double *err)
+            void *p, double tol, tSingInfo *si, double *err, int pr)
 {
   int stat;
   double XYZvec[4];
@@ -139,13 +130,16 @@ int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
   if(r>0.0)  *err = *err/r;
   if(*err>tol*100.0)
   {
-    printf("check_xyz_error: box->b=%d *err=%g\n", box->b, *err);
-    printf("X=%g Y=%g Z=%g  x=%g y=%g z=%g\n", *X,*Y,*Z, x,y,z);
-    prSingInfo(si);
+    if(pr)
+    {
+      printf("check_xyz_error: box->b=%d *err=%g\n", box->b, *err);
+      printf("X=%g Y=%g Z=%g  x=%g y=%g z=%g\n", *X,*Y,*Z, x,y,z);
+      prSingInfo(si);
+    }
     stat = -1;
   }
   else
-    stat=1;
+    stat = 1;
 
   return stat;
 }
@@ -190,7 +184,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = Y_of_y_forgiven_XZ(box, Y, y, *X, *Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, 1);
       }
       else if(si->dx_dX[2][3] == '.')
         errorexit("implement Y_of_z_forgiven_XZ(box, Y, z, *X,*Z);");
@@ -204,7 +198,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, 1);
       }
       else if(si->dx_dX[1][2] == '.')
         errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
@@ -220,7 +214,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, 1);
       }
       else if(si->dx_dX[1][2] == '.')
         errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");

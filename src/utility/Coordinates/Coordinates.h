@@ -21,6 +21,9 @@ int isSing_AnsorgNS12(void *aux, double X, double Y, double Z,
 int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
                       int update, tSingInfo *si);
 /* from findXYZ_of_xyz.c */
+int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
+            double x, double y, double z,
+            void *p, double tol, tSingInfo *si, double *err, int pr);
 int recover_if_start_on_singularity(tBox *box,
         double *X, double *Y, double *Z, double x, double y, double z,
         void *p, double tol, tSingInfo *si, double *err);
