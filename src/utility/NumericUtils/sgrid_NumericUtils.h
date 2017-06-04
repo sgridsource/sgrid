@@ -66,6 +66,10 @@ double integrate_trapez_1Dgrid(double* f, double dx, int i1, int i2);
 
 /* Attenuation functions */
 double Attenuation01(double x, double s, double p);
+double Att_0to1_x_x0_w_q_s(double x, double x0, double w, double q, double s);
+double dAtt_0to1_x_x0_w_q_s(double x, double x0, double w, double q, double s);
+double Att_1to0_x_x0_w_q_s(double x, double x0, double w, double q, double s);
+double dAtt_1to0_x_x0_w_q_s(double x, double x0, double w, double q, double s);
 
 /* for ODEs */
 double odeintegrate(double ystart[], int nvar, double x1, double x2,
