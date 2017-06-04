@@ -12,6 +12,6 @@ double Attenuation01(double x, double s, double p)
   if(x<=0.0) return 0.0;
   if(x>=1.0) return 1.0;
   
-  return 0.5*( 1.0 + tanh(2.0*s*p*p*(1-p)*( -1/x + ((1-p)/p)/(1-x) ) ) );
+  return 0.5*( 1.0 + tanh(2.0*s*p*p*(1.0-p)*( -1.0/x + ((1.0-p)/p)/(1.0-x) ) ) );
 }
 
