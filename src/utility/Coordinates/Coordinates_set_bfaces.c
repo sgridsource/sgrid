@@ -667,9 +667,9 @@ int set_bits_in_all_bfaces(tGrid *grid)
         if( !dequal(oZ[oind], Z[ind]) ) sameZ = 0;
         if( !(sameX || sameY || sameZ) ) break;
       }
-      bface->touch_sameX = sameX;
-      bface->touch_sameY = sameY;
-      bface->touch_sameZ = sameZ;
+      bface->sameX = sameX;
+      bface->sameY = sameY;
+      bface->sameZ = sameZ;
     }
   }
 

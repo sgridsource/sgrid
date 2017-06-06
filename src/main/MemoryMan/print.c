@@ -54,7 +54,7 @@ void printbface(tBface *bface)
           bface->oXi,bface->oYi,bface->oZi);
   printf("bits=%d%d%d%d%d%d%d%d\n",
          -bface->fpts_off_face,  -bface->touch,
-         -bface->touch_sameX,    -bface->touch_sameY, -bface->touch_sameZ,
+         -bface->sameX,          -bface->sameY,       -bface->sameZ,
          -bface->setnormalderiv, -bface->innerbound,  -bface->outerbound);
   if(bface->fpts==NULL) np = 0;
   else                  np = bface->fpts->npoints[bface->b];

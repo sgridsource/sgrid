@@ -134,9 +134,9 @@ typedef struct tBFACE {
   int oXi,oYi,oZi; // ind of vars in this box that contain coords in other box
   int fpts_off_face  : 1;  // 1 if points in fpts are not in face (e.g. ChebZeros)
   int touch          : 1;  // 1 if tBface only touches other face
-  int touch_sameX    : 1;  // 1 if X-coord of points in touching faces is same
-  int touch_sameY    : 1;  // 1 if Y-ccord of points in touching faces is same
-  int touch_sameZ    : 1;  // 1 if Z-ccord of points in touching faces is same
+  int sameX          : 1;  // 1 if X-coord of points in neighboring faces is same
+  int sameY          : 1;  // 1 if Y-ccord of points in neighboring faces is same
+  int sameZ          : 1;  // 1 if Z-ccord of points in neighboring faces is same
   int setnormalderiv : 1;  // 1 if we set normal derivs of field and not field itself
   int innerbound     : 1;  // 1 if bface is inner boundary (e.g. horizon)
   int outerbound     : 1;  // 1 if bface is outer grid boundary (e.g. infinity)

@@ -247,7 +247,17 @@ double do_Newton_step(tVarList *vlu, tVarList *vldu, double oldres,
 
   /* do full Newton step */
   do_partial_Newton_step(vlu, 1.0, vldu);
-
+/*
+if(strstr(VarName(vlu->index[0]), "BNSdata_Psi"))
+{
+tGrid *grid=vlu->grid;
+//prvarlist(vldu);
+//printvar(grid, "BNSdata_Psi_l");
+grid->time = -66;
+write_grid(grid);
+exit(5);
+}
+*/
   /* do we use backtracking? */
   if(Getv("GridIterators_Newtonstep", "backtrack"))
   {
