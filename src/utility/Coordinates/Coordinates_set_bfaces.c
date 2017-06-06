@@ -634,14 +634,12 @@ int set_bits_in_all_bfaces(tGrid *grid)
         if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
         else                            obface->setnormalderiv = 0;
       }
-      else
-        continue; /* nothing touches */
-
-      /* do nothing if boxes have a different number of grid points */
-      if(box->nnodes != obox->nnodes) continue;
 
       /* do nothing if bface->fpts is NULL */
       if(bface->fpts == NULL) continue;
+
+      /* do nothing if boxes have a different number of grid points */
+      if(box->nnodes != obox->nnodes) continue;
 
       /* loop over bface, and check which coords agree */
       oX = obox->v[iX];
