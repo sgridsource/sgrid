@@ -52,10 +52,10 @@ void printbface(tBface *bface)
   printf("b%d f%d fi%d  ob%d ofi%d  oXi=%d oYi=%d oZi=%d  ",
           bface->b,bface->f,bface->fi, bface->ob,bface->ofi,
           bface->oXi,bface->oYi,bface->oZi);
-  printf("bits=%d%d%d%d%d%d%d%d\n",
-         -bface->fpts_off_face,  -bface->touch,
-         -bface->sameX,          -bface->sameY,       -bface->sameZ,
-         -bface->setnormalderiv, -bface->innerbound,  -bface->outerbound);
+  printf("bits=%u%u%u%u%u%u%u%u\n",
+         bface->fpts_off_face,  bface->touch,
+         bface->sameX,          bface->sameY,       bface->sameZ,
+         bface->setnormalderiv, bface->innerbound,  bface->outerbound);
   if(bface->fpts==NULL) np = 0;
   else                  np = bface->fpts->npoints[bface->b];
   printf("     fpts=%p (%d points)  grid=%p\n", bface->fpts, np, bface->grid);
