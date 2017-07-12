@@ -3090,6 +3090,11 @@ void ddABphi_ddxyz_AnsorgNS(tBox *box, int ind, int domain,
 tBox *gridbox_with_original_sigma_pm(tBox *box)
 {
   tBox *ibox;
+
+  /* if we have a low box index (as in RealisticBBH), return box */
+  if(box->b <= 3) return box;
+
+  /* otherwise, assume AnsorgNS0/1/2/3 is in box0/1/2/3 and return this box */
   if     (box->x_of_X[1] == x_of_AnsorgNS0)  ibox = box->grid->box[0];
   else if(box->x_of_X[1] == x_of_AnsorgNS1)  ibox = box->grid->box[1];
   else if(box->x_of_X[1] == x_of_AnsorgNS2)  ibox = box->grid->box[2];
