@@ -93,26 +93,37 @@ void parse_parameter_file(char *parfile)
   nbuffer = strlen(buffer);
   if (0) printf("|%s|\n", buffer);
 
+  /* put a # in front of each par name */
+  for (i=0; i<nbuffer-2; i++)
+  {
+    if(buffer[i]==' ') j=i; /* save pos of newest space found in j */
+    if(buffer[i+1]=='=' || buffer[i+2]=='=') /* there's a '=' after pos i */
+    {
+      buffer[j]='#';  /* put a '#' in front of name, i.e. at pos j */
+      i++;
+    }
+  }
+  if (0) printf("|%s|\n", buffer);
+
   /* and remove spaces around = */
   for (i = j = 1; i < nbuffer; i++) {
     if (buffer[i] != ' ' || (buffer[i-1] != '=' && buffer[i+1] != '=')) 
       buffer[j++] = buffer[i];
   }
-  buffer[j-1] = '\0';
+  buffer[j] = '\0';
+  if(buffer[j-1] == ' ') buffer[j-1] = '\0';
   nbuffer = strlen(buffer);
   if (0) printf("|%s|\n", buffer);
 
   /* now buffer is 
-     | par=val ... val par=val ... val| 
+     |#par=val ... val#par=val ... val| 
   */
 
-  /* split parameter names and values by inserting zeros */
-  for (i = 1; i < nbuffer; i++) {
-    if (buffer[i] == '=') {
+  /* split parameter names and values by replacing '#' and '=' by zero */
+  for(i=0; i<nbuffer; i++)
+  {
+    if(buffer[i] == '#' || buffer[i] == '=')
       buffer[i] = '\0';
-      for (j = i-1; j > 0 && buffer[j-1] != ' '; j--);
-      buffer[j-1] = '\0';
-    }
   }
 
   /* loop over all parameter/value pairs */
