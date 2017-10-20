@@ -104,13 +104,23 @@ int Newton(
       lin_its=linSolver1(vldu, vlFu, vlres, vld1, vld2, linSolv_itmax, 
                          max2( (*normres)*linSolv_tolFac, linSolv_tol ),
                          &lin_normres, Jdu, linPrecon);
-      if(lin_its>=0) linSolverOK=1;
+      linSolverOK=1;
       /* if(pr) printf("Newton: after linSolver: %e\n",lin_normres); */
-
-      /* do Newton step: u^{n+1} = u^{n} - du */
-      /* do_partial_Newton_step(vlu, 1.0, vldu); */
-      lambda = do_Newton_step(vlu, vldu, res, Fu, Jdu,
-                              vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
+      if(lin_its>=0) /* linSolver1 found a solution without problems */
+      {
+        /* do Newton step: u^{n+1} = u^{n} - du */
+        /* do_partial_Newton_step(vlu, 1.0, vldu); */
+        lambda = do_Newton_step(vlu, vldu, res, Fu, Jdu,
+                                vlFu,  vlc1, vlc2, vlres, vld1, vld2, pr);
+      }
+      else /* linSolver1 returned error code */
+      {
+        lambda = -1.0; /* signal that we stayed at previous vlu */
+        printf("Newton error: *** Linear solver failed and returned %d ***\n",
+               lin_its);
+        printf("  signaling that solution is unchanged by setting lambda=%g\n",
+               lambda);
+      }
 
       /* do we seem to be caught in a local min, i.e. close to lambda=-1 ? */
       if(fabs(lambda+1.0)<ms)
