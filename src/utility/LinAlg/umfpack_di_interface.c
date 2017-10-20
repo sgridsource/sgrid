@@ -276,7 +276,7 @@ int umfpack_di_solve_fromAlines(tSparseVector **Aline, tVarList *vlx,
   free(x);
   free_umfpack_di_matrix(Ap, Ai, Ax);
 
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
 
 
@@ -400,7 +400,7 @@ int umfpack_di_solve_forSortedVars_fromAlines(tSparseVector **Aline,
   free(x);
   free_umfpack_di_matrix(Ap, Ai, Ax);
 
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
 
 
@@ -518,7 +518,7 @@ int umfpack_di_solve_fromAcolumns(tSparseVector **Acol,
   free(x);
   free_umfpack_di_matrix(Ap, Ai, Ax);
 
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
 
 
@@ -640,7 +640,7 @@ int umfpack_di_solve_forSortedVars_fromAcolumns(tSparseVector **Acol,
   free(x);
   free_umfpack_di_matrix(Ap, Ai, Ax);
 
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
 
 
@@ -742,5 +742,5 @@ int umfpack_di_solve_from_Ap_Ai_Ax(int *Ap, int *Ai, double *Ax,
   free(b);
   free(x);
 
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }

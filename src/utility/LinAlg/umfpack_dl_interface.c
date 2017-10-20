@@ -275,7 +275,7 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
   free(x);
   free_umfpack_dl_matrix(Ap, Ai, Ax);
 
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
 
 
@@ -377,7 +377,7 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
   free(b);
   free(x);
 
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
 
 /* solve A x = b with umfpack's umfpack_dl_solve
@@ -421,7 +421,7 @@ int umfpack_dl_solve_from_Ap_Ai_Ax_x_b(LONGINT *Ap, LONGINT *Ai, double *Ax,
   if(INFO!=0) PrintErrorCodesAndExit;
   if(INFO1!=0 || INFO2!=0) PrintErrorCodes;
 
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
 
 
@@ -506,5 +506,5 @@ int umfpack_dl_solve_from_tUMFPACK_A_x_b(tUMFPACK_A umfpackA,
     int INFO2=0;
     PrintErrorCodesAndExit;
   }
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }

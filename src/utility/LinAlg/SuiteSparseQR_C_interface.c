@@ -45,6 +45,16 @@
 /* some helper routines                                                    */
 /***************************************************************************/
 
+/* translate SuiteSparse warnings, so that return code is negative
+   when warnings occur */
+int translate_SuiteSparse_warnings(int INFO)
+{
+  if(INFO>0)  /* INFO is a warning */
+    return -(100000+INFO);
+  else
+    return INFO; /* this returns 0 if OK, or the error code if INFO<0 */
+}
+
 #ifdef SUITESPARSEQR
 /* get a sparse matrix in cholmod_sparse format from the array in Acol */
 cholmod_sparse *get_cholmod_sparse_fromAcolumns(tSparseVector **Acol,
@@ -254,7 +264,7 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
 #else
   CompileSuiteSparseQR;
 #endif
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
 
 
@@ -367,5 +377,5 @@ int SuiteSparseQR_solve_from_tSPQR_A_x_b(tSPQR_A SPQR_A,
 #else
   CompileSuiteSparseQR;
 #endif
-  return INFO;
+  return translate_SuiteSparse_warnings(INFO);
 }
