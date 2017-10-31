@@ -75,6 +75,8 @@ int sgrid_Coordinates(void)
     AddPar("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis", "no", "whether "
            "dsigma_pm_dphi and ddsigma_pm_dphidphi are 0 on x-axis [no,yes]");
   }
+  AddPar("Coordinates_set_bfaces", "no", "whether we set bfaces in the "
+         "function init_CoordTransform_And_Derivs [no,yes]");
 
   return 0;
 }

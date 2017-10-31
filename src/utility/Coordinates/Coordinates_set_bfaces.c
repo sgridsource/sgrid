@@ -246,9 +246,13 @@ void find_external_faces_of_box(tBox *box, int *extface)
 /* find and set all bfaces on an external box face f */
 /* The idea is to loop over the box faces and then move out using the Cartesian
    normal vectors. Then we check if we are in an other box. */
+/* This only creates a bface if there is some contact with another box.
+   It returns the number of new bfaces made for face f in this box. So if it
+   returns 0 nothing was done at all. */
 int set_bfaces_on_boxface(tBox *box, int f)
 {
   tGrid *grid = box->grid;
+  int nbfaces_old = box->nbfaces;
   int pr = Getv("Coordinates_verbose", "yes");
   int var_x = Ind("x");
   int var_y = Ind("y");
@@ -420,7 +424,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
   remove_bfaces_with_NULL_fpts(box);
 
   free_intList(obl);
-  return box->nbfaces;
+  return box->nbfaces - nbfaces_old;
 }
 
 
@@ -472,14 +476,35 @@ int set_ofi_in_all_bfaces(tGrid *grid)
   return 0;
 }
 
+/* mark face f as outer boundary */
+int add_boxface_as_outerbound_bface(tBox *box, int f)
+{
+  int fi, p, dir, i,j,k;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+
+  fi = add_empty_bface(box, f);
+  box->bface[fi]->outerbound = 1; /* mark as outer boundary */
+  dir = 1 + f/2;
+  p = ( (n1-1) )*(f%2);
+  forplaneN(dir, i,j,k, n1,n2,n3, p)
+  {
+    int ijk = Index(i,j,k);
+    add_point_to_bface_inbox(box, fi, ijk, f);
+  }
+  return 0;
+}
 
 /* set bfaces for each box on the grid */
 int Coordinates_set_bfaces(tGrid *grid)
 {
+  int set_bfaces = Getv("Coordinates_set_bfaces", "yes");
   int pr = Getv("Coordinates_verbose", "yes");
   int maxits = Geti("Coordinates_newtMAXITS"); /* save par */
   int b;
 
+  if(!set_bfaces) return 0;
   if(pr) printf("Coordinates_set_bfaces:\n");
 
   /* reduce iteration number in newton_linesrch_itsP
@@ -524,9 +549,16 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
     }
     /* set the bfaces for each face we found */
     for(f=0; f<6; f++)
-      if(extface[f])  set_bfaces_on_boxface(box, f);
+    {
+      if(extface[f])
+      {
+        int ret = set_bfaces_on_boxface(box, f);
+        //printf("f=%d, ret=%d\n", f, ret);
+        if(ret==0) add_boxface_as_outerbound_bface(box, f);
+      }
+    }
 
-    if(pr)
+    if(0)
     {
       printbfaces(box);
     }
@@ -540,12 +572,6 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
 
   if(pr) forallboxes(grid, b) printbfaces(grid->box[b]);
 
-prPointList(grid->box[3]->bface[0]->fpts);
-prPointList(grid->box[3]->bface[1]->fpts);
-prPointList(grid->box[4]->bface[0]->fpts);
-prPointList(grid->box[4]->bface[4]->fpts);
-exit(77);
-exit(88);
   return 0;
 }
 
