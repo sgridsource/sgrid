@@ -499,12 +499,10 @@ int add_boxface_as_outerbound_bface(tBox *box, int f)
 /* set bfaces for each box on the grid */
 int Coordinates_set_bfaces(tGrid *grid)
 {
-  int set_bfaces = Getv("Coordinates_set_bfaces", "yes");
   int pr = Getv("Coordinates_verbose", "yes");
   int maxits = Geti("Coordinates_newtMAXITS"); /* save par */
   int b;
 
-  if(!set_bfaces) return 0;
   if(pr) printf("Coordinates_set_bfaces:\n");
 
   /* reduce iteration number in newton_linesrch_itsP

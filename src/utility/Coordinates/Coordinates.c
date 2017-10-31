@@ -884,7 +884,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
 
   /* set all bfaces */
-  Coordinates_set_bfaces(grid);
+  if(Getv("Coordinates_set_bfaces", "yes")) Coordinates_set_bfaces(grid);
 
   return 0;
 }

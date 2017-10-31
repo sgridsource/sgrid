@@ -11,9 +11,6 @@ double dX_dx(int i, int m, int dXd,
 double ddX_dxdx(int i, int m, int n, int ddXdd,
                 tBox *box, int ind, double X, double Y, double Z);
 
-/* from Coordinates_set_bfaces.c */
-int Coordinates_set_bfaces(tGrid *grid);
-
 /* Singularities.c */
 void prSingInfo(tSingInfo *si);
 int isSing_AnsorgNS12(void *aux, double X, double Y, double Z,
