@@ -1,0 +1,50 @@
+physics = Poisson3
+
+Poisson3_linSolver_itmax = 100000
+Poisson3_linSolver = UMFPACK # templates_GMRES # bicgstab
+Poisson3_linSolver_Precon = templates
+Poisson3_linSolver_tolFac = 0.001
+GridIterators_UMFPACK_version   = dl
+GridIterators_verbose           = no # yes # very # no
+#GridIterators_GMRES_restart = 2000
+##GridIterators_templates_RESID_mode = tol
+GridIterators_Preconditioner_type = spectral # fd
+#GridIterators_Preconditioner_BlockJacobi_nsb1 = 2 # 1
+#GridIterators_Preconditioner_BlockJacobi_nsb2 = 2 # 1
+#GridIterators_Preconditioner_BlockJacobi_nsb3 = 1 # 1
+
+
+nboxes = 1
+
+box0_min1 = -1
+box0_max1 = 1
+
+box0_min2 = -1
+box0_max2 = 1
+
+box0_min3 = -1
+box0_max3 = 1
+
+
+n1  = 10
+n2  = 10
+n3  = 10
+
+iterate_parameters = no # yes
+iterate_parameter1 = box0_n1 12 18 24 # 30
+iterate_parameter2 = box0_n2 24 32 48 # 60
+iterate_parameter3 = box0_n3 15 21 31 # 39
+
+
+
+1douttime	= 0.1
+1doutput	= Poisson3_Psi_Err Poisson3_Psi Poisson3_rh1 Poisson3_rh2 Poisson3_Psix Poisson3_Psixx Poisson3_Chi_Err Poisson3_Chi Poisson3_Chix Poisson3_Chixx Poisson3_Err_Psi Poisson3_Err_Chi x y z  X Y Z
+1doutputall	= yes
+
+2douttime	= 0.1
+2doutput	= Poisson3_Psi_Err Poisson3_Psi Poisson3_rh1 Poisson3_rh2 Poisson3_Psix Poisson3_Psixx Poisson3_Chi_Err Poisson3_Chi Poisson3_Chix Poisson3_Chixx Poisson3_Err_Psi Poisson3_Err_Chi
+2doutputall	= yes
+
+outputX0_box0 = 1.268242413364671
+outputY0_box0 = 1.5708 # 3.141592653589793
+outputZ0_box0 = 0
