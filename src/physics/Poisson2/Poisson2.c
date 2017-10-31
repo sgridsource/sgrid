@@ -376,9 +376,9 @@ void Poisson2_set_BCs(tVarList *VLFu, tVarList *VLu, tVarList *VLuAll,
       tBox *box = grid->box[b];
       double *FPsi = box->v[VLFu->index[vind]];
       double *Psi  = box->v[VLu->index[vind]];
-      double *Psix = box->v[VLuAll->index[9*vind]];
-      double *Psiy = box->v[VLuAll->index[9*vind+1]];
-      double *Psiz = box->v[VLuAll->index[9*vind+2]];
+      double *Psix = box->v[VLuAll->index[10*vind+1]];
+      double *Psiy = box->v[VLuAll->index[10*vind+2]];
+      double *Psiz = box->v[VLuAll->index[10*vind+3]];
       int n1 = box->n1;
       int n2 = box->n2;
       int n3 = box->n3;
