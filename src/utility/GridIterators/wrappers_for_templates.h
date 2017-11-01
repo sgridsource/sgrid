@@ -34,4 +34,3 @@ int bicg_(long int *N, double *B, double *X, double *WORK, long int *LDW,
               int (*psolve)(double *x, double *b),
               int (*psolvetrans)(double *x, double *b),
               long int *INFO);
-       
