@@ -98,6 +98,11 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
     int oZi = bface->oZi;
     int pi, ind;
 
+    /* make sure oXi,... are positive */
+    if(oXi<0) oXi = Ind("X");
+    if(oYi<0) oYi = Ind("Y");
+    if(oZi<0) oZi = Ind("Z");
+
     /* check if there is another box */
     if(ob>=0)
     {
@@ -256,9 +261,7 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
         {
           /* we need 2d interpolation because the touching surfaces,
              do not have any points in common */
-
-          errorexit("implement more bface->same? cases!");
-
+          errorexit("fix bface->sameX || bface->sameY || bface->sameZ case!");
           int n1 = box->n1;
           int n2 = box->n2;
           int n3 = box->n3;
