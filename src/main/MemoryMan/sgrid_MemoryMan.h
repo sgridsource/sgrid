@@ -141,8 +141,22 @@ typedef struct tBFACE {
   unsigned innerbound     : 1; // 1 if bface is inner boundary (e.g. horizon)
   unsigned outerbound     : 1; // 1 if bface is outer grid boundary (e.g. infinity)
 } tBface;
-
-
+/* NOTE: ob, ofi, oXi,oYi,oZi are all set to -1 when a bface is allocated with
+   add_empty_bface. 
+   So ofi=-1 means we do not know the other face index yet.
+   In set_ofi_in_all_bfaces of utility/Coordinates/Coordinates_set_bfaces.c
+   we set ofi<-1 if box b OVERLAPS with several faces of box ob. This makes
+   sense, since for overlapping boxes a bface is not in the same place as
+   another bface, so that BCs involve 3d interpolation. In this case we set
+   ofi = -( (1<<(ofi1+1)) | (1<<(ofi2+1)) | ... )
+   so that (assuming int ofi has enough space) each other face index is in
+   one bit of ofi. We also make sure that then ofi<-1 and even.
+   In set_ofi_in_all_bfaces we also set
+   ofi = -( (1<<(ofi1+1)) | (1<<(ofi2+1)) | ... )
+   if a bface of box b TOUCHES several other box faces. BUT this should be
+   avoided!!! When touching, bfaces should be split so that each bface only
+   touches one other bface. We can, after all, have as many bfaces as we
+   want on each boxface. */
 
 
 /**************************************************************************/
