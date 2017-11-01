@@ -153,10 +153,10 @@ typedef struct tBFACE {
    one bit of ofi. We also make sure that then ofi<-1 and even.
    In set_ofi_in_all_bfaces we also set
    ofi = -( (1<<(ofi1+1)) | (1<<(ofi2+1)) | ... )
-   if a bface of box b TOUCHES several other box faces. BUT this should be
-   avoided!!! When touching, bfaces should be split so that each bface only
-   touches one other bface. We can, after all, have as many bfaces as we
-   want on each boxface. */
+   if a bface of box b TOUCHES several bfaces from other boxes. BUT this
+   should be avoided!!! When touching, bfaces should be split so that each
+   bface only touches one other bface. We can, after all, have as many
+   bfaces as we want on each boxface. */
 
 
 /**************************************************************************/
