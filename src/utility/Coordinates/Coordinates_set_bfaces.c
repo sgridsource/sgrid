@@ -451,6 +451,20 @@ int r_from_cbt_OR_nbt(unsigned int cbt, unsigned int nbt)
 }
 
 /* figure out how each bface is connected to other bfaces */
+/* Recall ofi=-1 means we do not know the other face index yet. Here
+   we set ofi<-1 if box b OVERLAPS with several faces of box ob. This makes
+   sense, since for overlapping boxes a bface is not in the same place as
+   any other bface, so that BCs involve 3d interpolation. In this case we set
+   ofi = -( (1<<(ofi1+1)) | (1<<(ofi2+1)) | ... )
+   so that (assuming int ofi has enough space) each other face index is in
+   one bit of ofi. We also make sure that then ofi<-1 and even.
+   If ofi cannot hold all bits we make ofi<-1 and set the LSB in ofi, so
+   that it becomes an odd number.
+   We also set ofi = -( (1<<(ofi1+1)) | (1<<(ofi2+1)) | ... )
+   if a bface of box b TOUCHES several other box faces. BUT this should be
+   avoided!!! When touching, bfaces should be split so that each bface only
+   touches one other bface. We can, after all, have as many bfaces as we
+   want on each boxface. */
 int set_ofi_in_all_bfaces(tGrid *grid)
 {
   int b;
