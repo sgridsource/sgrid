@@ -597,6 +597,8 @@ int set_bits_in_all_bfaces(tGrid *grid)
     for(fi=0; fi<box->nbfaces; fi++)
     {
       tBface *bface = box->bface[fi];
+      int f = bface->f;
+      int dir = 1 + f/2;
       int ob  = bface->ob;
       int ofi = bface->ofi;
       int oXi = bface->oXi;
@@ -617,6 +619,8 @@ int set_bits_in_all_bfaces(tGrid *grid)
       /* other box and corresponding bface */
       obox = grid->box[ob];
       obface = obox->bface[ofi];
+      of = obface->f;
+      od = 1+of/2;
 
       if(obface->ofi < 0) continue; /* nothing if not one face index */
 
@@ -627,8 +631,6 @@ int set_bits_in_all_bfaces(tGrid *grid)
       {
         double bX,bY,bZ;
         int i,j,k, off_face;
-        int f = bface->f;
-        int dir = 1 + f/2;
 
         bface->touch = 1; /* we are touching */
 
@@ -659,39 +661,70 @@ int set_bits_in_all_bfaces(tGrid *grid)
         else                            obface->setnormalderiv = 0;
       }
 
-      /* do nothing if bface->fpts is NULL */
-      if(bface->fpts == NULL) continue;
-
-      /* do nothing if boxes have a different number of grid points */
-      if(box->nnodes != obox->nnodes) continue;
-
-      /* loop over bface, and check which coords agree */
-      oX = obox->v[iX];
-      oY = obox->v[iY];
-      oZ = obox->v[iZ];
-      of = obface->f;
-      od = 1+of/2;
-      sameX = sameY = sameZ = 1;
-      forPointList_inbox(bface->fpts, box, pi, ind)
+      /* set one of bface->sameX/Y/Z to 1, if points are in touching face */
+      sameX = sameY = sameZ = 0;
+      if(dequal(obox->bbox[of], box->bbox[f]))
       {
-        int ok = kOfInd_n1n2(ind, n1,n2);
-        int oj = jOfInd_n1n2_k(ind, n1,n2, ok);
-        int oi = iOfInd_n1n2_jk(ind, n1,n2, oj,ok);
-        int oind;
+        double *C  = box->v[iX+dir-1]; /* coord in direction dir */
+        double *oC = obox->v[iX+od-1]; /* coord in direction od */
+        int i,j,k, oi,oj,ok, ind, oind, same;
 
+        /* find one point index in face f, and in face on other box */
+        i=j=k = oi=oj=ok = 0;
+        if(dir==1)      i = ( (box->n1-1) )*(f%2);
+        else if(dir==2) j = ( (box->n2-1) )*(f%2);
+        else if(dir==3) k = ( (box->n3-1) )*(f%2);
+        ind = Ind_n1n2(i,j,k, box->n1,box->n2);
         if(od==1)      oi = ( (obox->n1-1) )*(of%2);
         else if(od==2) oj = ( (obox->n2-1) )*(of%2);
         else if(od==3) ok = ( (obox->n3-1) )*(of%2);
         oind = Ind_n1n2(oi,oj,ok, obox->n1,obox->n2);
 
-        if( !dequal(oX[oind], X[ind]) ) sameX = 0;
-        if( !dequal(oY[oind], Y[ind]) ) sameY = 0;
-        if( !dequal(oZ[oind], Z[ind]) ) sameZ = 0;
-        if( !(sameX || sameY || sameZ) ) break;
+        /* are the two coords the same? */
+        if( dequal(oC[oind], C[ind]) ) same = 1;
+        else                           same = 0;
+
+        /* save result */
+        if(dir==1)       sameX = same;
+        else if(dir==2)  sameY = same;
+        else             sameZ = same;  /* dir=3 */
       }
       bface->sameX = sameX;
       bface->sameY = sameY;
       bface->sameZ = sameZ;
+
+      /* do nothing if bface->fpts is NULL */
+      if(bface->fpts == NULL) continue;
+
+      /* if both boxes have the same number of points */
+      if(box->nnodes == obox->nnodes)
+      {
+        /* loop over bface, and check which coords agree */
+        oX = obox->v[iX];
+        oY = obox->v[iY];
+        oZ = obox->v[iZ];
+        sameX = sameY = sameZ = 1;
+        forPointList_inbox(bface->fpts, box, pi, ind)
+        {
+          int ok = kOfInd_n1n2(ind, n1,n2);
+          int oj = jOfInd_n1n2_k(ind, n1,n2, ok);
+          int oi = iOfInd_n1n2_jk(ind, n1,n2, oj,ok);
+          int oind;
+
+          if(od==1)      oi = ( (obox->n1-1) )*(of%2);
+          else if(od==2) oj = ( (obox->n2-1) )*(of%2);
+          else if(od==3) ok = ( (obox->n3-1) )*(of%2);
+          oind = Ind_n1n2(oi,oj,ok, obox->n1,obox->n2);
+
+          if( !dequal(oX[oind], X[ind]) ) sameX = 0;
+          if( !dequal(oY[oind], Y[ind]) ) sameY = 0;
+          if( !dequal(oZ[oind], Z[ind]) ) sameZ = 0;
+          if( !(sameX || sameY || sameZ) ) break;
+        }
+        bface->sameX = bface->sameX | sameX;
+        bface->sameY = bface->sameY | sameY;
+        bface->sameZ = bface->sameZ | sameZ;
+      }
     }
   }
 
