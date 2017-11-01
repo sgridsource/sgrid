@@ -461,7 +461,7 @@ int r_from_cbt_OR_nbt(unsigned int cbt, unsigned int nbt)
    If ofi cannot hold all bits we make ofi<-1 and set the LSB in ofi, so
    that it becomes an odd number.
    We also set ofi = -( (1<<(ofi1+1)) | (1<<(ofi2+1)) | ... )
-   if a bface of box b TOUCHES several other box faces. BUT this should be
+   if a bface of box b TOUCHES several other bfaces. BUT this should be
    avoided!!! When touching, bfaces should be split so that each bface only
    touches one other bface. We can, after all, have as many bfaces as we
    want on each boxface. */
