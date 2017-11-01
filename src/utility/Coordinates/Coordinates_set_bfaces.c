@@ -428,6 +428,28 @@ int set_bfaces_on_boxface(tBox *box, int f)
 }
 
 
+/* Basically we compute r = cbt | nbt. But both cbt and nbt are supposed to
+   be greater than 1 unless they overflowed earlier. We also check that the
+   int r can hold cbt | nbt, since they are unsigned int. 
+   If any overflow occurs, r is odd, i.e. its LSB is set.
+   To avoid returning r=1 (e.g. if cbt=nbt=0) we return 3. */
+int r_from_cbt_OR_nbt(unsigned int cbt, unsigned int nbt)
+{
+  int r;
+  unsigned int bt = cbt | nbt;
+  if( cbt==0 || nbt==0 )
+    bt = bt | 1;    /* set LSB in bt to signal one overflow */
+  r = bt;
+  if(r<0) /* overflow in r = bt; */
+  {
+    bt = bt<<1; bt = bt>>1; /* shift left, right to zero MSB */
+    bt = bt | 1;            /* set LSB in bt to signal overflow */
+  }
+  if(bt==1) bt=3; /* make sure bt>1. So bt=3 if total overflow */
+  r = bt;
+  return r;
+}
+
 /* figure out how each bface is connected to other bfaces */
 int set_ofi_in_all_bfaces(tGrid *grid)
 {
@@ -455,19 +477,21 @@ int set_ofi_in_all_bfaces(tGrid *grid)
           else if(box->bface[fi]->ofi >= 0)
           {
             int c = box->bface[fi]->ofi;
-            unsigned int cbt = 1<<(c+1);
+            unsigned int cbt = 1<<(c+1); /* cbt = 2^([current ofi] + 1) */
             int n = ofi;
-            unsigned int nbt = 1<<(n+1);
-            int r = cbt | nbt;
+            unsigned int nbt = 1<<(n+1); /* nbt = 2^([ofi to be added] + 1) */
+            int r = r_from_cbt_OR_nbt(cbt, nbt);
             box->bface[fi]->ofi=-r;
+            /* if ofi<0 and odd there was an overflow in the bits!!! */
           }
           /* if several were there already use bits */
           else
           {
-            unsigned int cbt = -box->bface[fi]->ofi;
-            unsigned int nbt = 1<<(ofi+1);
-            int r = cbt | nbt;
+            unsigned int cbt = -box->bface[fi]->ofi; /* get current bits */
+            unsigned int nbt = 1<<(ofi+1); /* nbt = 2^([ofi to be added] + 1) */
+            int r = r_from_cbt_OR_nbt(cbt, nbt);
             box->bface[fi]->ofi=-r;
+            /* if ofi<0 and odd there was an overflow in the bits!!! */
           }
         } /* end if */
       }/* end ofi loop */
