@@ -83,6 +83,8 @@ int Poisson3_startup(tGrid *grid)
       Chi[i] = 0.9;
       rh1[i] = -exp(-(x*x + y*y + z*z))/sqrtPI3;
       rh2[i] = 0.0;
+      //Psi[i] = 0.5*b + (b+1)*x;
+      //Chi[i] = b - 2*(b+1)*x;
     }
   }
 
@@ -187,7 +189,12 @@ int Poisson3_solve(tGrid *grid)
     Precon=templates_Preconditioner_for_templates_solver;
   else
     errorexit("Poisson3_solve: unknown Poisson3_linSolver_Precon");
-
+/*
+F_Poisson3(VLFu, VLu, VLuAll, VLluAll);
+grid->time=0.5;
+write_grid(grid);
+exit(99);
+*/
   /* call Newton solver */
   Newton(F_Poisson3, J_Poisson3, VLu, VLFu, VLuAll, VLluAll,
          itmax, tol, &normresnonlin, 1,
