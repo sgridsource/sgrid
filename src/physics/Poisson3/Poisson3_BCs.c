@@ -261,7 +261,7 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
         {
           /* we need 2d interpolation because the touching surfaces,
              do not have any points in common */
-          errorexit("fix bface->sameX || bface->sameY || bface->sameZ case!");
+          //errorexit("fix bface->sameX || bface->sameY || bface->sameZ case!");
           int n1 = box->n1;
           int n2 = box->n2;
           int n3 = box->n3;
@@ -286,9 +286,9 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
             dP[1] = obox->v[iPsix]; /* derivs in other box */
             dP[2] = obox->v[iPsiy];
             dP[3] = obox->v[iPsiz];
-            spec_Coeffs_inplaneN(box, odir,op, dP[1], dcoeffs[1]);
-            spec_Coeffs_inplaneN(box, odir,op, dP[2], dcoeffs[2]);
-            spec_Coeffs_inplaneN(box, odir,op, dP[3], dcoeffs[3]);
+            spec_Coeffs_inplaneN(obox, odir,op, dP[1], dcoeffs[1]);
+            spec_Coeffs_inplaneN(obox, odir,op, dP[2], dcoeffs[2]);
+            spec_Coeffs_inplaneN(obox, odir,op, dP[3], dcoeffs[3]);
 
             forPointList_inbox(bface->fpts, box, pi, ind)
             {
