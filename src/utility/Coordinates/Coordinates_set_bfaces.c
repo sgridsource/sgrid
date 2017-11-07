@@ -768,3 +768,118 @@ int set_bits_in_all_bfaces(tGrid *grid)
 
   return 0;
 }
+
+
+/* set bface info for interior faces of the nb boxes (starting at b0) 
+   arranged into a touch pattern, e.g. the 6 boxes in a cubed sphere */
+int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int nb)
+{
+  int ifaces=0;
+  int b, b2, f, fi, fi2, dir, dir2, pl, pl2, i,j,k;
+  double rmin;
+
+  /* loop over nb boxes */
+  for(b=0; b<nb; b++)
+  {
+    tBox *box = grid->box[b0+b];
+    free_all_bfaces(box);
+    /* add one bface per face */
+    for(f=0; f<6; f++) add_empty_bface(box, f);
+  }
+
+  /* loop over nb boxes */
+  for(b=0; b<nb; b++)
+  {
+    tBox *box = grid->box[b0+b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+
+    /* loop over other boxes */
+    for(b2=0; b2<nb; b2++)
+    {
+      tBox *box2 = grid->box[b0+b2];
+      if(b2==b) continue; /* skip b */
+
+      /* loop over faces of box */
+      for(fi=0; fi<box->nbfaces; fi++)
+      {
+        tBface *bface  = box->bface[fi];
+
+        /* do nothing if we know other box already */
+        if(bface->ob >= 0) continue;
+
+        /* loop over faces of box2 */
+        for(fi2=0; fi2<box2->nbfaces; fi2++)
+        {
+          tBface *bface2 = box2->bface[fi2];
+
+          /* get durection and plane of both bfaces */
+          dir = fi/2 + 1;
+          if(dir==1)      pl=(fi%2)*n1;
+          else if(dir==2) pl=(fi%2)*n2;
+          else            pl=(fi%2)*n3; /* (dir==3) */
+          dir2 = fi2/2 + 1;
+          if(dir2==1)      pl2=(fi2%2)*box2->n1;
+          else if(dir2==2) pl2=(fi2%2)*box2->n2;
+          else             pl2=(fi2%2)*box2->n3; /* (dir==3) */
+
+          /* go over plane of fi */
+          forplaneN(dir, i,j,k, n1,n2,n3, pl)
+          {
+            int ind, ind2;
+            int iX = Ind("X");
+            double *pX = box->v[iX];
+            double *pY = box->v[iX+1];
+            double *pZ = box->v[iX+2];
+            double X,Y,Z, x,y,z;
+
+            /* find index of point and add it to bface->fpts */
+            ind = Index(i,j,k);
+            add_point_to_bface_inbox(box, fi, ind, fi);
+
+            /* get x,y,z of each point */
+            X = pX[ind];
+            Y = pY[ind];
+            Z = pZ[ind];
+            x = box->x_of_X[1]((void *) box, -1, X,Y,Z);
+            y = box->x_of_X[2]((void *) box, -1, X,Y,Z);
+            z = box->x_of_X[3]((void *) box, -1, X,Y,Z);
+            
+            /* check if there is also a point in plane of fi2 */
+            rmin = nearestXYZ_of_xyz_inplane(box2, &ind2,&X,&Y,&Z, x,y,z, dir2, pl2);
+            if(dequal(rmin,0.0))
+              add_point_to_bface_inbox(box2, fi2, ind2, fi2);
+          }
+
+          /* check if there are the same number of points in both fpts */
+          if(bface->fpts->npoints == bface2->fpts->npoints)
+          {
+            ifaces++; /* count the number of interfaces */
+
+            /* We found 2 exactly matching bfaces. Mark them */
+            bface->ob = b0+b2;
+            bface->ofi = fi2;
+            bface->touch = 1;
+            bface->same_fpts = 1;
+
+            bface2->ob = b0+b;
+            bface2->ofi = fi;
+            bface2->touch = 1;
+            bface2->same_fpts = 1;
+
+            /* should we set fields or their nomral derivs? */
+            if(bface->setnormalderiv == 0)  bface2->setnormalderiv = 1;
+            else                            bface2->setnormalderiv = 0;
+          }
+          else
+          {
+            FreePointList(bface->fpts);
+            FreePointList(bface2->fpts);
+          }
+        } /* fi2 loop */
+      }
+    } /* b2 loop */
+  }  /* b loop */
+  return ifaces;
+}
