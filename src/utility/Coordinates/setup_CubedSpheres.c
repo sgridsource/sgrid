@@ -9,17 +9,36 @@
 /* convert 6 boxes starting with b0 to some kind of cubed spheres */
 /* call this after all boxes exist already, so at POST_GRID */
 /* type can be "PyramidFrustum", "innerCubedSphere", "outerCubedSphere",
-   "CubedShell 
+   "CubedShell"
    It returns the index of the box right after the last converted box */
-int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, char *type,
+int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
                                   double *xc, double din, double dout)
 {
   int i;
   char par[1000];
   char val[1000];
+  char name[1000];
 
   if(b0+6 > grid->nboxes)
     errorexit("convert_6boxes_to_CubedSphere: nboxes is too small");
+
+  switch(type)
+  {
+    case PyramidFrustum:
+      snprintf(name, 999, "%s", "PyramidFrustum");  break;
+    
+    case innerCubedSphere:
+      snprintf(name, 999, "%s", "innerCubedSphere");  break;
+  
+    case outerCubedSphere:
+      snprintf(name, 999, "%s", "outerCubedSphere");  break;
+  
+    case CubedShell:
+      snprintf(name, 999, "%s", "CubedShell");  break;
+
+    default:
+      errorexit("convert_6boxes_to_CubedSphere: unkonwn type");
+  }
 
   /* set box pars */
   for(i=0; i<6; i++)
@@ -28,7 +47,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, char *type,
     int d;
     /* set coord type */
     snprintf(par, 999, "box%d_Coordinates", b0+i);
-    snprintf(val, 999, "%s%d", type,i);
+    snprintf(val, 999, "%s", name);
     Sets(par, val);
     /* set basis and min/max in each direction */
     for(d=1; d<=3; d++)
@@ -50,6 +69,10 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, char *type,
     /* set inner and outer distance from center */
     box->CI->s[0] = din;
     box->CI->s[1] = dout;
+
+    /* set domain index and type */
+    box->CI->dom = i;
+    box->CI->type= type;
 
     /* erase all bface info in this box */
     free_all_bfaces(box);
@@ -121,9 +144,9 @@ int arrange_12CubSph_into_empty_cube(tGrid *grid, int b0, double *xc,
                                      double din, double dmid, double dout)
 {
   int bl=b0;
-  bl = convert_6boxes_to_CubedSphere(grid, bl, "outerCubedSphere",
+  bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,
                                      xc, din,dmid);
-  bl = convert_6boxes_to_CubedSphere(grid, bl, "innerCubedSphere",
+  bl = convert_6boxes_to_CubedSphere(grid, bl, innerCubedSphere,
                                      xc, dmid,dout);
   return bl;
 }

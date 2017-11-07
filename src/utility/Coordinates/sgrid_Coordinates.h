@@ -4,6 +4,17 @@
 #include "Coordinates.h"
 
 
+/* For coordtrans_CubedSphere.c :
+   Type of cubed sphere or rather sphered cube coord transform */
+enum
+{
+  PyramidFrustum,   /* both inner & outer surfaces are flat */  
+  innerCubedSphere, /* inner surface is curved, but outer surface is flat */
+  outerCubedSphere, /* outer surface is curved, but inner surface is flat */
+  CubedShell        /* both inner & outer surfaces are curved */
+};
+
+
 /* Coordinates.c */
 int init_CoordTransform_And_Derivs(tGrid *grid);
 int compute_xyz_dXYZdxyz_ddXYZddxyz(tGrid *grid);
