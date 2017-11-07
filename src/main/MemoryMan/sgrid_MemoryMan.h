@@ -18,6 +18,14 @@ typedef struct tSINGINFO {
 } tSingInfo;
 
 
+/* struct that contains info that helps with coord trafo */
+typedef struct tCOORDINFO {
+  int iSurf[6];       /* surface var index, e.g. Surf[0]=sigma in AnsorgNS */
+  int idSurfdX[6][4]; /* index of derivs of surface var, dSurfdX[0][1]=dSurf[0]/dX */
+  double s[6];        /* some values, e.g. value of surface var in case it is const */
+  double xc[4];       /* xc[1..3] = (x,y,z) of coord center for this box */
+} tCoordInfo;
+
 /*************************************************************************/
 /* basic structures */
 
@@ -44,11 +52,13 @@ typedef struct tBOX {
   double *DD2;		/* diff. matrix for two derivs in direction 2 */
   double *DD3;		/* diff. matrix for two derivs in direction 3 */
   double (*x_of_X[4])(void *aux, int ind, double X, double Y, double Z);	    /* func to compute x from X */
+  double (*X_of_x[4])(void *aux, int ind, double x, double y, double z);	    /* func to compute X from x */
   double (*dX_dx[4][4])(void *aux, int ind, double X, double Y, double Z);	    /* dX_l_{spec}/dx_m_{cart} */
   void (*Sing_d_dx[4])(void *aux, void *v, void *v1, void *v2, void *v3);  /* func to compute d/dx_m_{cart} at singular points */
   double (*ddX_dxdx[4][4][4])(void *aux, int ind, double X, double Y, double Z); /* d^2X_l_{spec}/(dx_m_{cart} dx_n_{cart}) */
   double (*dx_dX[4][4])(void *aux, int ind, double X, double Y, double Z);	    /* dX_l_{cart}/dx_m_{spec} */
   int (*isSing)(void *aux, double X, double Y, double Z, int update, tSingInfo *si); /* indicates if there is a sing. at X,Y,Z */
+  tCoordInfo CI[1];     /* info about coords, access e.g. as: box->CI->xc[1] */
   double *F1;		/* filter matrix for direction 1 */
   double *F2;		/* filter matrix for direction 2 */
   double *F3;		/* filter matrix for direction 3 */
@@ -132,11 +142,12 @@ typedef struct tBFACE {
   int ob;          // ind. of other box that touches or overlaps, -1 if none
   int ofi;         // face index of other box (if they are touching)
   int oXi,oYi,oZi; // ind of vars in this box that contain coords in other box
-  unsigned fpts_off_face  : 1; // 1 if points in fpts are not in face (e.g. ChebZeros)
   unsigned touch          : 1; // 1 if tBface only touches other face
   unsigned sameX          : 1; // 1 if X-coord of points in neighboring faces is same
   unsigned sameY          : 1; // 1 if Y-ccord of points in neighboring faces is same
   unsigned sameZ          : 1; // 1 if Z-ccord of points in neighboring faces is same
+  unsigned same_fpts      : 1; // 1 if point i in fpts is same as point i in other fpts
+  unsigned fpts_off_face  : 1; // 1 if points in fpts are not in face (e.g. ChebZeros)
   unsigned setnormalderiv : 1; // 1 if we set normal derivs of field and not field itself
   unsigned innerbound     : 1; // 1 if bface is inner boundary (e.g. horizon)
   unsigned outerbound     : 1; // 1 if bface is outer grid boundary (e.g. infinity)
