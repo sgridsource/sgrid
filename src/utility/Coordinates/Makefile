@@ -8,7 +8,7 @@ OBJS := sgrid_$(NAME).o $(NAME).o cartesianDerivs.o doubleCovering.o\
 	coordtrans_AnsorgNS0.o coordtrans_AnsorgNS1.o\
 	coordtrans_AnsorgNS2.o coordtrans_AnsorgNS3.o\
 	coordtrans_Bfunc.o Coordinates_set_bfaces.o Singularities.o\
-	coordtrans_CubedSphere.o
+	coordtrans_CubedSphere.o setup_CubedSpheres.o
 
 include $(TOP)/Makefile.subdirs
 

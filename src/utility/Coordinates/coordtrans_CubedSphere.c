@@ -3,6 +3,7 @@
 /* transformations for cubed spheres which really are sphered cubes */
 
 #include "sgrid.h"
+#include "Coordinates.h"
 
 /*
 We only show domains 0-3. Domains 4 and 5 are in z-dir and are not shown here:

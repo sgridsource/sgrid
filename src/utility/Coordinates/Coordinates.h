@@ -607,3 +607,7 @@ double  ddz_dAdp_IAnsorgNS3(void *aux, int ind, double A, double B, double phi);
 double  ddz_dBdB_IAnsorgNS3(void *aux, int ind, double A, double B, double phi);
 double  ddz_dBdp_IAnsorgNS3(void *aux, int ind, double A, double B, double phi);
 double  ddz_dpdp_IAnsorgNS3(void *aux, int ind, double A, double B, double phi);
+
+/* from coordtrans_CubedSphere.c */
+double   x_of_PyraFrust0(void *aux, int ind, double lam, double A, double B);
+// and many more ...
