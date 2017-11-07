@@ -336,6 +336,9 @@ int initialize_grid(tGrid *g)
     printf("Initializing grid\n");
   }
 
+  /* setup coords in each box using parameters */
+  RunFun(COORDINATES, g); 
+
   /* some things need to be done before initial data */
   RunFun(PRE_INITIALDATA, g); 
 
