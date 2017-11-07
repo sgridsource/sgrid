@@ -103,3 +103,8 @@ int Coordinates_set_bfaces(tGrid *grid);
 int set_ofi_in_all_bfaces(tGrid *grid);
 int set_bits_in_all_bfaces(tGrid *grid);
 int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int nb);
+
+/* from setup_CubedSpheres.c */
+int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
+                                  double din1, double dmid1,
+                                  double din2, double dmid2);

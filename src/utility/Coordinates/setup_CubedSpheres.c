@@ -121,8 +121,10 @@ int arrange_12CubSph_into_empty_cube(tGrid *grid, int b0, double *xc,
                                      double din, double dmid, double dout)
 {
   int bl=b0;
-  bl = convert_6boxes_to_CubSph(grid, bl, "outerCubedSphere", xc, din,dmid);
-  bl = convert_6boxes_to_CubSph(grid, bl, "innerCubedSphere", xc, dmid,dout);
+  bl = convert_6boxes_to_CubedSphere(grid, bl, "outerCubedSphere",
+                                     xc, din,dmid);
+  bl = convert_6boxes_to_CubedSphere(grid, bl, "innerCubedSphere",
+                                     xc, dmid,dout);
   return bl;
 }
 
@@ -149,7 +151,7 @@ int arrange_1box12CubSph_into_full_cube(tGrid *grid, int b0, double *xc,
    | /      \ | /      \ |
    |/________\|/________\|
 */
-int two_full_cubes_touching_at_x0(tGrid *grid, int b0, int dc,
+int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
                                   double din1, double dmid1,
                                   double din2, double dmid2)
 {
