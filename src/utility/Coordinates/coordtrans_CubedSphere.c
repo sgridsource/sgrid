@@ -1,4 +1,4 @@
-/* coordtrans_CubSph.c */
+/* coordtrans_CubedSphere.c */
 /* Wolfgang Tichy, Nov 2017 */
 /* transformations for cubed spheres which really are sphered cubes */
 
