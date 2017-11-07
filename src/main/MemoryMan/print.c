@@ -46,6 +46,13 @@ void printnode(tNode *n)
   printf("\n");
 }
 
+void printCI(tBox *box)
+{
+  tCoordInfo *CI = box->CI;
+  printf("b%d: CI->dom=%d CI->type=%d\n", box->b, CI->dom, CI->type);
+}
+
+
 void printbface(tBface *bface)
 {
   int np;
