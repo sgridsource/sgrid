@@ -7,22 +7,22 @@
 /*
 We only show domains 0-3. Domains 4 and 5 are in z-dir and are not shown here:
 
-    1 excised cube    1 excised sphere   1 excised cube
-    in the middle     in the middle      in the middle
-    cubical outside   cubical outside    spheroidal outside
+    1 excised cube    1 excised sphere   1 excised cube       spheroidal
+    on the inside     on the inside      on the inside        inside and 
+    cubical outside   cubical outside    spheroidal outside   outside
 y                                              ____
  ^                                           _/    \_ 
- |    ________          ________            /        \
- |   |\  3   /|        |\  3   /|          / \  3   / \
- |   | \ __ / |        | \ __ / |         /   \ __ /   \
- |   |0 |  | 1|        |0 /  \ 1|        |  0  |  |  1  |
- |   |  |__|  |        |  \__/  |        |     |__|     |
- |   | / 2  \ |        | / 2  \ |         \   /    \   /
+ |    ________          ________            /        \            __
+ |   |\  3   /|        |\  3   /|          / \  3   / \          /3 \
+ |   | \ __ / |        | \ __ / |         /   \ __ /   \        /\  /\
+ |   |0 |  | 1|        |0 /  \ 1|        |  0  |  |  1  |      |0 () 1|
+ |   |  |__|  |        |  \__/  |        |     |__|     |       \/2 \/
+ |   | / 2  \ |        | / 2  \ |         \   /    \   /         \__/
  |   |/______\|        |/______\|          \ /  2   \ /
- |                                          \_      _/
- |                                            \____/ 
--|------------------------------------------------------------> x
-       FLAT              CURV0                 CURV1
+ |                                          \_      _/  domain size
+ |                                            \____/    is arbitrary
+-|-----------------------------------------------------------------------> x
+        FLAT             CURV0                 CURV1             CURV2
 */
 
 /* Type of cubed sphere or rather sphered cube coord transform */
@@ -31,6 +31,7 @@ enum
   FLAT,     /* both inner & outer surfaces are flat */  
   CURV0,    /* inner surface is curved, but outer surface is flat */
   CURV1,    /* outer surface is curved, but inner surface is flat */
+  CURV2     /* both inner & outer surfaces are curved */
 };
 
 
@@ -41,7 +42,7 @@ void xyz_of_lamAB_SphCube(tBox *box, int ind, int domain, int type,
                           double *x, double *y, double *z)
 {
   int dir, p;
-  double pm, xc,yc,zc, a0,a1, sigma;
+  double pm, xc,yc,zc, a0,a1, sigma0,sigma1;
 
   /* get direction, pm, and center */
   dir = domain/2 + 1;
@@ -62,17 +63,26 @@ void xyz_of_lamAB_SphCube(tBox *box, int ind, int domain, int type,
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
-    a0 = pm * sigma/sqrt(1.0 + A*A + B*B);
+    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    a0 = pm * sigma0/sqrt(1.0 + A*A + B*B);
     a1 = pm * box->CI->s[1];
   }
   else if(type==CURV1)
   {
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
-    sigma = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
     a0 = pm * box->CI->s[0];
-    a1 = pm * sigma/sqrt(1.0 + A*A + B*B);
+    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    a1 = pm * sigma1/sqrt(1.0 + A*A + B*B);
+  }
+  else if(type==CURV2)
+  {
+    /* this gives a cubed sphere piece where the outer surface is curved
+       and the inner one is flat */
+    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    a0 = pm * sigma0/sqrt(1.0 + A*A + B*B);
+    a1 = pm * sigma1/sqrt(1.0 + A*A + B*B);
   }
   else errorexit("unknown type");
 
