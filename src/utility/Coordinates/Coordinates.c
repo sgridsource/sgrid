@@ -667,6 +667,17 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dx_dX[3][2] = dz_dB_IAnsorgNS3;
       box->dx_dX[3][3] = dz_dp_IAnsorgNS3;
     }
+    else if( Getv(str, "PyramidFrustum") ||
+             Getv(str, "innerCubedSphere") ||
+             Getv(str, "outerCubedSphere") ||
+             Getv(str, "CubedShell") )
+    {
+      if(pr) printf("Coordinates: initializing CubedSphere coordinates...\n");
+      if(pr) printCI(box);
+      box->x_of_X[1] = x_of_CubedSphere;
+      box->x_of_X[2] = y_of_CubedSphere;
+      box->x_of_X[3] = z_of_CubedSphere;
+    }
     else
       errorexit("Coordinates: unknown coordinates...");
 

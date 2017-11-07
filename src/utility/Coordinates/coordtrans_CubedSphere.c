@@ -127,9 +127,9 @@ void dlamAB_dxyz_SphCube(tBox *box, int ind, int domain,
 #define RET_z CALL_xyz_of_lamAB_CubSph; return z
 
 /* Coord. trafos of for Cubed Spheres */
-double   x_of_CubedSphere(void *aux, int ind, double lam, double A, double B)
+double x_of_CubedSphere(void *aux, int ind, double lam, double A, double B)
 { RET_x; }
-double   y_of_CubedSphere(void *aux, int ind, double lam, double A, double B)
+double y_of_CubedSphere(void *aux, int ind, double lam, double A, double B)
 { RET_y; }
-double   z_of_CubedSphere(void *aux, int ind, double lam, double A, double B)
+double z_of_CubedSphere(void *aux, int ind, double lam, double A, double B)
 { RET_z; }
