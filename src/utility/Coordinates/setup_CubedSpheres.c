@@ -174,7 +174,10 @@ int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
   //....
   // do all faces have common points??? Assume this next:              
   /* all faces are touching and have the same points */
-  set_touching_bfaces_of_boxes_with_same_facepoints(grid, b0, bl-b0);
+  //set_touching_bfaces_of_boxes_with_same_facepoints(grid, b0, bl-b0);
+
+  /* do not set bface info yet, because this is likely called before
+     init_CoordTransform_And_Derivs */
 
   return bl;
 }
