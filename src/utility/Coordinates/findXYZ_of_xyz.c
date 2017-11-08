@@ -492,8 +492,7 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
   int n3 = box->n3;
   double dx, dy, dz, r, rmin=-1.0;
 
-  if(box->x_of_X[1]==NULL)
-    errorexit("nearestXYZ_of_xyz_inplane: box->x_of_X[1] = NULL");
+  if(px==NULL) errorexit("nearestXYZ_of_xyz_inplane: px=NULL");
 
   if(plane==1)
     forplane1(i,j,k, n1,n2,n3, pind)
