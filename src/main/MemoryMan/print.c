@@ -49,7 +49,18 @@ void printnode(tNode *n)
 void printCI(tBox *box)
 {
   tCoordInfo *CI = box->CI;
+  int i;
+
   printf("b%d: CI->dom=%d CI->type=%d\n", box->b, CI->dom, CI->type);
+  printf("CI->iSurf[] = [ ");
+  for(i=0;i<6;i++) printf("%d ", CI->iSurf[i]);
+  printf("]\n");
+  printf("CI->s[] = [ ");
+  for(i=0;i<6;i++) printf("%g ", CI->s[i]);
+  printf("]\n");
+  printf("CI->xc[] = [ ");
+  for(i=0;i<4;i++) printf("%g ", CI->xc[i]);
+  printf("]\n");
 }
 
 
