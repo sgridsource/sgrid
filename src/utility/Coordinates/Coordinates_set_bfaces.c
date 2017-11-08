@@ -842,10 +842,17 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
             X = pX[ind];
             Y = pY[ind];
             Z = pZ[ind];
-            x = box->x_of_X[1]((void *) box, -1, X,Y,Z);
-            y = box->x_of_X[2]((void *) box, -1, X,Y,Z);
-            z = box->x_of_X[3]((void *) box, -1, X,Y,Z);
-            
+            if(box->x_of_X[1]!=NULL)
+            {
+              x = box->x_of_X[1]((void *) box, -1, X,Y,Z);
+              y = box->x_of_X[2]((void *) box, -1, X,Y,Z);
+              z = box->x_of_X[3]((void *) box, -1, X,Y,Z);
+            }
+            else /* assume X,Y,Z are Cartesian */
+            {
+              x=X; y=Y; z=Z;
+            }
+
             /* check if there is also a point in plane of fi2 */
             rmin = nearestXYZ_of_xyz_inplane(box2, &ind2,&X,&Y,&Z, x,y,z, dir2, pl2);
             if(dequal(rmin,0.0))
@@ -853,7 +860,8 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
           }
 
           /* check if there are the same number of points in both fpts */
-          if(bface->fpts->npoints == bface2->fpts->npoints)
+          if(bface2->fpts != NULL)
+          if(bface->fpts->npoints[0] == bface2->fpts->npoints[0])
           {
             ifaces++; /* count the number of interfaces */
 
