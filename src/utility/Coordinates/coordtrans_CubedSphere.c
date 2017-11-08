@@ -41,7 +41,7 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
   int domain = box->CI->dom;  /* get domain and type info from box */
   int type = box->CI->type;
   int dir, p;
-  double pm, xc,yc,zc, a0,a1, sigma0,sigma1;
+  double pm, dx,dy,dz, xc,yc,zc, a0,a1, sigma0,sigma1;
 
   /* get direction, pm, and center */
   dir = domain/2 + 1;
@@ -87,22 +87,25 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
 
   /* compute coord trafo for each domain */
   if(dir==1)
-  { /* lam = (x-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc) */
-    *x = (a1-a0)*lam + a0;
-    *y = yc + A * (*x-xc);
-    *z = zc + B * (*x-xc);
+  { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc) */
+    dx = (a1-a0)*lam + a0;
+    *x = xc + dx;
+    *y = yc + A*dx;
+    *z = zc + B*dx;
   }
   else if(dir==2)
   {
-    *y = (a1-a0)*lam + a0;
-    *x = xc + A * (*y-yc);
-    *z = zc + B * (*y-yc);
+    dy = (a1-a0)*lam + a0;
+    *y = yc + dy;
+    *x = xc + A*dy;
+    *z = zc + B*dy;
   }
   else /* dir==3 */
   {
-    *z = (a1-a0)*lam + a0;
-    *y = yc + A * (*z-zc);
-    *x = xc + B * (*z-zc);
+    dz = (a1-a0)*lam + a0;
+    *z = zc + dz;
+    *y = yc + A*dz;
+    *x = xc + B*dz;
   }
 }
 
