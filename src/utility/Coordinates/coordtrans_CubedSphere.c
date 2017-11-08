@@ -41,7 +41,7 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
   int domain = box->CI->dom;  /* get domain and type info from box */
   int type = box->CI->type;
   int dir, p;
-  double pm, dx,dy,dz, xc,yc,zc, a0,a1, sigma0,sigma1;
+  double pm, rx,ry,rz, xc,yc,zc, a0,a1, sigma0,sigma1;
   double sqrt_1_A2_B2 = sqrt(1.0 + A*A + B*B);
 
   /* get direction, pm, and center */
@@ -89,24 +89,24 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
   /* compute coord trafo for each domain */
   if(dir==1)
   { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc) */
-    dx = (a1-a0)*lam + a0;
-    *x = xc + dx;
-    *y = yc + A*dx;
-    *z = zc + B*dx;
+    rx = (a1-a0)*lam + a0;
+    *x = xc + rx;
+    *y = yc + A*rx;
+    *z = zc + B*rx;
   }
   else if(dir==2)
   {
-    dy = (a1-a0)*lam + a0;
-    *y = yc + dy;
-    *x = xc + A*dy;
-    *z = zc + B*dy;
+    ry = (a1-a0)*lam + a0;
+    *y = yc + ry;
+    *x = xc + A*ry;
+    *z = zc + B*ry;
   }
   else /* dir==3 */
   {
-    dz = (a1-a0)*lam + a0;
-    *z = zc + dz;
-    *y = yc + A*dz;
-    *x = xc + B*dz;
+    rz = (a1-a0)*lam + a0;
+    *z = zc + rz;
+    *y = yc + A*rz;
+    *x = xc + B*rz;
   }
 }
 
@@ -118,7 +118,7 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   int domain = box->CI->dom;  /* get domain and type info from box */
   int type = box->CI->type;
   int dir, p;
-  double pm, dx,dy,dz,dr, xc,yc,zc, a0,a1, sigma0,sigma1;
+  double pm, rx,ry,rz,rc, xc,yc,zc, a0,a1, sigma0,sigma1;
   double sqrt_1_A2_B2;
 
   /* get direction, pm, and center */
@@ -130,13 +130,13 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   zc = box->CI->xc[3];
 
   /* get d=istance from center, and sqrt_1_A2_B2 */
-  dx = x-xc;
-  dy = y-yc;
-  dz = z-zc;
-  dr = sqrt(dx*dx + dy*dy + dz*dz);
-  if(dir==1)       sqrt_1_A2_B2 = fabs(dx)/dr;
-  else if(dir==2)  sqrt_1_A2_B2 = fabs(dy)/dr;
-  else             sqrt_1_A2_B2 = fabs(dz)/dr;
+  rx = x-xc;
+  ry = y-yc;
+  rz = z-zc;
+  rc = sqrt(rx*rx + ry*ry + rz*rz);
+  if(dir==1)       sqrt_1_A2_B2 = fabs(rx)/rc;
+  else if(dir==2)  sqrt_1_A2_B2 = fabs(ry)/rc;
+  else             sqrt_1_A2_B2 = fabs(rz)/rc;
 
   /* check type of trafo */
   if(type==PyramidFrustum)
@@ -175,36 +175,171 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   /* compute coord trafo for each domain */
   if(dir==1)
   { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc)
-       (1 + A^2 + B^2) dx^2 = dx^2 + dy^2 + dz^2
-       1/sqrt(1 + A^2 + B^2) = |dx|/sqrt(dx^2 + dy^2 + dz^2) = |dx|/dr */
-    *lam = (dx-a0)/(a1-a0);
-    *A   = dy/dx;
-    *B   = dz/dx;
+       (1 + A^2 + B^2) rx^2 = rx^2 + ry^2 + rz^2
+       1/sqrt(1 + A^2 + B^2) = |rx|/sqrt(rx^2 + ry^2 + rz^2) = |rx|/rc */
+    *lam = (rx-a0)/(a1-a0);
+    *A   = ry/rx;
+    *B   = rz/rx;
   }
   else if(dir==2)
   {
-    *lam = (dy-a0)/(a1-a0); 
-    *A   = dx/dy;
-    *B   = dz/dy;
+    *lam = (ry-a0)/(a1-a0); 
+    *A   = rx/ry;
+    *B   = rz/ry;
   }
   else /* dir==3 */
   {
-    *lam = (dz-a0)/(a1-a0);
-    *A   = dy/dz;
-    *B   = dx/dz;
+    *lam = (rz-a0)/(a1-a0);
+    *A   = ry/rz;
+    *B   = rx/rz;
   }
 }
 
-
-void dlamAB_dxyz_SphCube(tBox *box, int ind, int domain,
-                         double lam, double A, double B, 
-                         double *x, double *y, double *z,
-                         double *dlamdx, double *dlamdy, double *dlamdz,
-                         double *dAdx,   double *dAdy,   double *dAdz,
-                         double *dBdx,   double *dBdy,   double *dBdz)
+/* compute derivs of inverse trafo */
+void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B, 
+                        double *x, double *y, double *z,
+                        double *dlamdx, double *dlamdy, double *dlamdz,
+                        double *dAdx,   double *dAdy,   double *dAdz,
+                        double *dBdx,   double *dBdy,   double *dBdz)
 {
-}
+  int domain = box->CI->dom;  /* get domain and type info from box */
+  int type = box->CI->type;
+  int dir, p;
+  double pm, rx,ry,rz, rc2, xc,yc,zc, a0,a1, sigma0,sigma1;
+  double sqrt_1_A2_B2 = sqrt(1.0 + A*A + B*B);
+  double da0_dx,da0_dy,da0_dz, da1_dx,da1_dy,da1_dz;
 
+  /* get direction, pm, and center */
+  dir = domain/2 + 1;
+  p  = 2*(domain%2) - 1; /* p  = +/- 1 */
+  pm = p;                /* pm = +/- 1.0 */
+  xc = box->CI->xc[1];
+  yc = box->CI->xc[2];
+  zc = box->CI->xc[3];
+
+  /* check type of trafo */
+  if(type==PyramidFrustum)
+  {
+    /* this gives a pyramid frustum */
+    a0 = pm * box->CI->s[0];
+    a1 = pm * box->CI->s[1];
+    da0_dx = 0.0;
+    da1_dx = 0.0;
+  }
+  else if(type==innerCubedSphere)
+  {
+    /* this gives a cubed sphere piece where the inner surface is curved
+       and the outer surface is flat */
+    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    a0 = pm * sigma0/sqrt_1_A2_B2;
+    a1 = pm * box->CI->s[1];
+    da0_dx = a0;  /* mark as non-zero */
+    da1_dx = 0.0;
+  }
+  else if(type==outerCubedSphere)
+  {
+    /* this gives a cubed sphere piece where the outer surface is curved
+       and the inner one is flat */
+    a0 = pm * box->CI->s[0];
+    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    a1 = pm * sigma1/sqrt_1_A2_B2;
+    da0_dx = 0.0;
+    da1_dx = a1;  /* mark as non-zero */
+  }
+  else if(type==CubedShell)
+  {
+    /* this gives a cubed sphere piece where the outer surface is curved
+       and the inner one is flat */
+    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    a0 = pm * sigma0/sqrt_1_A2_B2;
+    a1 = pm * sigma1/sqrt_1_A2_B2;
+    da0_dx = a0; /* mark as non-zero */
+    da1_dx = a1; /* mark as non-zero */
+  }
+  else errorexit("unknown type");
+
+  /* compute coord trafo for each domain */
+  if(dir==1)
+  { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc)
+       (1 + A^2 + B^2) rx^2 = rx^2 + ry^2 + rz^2
+       1/sqrt(1 + A^2 + B^2) = |rx|/sqrt(rx^2 + ry^2 + rz^2) = |rx|/rc */
+    rx = (a1-a0)*lam + a0;
+    *x = xc + rx;
+    *y = yc + A*rx;
+    *z = zc + B*rx;
+    ry = *y-yc;
+    rz = *z-zc;
+    rc2= (rx*rx + ry*ry + rz*rz);
+    /* da0_dx = (1/rx - rx/rc^2)*a0 */
+    da0_dx *= (1.0/rx - rx/rc2);
+    da0_dy *= (       - ry/rc2);
+    da0_dz *= (       - rz/rc2);
+    /* lam = (rx-a0)/(a1-a0);
+       A   = ry/rx;
+       B   = rz/rx;
+       lam = (rx-a0(x,y,z))/(a1(x,y,z)-a0(x,y,z)) */
+    *dlamdx = (1.0 - da0_dx -(da1_dx-da0_dx)*lam)/(a1-a0);
+    *dlamdy = (    - da0_dy -(da1_dy-da0_dy)*lam)/(a1-a0);
+    *dlamdy = (    - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
+    *dAdx = -ry/(rx*rx);
+    *dAdy = (rx-ry)/(rx*rx);
+    *dAdz = 0.0;
+    *dBdx = -rz/(rx*rx);
+    *dBdy = 0.0;
+    *dBdz = (rx-rz)/(rx*rx);
+  }
+  else if(dir==2)
+  {
+    ry = (a1-a0)*lam + a0;
+    *y = yc + ry;
+    *x = xc + A*ry;
+    *z = zc + B*ry;
+    rx = *x-xc;
+    rz = *z-zc;
+    rc2= (rx*rx + ry*ry + rz*rz);
+    da0_dx *= (       - rx/rc2);
+    da0_dy *= (1.0/ry - ry/rc2);
+    da0_dz *= (       - rz/rc2);
+    /* lam = (ry-a0)/(a1-a0); 
+       A   = rx/ry;
+       B   = rz/ry; */
+    *dlamdx = (    - da0_dx -(da1_dx-da0_dx)*lam)/(a1-a0);
+    *dlamdy = (1.0 - da0_dy -(da1_dy-da0_dy)*lam)/(a1-a0);
+    *dlamdy = (    - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
+    *dAdx = (ry-rx)/(ry*ry);
+    *dAdy = -rx/(ry*ry);
+    *dAdz = 0.0;
+    *dBdx = 0.0;
+    *dBdy = -rz/(ry*ry);
+    *dBdz = (ry-rz)/(ry*ry);
+  }
+  else /* dir==3 */
+  {
+    rz = (a1-a0)*lam + a0;
+    *z = zc + rz;
+    *y = yc + A*rz;
+    *x = xc + B*rz;
+    rx = *x-xc;
+    ry = *y-yc;
+    rc2= (rx*rx + ry*ry + rz*rz);
+    da0_dx *= (       - rx/rc2);
+    da0_dy *= (       - ry/rc2);
+    da0_dz *= (1.0/rz - rz/rc2);
+    /* lam = (rz-a0)/(a1-a0);
+       A   = ry/rz;
+       B   = rx/rz; */
+    *dlamdx = (    - da0_dx -(da1_dx-da0_dx)*lam)/(a1-a0);
+    *dlamdy = (    - da0_dy -(da1_dy-da0_dy)*lam)/(a1-a0);
+    *dlamdy = (1.0 - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
+    *dAdx = 0.0;
+    *dAdy = (rz-ry)/(rz*rz);
+    *dAdz = -ry/(rz*rz);
+    *dBdx = (rz-rx)/(rz*rz);
+    *dBdy = 0.0;
+    *dBdz = -rx/(rz*rz);
+  }
+}
 
 
 #define CALL_xyz_of_lamAB_CubSph \
@@ -222,3 +357,42 @@ double y_of_CubedSphere(void *aux, int ind, double lam, double A, double B)
 { RET_y; }
 double z_of_CubedSphere(void *aux, int ind, double lam, double A, double B)
 { RET_z; }
+
+
+#define CALL_dlamAB_dxyz_CubSph \
+  tBox *box = (tBox *) aux;\
+  double x,y,z;\
+  double dlamdx,dlamdy,dlamdz, dAdx,dAdy,dAdz, dBdx,dBdy,dBdz;\
+  dlamAB_dxyz_CubSph(box, ind, lam,A,B, &x,&y,&z,\
+                     &dlamdx, &dlamdy, &dlamdz,\
+                     &dAdx,   &dAdy,   &dAdz,\
+                     &dBdx,   &dBdy,   &dBdz)
+#define RET_dlam_dx CALL_dlamAB_dxyz_CubSph; return dlamdx
+#define RET_dlam_dy CALL_dlamAB_dxyz_CubSph; return dlamdy
+#define RET_dlam_dz CALL_dlamAB_dxyz_CubSph; return dlamdz
+#define RET_dA_dx CALL_dlamAB_dxyz_CubSph; return dAdx
+#define RET_dA_dy CALL_dlamAB_dxyz_CubSph; return dAdy
+#define RET_dA_dz CALL_dlamAB_dxyz_CubSph; return dAdz
+#define RET_dB_dx CALL_dlamAB_dxyz_CubSph; return dBdx
+#define RET_dB_dy CALL_dlamAB_dxyz_CubSph; return dBdy
+#define RET_dB_dz CALL_dlamAB_dxyz_CubSph; return dBdz
+
+/* Derivs for Cubed Spheres */
+double dlam_dx_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dlam_dx; }
+double dlam_dy_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dlam_dy; }
+double dlam_dz_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dlam_dz; }
+double dA_dx_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dA_dx; }
+double dA_dy_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dA_dy; }
+double dA_dz_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dA_dz; }
+double dB_dx_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dB_dx; }
+double dB_dy_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dB_dy; }
+double dB_dz_CubedSphere(void *aux, int ind, double lam, double A, double B)
+{  RET_dB_dz; }

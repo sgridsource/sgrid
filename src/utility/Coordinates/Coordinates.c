@@ -677,8 +677,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->x_of_X[1] = x_of_CubedSphere;
       box->x_of_X[2] = y_of_CubedSphere;
       box->x_of_X[3] = z_of_CubedSphere;
-printf("FIXME: dlam_dx_CubedSphere is missing\n");
-/*
+
       box->dX_dx[1][1] = dlam_dx_CubedSphere;
       box->dX_dx[1][2] = dlam_dy_CubedSphere;
       box->dX_dx[1][3] = dlam_dz_CubedSphere;
@@ -688,7 +687,6 @@ printf("FIXME: dlam_dx_CubedSphere is missing\n");
       box->dX_dx[3][1] = dB_dx_CubedSphere;
       box->dX_dx[3][2] = dB_dy_CubedSphere;
       box->dX_dx[3][3] = dB_dz_CubedSphere;
-*/
     }
     else
       errorexit("Coordinates: unknown coordinates...");
