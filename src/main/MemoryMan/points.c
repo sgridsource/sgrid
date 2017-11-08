@@ -16,14 +16,26 @@
 /* Allocate memory for a PointList */
 tPointList *AllocatePointList(tGrid *grid)
 {
+ void *ret;
  int boxindex;
  tPointList *PL;
  
  PL=calloc(1, sizeof(*PL) );
 
  PL->grid=grid;
- PL->npoints=calloc(grid->nboxes, sizeof( *(PL->npoints) ) );
- PL->point  =calloc(grid->nboxes, sizeof( *(PL->point) ) );
+
+ ret = calloc(grid->nboxes, sizeof( *(PL->npoints) ) );
+ if(ret==NULL) 
+   errorexit("AllocatePointList: not enough memory for PL->npoints");
+ PL->npoints = ret;
+
+ ret = calloc(grid->nboxes, sizeof( *(PL->point) ) );
+ if(ret==NULL) 
+   errorexit("AllocatePointList: not enough memory for PL->point");
+ PL->point = ret;
+//printf("sizeof( *(PL->npoints) )=%d\n", sizeof( *(PL->npoints) ));
+//printf("sizeof( *(PL->point) )=%d\n", sizeof( *(PL->point) ));
+
  PL->blist = NULL;
  PL->nblist= 0;
  forallboxes(grid,boxindex)
