@@ -774,6 +774,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
    arranged into a touch pattern, e.g. the 6 boxes in a cubed sphere */
 int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int nb)
 {
+  int iX = Ind("X");
   int ifaces=0;
   int b, b2, f, fi, fi2, dir, dir2, pl, pl2, i,j,k;
   double rmin;
@@ -816,19 +817,18 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
 
           /* get durection and plane of both bfaces */
           dir = fi/2 + 1;
-          if(dir==1)      pl=(fi%2)*n1;
-          else if(dir==2) pl=(fi%2)*n2;
-          else            pl=(fi%2)*n3; /* (dir==3) */
+          if(dir==1)      pl=(fi%2)*(n1-1);
+          else if(dir==2) pl=(fi%2)*(n2-1);
+          else            pl=(fi%2)*(n3-1); /* (dir==3) */
           dir2 = fi2/2 + 1;
-          if(dir2==1)      pl2=(fi2%2)*box2->n1;
-          else if(dir2==2) pl2=(fi2%2)*box2->n2;
-          else             pl2=(fi2%2)*box2->n3; /* (dir==3) */
+          if(dir2==1)      pl2=(fi2%2)*(box2->n1-1);
+          else if(dir2==2) pl2=(fi2%2)*(box2->n2-1);
+          else             pl2=(fi2%2)*(box2->n3-1); /* (dir==3) */
 
           /* go over plane of fi */
           forplaneN(dir, i,j,k, n1,n2,n3, pl)
           {
             int ind, ind2;
-            int iX = Ind("X");
             double *pX = box->v[iX];
             double *pY = box->v[iX+1];
             double *pZ = box->v[iX+2];
