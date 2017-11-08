@@ -861,7 +861,7 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
 
           /* check if there are the same number of points in both fpts */
           if(bface2->fpts != NULL)
-          if(bface->fpts->npoints[0] == bface2->fpts->npoints[0])
+          if(bface->fpts->npoints[b] == bface2->fpts->npoints[b2])
           {
             ifaces++; /* count the number of interfaces */
 
@@ -884,6 +884,7 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
           {
             FreePointList(bface->fpts);
             FreePointList(bface2->fpts);
+            bface->fpts = bface2->fpts = NULL;
           }
         } /* fi2 loop */
       }
