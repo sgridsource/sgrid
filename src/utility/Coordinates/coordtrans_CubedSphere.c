@@ -42,6 +42,7 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
   int type = box->CI->type;
   int dir, p;
   double pm, dx,dy,dz, xc,yc,zc, a0,a1, sigma0,sigma1;
+  double sqrt_1_A2_B2 = sqrt(1.0 + A*A + B*B);
 
   /* get direction, pm, and center */
   dir = domain/2 + 1;
@@ -63,7 +64,7 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
     sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
-    a0 = pm * sigma0/sqrt(1.0 + A*A + B*B);
+    a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * box->CI->s[1];
   }
   else if(type==outerCubedSphere)
@@ -72,7 +73,7 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
        and the inner one is flat */
     a0 = pm * box->CI->s[0];
     sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
-    a1 = pm * sigma1/sqrt(1.0 + A*A + B*B);
+    a1 = pm * sigma1/sqrt_1_A2_B2;
   }
   else if(type==CubedShell)
   {
@@ -80,8 +81,8 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
        and the inner one is flat */
     sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
     sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
-    a0 = pm * sigma0/sqrt(1.0 + A*A + B*B);
-    a1 = pm * sigma1/sqrt(1.0 + A*A + B*B);
+    a0 = pm * sigma0/sqrt_1_A2_B2;
+    a1 = pm * sigma1/sqrt_1_A2_B2;
   }
   else errorexit("unknown type");
 
@@ -106,6 +107,91 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
     *z = zc + dz;
     *y = yc + A*dz;
     *x = xc + B*dz;
+  }
+}
+
+/* compute inverse sphered cube coord trafo. */
+/* Note: lam \in [0,1], (A,B) \in [-1,1] */
+void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
+                         double *lam, double *A, double *B)
+{
+  int domain = box->CI->dom;  /* get domain and type info from box */
+  int type = box->CI->type;
+  int dir, p;
+  double pm, dx,dy,dz,dr, xc,yc,zc, a0,a1, sigma0,sigma1;
+  double sqrt_1_A2_B2;
+
+  /* get direction, pm, and center */
+  dir = domain/2 + 1;
+  p  = 2*(domain%2) - 1; /* p  = +/- 1 */
+  pm = p;                /* pm = +/- 1.0 */
+  xc = box->CI->xc[1];
+  yc = box->CI->xc[2];
+  zc = box->CI->xc[3];
+
+  /* get d=istance from center, and sqrt_1_A2_B2 */
+  dx = x-xc;
+  dy = y-yc;
+  dz = z-zc;
+  dr = sqrt(dx*dx + dy*dy + dz*dz);
+  if(dir==1)       sqrt_1_A2_B2 = fabs(dx)/dr;
+  else if(dir==2)  sqrt_1_A2_B2 = fabs(dy)/dr;
+  else             sqrt_1_A2_B2 = fabs(dz)/dr;
+
+  /* check type of trafo */
+  if(type==PyramidFrustum)
+  {
+    /* this gives a pyramid frustum */
+    a0 = pm * box->CI->s[0];
+    a1 = pm * box->CI->s[1];
+  }
+  else if(type==innerCubedSphere)
+  {
+    /* this gives a cubed sphere piece where the inner surface is curved
+       and the outer surface is flat */
+    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    a0 = pm * sigma0/sqrt_1_A2_B2;
+    a1 = pm * box->CI->s[1];
+  }
+  else if(type==outerCubedSphere)
+  {
+    /* this gives a cubed sphere piece where the outer surface is curved
+       and the inner one is flat */
+    a0 = pm * box->CI->s[0];
+    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    a1 = pm * sigma1/sqrt_1_A2_B2;
+  }
+  else if(type==CubedShell)
+  {
+    /* this gives a cubed sphere piece where the outer surface is curved
+       and the inner one is flat */
+    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    a0 = pm * sigma0/sqrt_1_A2_B2;
+    a1 = pm * sigma1/sqrt_1_A2_B2;
+  }
+  else errorexit("unknown type");
+
+  /* compute coord trafo for each domain */
+  if(dir==1)
+  { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc)
+       (1 + A^2 + B^2) dx^2 = dx^2 + dy^2 + dz^2
+       1/sqrt(1 + A^2 + B^2) = |dx|/sqrt(dx^2 + dy^2 + dz^2) = |dx|/dr */
+    *lam = (dx-a0)/(a1-a0);
+    *A   = dy/dx;
+    *B   = dz/dx;
+  }
+  else if(dir==2)
+  {
+    *lam = (dy-a0)/(a1-a0); 
+    *A   = dx/dy;
+    *B   = dz/dy;
+  }
+  else /* dir==3 */
+  {
+    *lam = (dz-a0)/(a1-a0);
+    *A   = dy/dz;
+    *B   = dx/dz;
   }
 }
 
