@@ -49,7 +49,11 @@ void bface_normal(tBface *bface, int ijk, double *nx, double *ny, double *nz)
   double mag;
   int j;
 
-  if(box->v[idXd]==NULL) CartBox_normal(bface, ijk, nx,ny,nz);
+  if(box->v[idXd]==NULL) 
+  {
+    CartBox_normal(bface, ijk, nx,ny,nz);
+    return;
+  }
 
   /* get dXdx */
   for(j=1; j<=3; j++)
@@ -106,6 +110,24 @@ void bface_normal(tBface *bface, int ijk, double *nx, double *ny, double *nz)
     *ny /= mag;
     *nz /= mag;
   }
+/*
+printf("x=(%g,%g,%g)\n",
+box->v[Ind("x")][ijk], box->v[Ind("y")][ijk], box->v[Ind("z")][ijk]);
+printf("X=(%g,%g,%g)\n",
+box->v[Ind("X")][ijk], box->v[Ind("Y")][ijk], box->v[Ind("Z")][ijk]);
+printf("f%d xc=%g n=(%g,%g,%g)\n", bface->f, box->CI->xc[1], *nx,*ny,*nz);
+int i;
+for(i=1; i<=3; i++)
+{
+for(j=1; j<=3; j++) printf("%g   ", dXdx[i][j]);
+printf("\n");
+}
+for(i=1; i<=3; i++)
+{
+for(j=1; j<=3; j++) printf("   %g", dxdX[i][j]);
+printf("\n");
+}
+*/
 }
 
 
