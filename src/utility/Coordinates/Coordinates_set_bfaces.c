@@ -818,7 +818,7 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
           /* do nothing if we know other box already */
           if(bface2->ob >= 0) continue;
 
-          /* get durection and plane of both bfaces */
+          /* get direction and plane of both bfaces */
           dir = fi/2 + 1;
           if(dir==1)      pl=(fi%2)*(n1-1);
           else if(dir==2) pl=(fi%2)*(n2-1);
@@ -915,4 +915,45 @@ prdivider(1);
     } /* b2 loop */
   }  /* b loop */
   return ifaces;
+}
+
+/* Here we assume all empty bfaces are at the outer boundary. 
+   We mark them as such and add the surface points to its fpts */
+void set_all_bfaces_with_ob_minus1_to_outerbound(tGrid *grid, int b0, int nb)
+{
+  int b, fi, dir, pl, i,j,k;
+
+  /* loop over nb boxes */
+  for(b=0; b<nb; b++)
+  {
+    tBox *box = grid->box[b0+b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+
+    /* loop over faces of box */
+    for(fi=0; fi<box->nbfaces; fi++)
+    {
+      tBface *bface  = box->bface[fi];
+
+      /* do nothing if bface has another box */
+      if(bface->ob != -1) continue;
+
+      /* get direction and plane */
+      dir = fi/2 + 1;
+      if(dir==1)      pl=(fi%2)*(n1-1);
+      else if(dir==2) pl=(fi%2)*(n2-1);
+      else            pl=(fi%2)*(n3-1); /* (dir==3) */
+
+      /* go over plane of fi, and add all plane points */
+      forplaneN(dir, i,j,k, n1,n2,n3, pl)
+      {
+        int ind = Index(i,j,k);
+        /* add point to bface->fpts */
+        add_point_to_bface_inbox(box, fi, ind, fi);
+      }
+      /* mark as outerbound */
+      bface->outerbound = 1;
+    } /* fi loop */
+  }  /* b loop */
 }
