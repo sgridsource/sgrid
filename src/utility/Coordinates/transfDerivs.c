@@ -54,6 +54,11 @@ void dXdx_from_dxdX(double dXdx[4][4], double dxdX[4][4])
   sum        = (-(dxdX[1][2]*dxdX[2][1]) + dxdX[1][1]*dxdX[2][2])/DetM;
   dXdx[3][3] = sum;
 }
+/* compute dx^i/dX^n from dX^n/dx^l */
+void dxdX_from_dXdx(double dxdX[4][4], double dXdx[4][4])
+{
+  dXdx_from_dxdX(dxdX, dXdx);
+}
 
 /* compute d^2 X^i /(dx^j dx^k) from dx^n/dX^l and d^2 x^n/(dX^m dX^l) */
 void ddXdxdx_from_dXdx_ddxdXdX(double ddXdxdx[4][4][4],

@@ -34,6 +34,7 @@ void coordinateDependentFilter_Spherical(tBox *box, tVarList *unew);
 
 /* from transfDerivs.c */
 void dXdx_from_dxdX(double dXdx[4][4], double dxdX[4][4]);
+void dxdX_from_dXdx(double dxdX[4][4], double dXdx[4][4]);
 void ddXdxdx_from_dXdx_ddxdXdX(double ddXdxdx[4][4][4],
                                double dXdx[4][4], double ddxdXdX[4][4][4]);
 void dxdX_from_dxdU_dUdX(double dxdX[4][4],
