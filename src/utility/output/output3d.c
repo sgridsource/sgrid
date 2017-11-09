@@ -67,7 +67,8 @@ void write3d_boxvar(tBox *box, char *name)
 
       /* write header */
       fprintf(fp, "# vtk DataFile Version 2.0\n");
-      fprintf(fp, "variable %s, box %d, time %.16g, Note: uniform SPACING is fake\n", 
+      fprintf(fp, "variable %s, box %d, time %.16g, "
+              "Note: uniform grid spacings below are fake\n", 
               name, box->b, grid->time);
       fprintf(fp, binary ? "BINARY" : "ASCII\n");
       fprintf(fp, "\n");
