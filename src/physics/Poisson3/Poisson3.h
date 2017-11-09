@@ -2,6 +2,7 @@
 /* Wolfgang Tichy, Oct. 2017 */
 
 
+int Poisson3_initboxes(tGrid *grid);
 int Poisson3_startup(tGrid *grid);
 int Poisson3_analyze(tGrid *grid);
 int Poisson3_solve(tGrid *grid);

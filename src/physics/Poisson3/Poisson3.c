@@ -17,14 +17,35 @@ void Precon_fd_Poisson3_UMFPACK(tVarList *vlx, tVarList *vlb,
                                tVarList *vlc1, tVarList *vlc2);
 
 
+int Poisson3_initboxes(tGrid *grid)
+{
+  printf("Initializing Poisson3 boxes:\n");
+  if(Getv("Poisson3_grid","2starcubes"))
+  {
+    /* test cubed spheres */
+    two_full_cubes_touching_at_x0(grid, 0, 1.0, 0.2,0.4, 0.3,0.5);
+  }
+  return 0;
+}
+
 /* initialize Poisson3 */
 int Poisson3_startup(tGrid *grid)
 {
   int b;
+  int pr=1;
   printf("Initializing Poisson3:\n");
 
-  /* set bface structures that contain info about box boundaries */
-  Coordinates_set_bfaces(grid);
+  if(Getv("Poisson3_grid","2starcubes"))
+  {
+    /* set bface structures */
+    set_touching_bfaces_of_boxes_with_same_facepoints(grid, 0, 26);
+    if(pr) forallboxes(grid, b) printbfaces(grid->box[b]);
+  }
+  else
+  {
+    /* set bface structures that contain info about box boundaries */
+    Coordinates_set_bfaces(grid);
+  }
 
   /* set boundary information: farlimit, falloff, propagation speed */
   VarNameSetBoundaryInfo("Poisson3_Psi", 0, 1, 1.0);

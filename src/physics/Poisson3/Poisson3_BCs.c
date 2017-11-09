@@ -13,7 +13,7 @@
 
 
 
-/* find normal vector of box faces */
+/* find normal vector of box faces for Cartesian coords. */
 void CartBox_normal(tBface *bface, int ijk, double *nx, double *ny, double *nz)
 {
   *nx = *ny = *nz = 0.0;
@@ -35,6 +35,100 @@ void CartBox_normal(tBface *bface, int ijk, double *nx, double *ny, double *nz)
     default: 
       errorexit("bface->f must be 0,1,2,3,4,5");
   }
+}
+
+/* find normal vector of box face given by bface at point ijk */
+void bface_normal(tBface *bface, int ijk, double *nx, double *ny, double *nz)
+{
+  tBox *box = bface->grid->box[bface->b];
+  int idXd = Ind("dXdx");
+  int idYd = Ind("dYdx");
+  int idZd = Ind("dZdx");
+  double dXdx[4][4];
+  double dxdX[4][4];
+  double mag;
+  int j;
+
+  if(box->v[idXd]==NULL) CartBox_normal(bface, ijk, nx,ny,nz);
+
+  /* get dXdx */
+  for(j=1; j<=3; j++)
+  {
+    dXdx[1][j] = box->v[idXd + j-1][ijk];
+    dXdx[2][j] = box->v[idYd + j-1][ijk];
+    dXdx[3][j] = box->v[idZd + j-1][ijk];
+  }
+
+  /* get dxdX */
+  dxdX_from_dXdx(dxdX, dXdx);
+
+  /* get normal from derivs */
+  switch(bface->f)
+  {
+    case 0:
+      *nx = -dxdX[1][1];
+      *ny = -dxdX[2][1];
+      *nz = -dxdX[3][1];
+      break;
+    case 1:
+      *nx = dxdX[1][1];
+      *ny = dxdX[2][1];
+      *nz = dxdX[3][1];
+      break;
+    case 2:
+      *nx = -dxdX[1][2];
+      *ny = -dxdX[2][2];
+      *nz = -dxdX[3][2];
+      break;
+    case 3:
+      *nx = dxdX[1][2];
+      *ny = dxdX[2][2];
+      *nz = dxdX[3][2];
+      break;
+    case 4:
+      *nx = -dxdX[1][3];
+      *ny = -dxdX[2][3];
+      *nz = -dxdX[3][3];
+      break;
+    case 5:
+      *nx = dxdX[1][3];
+      *ny = dxdX[2][3];
+      *nz = dxdX[3][3];
+      break;
+    default: 
+      errorexit("bface->f must be 0,1,2,3,4,5");
+  }
+  /* normalize */
+  mag = sqrt(nx[0]*nx[0] + ny[0]*ny[0] + nz[0]*nz[0]);
+  if(mag>0.0)
+  { 
+    *nx /= mag;
+    *ny /= mag;
+    *nz /= mag;
+  }
+}
+
+
+/* find index in other box in case same_fpts */
+int ind_in_other_box_if_same_fpts(tBox *box, int fi, int pi)
+{
+  tBface *bface = box->bface[fi];
+  int ob  = bface->ob;
+  int ofi = bface->ofi;
+  tBox *obox = NULL;
+  tPointList *ofpts;
+  int oind;
+
+  if(ob<0) return -1;
+
+  /* get pointer to other box */
+  obox = box->grid->box[ob];
+
+  /* other fpts and index */
+  ofpts = (obox->bface[ofi])->fpts;
+  oind = ofpts->point[ob][pi];
+
+  return oind;
 }
 
 /* find index in other box in case sameX=sameY=sameZ=1 */
@@ -113,7 +207,34 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
 
       if(bface->touch) /* bface touches one other face */
       {
-        if(bface->sameX && bface->sameY && bface->sameZ)
+        if(bface->same_fpts)
+        {
+          if(bface->setnormalderiv) /* field derivs are equal */
+          {
+            dP[1] = obox->v[iPsix]; /* derivs in other box */
+            dP[2] = obox->v[iPsiy];
+            dP[3] = obox->v[iPsiz];
+            forPointList_inbox(bface->fpts, box, pi, ind)
+            {
+              int oind = ind_in_other_box_if_same_fpts(box, fi, pi);
+              double nx, ny, nz;
+              bface_normal(bface, ind, &nx, &ny, &nz);
+              FPsi[ind] = nx * (Psix[ind] - dP[1][oind]) +
+                          ny * (Psiy[ind] - dP[2][oind]) +
+                          nz * (Psiz[ind] - dP[3][oind]);
+            }
+          }
+          else /* fields are equal */
+          {
+            P = obox->v[iPsi]; /* values in box ob */
+            forPointList_inbox(bface->fpts, box, pi, ind)
+            {
+              int oind = ind_in_other_box_if_same_fpts(box, fi, pi);
+              FPsi[ind] = Psi[ind] - P[oind];
+            }
+          }
+        }
+        else if(bface->sameX && bface->sameY && bface->sameZ)
         {
           if(bface->setnormalderiv) /* field derivs are equal */
           {

@@ -11,6 +11,7 @@ int sgrid_Poisson3()
   printf("Adding Poisson3\n");
 
   /* functions */
+  AddFun(POST_GRID, Poisson3_initboxes, "initialize boxes we use");
   AddFun(PRE_INITIALDATA, Poisson3_startup, "initialize Poisson3");
   AddFun(INITIALDATA, Poisson3_solve, "solve Poisson3 Eq.");
   AddFun(ANALYZE, Poisson3_analyze, "compute error");
@@ -49,6 +50,7 @@ int sgrid_Poisson3()
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("Poisson3_linSolver_Precon", "I", 
          "Preconditioner used [I,fd_UMFPACK]");
+  AddPar("Poisson3_grid", "", "what grid we use [2starcubes]");
 	     	   	   	 
   return 0;
 }
