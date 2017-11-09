@@ -306,7 +306,7 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
        lam = (rx-a0(x,y,z))/(a1(x,y,z)-a0(x,y,z)) */
     *dlamdx = (1.0 - da0_dx -(da1_dx-da0_dx)*lam)/(a1-a0);
     *dlamdy = (    - da0_dy -(da1_dy-da0_dy)*lam)/(a1-a0);
-    *dlamdy = (    - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
+    *dlamdz = (    - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
     *dAdx = -ry/rx2;
     *dAdy = 1.0/rx;
     *dAdz = 0.0;
@@ -340,7 +340,7 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
        B   = rz/ry; */
     *dlamdx = (    - da0_dx -(da1_dx-da0_dx)*lam)/(a1-a0);
     *dlamdy = (1.0 - da0_dy -(da1_dy-da0_dy)*lam)/(a1-a0);
-    *dlamdy = (    - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
+    *dlamdz = (    - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
     *dAdx = 1.0/ry;
     *dAdy = -rx/ry2;
     *dAdz = 0.0;
@@ -374,7 +374,7 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
        B   = rx/rz; */
     *dlamdx = (    - da0_dx -(da1_dx-da0_dx)*lam)/(a1-a0);
     *dlamdy = (    - da0_dy -(da1_dy-da0_dy)*lam)/(a1-a0);
-    *dlamdy = (1.0 - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
+    *dlamdz = (1.0 - da0_dz -(da1_dz-da0_dz)*lam)/(a1-a0);
     *dAdx = 0.0;
     *dAdy = 1.0/rz;
     *dAdz = -ry/rz2;
