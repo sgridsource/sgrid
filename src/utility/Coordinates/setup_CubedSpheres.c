@@ -20,7 +20,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
   char name[1000];
 
   if(b0+6 > grid->nboxes)
-    errorexit("convert_6boxes_to_CubedSphere: nboxes is too small");
+    printf("convert_6boxes_to_CubedSphere: nboxes is too small\n");
 
   switch(type)
   {
@@ -37,14 +37,19 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
       snprintf(name, 999, "%s", "CubedShell");  break;
 
     default:
-      errorexit("convert_6boxes_to_CubedSphere: unkonwn type");
+      errorexit("convert_6boxes_to_CubedSphere: unknown type");
   }
 
   /* set box pars */
   for(i=0; i<6; i++)
   {
-    tBox *box = grid->box[b0+i];
+    tBox *box;
     int d;
+
+    /* break i-loop if we do not have enough boxes */
+    if(b0+i >= grid->nboxes) break;
+    box = grid->box[b0+i];
+
     /* set coord type */
     snprintf(par, 999, "box%d_Coordinates", b0+i);
     snprintf(val, 999, "%s", name);
@@ -83,7 +88,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
   /* convert boxes to what the pars now say */
   set_BoxStructures_fromPars(grid, 0);
 
-  return b0+6; /* return box index right after last added box */
+  return b0+i; /* return box index right after last added box */
 }
 
 /* convert 1 box to a cube centered at xc[i],
@@ -96,7 +101,10 @@ int convert_1box_to_cube(tGrid *grid, int b0, double *xc, double dout)
   int d;
 
   if(b0+1 > grid->nboxes)
-    errorexit("convert_1box_to_cube: nboxes is too small");
+  {
+    printf("convert_1box_to_cube: nboxes is too small\n");
+    return b0;
+  }
 
   /* set coord type */
   snprintf(par, 999, "box%d_Coordinates", b0);
