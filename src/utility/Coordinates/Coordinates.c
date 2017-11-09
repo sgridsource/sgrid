@@ -874,7 +874,7 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
 
     /* print distances in cart. coordinates */
-    if(pr)
+    if(pr && 0)
     {
       printf("Cartesian distances in box%d:\n", b);
       printf("X-direction: x[1]-x[0]=%g, ", x[1]-x[0]);
