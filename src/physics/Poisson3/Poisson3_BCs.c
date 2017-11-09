@@ -200,6 +200,10 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
   double *X = box->v[iX];
   double *Y = box->v[iX+1];
   double *Z = box->v[iX+2];
+  int ix = Ind("X");
+  double *px = box->v[ix];
+  double *pz = box->v[ix+1];
+  double *py = box->v[ix+2];
   int fi;
 
   /* loop over bfaces */
@@ -544,7 +548,19 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
       /* set far limit BC */
       if(bface->outerbound && setOuterBCs)
         forPointList_inbox(bface->fpts, box, pi, ind)
-          FPsi[ind] = Psi[ind] - outerBC(X[ind],Y[ind],Z[ind]);
+        {
+          double x,y,z;
+          /* get x,y,z of point ind */
+          if(px!=NULL)
+          {
+            x = px[ind];  y = py[ind];  z = pz[ind];
+          }
+          else
+          {
+            x = X[ind];   y = Y[ind];   z = Z[ind];
+          }
+          FPsi[ind] = Psi[ind] - outerBC(x,y,z);
+        }
     }
   }
 }
