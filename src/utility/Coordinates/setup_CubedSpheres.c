@@ -90,10 +90,9 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
    returns the index of the box right after the last converted box */
 int convert_1box_to_cube(tGrid *grid, int b0, double *xc, double dout)
 {
-  int i;
   char par[1000];
   char val[1000];
-  tBox *box = grid->box[b0+i];
+  tBox *box = grid->box[b0];
   int d;
 
   if(b0+1 > grid->nboxes)
