@@ -200,7 +200,7 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
   double *X = box->v[iX];
   double *Y = box->v[iX+1];
   double *Z = box->v[iX+2];
-  int ix = Ind("X");
+  int ix = Ind("x");
   double *px = box->v[ix];
   double *pz = box->v[ix+1];
   double *py = box->v[ix+2];

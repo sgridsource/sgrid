@@ -23,7 +23,7 @@ int Poisson3_initboxes(tGrid *grid)
   if(Getv("Poisson3_grid","2starcubes"))
   {
     /* test cubed spheres */
-    two_full_cubes_touching_at_x0(grid, 0, 1.0, 0.2,0.4, 0.3,0.5);
+    two_full_cubes_touching_at_x0(grid, 0, 0.25, 0.05,0.15, 0.1,0.2);
   }
   return 0;
 }
@@ -107,6 +107,9 @@ int Poisson3_startup(tGrid *grid)
       rh2[i] = 0.0;
       //Psi[i] = 0.5*b + (b+1)*x;
       //Chi[i] = b - 2*(b+1)*x;
+double r = sqrt(x*x + y*y + z*z);
+Psi[i] = 1.0/(4*PI*r)*erf(r);
+Chi[i] = 1.0;
     }
   }
 
@@ -320,6 +323,8 @@ void F_Poisson3(tVarList *VLFu, tVarList *VLu,
     {
       FPsi[i] = Chi[i]*Psixx[i] + Psiyy[i] + Chi[i]*Chi[i]*Psizz[i] - rh1[i];
       FChi[i] = Chixx[i] + Psix[i]*Chiyy[i] + Chizz[i] - rh2[i];
+FPsi[i] = Psixx[i] + Psiyy[i] + Psizz[i] - rh1[i];
+FChi[i] = Chixx[i] + Chiyy[i] + Chizz[i] - rh2[i];
     }
   }
 
@@ -376,6 +381,8 @@ void J_Poisson3(tVarList *VLJlu, tVarList *VLlu,
       JlPsi[i] = Chi[i]*lPsixx[i] + lChi[i]*Psixx[i]  +  lPsiyy[i]  +
                  Chi[i]*Chi[i]*lPsizz[i] + 2.0*lChi[i]*Psizz[i];
       JlChi[i] = lChixx[i] + Psix[i]*lChiyy[i] + lPsix[i]*Chiyy[i] + lChizz[i];
+JlPsi[i] = lPsixx[i] + lPsiyy[i] + lPsizz[i];
+JlChi[i] = lChixx[i] + lChiyy[i] + lChizz[i];
     }
   }
 
