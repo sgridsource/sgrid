@@ -38,7 +38,8 @@ int Poisson3_startup(tGrid *grid)
   if(Getv("Poisson3_grid","2starcubes"))
   {
     /* set bface structures */
-    set_touching_bfaces_of_boxes_with_same_facepoints(grid, 0, 26);
+    set_touching_bfaces_of_boxes_with_same_facepoints(grid, 0, grid->nboxes);
+    set_all_bfaces_with_ob_minus1_to_outerbound(grid, 0, grid->nboxes);
     if(pr) forallboxes(grid, b) printbfaces(grid->box[b]);
   }
   else
@@ -262,7 +263,7 @@ int Poisson3_analyze(tGrid *grid)
       double x = pX[i];
       double y = pY[i];
       double z = pZ[i];
-      double r = sqrt(x*x + y*y + z*z);
+      double r;
 
       if(px!=NULL) 
       {
@@ -270,6 +271,8 @@ int Poisson3_analyze(tGrid *grid)
         y = py[i];
         z = pz[i];
       }
+      r = sqrt(x*x + y*y + z*z);
+
       /* Soln of "Lapl Psi = rh1"  with rh1=-exp(-r*r)/sqrtPI3;
          is "Psi = 1.0/(4*PI*r)*erf(r)" */
       ErrPsi[i] = Psi[i] - 1.0/(4*PI*r)*erf(r);
@@ -283,7 +286,7 @@ int Poisson3_analyze(tGrid *grid)
 
 /* evaluate Poisson eqn for VLu */
 void F_Poisson3(tVarList *VLFu, tVarList *VLu,
-               tVarList *VLuAll, tVarList *VLluAll)
+                tVarList *VLuAll, tVarList *VLluAll)
 {
   tGrid *grid = VLu->grid;
   int b;
@@ -327,7 +330,7 @@ void F_Poisson3(tVarList *VLFu, tVarList *VLu,
 
 /* evaluate linearized eqns */
 void J_Poisson3(tVarList *VLJlu, tVarList *VLlu,
-               tVarList *VLuAll, tVarList *VLluAll)
+                tVarList *VLuAll, tVarList *VLluAll)
 {
   tGrid *grid = VLlu->grid;
   int b;
