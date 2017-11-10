@@ -107,9 +107,6 @@ int Poisson3_startup(tGrid *grid)
       rh2[i] = 0.0;
       //Psi[i] = 0.5*b + (b+1)*x;
       //Chi[i] = b - 2*(b+1)*x;
-double r = sqrt(x*x + y*y + z*z);
-Psi[i] = 1.0/(4*PI*r)*erf(r);
-Chi[i] = 1.0;
     }
   }
 
