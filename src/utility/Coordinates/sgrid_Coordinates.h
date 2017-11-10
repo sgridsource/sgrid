@@ -117,6 +117,8 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
 void set_all_bfaces_with_ob_minus1_to_outerbound(tGrid *grid, int b0, int nb);
 
 /* from setup_CubedSpheres.c */
+int arrange_1box12CubSph_into_full_cube(tGrid *grid, int b0, double *xc,
+                                        double din, double dmid, double dout);
 int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
                                   double din1, double dmid1,
                                   double din2, double dmid2);
