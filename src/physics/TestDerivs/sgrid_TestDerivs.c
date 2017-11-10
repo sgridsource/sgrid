@@ -13,6 +13,8 @@ int sgrid_TestDerivs()
   /* functions */
   AddFun(POST_GRID, Set_Test_Coordinates_AnsorgNS_sigma_pm,
          "setup the sigma_{+-} vars from AnsorgNS");
+  AddFun(POST_GRID, Setup_CubedSpheres_initboxes,
+         "setup some cobes spheres");
   AddFun(INITIALDATA, TestDerivs_startup, "initialize test");
   AddFun(ANALYZE, TestDerivs_analyze, "compute test results");
 
@@ -31,6 +33,7 @@ int sgrid_TestDerivs()
   AddPar("TestDerivs_x0",    "1",   "x-location of Gaussian wavepacket");
   AddPar("TestDerivs_y0",    "0.3", "y-location of Gaussian wavepacket");
   AddPar("TestDerivs_z0",    "0.1", "z-location of Gaussian wavepacket");
+  AddPar("TestDerivs_grid",  "", "grid we use [CubedSpheres]");
 	     	   	   	 
   return 0;
 }
