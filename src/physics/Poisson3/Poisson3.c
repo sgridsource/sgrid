@@ -320,8 +320,6 @@ void F_Poisson3(tVarList *VLFu, tVarList *VLu,
     {
       FPsi[i] = Chi[i]*Psixx[i] + Psiyy[i] + Chi[i]*Chi[i]*Psizz[i] - rh1[i];
       FChi[i] = Chixx[i] + Psix[i]*Chiyy[i] + Chizz[i] - rh2[i];
-FPsi[i] = Psixx[i] + Psiyy[i] + Psizz[i] - rh1[i];
-FChi[i] = Chixx[i] + Chiyy[i] + Chizz[i] - rh2[i];
     }
   }
 
@@ -378,8 +376,6 @@ void J_Poisson3(tVarList *VLJlu, tVarList *VLlu,
       JlPsi[i] = Chi[i]*lPsixx[i] + lChi[i]*Psixx[i]  +  lPsiyy[i]  +
                  Chi[i]*Chi[i]*lPsizz[i] + 2.0*lChi[i]*Psizz[i];
       JlChi[i] = lChixx[i] + Psix[i]*lChiyy[i] + lPsix[i]*Chiyy[i] + lChizz[i];
-JlPsi[i] = lPsixx[i] + lPsiyy[i] + lPsizz[i];
-JlChi[i] = lChixx[i] + lChiyy[i] + lChizz[i];
     }
   }
 
