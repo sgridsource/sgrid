@@ -1,0 +1,72 @@
+physics = TestDerivs
+
+TestDerivs_useDD = no
+
+TestDerivs_grid = CubedSpheres
+
+nboxes = 13
+
+n1  = 8
+n2  = 8
+n3  = 8
+
+iterate_parameters = yes
+iterate_parameter1 = n1  8 12 16 20 # 24
+iterate_parameter2 = n2  8 12 16 20 # 24
+iterate_parameter3 = n3  8 12 16 20 # 24
+
+0doutput_VolumeIntegralJacobian = one
+
+0douttime	= 0.1
+0doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
+0doutputall	= yes
+
+1douttime	= 0.1
+1doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi Coordinates_AnsorgNS_ddsigma_pm_dBdB Coordinates_AnsorgNS_ddsigma_pm_dBdphi Coordinates_AnsorgNS_ddsigma_pm_dphidphi
+1doutputall	= yes
+
+2douttime	= 0.1
+2doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi Coordinates_AnsorgNS_ddsigma_pm_dBdB Coordinates_AnsorgNS_ddsigma_pm_dBdphi Coordinates_AnsorgNS_ddsigma_pm_dphidphi
+2doutputall	= yes
+
+outputReplaceXby_box0 = x
+outputReplaceYby_box0 = y
+outputReplaceZby_box0 = z
+
+outputReplaceXby_box1 = x
+outputReplaceYby_box1 = y
+outputReplaceZby_box1 = z
+outputReplaceXby_box2 = x
+outputReplaceYby_box2 = y
+outputReplaceZby_box2 = z
+outputReplaceXby_box3 = x
+outputReplaceYby_box3 = y
+outputReplaceZby_box3 = z
+outputReplaceXby_box4 = x
+outputReplaceYby_box4 = y
+outputReplaceZby_box4 = z
+outputReplaceXby_box5 = x
+outputReplaceYby_box5 = y
+outputReplaceZby_box5 = z
+outputReplaceXby_box6 = x
+outputReplaceYby_box6 = y
+outputReplaceZby_box6 = z
+
+outputReplaceXby_box7 = x
+outputReplaceYby_box7 = y
+outputReplaceZby_box7 = z
+outputReplaceXby_box8 = x
+outputReplaceYby_box8 = y
+outputReplaceZby_box8 = z
+outputReplaceXby_box9 = x
+outputReplaceYby_box9 = y
+outputReplaceZby_box9 = z
+outputReplaceXby_box10 = x
+outputReplaceYby_box10 = y
+outputReplaceZby_box10 = z
+outputReplaceXby_box11 = x
+outputReplaceYby_box11 = y
+outputReplaceZby_box11 = z
+outputReplaceXby_box12 = x
+outputReplaceYby_box12 = y
+outputReplaceZby_box12 = z
