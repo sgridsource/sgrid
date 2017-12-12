@@ -57,7 +57,7 @@ int sgrid_output(void)
   AddPar("0doutputmax",  "", "variables with output of maximum");
   AddPar("0doutputmin",  "", "variables with output of minimum");
   AddPar("0doutputrms", "", "variables with output of l2-norm");
-  AddPar("0doutputmeanAbs", "", "variables with output of l_infinity-norm");
+  AddPar("0doutputmeanAbs", "", "variables with output of l1-norm");
   AddPar("0doutputmean",    "", "variables with output of mean");
   AddPar("0doutputVolInt",  "", "variables with output of Volume Integral");
 
