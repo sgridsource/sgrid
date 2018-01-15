@@ -119,7 +119,7 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   int type = box->CI->type;
   int dir, p;
   double pm, rx,ry,rz,rc, xc,yc,zc, a0,a1, sigma0,sigma1;
-  double sqrt_1_A2_B2;
+  double oosqrt_1_A2_B2;
 
   /* get direction, pm, and center */
   dir = domain/2 + 1;
@@ -134,9 +134,9 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   ry = y-yc;
   rz = z-zc;
   rc = sqrt(rx*rx + ry*ry + rz*rz);
-  if(dir==1)       sqrt_1_A2_B2 = fabs(rx)/rc;
-  else if(dir==2)  sqrt_1_A2_B2 = fabs(ry)/rc;
-  else             sqrt_1_A2_B2 = fabs(rz)/rc;
+  if(dir==1)       oosqrt_1_A2_B2 = fabs(rx)/rc;
+  else if(dir==2)  oosqrt_1_A2_B2 = fabs(ry)/rc;
+  else             oosqrt_1_A2_B2 = fabs(rz)/rc;
 
   /* check type of trafo */
   if(type==PyramidFrustum)
@@ -150,7 +150,7 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
     sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
-    a0 = pm * sigma0/sqrt_1_A2_B2;
+    a0 = pm * sigma0*oosqrt_1_A2_B2;
     a1 = pm * box->CI->s[1];
   }
   else if(type==outerCubedSphere)
@@ -159,7 +159,7 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
        and the inner one is flat */
     a0 = pm * box->CI->s[0];
     sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
-    a1 = pm * sigma1/sqrt_1_A2_B2;
+    a1 = pm * sigma1*oosqrt_1_A2_B2;
   }
   else if(type==CubedShell)
   {
@@ -167,8 +167,8 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
        and the inner one is flat */
     sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
     sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
-    a0 = pm * sigma0/sqrt_1_A2_B2;
-    a1 = pm * sigma1/sqrt_1_A2_B2;
+    a0 = pm * sigma0*oosqrt_1_A2_B2;
+    a1 = pm * sigma1*oosqrt_1_A2_B2;
   }
   else errorexit("unknown type");
 
