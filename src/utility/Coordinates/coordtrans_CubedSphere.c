@@ -63,7 +63,7 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0], func sigma_CubSph below */
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * box->CI->s[1];
   }
@@ -439,3 +439,27 @@ double dB_dy_CubedSphere(void *aux, int ind, double lam, double A, double B)
 {  RET_dB_dy; }
 double dB_dz_CubedSphere(void *aux, int ind, double lam, double A, double B)
 {  RET_dB_dz; }
+
+
+
+
+/* Functions to get sigma0/1 for cubed spheres from box->CI->iSurf[0/1].
+   box->CI->iSurf[0/1] is supposed to contain the index of the var where
+   we store sigma.
+   Here si is 0/1, and ind is the index of the point where we need sigma,
+   and A,B are the coordinates where we need sigma */
+double sigma_CubSph(tBox *box, int si, int ind, double A, double B)
+{
+  int isig = box->CI->iSurf[si]; /* get index of var with sigma */
+
+  /* if var index does not seem set, use sigma = box->CI->s[si] */
+  if(isig<1) return box->CI->s[si];
+
+  /* if we are on a grid point (ind>=0), use value at this point */
+  if(ind>=0) return box->v[isig][ind];
+  else /* we need to interpolate */
+  {
+    return 0;// FIXME: interpolate_isig_to_point_given by A,B(box, isig, B,phi, 0);
+  }
+}
+/* dsigma/dA and dsigma/dB need to be computed as well. */
