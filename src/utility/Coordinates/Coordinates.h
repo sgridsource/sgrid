@@ -613,6 +613,8 @@ double  ddz_dpdp_IAnsorgNS3(void *aux, int ind, double A, double B, double phi);
 double x_of_CubedSphere(void *aux, int ind, double lam, double A, double B);
 double y_of_CubedSphere(void *aux, int ind, double lam, double A, double B);
 double z_of_CubedSphere(void *aux, int ind, double lam, double A, double B);
+void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
+                         double *lam, double *A, double *B);
 double dlam_dx_CubedSphere(void *aux, int ind, double lam, double A, double B);
 double dlam_dy_CubedSphere(void *aux, int ind, double lam, double A, double B);
 double dlam_dz_CubedSphere(void *aux, int ind, double lam, double A, double B);

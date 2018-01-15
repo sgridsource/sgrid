@@ -678,6 +678,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->x_of_X[2] = y_of_CubedSphere;
       box->x_of_X[3] = z_of_CubedSphere;
 
+      box->XYZ_Of_xyz = lamAB_of_xyz_CubSph; /* inverse trafo */
+
       box->dX_dx[1][1] = dlam_dx_CubedSphere;
       box->dX_dx[1][2] = dlam_dy_CubedSphere;
       box->dX_dx[1][3] = dlam_dz_CubedSphere;
