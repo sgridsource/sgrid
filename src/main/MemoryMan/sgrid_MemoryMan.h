@@ -53,9 +53,9 @@ typedef struct tBOX {
   double *DD1;		/* diff. matrix for two derivs in direction 1 */
   double *DD2;		/* diff. matrix for two derivs in direction 2 */
   double *DD3;		/* diff. matrix for two derivs in direction 3 */
-  double (*x_of_X[4])(void *aux, int ind, double X, double Y, double Z);	    /* func to compute x from X */
-  double (*X_of_x[4])(void *aux, int ind, double x, double y, double z);	    /* func to compute X from x */
-  double (*dX_dx[4][4])(void *aux, int ind, double X, double Y, double Z);	    /* dX_l_{spec}/dx_m_{cart} */
+  double (*x_of_X[4])(void *aux, int ind, double X, double Y, double Z);    /* func to compute x from X. Note: xyz_Of_XYZ would be better */
+  void (*XYZ_Of_xyz)(struct tBOX *box, int ind, double x, double y, double z, double *X, double *Y, double *Z);  /* func to compute X,Y,Z from x,y,z */
+  double (*dX_dx[4][4])(void *aux, int ind, double X, double Y, double Z);    /* dX_l_{spec}/dx_m_{cart} */
   void (*Sing_d_dx[4])(void *aux, void *v, void *v1, void *v2, void *v3);  /* func to compute d/dx_m_{cart} at singular points */
   double (*ddX_dxdx[4][4][4])(void *aux, int ind, double X, double Y, double Z); /* d^2X_l_{spec}/(dx_m_{cart} dx_n_{cart}) */
   double (*dx_dX[4][4])(void *aux, int ind, double X, double Y, double Z);	    /* dX_l_{cart}/dx_m_{spec} */
