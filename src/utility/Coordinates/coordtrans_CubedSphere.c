@@ -482,13 +482,37 @@ double dB_dz_CubedSphere(void *aux, int ind, double lam, double A, double B)
 
 
 
+/* interpolate ibox->v[isig] */
+/* The use of Temp1 is not thread safe!
+   If tsafe=1 it is thread safe, because we allocate and the free
+   memory for each call. This is slower though. */
+double interpolate_isig_in_plane1_at_p(tBox *box, int isig,
+                                       int p, double A, double B, int tsafe)
+{
+  double interp;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  double *c;
+
+  if(tsafe)  c = malloc(n1*n2*n3 * sizeof(double));
+  else       c = box->v[Ind("Temp1")];
+
+  /* interpolate in plane1 at index p */
+  spec_Coeffs_inplaneN(box, 1,p, box->v[isig], c);
+  interp = spec_interpolate_inplaneN(box, 1,p, c, A,B);
+
+  if(tsafe) free(c);
+  return interp;
+}
+
 
 /* Functions to get sigma0/1 for cubed spheres from box->CI->iSurf[0/1].
    box->CI->iSurf[0/1] is supposed to contain the index of the var where
    we store sigma.
    Here si is 0/1, and ind is the index of the point where we need sigma,
    and A,B are the coordinates where we need sigma */
-double sigma_CubSph(tBox *box, int si, int ind, double A, double B)
+double CubedSphere_sigma(tBox *box, int si, int ind, double A, double B)
 {
   int isig = box->CI->iSurf[si]; /* get index of var with sigma */
 
@@ -499,7 +523,38 @@ double sigma_CubSph(tBox *box, int si, int ind, double A, double B)
   if(ind>=0) return box->v[isig][ind];
   else /* we need to interpolate */
   {
-    return 0;// FIXME: interpolate_isig_to_point_given by A,B(box, isig, B,phi, 0);
+    int p = (box->n1) * (si==1);   /* set plane index p */
+    return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
   }
 }
-/* dsigma/dA and dsigma/dB need to be computed as well. */
+/* dsigma/dA and dsigma/dB are derivs of sigma. */
+double CubedSphere_dsigma_dA(tBox *box, int si, int ind, double A, double B)
+{
+  int isig = box->CI->idSurfdX[si][2]; /* get index of var with dsigma/dA */
+
+  /* if var index does not seem set, use dsigma = 0 */
+  if(isig<1) return 0.0;
+
+  /* if we are on a grid point (ind>=0), use value at this point */
+  if(ind>=0) return box->v[isig][ind];
+  else /* we need to interpolate */
+  {
+    int p = (box->n1) * (si==1);   /* set plane index p */
+    return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
+  }
+}
+double CubedSphere_dsigma_dB(tBox *box, int si, int ind, double A, double B)
+{
+  int isig = box->CI->idSurfdX[si][3]; /* get index of var with dsigma/dB */
+
+  /* if var index does not seem set, use dsigma = 0 */
+  if(isig<1) return 0.0;
+
+  /* if we are on a grid point (ind>=0), use value at this point */
+  if(ind>=0) return box->v[isig][ind];
+  else /* we need to interpolate */
+  {
+    int p = (box->n1) * (si==1);   /* set plane index p */
+    return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
+  }
+}

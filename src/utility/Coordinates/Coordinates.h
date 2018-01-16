@@ -624,3 +624,6 @@ double dA_dz_CubedSphere(void *aux, int ind, double lam, double A, double B);
 double dB_dx_CubedSphere(void *aux, int ind, double lam, double A, double B);
 double dB_dy_CubedSphere(void *aux, int ind, double lam, double A, double B);
 double dB_dz_CubedSphere(void *aux, int ind, double lam, double A, double B);
+double CubedSphere_sigma(tBox *box, int si, int ind, double A, double B);
+double CubedSphere_dsigma_dA(tBox *box, int si, int ind, double A, double B);
+double CubedSphere_dsigma_dB(tBox *box, int si, int ind, double A, double B);
