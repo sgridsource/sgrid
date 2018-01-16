@@ -75,6 +75,15 @@ int sgrid_Coordinates(void)
     AddPar("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis", "no", "whether "
            "dsigma_pm_dphi and ddsigma_pm_dphidphi are 0 on x-axis [no,yes]");
   }
+  AddPar("Coordinates_CubedSphere_sigma01_vars", "no",
+         "create vars that contain sigma_{0/1} and their derivs [yes,no]");
+  if(Getv("Coordinates_CubedSphere_sigma01_vars", "yes"))
+  {
+    AddVar("Coordinates_CubedSphere_sigma01",     "", "sigma_{0/1}");
+    AddVar("Coordinates_CubedSphere_dsigma01_dA", "", "d/dA sigma_{0/1}");
+    AddVar("Coordinates_CubedSphere_dsigma01_dB", "", "d/dB sigma_{0/1}");
+  }
+
   AddPar("Coordinates_set_bfaces", "no", "whether we set bfaces in the "
          "function init_CoordTransform_And_Derivs [no,yes]");
 

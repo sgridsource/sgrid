@@ -6,6 +6,46 @@
 #include "Coordinates.h"
 
 
+
+/* set var sigma01 to a const in first or last plane of dir1,
+   si selects plane: si=0: first, si=1: last */
+void set_const_CubedSphere_sigma01_inplane(tBox *box, int isigma, int si,
+                                           double sigma)
+{
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int p = (n1) * (si==1);   /* set plane index p */
+  int i,j,k;
+
+  forplane1(i,j,k, n1,n2,n3, p)
+  {
+    int ijk = Index(i,j,k);
+    box->v[isigma][ijk] = sigma;
+  }
+}
+
+/* compute var dsigma01_dA/B everywhere.
+   But this could also be done in first or last plane of dir1,
+   where si selects plane: si=0: first, si=1: last */
+void compute_CubedSphere_dsigma01(tBox *box, int isigma,
+                                  int isigma_dA, int isigma_dB)
+{
+  double *sigma    = box->v[isigma];
+  double *dsigmadA = box->v[isigma_dA];
+  double *dsigmadB = box->v[isigma_dB];
+  /* 
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int p = (n1) * (si==1); // set plane index p
+  int i,j,k;
+  for now we ignore si and compute the deriv everywhere */
+  spec_Deriv1(box, 2, sigma, dsigmadA);
+  spec_Deriv1(box, 3, sigma, dsigmadB);
+}
+
+
 /* convert 6 boxes starting with b0 to some kind of cubed spheres */
 /* call this after all boxes exist already, so at POST_GRID */
 /* type can be "PyramidFrustum", "innerCubedSphere", "outerCubedSphere",
@@ -78,6 +118,56 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
     /* set domain index and type */
     box->CI->dom = i;
     box->CI->type= type;
+
+    /* set sigma vars and iSurf, idSurfdX for them */
+    if(Getv("Coordinates_CubedSphere_sigma01_vars", "yes"))
+    {
+      int isigma    = Ind("Coordinates_CubedSphere_sigma01");
+      int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
+      int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
+      if(box->v[isigma]!=NULL)
+      {
+        switch(type)
+        {
+          case innerCubedSphere:
+            /* compute sigma on first plane in dir1 from box->CI->s[0] */
+            set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
+            /* now set coord. info structure */
+            box->CI->iSurf[0] = isigma;
+            box->CI->idSurfdX[0][2] = isigma_dA;
+            box->CI->idSurfdX[0][3] = isigma_dB;
+            break;
+        
+          case outerCubedSphere:
+            /* compute sigma on last plane in dir1 from box->CI->s[1] */
+            set_const_CubedSphere_sigma01_inplane(box, isigma,1, box->CI->s[1]);
+            /* now set coord. info structure */
+            box->CI->iSurf[1] = isigma;
+            box->CI->idSurfdX[1][2] = isigma_dA;
+            box->CI->idSurfdX[1][3] = isigma_dB;
+            break;
+        
+          case CubedShell:
+            /* compute sigma on first plane in dir1 from box->CI->s[0] */
+            set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
+            /* compute sigma on last plane in dir1 from box->CI->s[1] */
+            set_const_CubedSphere_sigma01_inplane(box, isigma,1, box->CI->s[1]);
+            /* now set coord. info structure */
+            box->CI->iSurf[0] = isigma;
+            box->CI->idSurfdX[0][2] = isigma_dA;
+            box->CI->idSurfdX[0][3] = isigma_dB;
+            box->CI->iSurf[1] = isigma;
+            box->CI->idSurfdX[1][2] = isigma_dA;
+            box->CI->idSurfdX[1][3] = isigma_dB;
+            break;
+
+          default:
+            errorexit("convert_6boxes_to_CubedSphere: not sure what to do...");
+        }
+        /* compute sigma derivs */
+        compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
+      }
+    }
 
     /* erase all bface info in this box */
     free_all_bfaces(box);
