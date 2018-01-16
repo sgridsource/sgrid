@@ -14,7 +14,7 @@ int sgrid_TestDerivs()
   AddFun(POST_GRID, Set_Test_Coordinates_AnsorgNS_sigma_pm,
          "setup the sigma_{+-} vars from AnsorgNS");
   AddFun(POST_GRID, Setup_CubedSpheres_initboxes,
-         "setup some cobes spheres");
+         "setup some cubed spheres");
   AddFun(INITIALDATA, TestDerivs_startup, "initialize test");
   AddFun(ANALYZE, TestDerivs_analyze, "compute test results");
 
