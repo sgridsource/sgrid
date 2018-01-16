@@ -208,6 +208,9 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
   double pm, rx,ry,rz, rx2,ry2,rz2, rc2, xc,yc,zc, a0,a1, sigma0,sigma1;
   double sqrt_1_A2_B2 = sqrt(1.0 + A*A + B*B);
   double mx,my,mz, da0_dx,da0_dy,da0_dz, da1_dx,da1_dy,da1_dz;
+  double mx0,my0,mz0, mx1,my1,mz1;
+  double dsigma_dA_osigma0, dsigma_dB_osigma0;
+  double dsigma_dA_osigma1, dsigma_dB_osigma1;
 
   /* get direction, pm, and center */
   dir = domain/2 + 1;
@@ -221,6 +224,10 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
   if(type==PyramidFrustum)
   {
     /* this gives a pyramid frustum */
+    dsigma_dA_osigma0 = 0.0;
+    dsigma_dB_osigma0 = 0.0;
+    dsigma_dA_osigma1 = 0.0;
+    dsigma_dB_osigma1 = 0.0;
     a0 = pm * box->CI->s[0];
     a1 = pm * box->CI->s[1];
     da0_dx = 0.0;
@@ -235,7 +242,11 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
     sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    dsigma_dA_osigma0 = 0.0;
+    dsigma_dB_osigma0 = 0.0;
     a0 = pm * sigma0/sqrt_1_A2_B2;
+    dsigma_dA_osigma1 = 0.0;
+    dsigma_dB_osigma1 = 0.0;
     a1 = pm * box->CI->s[1];
     da0_dx = a0;  /* mark as non-zero */
     da0_dy = a0;  /* mark as non-zero */
@@ -249,7 +260,11 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
     a0 = pm * box->CI->s[0];
+    dsigma_dA_osigma0 = 0.0;
+    dsigma_dB_osigma0 = 0.0;
     sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    dsigma_dA_osigma1 = 0.0;
+    dsigma_dB_osigma1 = 0.0;
     a1 = pm * sigma1/sqrt_1_A2_B2;
     da0_dx = 0.0;
     da0_dy = 0.0;
@@ -263,7 +278,11 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
     sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    dsigma_dA_osigma0 = 0.0;
+    dsigma_dB_osigma0 = 0.0;
     sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    dsigma_dA_osigma1 = 0.0;
+    dsigma_dB_osigma1 = 0.0;
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * sigma1/sqrt_1_A2_B2;
     da0_dx = a0; /* mark as non-zero */
@@ -290,16 +309,25 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
     ry2 = ry*ry;
     rz2 = rz*rz;
     rc2= rx2 + ry2 + rz2;
-    /* da0_dx = (1/rx - rx/rc^2)*a0 */
+    /* da0_dx = (1/rx - rx/rc^2)*a0 + ((dsigma0/dx)/sigma0)*a0 */
+    /* da0_dy =       - ry/rc^2 *a0 + ((dsigma0/dy)/sigma0)*a0 */
     mx = (1.0/rx - rx/rc2);
     my = (       - ry/rc2);
     mz = (       - rz/rc2);
-    da0_dx *= mx;
-    da0_dy *= my;
-    da0_dz *= mz;
-    da1_dx *= mx;
-    da1_dy *= my;
-    da1_dz *= mz;
+    /* dsigma0/dx = -(ry/rx2)*dsigma0_dA - (rz/rx2)*dsigma0_dB */
+    /* dsigma0/dy =    (1/rx)*dsigma0_dA + 0 */
+    mx0 = -dsigma_dA_osigma0*(ry/rx2) - dsigma_dB_osigma0*(rz/rx2);
+    my0 =  dsigma_dA_osigma0/rx;
+    mz0 =                               dsigma_dB_osigma0/rx;
+    mx1 = -dsigma_dA_osigma1*(ry/rx2) - dsigma_dB_osigma1*(rz/rx2);
+    my1 =  dsigma_dA_osigma1/rx;
+    mz1 =                               dsigma_dB_osigma1/rx;
+    da0_dx *= (mx + mx0);
+    da0_dy *= (my + my0);
+    da0_dz *= (mz + mz0);
+    da1_dx *= (mx + mx1);
+    da1_dy *= (my + my1);
+    da1_dz *= (mz + mz1);
     /* lam = (rx-a0)/(a1-a0);
        A   = ry/rx;
        B   = rz/rx;
@@ -329,12 +357,18 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
     mx = (       - rx/rc2);
     my = (1.0/ry - ry/rc2);
     mz = (       - rz/rc2);
-    da0_dx *= mx;
-    da0_dy *= my;
-    da0_dz *= mz;
-    da1_dx *= mx;
-    da1_dy *= my;
-    da1_dz *= mz;
+    mx0 =  dsigma_dA_osigma0/ry;
+    my0 = -dsigma_dA_osigma0*(rx/ry2) - dsigma_dB_osigma0*(rz/ry2);
+    mz0 =                               dsigma_dB_osigma0/ry;
+    mx1 =  dsigma_dA_osigma1/ry;
+    my1 = -dsigma_dA_osigma1*(rx/ry2) - dsigma_dB_osigma1*(rz/ry2);
+    mz1 =                               dsigma_dB_osigma1/ry;
+    da0_dx *= (mx + mx0);
+    da0_dy *= (my + my0);
+    da0_dz *= (mz + mz0);
+    da1_dx *= (mx + mx1);
+    da1_dy *= (my + my1);
+    da1_dz *= (mz + mz1);
     /* lam = (ry-a0)/(a1-a0); 
        A   = rx/ry;
        B   = rz/ry; */
@@ -363,12 +397,18 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
     mx = (       - rx/rc2);
     my = (       - ry/rc2);
     mz = (1.0/rz - rz/rc2);
-    da0_dx *= mx;
-    da0_dy *= my;
-    da0_dz *= mz;
-    da1_dx *= mx;
-    da1_dy *= my;
-    da1_dz *= mz;
+    mx0 =                               dsigma_dB_osigma0/rz;
+    my0 =  dsigma_dA_osigma0/rz;
+    mz0 = -dsigma_dA_osigma0*(ry/rz2) - dsigma_dB_osigma0*(rx/rz2);
+    mx1 =                               dsigma_dB_osigma1/rz;
+    my1 =  dsigma_dA_osigma1/rz;
+    mz1 = -dsigma_dA_osigma1*(ry/rz2) - dsigma_dB_osigma1*(rx/rz2);
+    da0_dx *= (mx + mx0);
+    da0_dy *= (my + my0);
+    da0_dz *= (mz + mz0);
+    da1_dx *= (mx + mx1);
+    da1_dy *= (my + my1);
+    da1_dz *= (mz + mz1);
     /* lam = (rz-a0)/(a1-a0);
        A   = ry/rz;
        B   = rx/rz; */
