@@ -63,7 +63,7 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0], func sigma_CubSph below */
+    sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * box->CI->s[1];
   }
@@ -72,15 +72,15 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
     a0 = pm * box->CI->s[0];
-    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
     a1 = pm * sigma1/sqrt_1_A2_B2;
   }
   else if(type==CubedShell)
   {
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
-    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
-    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
+    sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * sigma1/sqrt_1_A2_B2;
   }
@@ -138,6 +138,25 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   else if(dir==2)  oosqrt_1_A2_B2 = fabs(ry)/rc;
   else             oosqrt_1_A2_B2 = fabs(rz)/rc;
 
+  /* get A,B for each domain */
+  if(dir==1)
+  { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc)
+       (1 + A^2 + B^2) rx^2 = rx^2 + ry^2 + rz^2
+       1/sqrt(1 + A^2 + B^2) = |rx|/sqrt(rx^2 + ry^2 + rz^2) = |rx|/rc */
+    *A   = ry/rx;
+    *B   = rz/rx;
+  }
+  else if(dir==2)
+  {
+    *A   = rx/ry;
+    *B   = rz/ry;
+  }
+  else /* dir==3 */
+  {
+    *A   = ry/rz;
+    *B   = rx/rz;
+  }
+
   /* check type of trafo */
   if(type==PyramidFrustum)
   {
@@ -149,7 +168,7 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
+    sigma0 = CubedSphere_sigma(box, 0, ind, *A,*B);
     a0 = pm * sigma0*oosqrt_1_A2_B2;
     a1 = pm * box->CI->s[1];
   }
@@ -158,40 +177,34 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
     a0 = pm * box->CI->s[0];
-    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    sigma1 = CubedSphere_sigma(box, 1, ind, *A,*B);
     a1 = pm * sigma1*oosqrt_1_A2_B2;
   }
   else if(type==CubedShell)
   {
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
-    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
-    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
+    sigma0 = CubedSphere_sigma(box, 0, ind, *A,*B);
+    sigma1 = CubedSphere_sigma(box, 1, ind, *A,*B);
     a0 = pm * sigma0*oosqrt_1_A2_B2;
     a1 = pm * sigma1*oosqrt_1_A2_B2;
   }
   else errorexit("unknown type");
 
-  /* compute coord trafo for each domain */
+  /* complete coord trafo for each domain and get lam */
   if(dir==1)
   { /* lam = (x-xc-a0)/(a1-a0),  A = (y-yc)/(x-xc),  B = (z-zc)/(x-xc)
        (1 + A^2 + B^2) rx^2 = rx^2 + ry^2 + rz^2
        1/sqrt(1 + A^2 + B^2) = |rx|/sqrt(rx^2 + ry^2 + rz^2) = |rx|/rc */
     *lam = (rx-a0)/(a1-a0);
-    *A   = ry/rx;
-    *B   = rz/rx;
   }
   else if(dir==2)
   {
     *lam = (ry-a0)/(a1-a0); 
-    *A   = rx/ry;
-    *B   = rz/ry;
   }
   else /* dir==3 */
   {
     *lam = (rz-a0)/(a1-a0);
-    *A   = ry/rz;
-    *B   = rx/rz;
   }
 }
 
@@ -241,9 +254,9 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
-    dsigma_dA_osigma0 = 0.0;
-    dsigma_dB_osigma0 = 0.0;
+    sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
+    dsigma_dA_osigma0 = CubedSphere_dsigma_dA(box, 0, ind, A,B)/sigma0;
+    dsigma_dB_osigma0 = CubedSphere_dsigma_dB(box, 0, ind, A,B)/sigma0;
     a0 = pm * sigma0/sqrt_1_A2_B2;
     dsigma_dA_osigma1 = 0.0;
     dsigma_dB_osigma1 = 0.0;
@@ -262,9 +275,9 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
     a0 = pm * box->CI->s[0];
     dsigma_dA_osigma0 = 0.0;
     dsigma_dB_osigma0 = 0.0;
-    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
-    dsigma_dA_osigma1 = 0.0;
-    dsigma_dB_osigma1 = 0.0;
+    sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
+    dsigma_dA_osigma1 = CubedSphere_dsigma_dA(box, 1, ind, A,B)/sigma1;
+    dsigma_dB_osigma1 = CubedSphere_dsigma_dB(box, 1, ind, A,B)/sigma1;
     a1 = pm * sigma1/sqrt_1_A2_B2;
     da0_dx = 0.0;
     da0_dy = 0.0;
@@ -277,12 +290,12 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
   {
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
-    sigma0 = box->CI->s[0];  /* or get it from box->CI->iSurf[0] */
-    dsigma_dA_osigma0 = 0.0;
-    dsigma_dB_osigma0 = 0.0;
-    sigma1 = box->CI->s[1];  /* or get it from box->CI->iSurf[1] */
-    dsigma_dA_osigma1 = 0.0;
-    dsigma_dB_osigma1 = 0.0;
+    sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
+    dsigma_dA_osigma0 = CubedSphere_dsigma_dA(box, 0, ind, A,B)/sigma0;
+    dsigma_dB_osigma0 = CubedSphere_dsigma_dB(box, 0, ind, A,B)/sigma0;
+    sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
+    dsigma_dA_osigma1 = CubedSphere_dsigma_dA(box, 1, ind, A,B)/sigma1;
+    dsigma_dB_osigma1 = CubedSphere_dsigma_dB(box, 1, ind, A,B)/sigma1;
     a0 = pm * sigma0/sqrt_1_A2_B2;
     a1 = pm * sigma1/sqrt_1_A2_B2;
     da0_dx = a0; /* mark as non-zero */
