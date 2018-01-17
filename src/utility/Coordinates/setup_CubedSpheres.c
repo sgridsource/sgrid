@@ -45,6 +45,22 @@ void compute_CubedSphere_dsigma01(tBox *box, int isigma,
   spec_Deriv1(box, 3, sigma, dsigmadB);
 }
 
+/* this deforms sigma for testing purposes */
+void deform_CubedSphere_sigma01(tBox *box, int isigma, double cA, double cB)
+{
+  int iA = Ind("Y");
+  int iB = Ind("Z");
+  int i;
+  double s = (box->CI->dom - 2.5)/2.5;
+  forallpoints(box,i)
+  {
+    double A = box->v[iA][i];
+    double B = box->v[iB][i];
+    double fac = (1.0 - cA*(A-1)*(A+1)*s) * (1.0 - cB*(B-1)*(B+1)*s);
+    box->v[isigma][i] *= fac;
+  }
+}
+
 
 /* convert 6 boxes starting with b0 to some kind of cubed spheres */
 /* call this after all boxes exist already, so at POST_GRID */
@@ -169,6 +185,9 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
       /* compute sigma derivs */
       if(box->v[isigma]!=NULL)
       {
+        /* deform sigma */
+        if(1) deform_CubedSphere_sigma01(box, isigma, 0.2, -0.1);
+        /* enable derivs and set them  */
         enablevar_inbox(box, isigma_dA);
         enablevar_inbox(box, isigma_dB);
         compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
