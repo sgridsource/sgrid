@@ -15,8 +15,10 @@ void set_const_CubedSphere_sigma01_inplane(tBox *box, int isigma, int si,
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
-  int p = (n1) * (si==1);   /* set plane index p */
+  int p = (n1-1) * (si==1);   /* set plane index p */
   int i,j,k;
+
+printf("si=%d p=%d\n", si, p);
 
   forplane1(i,j,k, n1,n2,n3, p)
   {
@@ -38,7 +40,7 @@ void compute_CubedSphere_dsigma01(tBox *box, int isigma,
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
-  int p = (n1) * (si==1); // set plane index p
+  int p = (n1-1) * (si==1); // set plane index p
   int i,j,k;
   for now we ignore si and compute the deriv everywhere */
   spec_Deriv1(box, 2, sigma, dsigmadA);

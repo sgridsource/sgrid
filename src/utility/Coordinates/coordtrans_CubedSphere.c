@@ -536,7 +536,7 @@ double CubedSphere_sigma(tBox *box, int si, int ind, double A, double B)
   if(ind>=0) return box->v[isig][ind];
   else /* we need to interpolate */
   {
-    int p = (box->n1) * (si==1);   /* set plane index p */
+    int p = (box->n1-1) * (si==1);   /* set plane index p */
     return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
   }
 }
@@ -552,7 +552,7 @@ double CubedSphere_dsigma_dA(tBox *box, int si, int ind, double A, double B)
   if(ind>=0) return box->v[isig][ind];
   else /* we need to interpolate */
   {
-    int p = (box->n1) * (si==1);   /* set plane index p */
+    int p = (box->n1-1) * (si==1);   /* set plane index p */
     return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
   }
 }
@@ -567,7 +567,7 @@ double CubedSphere_dsigma_dB(tBox *box, int si, int ind, double A, double B)
   if(ind>=0) return box->v[isig][ind];
   else /* we need to interpolate */
   {
-    int p = (box->n1) * (si==1);   /* set plane index p */
+    int p = (box->n1-1) * (si==1);   /* set plane index p */
     return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
   }
 }
