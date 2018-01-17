@@ -125,46 +125,52 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
       int isigma    = Ind("Coordinates_CubedSphere_sigma01");
       int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
       int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
+
+      switch(type)
+      {
+        case innerCubedSphere:
+          enablevar_inbox(box, isigma);
+          /* compute sigma on first plane in dir1 from box->CI->s[0] */
+          set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
+          /* now set coord. info structure */
+          box->CI->iSurf[0] = isigma;
+          box->CI->idSurfdX[0][2] = isigma_dA;
+          box->CI->idSurfdX[0][3] = isigma_dB;
+          break;
+      
+        case outerCubedSphere:
+          enablevar_inbox(box, isigma);
+          /* compute sigma on last plane in dir1 from box->CI->s[1] */
+          set_const_CubedSphere_sigma01_inplane(box, isigma,1, box->CI->s[1]);
+          /* now set coord. info structure */
+          box->CI->iSurf[1] = isigma;
+          box->CI->idSurfdX[1][2] = isigma_dA;
+          box->CI->idSurfdX[1][3] = isigma_dB;
+          break;
+      
+        case CubedShell:
+          enablevar_inbox(box, isigma);
+          /* compute sigma on first plane in dir1 from box->CI->s[0] */
+          set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
+          /* compute sigma on last plane in dir1 from box->CI->s[1] */
+          set_const_CubedSphere_sigma01_inplane(box, isigma,1, box->CI->s[1]);
+          /* now set coord. info structure */
+          box->CI->iSurf[0] = isigma;
+          box->CI->idSurfdX[0][2] = isigma_dA;
+          box->CI->idSurfdX[0][3] = isigma_dB;
+          box->CI->iSurf[1] = isigma;
+          box->CI->idSurfdX[1][2] = isigma_dA;
+          box->CI->idSurfdX[1][3] = isigma_dB;
+          break;
+
+        default:
+          errorexit("convert_6boxes_to_CubedSphere: not sure what to do...");
+      }
+      /* compute sigma derivs */
       if(box->v[isigma]!=NULL)
       {
-        switch(type)
-        {
-          case innerCubedSphere:
-            /* compute sigma on first plane in dir1 from box->CI->s[0] */
-            set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
-            /* now set coord. info structure */
-            box->CI->iSurf[0] = isigma;
-            box->CI->idSurfdX[0][2] = isigma_dA;
-            box->CI->idSurfdX[0][3] = isigma_dB;
-            break;
-        
-          case outerCubedSphere:
-            /* compute sigma on last plane in dir1 from box->CI->s[1] */
-            set_const_CubedSphere_sigma01_inplane(box, isigma,1, box->CI->s[1]);
-            /* now set coord. info structure */
-            box->CI->iSurf[1] = isigma;
-            box->CI->idSurfdX[1][2] = isigma_dA;
-            box->CI->idSurfdX[1][3] = isigma_dB;
-            break;
-        
-          case CubedShell:
-            /* compute sigma on first plane in dir1 from box->CI->s[0] */
-            set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
-            /* compute sigma on last plane in dir1 from box->CI->s[1] */
-            set_const_CubedSphere_sigma01_inplane(box, isigma,1, box->CI->s[1]);
-            /* now set coord. info structure */
-            box->CI->iSurf[0] = isigma;
-            box->CI->idSurfdX[0][2] = isigma_dA;
-            box->CI->idSurfdX[0][3] = isigma_dB;
-            box->CI->iSurf[1] = isigma;
-            box->CI->idSurfdX[1][2] = isigma_dA;
-            box->CI->idSurfdX[1][3] = isigma_dB;
-            break;
-
-          default:
-            errorexit("convert_6boxes_to_CubedSphere: not sure what to do...");
-        }
-        /* compute sigma derivs */
+        enablevar_inbox(box, isigma_dA);
+        enablevar_inbox(box, isigma_dB);
         compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
       }
     }

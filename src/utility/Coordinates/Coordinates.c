@@ -689,20 +689,6 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dB_dx_CubedSphere;
       box->dX_dx[3][2] = dB_dy_CubedSphere;
       box->dX_dx[3][3] = dB_dz_CubedSphere;
-
-      /* enable sigma_{01} vars */
-      if(Getv("Coordinates_CubedSphere_sigma01_vars", "yes"))
-        if( Getv(str, "innerCubedSphere") ||
-            Getv(str, "outerCubedSphere") ||
-            Getv(str, "CubedShell") )
-        {
-          int isigma    = Ind("Coordinates_CubedSphere_sigma01");
-          int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
-          int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
-          enablevar_inbox(box, isigma);
-          enablevar_inbox(box, isigma_dA);
-          enablevar_inbox(box, isigma_dB);
-        }
     }
     else
       errorexit("Coordinates: unknown coordinates...");
