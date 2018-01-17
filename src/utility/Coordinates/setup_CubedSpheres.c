@@ -18,8 +18,6 @@ void set_const_CubedSphere_sigma01_inplane(tBox *box, int isigma, int si,
   int p = (n1-1) * (si==1);   /* set plane index p */
   int i,j,k;
 
-printf("si=%d p=%d\n", si, p);
-
   forplane1(i,j,k, n1,n2,n3, p)
   {
     int ijk = Index(i,j,k);
