@@ -186,7 +186,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
       if(box->v[isigma]!=NULL)
       {
         /* deform sigma */
-        if(1) deform_CubedSphere_sigma01(box, isigma, 0.2, -0.1);
+        if(0) deform_CubedSphere_sigma01(box, isigma, 0.2, -0.1);
         /* enable derivs and set them  */
         enablevar_inbox(box, isigma_dA);
         enablevar_inbox(box, isigma_dB);
