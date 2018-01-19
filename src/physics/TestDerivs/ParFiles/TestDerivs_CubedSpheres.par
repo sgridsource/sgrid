@@ -2,9 +2,10 @@ physics = TestDerivs
 
 TestDerivs_useDD = no
 
-TestDerivs_grid = CubedSpheres
-
 nboxes = 13
+
+TestDerivs_grid = CubedSpheres
+Coordinates_CubedSphere_sigma01_vars = yes
 
 n1  = 8
 n2  = 8
@@ -22,11 +23,11 @@ iterate_parameter3 = n3  8 12 16 20 # 24
 0doutputall	= yes
 
 1douttime	= 0.1
-1doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi Coordinates_AnsorgNS_ddsigma_pm_dBdB Coordinates_AnsorgNS_ddsigma_pm_dBdphi Coordinates_AnsorgNS_ddsigma_pm_dphidphi
+1doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_CubedSphere_sigma01 Coordinates_CubedSphere_dsigma01_dA Coordinates_CubedSphere_dsigma01_dB
 1doutputall	= yes
 
 2douttime	= 0.1
-2doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_AnsorgNS_sigma_pm Coordinates_AnsorgNS_dsigma_pm_dB Coordinates_AnsorgNS_dsigma_pm_dphi Coordinates_AnsorgNS_ddsigma_pm_dBdB Coordinates_AnsorgNS_ddsigma_pm_dBdphi Coordinates_AnsorgNS_ddsigma_pm_dphidphi
+2doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_CubedSphere_sigma01 Coordinates_CubedSphere_dsigma01_dA Coordinates_CubedSphere_dsigma01_dB
 2doutputall	= yes
 
 outputReplaceXby_box0 = x
