@@ -61,6 +61,59 @@ void deform_CubedSphere_sigma01(tBox *box, int isigma, double cA, double cB)
   }
 }
 
+/* find Amax,Amin, Bmax,Bmin in a domain using distances from center */
+void set_AB_min_max_from_Din(int dom, double *Din,
+                             double *Amin, double *Amax,
+                             double *Bmin, double *Bmax)
+{
+  switch(dom)
+  {
+    case 0:
+      *Amin = -Din[3]/Din[dom];
+      *Amax =  Din[2]/Din[dom];
+      *Bmin = -Din[5]/Din[dom];
+      *Bmax =  Din[4]/Din[dom];
+      break;
+
+    case 1:
+      *Amin = -Din[2]/Din[dom];
+      *Amax =  Din[3]/Din[dom];
+      *Bmin = -Din[4]/Din[dom];
+      *Bmax =  Din[5]/Din[dom];
+      break;
+
+    case 2:
+      *Amin = -Din[1]/Din[dom];
+      *Amax =  Din[0]/Din[dom];
+      *Bmin = -Din[5]/Din[dom];
+      *Bmax =  Din[4]/Din[dom];
+      break;
+
+    case 3:
+      *Amin = -Din[0]/Din[dom];
+      *Amax =  Din[1]/Din[dom];
+      *Bmin = -Din[4]/Din[dom];
+      *Bmax =  Din[5]/Din[dom];
+      break;
+
+    case 4:
+      *Amin = -Din[3]/Din[dom];
+      *Amax =  Din[2]/Din[dom];
+      *Bmin = -Din[1]/Din[dom];
+      *Bmax =  Din[0]/Din[dom];
+      break;
+
+    case 5:
+      *Amin = -Din[2]/Din[dom];
+      *Amax =  Din[3]/Din[dom];
+      *Bmin = -Din[0]/Din[dom];
+      *Bmax =  Din[1]/Din[dom];
+      break;
+
+   default:
+      errorexit("set_AB_min_max_from_D: unknown dom");
+  }
+}
 
 /* convert 6 boxes starting with b0 to some kind of cubed spheres */
 /* call this after all boxes exist already, so at POST_GRID */
@@ -104,6 +157,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
   {
     tBox *box;
     int d;
+    double Amin,Amax, Bmin,Bmax;
 
     /* break i-loop if we do not have enough boxes */
     if(b0+i >= grid->nboxes) break;
@@ -114,17 +168,21 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
     snprintf(val, 999, "%s", name);
     Sets(par, val);
     /* set basis and min/max in each direction */
+    set_AB_min_max_from_Din(i, Din, &Amin,&Amax, &Bmin,&Bmax);
     for(d=1; d<=3; d++)
     {
       snprintf(par, 999, "box%d_basis%d", b0+i, d);
       Sets(par, "ChebExtrema");
 
       snprintf(par, 999, "box%d_min%d", b0+i, d);
-      if(d==1) Sets(par, "0");
-      else     Sets(par, "-1");
+      if(d==1)      Sets(par, "0");
+      else if(d==2) Setd(par, Amin);
+      else          Setd(par, Bmin);
 
       snprintf(par, 999, "box%d_max%d", b0+i, d);
-      Sets(par, "1");
+      if(d==1)      Sets(par, "1");
+      else if(d==2) Setd(par, Amax);
+      else          Setd(par, Bmax);
     }
 
     /* set center */
