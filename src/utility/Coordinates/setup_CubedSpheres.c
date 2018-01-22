@@ -66,9 +66,12 @@ void deform_CubedSphere_sigma01(tBox *box, int isigma, double cA, double cB)
 /* call this after all boxes exist already, so at POST_GRID */
 /* type can be "PyramidFrustum", "innerCubedSphere", "outerCubedSphere",
    "CubedShell"
-   It returns the index of the box right after the last converted box */
+   xc[1..3] = (x,y,z) of coord center for the 6 cubed spheres
+   Din[0...5] inner distance from center for cubed sph. domain 0-5
+   Dout[0...5] outer distance from center for cubed sph. domain 0-5 */
+/* It returns the index of the box right after the last converted box */
 int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
-                                  double *xc, double din, double dout)
+                                  double *xc, double *Din, double *Dout)
 {
   int i;
   char par[1000];
@@ -128,8 +131,8 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
     for(d=1; d<=3; d++)  box->CI->xc[d] = xc[d];
 
     /* set inner and outer distance from center */
-    box->CI->s[0] = din;
-    box->CI->s[1] = dout;
+    box->CI->s[0] = Din[i];
+    box->CI->s[1] = Dout[i];
 
     /* set domain index and type */
     box->CI->dom = i;
@@ -186,7 +189,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
       if(box->v[isigma]!=NULL)
       {
         /* deform sigma */
-        if(0) deform_CubedSphere_sigma01(box, isigma, 0.2, -0.1);
+        if(1) deform_CubedSphere_sigma01(box, isigma, 0.2, -0.1);
         /* enable derivs and set them  */
         enablevar_inbox(box, isigma_dA);
         enablevar_inbox(box, isigma_dB);
@@ -196,8 +199,6 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
 
     /* erase all bface info in this box */
     free_all_bfaces(box);
-
-    /* FIXME: maybe add varlist for inner or outer distance from center??? */
   }
 
   /* convert boxes to what the pars now say */
@@ -266,10 +267,23 @@ int arrange_12CubSph_into_empty_cube(tGrid *grid, int b0, double *xc,
                                      double din, double dmid, double dout)
 {
   int bl=b0;
+  int i;
+  double Din[6];
+  double Dmid[6];
+  double Dout[6];
+
+  /* set distances from center to din, dmid, dout for all domains */
+  for(i=0; i<6; i++)
+  {
+    Din[i] = din;
+    Dmid[i]= dmid;
+    Dout[i]= dout;
+  }
+  /* convert the 12 boxes */
   bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,
-                                     xc, din,dmid);
+                                     xc, Din,Dmid);
   bl = convert_6boxes_to_CubedSphere(grid, bl, innerCubedSphere,
-                                     xc, dmid,dout);
+                                     xc, Dmid,Dout);
   return bl;
 }
 
