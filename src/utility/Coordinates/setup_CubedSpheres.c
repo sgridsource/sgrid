@@ -398,3 +398,42 @@ int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
 
   return bl;
 }
+
+
+/* suround two big touching cubes with cubed spheres that have
+   A,B that are in an extended range
+         _______
+      __/       \__ 
+     /             \   
+    /__     3     __\  
+   /   -- _____ --   \     e.g. dom0/1 have A = [-0.8, 0.8] 
+  |   0  |  |  |   1  |         dom2/3 have A = [-1.25,1.25]
+  |      |__|__|      |
+   \ __--       --__ / 
+    \       2       /
+     \__         __/
+        \_______/ 
+*/
+int full_sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
+        double rout, double dc, 
+        double din1, double dmid1, double din2, double dmid2)
+{
+  int bl=b0;
+  double xc[4], Din[6], Dout[6];
+  int i;
+
+  /* make the 2 full cubes */
+  bl = two_full_cubes_touching_at_x0(grid, b0, dc, din1,dmid1, din2,dmid2);
+
+  /* set distances to make 6 more cubed spheres around these 2 full cubes */
+  for(i=0; i<6; i++)
+  {
+    if(i<3) Din[i] = 2.0*dc;
+    else    Din[i] = dc;
+    Dout[i] = rout;
+  }  
+  xc[1] = xc[2] = xc[3] = 0.0;
+  bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,
+                                     xc, Din,Dout);
+  return bl;
+}
