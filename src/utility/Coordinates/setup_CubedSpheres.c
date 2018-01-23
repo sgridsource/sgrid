@@ -428,7 +428,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
   /* set distances to make 6 more cubed spheres around these 2 full cubes */
   for(i=0; i<6; i++)
   {
-    if(i<3) Din[i] = 2.0*dc;
+    if(i<2) Din[i] = 2.0*dc;
     else    Din[i] = dc;
     Dout[i] = rout;
   }  
