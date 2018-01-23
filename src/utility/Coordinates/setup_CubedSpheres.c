@@ -409,12 +409,12 @@ int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
    /   -- _____ --   \     e.g. dom0/1 have A = [-0.8, 0.8] 
   |   0  |  |  |   1  |         dom2/3 have A = [-1.25,1.25]
   |      |__|__|      |
-   \ __--       --__ / 
-    \       2       /
+   \ __--       --__ /      rout is radius of sphere
+    \       2       /       2*dc is sidelength of one cube 
      \__         __/
         \_______/ 
 */
-int full_sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
+int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
         double rout, double dc, 
         double din1, double dmid1, double din2, double dmid2)
 {
