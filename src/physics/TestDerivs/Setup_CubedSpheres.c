@@ -19,5 +19,6 @@ int Setup_CubedSpheres_initboxes(tGrid *grid)
     /* test cubed spheres */
     arrange_1box12CubSph_into_full_cube(grid, 0, xc, 0.2,0.4,0.6);
   }
+parameterio_write_current_pars(grid);
   return 0;
 }
