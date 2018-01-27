@@ -21,7 +21,7 @@
 /* global vars for parameter data base
    (tParameter is defined in src/main/main/sgrid_main.h) */
 tParameter *pdb;
-int npdb, npdbmax = 1000;
+int npdb, npdbmax = 10000;
 
 tParameter *findparameter(char *name, int fatal);
 void setparameter(char *name, char *value);
