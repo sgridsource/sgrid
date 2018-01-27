@@ -77,8 +77,7 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
   }
   else if(type==CubedShell)
   {
-    /* this gives a cubed sphere piece where the outer surface is curved
-       and the inner one is flat */
+    /* this gives a cubed sphere where both inner outer surfaces are curved */
     sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
     sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
     a0 = pm * sigma0/sqrt_1_A2_B2;
@@ -182,8 +181,7 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   }
   else if(type==CubedShell)
   {
-    /* this gives a cubed sphere piece where the outer surface is curved
-       and the inner one is flat */
+    /* this gives a cubed sphere where both inner outer surfaces are curved */
     sigma0 = CubedSphere_sigma(box, 0, ind, *A,*B);
     sigma1 = CubedSphere_sigma(box, 1, ind, *A,*B);
     a0 = pm * sigma0*oosqrt_1_A2_B2;
@@ -288,8 +286,7 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
   }
   else if(type==CubedShell)
   {
-    /* this gives a cubed sphere piece where the outer surface is curved
-       and the inner one is flat */
+    /* this gives a cubed sphere where both inner outer surfaces are curved */
     sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
     dsigma_dA_osigma0 = CubedSphere_dsigma_dA(box, 0, ind, A,B)/sigma0;
     dsigma_dB_osigma0 = CubedSphere_dsigma_dB(box, 0, ind, A,B)/sigma0;
@@ -595,3 +592,180 @@ double CubedSphere_dsigma_dB(tBox *box, int si, int ind, double A, double B)
   else /* we need to interpolate */
     return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
 }
+
+
+/************************************************************************/
+/* some functions to stretch a cubed sphere to a large radius sigma0    */
+/************************************************************************/
+/*
+Recall in e.g. dom1: r = (sig1-sig0)*lam + sig0
+Def: L = sig1-sig0,   so: r = L lam + sig0
+We now replace lam by rho where
+rho = (sig1/L)*( 1.0 - sig0/(L*lam + sig0) )
+lam = (sig0/L)*( sig1/(sig1 - L*rho) - 1.0 )
+Then
+rho = (sig1/L)*( 1 - sig0/r )
+*/
+double rho_of_lam_sig0sig1(double lam, double sig0, double sig1)
+{
+  double L = sig1-sig0;
+  return (sig1/L)*( 1.0 - sig0/(L*lam + sig0) );
+}
+double lam_of_rho_sig0sig1(double rho, double sig0, double sig1)
+{
+  double L = sig1-sig0;
+  return (sig0/L)*( sig1/(sig1 - L*rho) - 1.0 );
+}
+
+/* Derivatives */
+double drho_dlam_of_rho_sig0sig1(double rho, double sig0, double sig1)
+{
+  double L = sig1-sig0;
+  double d = sig1 - L*rho;
+  return d*d/(sig0*sig1);
+}
+
+/* Coord. trafos of for stretched Cubed Spheres */
+/* Coordtrafo (rho,A,B) -> (x,y,z) */
+void xyz_of_rhoAB_CubSph(tBox *box, int ind, double rho, double A, double B,
+                         double *x, double *y, double *z)
+{
+  int type = box->CI->type;
+  double sigma0,sigma1, lam;
+
+  /* check type of trafo */
+  if(type==CubedShell)
+  {
+    /* this gives a cubed sphere where both inner outer surfaces are curved */
+    sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
+    sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
+  }
+  else errorexit("xyz_of_rhoAB_CubSph works only with CubedShell");
+
+  /* get lam, and then set x,y,z */
+  lam = lam_of_rho_sig0sig1(rho, sigma0,sigma1);
+  xyz_of_lamAB_CubSph(box, ind, lam,A,B, x,y,z);
+}
+
+/* inverse (x,y,z) -> (rho,A,B) */
+void rhoAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
+                         double *rho, double *A, double *B)
+{
+  int type = box->CI->type;
+  double sigma0,sigma1, lam;
+
+  /* get lam,A,B from x,y,z */
+  lamAB_of_xyz_CubSph(box, ind, x,y,z, &lam,A,B);
+
+  /* check type of trafo */
+  if(type==CubedShell)
+  {
+    /* this gives a cubed sphere where both inner outer surfaces are curved */
+    sigma0 = CubedSphere_sigma(box, 0, ind, *A,*B);
+    sigma1 = CubedSphere_sigma(box, 1, ind, *A,*B);
+  }
+  else errorexit("works only for CubedShell");
+
+  /* get rho from lambda */
+  *rho = rho_of_lam_sig0sig1(lam, sigma0,sigma1);
+}
+
+/* compute derivs of inverse trafo */
+void drhoAB_dxyz_CubSph(tBox *box, int ind, double rho, double A, double B, 
+                        double *x, double *y, double *z,
+                        double *drhodx, double *drhody, double *drhodz,
+                        double *dAdx,   double *dAdy,   double *dAdz,
+                        double *dBdx,   double *dBdy,   double *dBdz)
+{
+  int type = box->CI->type;
+  double sigma0,sigma1, lam, dlamdx,dlamdy,dlamdz, drho_dlam;
+
+  /* check type of trafo */
+  if(type==CubedShell)
+  {
+    int isig0 = box->CI->iSurf[0]; /* get index of var with sigma */
+    int isig1 = box->CI->iSurf[1]; /* get index of var with sigma */
+    if(isig0>0 || isig1>0)
+      errorexit("drhoAB_dxyz_CubSph works only with constant sigmas");
+
+    /* this gives a cubed sphere where both inner outer surfaces are curved */
+    sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
+    sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
+  }
+  else errorexit("works only for CubedShell");
+
+  /* get lam and derivs of lam */
+  lam = lam_of_rho_sig0sig1(rho, sigma0,sigma1);
+  dlamAB_dxyz_CubSph(box, ind, lam,A,B, x,y,z, &dlamdx, &dlamdy, &dlamdz,
+                                                  dAdx,    dAdy,    dAdz,
+                                                  dBdx,    dBdy,    dBdz);
+  /* get drho_dlam */
+  drho_dlam = drho_dlam_of_rho_sig0sig1(rho, sigma0,sigma1);
+  
+  /* now set drhodx, drhody, drhodz */
+  *drhodx = drho_dlam * dlamdx;
+  *drhody = drho_dlam * dlamdy;
+  *drhodz = drho_dlam * dlamdz;
+
+  /* if sigmas are not const we need to add: */
+  /* *drhodx += drho_dA * (*dAdx) + drho_dB * (*dBdx);
+     *drhody += drho_dA * (*dAdy) + drho_dB * (*dBdy);
+     *drhodz += drho_dA * (*dAdz) + drho_dB * (*dBdz); */
+  /* Note: drho_dA depends on dsigma_{0/1}/dA */
+}
+
+
+#define CALL_xyz_of_rhoAB_CubSph \
+  tBox *box = (tBox *) aux;\
+  double x,y,z;\
+  xyz_of_rhoAB_CubSph(box, ind, rho,A,B, &x,&y,&z)
+#define RET2_x CALL_xyz_of_rhoAB_CubSph; return x
+#define RET2_y CALL_xyz_of_rhoAB_CubSph; return y
+#define RET2_z CALL_xyz_of_rhoAB_CubSph; return z
+
+/* Coord. trafos of for stretched Cubed Spheres */
+double x_of_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{ RET2_x; }
+double y_of_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{ RET2_y; }
+double z_of_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{ RET2_z; }
+
+
+#define CALL_drhoAB_dxyz_CubSph \
+  tBox *box = (tBox *) aux;\
+  double x,y,z;\
+  double drhodx,drhody,drhodz, dAdx,dAdy,dAdz, dBdx,dBdy,dBdz;\
+  drhoAB_dxyz_CubSph(box, ind, rho,A,B, &x,&y,&z,\
+                     &drhodx, &drhody, &drhodz,\
+                     &dAdx,   &dAdy,   &dAdz,\
+                     &dBdx,   &dBdy,   &dBdz)
+#define RET2_drho_dx CALL_drhoAB_dxyz_CubSph; return drhodx
+#define RET2_drho_dy CALL_drhoAB_dxyz_CubSph; return drhody
+#define RET2_drho_dz CALL_drhoAB_dxyz_CubSph; return drhodz
+#define RET2_dA_dx CALL_drhoAB_dxyz_CubSph; return dAdx
+#define RET2_dA_dy CALL_drhoAB_dxyz_CubSph; return dAdy
+#define RET2_dA_dz CALL_drhoAB_dxyz_CubSph; return dAdz
+#define RET2_dB_dx CALL_drhoAB_dxyz_CubSph; return dBdx
+#define RET2_dB_dy CALL_drhoAB_dxyz_CubSph; return dBdy
+#define RET2_dB_dz CALL_drhoAB_dxyz_CubSph; return dBdz
+
+/* Derivs for stretched Cubed Spheres */
+double drho_dx_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_drho_dx; }
+double drho_dy_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_drho_dy; }
+double drho_dz_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_drho_dz; }
+double dA_dx_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_dA_dx; }
+double dA_dy_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_dA_dy; }
+double dA_dz_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_dA_dz; }
+double dB_dx_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_dB_dx; }
+double dB_dy_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_dB_dy; }
+double dB_dz_sCubedSphere(void *aux, int ind, double rho, double A, double B)
+{  RET2_dB_dz; }
