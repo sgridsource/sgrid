@@ -404,7 +404,7 @@ int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
 }
 
 
-/* suround two big touching cubes with cubed spheres that have
+/* surround two big touching cubes with cubed spheres that have
    A,B that are in an extended range
          _______
       __/       \__ 
@@ -413,14 +413,14 @@ int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
    /   -- _____ --   \     e.g. dom0/1 have A = [-0.8, 0.8] 
   |   0  |  |  |   1  |         dom2/3 have A = [-1.25,1.25]
   |      |__|__|      |
-   \ __--       --__ /      rout is radius of sphere
+   \ __--       --__ /      r0 is radius of outer sphere
     \       2       /       2*dc is sidelength of one cube 
      \__         __/
         \_______/ 
 */
 int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
-        double rout, double dc, 
-        double din1, double dmid1, double din2, double dmid2)
+        double dc, double din1, double dmid1, double din2, double dmid2,
+        double r0)
 {
   int bl=b0;
   double xc[4], Din[6], Dout[6];
@@ -434,10 +434,55 @@ int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
   {
     if(i<2) Din[i] = 2.0*dc;
     else    Din[i] = dc;
-    Dout[i] = rout;
+    Dout[i] = r0;
   }  
   xc[1] = xc[2] = xc[3] = 0.0;
   bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,0,
                                      xc, Din,Dout);
+  return bl;
+}
+
+
+/* put 6 stretchedCubedShell's around the sphere from
+   sphere_around_two_full_cubes_touching_at_x0
+                   ___________
+             _____/           \______
+          __/                        \_
+         /                             \
+       _- \-                         -/
+      /     \-       _______       -/
+     |        \-  __/       \__  -/   ...
+    |           \/             \/   
+   /            /__           __\  
+  |            /   -- _____ --   \    r0 is radius of inner sphere (sphere0)
+  |           |      |  |  |      |   r1 is radius of outer sphere (sphere1)
+  |           |      |__|__|      |
+  |            \ __--       --__ / 
+   \            \               /  
+    |          _/\__         __/
+     |       _/     \_______/ 
+      \    _/  
+       -_ /
+         \      ...
+*/
+int two_spheres_around_two_full_cubes(tGrid *grid, int b0,
+        double dc, double din1, double dmid1, double din2, double dmid2,
+        double r0, double r1)
+{
+  int bl=b0;
+  double xc[4], Din[6], Dout[6];
+  int i;
+
+  /* make the 2 full cubes and sphere0 around them */
+  bl = sphere_around_two_full_cubes_touching_at_x0(grid, b0, dc,
+                                                   din1,dmid1, din2,dmid2, r0);
+  /* set distances to make 6 more stretched cubed shells around sphere0 */
+  for(i=0; i<6; i++)
+  {
+    Din[i]  = r0;
+    Dout[i] = r1;
+  }  
+  xc[1] = xc[2] = xc[3] = 0.0;
+  bl = convert_6boxes_to_CubedSphere(grid, bl, CubedShell,1, xc, Din,Dout);
   return bl;
 }

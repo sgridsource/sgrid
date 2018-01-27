@@ -123,5 +123,8 @@ int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
                                   double din1, double dmid1,
                                   double din2, double dmid2);
 int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
-        double rout, double dc, 
-        double din1, double dmid1, double din2, double dmid2);
+        double dc, double din1, double dmid1, double din2, double dmid2,
+        double r0);
+int two_spheres_around_two_full_cubes(tGrid *grid, int b0,
+        double dc, double din1, double dmid1, double din2, double dmid2,
+        double r0, double r1);
