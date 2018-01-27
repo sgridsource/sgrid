@@ -123,7 +123,7 @@ void set_AB_min_max_from_Din(int dom, double *Din,
    Din[0...5] inner distance from center for cubed sph. domain 0-5
    Dout[0...5] outer distance from center for cubed sph. domain 0-5 */
 /* It returns the index of the box right after the last converted box */
-int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
+int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
                                   double *xc, double *Din, double *Dout)
 {
   int i;
@@ -151,6 +151,10 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
     default:
       errorexit("convert_6boxes_to_CubedSphere: unknown type");
   }
+
+  /* do we stretch a CubedShell? */
+  if(stretch)
+    snprintf(name, 999, "%s", "stretchedCubedShell");
 
   /* set box pars */
   for(i=0; i<6; i++)
@@ -197,7 +201,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type,
     box->CI->type= type;
 
     /* set sigma vars and iSurf, idSurfdX for them */
-    if(Getv("Coordinates_CubedSphere_sigma01_vars", "yes"))
+    if(Getv("Coordinates_CubedSphere_sigma01_vars", "yes") && (stretch==0))
     {
       int isigma    = Ind("Coordinates_CubedSphere_sigma01");
       int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
@@ -338,9 +342,9 @@ int arrange_12CubSph_into_empty_cube(tGrid *grid, int b0, double *xc,
     Dout[i]= dout;
   }
   /* convert the 12 boxes */
-  bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,
+  bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,0,
                                      xc, Din,Dmid);
-  bl = convert_6boxes_to_CubedSphere(grid, bl, innerCubedSphere,
+  bl = convert_6boxes_to_CubedSphere(grid, bl, innerCubedSphere,0,
                                      xc, Dmid,Dout);
   return bl;
 }
@@ -433,7 +437,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
     Dout[i] = rout;
   }  
   xc[1] = xc[2] = xc[3] = 0.0;
-  bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,
+  bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,0,
                                      xc, Din,Dout);
   return bl;
 }
