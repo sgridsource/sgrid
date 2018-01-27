@@ -690,6 +690,26 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dB_dy_CubedSphere;
       box->dX_dx[3][3] = dB_dz_CubedSphere;
     }
+    else if( Getv(str, "stretchedCubedShell") )
+    {
+      if(pr) printf("Coordinates: initializing stretchedCubedShell coordinates...\n");
+      if(pr) printCI(box);
+      box->x_of_X[1] = x_of_sCubedSphere;
+      box->x_of_X[2] = y_of_sCubedSphere;
+      box->x_of_X[3] = z_of_sCubedSphere;
+
+      box->XYZ_Of_xyz = rhoAB_of_xyz_CubSph; /* inverse trafo */
+
+      box->dX_dx[1][1] = drho_dx_sCubedSphere;
+      box->dX_dx[1][2] = drho_dy_sCubedSphere;
+      box->dX_dx[1][3] = drho_dz_sCubedSphere;
+      box->dX_dx[2][1] = dA_dx_sCubedSphere;
+      box->dX_dx[2][2] = dA_dy_sCubedSphere;
+      box->dX_dx[2][3] = dA_dz_sCubedSphere;
+      box->dX_dx[3][1] = dB_dx_sCubedSphere;
+      box->dX_dx[3][2] = dB_dy_sCubedSphere;
+      box->dX_dx[3][3] = dB_dz_sCubedSphere;
+    }
     else
       errorexit("Coordinates: unknown coordinates...");
 

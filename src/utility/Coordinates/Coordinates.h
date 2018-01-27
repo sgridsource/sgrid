@@ -627,3 +627,17 @@ double dB_dz_CubedSphere(void *aux, int ind, double lam, double A, double B);
 double CubedSphere_sigma(tBox *box, int si, int ind, double A, double B);
 double CubedSphere_dsigma_dA(tBox *box, int si, int ind, double A, double B);
 double CubedSphere_dsigma_dB(tBox *box, int si, int ind, double A, double B);
+double x_of_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double y_of_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double z_of_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+void rhoAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
+                         double *rho, double *A, double *B);
+double drho_dx_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double drho_dy_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double drho_dz_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double dA_dx_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double dA_dy_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double dA_dz_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double dB_dx_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double dB_dy_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+double dB_dz_sCubedSphere(void *aux, int ind, double rho, double A, double B);
