@@ -170,6 +170,12 @@ typedef struct tBFACE {
    should be avoided!!! When touching, bfaces should be split so that each
    bface only touches one other bface. We can, after all, have as many
    bfaces as we want on each boxface. */
+/* ALSO: We need a function that sets oXi,oYi,oZi and sets the corresponding
+   vars. Probably we just need the 3 vars oX,oY,oZ in each box. We can then
+   loop over all bfaces of a box and set oX,oY,oZ to whatever they need
+   to be. If edges or corners belong to several bfaces, the last bface wins.
+   If the BC routine later loops in the same order over the bfaces, all
+   should be consistent and work out. So use forallbfaces everywhere!!! */
 
 
 /**************************************************************************/

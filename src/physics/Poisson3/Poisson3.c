@@ -34,7 +34,23 @@ int Poisson3_startup(tGrid *grid)
   int b;
   int pr=1;
   printf("Initializing Poisson3:\n");
-
+/*
+forallboxes(grid, b)
+{
+tBox *box = grid->box[b];
+double lam = 0.66, A= 0.22, B=-0.77;
+double x,y,z, X,Y,Z;
+if(box->XYZ_Of_xyz)
+{
+x=box->x_of_X[1]((void *)box, -1, lam,A,B);
+y=box->x_of_X[2]((void *)box, -1, lam,A,B);
+z=box->x_of_X[3]((void *)box, -1, lam,A,B);
+box->XYZ_Of_xyz(box, -1, x,y,z, &X,&Y,&Z);
+printf("b=%d X=%g Y=%g Z=%g\n", b, X,Y,Z);
+}
+}
+exit(99);
+*/
   if(Getv("Poisson3_grid","2starcubes"))
   {
     /* set bface structures */

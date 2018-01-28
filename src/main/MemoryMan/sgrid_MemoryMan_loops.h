@@ -57,6 +57,10 @@
   for(k=(p), j = 0; j < (n2); j++) \
     for(i =((n1)-1)*(j%2); i < (n1) && i >= 0; i=i+1-2*(j%2))
 
+/* loop over bfaces in a box */
+#define forallbfaces(box,fi) \
+  for (fi = 0; fi < box->nbfaces; fi++)
+
 
 /**************************************************************************/
 /* loops over point lists */
