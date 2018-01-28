@@ -442,6 +442,9 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
       b_new->Meval3[k]   = b_old->Meval3[k];
       b_new->Int3[k]     = b_old->Int3[k];
     }
+
+    /* shallow copy of coord. info in CI */
+    b_new->CI[0] = b_old->CI[0];
   }
   if(pr) printgrid(g_new);
 
