@@ -481,7 +481,9 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
       if (FacePoint[b][f]->outerbound == 1)
         continue;
       
-      assert(FacePoint[b][f]->sh != 0);
+      //assert(FacePoint[b][f]->sh != 0);
+      if (FacePoint[b][f]->sh == 0)
+        printf("%d %d\n",b,f);
       
       int l = FacePoint[b][f]->l;
       struct POINT_S *edge = FacePoint[b][f]->edge;
@@ -552,7 +554,7 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
         double X[3];
         int adjacent_box = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
         
-        if (adjacent_box < 0)//the face is considered as outter or inner bound so the loop is terminated
+        if (adjacent_box < 0)//the face is considered as outer or inner bound so the loop is terminated
         {
           FacePoint[b][f]->outerbound = 1;
           break;
@@ -611,7 +613,7 @@ static void add_info(struct FACE_POINT_S *const FacePoint,int f, int b, struct P
   const int sh = FacePoint->sh;
   
   /*Make sure the identical box and face won't be double counted*/
-  if (FacePoint->shared != NULL)
+  if (sh != 0)
   {
     int i = 0;
     
@@ -757,9 +759,8 @@ static void *allc_FacePoint(tGrid *grid)
   {
     FacePoint[b] = malloc((TOT_NUM_FACE+1)*sizeof(*FacePoint[b]));
     assert(FacePoint[b] != NULL);
+    FacePoint[b][TOT_NUM_FACE] = NULL;
   }
-  
-  FacePoint[b][TOT_NUM_FACE] = NULL;
 
   forallboxes(grid,b)
     for (f = 0; f < TOT_NUM_FACE; f++)
@@ -1139,6 +1140,8 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     P->adjacent.ijk[2] = ijk_adj[2];
     
     /*If the found point is at face*/
+    FLAG_T flg = ERROR_F;
+    
     if (IsAtFace(adjacent_box,ijk_adj,face_list,grid) == 1)
     {
       double N[3];
@@ -1147,7 +1150,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       P->adjacent.touch = 1;
       
       i = 0;
-      while (face_list[i] > 0)
+      while (face_list[i] >= 0)
       {
         get_normal(N,grid->box[adjacent_box],\
           face_list[i],Index(ijk_adj[0],ijk_adj[1],ijk_adj[2]));
@@ -1158,17 +1161,20 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
           P->adjacent.interpolation = 0;
           add_info(FacePoint[b][f],face_list[i],adjacent_box,P);
           
+          flg = NONE_F;
           break;
         }
         i++;
       }
+      
+      if (flg == ERROR_F)//ERROR
+      {
+        fprintf(stderr,"ERROR:\n There is a collocation point in box: %d and at face: %d,\n"
+          "but its normal isn't match!\n",b,f);
+        abort();
+      }
     }
-    else //ERROR
-    {
-      fprintf(stderr,"ERROR:\n there is a collocation point at a face "
-        "but its normal isn't match!\n");
-      abort();
-    }
+    
   }
   else/*Since the found point is not collocated it needs interpolation*/
   {

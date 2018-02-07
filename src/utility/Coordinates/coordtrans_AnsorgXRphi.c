@@ -1,5 +1,5 @@
 /* coordtrans_AnsorgXRphi.c */
-/* Copyright (C) 2013 Wolfgang Tichy, 25.3.2013 */
+/* Copyright (C) 2013 Wolfgang Tichy, 22.1.2018 */
 /* Produced with Mathematica */
 
 #include "sgrid.h"

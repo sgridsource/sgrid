@@ -95,6 +95,7 @@ typedef enum FLAG
     STOP_F,
     TOUCH_F,
     SAME_FTPS_F,
+    ERROR_F
     
 }FLAG_T;
 
