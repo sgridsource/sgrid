@@ -154,6 +154,14 @@ typedef struct tBFACE {
   unsigned innerbound     : 1; // 1 if bface is inner boundary (e.g. horizon)
   unsigned outerbound     : 1; // 1 if bface is outer grid boundary (e.g. infinity)
 } tBface;
+/* The flags sameX/Y/Z refer to the X,Y,Z-coords of the neigboring box ob,
+   not the coords of box b the bface is on! E.g. if the points on the
+   touching face of box ob have the same Y and Z coords (of box ob) as the
+   points in our bface from box b we set sameY=sameZ=1. This means once we
+   find the X,Y,Z-coords (of box ob) of any point in our bface in box b,
+   there is a coordinate line (with Y=const1, Z=const2) on which this point
+   is located. Then we can later do 1D interpolation in box ob along its
+   X-direction in some BC. */
 /* NOTE: ob, ofi, oXi,oYi,oZi are all set to -1 when a bface is allocated with
    add_empty_bface. 
    So ofi=-1 means we do not know the other face index yet.
