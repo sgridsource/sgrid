@@ -1114,9 +1114,7 @@ static int IsEdge(int f, int *n, int i, int j, int k)
 static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind,int b, int f, long int i, int adjacent_box, tGrid *grid)
 {
   struct POINT_S *P;
-  int n1 = grid->box[b]->n1;
-  int n2 = grid->box[b]->n2;
-  int n3 = grid->box[b]->n3;
+  
   int ijk_adj[3];//the index of the point in adjacent box
   int face_list[TOT_NUM_FACE];
   
@@ -1152,8 +1150,12 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       i = 0;
       while (face_list[i] >= 0)
       {
+        int n1 = grid->box[adjacent_box]->n1;
+        int n2 = grid->box[adjacent_box]->n2;
+        int n3 = grid->box[adjacent_box]->n3;
+        
         get_normal(N,grid->box[adjacent_box],\
-          face_list[i],Index(ijk_adj[0],ijk_adj[1],ijk_adj[2]));
+          face_list[i],ijk_ind(grid->box[adjacent_box],ijk_adj));
         
         if (dequal(ABS(dot_product(P->geometry.N,N)),1))
         {
@@ -1178,7 +1180,42 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
   }
   else/*Since the found point is not collocated it needs interpolation*/
   {
+    int face[TOT_NUM_FACE];
+    int nf = 0,i;
+    
+    nf = 
+        XYZ_on_face(grid->box[adjacent_box],face,P->geometry.X[0],P->geometry.X[1],P->geometry.X[2]);
+    
+    if (nf == 0)
+      P->adjacent.touch = 0;//doesn't matter it is touching or not
+    else
+    {
+      for (i = 0; i < TOT_NUM_FACE; i++)
+      {
+        if ( face[i] == 1 )
+        {
+          double N[3];
+          
+          get_normal(N,grid->box[adjacent_box],i,ijk_ind(grid->box[adjacent_box],ijk_adj));
+          
+          if (dequal(ABS(dot_product(P->geometry.N,N)),1))
+          P->adjacent.face = i;
+        }
+      }
+    }
+      
     P->adjacent.interpolation = 1;
-    P->adjacent.touch = 0;//doesn't matter it is touching or not
+    P->adjacent.touch = 1;
+    
   }
+}
+
+/*Returning the index at box*/
+static int ijk_ind(tBox *box, int *i)
+{
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  
+  return Index(i[0],i[1],i[2]);
 }
