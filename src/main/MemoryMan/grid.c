@@ -360,6 +360,7 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
     for (i = 0; i < 4; i++, ijk++)
     {
       b_new->x_of_X[i]    = b_old->x_of_X[i];
+      b_new->XYZ_Of_xyz   = b_old->XYZ_Of_xyz;
       b_new->Sing_d_dx[i] = b_old->Sing_d_dx[i];
       for (j = 0; j < 4; j++)
       {
