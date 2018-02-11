@@ -36,6 +36,7 @@ void FN(free,LIST(TYP))(LIST(TYP) *u)
   {
     if (u->e) free(u->e);
     free(u);
+    u = NULL;
   }
 } 
 
