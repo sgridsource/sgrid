@@ -1,4 +1,4 @@
-k#include "sgrid.h"
+#include "sgrid.h"
 #include "Coordinates.h"
 #include "populate_bfaces_AR.h"
 
