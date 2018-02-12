@@ -14,6 +14,9 @@ void populate_bface(tGrid *grid)
   struct FACE_POINT_S ***FacePoint;//Format is FacePoint[box][face]->
   int b;
   
+  /* Operation */
+  printf("\n***Populating Bfaces***\n");
+  
   /*Allocating memory for face point struct*/
   FacePoint = allc_FacePoint(grid);
   
@@ -116,7 +119,7 @@ static void setting_remaining_flags(tGrid *grid)
 {
   
   /*set the correct ofi index if it is needed*/
-  //set_ofi_flag(grid);
+  set_ofi_flag(grid);
   //set_ofi_in_all_bfaces(grid);
   
   /*Finding all of the bfaces which touching each other and need copy, 
@@ -125,7 +128,7 @@ static void setting_remaining_flags(tGrid *grid)
   
   /*set bit fields in bfaces for each box on the grid, 
     once, ob and ofi are known*/
-  set_bits_in_all_bfaces(grid);
+  //set_bits_in_all_bfaces(grid);
   
 }
 
@@ -135,7 +138,7 @@ static void setting_remaining_flags(tGrid *grid)
 static void order_ftps_pair(tGrid *grid)
 {
   /*those bafaces which are paired*/
-  struct PAIR_S *pair;
+  struct PAIR_S *pair = 0;
   tBox *box;
   FLAG_T flg;
   int b,np;
@@ -216,13 +219,19 @@ static void order_ftps_pair(tGrid *grid)
     }//for (j1 = 0; j1 < m1; j1++)
     
   }//for (i = 0; i < np; i++)
+  
+  if (np > 0)
+    free(pair);
 }  
 
 
 /*set the correct ofi index if it is needed*/
 static void set_ofi_flag(tGrid *grid)
 {
-  int b;
+  /*those bafaces which are paired*/
+  struct PAIR_S *pair = 0;
+  FLAG_T flg;
+  int b, np = 0;
   
   forallboxes(grid,b)
   {
@@ -231,8 +240,13 @@ static void set_ofi_flag(tGrid *grid)
     
     for (bf = 0; bf < box->nbfaces; bf++)
     {
+      /* Check if this bface has already been counted */
+      flg = check_bface(pair,np,box->bface[bf]);
+      
+      if (flg == CONTINUE_F) continue;
+      
       /*If they both touch and collocated*/
-      if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts == 1)
+      if (box->bface[bf]->touch == 1)
       {
         int b2;
         int bf2;
@@ -240,31 +254,7 @@ static void set_ofi_flag(tGrid *grid)
         forallboxes(grid,b2)
         {
           tBox *box2 = grid->box[b2];
-          for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
-          {
-            if (box2->bface[bf2]->touch == 1 && box2->bface[bf2]->same_fpts == 1)
-            {
-              if (box2->bface[bf2]->ofi == box->bface[bf]->f && box2->bface[bf2]->ob == box->bface[bf]->b)
-              {
-                box2->bface[bf2]->ofi = bf;
-                box->bface[bf]->ofi   = bf2; 
-                break;
-              }
-            }
-            
-          }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
-        }
-        
-      }
-      /*If they only toch*/
-      else if (box->bface[bf]->touch == 1)
-      {
-        int b2;
-        int bf2;
-        
-        forallboxes(grid,b2)
-        {
-          tBox *box2 = grid->box[b2];
+          
           for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
           {
             if (box2->bface[bf2]->touch == 1)
@@ -272,7 +262,13 @@ static void set_ofi_flag(tGrid *grid)
               if (box2->bface[bf2]->ofi == box->bface[bf]->f && box2->bface[bf2]->ob == box->bface[bf]->b)
               {
                 box2->bface[bf2]->ofi = bf;
-                box->bface[bf]->ofi   = bf2; 
+                box->bface[bf]->ofi   = bf2;
+                
+                pair = realloc(pair,(np+1)*sizeof(*pair));
+                pair[np].bface1 = box->bface[bf];
+                pair[np].bface2 = box2->bface[bf2];
+                np++;
+                
                 break;
               }
             }
@@ -284,6 +280,9 @@ static void set_ofi_flag(tGrid *grid)
     }
   
   }
+  
+  if (np > 0)
+    free(pair);
 }  
 
 
@@ -337,6 +336,9 @@ static void find_remaining_bfaces(struct FACE_POINT_S ***const FacePoint,int b, 
         bface = make_bface(&P_same_fpts, grid);
         bface->touch = 1;
         bface->same_fpts= 1;
+        bface->ob = P_same_fpts.P[0]->adjacent.box;
+        bface->ofi = P_same_fpts.P[0]->adjacent.face;
+        /* NOTE: here we set ofi as the other face and later we will fix it to other face index */
         free(P_same_fpts.P);
       }
         
@@ -344,6 +346,9 @@ static void find_remaining_bfaces(struct FACE_POINT_S ***const FacePoint,int b, 
       {
         bface = make_bface(&P_unsame_fpts, grid);
         bface->touch = 1;
+        bface->ob = P_unsame_fpts.P[0]->adjacent.box;
+        bface->ofi = P_unsame_fpts.P[0]->adjacent.face;
+        /* NOTE: here we set ofi as the other face and later we will fix it to other face index */
         free(P_unsame_fpts.P);
       }
     }
@@ -351,6 +356,7 @@ static void find_remaining_bfaces(struct FACE_POINT_S ***const FacePoint,int b, 
     if (P_untouch.np > 0)
     {
       bface = make_bface(&P_untouch,grid);
+      bface->ob = P_untouch.P[0]->adjacent.box;
       free(P_untouch.P);
     }
     
@@ -367,6 +373,9 @@ static tBface *make_bface(struct SIMILAR_S *P, tGrid *grid)
   tBox *box = grid->box[b];
   fi = add_empty_bface(box, f);
   tBface *bface = box->bface[fi];
+  bface->f = f;
+  bface->b = b;
+  assert(f < TOT_NUM_FACE);
   
   if(bface->fpts==NULL)
     bface->fpts = AllocatePointList(box->grid);
@@ -409,11 +418,11 @@ static void group_point(FLAG_T kind, \
     {
       if (P->P[i]->adjacent.interpolation == 1)
       {
-        add_point(P1,P->P[i]);
+        add_point(P2,P->P[i]);
       }
       else
       {
-        add_point(P2,P->P[i]);
+        add_point(P1,P->P[i]);
       }
     }
   }
@@ -1367,14 +1376,14 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str)
     
     f2 = bface2->f;
     b2 = bface2->b;
-    sprintf(fname1,"%sb1%df1%dfi1%d_b2%df2%dfi2%d_1_%s",
-                  dir,f1,b1,bface1->fi,f2,b2,bface2->fi,str);
-    sprintf(fname2,"%sb1%df1%dfi1%d_b2%df2%dfi2%d_2_%s",
-                  dir,f1,b1,bface1->fi,f2,b2,bface2->fi,str);
+    sprintf(fname1,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _1_%s",
+                    b1,f1,bface1->fi,b2,f2,bface2->fi,str);
+    sprintf(fname2,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _2_%s",
+                    b1,f1,bface1->fi,b2,f2,bface2->fi,str);
     strcat(dir1,fname1);
     strcat(dir2,fname2);
-    fp1 = fopen(dir1,"w");
-    fp2 = fopen(dir2,"w");
+    fp1 = fopen(dir1,"w+");
+    fp2 = fopen(dir2,"w+");
     assert(fp1 != 0);
     assert(fp2 != 0);
     
@@ -1404,9 +1413,9 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str)
     tGrid *grid = bface1->grid;
     int i,m;
     
-    sprintf(fname1,"%sb1%df1%d_%s",dir,f1,b1,str);
+    sprintf(fname1,"b1:%d f1:%d _%s",b1,f1,str);
     strcat(dir1,fname1);
-    fp1 = fopen(dir1,"w");
+    fp1 = fopen(dir1,"w+");
     
     m = bface1->fpts->npoints[bface1->b];
     assert(m > 0);
