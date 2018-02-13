@@ -60,8 +60,8 @@ void f3vec_from_c1c2c3_VectorFuncP(int n, double *vec, double *fvec, void *p)
   if(oz) fvec[3] = -f3 * (vec[3]-Z1);
   par->status = ox | oy | oz | ux | uy | uz;
 //printf("vec[1],vec[2],vec[3]=%.15g %.15g %.15g  ", vec[1],vec[2],vec[3]);
-printf("X,Y,Z=%.15g %.15g %.15g\n", X,Y,Z);
-printf("  => fvec[1],fvec[2],fvec[3] = %.15g %.15g %.15g\n", fvec[1],fvec[2],fvec[3]);
+//printf("X,Y,Z=%.15g %.15g %.15g\n", X,Y,Z);
+//printf("  => fvec[1],fvec[2],fvec[3] = %.15g %.15g %.15g\n", fvec[1],fvec[2],fvec[3]);
 }
 
 /* Find min/max of function F on the grid in a box */
