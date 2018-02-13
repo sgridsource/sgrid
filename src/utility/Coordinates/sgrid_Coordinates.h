@@ -128,3 +128,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
 int two_spheres_around_two_full_cubes(tGrid *grid, int b0,
         double dc, double din1, double dmid1, double din2, double dmid2,
         double r0, double r1);
+
+/* from find_extrema.c */
+int box_extremum_of_F(tBox *box, int Fi,
+                      double *X, double *Y, double *Z, double *Fextr);
