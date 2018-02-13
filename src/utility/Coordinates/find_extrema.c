@@ -28,23 +28,23 @@ void f3vec_from_c1c2c3_VectorFuncP(int n, double *vec, double *fvec, void *p)
   double X = vec[1];
   double Y = vec[2];
   double Z = vec[3];
-  double X1 = box->bbox[0];
-  double X2 = box->bbox[1];
-  double Y1 = box->bbox[2];
-  double Y2 = box->bbox[3];
-  double Z1 = box->bbox[4];
-  double Z2 = box->bbox[5];
+  double X0 = box->bbox[0];
+  double X1 = box->bbox[1];
+  double Y0 = box->bbox[2];
+  double Y1 = box->bbox[3];
+  double Z0 = box->bbox[4];
+  double Z1 = box->bbox[5];
   double f1, f2, f3;
   int ox,oy,oz, ux,uy,uz; /* overrun & underrun flags */
 
   /* set overrun & underrun flags */
   ox=oy=oz=ux=uy=uz=0;
-  if(X<X1) { X=X1; ux=1; }
-  if(Y<Y1) { Y=Y1; ux=2; }
-  if(Z<Z1) { Z=Z1; uy=4; }
-  if(X>X1) { X=X2; oy=8; }
-  if(Y>Y1) { Y=Y2; oz=16; }
-  if(Z>Z1) { Z=Z2; oz=32; }
+  if(X<X0) { X=X0; ux=1; }
+  if(Y<Y0) { Y=Y0; uy=2; }
+  if(Z<Z0) { Z=Z0; uz=4; }
+  if(X>X1) { X=X1; ox=8; }
+  if(Y>Y1) { Y=Y1; oy=16; }
+  if(Z>Z1) { Z=Z1; oz=32; }
 
   /* interpolate */
   fvec[1] = f1 = spec_interpolate(box, cX, X,Y,Z);
@@ -52,13 +52,16 @@ void f3vec_from_c1c2c3_VectorFuncP(int n, double *vec, double *fvec, void *p)
   fvec[3] = f3 = spec_interpolate(box, cZ, X,Y,Z);
 
   /* put zero on boundary and continue linearly if over- or underrun */
-  if(ux) fvec[1] =  f1 * (X-X1);
-  if(uy) fvec[2] =  f2 * (Y-Y1);
-  if(uz) fvec[3] =  f3 * (Z-Z1);
-  if(ox) fvec[1] = -f1 * (X-X2);
-  if(oy) fvec[2] = -f2 * (Y-Y2);
-  if(oz) fvec[3] = -f3 * (Z-Z2);
+  if(ux) fvec[1] =  f1 * (vec[1]-X0);
+  if(uy) fvec[2] =  f2 * (vec[2]-Y0);
+  if(uz) fvec[3] =  f3 * (vec[3]-Z0);
+  if(ox) fvec[1] = -f1 * (vec[1]-X1);
+  if(oy) fvec[2] = -f2 * (vec[2]-Y1);
+  if(oz) fvec[3] = -f3 * (vec[3]-Z1);
   par->status = ox | oy | oz | ux | uy | uz;
+//printf("vec[1],vec[2],vec[3]=%.15g %.15g %.15g  ", vec[1],vec[2],vec[3]);
+printf("X,Y,Z=%.15g %.15g %.15g\n", X,Y,Z);
+printf("  => fvec[1],fvec[2],fvec[3] = %.15g %.15g %.15g\n", fvec[1],fvec[2],fvec[3]);
 }
 
 /* Find min/max of function F on the grid in a box */
@@ -68,6 +71,13 @@ void f3vec_from_c1c2c3_VectorFuncP(int n, double *vec, double *fvec, void *p)
 int box_extremum_of_F(tBox *box, int Fi,
                       double *X, double *Y, double *Z, double *Fextr)
 {
+  double X0 = box->bbox[0];
+  double X1 = box->bbox[1];
+  double Y0 = box->bbox[2];
+  double Y1 = box->bbox[3];
+  double Z0 = box->bbox[4];
+  double Z1 = box->bbox[5];
+  int ox,oy,oz, ux,uy,uz; /* overrun & underrun flags */
   int N = box->nnodes;
   double *cx = dmalloc(N);
   double *cy = dmalloc(N);
@@ -75,12 +85,12 @@ int box_extremum_of_F(tBox *box, int Fi,
   double *F  = box->v[Fi];
   double Xvec[4];
   t_box_c1c2c3_struct par[1];
-  int check, stat;
+  int check, stat, status;
 
   /* get all 3 derivs */
   spec_Deriv1(box, 1, F, cx);
   spec_Deriv1(box, 2, F, cy);
-  spec_Deriv1(box, 3, F, cy);
+  spec_Deriv1(box, 3, F, cz);
   /* transform derivs to coeffs, can be done in place */
   spec_Coeffs(box, cx, cx);
   spec_Coeffs(box, cy, cy);
@@ -105,6 +115,17 @@ int box_extremum_of_F(tBox *box, int Fi,
   *Y = Xvec[2];
   *Z = Xvec[3];
 
+  /* check if we are outside box, set overrun & underrun flags */
+  ox=oy=oz=ux=uy=uz=0;
+  if(*X<X0) { *X=X0; ux=1; }
+  if(*Y<Y0) { *Y=Y0; uy=2; }
+  if(*Z<Z0) { *Z=Z0; uz=4; }
+  if(*X>X1) { *X=X1; ox=8; }
+  if(*Y>Y1) { *Y=Y1; oy=16; }
+  if(*Z>Z1) { *Z=Z1; oz=32; }
+  status = -(ox | oy | oz | ux | uy | uz);
+  if(status==0) status = stat;
+
   /* set coeffs of F in cx, and set Fextr at rhis point */
   spec_Coeffs(box, F, cx);
   *Fextr = spec_interpolate(box, cx, *X,*Y,*Z);
@@ -112,5 +133,5 @@ int box_extremum_of_F(tBox *box, int Fi,
   free(cz);
   free(cy);
   free(cx);
-  return stat;
+  return status;
 }
