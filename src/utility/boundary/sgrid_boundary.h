@@ -23,3 +23,13 @@ void set_boundary_normalderiv_rightBound(tPointList *PL, int direc, int ui,
 void set_boundary_VonNeumannExcision(tPointList *PL, int unew);
 void set_boundary_radiative_analytic(tVarList *unew, tVarList *upre,
                                      double c, tVarList *ucur);
+
+/* from BCs_from_bfaces.c */
+void boxface_normal_at_ijk(tBox *box, int f, int ijk, double n[4]);
+void FPsi_1Dinterp_for_bface(int iFPsi, tBface *bface, int idir,
+                             int iPsi, int idPsi[4]);
+void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
+                             int iPsi, int idPsi[4]);
+void FPsi_3Dinterp_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4]);
+int ijk_in_other_box_if_same_fpts(tBface *bface, int pi);
+void FPsi_copy_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4]);
