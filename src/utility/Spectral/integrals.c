@@ -218,8 +218,7 @@ double VolumeIntegral_inBox(tBox *box, int vind)
   }
   else /* integrate without jac */
     VolInt = spec_3dIntegral(box, var, Integ);
-
-printf("box%d %s VolInt=%g\n", box->b, VarName(vind), VolInt);
+//printf("box%d %s VolInt=%g\n", box->b, VarName(vind), VolInt);
 
   free(Integ);
   return VolInt;
