@@ -176,7 +176,7 @@ int box_extremum_of_F_in_dir(tBox *box, int Fi, int dir, double C1, double C2,
   int N = box->nnodes;
   double *c = dmalloc(N);
   double *F = box->v[Fi];
-  double Cl = box->bbox[(dir-1)*2];
+  double Cl = box->bbox[(dir-1)*2];   /* bounds of C: C \in [Cl,Ch] */
   double Ch = box->bbox[(dir-1)*2+1];
   double X,Y,Z;
   t_box_c1c2c3_struct par[1];
