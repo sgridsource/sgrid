@@ -859,23 +859,23 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
             /* check if there is also a point in plane of fi2 */
             rmin = nearestXYZ_of_xyz_inplane(box2, &ind2,&X2,&Y2,&Z2,
                                              x,y,z, dir2, pl2);
-if(ind==0)
-{
-printf("dir2=%d pl2=%d\n", dir2, pl2);
-printf("fi=%d  X,Y,Z=%g,%g,%g x,y,z=%g,%g,%g\n", fi, X,Y,Z, x,y,z);
-printf("fi2=%d X2,Y2,Z2=%g,%g,%g rmin=%g\n", fi2, X2,Y2,Z2, rmin);
-}
+//if(ind==0)
+//{
+//printf("dir2=%d pl2=%d\n", dir2, pl2);
+//printf("fi=%d  X,Y,Z=%g,%g,%g x,y,z=%g,%g,%g\n", fi, X,Y,Z, x,y,z);
+//printf("fi2=%d X2,Y2,Z2=%g,%g,%g rmin=%g\n", fi2, X2,Y2,Z2, rmin);
+//}
             if(dequal(rmin,0.0))
               add_point_to_bface_inbox(box2, fi2, ind2, fi2);
           }
 
-printbface(bface);
-printbface(bface2);
-//if(fi2==2) exit(9);
-//if(b2>3) exit(9);
-//exit(9);
-prdivider(1);
-//write_grid(grid);
+//printbface(bface);
+//printbface(bface2);
+////if(fi2==2) exit(9);
+////if(b2>3) exit(9);
+////exit(9);
+//prdivider(1);
+////write_grid(grid);
           /* check if there are the same number of points in both fpts */
           if(bface2->fpts != NULL &&
              bface->fpts->npoints[b] == bface2->fpts->npoints[b2])
@@ -897,11 +897,11 @@ prdivider(1);
             if(bface->setnormalderiv == 0)  bface2->setnormalderiv = 1;
             else                            bface2->setnormalderiv = 0;
 
-prdivider(1);
-printbface(bface);
-printbface(bface2);
-prdivider(1);
-prdivider(1);
+//prdivider(1);
+//printbface(bface);
+//printbface(bface2);
+//prdivider(1);
+//prdivider(1);
             break; /* exit fi2 loop */
           }
           else
