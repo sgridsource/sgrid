@@ -185,7 +185,7 @@ int ind_in_other_box_if_sameXYZ(tBox *box, int fi, int ind)
 }
 
 /* set BC's between boxes and at outerbound */
-void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
+void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
                                         int iPsix, int iPsiy, int iPsiz,
                                         double (*outerBC)(double X, double Y, double Z),
                                         int setOuterBCs)
@@ -564,7 +564,65 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
     }
   }
 }
+/* set BC's between boxes and at outerbound */
+void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
+                                        int iPsix, int iPsiy, int iPsiz,
+                                        double (*outerBC)(double X, double Y, double Z),
+                                        int setOuterBCs)
+{
+  tGrid *grid = box->grid;
+  double *FPsi = box->v[iFPsi];
+  double *Psi  = box->v[iPsi];
+  int idPsi[4];
+  int fi;
+  idPsi[1] = iPsix;
+  idPsi[2] = iPsiy;
+  idPsi[3] = iPsiz;
 
+  /* loop over bfaces */
+  forallbfaces(box, fi)
+  {
+    tBface *bface = box->bface[fi];
+    int ob  = bface->ob;
+    int pi, ind;
+
+    if(ob>=0)
+    {
+      /* set BCs for cases where there is another box */
+      set_interbox_BCs_for_bface(iFPsi, bface, iPsi, idPsi);
+    }
+    else  /* there is no box */
+    {
+      /* set far limit BC */
+      if(bface->outerbound && setOuterBCs)
+      {
+        int iX = Ind("X");
+        double *X = box->v[iX];
+        double *Y = box->v[iX+1];
+        double *Z = box->v[iX+2];
+        int ix = Ind("x");
+        double *px = box->v[ix];
+        double *pz = box->v[ix+1];
+        double *py = box->v[ix+2];
+
+        forPointList_inbox(bface->fpts, box, pi, ind)
+        {
+          double x,y,z;
+          /* get x,y,z of point ind */
+          if(px!=NULL)
+          {
+            x = px[ind];  y = py[ind];  z = pz[ind];
+          }
+          else
+          {
+            x = X[ind];   y = Y[ind];   z = Z[ind];
+          }
+          FPsi[ind] = Psi[ind] - outerBC(x,y,z);
+        }
+      }
+    }
+  } /* end of of forallbfaces */
+}
 
 /* outer BC for Psi */
 double Poisson3_Psi_outerBC(double x, double y, double z)
@@ -631,6 +689,8 @@ void Poisson3_set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluAll,
       if(blkinfo!=NULL) if(b!=blkinfo->bi) continue;
 
       /* set some BCs for each box */
+      //Poisson3_set_interbox_and_outerBCs__old(box, iFPsi, iPsi,
+      //                                   iPsix,iPsiy,iPsiz, outerBC,1);
       Poisson3_set_interbox_and_outerBCs(box, iFPsi, iPsi,
                                          iPsix,iPsiy,iPsiz, outerBC,1);
     } /* end forallboxes */
