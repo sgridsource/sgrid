@@ -67,6 +67,14 @@ struct SIMILAR_S
   int np;
 };
 
+/* holding the info for face and normal */
+struct FACE_NORMAL_S
+{
+  double N[3];
+  int ijk;
+};
+
+
 /*those bafaces which are paired*/
 struct PAIR_S
 {
@@ -133,10 +141,17 @@ static void free_FacePoint(struct FACE_POINT_S ***FacePoint);
 static void set_ofi_flag(tGrid *grid);
 static void order_ftps_pair(tGrid *grid);
 static int ijk_ind(tBox *box, int *i);
+static void get_apprx_normal(struct FACE_NORMAL_S *fc_nr,tBox *box, int face,double *x1);
+static int closest_point(tBox *box,int face,double *x1);
+static void visualize_bfaces(tGrid *grid);
+static void visualize_boxes(tGrid *grid);
+static void print_bface(tBface *bface1,tBface *bface2,const char *str);
+static void test_bfaces(tGrid *grid);
 int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,double x, double y, double z);
 int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,double *X, double *Y, double *Z,double x, double y, double z);
 int add_empty_bface(tBox *box, int f);
 int set_bits_in_all_bfaces(tGrid *grid);
-int set_ofi_in_all_bfaces(tGrid *grid);
 int XYZ_on_face(tBox *box, int *face, double X, double Y, double Z);
+int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,double x, double y, double z);
 void AddToPointList(tPointList *PL, int boxindex, int newpoint);
+tPointList *AllocatePointList(tGrid *grid);
