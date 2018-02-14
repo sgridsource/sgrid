@@ -164,10 +164,7 @@ static void order_ftps_pair(tGrid *grid)
          
          assert(box->bface[bf]->ofi >= 0);
          
-         pair = realloc(pair,(np+1)*sizeof(*pair));
-         pair[np].bface1 = box->bface[bf];
-         pair[np].bface2 = grid->box[box->bface[bf]->ob]->bface[box->bface[bf]->ofi];
-         np++;
+         add_to_pair(&pair,box->bface[bf],grid->box[box->bface[bf]->ob]->bface[box->bface[bf]->ofi],&np);
       }
     }
   }
@@ -282,10 +279,7 @@ static void set_ofi_flag(tGrid *grid)
                 box2->bface[bf2]->ofi = bf;
                 box->bface[bf]->ofi   = bf2;
                 
-                pair = realloc(pair,(np+1)*sizeof(*pair));
-                pair[np].bface1 = box->bface[bf];
-                pair[np].bface2 = box2->bface[bf2];
-                np++;
+                add_to_pair(&pair,box->bface[bf],box2->bface[bf2],&np);
                 
                 flg = STOP_F;
                 break;
@@ -333,10 +327,7 @@ static void set_ofi_flag(tGrid *grid)
                 box2->bface[bf2]->ofi = bf;
                 box->bface[bf]->ofi   = bf2;
                 
-                pair = realloc(pair,(np+1)*sizeof(*pair));
-                pair[np].bface1 = box->bface[bf];
-                pair[np].bface2 = box2->bface[bf2];
-                np++;
+                add_to_pair(&pair,box->bface[bf],box2->bface[bf2],&np);
                 
                 flg = STOP_F;
                 break;
@@ -421,6 +412,7 @@ static void find_remaining_bfaces(struct FACE_POINT_S ***const FacePoint,int b, 
         
       if (P_unsame_fpts.np > 0)
       {
+        
         bface = make_bface(&P_unsame_fpts, grid);
         bface->touch = 1;
         bface->same_fpts = 0;
@@ -573,9 +565,7 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
       if (FacePoint[b][f]->outerbound == 1)
         continue;
       
-      //assert(FacePoint[b][f]->sh != 0);
-      if (FacePoint[b][f]->sh == 0)
-        printf("%d %d\n",b,f);
+      assert(FacePoint[b][f]->sh != 0);
       
       int l = FacePoint[b][f]->l;
       struct POINT_S *edge = FacePoint[b][f]->edge;
@@ -1300,6 +1290,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       {
         if ( face[i] == 1 )
         {
+          fc_nr[j].face = i;
           /* getting the approximate normal base on closest point */
           get_apprx_normal(&fc_nr[j],grid->box[adjacent_box],i,P->geometry.x);
           
@@ -1317,7 +1308,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
         double nrm2 = ABS(dot_product(P->geometry.N,fc_nr[i].N));
         if (dgreatereq(nrm2,nrm))
         {
-          keep_face = i;
+          keep_face = fc_nr[i].face;
           nrm = nrm2;
           
         }
@@ -1391,8 +1382,8 @@ static int ijk_ind(tBox *box, int *i)
 /* visualizing bfaces */
 static void visualize_bfaces(tGrid *grid)
 {
-  
-  int b;
+  struct PAIR_S *pair = 0;
+  int b,np = 0;
   
   forallboxes(grid,b)
   {
@@ -1405,21 +1396,29 @@ static void visualize_bfaces(tGrid *grid)
       
       if (bface->outerbound == 1)
       {
-        print_bface(bface,NULL,"outerbound");
+        print_bface(bface,NULL,"outerbound",pair,np);
+        
+        add_to_pair(&pair,bface,0,&np);
       }
       else if (bface->touch == 1 && bface->same_fpts == 1)
       {
         tBface *bface2 = grid->box[bface->ob]->bface[bface->ofi];
-        print_bface(bface,bface2,"touch_and_same_ftps");
+        print_bface(bface,bface2,"touch_and_same_ftps",pair,np);
+        
+        add_to_pair(&pair,bface,bface2,&np);
       }
       else if (bface->touch == 1 && bface->same_fpts == 0)
       {
         tBface *bface2 = grid->box[bface->ob]->bface[bface->ofi];
-        print_bface(bface,bface2,"touch_and_unsame_ftps");
+        print_bface(bface,bface2,"touch_and_unsame_ftps",pair,np);
+        
+        add_to_pair(&pair,bface,bface2,&np);
       }
       else if (bface->touch == 0)
       {
-        print_bface(bface,NULL,"Untouch");
+        print_bface(bface,NULL,"Untouch",pair,np);
+        
+        add_to_pair(&pair,bface,0,&np);
       }
       
     }
@@ -1427,8 +1426,19 @@ static void visualize_bfaces(tGrid *grid)
 }
 
 /* printing bface */
-static void print_bface(tBface *bface1,tBface *bface2,const char *str)
+static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAIR_S *pair, int np)
 {
+  
+  FLAG_T flg;
+  
+  flg = check_bface(pair,np,bface1);
+         
+  if (flg == CONTINUE_F) return;
+  
+  flg = check_bface(pair,np,bface2);
+         
+  if (flg == CONTINUE_F) return;
+  
   FILE *fp1,*fp2;
   char fname1[100] = {0},fname2[100] = {0};// file name
   char dir1[100] = {0},dir2[100] = {0};
@@ -1479,18 +1489,25 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str)
     for(i = 0; i < m; i++)
     {
       double x1[3];
-      double x2[3];
       
       get_x_coord(x1,grid->box[bface1->b],
                   bface1->fpts->point[bface1->b][i]);
-      get_x_coord(x2,grid->box[bface2->b],
-                  bface2->fpts->point[bface2->b][i]);
-                  
       fprintf(fp1,"%f %f %f\n",x1[0],x1[1],x1[2]);
-      fprintf(fp2,"%f %f %f\n",x2[0],x2[1],x2[2]);
       
     }
     
+    m = bface2->fpts->npoints[bface2->b];
+    assert(m > 0);
+    for(i = 0; i < m; i++)
+    {
+      double x2[3];
+      
+      get_x_coord(x2,grid->box[bface2->b],
+                  bface2->fpts->point[bface2->b][i]);
+      fprintf(fp2,"%f %f %f\n",x2[0],x2[1],x2[2]);
+      
+    }
+
     fclose(fp1);
     fclose(fp2);
   }
@@ -1642,4 +1659,30 @@ static void visualize_boxes(tGrid *grid)
     fclose(fp);
   }
   
+}
+
+/*add bface to pair structure*/
+static void add_to_pair(struct PAIR_S **pair,tBface *bface1,tBface *bface2,int *np)
+{
+  assert(bface1 != 0 || bface2 != 0);
+  
+  *pair = realloc(*pair,(*np+1)*sizeof(**pair));
+  
+  if (bface1 != 0 && bface2 != 0)
+  {
+    (*pair)[*np].bface1 = bface1;
+    (*pair)[*np].bface2 = bface2;
+  }
+  else if (bface1 == 0)
+  {
+    (*pair)[*np].bface1 = bface2;
+    (*pair)[*np].bface2 = bface2;
+  }
+  else
+  {
+    (*pair)[*np].bface1 = bface1;
+    (*pair)[*np].bface2 = bface1;
+  }
+  
+  ++*np;
 }
