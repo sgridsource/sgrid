@@ -19,12 +19,13 @@ void printgrid(tGrid *g)
 
 void printbox(tBox *box) 
 {
-  printf("b=%d: box=%p, grid=%p, n1=%d n2=%d n3=%d,\n"
+  printf("b=%d: box=%p, grid=%p, n1=%d n2=%d n3=%d,"
          " nnodes=%d, node=%p, v=%p\n",
 	 box->b, box, box->grid, box->n1, box->n2, box->n3, 
 	 box->nnodes, 
 	 box->node, box->v);
   printbbox(box, box->bbox, box->ibbox);
+  /*
   printf(" D1 =%p D2 =%p D3 =%p,\n"
          " DD1=%p DD2=%p DD3=%p,\n"
          " F1 =%p F2 =%p F3 =%p,\n"
@@ -36,6 +37,7 @@ void printbox(tBox *box)
 	 box->Mcoeffs1, box->Mcoeffs2, box->Mcoeffs3,
 	 box->Meval1, box->Meval2, box->Meval3,
 	 box->Int1, box->Int2, box->Int3);
+  */
   printf(" TransformType1=%d TransformType2=%d TransformType3=%d\n",
          box->TransformType1, box->TransformType2, box->TransformType3);
 }
