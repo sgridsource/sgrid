@@ -579,17 +579,19 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
   idPsi[2] = iPsiy;
   idPsi[3] = iPsiz;
 
-  /* set BCs for cases where there is another box */
-  set_interbox_BCs_for_bfaces(box, iFPsi, iPsi, idPsi);
-
   /* loop over bfaces */
   forallbfaces(box, fi)
   {
     tBface *bface = box->bface[fi];
     int ob  = bface->ob;
     int pi, ind;
-    /* check if there is no box */
-    if(ob<0)
+
+    if(ob>=0)
+    {
+      /* set BCs for cases where there is another box */
+      set_interbox_BCs_for_bface(iFPsi, bface, iPsi, idPsi);
+    }
+    else  /* there is no box */
     {
       /* set far limit BC */
       if(bface->outerbound && setOuterBCs)

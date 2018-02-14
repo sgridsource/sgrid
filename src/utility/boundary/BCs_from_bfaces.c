@@ -606,7 +606,8 @@ void set_interbox_BCs_for_bface(int iFPsi, tBface *bface,
 }
 
 /* set interbox BCs for all bfaces in this box */
-void set_interbox_BCs_for_bfaces(tBox *box, int iFPsi, int iPsi, int idPsi[4])
+void set_interbox_BCs_for_boxbfaces(tBox *box, int iFPsi,
+                                    int iPsi, int idPsi[4])
 {
   int fi;
   /* loop over bfaces */

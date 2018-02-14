@@ -35,4 +35,7 @@ int ijk_in_other_box_if_touch_samePoints_sameCoords(tBface *bface, int pi);
 int ijk_in_other_box_if_same_fpts(tBface *bface, int pi);
 void FPsi_copy_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4],
                          int (*get_oijk)(tBface *bface, int pi));
-void set_interbox_BCs_for_bfaces(tBox *box, int iFPsi, int iPsi, int idPsi[4]);
+void set_interbox_BCs_for_bface(int iFPsi, tBface *bface,
+                                int iPsi, int idPsi[4]);
+void set_interbox_BCs_for_boxbfaces(tBox *box, int iFPsi,
+                                    int iPsi, int idPsi[4]);
