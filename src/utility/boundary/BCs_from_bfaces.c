@@ -415,6 +415,44 @@ void FPsi_3Dinterp_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4])
 }
 
 
+/* find index in other box in the very special case where we have:
+   +same coords in both boxes
+   +same number of points in all directions
+   +all points in touching interface coincide   */
+int ijk_in_other_box_if_touch_samePoints_sameCoords(tBface *bface, int pi)
+{
+  tGrid *grid = bface->grid;
+  tBox *box = grid->box[bface->b];
+  int ob  = bface->ob;
+  int ofi = bface->ofi;
+  tBox *obox = NULL;
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int ijk, of, od, ok,oj,oi, oijk;
+
+  /* get ijk from pi */
+  if(pi>=bface->fpts->npoints[bface->b]) return -1;
+  ijk = bface->fpts->point[bface->b][pi]; /* ijk in box for pi */
+
+  if(ob<0) return -1;
+
+  /* get pointer to other box */
+  obox = box->grid->box[ob];
+
+  of = (obox->bface[ofi])->f;
+  od = 1+of/2;
+  ok = kOfInd_n1n2(ijk, n1,n2);
+  oj = jOfInd_n1n2_k(ijk, n1,n2, ok);
+  oi = iOfInd_n1n2_jk(ijk, n1,n2, oj,ok);
+
+  if(od==1)      oi = ( (obox->n1-1) )*(of%2);
+  else if(od==2) oj = ( (obox->n2-1) )*(of%2);
+  else if(od==3) ok = ( (obox->n3-1) )*(of%2);
+  oijk = Ind_n1n2(oi,oj,ok, obox->n1,obox->n2);
+  return oijk;
+}
+
 /* find index ijk in other box in case of same_fpts */
 int ijk_in_other_box_if_same_fpts(tBface *bface, int pi)
 {
@@ -445,7 +483,8 @@ int ijk_in_other_box_if_same_fpts(tBface *bface, int pi)
      FPsi = Psi(box) - Psi(obox)
    else
      FPsi[ind] = n_i [ dPsi_i(box) - dPsi_i(obox) ]  */
-void FPsi_copy_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4])
+void FPsi_copy_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4],
+                         int (*get_oijk)(tBface *bface, int pi))
 {
   tGrid *grid = bface->grid;
   tBox *box = grid->box[bface->b];
@@ -474,7 +513,7 @@ void FPsi_copy_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4])
   {
     forPointList_inbox(bface->fpts, box, pi, ind)
     {
-      int oind = ijk_in_other_box_if_same_fpts(bface, pi);
+      int oind = get_oijk(bface, pi);
       FPsi[ind] = Psi[ind] - P[oind];
     }
   }
@@ -482,7 +521,7 @@ void FPsi_copy_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4])
   {
     forPointList_inbox(bface->fpts, box, pi, ind)
     {
-      int oind = ijk_in_other_box_if_same_fpts(bface, pi);
+      int oind = get_oijk(bface, pi);
       double n[4];
       boxface_normal_at_ijk(box, bface->f, ind, n);
       FPsi[ind] = n[1] * (dPsi[1][ind] - dP[1][oind]) +
@@ -509,9 +548,20 @@ void set_interbox_BCs_for_bfaces(tBox *box, int iFPsi, int iPsi, int idPsi[4])
       if(bface->touch) /* bface touches one other face */
       {
         if(bface->same_fpts) /* we can copy */
-          FPsi_copy_for_bface(iFPsi, bface, iPsi, idPsi);
+          FPsi_copy_for_bface(iFPsi, bface, iPsi, idPsi,
+                              ijk_in_other_box_if_same_fpts);
         else if(bface->sameX && bface->sameY && bface->sameZ)
-          errorexit("if sameX=sameY=sameZ=1 we should have same_fpts=1");
+        {
+          int trouble = 0;
+          if(bface->fpts==NULL) trouble=1;
+          //add more ifs here that check if we really can use
+          // ijk_in_other_box_if_touch_samePoints_sameCoords, i.e. if we have:
+          // +touching boxes where all points coincide and same num. of points
+          if(trouble)
+            errorexit("if sameX=sameY=sameZ=1 we should have same_fpts=1");
+          FPsi_copy_for_bface(iFPsi, bface, iPsi, idPsi,
+                              ijk_in_other_box_if_touch_samePoints_sameCoords);
+        }
         else if(bface->sameX && bface->sameY)
         {
           int idir = 3;
