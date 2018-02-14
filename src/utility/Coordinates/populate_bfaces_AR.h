@@ -72,6 +72,7 @@ struct FACE_NORMAL_S
 {
   double N[3];
   int ijk;
+  int face;
 };
 
 
@@ -145,8 +146,9 @@ static void get_apprx_normal(struct FACE_NORMAL_S *fc_nr,tBox *box, int face,dou
 static int closest_point(tBox *box,int face,double *x1);
 static void visualize_bfaces(tGrid *grid);
 static void visualize_boxes(tGrid *grid);
-static void print_bface(tBface *bface1,tBface *bface2,const char *str);
+static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAIR_S *pair, int np);
 static void test_bfaces(tGrid *grid);
+static void add_to_pair(struct PAIR_S **pair,tBface *bface1,tBface *bface2,int *np);
 int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,double x, double y, double z);
 int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,double *X, double *Y, double *Z,double x, double y, double z);
 int add_empty_bface(tBox *box, int f);
