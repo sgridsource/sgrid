@@ -33,3 +33,4 @@ void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
 void FPsi_3Dinterp_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4]);
 int ijk_in_other_box_if_same_fpts(tBface *bface, int pi);
 void FPsi_copy_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4]);
+void set_interbox_BCs_for_bfaces(tBox *box, int iFPsi, int iPsi, int idPsi[4]);
