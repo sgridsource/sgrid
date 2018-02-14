@@ -185,7 +185,7 @@ int ind_in_other_box_if_sameXYZ(tBox *box, int fi, int ind)
 }
 
 /* set BC's between boxes and at outerbound */
-void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
+void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
                                         int iPsix, int iPsiy, int iPsiz,
                                         double (*outerBC)(double X, double Y, double Z),
                                         int setOuterBCs)
@@ -565,7 +565,7 @@ void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
   }
 }
 /* set BC's between boxes and at outerbound */
-void Poisson3_set_interbox_and_outerBCs__new(tBox *box, int iFPsi, int iPsi,
+void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
                                         int iPsix, int iPsiy, int iPsiz,
                                         double (*outerBC)(double X, double Y, double Z),
                                         int setOuterBCs)
@@ -687,10 +687,10 @@ void Poisson3_set_BCs(tVarList *vlFu, tVarList *vlu, tVarList *vluAll,
       if(blkinfo!=NULL) if(b!=blkinfo->bi) continue;
 
       /* set some BCs for each box */
+      //Poisson3_set_interbox_and_outerBCs__old(box, iFPsi, iPsi,
+      //                                   iPsix,iPsiy,iPsiz, outerBC,1);
       Poisson3_set_interbox_and_outerBCs(box, iFPsi, iPsi,
                                          iPsix,iPsiy,iPsiz, outerBC,1);
-      //Poisson3_set_interbox_and_outerBCs__new(box, iFPsi, iPsi,
-      //                                   iPsix,iPsiy,iPsiz, outerBC,1);
     } /* end forallboxes */
 
     Increm_vindDerivs:
