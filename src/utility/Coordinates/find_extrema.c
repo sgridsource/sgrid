@@ -12,6 +12,8 @@ typedef struct T_box_c1c2c3_struct {
   double *c1;  /* coeffs of fvec1 */
   double *c2;  /* coeffs of fvec2 */
   double *c3;  /* coeffs of fvec3 */
+  double C[4]; /* optional coordinate values, e.g. C[1]=X */
+  int dir;     /* direction 1,2, or 3 */
   int status;  /* status code */
 } t_box_c1c2c3_struct;
 
@@ -133,5 +135,84 @@ int box_extremum_of_F(tBox *box, int Fi,
   free(cz);
   free(cy);
   free(cx);
+  return status;
+}
+
+
+/* for zbrent_itsP: */
+/* get value from coeffs, e.g. coeffs could come from dF/dX of F */
+double f1_from_c1_dir_ZP(double vec, void *p)
+{
+  t_box_c1c2c3_struct *par = (t_box_c1c2c3_struct *) p;
+  tBox *box  = par->box;
+  double *co = par->c1;
+  double C1  = par->C[1];
+  double C2  = par->C[2];
+  int dir    = par->dir;
+  double X,Y,Z;
+  /* set X,Y,Z */
+  switch(dir)
+  {
+    case 1:  X=vec; Y=C1; Z=C2;  break;
+    case 2 : Y=vec; X=C1; Z=C2;  break;
+    case 3:  Z=vec; X=C1; Y=C2;  break;
+    default: errorexit("dir must be 1,2,3");
+  }
+  /* interpolate */
+  return spec_interpolate(box, co, X,Y,Z);
+}
+/* get fvec from coeffs, e.g. coeffs could come from dF/dX of F */
+void f1vec_from_c1_dir_VectorFuncP(int n, double *vec, double *fvec, void *p)
+{
+  fvec[1] = f1_from_c1_dir_ZP(vec[1], p);
+}
+
+
+/* find extremum along coord line, line is picked by direction dir.
+   e.g. if dir=1, C1=Y, C2=Z, and it will look along X and return X in C */
+int box_extremum_of_F_in_dir(tBox *box, int Fi, int dir, double C1, double C2,
+                             double *C, double *Fextr)
+{
+  int N = box->nnodes;
+  double *c = dmalloc(N);
+  double *F = box->v[Fi];
+  double Cl = box->bbox[(dir-1)*2];
+  double Ch = box->bbox[(dir-1)*2+1];
+  double X,Y,Z;
+  t_box_c1c2c3_struct par[1];
+  int stat, status;
+
+  /* get deriv in c */
+  spec_Deriv1(box, dir, F, c);
+  /* transform deriv c to coeffs c, can be done in place */
+  spec_Coeffs(box, c, c);
+
+  /* set pars */
+  par->box = box;
+  par->c1  = c;
+  par->dir = dir;
+  par->C[1] = C1;
+  par->C[2] = C2;
+
+  /* bracket root */
+  stat = zbrac_P(f1_from_c1_dir_ZP, &Cl,&Ch, (void *) par);
+  if(stat<0) return stat;
+
+  /* look for root in [Cl,Ch] */
+  status = zbrent_itsP(C, f1_from_c1_dir_ZP, Cl,Ch, (void *) par,
+                       1000, dequaleps);
+
+  /* set coeffs of F in cx, and set Fextr at rhis point */
+  spec_Coeffs(box, F, c);
+  switch(dir)
+  {
+    case 1:  X=*C; Y=C1; Z=C2;  break;
+    case 2 : Y=*C; X=C1; Z=C2;  break;
+    case 3:  Z=*C; X=C1; Y=C2;  break;
+    default: errorexit("dir must be 1,2,3");
+  }
+  *Fextr = spec_interpolate(box, c, X,Y,Z);
+
+  free(c);
   return status;
 }
