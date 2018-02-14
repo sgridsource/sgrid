@@ -35,13 +35,18 @@ void populate_bface(tGrid *grid)
   /*freeing memory*/
   free_FacePoint(FacePoint);
   
+  /* Visualize boxes */
+  if (1)
+    visualize_boxes(grid);
+  
   /* Testing bfaces */
-  if (0)
+  if (1)
     test_bfaces(grid);
   
   /* Visualize bfaces*/
   if (1)
     visualize_bfaces(grid);
+  
   
 }
 
@@ -120,7 +125,6 @@ static void setting_remaining_flags(tGrid *grid)
   
   /*set the correct ofi index if it is needed*/
   set_ofi_flag(grid);
-  //set_ofi_in_all_bfaces(grid);
   
   /*Finding all of the bfaces which touching each other and need copy, 
   they are called pair, and then order the index of each ftps point*/
@@ -142,6 +146,7 @@ static void order_ftps_pair(tGrid *grid)
   tBox *box;
   FLAG_T flg;
   int b,np;
+  
   np = 0;
   forallboxes(grid,b)
   {
@@ -205,7 +210,6 @@ static void order_ftps_pair(tGrid *grid)
           if (j1 != j2)
           {
             int tmp;
-            
             tmp = pair[i].bface2->fpts->point[bln2][j1];
             pair[i].bface2->fpts->point[bln2][j1] = ijk2;
             pair[i].bface2->fpts->point[bln2][j2] = tmp;
@@ -245,21 +249,86 @@ static void set_ofi_flag(tGrid *grid)
       
       if (flg == CONTINUE_F) continue;
       
+      flg = NONE_F;
+      
       /*If they both touch and collocated*/
-      if (box->bface[bf]->touch == 1)
+      if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts == 1)
       {
         int b2;
         int bf2;
         
         forallboxes(grid,b2)
         {
+          if (b2 == b) continue;
+          
           tBox *box2 = grid->box[b2];
           
           for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
           {
-            if (box2->bface[bf2]->touch == 1)
+          
+            flg = check_bface(pair,np,box2->bface[bf2]);
+            
+            if (flg == CONTINUE_F) continue;
+                
+            if (box2->bface[bf2]->touch == 1 && box2->bface[bf2]->same_fpts == 1)
             {
-              if (box2->bface[bf2]->ofi == box->bface[bf]->f && box2->bface[bf2]->ob == box->bface[bf]->b)
+              
+              if ( box2->bface[bf2]->ofi == box->bface[bf]->f   &&
+                   box2->bface[bf2]->ob  == box->bface[bf]->b   &&
+                   box2->bface[bf2]->f   == box->bface[bf]->ofi &&
+                   box2->bface[bf2]->b   == box->bface[bf]->ob     )
+              {
+                
+                box2->bface[bf2]->ofi = bf;
+                box->bface[bf]->ofi   = bf2;
+                
+                pair = realloc(pair,(np+1)*sizeof(*pair));
+                pair[np].bface1 = box->bface[bf];
+                pair[np].bface2 = box2->bface[bf2];
+                np++;
+                
+                flg = STOP_F;
+                break;
+                
+              }
+            }
+            
+          }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
+          
+          if (flg == STOP_F)
+            break;
+        }
+        
+        if (flg != STOP_F)
+            errorexit("The appropriate bface could not be found!\n");
+        
+      }
+      /* If they both only touch */
+      else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
+      {
+        int b2;
+        int bf2;
+        
+        forallboxes(grid,b2)
+        {
+          if (b2 == b) continue;
+          
+          tBox *box2 = grid->box[b2];
+          
+          for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
+          {
+            flg = check_bface(pair,np,box2->bface[bf2]);
+            
+            if (flg == CONTINUE_F) continue;
+            
+            if (box2->bface[bf2]->touch == 1 && box2->bface[bf2]->same_fpts != 1)
+            {
+              
+              if ( box2->bface[bf2]->ofi == box->bface[bf]->f   && 
+                   box2->bface[bf2]->ob  == box->bface[bf]->b   &&
+                   box2->bface[bf2]->f   == box->bface[bf]->ofi &&   
+                   box2->bface[bf2]->b   == box->bface[bf]->ob    )
+                   
               {
                 box2->bface[bf2]->ofi = bf;
                 box->bface[bf]->ofi   = bf2;
@@ -269,16 +338,24 @@ static void set_ofi_flag(tGrid *grid)
                 pair[np].bface2 = box2->bface[bf2];
                 np++;
                 
+                flg = STOP_F;
                 break;
+                
               }
             }
             
           }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
+          
+          if (flg == STOP_F)
+            break;
         }
         
-      }
-    }
+        if (flg != STOP_F)
+            errorexit("The appropriate bface could not be found!\n");
+            
+      }// else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
   
+    }//for (bf = 0; bf < box->nbfaces; bf++)
   }
   
   if (np > 0)
@@ -335,7 +412,7 @@ static void find_remaining_bfaces(struct FACE_POINT_S ***const FacePoint,int b, 
       {
         bface = make_bface(&P_same_fpts, grid);
         bface->touch = 1;
-        bface->same_fpts= 1;
+        bface->same_fpts = 1;
         bface->ob = P_same_fpts.P[0]->adjacent.box;
         bface->ofi = P_same_fpts.P[0]->adjacent.face;
         /* NOTE: here we set ofi as the other face and later we will fix it to other face index */
@@ -346,6 +423,7 @@ static void find_remaining_bfaces(struct FACE_POINT_S ***const FacePoint,int b, 
       {
         bface = make_bface(&P_unsame_fpts, grid);
         bface->touch = 1;
+        bface->same_fpts = 0;
         bface->ob = P_unsame_fpts.P[0]->adjacent.box;
         bface->ofi = P_unsame_fpts.P[0]->adjacent.face;
         /* NOTE: here we set ofi as the other face and later we will fix it to other face index */
@@ -1200,7 +1278,8 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     int face[TOT_NUM_FACE];
     int nf = 0,i;
     
-    x_to_X(P->geometry.x,X,grid->box[adjacent_box]);
+    XYZ_of_xyz(grid->box[adjacent_box],X,X+1,X+2,
+              P->geometry.x[0],P->geometry.x[1],P->geometry.x[2]);
     
     nf = 
         XYZ_on_face(grid->box[adjacent_box],face,X[0],X[1],X[2]);
@@ -1256,14 +1335,6 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
   }
 }
 
-/* transformation of x coord to X coord in box */
-static void x_to_X(double *x,double *X,tBox *box)
-{
-  x[0] = box->x_of_X[1](box,-1,X[0],X[1],X[2]);
-  x[1] = box->x_of_X[2](box,-1,X[0],X[1],X[2]);
-  x[2] = box->x_of_X[3](box,-1,X[0],X[1],X[2]);
-}
-
 /* getting the approximate normal base on closest point */
 static void get_apprx_normal(struct FACE_NORMAL_S *fc_nr,tBox *box, int face,double *x1)
 {
@@ -1274,7 +1345,7 @@ static void get_apprx_normal(struct FACE_NORMAL_S *fc_nr,tBox *box, int face,dou
   
 }
 
-/* find the closest point to ijk in the box and on the face */
+/* find the closest point to x1 in the box and on the face */
 static int closest_point(tBox *box,int face,double *x1)
 {
   int n[3] = {box->n1,box->n2,box->n3};
@@ -1361,25 +1432,40 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str)
   FILE *fp1,*fp2;
   char fname1[100] = {0},fname2[100] = {0};// file name
   char dir1[100] = {0},dir2[100] = {0};
-  const char *dir = "./VisualizingBface/\0";
+  const char *folder = "./VisualizingBface/\0";
   int f1,f2,b1,b2; // face and box number
   
-  strcpy(dir1,dir);
-  strcpy(dir2,dir);
+  strcpy(dir1,folder);
+  strcpy(dir2,folder);
   f1 = bface1->f;
   b1 = bface1->b;
   
   if (bface2 != 0)
   {
     tGrid *grid = bface1->grid;
+    char appn1[20],appn2[20];
     int i,m;
+    
+    appn1[0] = '\0';
+    appn2[0] = '\0';
+    
+    if (bface1->setnormalderiv == 1)
+    {
+      sprintf(appn1,"ND");
+      sprintf(appn2,"NND");
+    }
+    else
+    {
+      sprintf(appn2,"ND");
+      sprintf(appn1,"NND");
+    }
     
     f2 = bface2->f;
     b2 = bface2->b;
-    sprintf(fname1,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _1_%s",
-                    b1,f1,bface1->fi,b2,f2,bface2->fi,str);
-    sprintf(fname2,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _2_%s",
-                    b1,f1,bface1->fi,b2,f2,bface2->fi,str);
+    sprintf(fname1,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _%s_%s",
+                    b1,f1,bface1->fi,b2,f2,bface2->fi,appn1,str);
+    sprintf(fname2,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _%s_%s",
+                    b1,f1,bface1->fi,b2,f2,bface2->fi,appn2,str);
     strcat(dir1,fname1);
     strcat(dir2,fname2);
     fp1 = fopen(dir1,"w+");
@@ -1457,9 +1543,7 @@ static void test_bfaces(tGrid *grid)
         
         if (grid->box[bface2->ob]->bface[bface2->ofi] != bface)
         {
-          fprintf(stderr,"ERROR:\n There is a bface which "
-                "touches a wrong bface!\n");
-          abort();
+          errorexit("The ob or ofi flags is not set correctly!\n");
         }
       }// if (bface->touch == 1)
       
@@ -1468,6 +1552,11 @@ static void test_bfaces(tGrid *grid)
       {
         tBface *bface2 = grid->box[bface->ob]->bface[bface->ofi];
         int nb1, nb2;
+      
+        if (bface->setnormalderiv != 1 && bface2->setnormalderiv != 1)
+        {
+          errorexit("Flag setnormalderiv has not been set correctly\n");
+        }
         
         nb1 = bface->fpts->nblist;
         nb2 = bface2->fpts->nblist;
@@ -1475,14 +1564,13 @@ static void test_bfaces(tGrid *grid)
         assert(nb1 == 1);
         assert(nb2 == 1);
         
-        int np1 = bface->fpts->npoints[bface->fpts->blist[nb1]];
-        int np2 = bface2->fpts->npoints[bface2->fpts->blist[nb2]];
+        int np1 = bface->fpts->npoints[bface->fpts->blist[nb1-1]];
+        int np2 = bface2->fpts->npoints[bface2->fpts->blist[nb2-1]];
         
-        if ( np1 == np2 )
+        if ( np1 != np2 )
         {
-          fprintf(stderr,"ERROR: The number of points "
+          errorexit("The number of points "
               "for paired bfaces are not matched!\n");
-          abort();
         }
         
         int i;
@@ -1495,18 +1583,17 @@ static void test_bfaces(tGrid *grid)
           int *npoints = bface->fpts->npoints;
           int blist = bface->fpts->blist[0];
           
-          get_x_coord(x1,box,bface->fpts->point[npoints[blist]][i]);
+          get_x_coord(x1,box,bface->fpts->point[blist][i]);
           
           npoints = bface2->fpts->npoints;
           blist = bface2->fpts->blist[0];
           
-          get_x_coord(x2,box2,bface2->fpts->point[npoints[blist]][i]);
+          get_x_coord(x2,box2,bface2->fpts->point[blist][i]);
           
           if (!dequal(norm(x1,x2),0))
           {
-            fprintf(stderr,"ERROR: The indices of points "
+            errorexit("The indices of points "
               "for paired bfaces are not match!\n");
-            abort();
           }
           
         }
@@ -1518,3 +1605,41 @@ static void test_bfaces(tGrid *grid)
   
 }
 
+/* visualize boxes */
+static void visualize_boxes(tGrid *grid)
+{
+  FILE *fp;
+  char fname[100] = {0}, dir[100] = {0};
+  const char *folder = "./VisualizingBface/\0";
+  int b;
+  
+  
+  
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int i;
+    
+    dir[0] = 0;
+    strcpy(dir,folder);
+    fname[0] = 0;
+    sprintf(fname,"box:%d",b);
+    strcat(dir,fname);
+    
+    fp = fopen(dir,"w+");
+    assert(fp != 0);
+  
+    
+    forallpoints(box,i)
+    {
+      double x[3];
+      get_x_coord(x,box,i);
+      
+      fprintf(fp,"%f %f %f\n",x[0],x[1],x[2]);
+    }
+    
+    
+    fclose(fp);
+  }
+  
+}
