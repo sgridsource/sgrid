@@ -13,8 +13,8 @@ int quick_AddVar(tBox *box, char *name)
   int inew;
   /* add var name if we don't have it yet, and enable it */
   inew = IndLax(name);
-  if(inew<0) AddVar(name, "", "added for quick_Var_output");
-  inew = Ind(name);  
+  if(inew<0) AddVarToGrid(box->grid, name, "", "added for quick_Var_output");
+  inew = Ind(name);
   enablevar_inbox(box, inew);
   return inew;
 }
