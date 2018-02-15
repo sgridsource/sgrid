@@ -267,7 +267,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
 
 
 /* disable vars in box->CI->iSurf box->CI->idSurfdX and set all lto zero */
-int disable_and_reset_CI_iSurf_vars(tBox *box)
+void disable_and_reset_CI_iSurf_vars(tBox *box)
 {
   int i, j, vi;
   for(i=0; i<6; i++)
@@ -286,7 +286,7 @@ int disable_and_reset_CI_iSurf_vars(tBox *box)
 }
 
 /* disable Coordinates_CubedSphere_sigma01 and its derivs in a box */
-int disable_Coordinates_CubedSphere_sigma01(tBox *box)
+void disable_Coordinates_CubedSphere_sigma01(tBox *box)
 {
   int isigma = Ind("Coordinates_CubedSphere_sigma01");
   int i, vi;
