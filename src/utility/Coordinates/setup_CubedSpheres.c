@@ -288,13 +288,18 @@ void disable_and_reset_CI_iSurf_vars(tBox *box)
 /* disable Coordinates_CubedSphere_sigma01 and its derivs in a box */
 void disable_Coordinates_CubedSphere_sigma01(tBox *box)
 {
-  int isigma = Ind("Coordinates_CubedSphere_sigma01");
+  int isigma    = Ind("Coordinates_CubedSphere_sigma01");
+  int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
+  int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
   int i, vi;
   for(i=0; i<6; i++)
   {
     vi = box->CI->iSurf[i];
     if(vi == isigma) disable_and_reset_CI_iSurf_vars(box);
   }
+  disablevar_inbox(box, isigma);
+  disablevar_inbox(box, isigma_dA);
+  disablevar_inbox(box, isigma_dB);
 }
 
 /* convert 1 box to a cube centered at xc[i],
