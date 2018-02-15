@@ -7,15 +7,14 @@
 
 
 
-/* add a var and enable in a box, return its index */
+/* add a var and return its index */
 int quick_AddVar(tBox *box, char *name)
 {
   int inew;
-  /* add var name if we don't have it yet, and enable it */
+  /* add var name if we don't have it yet */
   inew = IndLax(name);
   if(inew<0) AddVarToGrid(box->grid, name, "", "added for quick_Var_output");
   inew = Ind(name);
-  enablevar_inbox(box, inew);
   return inew;
 }
 
@@ -37,8 +36,6 @@ void quick_Var_output(tBox *box, char *name,
   char *outiter1 = strdup(Gets("1doutiter"));
   char *outiter2 = strdup(Gets("2doutiter"));
   char *outiter3 = strdup(Gets("3doutiter"));
-
-  quick_AddVar(box, name);
 
   /* output all right now, but set time for output to fake_t */
   Sets("0doutput", name);
@@ -81,12 +78,16 @@ void quick_Var_output(tBox *box, char *name,
 void quick_Array_output(tBox *box, double *Ar, char *name,
                         double fake_t, int fake_i, int stop)
 {
-  int i;
-  int inew = quick_AddVar(box, name);
+  int i, inew, ison=0;
+
+  inew = quick_AddVar(box, name);
+  if(box->v[inew]) ison=1;
+  else             enablevar_inbox(box, inew);
 
   /* copy ar into var */
   forallpoints(box, i) box->v[inew][i] = Ar[i];
 
-  /* output the arraay */
+  /* output the array, and then disable the var */
   quick_Var_output(box, name, fake_t, fake_i, stop);
+  if(!ison) disablevar_inbox(box, inew);
 }
