@@ -265,6 +265,38 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
   return b0+i; /* return box index right after last added box */
 }
 
+
+/* disable vars in box->CI->iSurf box->CI->idSurfdX and set all lto zero */
+int disable_and_reset_CI_iSurf_vars(tBox *box)
+{
+  int i, j, vi;
+  for(i=0; i<6; i++)
+  {
+    vi = box->CI->iSurf[i];
+    if(vi>0) disablevar_inbox(box, vi);
+    box->CI->iSurf[i] = 0;
+
+    for(j=0; j<4; j++)
+    {
+      vi = box->CI->idSurfdX[i][j];
+      if(vi>0) disablevar_inbox(box, vi);
+      box->CI->idSurfdX[i][j] = 0;
+    }
+  }
+}
+
+/* disable Coordinates_CubedSphere_sigma01 and its derivs in a box */
+int disable_Coordinates_CubedSphere_sigma01(tBox *box)
+{
+  int isigma = Ind("Coordinates_CubedSphere_sigma01");
+  int i, vi;
+  for(i=0; i<6; i++)
+  {
+    vi = box->CI->iSurf[i];
+    if(vi == isigma) disable_and_reset_CI_iSurf_vars(box);
+  }
+}
+
 /* convert 1 box to a cube centered at xc[i],
    returns the index of the box right after the last converted box */
 int convert_1box_to_cube(tGrid *grid, int b0, double *xc, double dout)
