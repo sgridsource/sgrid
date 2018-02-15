@@ -15,6 +15,7 @@ void write3d_boxvar(tBox *box, char *name)
   int binary     = Getv("3dformat", "binary");
   int vtk        = Getv("3dformat", "vtk");
   int fakepoints = Getv("3dformat", "fakepoints");
+  int arrange_as_1d = Getv("3dformat", "arrange_as_1d");
   int addpoints  = Getv("3dformat", "addpoints");
   int dump       = Getv("3dformat", "dump");
   int flt        = Getv("3dformat", "float");
@@ -64,6 +65,14 @@ void write3d_boxvar(tBox *box, char *name)
       double dX = fabs(X1-X0)/(n1);
       double dY = fabs(Y1-Y0)/(n2);
       double dZ = fabs(Z1-Z0)/(n3);
+
+      if(arrange_as_1d) /* pretend that all points are along X-dir */
+      {
+        n1 = n1*n2*n3;
+        n2 = n3 = 1;
+        X0 = Y0 = Z0 = 0.0;
+        dX = dY = dZ = 1.0;
+      }
 
       /* write header */
       fprintf(fp, "# vtk DataFile Version 2.0\n");
