@@ -126,6 +126,9 @@ void set_AB_min_max_from_Din(int dom, double *Din,
 int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
                                   double *xc, double *Din, double *Dout)
 {
+  int isigma    = Ind("Coordinates_CubedSphere_sigma01");
+  int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
+  int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
   int i;
   char par[1000];
   char val[1000];
@@ -201,16 +204,11 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
     box->CI->type= type;
 
     /* set sigma vars and iSurf, idSurfdX for them */
-    if(Getv("Coordinates_CubedSphere_sigma01_vars", "yes") && (stretch==0))
+    if( (box->v[isigma]) &&  (stretch==0) )
     {
-      int isigma    = Ind("Coordinates_CubedSphere_sigma01");
-      int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
-      int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
-
       switch(type)
       {
         case innerCubedSphere:
-          enablevar_inbox(box, isigma);
           /* compute sigma on first plane in dir1 from box->CI->s[0] */
           set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
           /* now set coord. info structure */
@@ -220,7 +218,6 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
           break;
       
         case outerCubedSphere:
-          enablevar_inbox(box, isigma);
           /* compute sigma on last plane in dir1 from box->CI->s[1] */
           set_const_CubedSphere_sigma01_inplane(box, isigma,1, box->CI->s[1]);
           /* now set coord. info structure */
@@ -230,7 +227,6 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
           break;
       
         case CubedShell:
-          enablevar_inbox(box, isigma);
           /* compute sigma on first plane in dir1 from box->CI->s[0] */
           set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
           /* compute sigma on last plane in dir1 from box->CI->s[1] */
