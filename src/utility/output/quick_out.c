@@ -31,6 +31,10 @@ void quick_Var_output(tBox *box, char *name, double fake_t, int stop)
   char *output2 = strdup(Gets("2doutput"));
   char *output3 = strdup(Gets("3doutput"));
   char *format3 = strdup(Gets("3dformat"));
+  char *outiter0 = strdup(Gets("0doutiter"));
+  char *outiter1 = strdup(Gets("1doutiter"));
+  char *outiter2 = strdup(Gets("2doutiter"));
+  char *outiter3 = strdup(Gets("3doutiter"));
 
   quick_AddVar(box, name);
 
@@ -40,6 +44,10 @@ void quick_Var_output(tBox *box, char *name, double fake_t, int stop)
   Sets("2doutput", name);
   Sets("3doutput", name);
   Sets("3dformat", "vtk text double arrange_as_1d");
+  Sets("0doutiter","1");
+  Sets("1doutiter","1");
+  Sets("2doutiter","1");
+  Sets("3doutiter","1");
   grid->time = fake_t;
   write_grid(grid);
 
@@ -50,11 +58,19 @@ void quick_Var_output(tBox *box, char *name, double fake_t, int stop)
   Sets("2doutput", output2);
   Sets("3doutput", output3);
   Sets("3dformat", format3);
+  Sets("0doutiter", outiter0);
+  Sets("1doutiter", outiter1);
+  Sets("2doutiter", outiter2);
+  Sets("3doutiter", outiter3);
   free(output0);
   free(output1);
   free(output2);
   free(output3);
   free(format3);
+  free(outiter0);
+  free(outiter1);
+  free(outiter2);
+  free(outiter3);
   if(stop) exit(1);
 }
 
