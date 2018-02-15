@@ -36,7 +36,8 @@ int nvdb = 0, globalnvariables = 0;
 
 
 
-/* add variable to data base */
+/* add variable to data base.
+   Don't use this if we have a grid already! Instead use: AddVarToGrid */
 void AddVar(char *name, char *tensorindices, char *description)
 {
   tVar *new;
@@ -97,7 +98,6 @@ void AddVar(char *name, char *tensorindices, char *description)
 
 
 
-
 /* add constant variable to data base */
 void AddConstantVar(char *name, char *tensorindices, char *description)
 {
@@ -105,7 +105,14 @@ void AddConstantVar(char *name, char *tensorindices, char *description)
   VarNameSetConstantFlag(vdb[nvdb-1].name);
 }
 
-
+/* add a Var if we have a grid already */
+void AddVarToGrid(tGrid *grid, char *name, char *tensorindices,
+                  char *description)
+{
+  AddVar(name, tensorindices, description);
+  if(grid)
+    realloc_gridvariables(grid, globalnvariables);
+}
 
 
 /* return index of variable */

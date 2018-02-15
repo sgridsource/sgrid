@@ -199,6 +199,8 @@ int Ind(char *name);
 int IndLax(char *name);
 void AddVar(char *name, char *indices, char *description);
 void AddConstantVar(char *name, char *tensorindices, char *description);
+void AddVarToGrid(tGrid *grid, char *name, char *tensorindices,
+                  char *description);
 tVarList *AddDuplicate(tVarList *vl, char *postfix);
 tVarList *AddDuplicateEnable(tVarList *vl, char *postfix);
 
