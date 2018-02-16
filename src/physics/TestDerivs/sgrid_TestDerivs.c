@@ -11,9 +11,9 @@ int sgrid_TestDerivs()
   printf("Adding TestDerivs\n");
 
   /* functions */
-  AddFun(POST_GRID, Set_Test_Coordinates_AnsorgNS_sigma_pm,
+  AddFun(PRE_COORDINATES, Set_Test_Coordinates_AnsorgNS_sigma_pm,
          "setup the sigma_{+-} vars from AnsorgNS");
-  AddFun(POST_GRID, Setup_CubedSpheres_initboxes,
+  AddFun(PRE_COORDINATES, Setup_CubedSpheres_initboxes,
          "setup some cubed spheres");
   AddFun(INITIALDATA, TestDerivs_startup, "initialize test");
   AddFun(ANALYZE, TestDerivs_analyze, "compute test results");
