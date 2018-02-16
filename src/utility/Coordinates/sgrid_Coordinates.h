@@ -8,6 +8,7 @@
    Type of cubed sphere or rather sphered cube coord transform */
 enum
 {
+  CoordInfoNotSet,  /* if box->CI->type is not set, box->CI->type=0 */
   PyramidFrustum,   /* both inner & outer surfaces are flat */  
   innerCubedSphere, /* inner surface is curved, but outer surface is flat */
   outerCubedSphere, /* outer surface is curved, but inner surface is flat */
