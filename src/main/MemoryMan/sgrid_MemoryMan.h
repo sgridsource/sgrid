@@ -25,7 +25,7 @@ typedef struct tCOORDINFO {
   double s[6];        /* some values, e.g. value of surface var in case it is const */
   double xc[4];       /* xc[1..3] = (x,y,z) of coord center for this box */
   int dom;  /* domain index, e.g. 0-5 to indicate cubed sphere wedge */
-  int type; /* coordinate type, e.g. 1 for outer cubed sphere */
+  int type; /* coordinate type, e.g. outerCubedSphere */
 } tCoordInfo;
 
 /*************************************************************************/
