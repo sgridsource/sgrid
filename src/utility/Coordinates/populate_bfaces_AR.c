@@ -1474,14 +1474,14 @@ static void visualize_bfaces(tGrid *grid)
       else if (bface->touch == 1 && bface->same_fpts == 1)
       {
         tBface *bface2 = grid->box[bface->ob]->bface[bface->ofi];
-        print_bface(bface,bface2,"touch_and_same_ftps",pair,np);
+        print_bface(bface,bface2,"touch_and_same_fpts",pair,np);
         
         add_to_pair(&pair,bface,bface2,&np);
       }
       else if (bface->touch == 1 && bface->same_fpts == 0)
       {
         tBface *bface2 = grid->box[bface->ob]->bface[bface->ofi];
-        print_bface(bface,bface2,"touch_and_unsame_ftps",pair,np);
+        print_bface(bface,bface2,"touch_and_dffrnt_fpts",pair,np);
         
         add_to_pair(&pair,bface,bface2,&np);
       }
@@ -1530,22 +1530,38 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
     appn1[0] = '\0';
     appn2[0] = '\0';
     
-    if (bface1->setnormalderiv == 1)
+    if (bface1->touch == 1 && bface1->setnormalderiv == 1)
     {
       sprintf(appn1,"ND");
       sprintf(appn2,"NND");
     }
-    else
+    else if (bface2->touch == 1 && bface2->setnormalderiv == 1)
     {
       sprintf(appn2,"ND");
       sprintf(appn1,"NND");
     }
+    else if (bface1->touch == 1 && bface1->same_fpts == 0)
+    {
+      if (bface1->sameX == 1)  strcat(appn1,"X_\0");
+      if (bface1->sameY == 1)  strcat(appn1,"Y_\0");
+      if (bface1->sameZ == 1)  strcat(appn1,"Z_\0");
+      
+      if (bface2->sameX == 1)  strcat(appn2,"X_\0");
+      if (bface2->sameY == 1)  strcat(appn2,"Y_\0");
+      if (bface2->sameZ == 1)  strcat(appn2,"Z_\0");
+    }
+    else
+    {
+      sprintf(appn2," ");
+      sprintf(appn1," ");
+    }
+
     
     f2 = bface2->f;
     b2 = bface2->b;
-    sprintf(fname1,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _%s_%s",
+    sprintf(fname1,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _%s_%s1",
                     b1,f1,bface1->fi,b2,f2,bface2->fi,appn1,str);
-    sprintf(fname2,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _%s_%s",
+    sprintf(fname2,"b1:%d f1:%d fi1:%d_b2:%d f2:%d fi2:%d _%s_%s2",
                     b1,f1,bface1->fi,b2,f2,bface2->fi,appn2,str);
     strcat(dir1,fname1);
     strcat(dir2,fname2);
@@ -1567,6 +1583,8 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
       
     }
     
+    fclose(fp1);
+    
     m = bface2->fpts->npoints[bface2->b];
     assert(m > 0);
     for(i = 0; i < m; i++)
@@ -1579,7 +1597,6 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
       
     }
 
-    fclose(fp1);
     fclose(fp2);
   }
   else
