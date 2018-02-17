@@ -19,6 +19,8 @@ enum
 /* Coordinates.c */
 int init_CoordTransform_And_Derivs(tGrid *grid);
 int compute_xyz_dXYZdxyz_ddXYZddxyz(tGrid *grid);
+int set_box_CI_struct_from_pars(tGrid *grid);
+int set_box_CI_pars_from_box_CI_struct(tGrid *grid);
 
 /* cartesianDerivs.c */
 void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3);

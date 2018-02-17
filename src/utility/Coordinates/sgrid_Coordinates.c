@@ -13,6 +13,8 @@ int sgrid_Coordinates(void)
   printf("Adding Coordinates\n");
 
   /* functions */
+  AddFun(POST_GRID, set_box_CI_struct_from_pars,
+         "read box_CI pars and set box->CI struct");
   AddFun(COORDINATES, init_CoordTransform_And_Derivs, 
          "initialize coords and coord transforms");
 
@@ -43,6 +45,15 @@ int sgrid_Coordinates(void)
     snprintf(str, 999, "box%d_Coordinates", b);
     AddPar(str, "Cartesian", 
            "coordinates used in box [Cartesian, Polar, ...]");
+
+    snprintf(str, 999, "box%d_CI_s", b);
+    AddPar(str, "", "box->CI->s part of tCoordInfo");
+    snprintf(str, 999, "box%d_CI_xc", b);
+    AddPar(str, "", "box->CI->xc part of tCoordInfo");
+    snprintf(str, 999, "box%d_CI_dom", b);
+    AddPar(str, "", "box->CI->dom part of tCoordInfo");
+    snprintf(str, 999, "box%d_CI_type", b);
+    AddPar(str, "", "box->CI->type part of tCoordInfo");
 
     snprintf(str, 999, "box%d_CoordinateTransforms_generic", b);
     AddPar(str, "no", 

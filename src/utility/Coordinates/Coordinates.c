@@ -61,7 +61,12 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   int ddZdd = Ind("ddZddxx");
   int b;
 
-  for (b = 0; b < grid->nboxes; b++)
+  /* set the box%d_CI_... pars automatically from box->CI struct,
+     in case some function changed them, e.g. some cubed Sph. setup func. */
+  set_box_CI_pars_from_box_CI_struct(grid);
+
+  /* loop over all boxes */
+  forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
     char str[1000];
@@ -1009,6 +1014,96 @@ int compute_xyz_dXYZdxyz_ddXYZddxyz(tGrid *grid)
   }
   return 0;
 }
+
+/* record some parts of the box->CI structure in pars */
+int set_box_CI_pars_from_box_CI_struct(tGrid *grid)
+{
+  char par[1000];
+  char num[100];
+  char val[1000];
+  int b, i, im;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+
+    /* set box%d_CI_s */
+    snprintf(par, 999, "box%d_CI_s", b);
+    val[0]=0;
+    for(im=5, i=0; i<=im; i++)
+    {
+      snprintf(num, 99, "%.15g", box->CI->s[i]);
+      strncat(val, num, 999);
+      if(i<im) strncat(val, " ", 999); /* add space after number */
+    }
+    Sets(par, val);
+
+    /* set box%d_CI_xc */
+     snprintf(par, 999, "box%d_CI_xc", b);
+    val[0]=0;
+    for(im=3, i=0; i<=im; i++)
+    {
+      snprintf(num, 99, "%.15g", box->CI->xc[i]);
+      strncat(val, num, 999);
+      if(i<im) strncat(val, " ", 999); /* add space after number */
+    }
+    Sets(par, val);
+
+    /* set box%d_CI_dom */
+    snprintf(par, 999, "box%d_CI_dom", b);
+    snprintf(val, 999, "%d", box->CI->dom);
+    Sets(par, val);
+
+    /* set box%d_CI_type */
+    snprintf(par, 999, "box%d_CI_type", b);
+    snprintf(val, 999, "%d", box->CI->type);
+    Sets(par, val);
+  }
+  return 0;
+}
+
+/* set box->CI structure according to pars, this is done already in POST_GRID,
+   and only if the pars are not empty */
+int set_box_CI_struct_from_pars(tGrid *grid)
+{
+  char par[1000];
+  char val[1000];
+  char *num;
+  int b, i, im;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+
+    /* set box%d_CI_s */
+    snprintf(par, 999, "box%d_CI_s", b);
+    strncpy(val, Gets(par), 999);
+    for(i=0, num=strtok(val, " "); i<6 && num!=NULL; num=strtok(NULL, " "))
+    {
+      box->CI->s[i] = atof(num);
+      i++;
+    }
+
+    /* set box%d_CI_xc */
+    snprintf(par, 999, "box%d_CI_xc", b);
+    strncpy(val, Gets(par), 999);
+    for(i=0, num=strtok(val, " "); i<4 && num!=NULL; num=strtok(NULL, " "))
+    {
+      box->CI->xc[i] = atof(num);
+      i++;
+    }
+
+    /* set box%d_CI_dom */
+    snprintf(par, 999, "box%d_CI_dom", b);
+    num=Gets(par);
+    if(num[0]) box->CI->dom = atoi(num);
+
+    /* set box%d_CI_type */
+    snprintf(par, 999, "box%d_CI_type", b);
+    num=Gets(par);
+    if(num[0]) box->CI->type = atoi(num);
+  }
+  return 0;
+}
+
 
 
 /* Some trivial functions */
