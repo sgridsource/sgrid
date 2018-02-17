@@ -140,16 +140,10 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
   switch(type)
   {
     case PyramidFrustum:
-      snprintf(name, 999, "%s", "PyramidFrustum");  break;
-    
     case innerCubedSphere:
-      snprintf(name, 999, "%s", "innerCubedSphere");  break;
-  
     case outerCubedSphere:
-      snprintf(name, 999, "%s", "outerCubedSphere");  break;
-  
     case CubedShell:
-      snprintf(name, 999, "%s", "CubedShell");  break;
+      snprintf(name, 999, "%s", "CubedSphere");  break;
 
     default:
       errorexit("convert_6boxes_to_CubedSphere: unknown type");
@@ -157,7 +151,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
 
   /* do we stretch a CubedShell? */
   if(stretch)
-    snprintf(name, 999, "%s", "stretchedCubedShell");
+    snprintf(name, 999, "%s", "stretchedCubedSphere");
 
   /* set box pars */
   for(i=0; i<6; i++)

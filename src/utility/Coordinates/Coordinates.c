@@ -672,13 +672,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dx_dX[3][2] = dz_dB_IAnsorgNS3;
       box->dx_dX[3][3] = dz_dp_IAnsorgNS3;
     }
-    else if( Getv(str, "PyramidFrustum") ||
-             Getv(str, "innerCubedSphere") ||
-             Getv(str, "outerCubedSphere") ||
-             Getv(str, "CubedShell") )
+    else if( Getv(str, "CubedSphere") )
     {
-      if(pr) printf("Coordinates: initializing CubedSphere coordinates...\n");
-      if(pr) printCI(box);
+      if(pr)
+      {
+        printf("Coordinates: initializing CubedSphere type=%d=", box->CI->type);
+        switch(box->CI->type)
+        {
+          case PyramidFrustum:   printf("PyramidFrustum\n");   break;
+          case innerCubedSphere: printf("innerCubedSphere\n"); break;
+          case outerCubedSphere: printf("outerCubedSphere\n"); break;
+          case CubedShell:       printf("CubedShell\n");       break;
+          default:
+            printf("???\n");
+            errorexit("unknown type");
+        }
+        printCI(box);
+      }
       box->x_of_X[1] = x_of_CubedSphere;
       box->x_of_X[2] = y_of_CubedSphere;
       box->x_of_X[3] = z_of_CubedSphere;
@@ -695,10 +705,24 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dB_dy_CubedSphere;
       box->dX_dx[3][3] = dB_dz_CubedSphere;
     }
-    else if( Getv(str, "stretchedCubedShell") )
+    else if( Getv(str, "stretchedCubedSphere") )
     {
-      if(pr) printf("Coordinates: initializing stretchedCubedShell coordinates...\n");
-      if(pr) printCI(box);
+      if(pr)
+      {
+        printf("Coordinates: initializing stretchedCubedSphere type=%d=",
+               box->CI->type);
+        switch(box->CI->type)
+        {
+          //case PyramidFrustum:   printf("PyramidFrustum\n");   break;
+          //case innerCubedSphere: printf("innerCubedSphere\n"); break;
+          //case outerCubedSphere: printf("outerCubedSphere\n"); break;
+          case CubedShell:       printf("CubedShell\n");       break;
+          default:
+            printf("???\n");
+            errorexit("unknown type");
+        }
+        printCI(box);
+      }
       box->x_of_X[1] = x_of_sCubedSphere;
       box->x_of_X[2] = y_of_sCubedSphere;
       box->x_of_X[3] = z_of_sCubedSphere;
