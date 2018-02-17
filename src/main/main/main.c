@@ -336,21 +336,24 @@ int initialize_grid(tGrid *g)
     printf("Initializing grid\n");
   }
 
+  /* time bin to change box->CI struct if needed */
+  RunFun(PRE_COORDINATES, g);
+
   /* setup coords in each box using parameters */
-  RunFun(COORDINATES, g); 
+  RunFun(COORDINATES, g);
 
   /* some things need to be done before initial data */
-  RunFun(PRE_INITIALDATA, g); 
+  RunFun(PRE_INITIALDATA, g);
 
   /* compute initial data */
-  RunFun(INITIALDATA, g); 
+  RunFun(INITIALDATA, g);
 
   /* some things need to be done after initial data */
-  RunFun(POST_INITIALDATA, g); 
+  RunFun(POST_INITIALDATA, g);
 
   /* initial data is just another new time slice */
   RunFun(PRE_POST_EVOLVE, g);
-  RunFun(POST_EVOLVE, g); 
+  RunFun(POST_EVOLVE, g);
 
   /* initial data complete */
   prdivider(0);
