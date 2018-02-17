@@ -16,6 +16,11 @@ void populate_bface(tGrid *grid)
   
   /* Operation */
   printf("\n***Populating Bfaces***\n");
+
+//test
+  if (1)
+    visualize_boxes(grid);
+//end
   
   /*Allocating memory for face point struct*/
   FacePoint = allc_FacePoint(grid);
@@ -36,7 +41,7 @@ void populate_bface(tGrid *grid)
   free_FacePoint(FacePoint);
   
   /* Visualize boxes */
-  if (1)
+  if (0)
     visualize_boxes(grid);
   
   /* Testing bfaces */
@@ -130,10 +135,76 @@ static void setting_remaining_flags(tGrid *grid)
   they are called pair, and then order the index of each ftps point*/
   order_ftps_pair(grid);
   
-  /*set bit fields in bfaces for each box on the grid, 
-    once, ob and ofi are known*/
-  //set_bits_in_all_bfaces(grid);
+  /*Setting the SameX/Y/Z flags*/
+  set_same_X_Y_Z_flg(grid);
   
+}
+
+/*Setting the SameX/Y/Z flags*/
+static void set_same_X_Y_Z_flg(tGrid *grid)
+{
+  int b;
+  
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int bf;
+    
+    for (bf = 0; bf < box->nbfaces; bf++)
+    {
+      tBface *bface = box->bface[bf];
+      
+      if (bface->touch == 1 && bface->same_fpts == 0)
+      {
+        box = grid->box[bface->ob];
+        tBface *bface2 = box->bface[bface->ofi];
+        
+        /* Given the plane and bface, 
+            check if there is any X or Y or Z constant */
+        bface->sameX = check_sameXYZ(SAME_X,bface2);
+        bface->sameY = check_sameXYZ(SAME_Y,bface2);
+        bface->sameZ = check_sameXYZ(SAME_Z,bface2);
+      }
+    }
+  }//forallboxes(grid,b)
+  
+}
+
+
+/* Given the plane and bface, check if there is any X or Y or Z constant */
+static unsigned int check_sameXYZ(FLAG_T kind,tBface *bface)
+{
+  tBox *box;
+  double X0[3];
+  int b, m, i,slice;
+  
+  assert(bface->fpts != 0);
+  
+  b = bface->fpts->blist[0];
+  m = bface->fpts->npoints[b];
+  box = bface->fpts->grid->box[b];
+  
+  get_X_coord(X0,box,bface->fpts->point[b][0]);
+  
+  if (kind == SAME_X)
+    slice = 0;
+  
+  else if (kind == SAME_Y)
+    slice = 1;
+  
+  else if (kind == SAME_Z)
+    slice = 2;
+  
+  for (i = 1; i < m ; i++)
+  {
+    double X[3];
+    get_X_coord(X,box,bface->fpts->point[b][i]);
+    
+    if (!dequal(X[slice],X0[slice]))
+      return 0;
+  }
+  
+  return 1;
 }
 
 /*Finding all of the bfaces which 

@@ -104,7 +104,10 @@ typedef enum FLAG
     STOP_F,
     TOUCH_F,
     SAME_FTPS_F,
-    ERROR_F
+    ERROR_F,
+    SAME_X,
+    SAME_Y,
+    SAME_Z
     
 }FLAG_T;
 
@@ -141,6 +144,7 @@ static void group_point(FLAG_T kind,struct SIMILAR_S *P1, struct SIMILAR_S *P2, 
 static void free_FacePoint(struct FACE_POINT_S ***FacePoint);
 static void set_ofi_flag(tGrid *grid);
 static void order_ftps_pair(tGrid *grid);
+static void set_same_X_Y_Z_flg(tGrid *grid);
 static int ijk_ind(tBox *box, int *i);
 static void get_apprx_normal(struct FACE_NORMAL_S *fc_nr,tBox *box, int face,double *x1);
 static int closest_point(tBox *box,int face,double *x1);
@@ -149,6 +153,7 @@ static void visualize_boxes(tGrid *grid);
 static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAIR_S *pair, int np);
 static void test_bfaces(tGrid *grid);
 static void add_to_pair(struct PAIR_S **pair,tBface *bface1,tBface *bface2,int *np);
+static unsigned int check_sameXYZ(FLAG_T kind,tBface *bface);
 int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,double x, double y, double z);
 int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,double *X, double *Y, double *Z,double x, double y, double z);
 int add_empty_bface(tBox *box, int f);
