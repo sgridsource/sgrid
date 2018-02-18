@@ -213,12 +213,12 @@ int lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   {
     *lam = (rz-a0)/(a1-a0);
   }
-if(!finite(*lam))
-{
-printf("box->b=%d ind=%d x=%g y=%g z=%g  lam=%g A=%g B=%g\n",
-box->b,ind, x,y,z, *lam,*A,*B);
-printf("sigma0=%g sigma1=%g a0=%g a1=%g\n", sigma0,sigma1, a0,a1);
-}
+//if(!finite(*lam))
+//{
+//printf("box->b=%d ind=%d x=%g y=%g z=%g  lam=%g A=%g B=%g\n",
+//box->b,ind, x,y,z, *lam,*A,*B);
+//printf("sigma0=%g sigma1=%g a0=%g a1=%g\n", sigma0,sigma1, a0,a1);
+//}
   return stat;
 }
 
@@ -528,11 +528,11 @@ double interpolate_isig_in_plane1_at_p(tBox *box, int isig,
   /* interpolate in plane1 at index p */
   spec_Coeffs_inplaneN(box, 1,p, box->v[isig], c);
   interp = spec_interpolate_inplaneN(box, 1,p, c, A,B);
-if(!finite(interp))
-{
-printf("interp=%g box->b=%d p=%d A=%.18g B=%.18g\n", interp, box->b, p, A,B);
-//errorexit("interp is not finite");
-}
+//if(!finite(interp))
+//{
+//printf("interp=%g box->b=%d p=%d A=%.18g B=%.18g\n", interp, box->b, p, A,B);
+////errorexit("interp is not finite");
+//}
   if(tsafe) free(c);
   return interp;
 }
