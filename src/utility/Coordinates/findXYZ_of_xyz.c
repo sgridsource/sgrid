@@ -53,11 +53,14 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   tSingInfo si[1];
   int check, stat;
 
-  if(box->x_of_X[1]==NULL)
-    { *X = x;  *Y = y;  *Z = z;  return 0; }
+  if(box->x_of_X[1]==NULL) /* Cartesian */
+  { *X = x;  *Y = y;  *Z = z;  return 0; }
 
   if(box->XYZ_Of_xyz!=NULL)
-    { box->XYZ_Of_xyz(box, -1, x,y,z, X,Y,Z);  return 0; }
+  {
+    box->XYZ_Of_xyz(box, -1, x,y,z, X,Y,Z);
+    return 0;
+  }
 
   pars->box = box;
   pars->desired_x = x;

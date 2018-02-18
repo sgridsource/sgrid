@@ -35,8 +35,8 @@ y                                              ____
 
 /* compute a sphered cube coord trafo. The type is enumerated above. */
 /* Note: lam \in [0,1], (A,B) \in [-1,1] */
-void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
-                         double *x, double *y, double *z)
+int xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
+                        double *x, double *y, double *z)
 {
   int domain = box->CI->dom;  /* get domain and type info from box */
   int type = box->CI->type;
@@ -107,12 +107,13 @@ void xyz_of_lamAB_CubSph(tBox *box, int ind, double lam, double A, double B,
     *y = yc + A*rz;
     *x = xc + B*rz;
   }
+  return 0;
 }
 
 /* compute inverse sphered cube coord trafo. */
 /* Note: lam \in [0,1], (A,B) \in [-1,1] */
-void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
-                         double *lam, double *A, double *B)
+int lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
+                        double *lam, double *A, double *B)
 {
   int domain = box->CI->dom;  /* get domain and type info from box */
   int type = box->CI->type;
@@ -204,14 +205,21 @@ void lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   {
     *lam = (rz-a0)/(a1-a0);
   }
+if(!finite(*lam))
+{
+printf("box->b=%d ind=%d x=%g y=%g z=%g  lam=%g A=%g B=%g\n",
+box->b,ind, x,y,z, *lam,*A,*B);
+printf("sigma0=%g sigma1=%g a0=%g a1=%g\n", sigma0,sigma1, a0,a1);
+}
+  return 0;
 }
 
 /* compute derivs of inverse trafo */
-void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B, 
-                        double *x, double *y, double *z,
-                        double *dlamdx, double *dlamdy, double *dlamdz,
-                        double *dAdx,   double *dAdy,   double *dAdz,
-                        double *dBdx,   double *dBdy,   double *dBdz)
+int dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
+                       double *x, double *y, double *z,
+                       double *dlamdx, double *dlamdy, double *dlamdz,
+                       double *dAdx,   double *dAdy,   double *dAdz,
+                       double *dBdx,   double *dBdy,   double *dBdz)
 {
   int domain = box->CI->dom;  /* get domain and type info from box */
   int type = box->CI->type;
@@ -432,6 +440,7 @@ void dlamAB_dxyz_CubSph(tBox *box, int ind, double lam, double A, double B,
     *dBdy = 0.0;
     *dBdz = -rx/rz2;
   }
+  return 0;
 }
 
 
@@ -511,7 +520,11 @@ double interpolate_isig_in_plane1_at_p(tBox *box, int isig,
   /* interpolate in plane1 at index p */
   spec_Coeffs_inplaneN(box, 1,p, box->v[isig], c);
   interp = spec_interpolate_inplaneN(box, 1,p, c, A,B);
-
+if(!finite(interp))
+{
+printf("interp=%g box->b=%d p=%d A=%.18g B=%.18g\n", interp, box->b, p, A,B);
+errorexit("interp is not finite");
+}
   if(tsafe) free(c);
   return interp;
 }
@@ -627,8 +640,8 @@ double drho_dlam_of_rho_sig0sig1(double rho, double sig0, double sig1)
 
 /* Coord. trafos of for stretched Cubed Spheres */
 /* Coordtrafo (rho,A,B) -> (x,y,z) */
-void xyz_of_rhoAB_CubSph(tBox *box, int ind, double rho, double A, double B,
-                         double *x, double *y, double *z)
+int xyz_of_rhoAB_CubSph(tBox *box, int ind, double rho, double A, double B,
+                        double *x, double *y, double *z)
 {
   int type = box->CI->type;
   double sigma0,sigma1, lam;
@@ -645,11 +658,12 @@ void xyz_of_rhoAB_CubSph(tBox *box, int ind, double rho, double A, double B,
   /* get lam, and then set x,y,z */
   lam = lam_of_rho_sig0sig1(rho, sigma0,sigma1);
   xyz_of_lamAB_CubSph(box, ind, lam,A,B, x,y,z);
+  return 0;
 }
 
 /* inverse (x,y,z) -> (rho,A,B) */
-void rhoAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
-                         double *rho, double *A, double *B)
+int rhoAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
+                        double *rho, double *A, double *B)
 {
   int type = box->CI->type;
   double sigma0,sigma1, lam;
@@ -668,14 +682,15 @@ void rhoAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
 
   /* get rho from lambda */
   *rho = rho_of_lam_sig0sig1(lam, sigma0,sigma1);
+  return 0;
 }
 
 /* compute derivs of inverse trafo */
-void drhoAB_dxyz_CubSph(tBox *box, int ind, double rho, double A, double B, 
-                        double *x, double *y, double *z,
-                        double *drhodx, double *drhody, double *drhodz,
-                        double *dAdx,   double *dAdy,   double *dAdz,
-                        double *dBdx,   double *dBdy,   double *dBdz)
+int drhoAB_dxyz_CubSph(tBox *box, int ind, double rho, double A, double B,
+                       double *x, double *y, double *z,
+                       double *drhodx, double *drhody, double *drhodz,
+                       double *dAdx,   double *dAdy,   double *dAdz,
+                       double *dBdx,   double *dBdy,   double *dBdz)
 {
   int type = box->CI->type;
   double sigma0,sigma1, lam, dlamdx,dlamdy,dlamdz, drho_dlam;
@@ -712,6 +727,7 @@ void drhoAB_dxyz_CubSph(tBox *box, int ind, double rho, double A, double B,
      *drhody += drho_dA * (*dAdy) + drho_dB * (*dBdy);
      *drhodz += drho_dA * (*dAdz) + drho_dB * (*dBdz); */
   /* Note: drho_dA depends on dsigma_{0/1}/dA */
+  return 0;
 }
 
 
