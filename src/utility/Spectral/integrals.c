@@ -174,7 +174,7 @@ double spec_3dIntegral(tBox *box, double *u, double *U)
 
 /* compute volume integral \int dx dy dz v(x,y,z)  of var v with
    index vind in a box. Here volume Jacobian is included. */
-double VolumeIntegral_inBox(tBox *box, int vind)
+double BoxVolumeIntegral(tBox *box, int vind)
 {
   int idXdx = Ind("dXdx");
   int idYdx = Ind("dYdx");
@@ -204,7 +204,7 @@ double VolumeIntegral_inBox(tBox *box, int vind)
               dXdz[i]*dYdx[i]*dZdy[i] - dXdz[i]*dYdy[i]*dZdx[i] -
               dXdy[i]*dYdx[i]*dZdz[i] - dXdx[i]*dYdz[i]*dZdy[i];
       else
-        errorexit("VolumeIntegral_inBox: implement dXdx==NULL case");
+        errorexit("BoxVolumeIntegral: implement dXdx==NULL case");
 
       if(det!=0.0) jac = 1.0/fabs(det);
       /* if det=0 jac should really be infinite, but we hope that the integrand
@@ -221,6 +221,17 @@ double VolumeIntegral_inBox(tBox *box, int vind)
 //printf("box%d %s VolInt=%g\n", box->b, VarName(vind), VolInt);
 
   free(Integ);
+  return VolInt;
+}
+
+/* compute volume integral of var with index vind over entire grid.
+   Here any Psi^6 needs to be already included in the var we integrate. */
+double GridVolumeIntegral(tGrid *grid, int vind)
+{
+  double VolInt = 0.0;
+  int b;
+  forallboxes(grid, b)
+    VolInt += BoxVolumeIntegral(grid->box[b], vind);
   return VolInt;
 }
 
