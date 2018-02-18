@@ -57,10 +57,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   { *X = x;  *Y = y;  *Z = z;  return 0; }
 
   if(box->XYZ_Of_xyz!=NULL)
-  {
-    box->XYZ_Of_xyz(box, -1, x,y,z, X,Y,Z);
-    return 0;
-  }
+    return box->XYZ_Of_xyz(box, -1, x,y,z, X,Y,Z);
 
   pars->box = box;
   pars->desired_x = x;
