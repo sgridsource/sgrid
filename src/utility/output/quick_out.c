@@ -19,10 +19,9 @@ int quick_AddVar(tBox *box, char *name)
 }
 
 
-/* output a var in a box, with normal write_grid, but some output pars
-   and time changed, it can also exit after writing if stop=1 */
-void quick_Var_output(tBox *box, char *name,
-                      double fake_t, int fake_i, int stop)
+/* output a var in a box, with normal write_grid, but some output pars,
+   time and iteration are changed */
+void quick_Var_output(tBox *box, char *name, double fake_t, int fake_i)
 {
   tGrid *grid = box->grid;
   double t = grid->time;
@@ -71,12 +70,11 @@ void quick_Var_output(tBox *box, char *name,
   free(outiter1);
   free(outiter2);
   free(outiter3);
-  if(stop) exit(1);
 }
 
 /* same as quick_Var_output, but first copy an array into var in box */
 void quick_Array_output(tBox *box, double *Ar, char *name,
-                        double fake_t, int fake_i, int stop)
+                        double fake_t, int fake_i)
 {
   int i, inew, ison=0;
 
@@ -88,6 +86,6 @@ void quick_Array_output(tBox *box, double *Ar, char *name,
   forallpoints(box, i) box->v[inew][i] = Ar[i];
 
   /* output the array, and then disable the var */
-  quick_Var_output(box, name, fake_t, fake_i, stop);
+  quick_Var_output(box, name, fake_t, fake_i);
   if(!ison) disablevar_inbox(box, inew);
 }
