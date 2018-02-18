@@ -120,6 +120,7 @@ int lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
   int dir, p;
   double pm, rx,ry,rz,rc, xc,yc,zc, a0,a1, sigma0,sigma1;
   double oosqrt_1_A2_B2;
+  int stat=0;
 
   /* get direction, pm, and center */
   dir = domain/2 + 1;
@@ -157,6 +158,10 @@ int lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
     *B   = rx/rz;
   }
 
+  /* check if A or B are out of range */
+  if( *A < box->bbox[2] || box->bbox[3] < *A ||
+      *B < box->bbox[4] || box->bbox[5] < *B ) stat=-1;
+
   /* check type of trafo */
   if(type==PyramidFrustum)
   {
@@ -171,6 +176,7 @@ int lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
     sigma0 = CubedSphere_sigma(box, 0, ind, *A,*B);
     a0 = pm * sigma0*oosqrt_1_A2_B2;
     a1 = pm * box->CI->s[1];
+    if(ind<0) stat*=2; /* we want signal that now we interpolated sigma */
   }
   else if(type==outerCubedSphere)
   {
@@ -179,6 +185,7 @@ int lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
     a0 = pm * box->CI->s[0];
     sigma1 = CubedSphere_sigma(box, 1, ind, *A,*B);
     a1 = pm * sigma1*oosqrt_1_A2_B2;
+    if(ind<0) stat*=2; /* we want signal that now we interpolated sigma */
   }
   else if(type==CubedShell)
   {
@@ -187,6 +194,7 @@ int lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
     sigma1 = CubedSphere_sigma(box, 1, ind, *A,*B);
     a0 = pm * sigma0*oosqrt_1_A2_B2;
     a1 = pm * sigma1*oosqrt_1_A2_B2;
+    if(ind<0) stat*=2; /* we want signal that now we interpolated sigma */
   }
   else errorexit("unknown type");
 
@@ -211,7 +219,7 @@ printf("box->b=%d ind=%d x=%g y=%g z=%g  lam=%g A=%g B=%g\n",
 box->b,ind, x,y,z, *lam,*A,*B);
 printf("sigma0=%g sigma1=%g a0=%g a1=%g\n", sigma0,sigma1, a0,a1);
 }
-  return 0;
+  return stat;
 }
 
 /* compute derivs of inverse trafo */
@@ -523,7 +531,7 @@ double interpolate_isig_in_plane1_at_p(tBox *box, int isig,
 if(!finite(interp))
 {
 printf("interp=%g box->b=%d p=%d A=%.18g B=%.18g\n", interp, box->b, p, A,B);
-errorexit("interp is not finite");
+//errorexit("interp is not finite");
 }
   if(tsafe) free(c);
   return interp;
@@ -657,8 +665,7 @@ int xyz_of_rhoAB_CubSph(tBox *box, int ind, double rho, double A, double B,
 
   /* get lam, and then set x,y,z */
   lam = lam_of_rho_sig0sig1(rho, sigma0,sigma1);
-  xyz_of_lamAB_CubSph(box, ind, lam,A,B, x,y,z);
-  return 0;
+  return xyz_of_lamAB_CubSph(box, ind, lam,A,B, x,y,z);
 }
 
 /* inverse (x,y,z) -> (rho,A,B) */
@@ -666,10 +673,11 @@ int rhoAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
                         double *rho, double *A, double *B)
 {
   int type = box->CI->type;
+  int stat;
   double sigma0,sigma1, lam;
 
   /* get lam,A,B from x,y,z */
-  lamAB_of_xyz_CubSph(box, ind, x,y,z, &lam,A,B);
+  stat = lamAB_of_xyz_CubSph(box, ind, x,y,z, &lam,A,B);
 
   /* check type of trafo */
   if(type==CubedShell)
@@ -682,7 +690,7 @@ int rhoAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
 
   /* get rho from lambda */
   *rho = rho_of_lam_sig0sig1(lam, sigma0,sigma1);
-  return 0;
+  return stat;
 }
 
 /* compute derivs of inverse trafo */
