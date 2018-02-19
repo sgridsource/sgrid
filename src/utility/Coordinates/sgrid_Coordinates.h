@@ -118,6 +118,7 @@ int set_ofi_in_all_bfaces(tGrid *grid);
 int set_bits_in_all_bfaces(tGrid *grid);
 int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int nb);
 void set_all_bfaces_with_ob_minus1_to_outerbound(tGrid *grid, int b0, int nb);
+int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid);
 
 /* from setup_CubedSpheres.c */
 void disable_and_reset_CI_iSurf_vars(tBox *box);

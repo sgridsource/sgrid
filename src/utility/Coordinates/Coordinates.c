@@ -958,6 +958,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   /* set all bfaces */
   if(Getv("Coordinates_set_bfaces", "yes")) Coordinates_set_bfaces(grid);
 
+  /* set the oX,oY,oZ vars needed for interpolation in bfaces */
+  set_oX_oY_oZ_vars_for_bfaces(grid);
+
   return 0;
 }
 
@@ -1129,6 +1132,7 @@ int set_box_CI_struct_from_pars(tGrid *grid)
 }
 
 
+/* ******************************************************************** */
 
 /* Some trivial functions */
 double zero_of_xyz(void *aux, int ind, double X, double Y, double Z)

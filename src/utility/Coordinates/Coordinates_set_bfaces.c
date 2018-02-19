@@ -957,3 +957,63 @@ void set_all_bfaces_with_ob_minus1_to_outerbound(tGrid *grid, int b0, int nb)
     } /* fi loop */
   }  /* b loop */
 }
+
+
+/* set the vars oX,oY,oZ for all bfaces in order */
+int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
+{
+  int b, fi;
+  int iX = Ind("X");
+  int ix = Ind("x");
+  int ioX= Ind("oX");
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    double *px, *py, *pz;
+
+    if(box->x_of_X==NULL) /* Cartesian */
+    {
+       px = box->v[iX];
+       py = box->v[iX+1];
+       pz = box->v[iX+2];
+    }
+    else
+    {
+      px = box->v[ix];
+      py = box->v[ix+1];
+      pz = box->v[ix+2];
+      if(!px) errorexit("implement case where \"x\" is not enabled");
+    }
+
+    /* loop over all bfaces in this box in order */
+    forallbfaces(box, fi)
+    {
+      tBface *bface = box->bface[fi];
+      int ob  = bface->ob;
+      int oXi = bface->oXi;
+      int oYi = bface->oYi;
+      int oZi = bface->oZi;
+      int pi, ijk;
+
+      /* copy oX,oY,oZ from other box */
+      if(ob>=0 && oXi==ioX) /* if we use the var oX */
+        if(bface->fpts)
+        {
+          enablevar_inbox(box, oXi);
+          enablevar_inbox(box, oYi);
+          enablevar_inbox(box, oZi);
+          forPointList_inbox(bface->fpts, box, pi, ijk)
+          {
+            double *oX, *oY, *oZ;
+            /* get oX,oY,oZ in other box */
+            XYZ_of_xyz(grid->box[ob], oX,oY,oZ, px[ijk],py[ijk],pz[ijk]);
+            box->v[oXi][ijk] = *oX;
+            box->v[oYi][ijk] = *oY;
+            box->v[oZi][ijk] = *oZ;
+          }
+        }
+    }
+  }
+  return 0;
+}
