@@ -158,9 +158,22 @@ int lamAB_of_xyz_CubSph(tBox *box, int ind, double x, double y, double z,
     *B   = rx/rz;
   }
 
-  /* check if A or B are out of range */
-  if( *A < box->bbox[2] || box->bbox[3] < *A ||
-      *B < box->bbox[4] || box->bbox[5] < *B ) stat=-1;
+  /* check if A is out of range */
+  if( *A < box->bbox[2] || box->bbox[3] < *A )
+  {
+    /* put A within range if we are just a bit out */
+    if(dequal(*A,box->bbox[2]))      *A = box->bbox[2];
+    else if(dequal(*A,box->bbox[3])) *A = box->bbox[3];
+    else stat=-1;
+  }
+  /* check if B is out of range */
+  if( *B < box->bbox[4] || box->bbox[5] < *B )
+  {
+    /* put B within range if we are just a bit out */
+    if(dequal(*B,box->bbox[4]))      *B = box->bbox[4];
+    else if(dequal(*B,box->bbox[5])) *B = box->bbox[5];
+    else stat=-1;
+  }
 
   /* check type of trafo */
   if(type==PyramidFrustum)
