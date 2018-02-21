@@ -1,6 +1,5 @@
 #include <assert.h>
 #define SQ(x) (x)*(x)
-#define EPS 1E-7
 
 /*Info about the geometry of a point*/
 struct GEOMETRY_S
@@ -23,6 +22,8 @@ struct ADJACENT_S
   int oXi[3];
   unsigned int touch: 1;//1 if it touches, 0 if it overlaps
   unsigned int interpolation: 1;//1 if needs interpolation, 0 otherwise
+  unsigned int outerbound: 1;//1 if it is outerbound , otherwise 0
+  
 };
 
 /*All info about a point*/
@@ -35,11 +36,12 @@ struct POINT_S
 /*Shared info*/
 struct SHARED_S
 {
-  int face;
   int box;
-  struct POINT_S **P;/*The colloction of point which are 
-        in a same box and on same face and 
-          having the same adjacent box and face*/
+  int face;
+  int *kind;
+  int *indx;// index in inner or edge sturcture
+  struct FACE_POINT_S *FacePoint;
+  struct POINT_S *(*pnt)(struct FACE_POINT_S *FacePoint,int kind, int indx);
   int np;//total num of points above
 };
 
@@ -101,6 +103,7 @@ typedef enum FLAG
     EDGE_F,
     CONTINUE_F,
     NONE_F,
+    FOUND_F,
     STOP_F,
     TOUCH_F,
     SAME_FTPS_F,
@@ -131,8 +134,9 @@ static int IsAtFace(int box, int *ijk,int *f,tGrid *grid);
 static double ABS(double x);
 static double dot_product(double *x,double *y);
 static void add_info(struct FACE_POINT_S *const FacePoint,int f, int b,struct POINT_S *P);
-static int b_xyz_in_exblist(tGrid *grid,double *x,int *ex_blist,int ex_bn);
-static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind,int b, int f, long int i, int adjacent_box, tGrid *grid);
+static int *b_xyz_in_exblist(tGrid *grid,double *x,int *ex_blist,int ex_bn,int *nb);
+static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind,int b, int f, long int i,int *adj_box, int n_adj_box,tGrid *grid);
+static void *duplicate_points(struct FACE_POINT_S ***const FacePoint,FLAG_T kind,int b, int f,int indx,int n_dup,int *end);
 static void group_similar_points(struct FACE_POINT_S ***const FacePoint,tGrid *grid);
 static int find_outerbound_bfaces(struct FACE_POINT_S ***const FacePoint,int b, int f,tGrid *grid);
 static void find_remaining_bfaces(struct FACE_POINT_S ***const FacePoint,int b, int f,tGrid *grid);
@@ -153,6 +157,7 @@ static void visualize_boxes(tGrid *grid);
 static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAIR_S *pair, int np);
 static void test_bfaces(tGrid *grid);
 static void add_to_pair(struct PAIR_S **pair,tBface *bface1,tBface *bface2,int *np);
+struct POINT_S *point_in_FacePoint(struct FACE_POINT_S *FacePoint,int kind, int indx);
 static unsigned int check_sameXYZ(FLAG_T kind,tBface *bface);
 int b_XYZ_of_xyz(tGrid *grid, double *X, double *Y, double *Z,double x, double y, double z);
 int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,double *X, double *Y, double *Z,double x, double y, double z);
