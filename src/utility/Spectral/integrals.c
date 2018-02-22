@@ -172,6 +172,70 @@ double spec_3dIntegral(tBox *box, double *u, double *U)
 }
 
 
+/* compute volume integral \int dx dy dz v(x,y,z)  of var v with
+   index vind in a box. Here volume Jacobian is included. */
+double BoxVolumeIntegral(tBox *box, int vind)
+{
+  int idXdx = Ind("dXdx");
+  int idYdx = Ind("dYdx");
+  int idZdx = Ind("dZdx");
+  double *dXdx  = box->v[idXdx];
+  double *dXdy  = box->v[idXdx+1];
+  double *dXdz  = box->v[idXdx+2];
+  double *dYdx  = box->v[idYdx];
+  double *dYdy  = box->v[idYdx+1];
+  double *dYdz  = box->v[idYdx+2];
+  double *dZdx  = box->v[idZdx];
+  double *dZdy  = box->v[idZdx+1];
+  double *dZdz  = box->v[idZdx+2];
+  double *var   = box->v[vind];
+  double *Integ = dmalloc(box->nnodes);
+  double VolInt;
+  int i;
+
+  if( box->x_of_X[1] != NULL ) /* not Cartesian coords */
+  {
+    forallpoints(box, i)
+    {
+      double jac, det;
+
+      if(dXdx!=NULL)
+        det = dXdx[i]*dYdy[i]*dZdz[i] + dXdy[i]*dYdz[i]*dZdx[i] +
+              dXdz[i]*dYdx[i]*dZdy[i] - dXdz[i]*dYdy[i]*dZdx[i] -
+              dXdy[i]*dYdx[i]*dZdz[i] - dXdx[i]*dYdz[i]*dZdy[i];
+      else
+        errorexit("BoxVolumeIntegral: implement dXdx==NULL case");
+
+      if(det!=0.0) jac = 1.0/fabs(det);
+      /* if det=0 jac should really be infinite, but we hope that the integrand
+         goes to zero quickly enough that jac=0 makes no difference! */
+      else jac = 0.0;
+
+      Integ[i] = var[i] * jac;
+    }
+    /* integrate with jac */
+    VolInt = spec_3dIntegral(box, Integ, Integ);
+  }
+  else /* integrate without jac */
+    VolInt = spec_3dIntegral(box, var, Integ);
+//printf("box%d %s VolInt=%g\n", box->b, VarName(vind), VolInt);
+
+  free(Integ);
+  return VolInt;
+}
+
+/* compute volume integral of var with index vind over entire grid.
+   Here any Psi^6 needs to be already included in the var we integrate. */
+double GridVolumeIntegral(tGrid *grid, int vind)
+{
+  double VolInt = 0.0;
+  int b;
+  forallboxes(grid, b)
+    VolInt += BoxVolumeIntegral(grid->box[b], vind);
+  return VolInt;
+}
+
+
 /* compute U = 2d integral of var u over theta and phi */
 /* Note: U(r) = \int_0^{pi) dtheta \int_0^{2pi) dphi  
                 u(r,theta,phi) |sin(theta)| r^2        */

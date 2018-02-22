@@ -11,7 +11,7 @@ int sgrid_Poisson3()
   printf("Adding Poisson3\n");
 
   /* functions */
-  AddFun(POST_GRID, Poisson3_initboxes, "initialize boxes we use");
+  AddFun(PRE_COORDINATES, Poisson3_initboxes, "initialize boxes we use");
   AddFun(PRE_INITIALDATA, Poisson3_startup, "initialize Poisson3");
   AddFun(INITIALDATA, Poisson3_solve, "solve Poisson3 Eq.");
   AddFun(ANALYZE, Poisson3_analyze, "compute error");

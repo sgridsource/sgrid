@@ -25,7 +25,7 @@ typedef struct tCOORDINFO {
   double s[6];        /* some values, e.g. value of surface var in case it is const */
   double xc[4];       /* xc[1..3] = (x,y,z) of coord center for this box */
   int dom;  /* domain index, e.g. 0-5 to indicate cubed sphere wedge */
-  int type; /* coordinate type, e.g. 1 for outer cubed sphere */
+  int type; /* coordinate type, e.g. outerCubedSphere */
 } tCoordInfo;
 
 /*************************************************************************/
@@ -54,7 +54,7 @@ typedef struct tBOX {
   double *DD2;		/* diff. matrix for two derivs in direction 2 */
   double *DD3;		/* diff. matrix for two derivs in direction 3 */
   double (*x_of_X[4])(void *aux, int ind, double X, double Y, double Z);    /* func to compute x from X. Note: xyz_Of_XYZ would be better */
-  void (*XYZ_Of_xyz)(struct tBOX *box, int ind, double x, double y, double z, double *X, double *Y, double *Z);  /* func to compute X,Y,Z from x,y,z */
+  int (*XYZ_Of_xyz)(struct tBOX *box, int ind, double x, double y, double z, double *X, double *Y, double *Z);  /* func to compute X,Y,Z from x,y,z */
   double (*dX_dx[4][4])(void *aux, int ind, double X, double Y, double Z);    /* dX_l_{spec}/dx_m_{cart} */
   void (*Sing_d_dx[4])(void *aux, void *v, void *v1, void *v2, void *v3);  /* func to compute d/dx_m_{cart} at singular points */
   double (*ddX_dxdx[4][4][4])(void *aux, int ind, double X, double Y, double Z); /* d^2X_l_{spec}/(dx_m_{cart} dx_n_{cart}) */

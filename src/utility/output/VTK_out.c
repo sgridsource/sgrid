@@ -139,9 +139,9 @@ FILE *fopen_vtk(char *varname, char *suffix, int b, int n)
     mkdir(filename, 0777);  
   else
     fclose(fp);
-  
+
   /* open file */
-  snprintf(filename, 1000, "%s/%s.%s%d_vtk/%s.%s%d_%04d.vtk", 
+  snprintf(filename, 1000, "%s/%s.%s%d_vtk/%s.%s%d_%08d.vtk",
 	   outdir, varname, suffix, b,
 	   varname, suffix, b, n);
   fp = fopen(filename, "wb");

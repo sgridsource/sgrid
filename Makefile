@@ -17,7 +17,7 @@ EXECDIR = $(TOP)/exe
 # variables common to all setups
 CC = gcc	# gcc or icc
 CXX =		# g++ or icc
-CLINKER = # will be used only in src/main/main/Makefile for linking
+CLINKER =	# will be used only in src/main/main/Makefile for linking
 AR = ar		# ar command we use to build library from object files
 
 INCS = -I$(TOP)/src/main/main
@@ -42,8 +42,8 @@ OFLAGS = -O2
 # --------------------------------------------------------------------------
 # some libraries are currently required
 libpaths = src/main/MemoryMan src/utility/ParManipulator
-libpaths += src/utility/output src/utility/evolve
 libpaths += src/utility/Coordinates src/utility/Spectral
+libpaths += src/utility/output src/utility/evolve
 libpaths += src/utility/NumberChecker
 libpaths += src/utility/checkpoint
 

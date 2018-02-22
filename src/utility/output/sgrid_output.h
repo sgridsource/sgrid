@@ -12,3 +12,9 @@ int find_ind_closest_to_Y0(tBox *box, double Y0);
 int find_ind_closest_to_Z0(tBox *box, double Z0);
 
 int write_grid(tGrid *grid);
+
+/* quick_out.c for debugging */
+void quick_Vars_output(tBox *box, char *names, double fake_t, int fake_i);
+void quick_Array_output(tBox *box, double *Ar, char *name,
+                        double fake_t, int fake_i);
+void quick_VarList_output(tBox *box, tVarList *vl, double fake_t, int fake_i);

@@ -126,6 +126,9 @@ void set_AB_min_max_from_Din(int dom, double *Din,
 int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
                                   double *xc, double *Din, double *Dout)
 {
+  int isigma    = Ind("Coordinates_CubedSphere_sigma01");
+  int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
+  int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
   int i;
   char par[1000];
   char val[1000];
@@ -137,16 +140,10 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
   switch(type)
   {
     case PyramidFrustum:
-      snprintf(name, 999, "%s", "PyramidFrustum");  break;
-    
     case innerCubedSphere:
-      snprintf(name, 999, "%s", "innerCubedSphere");  break;
-  
     case outerCubedSphere:
-      snprintf(name, 999, "%s", "outerCubedSphere");  break;
-  
     case CubedShell:
-      snprintf(name, 999, "%s", "CubedShell");  break;
+      snprintf(name, 999, "%s", "CubedSphere");  break;
 
     default:
       errorexit("convert_6boxes_to_CubedSphere: unknown type");
@@ -154,7 +151,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
 
   /* do we stretch a CubedShell? */
   if(stretch)
-    snprintf(name, 999, "%s", "stretchedCubedShell");
+    snprintf(name, 999, "%s", "stretchedCubedSphere");
 
   /* set box pars */
   for(i=0; i<6; i++)
@@ -201,16 +198,11 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
     box->CI->type= type;
 
     /* set sigma vars and iSurf, idSurfdX for them */
-    if(Getv("Coordinates_CubedSphere_sigma01_vars", "yes") && (stretch==0))
+    if( (box->v[isigma]) &&  (stretch==0) )
     {
-      int isigma    = Ind("Coordinates_CubedSphere_sigma01");
-      int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
-      int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
-
       switch(type)
       {
         case innerCubedSphere:
-          enablevar_inbox(box, isigma);
           /* compute sigma on first plane in dir1 from box->CI->s[0] */
           set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
           /* now set coord. info structure */
@@ -220,7 +212,6 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
           break;
       
         case outerCubedSphere:
-          enablevar_inbox(box, isigma);
           /* compute sigma on last plane in dir1 from box->CI->s[1] */
           set_const_CubedSphere_sigma01_inplane(box, isigma,1, box->CI->s[1]);
           /* now set coord. info structure */
@@ -230,7 +221,6 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
           break;
       
         case CubedShell:
-          enablevar_inbox(box, isigma);
           /* compute sigma on first plane in dir1 from box->CI->s[0] */
           set_const_CubedSphere_sigma01_inplane(box, isigma,0, box->CI->s[0]);
           /* compute sigma on last plane in dir1 from box->CI->s[1] */
@@ -267,6 +257,43 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
   set_BoxStructures_fromPars(grid, 0);
 
   return b0+i; /* return box index right after last added box */
+}
+
+
+/* disable vars in box->CI->iSurf box->CI->idSurfdX and set all lto zero */
+void disable_and_reset_CI_iSurf_vars(tBox *box)
+{
+  int i, j, vi;
+  for(i=0; i<6; i++)
+  {
+    vi = box->CI->iSurf[i];
+    if(vi>0) disablevar_inbox(box, vi);
+    box->CI->iSurf[i] = 0;
+
+    for(j=0; j<4; j++)
+    {
+      vi = box->CI->idSurfdX[i][j];
+      if(vi>0) disablevar_inbox(box, vi);
+      box->CI->idSurfdX[i][j] = 0;
+    }
+  }
+}
+
+/* disable Coordinates_CubedSphere_sigma01 and its derivs in a box */
+void disable_Coordinates_CubedSphere_sigma01(tBox *box)
+{
+  int isigma    = Ind("Coordinates_CubedSphere_sigma01");
+  int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
+  int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
+  int i, vi;
+  for(i=0; i<6; i++)
+  {
+    vi = box->CI->iSurf[i];
+    if(vi == isigma) disable_and_reset_CI_iSurf_vars(box);
+  }
+  disablevar_inbox(box, isigma);
+  disablevar_inbox(box, isigma_dA);
+  disablevar_inbox(box, isigma_dB);
 }
 
 /* convert 1 box to a cube centered at xc[i],

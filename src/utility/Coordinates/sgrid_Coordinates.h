@@ -8,6 +8,7 @@
    Type of cubed sphere or rather sphered cube coord transform */
 enum
 {
+  CoordInfoNotSet,  /* if box->CI->type is not set, box->CI->type=0 */
   PyramidFrustum,   /* both inner & outer surfaces are flat */  
   innerCubedSphere, /* inner surface is curved, but outer surface is flat */
   outerCubedSphere, /* outer surface is curved, but inner surface is flat */
@@ -18,6 +19,8 @@ enum
 /* Coordinates.c */
 int init_CoordTransform_And_Derivs(tGrid *grid);
 int compute_xyz_dXYZdxyz_ddXYZddxyz(tGrid *grid);
+int set_box_CI_struct_from_pars(tGrid *grid);
+int set_box_CI_pars_from_box_CI_struct(tGrid *grid);
 
 /* cartesianDerivs.c */
 void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3);
@@ -115,8 +118,11 @@ int set_ofi_in_all_bfaces(tGrid *grid);
 int set_bits_in_all_bfaces(tGrid *grid);
 int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int nb);
 void set_all_bfaces_with_ob_minus1_to_outerbound(tGrid *grid, int b0, int nb);
+int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid);
 
 /* from setup_CubedSpheres.c */
+void disable_and_reset_CI_iSurf_vars(tBox *box);
+void disable_Coordinates_CubedSphere_sigma01(tBox *box);
 int arrange_1box12CubSph_into_full_cube(tGrid *grid, int b0, double *xc,
                                         double din, double dmid, double dout);
 int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
@@ -132,3 +138,5 @@ int two_spheres_around_two_full_cubes(tGrid *grid, int b0,
 /* from find_extrema.c */
 int box_extremum_of_F(tBox *box, int Fi,
                       double *X, double *Y, double *Z, double *Fextr);
+int box_extremum_of_F_in_dir(tBox *box, int Fi, int dir, double C1, double C2,
+                             double *C, double *Fextr);

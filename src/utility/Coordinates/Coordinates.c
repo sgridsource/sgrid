@@ -61,7 +61,12 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   int ddZdd = Ind("ddZddxx");
   int b;
 
-  for (b = 0; b < grid->nboxes; b++)
+  /* set the box%d_CI_... pars automatically from box->CI struct,
+     in case some function changed them, e.g. some cubed Sph. setup func. */
+  set_box_CI_pars_from_box_CI_struct(grid);
+
+  /* loop over all boxes */
+  forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
     char str[1000];
@@ -667,13 +672,23 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dx_dX[3][2] = dz_dB_IAnsorgNS3;
       box->dx_dX[3][3] = dz_dp_IAnsorgNS3;
     }
-    else if( Getv(str, "PyramidFrustum") ||
-             Getv(str, "innerCubedSphere") ||
-             Getv(str, "outerCubedSphere") ||
-             Getv(str, "CubedShell") )
+    else if( Getv(str, "CubedSphere") )
     {
-      if(pr) printf("Coordinates: initializing CubedSphere coordinates...\n");
-      if(pr) printCI(box);
+      if(pr)
+      {
+        printf("Coordinates: initializing CubedSphere type=%d=", box->CI->type);
+        switch(box->CI->type)
+        {
+          case PyramidFrustum:   printf("PyramidFrustum\n");   break;
+          case innerCubedSphere: printf("innerCubedSphere\n"); break;
+          case outerCubedSphere: printf("outerCubedSphere\n"); break;
+          case CubedShell:       printf("CubedShell\n");       break;
+          default:
+            printf("???\n");
+            errorexit("unknown type");
+        }
+        printCI(box);
+      }
       box->x_of_X[1] = x_of_CubedSphere;
       box->x_of_X[2] = y_of_CubedSphere;
       box->x_of_X[3] = z_of_CubedSphere;
@@ -690,10 +705,24 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][2] = dB_dy_CubedSphere;
       box->dX_dx[3][3] = dB_dz_CubedSphere;
     }
-    else if( Getv(str, "stretchedCubedShell") )
+    else if( Getv(str, "stretchedCubedSphere") )
     {
-      if(pr) printf("Coordinates: initializing stretchedCubedShell coordinates...\n");
-      if(pr) printCI(box);
+      if(pr)
+      {
+        printf("Coordinates: initializing stretchedCubedSphere type=%d=",
+               box->CI->type);
+        switch(box->CI->type)
+        {
+          //case PyramidFrustum:   printf("PyramidFrustum\n");   break;
+          //case innerCubedSphere: printf("innerCubedSphere\n"); break;
+          //case outerCubedSphere: printf("outerCubedSphere\n"); break;
+          case CubedShell:       printf("CubedShell\n");       break;
+          default:
+            printf("???\n");
+            errorexit("unknown type");
+        }
+        printCI(box);
+      }
       box->x_of_X[1] = x_of_sCubedSphere;
       box->x_of_X[2] = y_of_sCubedSphere;
       box->x_of_X[3] = z_of_sCubedSphere;
@@ -929,6 +958,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
   /* set all bfaces */
   if(Getv("Coordinates_set_bfaces", "yes")) Coordinates_set_bfaces(grid);
 
+  /* set the oX,oY,oZ vars needed for interpolation in bfaces */
+  set_oX_oY_oZ_vars_for_bfaces(grid);
+
   return 0;
 }
 
@@ -1010,6 +1042,97 @@ int compute_xyz_dXYZdxyz_ddXYZddxyz(tGrid *grid)
   return 0;
 }
 
+/* record some parts of the box->CI structure in pars */
+int set_box_CI_pars_from_box_CI_struct(tGrid *grid)
+{
+  char par[1000];
+  char num[100];
+  char val[1000];
+  int b, i, im;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+
+    /* set box%d_CI_s */
+    snprintf(par, 999, "box%d_CI_s", b);
+    val[0]=0;
+    for(im=5, i=0; i<=im; i++)
+    {
+      snprintf(num, 99, "%.15g", box->CI->s[i]);
+      strncat(val, num, 999);
+      if(i<im) strncat(val, " ", 999); /* add space after number */
+    }
+    Sets(par, val);
+
+    /* set box%d_CI_xc */
+     snprintf(par, 999, "box%d_CI_xc", b);
+    val[0]=0;
+    for(im=3, i=0; i<=im; i++)
+    {
+      snprintf(num, 99, "%.15g", box->CI->xc[i]);
+      strncat(val, num, 999);
+      if(i<im) strncat(val, " ", 999); /* add space after number */
+    }
+    Sets(par, val);
+
+    /* set box%d_CI_dom */
+    snprintf(par, 999, "box%d_CI_dom", b);
+    snprintf(val, 999, "%d", box->CI->dom);
+    Sets(par, val);
+
+    /* set box%d_CI_type */
+    snprintf(par, 999, "box%d_CI_type", b);
+    snprintf(val, 999, "%d", box->CI->type);
+    Sets(par, val);
+  }
+  return 0;
+}
+
+/* set box->CI structure according to pars, this is done already in POST_GRID,
+   and only if the pars are not empty */
+int set_box_CI_struct_from_pars(tGrid *grid)
+{
+  char par[1000];
+  char val[1000];
+  char *num;
+  int b, i, im;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+
+    /* set box%d_CI_s */
+    snprintf(par, 999, "box%d_CI_s", b);
+    strncpy(val, Gets(par), 999);
+    for(i=0, num=strtok(val, " "); i<6 && num!=NULL; num=strtok(NULL, " "))
+    {
+      box->CI->s[i] = atof(num);
+      i++;
+    }
+
+    /* set box%d_CI_xc */
+    snprintf(par, 999, "box%d_CI_xc", b);
+    strncpy(val, Gets(par), 999);
+    for(i=0, num=strtok(val, " "); i<4 && num!=NULL; num=strtok(NULL, " "))
+    {
+      box->CI->xc[i] = atof(num);
+      i++;
+    }
+
+    /* set box%d_CI_dom */
+    snprintf(par, 999, "box%d_CI_dom", b);
+    num=Gets(par);
+    if(num[0]) box->CI->dom = atoi(num);
+
+    /* set box%d_CI_type */
+    snprintf(par, 999, "box%d_CI_type", b);
+    num=Gets(par);
+    if(num[0]) box->CI->type = atoi(num);
+  }
+  return 0;
+}
+
+
+/* ******************************************************************** */
 
 /* Some trivial functions */
 double zero_of_xyz(void *aux, int ind, double X, double Y, double Z)

@@ -12,6 +12,7 @@ void boxface_normal_at_ijk(tBox *box, int f, int ijk, double n[4])
 {
   int dir = 1 + f/2;     /* get direction */
   int sig = 1 - 2*(f%2); /* get sign for outward direction */
+  int iX   = Ind("X");
   int idXd = Ind("dXdx");
   int idYd = Ind("dYdx");
   int idZd = Ind("dZdx");
@@ -21,23 +22,33 @@ void boxface_normal_at_ijk(tBox *box, int f, int ijk, double n[4])
 
   if(f>5 || f<0) errorexit("f must be 0,1,2,3,4,5");
 
-  /* check if if we dXdx is available */
-  if(box->v[idXd]!=NULL)
+  if(box->x_of_X[1]!=NULL) /* not Cartesian */
   {
-    /* get dXdx */
-    for(j=1; j<=3; j++)
+    /* check if the var dXdx is available */
+    if(box->v[idXd]!=NULL)
     {
-      dXdx[1][j] = box->v[idXd + j-1][ijk];
-      dXdx[2][j] = box->v[idYd + j-1][ijk];
-      dXdx[3][j] = box->v[idZd + j-1][ijk];
+      /* get dXdx */
+      for(j=1; j<=3; j++)
+      {
+        dXdx[1][j] = box->v[idXd + j-1][ijk];
+        dXdx[2][j] = box->v[idYd + j-1][ijk];
+        dXdx[3][j] = box->v[idZd + j-1][ijk];
+      }
+      /* get normal from derivs */
+      n[1] = dXdx[dir][1];
+      n[2] = dXdx[dir][2];
+      n[3] = dXdx[dir][3];
     }
-
-    /* get normal from derivs */
-    n[1] = dXdx[dir][1];
-    n[2] = dXdx[dir][2];
-    n[3] = dXdx[dir][3];
+    else /* call dX_dx functions */
+    {
+      double X = box->v[iX][ijk];
+      double Y = box->v[iX+1][ijk];
+      double Z = box->v[iX+2][ijk];
+      for(j=1; j<=3; j++)
+        n[j] = box->dX_dx[dir][j](box, -1, X,Y,Z);
+    }
   }
-  else  /* if we dXdx is not available, use Cartesian normal*/
+  else  /* use Cartesian normal */
   {
     n[1] = n[2] = n[3] = 0.0;
     n[dir] = 1.0;

@@ -13,6 +13,8 @@ int sgrid_Coordinates(void)
   printf("Adding Coordinates\n");
 
   /* functions */
+  AddFun(POST_GRID, set_box_CI_struct_from_pars,
+         "read box_CI pars and set box->CI struct");
   AddFun(COORDINATES, init_CoordTransform_And_Derivs, 
          "initialize coords and coord transforms");
 
@@ -30,6 +32,10 @@ int sgrid_Coordinates(void)
   AddVar("oY", "", "Y-coord from other boxes for each point in box-bfaces");
   AddVar("oZ", "", "Z-coord from other boxes for each point in box-bfaces");
   AddVar("Temp1", "",     "temporary variable(e.g. to store coeffs)");
+  /* create vars that contain cub. sph. sigma_{0/1} and their derivs */
+  AddVar("Coordinates_CubedSphere_sigma01",     "", "sigma_{0/1}");
+  AddVar("Coordinates_CubedSphere_dsigma01_dA", "", "d/dA sigma_{0/1}");
+  AddVar("Coordinates_CubedSphere_dsigma01_dB", "", "d/dB sigma_{0/1}");
   
   /* parameters */
   for(b=0; b<nboxes; b++)
@@ -39,6 +45,15 @@ int sgrid_Coordinates(void)
     snprintf(str, 999, "box%d_Coordinates", b);
     AddPar(str, "Cartesian", 
            "coordinates used in box [Cartesian, Polar, ...]");
+
+    snprintf(str, 999, "box%d_CI_s", b);
+    AddPar(str, "", "box->CI->s part of tCoordInfo");
+    snprintf(str, 999, "box%d_CI_xc", b);
+    AddPar(str, "", "box->CI->xc part of tCoordInfo");
+    snprintf(str, 999, "box%d_CI_dom", b);
+    AddPar(str, "", "box->CI->dom part of tCoordInfo");
+    snprintf(str, 999, "box%d_CI_type", b);
+    AddPar(str, "", "box->CI->type part of tCoordInfo");
 
     snprintf(str, 999, "box%d_CoordinateTransforms_generic", b);
     AddPar(str, "no", 
@@ -78,15 +93,6 @@ int sgrid_Coordinates(void)
     AddPar("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis", "no", "whether "
            "dsigma_pm_dphi and ddsigma_pm_dphidphi are 0 on x-axis [no,yes]");
   }
-  AddPar("Coordinates_CubedSphere_sigma01_vars", "no",
-         "create vars that contain sigma_{0/1} and their derivs [yes,no]");
-  if(Getv("Coordinates_CubedSphere_sigma01_vars", "yes"))
-  {
-    AddVar("Coordinates_CubedSphere_sigma01",     "", "sigma_{0/1}");
-    AddVar("Coordinates_CubedSphere_dsigma01_dA", "", "d/dA sigma_{0/1}");
-    AddVar("Coordinates_CubedSphere_dsigma01_dB", "", "d/dB sigma_{0/1}");
-  }
-
   AddPar("Coordinates_set_bfaces", "no", "whether we set bfaces in the "
          "function init_CoordTransform_And_Derivs [no,yes]");
 
