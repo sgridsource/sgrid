@@ -115,7 +115,15 @@ int Newton(
       }
       else /* linSolver1 returned error code */
       {
-        lambda = -1.0; /* signal that we stayed at previous vlu */
+        /* reset du to zero */
+        vlsetconstant(vldu, 0.0);
+        /* call Jdu with vldu=0,
+           which hopefully resets all derivs of vldu to zero */
+        if(Getv("GridIterators_Newton_EndOfStep", "Jdu"))
+          Jdu(vlres, vldu, vld1, vld2);
+
+        /* signal that we stayed at previous vlu */
+        lambda = -1.0;
         printf("Newton error: *** Linear solver failed and returned %d ***\n",
                lin_its);
         printf("  signaling that solution is unchanged by setting lambda=%g\n",
