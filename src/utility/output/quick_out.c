@@ -21,7 +21,7 @@ int quick_AddVar(tBox *box, char *name)
 
 /* output a var in a box, with normal write_grid, but some output pars,
    time and iteration are changed */
-void quick_Var_output(tBox *box, char *name, double fake_t, int fake_i)
+void quick_Vars_output(tBox *box, char *names, double fake_t, int fake_i)
 {
   tGrid *grid = box->grid;
   double t = grid->time;
@@ -37,10 +37,10 @@ void quick_Var_output(tBox *box, char *name, double fake_t, int fake_i)
   char *outiter3 = strdup(Gets("3doutiter"));
 
   /* output all right now, but set time for output to fake_t */
-  Sets("0doutput", name);
-  Sets("1doutput", name);
-  Sets("2doutput", name);
-  Sets("3doutput", name);
+  Sets("0doutput", names);
+  Sets("1doutput", names);
+  Sets("2doutput", names);
+  Sets("3doutput", names);
   Sets("3dformat", "vtk text double arrange_as_1d");
   Sets("0doutiter","1");
   Sets("1doutiter","1");
@@ -72,7 +72,7 @@ void quick_Var_output(tBox *box, char *name, double fake_t, int fake_i)
   free(outiter3);
 }
 
-/* same as quick_Var_output, but first copy an array into var in box */
+/* same as quick_Vars_output, but first copy an array into var in box */
 void quick_Array_output(tBox *box, double *Ar, char *name,
                         double fake_t, int fake_i)
 {
@@ -86,6 +86,25 @@ void quick_Array_output(tBox *box, double *Ar, char *name,
   forallpoints(box, i) box->v[inew][i] = Ar[i];
 
   /* output the array, and then disable the var */
-  quick_Var_output(box, name, fake_t, fake_i);
+  quick_Vars_output(box, name, fake_t, fake_i);
   if(!ison) disablevar_inbox(box, inew);
+}
+
+/* same as quick_Vars_output, but for an entire varlist */
+void quick_VarList_output(tBox *box, tVarList *vl, double fake_t, int fake_i)
+{
+  int nl = 3;
+  char *names = calloc(nl, sizeof(char));
+  int vind;
+
+  for(vind=0; vind<vl->n; vind++)
+  {
+    char *varname = VarName(vl->index[vind]);
+    nl += strlen(varname)+1;
+    names = realloc(names, nl);
+    if(vind>0) strcat(names, " ");
+    strcat(names, varname);
+  }
+  quick_Vars_output(box, names, fake_t, fake_i);
+  free(names);
 }
