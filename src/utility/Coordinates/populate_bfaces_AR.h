@@ -149,6 +149,7 @@ static void free_FacePoint(struct FACE_POINT_S ***FacePoint);
 static void set_ofi_flag(tGrid *grid);
 static void order_ftps_pair(tGrid *grid);
 static void set_same_X_Y_Z_flg(tGrid *grid);
+static void set_oXi_oYi_oZi_flg(tGrid *grid);
 static int ijk_ind(tBox *box, int *i);
 static void get_apprx_normal(struct FACE_NORMAL_S *fc_nr,tBox *box, int face,double *x1);
 static int closest_point(tBox *box,int face,double *x1);

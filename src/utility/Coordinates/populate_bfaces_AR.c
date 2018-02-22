@@ -142,9 +142,37 @@ static void setting_remaining_flags(tGrid *grid)
   they are called pair, and then order the index of each ftps point*/
   order_ftps_pair(grid);
   
-  /*Setting the SameX/Y/Z flags*/
+  /* Setting the SameX/Y/Z flags */
   set_same_X_Y_Z_flg(grid);
   
+  /* Setting oXi, oYi, oZi flags */
+  set_oXi_oYi_oZi_flg(grid);
+  
+}
+
+/* Setting oXi, oYi, oZi flags */
+static void set_oXi_oYi_oZi_flg(tGrid *grid)
+{
+  int b;
+  
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int bf;
+    
+    for (bf = 0; bf < box->nbfaces; bf++)
+    {
+      tBface *bface = box->bface[bf];
+      
+      if (bface->touch == 1 && bface->same_fpts == 0)
+      {
+        bface->oXi = Ind("oX");
+        bface->oYi = Ind("oY");
+        bface->oZi = Ind("oZ");
+      }
+    }
+  }
+ 
 }
 
 /*Setting the SameX/Y/Z flags*/
