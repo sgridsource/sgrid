@@ -15,7 +15,7 @@ void populate_bface(tGrid *grid)
 {
   struct FACE_POINT_S ***FacePoint;//Format is FacePoint[box][face]->
   int b;
-  
+
   /* Operation */
   printf("\n***Populating Bfaces***\n");
 
@@ -38,7 +38,7 @@ void populate_bface(tGrid *grid)
   free_FacePoint(FacePoint);
   
   /* Visualize boxes */
-  if (0)
+  if (1)
     visualize_boxes(grid);
   
   /* Testing bfaces */
@@ -46,7 +46,7 @@ void populate_bface(tGrid *grid)
     test_bfaces(grid);
   
   /* Visualize bfaces*/
-  if (0)
+  if (1)
     visualize_bfaces(grid);
   
   
@@ -659,6 +659,7 @@ int b, int f,tGrid *grid)
     int n2 = box->n2;
     int n3 = box->n3;
     int bfacei,i;
+    int l = 0, s = 0;
     
     bfacei = add_empty_bface(box,f);
     
@@ -667,18 +668,30 @@ int b, int f,tGrid *grid)
     /*Filling point list for inner*/
     for (i = 0; i < FacePoint[b][f]->s; i++)
     {
-      add_point_to_bface_inbox(box,bfacei,\
-          FacePoint[b][f]->inner[i].geometry.ijk,f);
+      if (FacePoint[b][f]->inner[i].adjacent.outerbound == 1)
+      {
+        add_point_to_bface_inbox(box,bfacei,\
+            FacePoint[b][f]->inner[i].geometry.ijk,f);
+        s++;
+      }
     }
     
     /*Filling point list for edge*/
     for (i = 0; i < FacePoint[b][f]->l; i++)
     {
-      add_point_to_bface_inbox(box,bfacei,\
+      
+      if (FacePoint[b][f]->edge[i].adjacent.outerbound == 1)
+      {
+        add_point_to_bface_inbox(box,bfacei,\
           FacePoint[b][f]->edge[i].geometry.ijk,f);
+        l++;
+      }
     }
     
-    return CONTINUE_F;
+    if (l == FacePoint[b][f]->l && s == FacePoint[b][f]->s)
+      return CONTINUE_F;
+    else
+      return NONE_F;
   }
   
   else
@@ -704,11 +717,6 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
     
     for (f = 0; f < f_max; f++)
     {
-      if (FacePoint[b][f]->outerbound == 1)
-        continue;
-        
-      assert(FacePoint[b][f]->sh != 0);
-      
       const int l = FacePoint[b][f]->l;
       int *blist = malloc(FacePoint[b][f]->sh*sizeof(*blist));
       int i;
@@ -724,6 +732,22 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
         double X[3];
         double *x = FacePoint[b][f]->edge[i].geometry.x;
         int k;
+        
+        /* if this face reach outerbound, check if this point also */
+        if (FacePoint[b][f]->outerbound == 1)
+        {
+          double q[3] = { edge[i].geometry.x[0]+edge[i].geometry.N[0]*EPS,\
+                            edge[i].geometry.x[1]+edge[i].geometry.N[1]*EPS,\
+                            edge[i].geometry.x[2]+edge[i].geometry.N[2]*EPS};
+          int out; 
+          out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+          
+          if (out < 0)
+          {
+            FacePoint[b][f]->edge[i].adjacent.outerbound = 1;
+            continue;
+          }
+        }
         
         inbox = 0;
         nb = 0;
@@ -758,7 +782,8 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
           free(inbox);
       }
       
-      free (blist);
+      if (FacePoint[b][f]->sh > 0)
+        free (blist);
       
     }//for (f = 0; f < f_max; f++)
   }//for (b = 0; b < b_max; b++)
