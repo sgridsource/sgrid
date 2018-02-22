@@ -458,6 +458,17 @@ static void set_ofi_flag(tGrid *grid)
             errorexit("The appropriate bface could not be found!\n");
             
       }// else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
+      
+      /* If this bface is untouch */
+      else if (box->bface[bf]->touch == 0 && box->bface[bf]->ofi == -1)
+      {
+        add_to_pair(&pair,box->bface[bf],box->bface[bf],&np);
+      }// else if (box->bface[bf]->touch == 0 && box->bface[bf]->ofi == -1)
+      
+      else
+      {
+        errorexit("This case is not considered!\n");
+      }
   
     }//for (bf = 0; bf < box->nbfaces; bf++)
   }
@@ -540,6 +551,7 @@ static void find_remaining_bfaces(struct FACE_POINT_S ***const FacePoint,int b, 
     {
       bface = make_bface(&P_untouch,grid);
       bface->ob = P_untouch.P[0]->adjacent.box;
+      bface->ofi = -1;
       free(P_untouch.P);
     }
     
@@ -1439,12 +1451,13 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       /*If the found point is at face*/
       if (IsAtFace(record[k].box,record[k].ijk,face_list,grid) == 1)
       {
-        record[k].AtFace = 1;
-        flg = NONE_F;
         double N[3];
         int i = 0;
         
+        record[k].AtFace = 1;
         record[k].touch = 1;
+        flg = NONE_F;
+        
         i = 0;
         while (face_list[i] >= 0)
         {
@@ -1471,10 +1484,12 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
         }
         
       }
-      else//It's not at face so it is inside and it needs iterpolation
+      /* It's not at face so it is inside the mesh and it 
+       * needs iterpolation and it is considered as untouch one */
+      else
       {
-        errorexit("We have a collocated point which located \n"
-        "on a face and on the inner mesh of two boxes. This case has not been considered yet!");
+        record[k].AtFace = -1;
+        record[k].touch = 0;
       }
       
     }
@@ -1499,6 +1514,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       if (nf == 0)
       {
         record[k].touch = 0;
+        record[k].face = -1;
       }
       else
       {
@@ -1626,7 +1642,8 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     while(k < n_adj_box)
     {
       if (record[k].interpolation == 1 && 
-          record[k].touch         == 1)
+          record[k].touch         == 1 &&
+          record[k].face          >= 0   )
       {
         if (index != -1 && dgreatereq(record[k].nrm,record[index].nrm))
           index = k;
@@ -1657,15 +1674,13 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     while(k < n_adj_box)
     {
       if (record[k].interpolation == 1 && 
-          record[k].touch         == 0)
+          record[k].touch         == 0 &&
+          record[k].face          <  0   )
       {
-        errorexit("This case has not been considered");
-        
         P->adjacent.box = record[k].box;
         P->adjacent.touch = record[k].touch;
         P->adjacent.face = record[k].face;
         P->adjacent.interpolation = record[k].interpolation;
-        add_to_share(FacePoint[b][f],P->adjacent.face,P->adjacent.box,kind,i);
         flg = FOUND_F;
         break;
       }
@@ -2024,6 +2039,11 @@ static void test_bfaces(tGrid *grid)
         }
       }// if (bface->touch == 1 && bface->same_fpts == 1)
       
+      if (bface->touch == 0)
+      {
+        if (bface->ofi >= 0)
+          errorexit("The untouch bface is not set correctly");
+      }
     }// for (bf = 0; bf < box->nbfaces; bf++)
     
   }// forallboxes(grid,b)
