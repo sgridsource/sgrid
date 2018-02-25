@@ -163,7 +163,8 @@ static void set_oXi_oYi_oZi_flg(tGrid *grid)
     for (bf = 0; bf < box->nbfaces; bf++)
     {
       tBface *bface = box->bface[bf];
-      
+      //FIXME: if boxes overlap touch=0 same_fpts=0 but we still need to inter-
+      //       polate!!! I.e. id ob>=0 but no touch we need oXi...
       if (bface->touch == 1 && bface->same_fpts == 0)
       {
         bface->oXi = Ind("oX");
