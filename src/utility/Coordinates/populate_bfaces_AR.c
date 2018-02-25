@@ -5,20 +5,17 @@
 #define EPS 1E-5
 #define EPS2 1E-3
 
-/*
-NOTE2:
-It's only work for boxes with 6 faces
-*/
-
 
 /*populating bface structure*/
 void populate_bface(tGrid *grid)
 {
   struct FACE_POINT_S ***FacePoint;//Format is FacePoint[box][face]->
   int b;
-//test
+  
+  /* Visualize boxes */
+  if (1)
     visualize_boxes(grid);
-//end
+  
   /* Operation */
   printf("\n***Populating Bfaces***\n");
 
@@ -40,10 +37,6 @@ void populate_bface(tGrid *grid)
   /*freeing memory*/
   free_FacePoint(FacePoint);
   
-  /* Visualize boxes */
-  if (1)
-    visualize_boxes(grid);
-  
   /* Testing bfaces */
   if (1)
     test_bfaces(grid);
@@ -51,7 +44,6 @@ void populate_bface(tGrid *grid)
   /* Visualize bfaces*/
   if (1)
     visualize_bfaces(grid);
-  
   
 }
 
@@ -166,8 +158,7 @@ static void set_oXi_oYi_oZi_flg(tGrid *grid)
     for (bf = 0; bf < box->nbfaces; bf++)
     {
       tBface *bface = box->bface[bf];
-      //FIXME: if boxes overlap touch=0 same_fpts=0 but we still need to inter-
-      //       polate!!! I.e. id ob>=0 but no touch we need oXi...
+      
       if (bface->touch == 1 && bface->same_fpts == 0)
       {
         bface->oXi = Ind("oX");
@@ -725,6 +716,11 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
       int *blist = malloc(FacePoint[b][f]->sh*sizeof(*blist));
       int i;
       
+      /* if this face is internal face */
+      if (FacePoint[b][f]->internal_face == 1)
+          continue;
+      
+      
       for (i = 0; i < FacePoint[b][f]->sh; i++)
       {
         blist[i] = FacePoint[b][f]->shared[i].box;
@@ -738,7 +734,6 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
         int k;
         
         /* if this point reach outerbound */
-        
         double q[3] = { edge[i].geometry.x[0]+edge[i].geometry.N[0]*EPS,\
                           edge[i].geometry.x[1]+edge[i].geometry.N[1]*EPS,\
                           edge[i].geometry.x[2]+edge[i].geometry.N[2]*EPS};
@@ -814,6 +809,10 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
       int *adj_box,n_adj_box;//list and number of adjacent boxes
       const int s = FacePoint[b][f]->s;
       int i;
+      
+      /* if this face is internal face */
+      if (FacePoint[b][f]->internal_face == 1)
+          continue;
       
       for (i = 0; i < s; i++)
       {
@@ -1155,6 +1154,7 @@ static void init_FacePoint(struct FACE_POINT_S ***FacePoint,tGrid *grid)
 static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
 {
   int b, f;
+  FLAG_T flg = NONE_F;
   
   forallboxes(grid,b)
   {
@@ -1174,6 +1174,8 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
       int i_l,j_l,k_l;/*lower range of i, j and k */
       int i_u,j_u,k_u;/*upper range of i, j and k */
       
+      flg = NONE_F;
+      
       /*Filling the edge and inner points*/
       setup_range(f,n,&i_l,&j_l,&k_l,&i_u,&j_u,&k_u,NULL);
       e = 0;
@@ -1181,34 +1183,77 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
       for (i = i_l; i <= i_u; i++)
       {
         for (j = j_l; j <= j_u; j++)
+        {
          for (k = k_l; k <= k_u; k++)
          {
+           FLAG_T kind;
+           
            if (IsEdge(f,n,i,j,k) == 1)/*If it is on edge*/
            {
              assert(e < l);
              P = &edge[e];
              e++;
-             
+             kind = EDGE_F;
            }
            else
            {
              assert(in < s);
              P = &inner[in];
              in++;
-             
+             kind = INNER_F;
            }
            
            get_x_coord(P->geometry.x,box,Index(i,j,k));
            get_X_coord(P->geometry.X,box,Index(i,j,k));
-           get_normal(P->geometry.N,box,f,Index(i,j,k));
+           
            P->geometry.ijk = Index(i,j,k);
            P->geometry.b = b;
            P->geometry.f = f;
            
+           if (kind == INNER_F)
+           {
+             FacePoint[b][f]->internal_face = IsInternal(box,P->geometry.X);
+           }
+           
+           if (FacePoint[b][f]->internal_face == 1)
+           {
+             flg = INTERNAL_F;
+             break;
+           }
+             
+           get_normal(P->geometry.N,box,f,Index(i,j,k));
+          
+           
          }
+         if (flg == INTERNAL_F)
+           break;
+        }
+        if (flg == INTERNAL_F)
+           break;
       }
     }
   }//End of forallboxes
+}
+
+/*check if the point is internal and if so returns 1 otherwise 0*/
+static int IsInternal(tBox *const box, double *const X)
+{
+  int nf, face[TOT_NUM_FACE];
+  
+  nf = XYZ_on_face(box,face,X[0],X[1],X[2]);
+  
+  if (nf > 1)
+  {
+    if ( (face[X_FACE0] == 1 && face[X_FACE1] == 1) ||
+         (face[Y_FACE0] == 1 && face[Y_FACE0] == 1) ||
+         (face[Z_FACE0] == 1 && face[Z_FACE0] == 1)   )
+      return 1;
+    else
+      return 0;
+  }
+  
+  else
+    return 0;
 }
 
 /*Gettig the normalized normal in outward direction*/
@@ -1259,7 +1304,17 @@ static void get_normal(double *N,tBox *box,int face,long int ijk)
         N[j] = box->v[idZd+j][ijk];
     }
     
+    //test
+    double n = sqrt(SQ(N[0])+SQ(N[1])+SQ(N[2]));
+    if (dequal(n,0))
+    {
+      yo();
+    }
+  
+    //edn
+    
     normalizing_N(N);
+    
     
   }
   

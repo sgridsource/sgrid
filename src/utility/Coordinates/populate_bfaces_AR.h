@@ -60,6 +60,7 @@ struct FACE_POINT_S
   int sh;//total num of shared
   
   unsigned int outerbound;//if the face is outerbound it is 1, otherwise 0
+  int internal_face;//if it is internal face 1 otherwise 0
 };
 
 /*Similiar points*/
@@ -110,7 +111,8 @@ typedef enum FLAG
     ERROR_F,
     SAME_X,
     SAME_Y,
-    SAME_Z
+    SAME_Z,
+    INTERNAL_F
     
 }FLAG_T;
 
@@ -151,6 +153,7 @@ static void order_ftps_pair(tGrid *grid);
 static void set_same_X_Y_Z_flg(tGrid *grid);
 static void set_oXi_oYi_oZi_flg(tGrid *grid);
 static int ijk_ind(tBox *box, int *i);
+static int IsInternal(tBox *const box, double *const X);
 static void get_apprx_normal(struct FACE_NORMAL_S *fc_nr,tBox *box, int face,double *x1);
 static int closest_point(tBox *box,int face,double *x1);
 static void visualize_bfaces(tGrid *grid);
