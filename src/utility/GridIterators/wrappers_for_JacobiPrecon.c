@@ -495,13 +495,13 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   {
     if(Blocks_JacobiPrecon.type==2) /* if we use SPQR */
     {
-      printf(" SuiteSparseQR_C_factorize_tSPQR_A in block%d...\n", i);
+      if(pr) printf(" SuiteSparseQR_C_factorize_tSPQR_A in block%d...\n", i);
       fflush(stdout);
       SuiteSparseQR_C_factorize_tSPQR_A(&(Blocks_JacobiPrecon.SPQR[i]), 0);
     }
     else
     {
-      printf(" umfpack_dl_numeric_from_tUMFPACK_A in block%d...\n", i);
+      if(pr) printf(" umfpack_dl_numeric_from_tUMFPACK_A in block%d...\n", i);
       fflush(stdout);
       umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
                                          Blocks_JacobiPrecon.blockdims[i], 0);
