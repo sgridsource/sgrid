@@ -2,7 +2,8 @@
 #include "Coordinates.h"
 #include "populate_bfaces_AR.h"
 
-#define EPS 1E-7
+#define EPS 1E-5
+#define EPS2 1E-3
 
 /*
 NOTE2:
@@ -15,7 +16,9 @@ void populate_bface(tGrid *grid)
 {
   struct FACE_POINT_S ***FacePoint;//Format is FacePoint[box][face]->
   int b;
-
+//test
+    visualize_boxes(grid);
+//end
   /* Operation */
   printf("\n***Populating Bfaces***\n");
 
@@ -733,20 +736,18 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
         double *x = FacePoint[b][f]->edge[i].geometry.x;
         int k;
         
-        /* if this face reach outerbound, check if this point also */
-        if (FacePoint[b][f]->outerbound == 1)
+        /* if this point reach outerbound */
+        
+        double q[3] = { edge[i].geometry.x[0]+edge[i].geometry.N[0]*EPS,\
+                          edge[i].geometry.x[1]+edge[i].geometry.N[1]*EPS,\
+                          edge[i].geometry.x[2]+edge[i].geometry.N[2]*EPS};
+        int out; 
+        out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+        
+        if (out < 0)
         {
-          double q[3] = { edge[i].geometry.x[0]+edge[i].geometry.N[0]*EPS,\
-                            edge[i].geometry.x[1]+edge[i].geometry.N[1]*EPS,\
-                            edge[i].geometry.x[2]+edge[i].geometry.N[2]*EPS};
-          int out; 
-          out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
-          
-          if (out < 0)
-          {
-            FacePoint[b][f]->edge[i].adjacent.outerbound = 1;
-            continue;
-          }
+          FacePoint[b][f]->edge[i].adjacent.outerbound = 1;
+          continue;
         }
         
         inbox = 0;
@@ -816,6 +817,19 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
       for (i = 0; i < s; i++)
       {
         struct POINT_S *inner = FacePoint[b][f]->inner;
+        double q[3] = { inner[i].geometry.x[0]+inner[i].geometry.N[0]*EPS,
+                        inner[i].geometry.x[1]+inner[i].geometry.N[1]*EPS,
+                        inner[i].geometry.x[2]+inner[i].geometry.N[2]*EPS };
+        double X[3];
+        
+        /* This set the priority to outerbound or innerbound */
+        int out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+        if (out < 0)
+        {
+          FacePoint[b][f]->inner[i].adjacent.outerbound = 1;
+          FacePoint[b][f]->outerbound = 1;// Flag this face for future uses
+          continue;
+        }
         
         adj_box = 0;
         n_adj_box = 0;
@@ -825,10 +839,6 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
         /*if the point couldn't be found, let's try the normal approach*/
         if (n_adj_box == 0)
         {
-          double q[3] = { inner[i].geometry.x[0]+inner[i].geometry.N[0]*EPS,\
-                          inner[i].geometry.x[1]+inner[i].geometry.N[1]*EPS,\
-                          inner[i].geometry.x[2]+inner[i].geometry.N[2]*EPS};
-          double X[3];
           
           adj_box = malloc(sizeof(*adj_box));
           assert(adj_box != 0);
@@ -1680,13 +1690,80 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     
     if (index != -1)  
     {
-      assert(!dequal(record[index].nrm,0));
+      /* If there is an ambiguity between outerbound and interpolation,
+       * one has to study the neighbor of the point to realize the status */
+      if (dequal(record[index].nrm,0))
+      {
+        struct FACE_NORMAL_S *fc_nr = 0;
+        double N[3] = {P->geometry.N[0],P->geometry.N[1],P->geometry.N[2]};
+        double X[3];
+        int face[TOT_NUM_FACE];
+        int i, nf = 0;
       
-      P->adjacent.box = record[index].box;
-      P->adjacent.touch = record[index].touch;
-      P->adjacent.face = record[index].face;
-      P->adjacent.interpolation = record[index].interpolation;
-      add_to_share(FacePoint[b][f],P->adjacent.face,P->adjacent.box,kind,i);
+        XYZ_of_xyz(grid->box[record[index].box],X,X+1,X+2,
+                P->geometry.x[0],P->geometry.x[1],P->geometry.x[2]);
+      
+        nf = XYZ_on_face(grid->box[record[index].box],face,X[0],X[1],X[2]);
+        assert(nf != 0);
+        
+        fc_nr = calloc(nf,sizeof(*fc_nr));
+        assert(fc_nr != 0);
+        
+        int j = 0;
+        for (i = 0; i < TOT_NUM_FACE; i++)
+        {
+          if ( face[i] == 1 )
+          {
+            fc_nr[j].face = i;
+            /* getting the approximate normal base on closest point */
+            get_apprx_normal(&fc_nr[j],grid->box[record[index].box],i,P->geometry.x);
+            
+            N[0] += EPS2*fc_nr[j].N[0];
+            N[1] += EPS2*fc_nr[j].N[1];
+            N[2] += EPS2*fc_nr[j].N[2];
+            
+            j++;
+            
+          }
+        }
+        
+        free(fc_nr);
+        
+        double Nsqr = sqrt(SQ(N[0])+SQ(N[1])+SQ(N[2]));
+        assert(!dequal(Nsqr,0));
+        N[0] /= Nsqr;
+        N[1] /= Nsqr;
+        N[2] /= Nsqr;
+        
+        double q[3] = { P->geometry.x[0]+N[0]*EPS,
+                        P->geometry.x[1]+N[1]*EPS,
+                        P->geometry.x[2]+N[2]*EPS };
+        int out; 
+        out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+        
+        if (out < 0)
+        {
+          P->adjacent.outerbound = 1;
+        }
+        else
+        {
+          P->adjacent.box = record[index].box;
+          P->adjacent.touch = 0;
+          P->adjacent.face = -1;
+          P->adjacent.interpolation = 1;
+          add_to_share(FacePoint[b][f],P->adjacent.face,P->adjacent.box,kind,i);
+        }
+
+      }
+      else
+      {
+        P->adjacent.box = record[index].box;
+        P->adjacent.touch = record[index].touch;
+        P->adjacent.face = record[index].face;
+        P->adjacent.interpolation = record[index].interpolation;
+        add_to_share(FacePoint[b][f],P->adjacent.face,P->adjacent.box,kind,i);
+      }
+      
       flg = FOUND_F;
     }
   
@@ -1706,6 +1783,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
         P->adjacent.touch = record[k].touch;
         P->adjacent.face = record[k].face;
         P->adjacent.interpolation = record[k].interpolation;
+        add_to_share(FacePoint[b][f],P->adjacent.face,P->adjacent.box,kind,i);
         flg = FOUND_F;
         break;
       }
