@@ -159,7 +159,8 @@ void find_external_faces_of_box(tBox *box, int *extface)
         double x = box->v[var_x][ijk];
         double y = box->v[var_y][ijk];
         double z = box->v[var_z][ijk];
-        double ox,oy,oz, Nx,Ny,Nz, Nmag, dx,dy,dz, dist;
+        double Ndir[4];
+        double ox,oy,oz, dx,dy,dz, dist;
         int li, ret;
 
         /* pick one of X,Y,Z on boundary */
@@ -168,19 +169,15 @@ void find_external_faces_of_box(tBox *box, int *extface)
         if(dir==3) Z = box->bbox[f];
 
         /* use normal vector to find point ox,oy,oz slightly outside box */
-        Nx = box->dx_dX[1][dir](box, -1, X,Y,Z);
-        Ny = box->dx_dX[2][dir](box, -1, X,Y,Z);
-        Nz = box->dx_dX[3][dir](box, -1, X,Y,Z);
-        Nmag = sqrt(Nx*Nx + Ny*Ny + Nz*Nz);
-        dx = s*Nx*dL;
-        dy = s*Ny*dL;
-        dz = s*Nz*dL;
-        if(Nmag!=0.0) { dx=dx/Nmag;  dy=dy/Nmag;  dz=dz/Nmag; }
+        boxface_outwarddir_at_XYZ(box, f, X,Y,Z, Ndir);
+        dx = Ndir[1]*dL;
+        dy = Ndir[2]*dL;
+        dz = Ndir[3]*dL;
         ox = x + dx;
         oy = y + dy;
         oz = z + dz;
 //printf("b%d dir%d  p%d, f%d, i,j,k=%d,%d,%d\n", b, dir, p, f, i,j,k);
-//printf(" Nx,Ny,Nz=%g,%g,%g Nmag=%g\n", Nx,Ny,Nz, Nmag);
+//printf(" Nx,Ny,Nz=%g,%g,%g\n", NNdir[1],Ndir[2],Ndir[3]);
 //printf(" x,y,z=%g,%g,%g ox,oy,oz=%g,%g,%g\n", x,y,z, ox,oy,oz);
 //printf(" dx,dy,dz=%g,%g,%g\n", dx,dy,dz);
 
