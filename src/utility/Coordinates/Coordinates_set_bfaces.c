@@ -137,11 +137,9 @@ void find_external_faces_of_box(tBox *box, int *extface)
     /* go over faces, but not edges */
     for(p=0; p<n1; p+=n1-1)
     {
-      int s; /* sign s=+-1 */
-
-      /* pick sign s of normal and pick face index */
-      if(p==0) { s=-1;  f=2*d;   }
-      else     { s=+1;  f=2*d+1; }
+      /* pick face index */
+      if(p==0) f=2*d;
+      else     f=2*d+1;
 
       /* mark other box as non-existent by default */
       ob = -1;
