@@ -116,7 +116,12 @@ void boxface_outwarddir_at_ijk(tBox *box, int f, int ijk, double n[4])
       for(j=1; j<=3; j++)
         n[j] = box->dx_dX[j][dir](box, -1, X,Y,Z);
     }
-    else errorexit("box->dx_dX[1][dir] is NULL");
+    else /* try normal instead */
+    {
+      boxface_normal_at_ijk(box, f, ijk, n);
+      return;
+      errorexit("box->dx_dX[1][dir] is NULL");
+    }
   }
   else  /* use Cartesian normal */
   {
@@ -182,7 +187,12 @@ void boxface_outwarddir_at_XYZ(tBox *box, int f, double X,double Y,double Z,
       for(j=1; j<=3; j++)
         n[j] = box->dx_dX[j][dir](box, -1, X,Y,Z);
     }
-    else errorexit("box->dx_dX[1][dir] is NULL");
+    else /* try normal instead */
+    {
+      boxface_normal_at_XYZ(box, f, X,Y,Z, n);
+      return;
+      errorexit("box->dx_dX[1][dir] is NULL");
+    }
   }
   else  /* use Cartesian normal */
   {
