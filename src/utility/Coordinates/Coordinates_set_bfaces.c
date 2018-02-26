@@ -168,9 +168,9 @@ void find_external_faces_of_box(tBox *box, int *extface)
         if(dir==3) Z = box->bbox[f];
 
         /* use normal vector to find point ox,oy,oz slightly outside box */
-        Nx = box->dX_dx[dir][1](box, -1, X,Y,Z);
-        Ny = box->dX_dx[dir][2](box, -1, X,Y,Z);
-        Nz = box->dX_dx[dir][3](box, -1, X,Y,Z);
+        Nx = box->dx_dX[1][dir](box, -1, X,Y,Z);
+        Ny = box->dx_dX[2][dir](box, -1, X,Y,Z);
+        Nz = box->dx_dX[3][dir](box, -1, X,Y,Z);
         Nmag = sqrt(Nx*Nx + Ny*Ny + Nz*Nz);
         dx = s*Nx*dL;
         dy = s*Ny*dL;
@@ -331,10 +331,10 @@ int set_bfaces_on_boxface(tBox *box, int f)
 
 
       /* normal vector */
-      if(box->dX_dx[dir][1]==NULL) errorexit("we need box->dX_dx[dir][1]");
-      Nx = box->dX_dx[dir][1](box, -1, X,Y,Z);
-      Ny = box->dX_dx[dir][2](box, -1, X,Y,Z);
-      Nz = box->dX_dx[dir][3](box, -1, X,Y,Z);
+      if(box->dx_dX[1][dir]==NULL) errorexit("we need box->dx_dX[1][dir]");
+      Nx = box->dx_dX[1][dir](box, -1, X,Y,Z);
+      Ny = box->dx_dX[2][dir](box, -1, X,Y,Z);
+      Nz = box->dx_dX[3][dir](box, -1, X,Y,Z);
 
       /* if we are also on another face add a bit of the normal as well */
       if(XYZ_on_face(box, face, X,Y,Z))
@@ -345,9 +345,9 @@ int set_bfaces_on_boxface(tBox *box, int f)
           if(face[ff])
           {
             int dir = 1+ff/2;
-            Nx += 0.1 * ( box->dX_dx[dir][1](box, -1, X,Y,Z) );
-            Ny += 0.1 * ( box->dX_dx[dir][2](box, -1, X,Y,Z) );
-            Nz += 0.1 * ( box->dX_dx[dir][3](box, -1, X,Y,Z) );
+            Nx += 0.1 * ( box->dx_dX[1][dir](box, -1, X,Y,Z) );
+            Ny += 0.1 * ( box->dx_dX[2][dir](box, -1, X,Y,Z) );
+            Nz += 0.1 * ( box->dx_dX[3][dir](box, -1, X,Y,Z) );
           }
       }
     }
