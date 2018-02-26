@@ -132,6 +132,71 @@ void boxface_outwarddir_at_ijk(tBox *box, int f, int ijk, double n[4])
   n[3] /= smag;
 }
 
+/* find normal vector (n[1],n[2],n[3]) of box face f at X,Y,Z */
+void boxface_normal_at_XYZ(tBox *box, int f, double X,double Y,double Z,
+                           double n[4])
+{
+  int dir = 1 + f/2;     /* get direction */
+  int sig = 2*(f%2) - 1; /* get sign for outward direction */
+  double smag;
+  int j;
+
+  if(f>5 || f<0) errorexit("f must be 0,1,2,3,4,5");
+
+  if(box->x_of_X[1]!=NULL) /* not Cartesian */
+  {
+    for(j=1; j<=3; j++)
+      n[j] = box->dX_dx[dir][j](box, -1, X,Y,Z);
+  }
+  else  /* use Cartesian normal */
+  {
+    n[1] = n[2] = n[3] = 0.0;
+    n[dir] = 1.0;
+  }
+
+  /* normalize and set sign from sig */
+  smag = sig * sqrt(n[1]*n[1] + n[2]*n[2] + n[3]*n[3]);
+  if(smag == 0.0) smag = sig;
+  n[1] /= smag;
+  n[2] /= smag;
+  n[3] /= smag;
+}
+
+/* find vector (n[1],n[2],n[3]) along coord. direction out of box face f
+   at point X,Y,Z */
+void boxface_outwarddir_at_XYZ(tBox *box, int f, double X,double Y,double Z,
+                               double n[4])
+{
+  int dir = 1 + f/2;     /* get direction */
+  int sig = 2*(f%2) - 1; /* get sign for outward direction */
+  double smag;
+  int j;
+
+  if(f>5 || f<0) errorexit("f must be 0,1,2,3,4,5");
+
+  if(box->x_of_X[1]!=NULL) /* not Cartesian */
+  {
+    /* check if the func dx_dX is available */
+    if(box->dx_dX[1][dir]!=NULL) /* call dx_dX functions */
+    {
+      for(j=1; j<=3; j++)
+        n[j] = box->dx_dX[j][dir](box, -1, X,Y,Z);
+    }
+    else errorexit("box->dx_dX[1][dir] is NULL");
+  }
+  else  /* use Cartesian normal */
+  {
+    n[1] = n[2] = n[3] = 0.0;
+    n[dir] = 1.0;
+  }
+
+  /* normalize and set sign from sig */
+  smag = sig * sqrt(n[1]*n[1] + n[2]*n[2] + n[3]*n[3]);
+  if(smag == 0.0) smag = sig;
+  n[1] /= smag;
+  n[2] /= smag;
+  n[3] /= smag;
+}
 
 
 /* interpolate onto points in box on bface 

@@ -27,6 +27,10 @@ void set_boundary_radiative_analytic(tVarList *unew, tVarList *upre,
 /* from BCs_from_bfaces.c */
 void boxface_normal_at_ijk(tBox *box, int f, int ijk, double n[4]);
 void boxface_outwarddir_at_ijk(tBox *box, int f, int ijk, double n[4]);
+void boxface_normal_at_XYZ(tBox *box, int f, double X,double Y,double Z,
+                           double n[4]);
+void boxface_outwarddir_at_XYZ(tBox *box, int f, double X,double Y,double Z,
+                               double n[4]);
 void FPsi_1Dinterp_for_bface(int iFPsi, tBface *bface, int idir,
                              int iPsi, int idPsi[4]);
 void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
