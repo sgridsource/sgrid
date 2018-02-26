@@ -1263,70 +1263,13 @@ static int IsInternal(tBox *const box, double *const X)
 /*Gettig the normalized normal in outward direction*/
 static void get_normal(double *N,tBox *box,int face,long int ijk)
 {
-  int idXd = Ind("dXdx");
-  int idYd = Ind("dYdx");
-  int idZd = Ind("dZdx");
-  int j;
-
-  if(box->v[idXd]==NULL)//If the box using cartesian coords
-  {
-    if (face == X_FACE0 || face == X_FACE1)
-    {
-      N[0] = 1;
-      N[1] = 0;
-      N[2] = 0;
-    }
-    else if (face == Y_FACE0 || face == Y_FACE1)
-    {
-      N[0] = 0;
-      N[1] = 1;
-      N[2] = 0;
-    }
-    else if (face == Z_FACE0 || face == Z_FACE1)
-    {
-      N[0] = 0;
-      N[1] = 0;
-      N[2] = 1;
-    }
-  }
+  double n[4];
   
-  else
-  {
-    if (face == X_FACE0 || face == X_FACE1)
-    {
-      for(j = 0; j < 3; j++)
-        N[j] = box->v[idXd+j][ijk];
-    }
-    else if (face == Y_FACE0 || face == Y_FACE1)
-    {
-      for(j = 0; j < 3; j++)
-        N[j] = box->v[idYd+j][ijk];
-    }
-    else if (face == Z_FACE0 || face == Z_FACE1)
-    {
-      for(j = 0; j < 3; j++)
-        N[j] = box->v[idZd+j][ijk];
-    }
-    
-    //test
-    double n = sqrt(SQ(N[0])+SQ(N[1])+SQ(N[2]));
-    if (dequal(n,0))
-    {
-      yo();
-    }
+  boxface_outwarddir_at_ijk(box,face,ijk,n);
   
-    //edn
-    
-    normalizing_N(N);
-    
-    
-  }
-  
-  /*Setting the sign in order to have outward direction*/
-  int s = 2*(face%2)-1;
-  N[0] *= s;
-  N[1] *= s;
-  N[2] *= s;
+  N[0] = n[1];
+  N[1] = n[2];
+  N[2] = n[3];
   
 }
 

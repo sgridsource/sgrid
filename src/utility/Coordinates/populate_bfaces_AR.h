@@ -171,3 +171,4 @@ int XYZ_on_face(tBox *box, int *face, double X, double Y, double Z);
 int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,double x, double y, double z);
 void AddToPointList(tPointList *PL, int boxindex, int newpoint);
 tPointList *AllocatePointList(tGrid *grid);
+void boxface_outwarddir_at_ijk(tBox *box, int f, int ijk, double n[4]);
