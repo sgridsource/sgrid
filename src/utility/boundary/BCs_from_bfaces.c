@@ -6,12 +6,11 @@
 
 
 
-/* find normal vector (n[1],n[2],n[3]) of box face given by 
-   bface at point ijk */
+/* find normal vector (n[1],n[2],n[3]) of box face f at point ijk */
 void boxface_normal_at_ijk(tBox *box, int f, int ijk, double n[4])
 {
   int dir = 1 + f/2;     /* get direction */
-  int sig = 1 - 2*(f%2); /* get sign for outward direction */
+  int sig = 2*(f%2) - 1; /* get sign for outward direction */
   int iX   = Ind("X");
   int idXd = Ind("dXdx");
   int idYd = Ind("dYdx");
@@ -73,6 +72,64 @@ for(j=1; j<=3; j++) printf("%g   ", dXdx[i][j]);
 printf("\n");
 }
 */
+}
+
+/* find vector (n[1],n[2],n[3]) along coord. direction out of box face f
+   at point ijk */
+void boxface_outwarddir_at_ijk(tBox *box, int f, int ijk, double n[4])
+{
+  int dir = 1 + f/2;     /* get direction */
+  int sig = 2*(f%2) - 1; /* get sign for outward direction */
+  int iX   = Ind("X");
+  /*  int idxd = Ind("dxdX"); // we do not have dxdX yet!!!
+      int idyd = Ind("dydX");
+      int idzd = Ind("dzdX"); */
+  int idxd=-1, idyd=-1, idzd=-1;
+  double dxdX[4][4];
+  double smag;
+  int j;
+
+  if(f>5 || f<0) errorexit("f must be 0,1,2,3,4,5");
+
+  if(box->x_of_X[1]!=NULL) /* not Cartesian */
+  {
+    /* check if the var dxdX is available */
+    if(idxd>0 && box->v[idxd]!=NULL)
+    {
+      /* get dxdX */
+      for(j=1; j<=3; j++)
+      {
+        dxdX[1][j] = box->v[idxd + j-1][ijk];
+        dxdX[2][j] = box->v[idyd + j-1][ijk];
+        dxdX[3][j] = box->v[idzd + j-1][ijk];
+      }
+      /* get direction vectors from derivs */
+      n[1] = dxdX[1][dir];
+      n[2] = dxdX[2][dir];
+      n[3] = dxdX[3][dir];
+    }
+    else if(box->dx_dX[1][dir]!=NULL) /* call dx_dX functions */
+    {
+      double X = box->v[iX][ijk];
+      double Y = box->v[iX+1][ijk];
+      double Z = box->v[iX+2][ijk];
+      for(j=1; j<=3; j++)
+        n[j] = box->dx_dX[j][dir](box, -1, X,Y,Z);
+    }
+    else errorexit("box->dx_dX[1][dir] is NULL");
+  }
+  else  /* use Cartesian normal */
+  {
+    n[1] = n[2] = n[3] = 0.0;
+    n[dir] = 1.0;
+  }
+
+  /* normalize and set sign from sig */
+  smag = sig * sqrt(n[1]*n[1] + n[2]*n[2] + n[3]*n[3]);
+  if(smag == 0.0) smag = sig;
+  n[1] /= smag;
+  n[2] /= smag;
+  n[3] /= smag;
 }
 
 
