@@ -87,10 +87,13 @@ double smallest_box_size(tGrid *grid)
   return L;
 }
 
-
-/* determine which box faces touch or overlap other boxes, returns extface */
+/* determine which box faces touch or overlap other boxes,
+   or touch the outside of our box, returns extface */
 /* extface[f]=1 means face f is external, i.e. needs BC */
-void find_external_faces_of_box(tBox *box, int *extface)
+/* Faces with e.g. periodic coordinates are marked as extface[f]=0. */
+/* If inlcOuterBound=1 we mark faces that are not in contact with any other
+   box as external (because they probably need an outer BC) */
+void find_external_faces_of_box(tBox *box, int *extface, int inlcOuterBound)
 {
   tGrid *grid = box->grid;
   int pr = Getv("Coordinates_verbose", "yes");
@@ -110,7 +113,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
   intList *obl = alloc_intList(); /* list that contains other boxes*/
   int ob, oi;
   double oX,oY,oZ;
-  double L, dL;
+  double L;
 
   /* mark faces in periodic dirs with not external, i.e. extface[f]=0  */
   for(f=0; f<6; f++)
@@ -119,12 +122,16 @@ void find_external_faces_of_box(tBox *box, int *extface)
     else                      extface[f]=1;
   }
 
-  /* do nothing else if this is a Cartesian box */
-  if(box->x_of_X[1]==NULL) return;
+  if(box->x_of_X[1]==NULL) /* Cartesian box */
+  {
+    if(inlcOuterBound) return; /* do nothing else for a Cartesian box */
+    var_x = var_X;
+    var_y = var_Y;
+    var_z = var_Z;
+  }
 
   /* find box size L of smallest box */
   L = smallest_box_size(grid);
-  dL = L*EPS;
 
   /* make obl that contains all boxes */
   forallboxes(grid, i) if(i!=b) unionpush_intList(obl, i);
@@ -158,7 +165,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
         double y = box->v[var_y][ijk];
         double z = box->v[var_z][ijk];
         double Ndir[4];
-        double ox,oy,oz, dx,dy,dz, dist;
+        double ox,oy,oz, dx,dy,dz, d0, dist;
         int li, ret;
 
         /* pick one of X,Y,Z on boundary */
@@ -168,21 +175,22 @@ void find_external_faces_of_box(tBox *box, int *extface)
 
         /* use normal vector to find point ox,oy,oz slightly outside box */
         boxface_outwarddir_at_XYZ(box, f, X,Y,Z, Ndir);
-        dx = Ndir[1]*dL;
-        dy = Ndir[2]*dL;
-        dz = Ndir[3]*dL;
+        d0 = sqrt(x*x + y*y + z*z);
+        dx = Ndir[1]*(L+d0)*EPS;
+        dy = Ndir[2]*(L+d0)*EPS;
+        dz = Ndir[3]*(L+d0)*EPS;
         ox = x + dx;
         oy = y + dy;
         oz = z + dz;
 //printf("b%d dir%d  p%d, f%d, i,j,k=%d,%d,%d\n", b, dir, p, f, i,j,k);
-//printf(" Nx,Ny,Nz=%g,%g,%g\n", NNdir[1],Ndir[2],Ndir[3]);
+//printf(" Ndir=%g,%g,%g\n", Ndir[1],Ndir[2],Ndir[3]);
 //printf(" x,y,z=%g,%g,%g ox,oy,oz=%g,%g,%g\n", x,y,z, ox,oy,oz);
 //printf(" dx,dy,dz=%g,%g,%g\n", dx,dy,dz);
 
         /* find point in this box */
         dist = nearestinnerXYZ_of_xyz(box, &oi, &oX,&oY,&oZ, ox,oy,oz);
         dist = sqrt(dist);
-        ret=XYZ_of_xyz(box, &oX,&oY,&oZ, ox,oy,oz);
+        ret = b_XYZ_of_xyz_inboxlist(grid, &b,1, &oX,&oY,&oZ, ox,oy,oz);
         if(ret>=0)
         {
           if(!(box->periodic[1]))
@@ -197,7 +205,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
         {
 //printf("%g ", dist);
 //printf("%d %d %d x,y,z=%g,%g,%g dx,dy,dz=%g,%g,%g\n", i,j,k, x,y,z, dx,dy,dz);
-//printf("%d %d %d x,y,z=%g,%g,%g Nx,Ny,Nz=%g,%g,%g\n", i,j,k, x,y,z, Nx,Ny,Nz);
+//printf("%d %d %d x,y,z=%g,%g,%g Ndir=%g,%g,%g\n", i,j,k, x,y,z, Ndir[1],Ndir[2],Ndir[3]);
           extface[f]=0; /* mark face as not external */
           goto endplaneloop; /* break; does not work for nested loop */
         }
@@ -212,7 +220,7 @@ void find_external_faces_of_box(tBox *box, int *extface)
           dist = sqrt(dist);
           if(dist<0.5*L)
           {
-            ret=XYZ_of_xyz(obox, &oX,&oY,&oZ, ox,oy,oz);
+            ret = b_XYZ_of_xyz_inboxlist(grid, &bi,1, &oX,&oY,&oZ, ox,oy,oz);
             if(ret>=0)
             {
               if(!(obox->periodic[1]))
@@ -229,8 +237,19 @@ void find_external_faces_of_box(tBox *box, int *extface)
         if(ob>=0) 
         { i=n1; j=n2; k=n3; } /* leave plane loop if face is external*/
       } endplaneloop:
-      /* if ob<0, we found no other box face f is not external */
-      if(ob<0) extface[f]=0;
+      /* check about including outer boundaries */
+      if(inlcOuterBound)
+      {
+        /* if ob=b the other box is the box itself,
+           so it's not an external face */
+        if(ob==b) extface[f]=0;
+        // NOTE currently obl does not contain b, so ob=b cannot happen!!!
+      }
+      else
+      {
+        /* if ob<0, we found no other box face and f is not external */
+        if(ob<0) extface[f]=0;
+      }
     }
   } /* end loop over directions */
 
@@ -571,7 +590,7 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
         errorexiti("Coordinates_set_bfaces: dx_dX[1][1]==NULL in box%d", b);
 
     /* find all external faces of box */
-    find_external_faces_of_box(box, extface);
+    find_external_faces_of_box(box, extface, 0);
     if(pr)
     {
       printf("external faces on box%d: ", b);
