@@ -108,6 +108,9 @@ static void group_similar_points(struct FACE_POINT_S ***const FacePoint,tGrid *g
     {
       FLAG_T flg;
       
+      if (FacePoint[b][f]->internal_face == 1)
+        continue;
+      
       /*find outerbound bfaces*/
       flg = find_outerbound_bfaces(FacePoint,b,f,grid);
       
@@ -1160,8 +1163,11 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
   forallboxes(grid,b)
   {
     tBox *box = grid->box[b];
+    int extface[TOT_NUM_FACE];
     int n[3] = {box->n1,box->n2,box->n3};
     int n1 = n[0] ,n2 = n[1];//They are needed for macro Index
+    
+    find_external_faces_of_box(box,extface,1);
     
     for (f = 0; f < TOT_NUM_FACE; f++)
     {
@@ -1175,10 +1181,11 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
       int i_l,j_l,k_l;/*lower range of i, j and k */
       int i_u,j_u,k_u;/*upper range of i, j and k */
       
-      flg = NONE_F;
-      
-      if (FacePoint[b][f]->internal_face == 1)
+      if ( extface[f] == 0 )
+      {
+        FacePoint[b][f]->internal_face = 1;
         continue;
+      }
       
       /*Filling the edge and inner points*/
       setup_range(f,n,&i_l,&j_l,&k_l,&i_u,&j_u,&k_u,NULL);
@@ -1190,21 +1197,18 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
         {
          for (k = k_l; k <= k_u; k++)
          {
-           FLAG_T kind;
            
            if (IsEdge(f,n,i,j,k) == 1)/*If it is on edge*/
            {
              assert(e < l);
              P = &edge[e];
              e++;
-             kind = EDGE_F;
            }
            else
            {
              assert(in < s);
              P = &inner[in];
              in++;
-             kind = INNER_F;
            }
            
            get_x_coord(P->geometry.x,box,Index(i,j,k));
@@ -1213,51 +1217,15 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
            P->geometry.ijk = Index(i,j,k);
            P->geometry.b = b;
            P->geometry.f = f;
-           
-           if (kind == INNER_F)
-           {
-             FacePoint[b][f]->internal_face = IsInternal(box,P->geometry.X);
-           }
-           
-           if (FacePoint[b][f]->internal_face == 1)
-           {
-             flg = INTERNAL_F;
-             break;
-           }
              
            get_normal(P->geometry.N,box,f,Index(i,j,k));
           
            
          }
-         if (flg == INTERNAL_F)
-           break;
         }
-        if (flg == INTERNAL_F)
-           break;
       }
     }
   }//End of forallboxes
-}
-
-/*check if the point is internal and if so returns 1 otherwise 0*/
-static int IsInternal(tBox *const box, double *const X)
-{
-  int nf, face[TOT_NUM_FACE];
-  
-  nf = XYZ_on_face(box,face,X[0],X[1],X[2]);
-  
-  if (nf > 1)
-  {
-    if ( (face[X_FACE0] == 1 && face[X_FACE1] == 1) ||
-         (face[Y_FACE0] == 1 && face[Y_FACE0] == 1) ||
-         (face[Z_FACE0] == 1 && face[Z_FACE0] == 1)   )
-      return 1;
-    else
-      return 0;
-  }
-  
-  else
-    return 0;
 }
 
 /*Gettig the normalized normal in outward direction*/

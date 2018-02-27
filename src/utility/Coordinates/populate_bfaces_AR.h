@@ -153,7 +153,6 @@ static void order_ftps_pair(tGrid *grid);
 static void set_same_X_Y_Z_flg(tGrid *grid);
 static void set_oXi_oYi_oZi_flg(tGrid *grid);
 static int ijk_ind(tBox *box, int *i);
-static int IsInternal(tBox *const box, double *const X);
 static void get_apprx_normal(struct FACE_NORMAL_S *fc_nr,tBox *box, int face,double *x1);
 static int closest_point(tBox *box,int face,double *x1);
 static void visualize_bfaces(tGrid *grid);
@@ -172,3 +171,4 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,double x, double y, do
 void AddToPointList(tPointList *PL, int boxindex, int newpoint);
 tPointList *AllocatePointList(tGrid *grid);
 void boxface_outwarddir_at_ijk(tBox *box, int f, int ijk, double n[4]);
+void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound);
