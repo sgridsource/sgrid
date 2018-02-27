@@ -7,7 +7,7 @@
 
 
 /*populating bface structure*/
-void populate_bface(tGrid *grid)
+int populate_bfaces(tGrid *grid)
 {
   struct FACE_POINT_S ***FacePoint;//Format is FacePoint[box][face]->
   int b;
@@ -45,6 +45,7 @@ void populate_bface(tGrid *grid)
   if (1)
     visualize_bfaces(grid);
   
+  return 0;
 }
 
 /*freeing memory*/
@@ -159,7 +160,7 @@ static void set_oXi_oYi_oZi_flg(tGrid *grid)
     {
       tBface *bface = box->bface[bf];
       
-      if (bface->touch == 1 && bface->same_fpts == 0)
+      if (bface->same_fpts == 0)
       {
         bface->oXi = Ind("oX");
         bface->oYi = Ind("oY");
@@ -1176,6 +1177,9 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
       
       flg = NONE_F;
       
+      if (FacePoint[b][f]->internal_face == 1)
+        continue;
+      
       /*Filling the edge and inner points*/
       setup_range(f,n,&i_l,&j_l,&k_l,&i_u,&j_u,&k_u,NULL);
       e = 0;
@@ -1259,70 +1263,13 @@ static int IsInternal(tBox *const box, double *const X)
 /*Gettig the normalized normal in outward direction*/
 static void get_normal(double *N,tBox *box,int face,long int ijk)
 {
-  int idXd = Ind("dXdx");
-  int idYd = Ind("dYdx");
-  int idZd = Ind("dZdx");
-  int j;
-
-  if(box->v[idXd]==NULL)//If the box using cartesian coords
-  {
-    if (face == X_FACE0 || face == X_FACE1)
-    {
-      N[0] = 1;
-      N[1] = 0;
-      N[2] = 0;
-    }
-    else if (face == Y_FACE0 || face == Y_FACE1)
-    {
-      N[0] = 0;
-      N[1] = 1;
-      N[2] = 0;
-    }
-    else if (face == Z_FACE0 || face == Z_FACE1)
-    {
-      N[0] = 0;
-      N[1] = 0;
-      N[2] = 1;
-    }
-  }
+  double n[4];
   
-  else
-  {
-    if (face == X_FACE0 || face == X_FACE1)
-    {
-      for(j = 0; j < 3; j++)
-        N[j] = box->v[idXd+j][ijk];
-    }
-    else if (face == Y_FACE0 || face == Y_FACE1)
-    {
-      for(j = 0; j < 3; j++)
-        N[j] = box->v[idYd+j][ijk];
-    }
-    else if (face == Z_FACE0 || face == Z_FACE1)
-    {
-      for(j = 0; j < 3; j++)
-        N[j] = box->v[idZd+j][ijk];
-    }
-    
-    //test
-    double n = sqrt(SQ(N[0])+SQ(N[1])+SQ(N[2]));
-    if (dequal(n,0))
-    {
-      yo();
-    }
+  boxface_outwarddir_at_ijk(box,face,ijk,n);
   
-    //edn
-    
-    normalizing_N(N);
-    
-    
-  }
-  
-  /*Setting the sign in order to have outward direction*/
-  int s = 2*(face%2)-1;
-  N[0] *= s;
-  N[1] *= s;
-  N[2] *= s;
+  N[0] = n[1];
+  N[1] = n[2];
+  N[2] = n[3];
   
 }
 
@@ -2007,11 +1954,15 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
   FILE *fp1,*fp2;
   char fname1[100] = {0},fname2[100] = {0};// file name
   char dir1[100] = {0},dir2[100] = {0};
-  const char *folder = "./VisualizingBface/\0";
+  char *folder = Gets("outdir");
+  char *slsh = "/";
   int f1,f2,b1,b2; // face and box number
   
   strcpy(dir1,folder);
   strcpy(dir2,folder);
+  strcat(dir1,slsh);
+  strcat(dir2,slsh);
+  
   f1 = bface1->f;
   b1 = bface1->b;
   
@@ -2214,7 +2165,8 @@ static void visualize_boxes(tGrid *grid)
 {
   FILE *fp;
   char fname[100] = {0}, dir[100] = {0};
-  const char *folder = "./VisualizingBface/\0";
+  char *folder = Gets("outdir");
+  char *slsh = "/";
   int b;
   
   
@@ -2224,8 +2176,10 @@ static void visualize_boxes(tGrid *grid)
     tBox *box = grid->box[b];
     int i;
     
-    dir[0] = 0;
+    dir[0] = '\0';
     strcpy(dir,folder);
+    strcat(dir,slsh);
+    
     fname[0] = 0;
     sprintf(fname,"box:%d",b);
     strcat(dir,fname);
