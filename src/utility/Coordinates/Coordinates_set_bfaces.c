@@ -91,9 +91,9 @@ double smallest_box_size(tGrid *grid)
    or touch the outside of our box, returns extface */
 /* extface[f]=1 means face f is external, i.e. needs BC */
 /* Faces with e.g. periodic coordinates are marked as extface[f]=0. */
-/* If inlcOuterBound=1 we mark faces that are not in contact with any other
+/* If inclOuterBound=1 we mark faces that are not in contact with any other
    box as external (because they probably need an outer BC) */
-void find_external_faces_of_box(tBox *box, int *extface, int inlcOuterBound)
+void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
 {
   tGrid *grid = box->grid;
   int pr = Getv("Coordinates_verbose", "yes");
@@ -124,7 +124,7 @@ void find_external_faces_of_box(tBox *box, int *extface, int inlcOuterBound)
 
   if(box->x_of_X[1]==NULL) /* Cartesian box */
   {
-    if(inlcOuterBound) return; /* do nothing else for a Cartesian box */
+    if(inclOuterBound) return; /* do nothing else for a Cartesian box */
     var_x = var_X;
     var_y = var_Y;
     var_z = var_Z;
@@ -238,7 +238,7 @@ void find_external_faces_of_box(tBox *box, int *extface, int inlcOuterBound)
         { i=n1; j=n2; k=n3; } /* leave plane loop if face is external*/
       } endplaneloop:
       /* check about including outer boundaries */
-      if(inlcOuterBound)
+      if(inclOuterBound)
       {
         /* if ob=b the other box is the box itself,
            so it's not an external face */
