@@ -13,8 +13,8 @@
 
 */
 /* where @@@@... stands for 10800 floats.
-e.g. sgrid3d_to_2d -j=5 -k=0 foo
-will dump the file foo along the line j=5,k=0 */
+e.g. sgrid3d_to_2d -j=5 foo
+will dump the file foo in the plane j=5 */
 
 #define STRLEN 65535
 

@@ -1,5 +1,5 @@
 /* extractvar_from_checkpoint.c */
-/* transform or modify checkpoint data */
+/* extract a variable from checkpoint data file */
 /* (c) Wolfgang Tichy 2014 */
 
 
