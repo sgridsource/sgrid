@@ -553,6 +553,7 @@ int Coordinates_set_bfaces(tGrid *grid)
 {
   int pr = Getv("Coordinates_verbose", "yes");
   int maxits = Geti("Coordinates_newtMAXITS"); /* save par */
+  int inclOuterBound = 1;
   int b;
 
   if(pr) printf("Coordinates_set_bfaces:\n");
@@ -590,7 +591,7 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
         errorexiti("Coordinates_set_bfaces: dx_dX[1][1]==NULL in box%d", b);
 
     /* find all external faces of box */
-    find_external_faces_of_box(box, extface, 0);
+    find_external_faces_of_box(box, extface, inclOuterBound);
     if(pr)
     {
       printf("external faces on box%d: ", b);
