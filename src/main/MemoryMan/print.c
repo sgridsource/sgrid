@@ -88,6 +88,7 @@ void printbface(tBface *bface)
   else                  np = bface->fpts->npoints[bface->b];
   printf("     fpts=%p (%d points)  grid=%p\n", bface->fpts, np, bface->grid);
   //prPointList(bface->fpts);
+  prPointList_ijk_inbox(bface->fpts, bface->b);
 }
 
 void printbfaces(tBox *box)

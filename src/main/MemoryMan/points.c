@@ -127,6 +127,50 @@ void prPointList(tPointList *PL)
   else printf("PointList=%p\n", PL);
 }
 
+/* print part of PointList in one box b */
+void prPointList_inbox(tPointList *PL, int b)
+{
+  int i;
+  if(PL!=NULL)
+  {
+    printf("PointList->grid=%p  PointList->nblist=%d  "
+           "PointList->npoints[%d]=%d\n",
+           PL->grid, PL->nblist, b, PL->npoints[b]);
+    printf("*(PointList->point[%d]) = ", b);
+    for(i=0; i<PL->npoints[b]; i++)
+      printf("%d ",PL->point[b][i]);
+    printf("\n");
+  }
+  else printf("PointList=%p\n", PL);
+}
+
+/* print part of PointList in one box b as i,j,k */
+void prPointList_ijk_inbox(tPointList *PL, int b)
+{
+  int n;
+  int n1 = PL->grid->box[b]->n1;
+  int n2 = PL->grid->box[b]->n2;
+
+  if(PL!=NULL)
+  {
+    printf("PointList->grid=%p  PointList->nblist=%d  "
+           "PointList->npoints[%d]=%d\n",
+           PL->grid, PL->nblist, b, PL->npoints[b]);
+    printf("*(PointList->point[%d]) = ", b);
+    for(n=0; n<PL->npoints[b]; n++)
+    {
+      int ijk = PL->point[b][n];
+      int k = kOfInd_n1n2(ijk,n1,n2);
+      int j = jOfInd_n1n2_k(ijk,n1,n2,k);
+      int i = iOfInd_n1n2_jk(ijk,n1,n2,j,k);
+      printf("%d,%d,%d ", i,j,k);
+    }
+    printf("\n");
+  }
+  else printf("PointList=%p\n", PL);
+}
+
+
 /* return a duplicate of PL0 but put grid into it */
 tPointList *DuplicatePointList_for_grid(tPointList *PL0, tGrid *grid)
 {

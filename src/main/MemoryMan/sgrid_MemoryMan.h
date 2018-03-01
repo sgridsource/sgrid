@@ -272,6 +272,8 @@ tPointList *AllocatePointList(tGrid *grid);
 void AddToPointList(tPointList *PL, int boxindex, int newpoint);
 void FreePointList(tPointList *PL);
 void prPointList(tPointList *PL);
+void prPointList_inbox(tPointList *PL, int b);
+void prPointList_ijk_inbox(tPointList *PL, int b);
 tPointList *DuplicatePointList_for_grid(tPointList *PL0, tGrid *grid);
 tPointList *DuplicatePointList(tPointList *PL0);
 
