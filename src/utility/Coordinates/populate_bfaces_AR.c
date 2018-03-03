@@ -163,7 +163,7 @@ static void set_oXi_oYi_oZi_flg(tGrid *grid)
     {
       tBface *bface = box->bface[bf];
       
-      if (bface->same_fpts == 0)
+      if( (bface->same_fpts == 0) && (bface->ob >= 0) )
       {
         bface->oXi = Ind("oX");
         bface->oYi = Ind("oY");
