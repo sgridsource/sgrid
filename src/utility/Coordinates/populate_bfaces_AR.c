@@ -136,16 +136,16 @@ static void group_similar_points(struct FACE_POINT_S ***const FacePoint,tGrid *g
 }
 
 
-/*there are some flags which are not set yet,
-  furtheremore, the indices of fpts needs to be orderly*/
+/* there are some flags which are not set yet,
+   furtheremore, the indices of fpts needs to be orderly */
 static void setting_remaining_flags(tGrid *grid)
 {
 
-  /*set the correct ofi index if it is needed*/
+  /* set the correct ofi index if it is needed */
   set_ofi_flag(grid);
 
-  /*Finding all of the bfaces which touching each other and need copy,
-  they are called pair, and then order the index of each ftps point*/
+  /* Finding all of the bfaces which touching each other and need copy,
+     they are called pair, and then order the index of each ftps point */
   order_ftps_pair(grid);
 
   /* Setting the SameX/Y/Z flags */
@@ -154,6 +154,8 @@ static void setting_remaining_flags(tGrid *grid)
   /* Setting oXi, oYi, oZi flags */
   set_oXi_oYi_oZi_flg(grid);
 
+  /* make sure flags are consistent */
+  set_consistent_flags_in_all_bfaces(grid);
 }
 
 /* Setting oXi, oYi, oZi flags */

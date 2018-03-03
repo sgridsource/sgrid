@@ -61,7 +61,7 @@ exit(99);
   else
   {
     /* set bface structures that contain info about box boundaries */
-    Coordinates_set_bfaces(grid);
+    //Coordinates_set_bfaces(grid);
   }
 
   /* set boundary information: farlimit, falloff, propagation speed */

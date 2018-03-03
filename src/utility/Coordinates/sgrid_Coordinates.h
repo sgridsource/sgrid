@@ -120,6 +120,7 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
 void set_all_bfaces_with_ob_minus1_to_outerbound(tGrid *grid, int b0, int nb);
 int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid);
 void find_external_faces_of_box(tBox *box, int *extface, int inlcOuterBound);
+int set_consistent_flags_in_all_bfaces(tGrid *grid);
 
 /* from populate_bfaces_AR.c */
 int populate_bfaces(tGrid *grid);

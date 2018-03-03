@@ -785,6 +785,54 @@ int set_bits_in_all_bfaces(tGrid *grid)
   return 0;
 }
 
+/* make sure bit fields in all bfaces are consitent.
+   Right now we just set bface->setnormalderiv */
+int set_consistent_flags_in_all_bfaces(tGrid *grid)
+{
+  int b;
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int fi;
+
+    /* loop over bfaces */
+    forallbfaces(box,fi)
+    {
+      tBface *bface = box->bface[fi];
+      int f = bface->f;
+      int ob  = bface->ob;
+      int ofi = bface->ofi;
+      tBox *obox = NULL;
+      tBface *obface = NULL;
+      int of;
+
+      if(ob<0)  continue; /* do nothing if there is no other box at this bface */
+      if(ofi<0) continue; /* do nothing if there not one face index in other box */
+
+      /* other box and corresponding bface */
+      obox = grid->box[ob];
+      obface = obox->bface[ofi];
+      of = obface->f;
+
+      if(obface->ofi < 0) continue; /* nothing if not one face index */
+
+      /* if we get here there are 2 paired bfaces */
+
+      /* check if the 2 are touching */
+      if(bface->touch)
+      {
+        if(obface->touch==0) errorexit("inconsistent touch flags");
+
+        /* set consistent setnormalderiv flag */
+        if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
+        else                            obface->setnormalderiv = 0;
+      }
+    } /* end forallbfaces */
+  }
+  return 0;
+}
+
 
 /* set bface info for interior faces of the nb boxes (starting at b0) 
    arranged into a touch pattern, e.g. the 6 boxes in a cubed sphere */
