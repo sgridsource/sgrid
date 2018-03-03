@@ -15,8 +15,10 @@ int sgrid_Coordinates(void)
   /* functions */
   AddFun(POST_GRID, set_box_CI_struct_from_pars,
          "read box_CI pars and set box->CI struct");
-  AddFun(COORDINATES, init_CoordTransform_And_Derivs, 
+  AddFun(COORDINATES, init_CoordTransform_And_Derivs,
          "initialize coords and coord transforms");
+  AddFun(COORDINATES, Coordinates_set_bfaces,
+         "set the bfaces at least once here");
 
   /* variables */
   AddVar("x", "", "cartesian x coordinate");

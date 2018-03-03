@@ -1014,6 +1014,7 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
 
       /* copy oX,oY,oZ from other box */
       if(ob>=0 && oXi==ioX) /* if we use the var oX */
+      {
         if(bface->fpts)
         {
           enablevar_inbox(box, oXi);
@@ -1029,6 +1030,13 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
             box->v[oZi][ijk] = *oZ;
           }
         }
+      }
+      else
+      {
+        disablevar_inbox(box, oXi);
+        disablevar_inbox(box, oYi);
+        disablevar_inbox(box, oZi);
+      } /* end else */
     }
   }
   return 0;
@@ -1044,6 +1052,9 @@ int Coordinates_set_bfaces(tGrid *grid)
     ret = Coordinates_set_bfaces_oldWT(grid);
   else /* use AR algorithm */
     ret = populate_bfaces(grid);
+
+  /* set the oX,oY,oZ vars needed for interpolation in bfaces */
+  set_oX_oY_oZ_vars_for_bfaces(grid);
 
   return ret;
 }
