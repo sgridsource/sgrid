@@ -12,6 +12,7 @@
    return list of indices into variable list 
    return sign under reflections for symmetry boundaries
    note that we treat 3d indices i,j,k,... and 4d indices a,b,c,...
+   ilist[0], ilist[1], ... need to be freed by caller
 
    should be made automatic, but for now this is simpler 
 */

@@ -58,6 +58,7 @@ void AddVar(char *name, char *tensorindices, char *description)
   {
     /* construct name of variable */
     snprintf(fullname, 100, "%s%s", name, ilist[j]);
+    free(ilist[j]); /* free string allocated in tensorindexlist */
 
     /* make sure that this variable does not exist yet */
     for(i = 0; i < nvdb; i++)
