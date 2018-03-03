@@ -110,7 +110,7 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
   int d, dir;     /* we use dir = d+1 */ 
   int i,j,k, p, f;
   char str[1000];
-  intList *obl = alloc_intList(); /* list that contains other boxes*/
+  intList *obl; /* list that contains other boxes*/
   int ob, oi;
   double oX,oY,oZ;
   double L;
@@ -132,6 +132,8 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
 
   /* find box size L of smallest box */
   L = smallest_box_size(grid);
+
+  obl = alloc_intList(); /* list that will contain other boxes */
 
   /* make obl that contains all boxes */
   forallboxes(grid, i) if(i!=b) unionpush_intList(obl, i);
