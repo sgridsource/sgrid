@@ -548,8 +548,9 @@ int add_boxface_as_outerbound_bface(tBox *box, int f)
   return 0;
 }
 
-/* set bfaces for each box on the grid */
-int Coordinates_set_bfaces(tGrid *grid)
+/* set bfaces for each box on the grid with old algorithm.
+   This one is not general and fails in many cases. */
+int Coordinates_set_bfaces_oldWT(tGrid *grid)
 {
   int pr = Getv("Coordinates_verbose", "yes");
   int maxits = Geti("Coordinates_newtMAXITS"); /* save par */
@@ -1031,4 +1032,18 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
     }
   }
   return 0;
+}
+
+
+/* set bfaces for each box on the grid */
+int Coordinates_set_bfaces(tGrid *grid)
+{
+  int ret;
+
+  if(Getv("Coordinates_set_bfaces","oldWT"))
+    ret = Coordinates_set_bfaces_oldWT(grid);
+  else /* use AR algorithm */
+    ret = populate_bfaces(grid);
+
+  return ret;
 }
