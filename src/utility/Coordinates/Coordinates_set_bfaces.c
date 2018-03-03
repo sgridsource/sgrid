@@ -1022,7 +1022,7 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
           enablevar_inbox(box, oZi);
           forPointList_inbox(bface->fpts, box, pi, ijk)
           {
-            double *oX, *oY, *oZ;
+            double oX[1], oY[1], oZ[1];
             /* get oX,oY,oZ in other box */
             XYZ_of_xyz(grid->box[ob], oX,oY,oZ, px[ijk],py[ijk],pz[ijk]);
             box->v[oXi][ijk] = *oX;
@@ -1033,9 +1033,9 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
       }
       else
       {
-        disablevar_inbox(box, oXi);
-        disablevar_inbox(box, oYi);
-        disablevar_inbox(box, oZi);
+        disablevar_inbox(box, ioX);
+        disablevar_inbox(box, ioX+1);
+        disablevar_inbox(box, ioX+2);
       } /* end else */
     }
   }
@@ -1046,12 +1046,15 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
 /* set bfaces for each box on the grid */
 int Coordinates_set_bfaces(tGrid *grid)
 {
-  int ret;
+  int b, ret;
 
   if(Getv("Coordinates_set_bfaces","oldWT"))
     ret = Coordinates_set_bfaces_oldWT(grid);
   else /* use AR algorithm */
     ret = populate_bfaces(grid);
+
+  /* print all bfaces */
+  forallboxes(grid, b) printbfaces(grid->box[b]);
 
   /* set the oX,oY,oZ vars needed for interpolation in bfaces */
   set_oX_oY_oZ_vars_for_bfaces(grid);
