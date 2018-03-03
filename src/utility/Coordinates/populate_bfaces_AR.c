@@ -1,3 +1,6 @@
+/* populate_bfaces_AR.c */
+/* Alireza Rashti 2/2018 */
+
 #include "sgrid.h"
 #include "Coordinates.h"
 #include "populate_bfaces_AR.h"
@@ -11,7 +14,11 @@ int populate_bfaces(tGrid *grid)
 {
   struct FACE_POINT_S ***FacePoint;//Format is FacePoint[box][face]->
   int b;
-  
+
+  /* free all bfaces that someone else may have made before */
+  forallboxes(grid, b)
+    free_all_bfaces(grid->box[b]);
+
   /* Visualize boxes */
   if (1)
     visualize_boxes(grid);
