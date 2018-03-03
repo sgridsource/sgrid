@@ -54,14 +54,10 @@ exit(99);
   if(Getv("Poisson3_grid","2starcubes"))
   {
     /* set bface structures */
+    printf("set_touching_bfaces_of_boxes_with_same_facepoints:\n");
     set_touching_bfaces_of_boxes_with_same_facepoints(grid, 0, grid->nboxes);
     set_all_bfaces_with_ob_minus1_to_outerbound(grid, 0, grid->nboxes);
     if(pr) forallboxes(grid, b) printbfaces(grid->box[b]);
-  }
-  else
-  {
-    /* set bface structures that contain info about box boundaries */
-    //Coordinates_set_bfaces(grid);
   }
 
   /* set boundary information: farlimit, falloff, propagation speed */
