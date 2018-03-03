@@ -12,7 +12,8 @@
 /*populating bface structure*/
 int populate_bfaces(tGrid *grid)
 {
-  struct FACE_POINT_S ***FacePoint;//Format is FacePoint[box][face]->
+  struct FACE_POINT_S ***FacePoint; // Format is FacePoint[box][face]->
+  char *maxits = strdup(Gets("Coordinates_newtMAXITS")); /* save par */
   int b;
 
   /* free all bfaces that someone else may have made before */
@@ -25,6 +26,10 @@ int populate_bfaces(tGrid *grid)
 
   /* Operation */
   printf("\n***Populating Bfaces***\n");
+
+  /* reduce iteration number in newton_linesrch_itsP so that it fails
+     faster if we look for X,Y,Z in at box that does not contain it. */
+  Seti("Coordinates_newtMAXITS", 75);
 
   /*Allocating memory for face point struct*/
   FacePoint = allc_FacePoint(grid);
@@ -51,6 +56,10 @@ int populate_bfaces(tGrid *grid)
   /* Visualize bfaces*/
   if (1)
     visualize_bfaces(grid);
+
+  /* restore Coordinates_newtMAXITS to saved value */
+  Sets("Coordinates_newtMAXITS", maxits);
+  free(maxits);
 
   return 0;
 }
