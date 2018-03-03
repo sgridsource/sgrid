@@ -1002,6 +1002,11 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
       if(!px) errorexit("implement case where \"x\" is not enabled");
     }
 
+    /* disable the ioX vars by default */
+    disablevar_inbox(box, ioX);
+    disablevar_inbox(box, ioX+1);
+    disablevar_inbox(box, ioX+2);
+
     /* loop over all bfaces in this box in order */
     forallbfaces(box, fi)
     {
@@ -1014,7 +1019,6 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
 
       /* copy oX,oY,oZ from other box */
       if(ob>=0 && oXi==ioX) /* if we use the var oX */
-      {
         if(bface->fpts)
         {
           enablevar_inbox(box, oXi);
@@ -1030,14 +1034,7 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
             box->v[oZi][ijk] = *oZ;
           }
         }
-      }
-      else
-      {
-        disablevar_inbox(box, ioX);
-        disablevar_inbox(box, ioX+1);
-        disablevar_inbox(box, ioX+2);
-      } /* end else */
-    }
+    } /* end forallboxes */
   }
   return 0;
 }
