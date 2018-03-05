@@ -1927,6 +1927,8 @@ static void visualize_bfaces(tGrid *grid)
 
     }
   }
+  
+  free(pair);
 }
 
 /* printing bface */
