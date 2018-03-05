@@ -759,10 +759,10 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
         double q[3] = { edge[i].geometry.x[0]+edge[i].geometry.N[0]*EPS,\
                           edge[i].geometry.x[1]+edge[i].geometry.N[1]*EPS,\
                           edge[i].geometry.x[2]+edge[i].geometry.N[2]*EPS};
-        int out;
-        out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+                          
+        const int out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
 
-        if (out < 0)
+        if (out < 0 && FacePoint[b][f]->outerbound == 1)
         {
           FacePoint[b][f]->edge[i].adjacent.outerbound = 1;
           continue;
@@ -789,7 +789,14 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
           blist[FacePoint[b][f]->sh] = b;
           inbox = b_xyz_in_exblist(grid,x,blist,FacePoint[b][f]->sh+1,&nb);
 
-          if (nb == 0)//if still couldn't be found
+          if (nb == 0 && out < 0)
+          {
+            FacePoint[b][f]->outerbound = 1;
+            FacePoint[b][f]->edge[i].adjacent.outerbound = 1;
+            continue;
+          }
+          
+          else //if still couldn't be found
           {
             errorexit("There is no box for this point!\n");
           }
@@ -801,8 +808,7 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
           free(inbox);
       }
 
-      if (FacePoint[b][f]->sh > 0)
-        free (blist);
+      free (blist);
 
     }//for (f = 0; f < f_max; f++)
   }//for (b = 0; b < b_max; b++)
