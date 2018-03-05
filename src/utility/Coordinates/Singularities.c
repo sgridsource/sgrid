@@ -72,6 +72,7 @@ int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
     {
       for(i=1; i<6; i++) si->f[i] = 0;
       si->f[0] = 1;
+      si->x[1] = si->x[2] = si->x[3] = '.';
       for(i=1; i<=3; i++)   si->dx_dX[i][1] = '.';
       for(i=1; i<=3; i++) { si->dx_dX[i][2] = si->dx_dX[i][3] = '0'; }
     }
@@ -83,6 +84,9 @@ int isSing_AnsorgNS03(void *aux, double X, double Y, double Z,
     {
       for(i=0; i<6; i++) si->f[i] = 0;
       si->f[2+dequal(Y, 1.0)] = 1;
+
+      si->x[1] = '.';
+      si->x[2] = si->x[3] = '0';
 
       si->dx_dX[1][1] = '.';
       si->dx_dX[2][1] = si->dx_dX[3][1] = '0';
