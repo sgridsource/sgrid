@@ -20,6 +20,13 @@ int TestDerivs_startup(tGrid *grid)
   double z0        = Getd("TestDerivs_z0");
   
   printf("Initializing TestDerivs:\n");
+
+//  //populate_bfaces(grid);
+//  double q[3]={65.623508,8.236062,2.648371};
+//  double X[3]={1.,1.,1.};
+//  b_XYZ_of_xyz(grid,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
+//  abort();
+
   
   /* enable all vars */
   enablevar(grid, Ind("TestDerivs_u"));
