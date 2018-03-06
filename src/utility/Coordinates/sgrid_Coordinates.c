@@ -68,8 +68,8 @@ int sgrid_Coordinates(void)
          "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");
   AddPar("Coordinates_newtTOLF", "1e-10", "newton tolerence");
   AddPar("Coordinates_newtMAXITS", "100000", "max. newton iterations");
-  AddPar("Coordinates_verboseSing", "yes", "print warning when recovery from "
-         "Coordinate singularity fails [yes,no]");
+  AddPar("Coordinates_newtVerbose", "yes", "print warnings when error is big "
+         "or recovery from Coordinate singularity fails [yes,no]");
   AddPar("Coordinates_useDD", "no", "if we use DD in D_and_DD_Of_S..");
   AddPar("compactSphericalDF_r0", "-1", "radius r at xi=0");
   AddPar("tan_stretch_s", "0", "how much we stretch [0,Xmax]");

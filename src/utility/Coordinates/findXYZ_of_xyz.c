@@ -48,7 +48,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                 double x, double y, double z)
 {
   double tol = Getd("Coordinates_newtTOLF");
-  int verboseSing = Getv("Coordinates_verboseSing","yes");
+  int newtVerbose = Getv("Coordinates_newtVerbose","yes");
   double XYZvec[4];
   t_grid_box_desired_xyz_struct pars[1];
   tSingInfo si[1];
@@ -73,9 +73,9 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
     double err;
 
     stat = recover_if_start_on_singularity(box, X,Y,Z, x,y,z, (void *) pars,
-                                           tol, si, &err, verboseSing);
+                                           tol, si, &err, newtVerbose);
     /* check if error is ok */
-    if(stat<0)
+    if(newtVerbose && stat<0)
     {
       printf("XYZ_of_xyz: recover_if_start_on_singularity failed: err=%g\n",
              err);
@@ -107,7 +107,8 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
     int stat2;
     printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
     printf("            in box%d at x=%g y=%g z=%g\n", box->b, x,y,z);
-    stat2 = check_xyz_error(box, X,Y,Z, x,y,z, (void *) pars, tol, NULL, &err, 1);
+    stat2 = check_xyz_error(box, X,Y,Z, x,y,z, (void *) pars,
+                            tol, NULL, &err, newtVerbose);
     if(check)
     {
       if(stat2==1) { stat =  abs(stat); check=0; }
