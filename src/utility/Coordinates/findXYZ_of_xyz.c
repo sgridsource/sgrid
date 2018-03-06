@@ -48,6 +48,7 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                 double x, double y, double z)
 {
   double tol = Getd("Coordinates_newtTOLF");
+  int verboseSing = Getv("Coordinates_verboseSing","yes");
   double XYZvec[4];
   t_grid_box_desired_xyz_struct pars[1];
   tSingInfo si[1];
@@ -71,8 +72,8 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   {
     double err;
 
-    stat = recover_if_start_on_singularity(box, X,Y,Z, x,y,z,
-                                           (void *) pars, tol, si, &err);
+    stat = recover_if_start_on_singularity(box, X,Y,Z, x,y,z, (void *) pars,
+                                           tol, si, &err, verboseSing);
     /* check if error is ok */
     if(stat<0)
     {
@@ -157,7 +158,7 @@ int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
 /* do something if we start on a coordinate singularity */
 int recover_if_start_on_singularity(tBox *box,
         double *X, double *Y, double *Z, double x, double y, double z,
-        void *p, double tol, tSingInfo *si, double *err)
+        void *p, double tol, tSingInfo *si, double *err, int pr)
 {
   int stat = -1;
   int dir[4];  /* direction info */
@@ -194,7 +195,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = Y_of_y_forgiven_XZ(box, Y, y, *X, *Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, 1);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, pr);
       }
       else if(si->dx_dX[2][3] == '.')
         errorexit("implement Y_of_z_forgiven_XZ(box, Y, z, *X,*Z);");
@@ -208,7 +209,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, 1);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, pr);
       }
       else if(si->dx_dX[1][2] == '.')
         errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");
@@ -224,7 +225,7 @@ int recover_if_start_on_singularity(tBox *box,
       {
         stat = X_of_x_forgiven_YZ(box, X, x, *Y,*Z);
         if(stat>=0)
-          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, 1);
+          stat = check_xyz_error(box, X,Y,Z, x,y,z, p, tol, si, err, pr);
       }
       else if(si->dx_dX[1][2] == '.')
         errorexit("implement X_of_y_forgiven_YZ(box, X, y, *Y,*Z);");

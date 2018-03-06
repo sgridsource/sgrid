@@ -23,7 +23,7 @@ int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
             void *p, double tol, tSingInfo *si, double *err, int pr);
 int recover_if_start_on_singularity(tBox *box,
         double *X, double *Y, double *Z, double x, double y, double z,
-        void *p, double tol, tSingInfo *si, double *err);
+        void *p, double tol, tSingInfo *si, double *err, int pr);
 
 /* from doubleCovering.c */
 void reset_doubleCoveredPoints_SphericalDF(tBox *box, tVarList *unew);
