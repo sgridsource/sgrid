@@ -719,8 +719,9 @@ int b, int f,tGrid *grid)
 static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *grid)
 {
   int *inbox = 0,nb = 0;
+  double X[3] = {0};
   int b,b_max;
-
+  
   b_max = tot_num(FacePoint);
 
   for (b = 0; b < b_max; b++)
@@ -751,7 +752,7 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
       for (i = 0; i < l; i++)
       {
         struct POINT_S *edge = FacePoint[b][f]->edge;
-        double X[3];
+       
         double *x = FacePoint[b][f]->edge[i].geometry.x;
         int k;
 
@@ -760,7 +761,7 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
                           edge[i].geometry.x[1]+edge[i].geometry.N[1]*EPS,\
                           edge[i].geometry.x[2]+edge[i].geometry.N[2]*EPS};
                           
-        const int out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+        const int out = b_XYZ_of_xyz(grid,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
 
         if (out < 0 && FacePoint[b][f]->outerbound == 1)
         {
@@ -773,7 +774,7 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
 
         for (k = 0; k < FacePoint[b][f]->sh; k++)
         {
-          int b_ = b_XYZ_of_xyz_inboxlist(grid,&blist[k],1,X,X+1,X+2,x[0],x[1],x[2]);
+          int b_ = b_XYZ_of_xyz_inboxlist(grid,&blist[k],1,&X[0],&X[1],&X[2],x[0],x[1],x[2]);
 
           if ( b_ >= 0 )
           {
@@ -795,10 +796,10 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
             FacePoint[b][f]->edge[i].adjacent.outerbound = 1;
             continue;
           }
-          
-          else //if still couldn't be found
+          else if (nb == 0)//if still couldn't be found
           {
-            errorexit("There is no box for this point!\n");
+            fprintf(stderr,"Point = (%f,%f,%f)\n",x[0],x[1],x[2]);
+            errorexit("There is no box for the above point!\n");
           }
         }
 
@@ -817,9 +818,10 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
 /*Finding the adjacent structure for inner points*/
 static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *grid)
 {
-  int b,b_max;
+  double X[3] = {0};
   int blist;
-
+  int b,b_max;
+  
   b_max = tot_num(FacePoint);
 
   for (b = 0; b < b_max; b++)
@@ -848,8 +850,7 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
         double q[3] = { inner[i].geometry.x[0]+inner[i].geometry.N[0]*EPS,
                         inner[i].geometry.x[1]+inner[i].geometry.N[1]*EPS,
                         inner[i].geometry.x[2]+inner[i].geometry.N[2]*EPS };
-        double X[3];
-
+                        
         /* This set the priority to outerbound or innerbound */
         int out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
         if (out < 0)
@@ -867,11 +868,11 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
         /*if the point couldn't be found, let's try the normal approach*/
         if (n_adj_box == 0)
         {
-
+        
           adj_box = malloc(sizeof(*adj_box));
           assert(adj_box != 0);
           n_adj_box++;
-          adj_box[0] = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+          adj_box[0] = b_XYZ_of_xyz(grid,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
 
           if (adj_box[0] < 0)//the point is considered as outer or inner bound
             n_adj_box = 0;
@@ -897,7 +898,7 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
 static int *b_xyz_in_exblist(tGrid *grid,double *x,int *ex_blist,int ex_bn,int *nb)
 {
   int *inbox, b, *b_list, j;
-  double X[3];
+  double X[3] = {0};
 
   forallboxes(grid,b);
 
@@ -936,7 +937,7 @@ static int *b_xyz_in_exblist(tGrid *grid,double *x,int *ex_blist,int ex_bn,int *
   while (j < k)
   {
 
-    b = b_XYZ_of_xyz_inboxlist(grid,&b_list[j],1,X,X+1,X+2,x[0],x[1],x[2]);
+    b = b_XYZ_of_xyz_inboxlist(grid,&b_list[j],1,&X[0],&X[1],&X[2],x[0],x[1],x[2]);
 
     if (b >= 0)
     {
@@ -1452,6 +1453,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     double nrm;// dot products of normal N1.N2
   } *record = 0;
   struct POINT_S *P;
+  double X[3] = {0};
   int ijk_adj[3];//the index of the point in adjacent box
   int face_list[TOT_NUM_FACE];
   FLAG_T flg;
@@ -1530,7 +1532,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       collocated point, the appropriate normal will be chosen based on the closest point*/
       /* add this info into the share structure */
 
-      double X[3];
+     
       int face[TOT_NUM_FACE];
       int nf = 0,i;
 
@@ -1691,7 +1693,6 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       {
         struct FACE_NORMAL_S *fc_nr = 0;
         double N[3] = {P->geometry.N[0],P->geometry.N[1],P->geometry.N[2]};
-        double X[3];
         int face[TOT_NUM_FACE];
         int i, nf = 0;
 
@@ -1734,7 +1735,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
                         P->geometry.x[1]+N[1]*EPS,
                         P->geometry.x[2]+N[2]*EPS };
         int out;
-        out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+        out = b_XYZ_of_xyz(grid,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
 
         if (out < 0)
         {
