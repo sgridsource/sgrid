@@ -972,6 +972,33 @@ int set_bits_in_all_bfaces(tGrid *grid)
   return 0;
 }
 
+/* Set oXi, oYi, oZi indices when needed */
+int set_oXi_oYi_oZi_in_all_bfaces(tGrid *grid)
+{
+  int b;
+
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int fi;
+
+    forallbfaces(box, fi)
+    {
+      tBface *bface = box->bface[fi];
+
+      if(bface->same_fpts) continue;
+      if(bface->sameX && bface->sameY && bface->sameZ) continue;
+      if(bface->ob >= 0)
+      {
+        bface->oXi = Ind("oX");
+        bface->oYi = Ind("oY");
+        bface->oZi = Ind("oZ");
+      }
+    }
+  }
+  return 0;
+}
+
 /* make sure bit fields in all bfaces are consitent.
    Right now we just set bface->setnormalderiv */
 int set_consistent_flags_in_all_bfaces(tGrid *grid)
