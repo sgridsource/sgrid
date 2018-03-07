@@ -191,7 +191,6 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
 
         /* find point in this box */
         dist = nearestinnerXYZ_of_xyz(box, &oi, &oX,&oY,&oZ, ox,oy,oz);
-        dist = sqrt(dist);
         ret = b_XYZ_of_xyz_inboxlist(grid, &b,1, &oX,&oY,&oZ, ox,oy,oz);
         if(ret>=0)
         {
@@ -219,7 +218,6 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
           tBox *obox = grid->box[bi];
           dist = nearestXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
           //dist = nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
-          dist = sqrt(dist);
           if(dist<0.5*L)
           {
             ret = b_XYZ_of_xyz_inboxlist(grid, &bi,1, &oX,&oY,&oZ, ox,oy,oz);
@@ -391,7 +389,6 @@ int set_bfaces_on_boxface_oldWT(tBox *box, int f)
       double osize = find_box_size(obox);
       double dist = nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
       //double dist = guessXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
-      dist = sqrt(dist);
 //printf("o%dsize=%g ", obox->b, osize);
 //printf("  bi=%d dist=%g ob=%d oi=%d oX,oY,oZ=%g,%g,%g\n",
 //bi,dist, ob, oi, oX,oY,oZ);
@@ -574,7 +571,6 @@ int set_bfaces_on_boxface(tBox *box, int f)
       double osize = find_box_size(obox);
       double dist = nearestinnerXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
       //double dist = guessXYZ_of_xyz(obox, &oi, &oX,&oY,&oZ, ox,oy,oz);
-      dist = sqrt(dist);
       if(dist<osize)
       {
         ret=XYZ_of_xyz(obox, &oX,&oY,&oZ, ox,oy,oz);
@@ -1140,6 +1136,7 @@ int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int n
             /* check if there is also a point in plane of fi2 */
             rmin = nearestXYZ_of_xyz_inplane(box2, &ind2,&X2,&Y2,&Z2,
                                              x,y,z, dir2, pl2);
+            if(rmin>0.) rmin = rmin*rmin;
 //if(ind==0)
 //{
 //printf("dir2=%d pl2=%d\n", dir2, pl2);
