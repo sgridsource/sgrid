@@ -809,6 +809,9 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
   /* set outer boundary flag */
   mark_all_bfaces_without_ob_as_outerbound(grid);
 
+  /* set some var indices if we need to interpolate */
+  set_oXi_oYi_oZi_in_all_bfaces(grid);
+
   if(0 && pr) forallboxes(grid, b) printbfaces(grid->box[b]);
 
   return 0;
