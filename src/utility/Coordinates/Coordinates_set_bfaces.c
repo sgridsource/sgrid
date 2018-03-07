@@ -1285,11 +1285,11 @@ int Coordinates_set_bfaces(tGrid *grid)
   else /* use AR algorithm */
     ret = populate_bfaces(grid);
 
-  /* print all bfaces */
-  forallboxes(grid, b) printbfaces(grid->box[b]);
-
   /* set the oX,oY,oZ vars needed for interpolation in bfaces */
   set_oX_oY_oZ_vars_for_bfaces(grid);
+
+  /* print all bfaces */
+  forallboxes(grid, b) printbfaces(grid->box[b]);
 
   return ret;
 }
