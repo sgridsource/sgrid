@@ -47,8 +47,12 @@ void xyz_VectorFuncP(int n, double *XYZvec, double *fvec, void *p)
 int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
                 double x, double y, double z)
 {
-  double tol = Getd("Coordinates_newtTOLF");
-  int newtVerbose = Getv("Coordinates_newtVerbose","yes");
+  static int firstcall = 1;
+  static int Coordinates_newtTOLF_ParIndex;
+  static int Coordinates_XYZ_of_xyz_Verbose_ParIndex;
+  static int Coordinates_XYZ_of_xyz_Guess_ParIndex;
+  double tol;
+  int XYZ_of_xyz_Verbose, XYZ_of_xyz_Guess;
   double XYZvec[4];
   t_grid_box_desired_xyz_struct pars[1];
   tSingInfo si[1];
@@ -60,6 +64,29 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   if(box->XYZ_Of_xyz!=NULL)
     return box->XYZ_Of_xyz(box, -1, x,y,z, X,Y,Z);
 
+  /* get par indices once */
+  if(firstcall)
+  {
+    firstcall=0;
+    Coordinates_newtTOLF_ParIndex = GetParIndex("Coordinates_newtTOLF");
+    Coordinates_XYZ_of_xyz_Verbose_ParIndex = GetParIndex("Coordinates_XYZ_of_xyz_Verbose");
+    Coordinates_XYZ_of_xyz_Guess_ParIndex = GetParIndex("Coordinates_XYZ_of_xyz_Guess");
+  }
+  /* use par indices to quickly get pars */
+  tol = GetCachedNumValByParIndex(Coordinates_newtTOLF_ParIndex);
+  XYZ_of_xyz_Verbose =
+    GetCachedBoolValByParIndex(Coordinates_XYZ_of_xyz_Verbose_ParIndex);
+  XYZ_of_xyz_Guess =
+    GetCachedBoolValByParIndex(Coordinates_XYZ_of_xyz_Guess_ParIndex);
+
+  /* do we overwrite *X,*Y,*Z with a new guess? */
+  if(XYZ_of_xyz_Guess)
+  {
+    int ind;
+    double dis = guessXYZ_of_xyz(box, &ind, X,Y,Z, x,y,z);
+  }
+
+  /* set some pars for root finder */
   pars->box = box;
   pars->desired_x = x;
   pars->desired_y = y;
@@ -73,9 +100,9 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
     double err;
 
     stat = recover_if_start_on_singularity(box, X,Y,Z, x,y,z, (void *) pars,
-                                           tol, si, &err, newtVerbose);
+                                           tol, si, &err, XYZ_of_xyz_Verbose);
     /* check if error is ok */
-    if(newtVerbose && stat<0)
+    if(XYZ_of_xyz_Verbose && stat<0)
     {
       printf("XYZ_of_xyz: recover_if_start_on_singularity failed: err=%g\n",
              err);
@@ -105,13 +132,13 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   {
     double err;
     int stat2;
-    if(1 || newtVerbose)
+    if(1 || XYZ_of_xyz_Verbose)
     {
       printf("XYZ_of_xyz: check=%d stat=%d\n", check, stat);
       printf("            in box%d at x=%g y=%g z=%g\n", box->b, x,y,z);
     }
     stat2 = check_xyz_error(box, X,Y,Z, x,y,z, (void *) pars,
-                            tol, NULL, &err, newtVerbose);
+                            tol, NULL, &err, XYZ_of_xyz_Verbose);
     if(check)
     {
       if(stat2==1) { stat =  abs(stat); check=0; }
