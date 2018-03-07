@@ -1225,9 +1225,9 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
 
     if(box->x_of_X==NULL) /* Cartesian */
     {
-       px = box->v[iX];
-       py = box->v[iX+1];
-       pz = box->v[iX+2];
+      px = box->v[iX];
+      py = box->v[iX+1];
+      pz = box->v[iX+2];
     }
     else
     {
