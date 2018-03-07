@@ -513,8 +513,8 @@ int set_bfaces_on_boxface(tBox *box, int f)
     double Y = pY[ijk];
     double Z = pZ[ijk];
     int face[6];
-    double x,y,z, x_in,y_in,z_in;
-    double N[4], mag, Dx,Dy,Dz, Vx,Vy,Vz;
+    double x,y,z;
+    double N[4];
     double ox,oy,oz, dx,dy,dz;
     int ijk_in;
 
@@ -529,74 +529,35 @@ int set_bfaces_on_boxface(tBox *box, int f)
       int ff;
       face[f]=0; /* remove current face */
       /* move i,j,k inward away from edge or corner */
-      for(ff=0; ff<6; ff++)
-        if(face[ff])
-        {
-          i_in = i + face[0];
-          i_in = i - face[1];
-          j_in = j + face[2];
-          j_in = j - face[3];
-          k_in = k + face[4];
-          k_in = k - face[5];
-        }
+      i_in += face[0];
+      i_in -= face[1];
+      j_in += face[2];
+      j_in -= face[3];
+      k_in += face[4];
+      k_in -= face[5];
     }
     ijk_in = Index(i_in,j_in,k_in);
 
     /* get outward vector N[1],N[2],N[3] at ijk_in */
     boxface_outwarddir_at_ijk(box, f, ijk_in, N);
 
-    /* get difference vector between ijk_in and ijk */
+    /* get x,y,z of point from which we move out, sometimes this is
+       one point in from the edge */
     if(box->x_of_X[1]==NULL) /* this is a Cartesian box */
     {
-      x    =  X;           y    =  Y;           z    =  Z;
-      x_in = pX[ijk_in];   y_in = pY[ijk_in];   z_in = pZ[ijk_in];
+      x = pX[ijk_in];   y = pY[ijk_in];   z = pZ[ijk_in];
     }
     else
     {
-      x    = px[ijk];      y    = py[ijk];      z    = pz[ijk];
-      x_in = px[ijk_in];   y_in = py[ijk_in];   z_in = pz[ijk_in];
+      x = px[ijk_in];   y = py[ijk_in];   z = pz[ijk_in];
     }
-    Dx = x_in - x;
-    Dy = y_in - y;
-    Dz = z_in - z;
-    mag = sqrt(Dx*Dx + Dy*Dy + Dz*Dz);
+    //printf(" %d,%d,%d  %d,%d,%d  n=%d  x=%g y=%g z=%g\n",
+    //i,j,k, i_in,j_in,k_in, XYZ_on_face(box, face, X,Y,Z), x,y,z);
 
-    /* set vector V which we use to go outside the box */
-    if(mag>0.0)
-    {
-      /* normalize D */
-      Dx /= mag;
-      Dy /= mag;
-      Dz /= mag;
-
-      /* projection of D along N */
-      mag = Dx*N[1] + Dy*N[2] + Dz*N[3];
-
-      /* if the angle between N and D is greater than 90 degrees,
-         subtract this projection from D, so that D is perpendicular to N */
-      if(mag<0.)
-      {
-        Dx -= mag*N[1];
-        Dy -= mag*N[2];
-        Dz -= mag*N[3];
-      }
-
-      /* construct vector we use to move out of box */
-      Vx = Dx + EPS*N[1];
-      Vy = Dy + EPS*N[2];
-      Vz = Dz + EPS*N[3];
-    }
-    else
-    {
-      Vx = N[1];
-      Vy = N[2];
-      Vz = N[3];
-    }
-
-    /* use vector V to find point ox,oy,oz slightly outside box */
-    dx = Vx*dL;
-    dy = Vx*dL;
-    dz = Vx*dL;
+    /* use vector N to find point ox,oy,oz slightly outside box */
+    dx = N[1]*dL;
+    dy = N[2]*dL;
+    dz = N[3]*dL;
     ox = x + dx;
     oy = y + dy;
     oz = z + dz;
@@ -625,22 +586,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
             if(dless(oY,obox->bbox[2]) || dless(obox->bbox[3],oY)) continue;
           if(!(obox->periodic[3]))
             if(dless(oZ,obox->bbox[4]) || dless(obox->bbox[5],oZ)) continue;
-          /*
-          if(!(obox->periodic[1]))
-            if(oX < obox->bbox[0] || obox->bbox[1] < oX) continue;
-          if(!(obox->periodic[2]))
-            if(oY < obox->bbox[2] || obox->bbox[3] < oY) continue;
-          if(!(obox->periodic[3]))
-            if(oZ < obox->bbox[4] || obox->bbox[5] < oZ) continue;
-          */
-          /*
-          if(!(obox->periodic[1]))
-            if(LESS(oX,obox->bbox[0]) || LESS(obox->bbox[1],oX)) continue;
-          if(!(obox->periodic[2]))
-            if(LESS(oY,obox->bbox[2]) || LESS(obox->bbox[3],oY)) continue;
-          if(!(obox->periodic[3]))
-            if(LESS(oZ,obox->bbox[4]) || LESS(obox->bbox[5],oZ)) continue;
-          */
+
           ob=obox->b;
           break; /* we found point in box ob */
         }
@@ -662,6 +608,25 @@ int set_bfaces_on_boxface(tBox *box, int f)
   return box->nbfaces - nbfaces_old;
 }
 
+/* mark all bfaces that have no other box as outer boundary */
+int mark_all_bfaces_without_ob_as_outerbound(tGrid *grid)
+{
+  int b;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int fi;
+
+    forallbfaces(box, fi)
+    {
+      tBface *bface = box->bface[fi];
+      /* if ob=-1 there is no other box, mark as outer boundary */
+      if(bface->ob == -1)
+        bface->outerbound = 1;
+    }
+  }
+  return 0;
+}
 
 
 
@@ -827,16 +792,12 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
     {
       if(extface[f])
       {
-        int ret = set_bfaces_on_boxface_oldWT(box, f);
+        int ret = set_bfaces_on_boxface(box, f);
         //printf("f=%d, ret=%d\n", f, ret);
         if(ret==0) add_boxface_as_outerbound_bface(box, f);
       }
     }
-
-    if(0)
-    {
-      printbfaces(box);
-    }
+    if(0) printbfaces(box);
   }
   /* restore Coordinates_newtMAXITS */
   Seti("Coordinates_newtMAXITS", maxits);
@@ -845,7 +806,10 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
   set_ofi_in_all_bfaces(grid);
   set_bits_in_all_bfaces(grid);
 
-  if(pr) forallboxes(grid, b) printbfaces(grid->box[b]);
+  /* set outer boundary flag */
+  mark_all_bfaces_without_ob_as_outerbound(grid);
+
+  if(0 && pr) forallboxes(grid, b) printbfaces(grid->box[b]);
 
   return 0;
 }
