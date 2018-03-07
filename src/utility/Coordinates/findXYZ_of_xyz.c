@@ -371,6 +371,7 @@ double nearestXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
       *Z = pZ[i];
     } 
   }
+  if(rmin>0.) rmin = sqrt(rmin);
   return rmin;
 }
 
@@ -454,6 +455,7 @@ double nearestinnerXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double 
       *Z = pZ[ijk];
     }
   }
+  if(rmin>0.) rmin = sqrt(rmin);
   return rmin;
 }
 
@@ -481,7 +483,7 @@ int XYZ_on_face(tBox *box, int *face, double X, double Y, double Z)
   return nf; /* number of faces point is on */
 }
 
-/* find guess is nearest X,Y,Z in box from x,y,z */
+/* find guess that is nearest X,Y,Z in box from x,y,z */
 double guessXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
                        double x, double y, double z)
 {
@@ -588,6 +590,7 @@ double nearestXYZ_of_xyz_inplane(tBox *box, int *ind,
   else
     errorexit("nearestXYZ_of_xyz_inplane: plane has to be 1, 2 or 3");
 
+  if(rmin>0.) rmin = sqrt(rmin);
   return rmin;
 }
 
