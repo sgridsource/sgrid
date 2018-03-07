@@ -719,6 +719,7 @@ int b, int f,tGrid *grid)
 static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *grid)
 {
   int *inbox = 0,nb = 0;
+  int *blist = 0;
   double X[3] = {0};
   int b,b_max;
   
@@ -736,15 +737,19 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
     for (f = 0; f < f_max; f++)
     {
       const int l = FacePoint[b][f]->l;
-      int *blist = malloc(FacePoint[b][f]->sh*sizeof(*blist));
+      const int sh = FacePoint[b][f]->sh;
       int i;
-
+      
+      blist = realloc(blist,FacePoint[b][f]->sh*sizeof(*blist));
+      
       /* if this face is internal face */
       if (FacePoint[b][f]->internal_face == 1)
-          continue;
+      {
+        continue;
+      }
 
-
-      for (i = 0; i < FacePoint[b][f]->sh; i++)
+      
+      for (i = 0; i < sh; i++)
       {
         blist[i] = FacePoint[b][f]->shared[i].box;
       }
@@ -760,9 +765,9 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
         double q[3] = { edge[i].geometry.x[0]+edge[i].geometry.N[0]*EPS,\
                           edge[i].geometry.x[1]+edge[i].geometry.N[1]*EPS,\
                           edge[i].geometry.x[2]+edge[i].geometry.N[2]*EPS};
-                          
+        
         const int out = b_XYZ_of_xyz(grid,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
-
+        
         if (out < 0 && FacePoint[b][f]->outerbound == 1)
         {
           FacePoint[b][f]->edge[i].adjacent.outerbound = 1;
@@ -772,10 +777,11 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
         inbox = 0;
         nb = 0;
 
-        for (k = 0; k < FacePoint[b][f]->sh; k++)
+        for (k = 0; k < sh; k++)
         {
+          
           int b_ = b_XYZ_of_xyz_inboxlist(grid,&blist[k],1,&X[0],&X[1],&X[2],x[0],x[1],x[2]);
-
+          
           if ( b_ >= 0 )
           {
             inbox = realloc(inbox,(nb+1)*sizeof(*inbox));
@@ -786,10 +792,13 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
 
         if (nb == 0) //Find the adjacent box;
         {
-          blist = realloc(blist,(FacePoint[b][f]->sh+1)*sizeof(*blist));
-          blist[FacePoint[b][f]->sh] = b;
-          inbox = b_xyz_in_exblist(grid,x,blist,FacePoint[b][f]->sh+1,&nb);
-
+          blist = realloc(blist,(sh+1)*sizeof(*blist));
+          assert(blist != 0);
+          
+          blist[sh] = b;
+          
+          inbox = b_xyz_in_exblist(grid,x,blist,sh+1,&nb);
+          
           if (nb == 0 && out < 0)
           {
             FacePoint[b][f]->outerbound = 1;
@@ -801,6 +810,7 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
             fprintf(stderr,"Point = (%f,%f,%f)\n",x[0],x[1],x[2]);
             errorexit("There is no box for the above point!\n");
           }
+          
         }
 
         populate_adjacent(FacePoint,EDGE_F,b,f,i,inbox,nb,grid);
@@ -809,10 +819,12 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
           free(inbox);
       }
 
-      free (blist);
+      
 
     }//for (f = 0; f < f_max; f++)
   }//for (b = 0; b < b_max; b++)
+  
+  free (blist);
 }
 
 /*Finding the adjacent structure for inner points*/
@@ -952,7 +964,10 @@ static int *b_xyz_in_exblist(tGrid *grid,double *x,int *ex_blist,int ex_bn,int *
   }
 
   free(b_list);
-
+  
+  if (*nb == 0)
+    return 0;
+    
   return inbox;
 
 }
