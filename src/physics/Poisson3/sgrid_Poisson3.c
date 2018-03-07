@@ -50,7 +50,8 @@ int sgrid_Poisson3()
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("Poisson3_linSolver_Precon", "I", 
          "Preconditioner used [I,fd_UMFPACK]");
-  AddPar("Poisson3_grid", "", "what grid we use [2starcubes]");
+  AddPar("Poisson3_grid", "", "what grid we use [2starcubes,CubedSpheres]");
+  AddPar("Poisson3_set_bfaces", "yes", "do we set bfaces [yes,no]");
 	     	   	   	 
   return 0;
 }
