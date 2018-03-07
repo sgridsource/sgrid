@@ -971,6 +971,193 @@ int set_bits_in_all_bfaces(tGrid *grid)
   return 0;
 }
 
+/* set bit fields in bfaces for each box on the grid */
+int set_bits_in_all_bfaces__new(tGrid *grid)
+{
+  int iX = Ind("X");
+  int iY = iX+1;
+  int iZ = iX+2;
+  int ix = Ind("x");
+  int iy = ix+1;
+  int iz = ix+2;
+  int b;
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int n1 = box->n1;
+    int n2 = box->n2;
+    int n3 = box->n3;
+    double *pX = box->v[iX];
+    double *pY = box->v[iY];
+    double *pZ = box->v[iZ];
+    double *px = box->v[ix];
+    double *py = box->v[iy];
+    double *pz = box->v[iz];
+    int fi;
+
+    /* loop over bfaces */
+    forallbfaces(box, fi)
+    {
+      tBface *bface = box->bface[fi];
+      int f = bface->f;
+      tPointList *fpts = bface->fpts;
+      tPointList *ofpts = NULL;
+      intList *ilist = NULL;
+      intList *plist = NULL;
+      int dir = 1 + f/2;
+      int ob  = bface->ob;
+      int ofi = bface->ofi;
+      tBox *obox = NULL;
+      tBface *obface = NULL;
+      int touch, sameX, sameY, sameZ, same_fpts, fpts_off_face;
+      int pi, ind, oind, N;
+      double X,Y,Z, oX,oY,oZ, x,y,z, dist;
+      int of, od;
+
+      if(ob<0)  continue; /* do nothing if there is no other box at this bface */
+      if(ofi<0) continue; /* do nothing if there not one face index in other box */
+
+      /* other box and corresponding bface */
+      obox = grid->box[ob];
+      obface = obox->bface[ofi];
+      of = obface->f;
+      od = 1+of/2;
+
+      if(obface->ofi < 0) continue; /* do nothing if not one other face index */
+
+      /* if we get here there are two bfaces that may touch */
+
+      if(fpts == NULL)  continue; /* do nothing if we do not have points */
+
+      /* init flags */
+      touch = sameX = sameY = sameZ = same_fpts = fpts_off_face = 0;
+
+      /* PointList and intList to save points in other box */
+      ofpts = AllocatePointList(grid);
+      plist = alloc_intList();
+
+      /* go over points in bface */
+      forPointList_inbox(fpts, box, pi, ind)
+      {
+        /* get x,y,z */
+        if(box->x_of_X[1]==NULL) /* this is a Cartesian box */
+        {
+          x = pX[ind];   y = pY[ind];   z = pZ[ind];
+        }
+        else
+        {
+          x = px[ind];   y = py[ind];   z = pz[ind];
+        }
+        /* find closest point in other box */
+        dist = nearestXYZ_of_xyz(obox, &oind, &oX,&oY,&oZ, x,y,z);
+        push_intList(plist, oind);
+        if(dist<dequaleps)
+          AddToPointList(ofpts, obox->b, oind);
+      }
+
+      /* now check if ofpts is the same as obface->fpts */
+      if(ofpts->npoints[obox->b] == obface->fpts->npoints[obox->b])
+      {
+        /* make an intList point at the list in ofpts */
+        ilist->n = ofpts->npoints[obox->b];
+        ilist->e = ofpts->point[obox->b];
+        same_fpts = 1;
+        forPointList_inbox(obface->fpts, box, pi, ind)
+          if( !in_intList(ilist, ind) ) { same_fpts=0; break; }
+
+        /* if same_fpts we now use ofpts instead of obface->fpts,
+           since ofpts will be ordered correctly */
+        if(same_fpts)
+        {
+          tPointList *temp;
+          temp = obface->fpts;
+          obface->fpts = ofpts;
+          ofpts = temp;
+          touch = 1; /* same same_fpts implies they are touching */
+        }
+      }
+      else
+        same_fpts = 0;
+
+      /* free ofpts */
+      FreePointList(ofpts);
+
+      /* do we need other flags? */
+      if(same_fpts)
+      {
+        bface->same_fpts = same_fpts;
+        bface->touch     = touch;
+        free_intList(plist);
+        continue; /* go to next bface */
+      }
+
+      /* go over points in bface again to see if we are touching and how? */
+      touch = 0;
+      N = 0;
+      forPointList_inbox(fpts, box, pi, ind)
+      {
+        int face[6];
+
+        /* get x,y,z */
+        if(box->x_of_X[1]==NULL) /* this is a Cartesian box */
+        {
+          x = pX[ind];   y = pY[ind];   z = pZ[ind];
+        }
+        else
+        {
+          x = px[ind];   y = py[ind];   z = pz[ind];
+        }
+        /* closest point in other box was saved in plist */
+        oind = plist->e[pi];
+        oX = obox->v[iX][oind];
+        oY = obox->v[iY][oind];
+        oZ = obox->v[iZ][oind];
+        XYZ_of_xyz(obox, &oX,&oY,&oZ, x,y,z);
+        XYZ_on_face(obox, face, oX,oY,oZ);
+        if(face[of]) N++; /* count number of points we find on face of obox */
+
+        /* see if points in fpts are on our bface */
+        X = box->v[iX][ind];
+        Y = box->v[iY][ind];
+        Z = box->v[iZ][ind];
+        XYZ_on_face(obox, face, X,Y,Z);
+        if(!face[f]) fpts_off_face = 1;
+      }
+      /* is each point on face of other box? */
+      if(fpts->npoints[box->b] == N)
+      {
+        touch=1;
+        if(od==1)       sameX=1;
+        else if(od==2)  sameY=1;
+        else            sameZ=1;
+      }
+      else
+        touch=0;
+
+      /* set the flags we have now */
+      bface->touch = touch;
+      bface->sameX = sameX;
+      bface->sameY = sameY;
+      bface->sameZ = sameZ;
+      bface->same_fpts = same_fpts;
+      bface->fpts_off_face = fpts_off_face;
+
+      /* free the list we allocated earlier */
+      free_intList(plist);
+
+      /* should we set fields or their nomral derivs? */
+      if(bface->touch)
+      {
+        if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
+        else                            obface->setnormalderiv = 0;
+      }
+    } /* end loop over bfaces */
+  }
+
+  return 0;
+}
+
 /* Set oXi, oYi, oZi indices when needed */
 int set_oXi_oYi_oZi_in_all_bfaces(tGrid *grid)
 {
@@ -1047,7 +1234,7 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
 }
 
 
-/* set bface info for interior faces of the nb boxes (starting at b0) 
+/* set bface info for interior faces of the nb boxes (starting at b0)
    arranged into a touch pattern, e.g. the 6 boxes in a cubed sphere */
 int set_touching_bfaces_of_boxes_with_same_facepoints(tGrid *grid, int b0, int nb)
 {

@@ -153,9 +153,11 @@ void prPointList_ijk_inbox(tPointList *PL, int b)
 
   if(PL!=NULL)
   {
-    printf("PointList->grid=%p  PointList->nblist=%d  "
-           "PointList->npoints[%d]=%d\n",
-           PL->grid, PL->nblist, b, PL->npoints[b]);
+    //printf("PointList->grid=%p  PointList->nblist=%d  "
+    //       "PointList->npoints[%d]=%d\n",
+    //       PL->grid, PL->nblist, b, PL->npoints[b]);
+    printf("PointList->nblist=%d  PointList->npoints[%d]=%d\n",
+           PL->nblist, b, PL->npoints[b]);
     printf("*(PointList->point[%d]) = ", b);
     for(n=0; n<PL->npoints[b]; n++)
     {
