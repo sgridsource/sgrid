@@ -800,7 +800,7 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
 
   /* set ofi and bit fields for all bfaces */
   set_ofi_in_all_bfaces(grid);
-  set_bits_in_all_bfaces(grid);
+  set_bits_in_all_bfaces__old(grid);
 
   /* set outer boundary flag */
   mark_all_bfaces_without_ob_as_outerbound(grid);
@@ -815,7 +815,7 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
 
 
 /* set bit fields in bfaces for each box on the grid */
-int set_bits_in_all_bfaces(tGrid *grid)
+int set_bits_in_all_bfaces__old(tGrid *grid)
 {
   int iX = Ind("X");
   int iY = iX+1;
@@ -972,7 +972,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
 }
 
 /* set bit fields in bfaces for each box on the grid */
-int set_bits_in_all_bfaces__new(tGrid *grid)
+int set_bits_in_all_bfaces(tGrid *grid)
 {
   int iX = Ind("X");
   int iY = iX+1;
@@ -1003,7 +1003,7 @@ int set_bits_in_all_bfaces__new(tGrid *grid)
       int f = bface->f;
       tPointList *fpts = bface->fpts;
       tPointList *ofpts = NULL;
-      intList *ilist = NULL;
+      intList ilist[1]; /* allocate ilist on stack */
       intList *plist = NULL;
       int dir = 1 + f/2;
       int ob  = bface->ob;
@@ -1063,8 +1063,8 @@ int set_bits_in_all_bfaces__new(tGrid *grid)
         ilist->n = ofpts->npoints[obox->b];
         ilist->e = ofpts->point[obox->b];
         same_fpts = 1;
-        forPointList_inbox(obface->fpts, box, pi, ind)
-          if( !in_intList(ilist, ind) ) { same_fpts=0; break; }
+        forPointList_inbox(obface->fpts, obox, pi, oind)
+          if( !in_intList(ilist, oind) ) { same_fpts=0; break; }
 
         /* if same_fpts we now use ofpts instead of obface->fpts,
            since ofpts will be ordered correctly */
@@ -1121,7 +1121,7 @@ int set_bits_in_all_bfaces__new(tGrid *grid)
         X = box->v[iX][ind];
         Y = box->v[iY][ind];
         Z = box->v[iZ][ind];
-        XYZ_on_face(obox, face, X,Y,Z);
+        XYZ_on_face(box, face, X,Y,Z);
         if(!face[f]) fpts_off_face = 1;
       }
       /* is each point on face of other box? */
