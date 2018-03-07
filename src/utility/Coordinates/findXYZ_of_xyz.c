@@ -84,6 +84,11 @@ int XYZ_of_xyz(tBox *box, double *X, double *Y, double *Z,
   {
     int ind;
     double dis = guessXYZ_of_xyz(box, &ind, X,Y,Z, x,y,z);
+    //printf("b%d X guess: %g %g %g for x: %g %g %g\n",box->b, *X,*Y,*Z, x,y,z);
+    //printf("\t\tfor X guess at ind=%d: x: %g %g %g\n", ind,
+    //box->x_of_X[1](box, ind, *X,*Y,*Z),
+    //box->x_of_X[2](box, ind, *X,*Y,*Z),
+    //box->x_of_X[3](box, ind, *X,*Y,*Z));
   }
 
   /* set some pars for root finder */
