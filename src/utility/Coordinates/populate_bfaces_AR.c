@@ -14,6 +14,7 @@ int populate_bfaces(tGrid *grid)
 {
   struct FACE_POINT_S ***FacePoint; // Format is FacePoint[box][face]->
   char *maxits = strdup(Gets("Coordinates_newtMAXITS")); /* save par */
+  char *guess = strdup(Gets("Coordinates_XYZ_of_xyz_Guess")); /* save par */
   int b;
 
   /* free all bfaces that someone else may have made before */
@@ -27,9 +28,11 @@ int populate_bfaces(tGrid *grid)
   /* Operation */
   printf("\n***Populating Bfaces***\n");
 
-  /* reduce iteration number in newton_linesrch_itsP so that it fails
-     faster if we look for X,Y,Z in at box that does not contain it. */
+  /* Reduce iteration number in newton_linesrch_itsP so that it fails
+     faster if we look for X,Y,Z in at box that does not contain it.
+     Also make it pick its own initial guess (which is very slow) */
   Seti("Coordinates_newtMAXITS", 75);
+  Sets("Coordinates_XYZ_of_xyz_Guess","yes");
 
   /*Allocating memory for face point struct*/
   FacePoint = allc_FacePoint(grid);
@@ -57,8 +60,10 @@ int populate_bfaces(tGrid *grid)
   if (1)
     visualize_bfaces(grid);
 
-  /* restore Coordinates_newtMAXITS to saved value */
+  /* restore Coordinates_... pars to saved values */
   Sets("Coordinates_newtMAXITS", maxits);
+  Sets("Coordinates_XYZ_of_xyz_Guess", guess);
+  free(guess);
   free(maxits);
 
   return 0;
