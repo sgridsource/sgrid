@@ -193,13 +193,19 @@ int check_xyz_error(tBox *box, double *X, double *Y, double *Z,
 
 /* do something if we start on a coordinate singularity */
 int recover_if_start_on_singularity(tBox *box,
-        double *X, double *Y, double *Z, double x, double y, double z,
+        double *X0, double *Y0, double *Z0, double x, double y, double z,
         void *p, double tol, tSingInfo *si, double *err, int pr)
 {
   int stat = -1;
   int dir[4];  /* direction info */
   int zc[4];   /* cols with zeros, e.g. zc[3]=1 => col3 has all zeros */
   int nf, i, j;
+  double X[1], Y[1], Z[1];
+
+  /* get input X0,Y0,Z0 into X,Y,Z */
+  *X = *X0;
+  *Y = *Y0;
+  *Z = *Z0;
 
   /* find dirs with sing. */
   for(i=1; i<=3; i++) dir[i]=0;
@@ -268,6 +274,14 @@ int recover_if_start_on_singularity(tBox *box,
       else if(si->dx_dX[1][3] == '.')
         errorexit("implement X_of_z_forgiven_YZ(box, X, z, *Y,*Z);");
     }
+  }
+
+  /* write back into X0,Y0,Z0 if all is ok */
+  if(1 || stat>=0)
+  {
+    *X0 = *X;
+    *Y0 = *Y;
+    *Z0 = *Z;
   }
   //printf("rec: stat=%d\n", stat);
   return stat;
