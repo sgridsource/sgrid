@@ -812,6 +812,9 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
   /* set outer boundary flag */
   mark_all_bfaces_without_ob_as_outerbound(grid);
 
+  /* this sets the setnormalderiv again */
+  set_consistent_flags_in_all_bfaces(grid);
+
   /* set some var indices if we need to interpolate */
   set_oXi_oYi_oZi_in_all_bfaces(grid);
 
@@ -1246,11 +1249,35 @@ int set_oXi_oYi_oZi_in_all_bfaces(tGrid *grid)
   return 0;
 }
 
+/* set setnormalderiv=0 in all bfaces */
+int zero_setnormalderiv_flag_in_all_bfaces(tGrid *grid)
+{
+  int b;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int fi;
+    /* loop over bfaces */
+    forallbfaces(box,fi)
+    {
+      tBface *bface = box->bface[fi];
+      bface->setnormalderiv = 0;
+    } /* end forallbfaces */
+  }
+  return 0;
+}
+
 /* make sure bit fields in all bfaces are consitent.
    Right now we just set bface->setnormalderiv */
 int set_consistent_flags_in_all_bfaces(tGrid *grid)
 {
   int b;
+  int sndorder1 = Getv("Coordinates_bface_options","setnormalderiv_order1");
+  int sndorder2 = Getv("Coordinates_bface_options","setnormalderiv_order2");
+
+  /* set setnormalderiv=0 in all bfaces if we want a particluar order */
+  if(sndorder1 || sndorder2)
+    zero_setnormalderiv_flag_in_all_bfaces(grid);
 
   forallboxes(grid, b)
   {
@@ -1286,8 +1313,18 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
         if(obface->touch==0) errorexit("inconsistent touch flags");
 
         /* set consistent setnormalderiv flag */
-        if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
-        else                            obface->setnormalderiv = 0;
+        if(sndorder2)
+        {
+          /* note sndorder2 makes templates_GMRES_with_BlockJacobi_precon fail
+             with 6 or more cubed spheres */
+          if(obface->setnormalderiv == 0) bface->setnormalderiv = 1;
+          else                            bface->setnormalderiv = 0;
+        }
+        else /* use sndorder1 */
+        {
+          if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
+          else                            obface->setnormalderiv = 0;
+        }
       }
     } /* end forallbfaces */
   }
