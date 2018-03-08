@@ -748,7 +748,7 @@ int Coordinates_set_bfaces_oldWT(tGrid *grid)
   int inclOuterBound = 1;
   int b;
 
-  if(pr) printf("Coordinates_set_bfaces:\n");
+  if(pr) printf("Coordinates_set_bfaces_oldWT:\n");
 
   /* reduce iteration number in newton_linesrch_itsP
      and then loop over boxes */
@@ -807,7 +807,7 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
 
   /* set ofi and bit fields for all bfaces */
   if(pr)
-    printf("Coordinates_set_bfaces:  setting ofi and bit fields for all bfaces\n");
+    printf("Coordinates_set_bfaces_oldWT:  setting ofi and bit fields for all bfaces\n");
   set_ofi_in_all_bfaces(grid);
   set_bits_in_all_bfaces(grid);
 
@@ -1570,14 +1570,46 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
       if(ob>=0 && oXi==ioX) /* if we use the var oX */
         if(bface->fpts)
         {
+          int n1 = box->n1;
+          int n2 = box->n2;
+          int n3 = box->n3;
+          int i,j,k, i0,j0,k0;
+          i0 = j0 = k0 = -1000;
+
           enablevar_inbox(box, oXi);
           enablevar_inbox(box, oYi);
           enablevar_inbox(box, oZi);
           forPointList_inbox(bface->fpts, box, pi, ijk)
           {
+            tBox *obox = grid->box[ob];
             double oX[1], oY[1], oZ[1];
+
+            /* if we do not have an inverse we need some guess for oX,oY,oZ */
+            if(obox->XYZ_Of_xyz==NULL)
+            {
+              int k = kOfInd_n1n2(ijk,n1,n2);
+              int j = jOfInd_n1n2_k(ijk,n1,n2,k);
+              int i = iOfInd_n1n2_jk(ijk,n1,n2,j,k);
+              int di,dj,dk, oind;
+              double d2;
+
+              /* how much have i,j,k changed? If much, get new guess for oX,oY,oZ */
+              di = i-i0;
+              dj = j-j0;
+              dk = k-k0;
+              d2 = di*di + dj*dj + dk*dk;
+              d2 = sqrt(d2);
+              if(d2>1.5)
+                guessXYZ_of_xyz(obox, &oind, oX,oY,oZ, px[ijk],py[ijk],pz[ijk]);
+
+              /* save old i,j,k */
+              i0 = i;
+              j0 = j;
+              k0 = k;
+              moveXYZ_off_face(obox, oX,oY,oZ);
+            }
             /* get oX,oY,oZ in other box */
-            XYZ_of_xyz(grid->box[ob], oX,oY,oZ, px[ijk],py[ijk],pz[ijk]);
+            XYZ_of_xyz(obox, oX,oY,oZ, px[ijk],py[ijk],pz[ijk]);
             box->v[oXi][ijk] = *oX;
             box->v[oYi][ijk] = *oY;
             box->v[oZi][ijk] = *oZ;
@@ -1594,12 +1626,15 @@ int Coordinates_set_bfaces(tGrid *grid)
 {
   int b, ret;
 
+  if(1) printf("Coordinates_set_bfaces:\n");
+
   if(Getv("Coordinates_set_bfaces","oldWT"))
     ret = Coordinates_set_bfaces_oldWT(grid);
   else /* use AR algorithm */
     ret = populate_bfaces(grid);
 
   /* set the oX,oY,oZ vars needed for interpolation in bfaces */
+  printf("setting oX,oY,oZ needed for interpolation in bfaces\n");
   set_oX_oY_oZ_vars_for_bfaces(grid);
 
   /* print all bfaces */
