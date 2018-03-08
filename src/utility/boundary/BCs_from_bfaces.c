@@ -453,13 +453,26 @@ void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
                   n[2] * (dPsi[2][ind] - Pinterp[2]) +
                   n[3] * (dPsi[3][ind] - Pinterp[3]);
     }
-    if(!finite(Pinterp[1]))
+    if(!isfinite(Pinterp[1]))
     {
-      printf("Pinterp[1]=%g  X1=%.13g X2=%.13g  ind=%d\n",
-              Pinterp[1], X1,X2, ind);
+      printf("Pinterp[1]=%g  X1=%.13g X2=%.13g  oCi1=%d oCi2=%d  ind=%d\n",
+              Pinterp[1], X1,X2, oCi1,oCi2, ind);
+      printf("obox->b=%d plN=%d op=%d Pcoeffs[1][0]=%g\n",
+              obox->b, plN, op, Pcoeffs[1][0]);
+      printf("obox->bbox = [%g,%g] [%g,%g] [%g,%g]\n", obox->bbox[0], obox->bbox[1],
+              obox->bbox[2], obox->bbox[3], obox->bbox[4], obox->bbox[5]);
+      printCI(obox);
+      printf("box->b=%d\n", box->b);
+      printf("box->bbox = [%g,%g] [%g,%g] [%g,%g]\n", box->bbox[0], box->bbox[1],
+              box->bbox[2], box->bbox[3], box->bbox[4], box->bbox[5]);
+      printCI(box);
+      printf("outputting oX oY oZ with quick_Vars_output at time 42\n");
+      quick_Vars_output(box, "oX oY oZ", 42.0, 42);
+      printf("bface:\n");
       printbface(bface);
+      printf("obface:\n");
       printbface(obface);
-      grid->time  = 42;
+      grid->time  = 42.1;
       write_grid(grid);
       errorexit("Pinterp[1] is not finite!");
     }
