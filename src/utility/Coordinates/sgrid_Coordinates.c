@@ -102,7 +102,7 @@ int sgrid_Coordinates(void)
   AddPar("Coordinates_set_bfaces", "no", "whether we set bfaces in the "
          "function init_CoordTransform_And_Derivs [no,yes]");
   AddPar("Coordinates_bface_options", "setnormalderiv_order1", "how we set some "
-         "bface flags [none,"
+         "bface flags [none,populate_bfaces"
          "setnormalderiv_order0,setnormalderiv_order1,setnormalderiv_order2]");
 
   return 0;

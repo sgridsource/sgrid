@@ -1628,10 +1628,10 @@ int Coordinates_set_bfaces(tGrid *grid)
 
   if(1) printf("Coordinates_set_bfaces:\n");
 
-  if(Getv("Coordinates_set_bfaces","oldWT"))
-    ret = Coordinates_set_bfaces_oldWT(grid);
-  else /* use AR algorithm */
+  if(Getv("Coordinates_bface_options","populate_bfaces")) /* use AR algorithm */
     ret = populate_bfaces(grid);
+  else
+    ret = Coordinates_set_bfaces_oldWT(grid);
 
   /* set the oX,oY,oZ vars needed for interpolation in bfaces */
   printf("setting oX,oY,oZ needed for interpolation in bfaces\n");
