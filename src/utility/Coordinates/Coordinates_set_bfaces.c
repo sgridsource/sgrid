@@ -9,6 +9,13 @@
 #define LESS(a, b) ((a) < (b) - EPS*L )
 
 
+/* struct types used tp pass data */
+typedef struct T_box_ijk_struct {
+  tBox *box;
+  int ijk;
+} t_box_ijk_struct;
+
+
 /* find box size L of box */
 double find_box_size(tBox *box)
 {
@@ -800,7 +807,7 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
 
   /* set ofi and bit fields for all bfaces */
   set_ofi_in_all_bfaces(grid);
-  set_bits_in_all_bfaces__old(grid);
+  set_bits_in_all_bfaces(grid);
 
   /* set outer boundary flag */
   mark_all_bfaces_without_ob_as_outerbound(grid);
@@ -971,6 +978,33 @@ int set_bits_in_all_bfaces__old(tGrid *grid)
   return 0;
 }
 
+/* check if ind is at xyz of index ijk */
+int ind_IsAt_xyzofijk(int ind, void *p)
+{
+  t_box_ijk_struct *pars = p;
+  tBox *box = pars->box;
+  int ijk   = pars->ijk;
+  int ix;
+  double *x, *y, *z;
+  double dx,dy,dz, r2;
+
+  if(box->x_of_X[1]==NULL) /* this is a Cartesian box */
+    ix = Ind("X");
+  else
+    ix = Ind("x");
+  x = box->v[ix];
+  y = box->v[ix+1];
+  z = box->v[ix+2];
+  dx = x[ijk]-x[ind];
+  dy = y[ijk]-y[ind];
+  dz = z[ijk]-z[ind];
+  r2 = dx*dx + dy*dy + dz*dz;
+//if(ijk==448) printf("ind=%d ijk=%d r2=%g, %g %g %g\n",
+//ind, ijk, r2, x[ijk],y[ijk],z[ijk]);
+  if(r2<dequaleps*dequaleps) return 1;
+  else return 0;
+}
+
 /* set bit fields in bfaces for each box on the grid */
 int set_bits_in_all_bfaces(tGrid *grid)
 {
@@ -1013,7 +1047,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
       int touch, sameX, sameY, sameZ, same_fpts, fpts_off_face;
       int pi, ind, oind, N;
       double X,Y,Z, oX,oY,oZ, x,y,z, dist;
-      int of, od;
+      int of, od, opl;
 
       if(ob<0)  continue; /* do nothing if there is no other box at this bface */
       if(ofi<0) continue; /* do nothing if there not one face index in other box */
@@ -1023,6 +1057,9 @@ int set_bits_in_all_bfaces(tGrid *grid)
       obface = obox->bface[ofi];
       of = obface->f;
       od = 1+of/2;
+      if(od==1)       opl = (obox->n1-1) * (of%2);
+      else if(od==2)  opl = (obox->n2-1) * (of%2);
+      else            opl = (obox->n3-1) * (of%2);
 
       if(obface->ofi < 0) continue; /* do nothing if not one other face index */
 
@@ -1050,7 +1087,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
           x = px[ind];   y = py[ind];   z = pz[ind];
         }
         /* find closest point in other box */
-        dist = nearestXYZ_of_xyz(obox, &oind, &oX,&oY,&oZ, x,y,z);
+        dist = nearestXYZ_of_xyz_inplane(obox, &oind, &oX,&oY,&oZ, x,y,z, od, opl);
         push_intList(plist, oind);
         if(dist<dequaleps)
           AddToPointList(ofpts, obox->b, oind);
@@ -1059,22 +1096,50 @@ int set_bits_in_all_bfaces(tGrid *grid)
       /* now check if ofpts is the same as obface->fpts */
       if(ofpts->npoints[obox->b] == obface->fpts->npoints[obox->b])
       {
-        /* make an intList point at the list in ofpts */
-        ilist->n = ofpts->npoints[obox->b];
-        ilist->e = ofpts->point[obox->b];
+        /* make an intList point at the list in obface->fpts */
+        ilist->n = obface->fpts->npoints[obox->b];
+        ilist->e = obface->fpts->point[obox->b];
         same_fpts = 1;
-        forPointList_inbox(obface->fpts, obox, pi, oind)
+        forPointList_inbox(ofpts, obox, pi, oind)
           if( !in_intList(ilist, oind) ) { same_fpts=0; break; }
 
-        /* if same_fpts we now use ofpts instead of obface->fpts,
-           since ofpts will be ordered correctly */
-        if(same_fpts)
+        if(same_fpts) touch = 1; /* same same_fpts implies they are touching */
+
+        /* if same_fpts we now use ofpts to reorder obface->fpts,
+           since ofpts will be ordered correctly,
+           if obface->same_fpts=1, it was ordered previously already */
+        if(same_fpts && obface->same_fpts==0)
         {
-          tPointList *temp;
-          temp = obface->fpts;
-          obface->fpts = ofpts;
-          ofpts = temp;
-          touch = 1; /* same same_fpts implies they are touching */
+          t_box_ijk_struct pars[1];
+          intList *ilist2 = duplicate_intList(ilist);
+          intList *ilist3 = alloc_intList();
+
+          /* recall ilist->e=obface->fpts->point[obox->b] */
+          /* find point with oind in ilist2, and record them in ilist3 */
+          forPointList_inbox(ofpts, obox, pi, oind)
+          {
+            int in;
+            pars->box = obox;
+            pars->ijk = oind;
+            in = index_prop_intList(ilist2, 0, ind_IsAt_xyzofijk, (void *) pars);
+            if(in>=0)
+            {
+              push_intList(ilist3, ilist2->e[in]);
+              dropindex_intList(ilist2, in);
+            }
+            //printf("%d %d  ", oind, in);
+          }
+
+          /* reorder obface->fpts such that it aligns with ofpts */
+          /* i.e. swap ilist->e=ilist->e=obface->fpts->point[obox->b] with ilist3 */
+          if(obface->fpts->npoints[obox->b] != ilist3->n)
+            errorexit("obface->fpts->npoints[obox->b] != ilist3->n");
+          obface->fpts->point[obox->b] = ilist3->e;
+          ilist3->e = ilist->e;
+
+          /* now free the lists we don't need anymore */
+          free_intList(ilist3);
+          free_intList(ilist2);
         }
       }
       else
@@ -1084,13 +1149,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
       FreePointList(ofpts);
 
       /* do we need other flags? */
-      if(same_fpts)
-      {
-        bface->same_fpts = same_fpts;
-        bface->touch     = touch;
-        free_intList(plist);
-        continue; /* go to next bface */
-      }
+      if(same_fpts) goto Set_bface_flags_and_continue;
 
       /* go over points in bface again to see if we are touching and how? */
       touch = 0;
@@ -1135,23 +1194,24 @@ int set_bits_in_all_bfaces(tGrid *grid)
       else
         touch=0;
 
-      /* set the flags we have now */
-      bface->touch = touch;
-      bface->sameX = sameX;
-      bface->sameY = sameY;
-      bface->sameZ = sameZ;
-      bface->same_fpts = same_fpts;
-      bface->fpts_off_face = fpts_off_face;
+      Set_bface_flags_and_continue:
+        /* set the flags we have now */
+        bface->touch = touch;
+        bface->sameX = sameX;
+        bface->sameY = sameY;
+        bface->sameZ = sameZ;
+        bface->same_fpts = same_fpts;
+        bface->fpts_off_face = fpts_off_face;
 
-      /* free the list we allocated earlier */
-      free_intList(plist);
+        /* free the list we allocated earlier */
+        free_intList(plist);
 
-      /* should we set fields or their nomral derivs? */
-      if(bface->touch)
-      {
-        if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
-        else                            obface->setnormalderiv = 0;
-      }
+        /* should we set fields or their nomral derivs? */
+        if(bface->touch)
+        {
+          if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
+          else                            obface->setnormalderiv = 0;
+        }
     } /* end loop over bfaces */
   }
 

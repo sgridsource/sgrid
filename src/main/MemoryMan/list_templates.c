@@ -51,6 +51,16 @@ void FN(clear,LIST(TYP))(LIST(TYP) *u)
   }
 }
 
+/* print list u */
+void FN(pr,LIST(TYP))(LIST(TYP) *u)
+{
+  int i;
+  double ui;
+  printf("n=%d  e =", u->n);
+  for(i=0; i<u->n; i++) { ui=u->e[i]; printf(" %g" , ui); }
+  printf("\n");
+}
+
 /* add an entry to a list */
 void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi)
 {
@@ -88,7 +98,16 @@ void FN(unionpushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u)
   for(i=0; i<u->n; i++) FN(unionpush,LIST(TYP))(v, u->e[i]);
 }
 
-/* drop an entry from a variable list */
+/* drop an entry from a list */
+void FN(dropindex,LIST(TYP))(LIST(TYP) *v, int ind)
+{
+  int i;
+  if(ind<0 || ind >= v->n) return;
+  for(i = ind; i < v->n-1; i++)  v->e[i] = v->e[i+1];
+  v->n -= 1;
+}
+
+/* drop an entry from a list */
 void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi)
 {
   int i;
@@ -139,5 +158,33 @@ int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi)
   int i;
   int in=0;
   for(i=0; i<v->n; i++) if(v->e[i]==vi) { in=1; break; }
+  return in;
+}
+
+/* return index of first element vi in list v, returns -1 if not in list */
+int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi)
+{
+  int i;
+  int in=-1; /* is not in list */
+  for(i=0; i<v->n; i++) if(v->e[i]==vi) { in=i; break; }
+  return in;
+}
+
+/* return index of first element in list v that has prop returning 1,
+   we start checking with element i0, returns -1 if prop returns 0 for all in v */
+/* the function prop could be as simple as:
+   int prop(int vi, void *p)
+   {
+     int *pi = (int *) p;
+     return (vi == *pi);
+   }
+*/
+int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
+                             int (*prop)(TYP vi, void *p), void *pars)
+{
+  int i;
+  int in=-1; /* is not in list */
+  if(i0<0) i0=0;
+  for(i=i0; i<v->n; i++) if(prop(v->e[i], pars)) { in=i; break; }
   return in;
 }

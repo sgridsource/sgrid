@@ -2,6 +2,7 @@
 /* Wolfgang Tichy, May 2017 */
 
 #include <stdlib.h>
+#include <stdio.h>
 
 /* compile list functions with lists of type int
    e.g. intList *alloc_intList(void);  */

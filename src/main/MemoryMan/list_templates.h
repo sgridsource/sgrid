@@ -36,15 +36,20 @@ typedefLIST(TYP);
 LIST(TYP) *FN(alloc,LIST(TYP))(void);
 void FN(free,LIST(TYP))(LIST(TYP) *u);
 void FN(clear,LIST(TYP))(LIST(TYP) *u);
+void FN(pr,LIST(TYP))(LIST(TYP) *u);
 void FN(push,LIST(TYP))(LIST(TYP) *v, TYP vi);
 void FN(pushlist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
 void FN(unionpush,LIST(TYP))(LIST(TYP) *v, TYP vi);
 void FN(unionpushlist,LIST(TYP))(LIST(TYP) *u, LIST(TYP) *v);
+void FN(dropindex,LIST(TYP))(LIST(TYP) *v, int ind);
 void FN(drop,LIST(TYP))(LIST(TYP) *v, TYP vi);
 void FN(droplastn,LIST(TYP))(LIST(TYP) *v, int n);
 void FN(droplist,LIST(TYP))(LIST(TYP) *v, LIST(TYP) *u);
 LIST(TYP) *FN(duplicate,LIST(TYP))(LIST(TYP) *v);
 int FN(in,LIST(TYP))(LIST(TYP) *v, TYP vi);
+int FN(index,LIST(TYP))(LIST(TYP) *v, TYP vi);
+int FN(index_prop,LIST(TYP))(LIST(TYP) *v, int i0,
+                             int (*prop)(TYP vi, void *p), void *pars);
 /* e.g.: if TYP = int 
    LIST(TYP) FN(alloc,LIST(TYP))(void)
    becomes
