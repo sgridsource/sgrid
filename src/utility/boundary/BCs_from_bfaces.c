@@ -761,7 +761,18 @@ void set_interbox_BCs_for_bface(int iFPsi, tBface *bface,
       else if(bface->fpts_off_face)
         errorexit("implement fpts_off_face=1 case!");
       else
+      {
+        int ofi = bface->ofi;
+        printf("There may be some flags missing on this bface...\n");
+        printf("bface:\n");
+        printbface(bface);
+        if(ob>=0 && ofi >=0)
+        {
+          printf("other bface:\n");
+          printbface(bface->grid->box[ob]->bface[ofi]);
+        }
         errorexit("we should not get here");
+      }
     }
     else /* bface is not associated with just one other face */
     {
