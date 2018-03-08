@@ -1172,6 +1172,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
         oX = obox->v[iX][oind];
         oY = obox->v[iY][oind];
         oZ = obox->v[iZ][oind];
+        moveXYZ_off_face(obox, &oX,&oY,&oZ);
         XYZ_of_xyz(obox, &oX,&oY,&oZ, x,y,z);
         XYZ_on_face(obox, face, oX,oY,oZ);
         if(face[of]) N++; /* count number of points we find on face of obox */
