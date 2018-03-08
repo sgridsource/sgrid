@@ -365,6 +365,7 @@ void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
   int oZi = bface->oZi;
   tBox *obox = NULL;
   int oCi1, oCi2;
+  double rangeC1[2], rangeC2[2];
   tBface *obface;
   int of, op;
   int pi, ind;
@@ -401,18 +402,30 @@ void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
     op = ( (obox->n1-1) )*(of%2);
     oCi1 = oYi;
     oCi2 = oZi;
+    rangeC1[0] = obox->bbox[2];
+    rangeC1[1] = obox->bbox[3];
+    rangeC2[0] = obox->bbox[4];
+    rangeC2[1] = obox->bbox[5];
   }
   else if(plN==2)
   {
     op = ( (obox->n2-1) )*(of%2);
     oCi1 = oXi;
     oCi2 = oZi;
+    rangeC1[0] = obox->bbox[0];
+    rangeC1[1] = obox->bbox[1];
+    rangeC2[0] = obox->bbox[4];
+    rangeC2[1] = obox->bbox[5];
   }
   else if(plN==3)
   {
     op = ( (obox->n3-1) )*(of%2);
     oCi1 = oXi;
     oCi2 = oYi;
+    rangeC1[0] = obox->bbox[0];
+    rangeC1[1] = obox->bbox[1];
+    rangeC2[0] = obox->bbox[2];
+    rangeC2[1] = obox->bbox[3];
   }
   else errorexit("1<=plN<=3 is required");
   if(oCi1<=0 || oCi2<=0) errorexit("oCi1/2 > 0 is required");
@@ -430,24 +443,28 @@ void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
   /* loop over bface points */
   forPointList_inbox(bface->fpts, box, pi, ind)
   {
-    double X1 = box->v[oCi1][ind];
-    double X2 = box->v[oCi2][ind];
+    double C1 = box->v[oCi1][ind];
+    double C2 = box->v[oCi2][ind];
     double Pinterp[4], n[4];
+
+    /* skip point if C1 or C2 are out of their range */
+    if(C1<rangeC1[0] || C1>rangeC1[1]) continue;
+    if(C2<rangeC2[0] || C2>rangeC2[1]) continue;
 
     if(bface->setnormalderiv == 0)
     {
       Pinterp[1] = spec_interpolate_inplaneN(obox, plN, op,
-                                             Pcoeffs[1], X1,X2);
+                                             Pcoeffs[1], C1,C2);
       FPsi[ind] = Psi[ind] - Pinterp[1];
     }
     else
     {
       Pinterp[1] = spec_interpolate_inplaneN(obox, plN, op,
-                                             Pcoeffs[1], X1,X2);
+                                             Pcoeffs[1], C1,C2);
       Pinterp[2] = spec_interpolate_inplaneN(obox, plN, op,
-                                             Pcoeffs[2], X1,X2);
+                                             Pcoeffs[2], C1,C2);
       Pinterp[3] = spec_interpolate_inplaneN(obox, plN, op,
-                                             Pcoeffs[3], X1,X2);
+                                             Pcoeffs[3], C1,C2);
       boxface_normal_at_ijk(box, bface->f, ind, n);
       FPsi[ind] = n[1] * (dPsi[1][ind] - Pinterp[1]) +
                   n[2] * (dPsi[2][ind] - Pinterp[2]) +
@@ -455,8 +472,8 @@ void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
     }
     if(!isfinite(Pinterp[1]))
     {
-      printf("Pinterp[1]=%g  X1=%.13g X2=%.13g  oCi1=%d oCi2=%d  ind=%d\n",
-              Pinterp[1], X1,X2, oCi1,oCi2, ind);
+      printf("Pinterp[1]=%g  C1=%.13g C2=%.13g  oCi1=%d oCi2=%d  ind=%d\n",
+              Pinterp[1], C1,C2, oCi1,oCi2, ind);
       printf("obox->b=%d plN=%d op=%d Pcoeffs[1][0]=%g\n",
               obox->b, plN, op, Pcoeffs[1][0]);
       printf("obox->bbox = [%g,%g] [%g,%g] [%g,%g]\n", obox->bbox[0], obox->bbox[1],
