@@ -5,10 +5,20 @@ in SparseVector_utils.c can output sparse matrices in MatrixMarket Format.
 It is used in e.g. src/utility/GridIterators/wrappers_for_UMFPACK.c if we set
 GridIterators_verbose = yes very
 
-This produces files of the form lop_matrix2_13s.mtx . Such matrices can be
-loaded into octave with the included mmread.m :
-octave
+# This produces files of the form lop_matrix2_13s.mtx . Such matrices can be
+# loaded into octave with the included mmread.m and octave:
+octave-cli
 A1 = mmread("t3/lop_matrix2_13s.mtx")
 cond(A1)
+# The last line prints the condition number of the matrix.
 
-The last line prints the condition number of the matrix.
+# SciPy and NumPy can also read such matrices, but octave is faster:
+import numpy as np
+import scipy.linalg as sl
+import scipy.sparse.linalg as ssl
+import scipy.io as sio
+A1 = sio.mmread("bu13/lop_matrix0_1s.mtx")
+U, w, Vh = ssl.svds(A1, which='LM')  # compute largest sing. vals.
+print(w)
+U, w, Vh = ssl.svds(A1, which='SM')  # comute smallest sing. vals.
+print(w)
