@@ -777,10 +777,10 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
 */
     //check_box_dx_dX(box, 0.1, 0.2, 0.3);
 
-    /* When not Cartesian, check if dx/dX exists */
-    if(box->x_of_X[1]!=NULL)
-      if(box->dx_dX[1][1]==NULL)
-        errorexiti("Coordinates_set_bfaces: dx_dX[1][1]==NULL in box%d", b);
+    ///* When not Cartesian, check if dx/dX exists */
+    //if(box->x_of_X[1]!=NULL)
+    //  if(box->dx_dX[1][1]==NULL)
+    //    errorexiti("Coordinates_set_bfaces: dx_dX[1][1]==NULL in box%d", b);
 
     /* find all external faces of box */
     find_external_faces_of_box(box, extface, inclOuterBound);
