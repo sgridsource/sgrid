@@ -806,6 +806,8 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
   Seti("Coordinates_newtMAXITS", maxits);
 
   /* set ofi and bit fields for all bfaces */
+  if(pr)
+    printf("Coordinates_set_bfaces:  setting ofi and bit fields for all bfaces\n");
   set_ofi_in_all_bfaces(grid);
   set_bits_in_all_bfaces(grid);
 
