@@ -66,14 +66,14 @@
 /* loops over point lists */
 
 /* loop over all points ijk in all boxes in list pointlist */
-#define forPointList(pointlist, boxindex, pi , ijk) \
-  forallboxes(pointlist->grid,boxindex) \
-    for(pi = 0 , ijk = pointlist->point[boxindex][pi]; \
-        pi < pointlist->npoints[boxindex]; \
-        ijk = pointlist->point[boxindex][pi+1], pi++ )
+#define forPointList(pointlist, boxindx, pi , ijk) \
+  forallboxes(pointlist->grid,boxindx) \
+    for(pi = 0 , ijk = pointlist->point[boxindx][pi]; \
+        pi < pointlist->npoints[boxindx]; \
+        pi++, ijk = pointlist->point[boxindx][pi-(pi==pointlist->npoints[boxindx])])
 
 /* loop over all points ijk in all boxes in list pointlist */
 #define forPointList_inbox(pointlist, box, pi , ijk) \
   for(pi = 0 , ijk = pointlist->point[box->b][pi]; \
         pi < pointlist->npoints[box->b]; \
-        ijk = pointlist->point[box->b][pi+1], pi++ )
+        pi++, ijk = pointlist->point[box->b][pi-(pi==pointlist->npoints[box->b])])
