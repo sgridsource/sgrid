@@ -4,7 +4,7 @@
 #include "sgrid.h"
 #include "Coordinates.h"
 
-#define EPS dequaleps*1e3
+#define EPS 1e-5
 
 #define LESS(a, b) ((a) < (b) - EPS*L )
 
@@ -481,14 +481,13 @@ int set_bfaces_on_boxface(tBox *box, int f)
   intList *obl = alloc_intList(); /* list that contains other boxes*/
   int ob, oi;
   double oX,oY,oZ;
-  double L, dL;
+  double L;
 
   d = f/2;
   dir = d+1;
 
   /* find box size L of smallest box */
   L = smallest_box_size(grid);
-  dL = L*EPS;
 
   /* make obl that contains all boxes except b,
      and add one bface for each of the other boxes */
@@ -519,7 +518,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
     int face[6];
     double x,y,z;
     double N[4];
-    double ox,oy,oz, dx,dy,dz;
+    double ox,oy,oz, dx,dy,dz, d0;
     int ijk_in;
 
     /* pick one of X,Y,Z on boundary */
@@ -559,9 +558,10 @@ int set_bfaces_on_boxface(tBox *box, int f)
     //i,j,k, i_in,j_in,k_in, XYZ_on_face(box, face, X,Y,Z), x,y,z);
 
     /* use vector N to find point ox,oy,oz slightly outside box */
-    dx = N[1]*dL;
-    dy = N[2]*dL;
-    dz = N[3]*dL;
+    d0 = sqrt(x*x + y*y + z*z);
+    dx = N[1]*(L+d0)*EPS;
+    dy = N[2]*(L+d0)*EPS;
+    dz = N[3]*(L+d0)*EPS;
     ox = x + dx;
     oy = y + dy;
     oz = z + dz;
