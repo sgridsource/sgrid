@@ -1,0 +1,148 @@
+physics = Poisson3
+
+errorexit = abort
+
+Poisson3_itmax = 10
+
+Poisson3_linSolver_itmax = 100000
+Poisson3_linSolver = templates_GMRES_with_BlockJacobi_precon # UMFPACK # templates_GMRES # bicgstab
+Poisson3_linSolver_Precon = templates
+Poisson3_linSolver_tolFac = 0.001
+GridIterators_UMFPACK_version   = dl
+GridIterators_verbose           = no # yes # very # no
+GridIterators_GMRES_restart = 2000
+##GridIterators_templates_RESID_mode = tol
+GridIterators_Preconditioner_type = spectral # fd
+#GridIterators_Preconditioner_BlockJacobi_nsb1 = 2 # 1
+#GridIterators_Preconditioner_BlockJacobi_nsb2 = 2 # 1
+#GridIterators_Preconditioner_BlockJacobi_nsb3 = 2 # 1
+
+
+nboxes = 38 # 13 # 26
+Poisson3_grid = CubedSpheres # 2starcubes
+Poisson3_set_bfaces = no
+#Coordinates_useDD = no
+
+n1  = 6
+n2  = 6
+n3  = 6
+
+iterate_parameters = yes
+iterate_parameter1 = n1 6 8 10 12 14
+iterate_parameter2 = n2 6 8 10 12 14
+iterate_parameter3 = n3 6 8 10 12 14
+
+
+0doutput_VolumeIntegralJacobian = one
+
+0douttime	= 0.1
+0doutput	= Poisson3_Psi_Err Poisson3_Chi_Err Poisson3_Err_Psi Poisson3_Err_Chi
+0doutputall	= yes
+
+1douttime	= 0.1
+1doutput	= Poisson3_Psi_Err Poisson3_Psi Poisson3_rh1 Poisson3_rh2 Poisson3_Psix Poisson3_Psixx Poisson3_Chi_Err Poisson3_Chi Poisson3_Chix Poisson3_Chixx Poisson3_Err_Psi Poisson3_Err_Chi x y z  X Y Z
+1doutputall	= yes
+
+2douttime	= 0.1
+2doutput	= Poisson3_Psi_Err Poisson3_Psi Poisson3_rh1 Poisson3_rh2 Poisson3_Psix Poisson3_Psixx Poisson3_Chi_Err Poisson3_Chi Poisson3_Chix Poisson3_Chixx Poisson3_Err_Psi Poisson3_Err_Chi x y z  X Y Z
+2doutputall	= yes
+
+3douttime	= 0.1
+3doutput	= x y z  X Y Z
+3dformat	= vtk float
+
+#outputX0_box0 = 1.268242413364671
+#outputY0_box0 = 1.5708 # 3.141592653589793
+#outputZ0_box0 = 0
+
+outputX0_box1 = 0
+outputY0_box1 = 0
+outputZ0_box1 = 0
+
+outputReplaceXby_box0 = x
+outputReplaceYby_box0 = y
+outputReplaceZby_box0 = z
+
+outputReplaceXby_box1 = x
+outputReplaceYby_box1 = y
+outputReplaceZby_box1 = z
+outputReplaceXby_box2 = x
+outputReplaceYby_box2 = y
+outputReplaceZby_box2 = z
+outputReplaceXby_box3 = x
+outputReplaceYby_box3 = y
+outputReplaceZby_box3 = z
+outputReplaceXby_box4 = x
+outputReplaceYby_box4 = y
+outputReplaceZby_box4 = z
+outputReplaceXby_box5 = x
+outputReplaceYby_box5 = y
+outputReplaceZby_box5 = z
+outputReplaceXby_box6 = x
+outputReplaceYby_box6 = y
+outputReplaceZby_box6 = z
+
+outputReplaceXby_box7 = x
+outputReplaceYby_box7 = y
+outputReplaceZby_box7 = z
+outputReplaceXby_box8 = x
+outputReplaceYby_box8 = y
+outputReplaceZby_box8 = z
+outputReplaceXby_box9 = x
+outputReplaceYby_box9 = y
+outputReplaceZby_box9 = z
+
+
+outputReplaceXby_box10 = x
+outputReplaceYby_box10 = y
+outputReplaceZby_box10 = z
+
+outputReplaceXby_box11 = x
+outputReplaceYby_box11 = y
+outputReplaceZby_box11 = z
+outputReplaceXby_box12 = x
+outputReplaceYby_box12 = y
+outputReplaceZby_box12 = z
+outputReplaceXby_box13 = x
+outputReplaceYby_box13 = y
+outputReplaceZby_box13 = z
+outputReplaceXby_box14 = x
+outputReplaceYby_box14 = y
+outputReplaceZby_box14 = z
+outputReplaceXby_box15 = x
+outputReplaceYby_box15 = y
+outputReplaceZby_box15 = z
+outputReplaceXby_box16 = x
+outputReplaceYby_box16 = y
+outputReplaceZby_box16 = z
+
+outputReplaceXby_box17 = x
+outputReplaceYby_box17 = y
+outputReplaceZby_box17 = z
+outputReplaceXby_box18 = x
+outputReplaceYby_box18 = y
+outputReplaceZby_box18 = z
+outputReplaceXby_box19 = x
+outputReplaceYby_box19 = y
+outputReplaceZby_box19 = z
+
+
+outputReplaceXby_box20 = x
+outputReplaceYby_box20 = y
+outputReplaceZby_box20 = z
+
+outputReplaceXby_box21 = x
+outputReplaceYby_box21 = y
+outputReplaceZby_box21 = z
+outputReplaceXby_box22 = x
+outputReplaceYby_box22 = y
+outputReplaceZby_box22 = z
+outputReplaceXby_box23 = x
+outputReplaceYby_box23 = y
+outputReplaceZby_box23 = z
+outputReplaceXby_box24 = x
+outputReplaceYby_box24 = y
+outputReplaceZby_box24 = z
+outputReplaceXby_box25 = x
+outputReplaceYby_box25 = y
+outputReplaceZby_box25 = z
