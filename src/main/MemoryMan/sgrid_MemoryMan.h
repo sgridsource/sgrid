@@ -110,6 +110,9 @@ typedef struct tBOX {
 typedef struct tGRID {
   tBox **box;	/* list of pointers to boxes */
   int nboxes;	/* number of boxes */
+  /* int nall;// sometimes e.g. Newton may need extra eqns that are not on any grid
+                 point. We can collect them in an extra box if nall>nboxes. We then
+                 replace forallboxes with e.g. forallof that loops over nall boxes.*/
   int nvariables;	/* number of variables */
   int iteration;	/* number of iterations */
   double time;	/* physical time */
