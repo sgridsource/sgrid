@@ -131,6 +131,8 @@ int populate_bfaces(tGrid *grid);
 /* from setup_CubedSpheres.c */
 void disable_and_reset_CI_iSurf_vars(tBox *box);
 void disable_Coordinates_CubedSphere_sigma01(tBox *box);
+void compute_CubedSphere_dsigma01(tBox *box, int isigma,
+                                  int isigma_dA, int isigma_dB);
 int arrange_1box12CubSph_into_full_cube(tGrid *grid, int b0, double *xc,
                                         double din, double dmid, double dout);
 int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,

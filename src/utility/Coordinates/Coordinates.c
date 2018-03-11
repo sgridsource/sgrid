@@ -674,6 +674,9 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     }
     else if( Getv(str, "CubedSphere") )
     {
+      int isigma    = Ind("Coordinates_CubedSphere_sigma01");
+      int isigma_dA = Ind("Coordinates_CubedSphere_dsigma01_dA");
+      int isigma_dB = Ind("Coordinates_CubedSphere_dsigma01_dB");
       if(pr)
       {
         printf("Coordinates: initializing CubedSphere type=%d=", box->CI->type);
@@ -704,6 +707,10 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       box->dX_dx[3][1] = dB_dx_CubedSphere;
       box->dX_dx[3][2] = dB_dy_CubedSphere;
       box->dX_dx[3][3] = dB_dz_CubedSphere;
+
+      /* set derivs of Coordinates_CubedSphere_sigma01, if it is on */
+      if(box->v[isigma]!=NULL)
+        compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
     }
     else if( Getv(str, "stretchedCubedSphere") )
     {
