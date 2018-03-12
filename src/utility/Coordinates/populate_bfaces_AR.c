@@ -150,8 +150,7 @@ static void group_similar_points(struct FACE_POINT_S ***const FacePoint,tGrid *g
 }
 
 
-/* there are some flags which are not set yet,
-   furtheremore, the indices of fpts needs to be orderly */
+/* Setting the flags */
 static void setting_remaining_flags(tGrid *grid)
 {
 
@@ -210,11 +209,11 @@ static void set_same_X_Y_Z_flg(tGrid *grid)
     for (bf = 0; bf < box->nbfaces; bf++)
     {
       tBface *bface = box->bface[bf];
-
+      
       if (bface->touch == 1 && bface->same_fpts == 0)
       {
-        box = grid->box[bface->ob];
-        tBface *bface2 = box->bface[bface->ofi];
+        tBox *box2 = grid->box[bface->ob];
+        tBface *bface2 = box2->bface[bface->ofi];
 
         /* Given the plane and bface,
             check if there is any X or Y or Z constant */
@@ -256,7 +255,7 @@ static unsigned int check_sameXYZ(FLAG_T kind,tBface *bface)
   {
     double X[3];
     get_X_coord(X,box,bface->fpts->point[b][i]);
-
+    
     if (!dequal(X[slice],X0[slice]))
       return 0;
   }
@@ -301,8 +300,6 @@ static void order_ftps_pair(tGrid *grid)
   int i;
   for (i = 0; i < np; i++)
   {
-    pair[i].bface1->setnormalderiv = 1;
-
     /*arranging the point index in fpts*/
     assert(pair[i].bface1->fpts->nblist == pair[i].bface2->fpts->nblist);
 
@@ -1990,12 +1987,14 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
     appn1[0] = '\0';
     appn2[0] = '\0';
 
-    if (bface1->touch == 1 && bface1->setnormalderiv == 1)
+    if (bface1->touch == 1 && bface1->setnormalderiv == 1 
+        && bface1->same_fpts == 1)
     {
       sprintf(appn1,"ND");
       sprintf(appn2,"NND");
     }
-    else if (bface2->touch == 1 && bface2->setnormalderiv == 1)
+    else if (bface2->touch == 1 && bface2->setnormalderiv == 1
+        && bface1->same_fpts == 1)
     {
       sprintf(appn2,"ND");
       sprintf(appn1,"NND");
