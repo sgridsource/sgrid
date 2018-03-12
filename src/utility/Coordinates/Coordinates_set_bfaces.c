@@ -114,7 +114,7 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
-  int d, dir;     /* we use dir = d+1 */ 
+  int nd, d, dir;     /* we use dir = d+1 */
   int i,j,k, p, f;
   char str[1000];
   intList *obl; /* list that contains other boxes*/
@@ -149,9 +149,10 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
   for(d=0; d<3; d++)
   {
     dir = d+1;
+    nd  = (n1)*(dir==1) + (n2)*(dir==2) + (n3)*(dir==3);
 
     /* go over faces, but not edges */
-    for(p=0; p<n1; p+=n1-1)
+    for(p=0; p<nd; p+=nd-1)
     {
       /* pick face index */
       if(p==0) f=2*d;
@@ -211,10 +212,12 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
         dist=sqrt(x*x + y*y + z*z);
         if(ret>=0 && dist<1e60) /* point is in this box and x,y,z is not inf  */
         {
-//printf("%g ", dist);
-//printf("%d %d %d x,y,z=%g,%g,%g dx,dy,dz=%g,%g,%g\n", i,j,k, x,y,z, dx,dy,dz);
-//printf("%d %d %d x,y,z=%g,%g,%g Ndir=%g,%g,%g\n", i,j,k, x,y,z, Ndir[1],Ndir[2],Ndir[3]);
+          //printf("%g ", dist);
+          //printf("%d %d %d x,y,z=%g,%g,%g dx,dy,dz=%g,%g,%g\n", i,j,k, x,y,z, dx,dy,dz);
+          //printf("%d %d %d X,Y,Z=%g,%g,%g Ndir=%g,%g,%g\n", i,j,k, X,Y,Z, Ndir[1],Ndir[2],Ndir[3]);
+          //printf("%d %d %d oX,oY,oZ=%g,%g,%g Ndir=%g,%g,%g\n", i,j,k, oX,oY,oZ, Ndir[1],Ndir[2],Ndir[3]);
           extface[f]=0; /* mark face as not external */
+          //if(extface[f]==0) errorexit("1");
           goto endplaneloop; /* break; does not work for nested loop */
         }
 
@@ -250,12 +253,14 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
         /* if ob=b the other box is the box itself,
            so it's not an external face */
         if(ob==b) extface[f]=0;
-        // NOTE currently obl does not contain b, so ob=b cannot happen!!!
+        /* NOTE currently obl does not contain b, so ob=b cannot happen!!! */
+        //if(extface[f]==0) errorexit("2");
       }
       else
       {
         /* if ob<0, we found no other box face and f is not external */
         if(ob<0) extface[f]=0;
+        //if(extface[f]==0) errorexit("3");
       }
     }
   } /* end loop over directions */
