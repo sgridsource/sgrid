@@ -13,8 +13,6 @@ int sgrid_Coordinates(void)
   printf("Adding Coordinates\n");
 
   /* functions */
-  AddFun(POST_GRID, set_box_CI_struct_from_pars,
-         "read box_CI pars and set box->CI struct");
   AddFun(COORDINATES, init_CoordTransform_And_Derivs,
          "initialize coords and coord transforms");
   AddFun(COORDINATES, Coordinates_set_bfaces,

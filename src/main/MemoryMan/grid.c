@@ -53,6 +53,10 @@ tGrid *make_grid(int pr)
 
   /* set all pointers in each tBox struct of grid from Pars */
   set_BoxStructures_fromPars(g, 0);
+
+  /* set coord. info CI inside each box from box_CI pars */
+  set_box_CI_struct_from_pars(g);
+
   if(pr) printgrid(g);
 
   /* return pointer to newly created grid */
