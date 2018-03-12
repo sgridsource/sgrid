@@ -300,8 +300,6 @@ static void order_ftps_pair(tGrid *grid)
   int i;
   for (i = 0; i < np; i++)
   {
-    pair[i].bface1->setnormalderiv = 1;
-
     /*arranging the point index in fpts*/
     assert(pair[i].bface1->fpts->nblist == pair[i].bface2->fpts->nblist);
 
@@ -1989,12 +1987,14 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
     appn1[0] = '\0';
     appn2[0] = '\0';
 
-    if (bface1->touch == 1 && bface1->setnormalderiv == 1)
+    if (bface1->touch == 1 && bface1->setnormalderiv == 1 
+        && bface1->same_fpts == 1)
     {
       sprintf(appn1,"ND");
       sprintf(appn2,"NND");
     }
-    else if (bface2->touch == 1 && bface2->setnormalderiv == 1)
+    else if (bface2->touch == 1 && bface2->setnormalderiv == 1
+        && bface1->same_fpts == 1)
     {
       sprintf(appn2,"ND");
       sprintf(appn1,"NND");
