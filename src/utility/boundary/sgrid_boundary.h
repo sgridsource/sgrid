@@ -44,3 +44,5 @@ void set_interbox_BCs_for_bface(int iFPsi, tBface *bface,
                                 int iPsi, int idPsi[4]);
 void set_interbox_BCs_for_boxbfaces(tBox *box, int iFPsi,
                                     int iPsi, int idPsi[4]);
+void set_interbox_BC_onface(tBox *box, int iFPsi, int face, int iPsi,
+                            int idPsi[4], int setnormalderiv);

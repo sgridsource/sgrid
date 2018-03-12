@@ -801,3 +801,31 @@ void set_interbox_BCs_for_boxbfaces(tBox *box, int iFPsi,
     set_interbox_BCs_for_bface(iFPsi, bface, iPsi, idPsi);
   }
 }
+
+/* interbox BCs for one face of a box and select setnormalderiv flag */
+/* this can be used to set normal derivs or field values the same,
+   if setnormalderiv = -1 it uses bface->setnormalderiv */
+void set_interbox_BC_onface(tBox *box, int iFPsi, int face, int iPsi,
+                            int idPsi[4], int setnormalderiv)
+{
+  int fi;
+  tBface bface_copy[1];
+
+  forallbfaces(box, fi)
+  {
+    tBface *bface = box->bface[fi];
+
+    /* do nothing for wrong face */
+    if(bface->f != face) continue;
+
+    /* shallow copy of bface */
+    *bface_copy = *bface;
+
+    /* adjust setnormalderiv flag  */
+    if(setnormalderiv >= 0)
+      bface_copy->setnormalderiv = setnormalderiv;
+
+    /* call general BC for bface_copy */
+    set_interbox_BCs_for_bface(iFPsi, bface_copy, iPsi, idPsi);
+  }
+}
