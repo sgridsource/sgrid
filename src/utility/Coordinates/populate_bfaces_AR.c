@@ -381,47 +381,38 @@ static void set_ofi_flag(tGrid *grid)
       /*If they both touch and collocated*/
       if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts == 1)
       {
-        int b2;
+        
+        tBox *box2 = grid->box[box->bface[bf]->ob];
         int bf2;
-
-        forallboxes(grid,b2)
+        
+        for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
         {
-          if (b2 == b) continue;
 
-          tBox *box2 = grid->box[b2];
+          flg = check_bface(pair,np,box2->bface[bf2]);
 
-          for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
+          if (flg == CONTINUE_F) continue;
+
+          if (box2->bface[bf2]->touch == 1 && box2->bface[bf2]->same_fpts == 1)
           {
 
-            flg = check_bface(pair,np,box2->bface[bf2]);
-
-            if (flg == CONTINUE_F) continue;
-
-            if (box2->bface[bf2]->touch == 1 && box2->bface[bf2]->same_fpts == 1)
+            if ( box2->bface[bf2]->ofi == box->bface[bf]->f   &&
+                 box2->bface[bf2]->ob  == box->bface[bf]->b   &&
+                 box2->bface[bf2]->f   == box->bface[bf]->ofi &&
+                 box2->bface[bf2]->b   == box->bface[bf]->ob     )
             {
 
-              if ( box2->bface[bf2]->ofi == box->bface[bf]->f   &&
-                   box2->bface[bf2]->ob  == box->bface[bf]->b   &&
-                   box2->bface[bf2]->f   == box->bface[bf]->ofi &&
-                   box2->bface[bf2]->b   == box->bface[bf]->ob     )
-              {
+              box2->bface[bf2]->ofi = bf;
+              box->bface[bf]->ofi   = bf2;
 
-                box2->bface[bf2]->ofi = bf;
-                box->bface[bf]->ofi   = bf2;
+              add_to_pair(&pair,box->bface[bf],box2->bface[bf2],&np);
 
-                add_to_pair(&pair,box->bface[bf],box2->bface[bf2],&np);
+              flg = STOP_F;
+              break;
 
-                flg = STOP_F;
-                break;
-
-              }
             }
+          }
 
-          }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
-
-          if (flg == STOP_F)
-            break;
-        }
+        }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
 
         if (flg != STOP_F)
         {
@@ -432,46 +423,37 @@ static void set_ofi_flag(tGrid *grid)
       /* If they both only touch */
       else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
       {
-        int b2;
+        
+        tBox *box2 = grid->box[box->bface[bf]->ob];
         int bf2;
 
-        forallboxes(grid,b2)
+        for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
         {
-          if (b2 == b) continue;
+          flg = check_bface(pair,np,box2->bface[bf2]);
 
-          tBox *box2 = grid->box[b2];
+          if (flg == CONTINUE_F) continue;
 
-          for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
+          if (box2->bface[bf2]->touch == 1 && box2->bface[bf2]->same_fpts != 1)
           {
-            flg = check_bface(pair,np,box2->bface[bf2]);
 
-            if (flg == CONTINUE_F) continue;
+            if ( box2->bface[bf2]->ofi == box->bface[bf]->f   &&
+                 box2->bface[bf2]->ob  == box->bface[bf]->b   &&
+                 box2->bface[bf2]->f   == box->bface[bf]->ofi &&
+                 box2->bface[bf2]->b   == box->bface[bf]->ob    )
 
-            if (box2->bface[bf2]->touch == 1 && box2->bface[bf2]->same_fpts != 1)
             {
+              box2->bface[bf2]->ofi = bf;
+              box->bface[bf]->ofi   = bf2;
 
-              if ( box2->bface[bf2]->ofi == box->bface[bf]->f   &&
-                   box2->bface[bf2]->ob  == box->bface[bf]->b   &&
-                   box2->bface[bf2]->f   == box->bface[bf]->ofi &&
-                   box2->bface[bf2]->b   == box->bface[bf]->ob    )
+              add_to_pair(&pair,box->bface[bf],box2->bface[bf2],&np);
 
-              {
-                box2->bface[bf2]->ofi = bf;
-                box->bface[bf]->ofi   = bf2;
+              flg = STOP_F;
+              break;
 
-                add_to_pair(&pair,box->bface[bf],box2->bface[bf2],&np);
-
-                flg = STOP_F;
-                break;
-
-              }
             }
+          }
 
-          }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
-
-          if (flg == STOP_F)
-            break;
-        }
+        }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
 
         if (flg != STOP_F)
             errorexit("The appropriate bface could not be found!\n");
@@ -768,7 +750,26 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
                           edge[i].geometry.x[1]+edge[i].geometry.N[1]*EPS,\
                           edge[i].geometry.x[2]+edge[i].geometry.N[2]*EPS};
         
-        const int out = b_XYZ_of_xyz(grid,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
+        int out = b_XYZ_of_xyz(grid,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
+        
+        if (out == b)
+        {
+          int *obl = 0; /* list */
+          int ii,jj;
+          
+          /* make obl that contains all boxes */
+          jj = 0;
+          forallboxes(grid, ii) 
+            if(ii != b) 
+            {
+              obl = realloc(obl,(jj+1)*sizeof(*obl));
+              obl[jj++] = ii;
+            }
+          
+          out = b_XYZ_of_xyz_inboxlist(grid,obl,ii-1,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
+          
+          free(obl);
+        }
         
         if (out < 0 && FacePoint[b][f]->outerbound == 1)
         {
@@ -867,6 +868,26 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
                         
         /* This set the priority to outerbound or innerbound */
         int out = b_XYZ_of_xyz(grid,X,X+1,X+2,q[0],q[1],q[2]);
+        
+        if (out == b)
+        {
+          int *obl = 0; /* list */
+          int ii,jj;
+          
+          /* make obl that contains all boxes */
+          jj = 0;
+          forallboxes(grid, ii) 
+            if(ii != b) 
+            {
+              obl = realloc(obl,(jj+1)*sizeof(*obl));
+              obl[jj++] = ii;
+            }
+          
+          out = b_XYZ_of_xyz_inboxlist(grid,obl,ii-1,&X[0],&X[1],&X[2],q[0],q[1],q[2]);
+          
+          free(obl);
+        }
+        
         if (out < 0)
         {
           FacePoint[b][f]->inner[i].adjacent.outerbound = 1;
@@ -878,7 +899,7 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
         n_adj_box = 0;
 
         adj_box = b_xyz_in_exblist(grid,inner[i].geometry.x,&blist,1,&n_adj_box);
-
+        
         /*if the point couldn't be found, let's try the normal approach*/
         if (n_adj_box == 0)
         {
@@ -1205,7 +1226,7 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
   forallboxes(grid,b)
   {
     tBox *box = grid->box[b];
-    int extface[TOT_NUM_FACE];
+    int extface[TOT_NUM_FACE]={0};
     int n[3] = {box->n1,box->n2,box->n3};
     int n1 = n[0] ,n2 = n[1];//They are needed for macro Index
 
@@ -1467,7 +1488,9 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     int interpolation;// 1 means yes 0 no
     int touch;// 1 means yes 0 no
     int ijk[3];
+    int irrelevant; //if it is irrelevant 1, otherwise 0
     double nrm;// dot products of normal N1.N2
+    
   } *record = 0;
   struct POINT_S *P;
   double X[3] = {0};
@@ -1490,7 +1513,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
   while (k < n_adj_box)
   {
     record[k].box = adj_box[k];
-
+    
     /*If the point x collocated with the
        same point in adjacent point*/
     if (IsCollocated(P->geometry.x,record[k].box,record[k].ijk,P->adjacent.X,grid) == 1)
@@ -1526,10 +1549,35 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
           }
           i++;
         }
-        /* if the point is at irrelevant point */
+        /* if the point is an irrelevant point */
         if (flg == NONE_F)
         {
-          record[k].face = -1;
+          int indx0;
+          double nrm0 = 0;
+          
+          /*Find the fitest norm*/
+          i = 0;
+          while (face_list[i] >= 0)
+          {
+            double nrm;
+
+            get_normal(N,grid->box[record[k].box],\
+              face_list[i],ijk_ind(grid->box[record[k].box],record[k].ijk));
+            nrm = ABS(dot_product(P->geometry.N,N));
+            
+            if (dgreatereq(nrm,nrm0))
+            {
+              nrm0 = nrm;
+              indx0 = i;
+            }
+            
+            i++;
+          }
+          
+          record[k].face = face_list[indx0];
+          record[k].interpolation = 0;
+          record[k].nrm = nrm0;
+          record[k].irrelevant = 1;
         }
 
       }
@@ -1631,7 +1679,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
   {
     if (record[k].collocated == 1 &&
         record[k].AtFace     == 1 &&
-        record[k].face       != -1)
+        record[k].irrelevant == 0)
     {
       n_identical++;
       desired_indx = realloc(desired_indx,(n_identical)*sizeof(*desired_indx));
@@ -1653,7 +1701,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     P->adjacent.interpolation = record[k].interpolation;
     assert(P->adjacent.touch == 1);
     assert(P->adjacent.interpolation == 0);
-    assert(dequal(record[k].nrm,1));
+    //assert(dequal(record[k].nrm,1));
     add_to_share(FacePoint[b][f],P->adjacent.face,P->adjacent.box,kind,i);
 
     if (n_identical > 1) // we have identical cases
@@ -1673,7 +1721,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
         P1[l-1].adjacent.interpolation = record[k].interpolation;
         assert(P1[l-1].adjacent.touch == 1);
         assert(P1[l-1].adjacent.interpolation == 0);
-        assert(dequal(record[k].nrm,1));
+        //assert(dequal(record[k].nrm,1));
         add_to_share(FacePoint[b][f],P1[l-1].adjacent.face,P1[l-1].adjacent.box,kind,end+l-1);
 
       }
@@ -1782,7 +1830,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
 
   }
 
-  /* If it stil is not found check for untouch one*/
+  /* If it still is not found check for untouch one*/
   if (flg != FOUND_F)
   {
     k = 0;
@@ -1804,7 +1852,46 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     }
 
   }
-
+  
+  /* If it still is not found check for collocated point 
+  and compromise the normal */
+  if (flg != FOUND_F)
+  {
+    int indx;
+    double nrm = -1;
+    
+    k = 0;
+    while(k < n_adj_box)
+    {
+      /* find the greatest nrm */
+      if ( record[k].collocated == 1 && 
+           record[k].AtFace     == 1 &&
+           dgreatereq(record[k].nrm,nrm) )
+      {
+        nrm = record[k].nrm;
+        indx = k;
+      }
+      
+      k++;
+    }
+    
+    k = indx;  
+    P->adjacent.box = record[k].box;
+    P->adjacent.ijk[0] = record[k].ijk[0];
+    P->adjacent.ijk[1] = record[k].ijk[1];
+    P->adjacent.ijk[2] = record[k].ijk[2];
+    P->adjacent.touch = record[k].touch;
+    P->adjacent.face = record[k].face;
+    P->adjacent.interpolation = record[k].interpolation;
+    add_to_share(FacePoint[b][f],P->adjacent.face,P->adjacent.box,kind,i);
+    
+    assert(P->adjacent.touch == 1);
+    assert(P->adjacent.interpolation == 0);
+    
+    if (dgreater(record[k].nrm,0))
+      flg = FOUND_F;
+  }
+  
   /* check if the pertinent adjacent has been found */
   if (flg != FOUND_F)
   {
