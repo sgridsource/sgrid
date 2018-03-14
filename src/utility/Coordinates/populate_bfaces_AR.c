@@ -417,18 +417,12 @@ static void set_ofi_flag(tGrid *grid)
 
         if (flg != STOP_F)
         {
-          //test
-          //double xx[3]={0};
-          //get_x_coord(xx,box,box->bface[bf]->fpts->point[0][0]);
-          //fprintf(stderr,"**%f %f %f\n",xx[0],xx[1],xx[2]);
-          //end
           /* Since couldn't be found, save this bface for further analysis */
           add_to_pair(&pair2,box->bface[bf],0,&np2);
           
           /* book keeping */
           add_to_pair(&pair,box->bface[bf],0,&np);
           
-          errorexit("The appropriate bface could not be found!\n");
         }
 
       }
@@ -467,9 +461,15 @@ static void set_ofi_flag(tGrid *grid)
 
         }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
 
+        /* No interpolation bface could be found, so treat it as it goes inside
+            the other box ob, like untouched one*/
         if (flg != STOP_F)
-            errorexit("The appropriate bface could not be found!\n");
-
+        {
+          box->bface[bf]->touch = 0;
+          box->bface[bf]->ofi = -1;
+          add_to_pair(&pair,box->bface[bf],0,&np);
+          
+        }
       }// else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
 
       /* If this bface is untouch */
