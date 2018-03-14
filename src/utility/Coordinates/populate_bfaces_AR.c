@@ -461,15 +461,36 @@ static void set_ofi_flag(tGrid *grid)
 
         }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
 
-        /* No interpolation bface could be found, so treat it as it goes inside
-            the other box ob, like untouched one*/
+        /* No appropriate interpolation bface could be found to be paired
+        , so decide based on the most appropriate bface */
         if (flg != STOP_F)
         {
-          box->bface[bf]->touch = 0;
-          box->bface[bf]->ofi = -1;
-          add_to_pair(&pair,box->bface[bf],0,&np);
-          
+          tBox *box2 = grid->box[box->bface[bf]->ob];
+          int bf2;
+
+          for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
+          {
+
+            if ( box2->bface[bf2]->ob  == box->bface[bf]->b   &&
+                 box2->bface[bf2]->f   == box->bface[bf]->ofi    )
+            {
+            
+              box->bface[bf]->ofi   = bf2;
+              add_to_pair(&pair,box->bface[bf],0,&np);
+              
+              flg = STOP_F;
+              break;
+      
+            }  
+          }
         }
+        
+        /* if it still couldn't be found */
+        if (flg != STOP_F)
+        {
+          errorexit("Tha appropriate interpolation bface could not be matched\n");
+        }
+        
       }// else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
 
       /* If this bface is untouch */
@@ -2296,17 +2317,6 @@ static void test_bfaces(tGrid *grid)
     for (bf = 0; bf < box->nbfaces; bf++)
     {
       tBface *bface = box->bface[bf];
-
-      /* Check the pair bfaces */
-      if (bface->touch == 1)
-      {
-        tBface *bface2 = grid->box[bface->ob]->bface[bface->ofi];
-
-        if (grid->box[bface2->ob]->bface[bface2->ofi] != bface)
-        {
-          errorexit("The ob or ofi flags is not set correctly!\n");
-        }
-      }// if (bface->touch == 1)
 
       /* check the indices of pair bfaces */
       if (bface->touch == 1 && bface->same_fpts == 1)
