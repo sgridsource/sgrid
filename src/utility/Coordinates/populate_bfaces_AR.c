@@ -417,18 +417,12 @@ static void set_ofi_flag(tGrid *grid)
 
         if (flg != STOP_F)
         {
-          //test
-          //double xx[3]={0};
-          //get_x_coord(xx,box,box->bface[bf]->fpts->point[0][0]);
-          //fprintf(stderr,"**%f %f %f\n",xx[0],xx[1],xx[2]);
-          //end
           /* Since couldn't be found, save this bface for further analysis */
           add_to_pair(&pair2,box->bface[bf],0,&np2);
           
           /* book keeping */
           add_to_pair(&pair,box->bface[bf],0,&np);
           
-          errorexit("The appropriate bface could not be found!\n");
         }
 
       }
@@ -467,9 +461,36 @@ static void set_ofi_flag(tGrid *grid)
 
         }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
 
+        /* No appropriate interpolation bface could be found to be paired
+        , so decide based on the most appropriate bface */
         if (flg != STOP_F)
-            errorexit("The appropriate bface could not be found!\n");
+        {
+          tBox *box2 = grid->box[box->bface[bf]->ob];
+          int bf2;
 
+          for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
+          {
+
+            if ( box2->bface[bf2]->ob  == box->bface[bf]->b   &&
+                 box2->bface[bf2]->f   == box->bface[bf]->ofi    )
+            {
+            
+              box->bface[bf]->ofi   = bf2;
+              add_to_pair(&pair,box->bface[bf],0,&np);
+              
+              flg = STOP_F;
+              break;
+      
+            }  
+          }
+        }
+        
+        /* if it still couldn't be found */
+        if (flg != STOP_F)
+        {
+          errorexit("Tha appropriate interpolation bface could not be matched\n");
+        }
+        
       }// else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
 
       /* If this bface is untouch */
@@ -486,6 +507,24 @@ static void set_ofi_flag(tGrid *grid)
     }//for (bf = 0; bf < box->nbfaces; bf++)
   }
 
+  /* make sure all bfaces have been treated*/
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int bf;
+
+    for (bf = 0; bf < box->nbfaces; bf++)
+    {
+      /* Check if this bface has already been counted */
+      flg = check_bface(pair,np,box->bface[bf]);
+
+      if (flg != CONTINUE_F)
+      {
+        errorexit("There are some bfaces which are left unconsidered\n");
+      }
+    }
+  }
+  
   /* Find the bfaces which couldn't be found */
   i = 0;
   while (i < np2)
@@ -1586,7 +1625,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     int interpolation;// 1 means yes 0 no
     int touch;// 1 means yes 0 no
     int ijk[3];
-    int irrelevant; //if it is irrelevant 1, otherwise 0
+    int conditional; //if it is conditional 1, otherwise 0
     double nrm;// dot products of normal N1.N2
     
   } *record = 0;
@@ -1647,7 +1686,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
           }
           i++;
         }
-        /* if the point is an irrelevant point */
+        /* if the point is a conditional point */
         if (flg == NONE_F)
         {
           int indx0;
@@ -1675,7 +1714,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
           record[k].face = face_list[indx0];
           record[k].interpolation = 0;
           record[k].nrm = nrm0;
-          record[k].irrelevant = 1;
+          record[k].conditional = 1;
         }
 
       }
@@ -1709,7 +1748,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       
       for (i = 0; i < TOT_NUM_FACE; i++)
       {
-        if (face[i] == 1 && FacePoint[record[k].box][i]->internal_face == 0)
+        if (face[i] == 1 && FacePoint[record[k].box][i]->internal_face == 1)
         {
           face[i] = 0;
           nf--;
@@ -1788,7 +1827,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
   {
     if (record[k].collocated == 1 &&
         record[k].AtFace     == 1 &&
-        record[k].irrelevant == 0)
+        record[k].conditional == 0)
     {
       n_identical++;
       desired_indx = realloc(desired_indx,(n_identical)*sizeof(*desired_indx));
@@ -2000,9 +2039,6 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     if (dgreater(record[k].nrm,0))
       flg = FOUND_F;
       
-      //test
-      //yo();
-      //edn
   }
   
   /* check if the pertinent adjacent has been found */
@@ -2299,17 +2335,6 @@ static void test_bfaces(tGrid *grid)
     for (bf = 0; bf < box->nbfaces; bf++)
     {
       tBface *bface = box->bface[bf];
-
-      /* Check the pair bfaces */
-      if (bface->touch == 1)
-      {
-        tBface *bface2 = grid->box[bface->ob]->bface[bface->ofi];
-
-        if (grid->box[bface2->ob]->bface[bface2->ofi] != bface)
-        {
-          errorexit("The ob or ofi flags is not set correctly!\n");
-        }
-      }// if (bface->touch == 1)
 
       /* check the indices of pair bfaces */
       if (bface->touch == 1 && bface->same_fpts == 1)
