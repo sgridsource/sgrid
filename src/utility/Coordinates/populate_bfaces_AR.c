@@ -415,16 +415,6 @@ static void set_ofi_flag(tGrid *grid)
 
         }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
 
-        if (flg != STOP_F)
-        {
-          /* Since couldn't be found, save this bface for further analysis */
-          add_to_pair(&pair2,box->bface[bf],0,&np2);
-          
-          /* book keeping */
-          add_to_pair(&pair,box->bface[bf],0,&np);
-          
-        }
-
       }
       /* If they both only touch */
       else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
@@ -461,42 +451,13 @@ static void set_ofi_flag(tGrid *grid)
 
         }//for (bf2 = 0; bf2 < grid->box[b2]->nbfaces; bf2++)
 
-        /* No appropriate interpolation bface could be found to be paired
-        , so decide based on the most appropriate bface */
-        if (flg != STOP_F)
-        {
-          tBox *box2 = grid->box[box->bface[bf]->ob];
-          int bf2;
-
-          for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
-          {
-
-            if ( box2->bface[bf2]->ob  == box->bface[bf]->b   &&
-                 box2->bface[bf2]->f   == box->bface[bf]->ofi    )
-            {
-            
-              box->bface[bf]->ofi   = bf2;
-              add_to_pair(&pair,box->bface[bf],0,&np);
-              
-              flg = STOP_F;
-              break;
-      
-            }  
-          }
-        }
-        
-        /* if it still couldn't be found */
-        if (flg != STOP_F)
-        {
-          errorexit("Tha appropriate interpolation bface could not be matched\n");
-        }
-        
       }// else if (box->bface[bf]->touch == 1 && box->bface[bf]->same_fpts != 1)
 
       /* If this bface is untouch */
-      else if (box->bface[bf]->touch == 0 && box->bface[bf]->ofi == -1)
+      else if (box->bface[bf]->touch == 0 && box->bface[bf]->ofi < 0)
       {
         add_to_pair(&pair,box->bface[bf],box->bface[bf],&np);
+        flg = STOP_F;
       }// else if (box->bface[bf]->touch == 0 && box->bface[bf]->ofi == -1)
 
       else
@@ -504,36 +465,26 @@ static void set_ofi_flag(tGrid *grid)
         errorexit("This case is not considered!\n");
       }
 
+      if (flg != STOP_F)
+      {
+        /* Since couldn't be found, save this bface for further analysis */
+        add_to_pair(&pair2,box->bface[bf],0,&np2);
+        
+        /* book keeping */
+        add_to_pair(&pair,box->bface[bf],0,&np);
+      }
+      
     }//for (bf = 0; bf < box->nbfaces; bf++)
   }
 
-  /* make sure all bfaces have been treated*/
-  forallboxes(grid,b)
-  {
-    tBox *box = grid->box[b];
-    int bf;
-
-    for (bf = 0; bf < box->nbfaces; bf++)
-    {
-      /* Check if this bface has already been counted */
-      flg = check_bface(pair,np,box->bface[bf]);
-
-      if (flg != CONTINUE_F)
-      {
-        errorexit("There are some bfaces which are left unconsidered\n");
-      }
-    }
-  }
-  
-  /* Find the bfaces which couldn't be found */
+  /* Find the the bfaces which couldn't be found earlier*/
   i = 0;
   while (i < np2)
   {
-    
     set_ofi_flag_exclusively(&pair2[i],grid);
-    
     i++;
   }
+  
   
   if (np > 0)   free(pair);
   if (np2 > 0)  free(pair2);
@@ -584,6 +535,43 @@ static void  set_ofi_flag_exclusively(struct PAIR_S *pair,tGrid *grid)
     }
 
     
+  }
+  
+  /*If it needs interpolations*/
+  /* No appropriate interpolation bface could be found to be paired
+  , so decide based on the most appropriate bface */
+  else if (bface->touch == 1 && bface->same_fpts != 1)
+  {
+    tBox *box2 = grid->box[bface->ob];
+    FLAG_T flg = NONE_F;
+    int bf2;
+
+    for (bf2 = 0; bf2 < box2->nbfaces; bf2++)
+    {
+
+      if ( box2->bface[bf2]->ob  == bface->b   &&
+           box2->bface[bf2]->f   == bface->ofi    )
+      {
+      
+        bface->ofi   = bf2;
+        
+        flg = STOP_F;
+        break;
+
+      }  
+    }
+    
+    /* if it still couldn't be found */
+    if (flg != STOP_F)
+    {
+      errorexit("Tha appropriate interpolation bface could not be matched\n");
+    }
+
+  }
+  
+  else
+  {
+    errorexit("This case is not considered!\n");
   }
 
 }
