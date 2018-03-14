@@ -328,6 +328,7 @@ int templates_bicgstab_wrapper(
   if(Getv("GridIterators_templates_RESID_mode", "tol/norm(b)") && norm_b>0.0)
     RESID = RESID / norm_b;
 
+  if(pr) prTimeIn_s("Time BEFORE bicgstab_: ");
   if(pr) printf("  templates_bicgstab_wrapper: itmax=%d tol=%.3e "
                 "N=%ld LDW=%ld\n"
                 "  ITER=%ld RESID=%.3e\n",
@@ -381,6 +382,8 @@ int templates_bicgstab_wrapper(
   if(pr) printf("  templates_bicgstab_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
                 ITER, RESID, INFO);
   fflush(stdout);
+
+  if(pr) prTimeIn_s("Time AFTER bicgstab_: ");
 
   /* iteration failed */
   if(INFO<0) return INFO;
