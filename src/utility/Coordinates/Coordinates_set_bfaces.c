@@ -1310,27 +1310,31 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
       obface = obox->bface[ofi];
       of = obface->f;
 
-      if(obface->ofi < 0) continue; /* nothing if not one face index */
-
-      /* if we get here there are 2 paired bfaces */
-
       /* check if the 2 are touching */
       if(bface->touch)
       {
         if(obface->touch==0) errorexit("inconsistent touch flags");
 
-        /* set consistent setnormalderiv flag */
-        if(sndorder2)
+        if(obface->ofi == fi) /* we have 2 paired bfaces */
         {
+          /* set consistent setnormalderiv flag */
+          if(sndorder2)
+          {
           /* note sndorder2 makes templates_GMRES_with_BlockJacobi_precon fail
-             with 6 or more cubed spheres */
+               with 6 or more cubed spheres */
+            if(obface->setnormalderiv == 0) bface->setnormalderiv = 1;
+            else                            bface->setnormalderiv = 0;
+          }
+          else /* use sndorder1 */
+          {
+            if(bface->setnormalderiv == 0) obface->setnormalderiv = 1;
+            else                           obface->setnormalderiv = 0;
+          }
+        }
+        else /* obface doesn't refer to this bface */
+        {
           if(obface->setnormalderiv == 0) bface->setnormalderiv = 1;
           else                            bface->setnormalderiv = 0;
-        }
-        else /* use sndorder1 */
-        {
-          if(bface->setnormalderiv == 0)  obface->setnormalderiv = 1;
-          else                            obface->setnormalderiv = 0;
         }
       }
     } /* end forallbfaces */
