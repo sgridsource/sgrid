@@ -507,6 +507,24 @@ static void set_ofi_flag(tGrid *grid)
     }//for (bf = 0; bf < box->nbfaces; bf++)
   }
 
+  /* make sure all bfaces have been treated*/
+  forallboxes(grid,b)
+  {
+    tBox *box = grid->box[b];
+    int bf;
+
+    for (bf = 0; bf < box->nbfaces; bf++)
+    {
+      /* Check if this bface has already been counted */
+      flg = check_bface(pair,np,box->bface[bf]);
+
+      if (flg != CONTINUE_F)
+      {
+        errorexit("There are some bfaces which are left unconsidered\n");
+      }
+    }
+  }
+  
   /* Find the bfaces which couldn't be found */
   i = 0;
   while (i < np2)
