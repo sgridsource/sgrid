@@ -1586,7 +1586,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     int interpolation;// 1 means yes 0 no
     int touch;// 1 means yes 0 no
     int ijk[3];
-    int irrelevant; //if it is irrelevant 1, otherwise 0
+    int conditional; //if it is conditional 1, otherwise 0
     double nrm;// dot products of normal N1.N2
     
   } *record = 0;
@@ -1647,7 +1647,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
           }
           i++;
         }
-        /* if the point is an irrelevant point */
+        /* if the point is a conditional point */
         if (flg == NONE_F)
         {
           int indx0;
@@ -1675,7 +1675,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
           record[k].face = face_list[indx0];
           record[k].interpolation = 0;
           record[k].nrm = nrm0;
-          record[k].irrelevant = 1;
+          record[k].conditional = 1;
         }
 
       }
@@ -1709,7 +1709,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       
       for (i = 0; i < TOT_NUM_FACE; i++)
       {
-        if (face[i] == 1 && FacePoint[record[k].box][i]->internal_face == 0)
+        if (face[i] == 1 && FacePoint[record[k].box][i]->internal_face == 1)
         {
           face[i] = 0;
           nf--;
@@ -1788,7 +1788,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
   {
     if (record[k].collocated == 1 &&
         record[k].AtFace     == 1 &&
-        record[k].irrelevant == 0)
+        record[k].conditional == 0)
     {
       n_identical++;
       desired_indx = realloc(desired_indx,(n_identical)*sizeof(*desired_indx));
@@ -2001,7 +2001,7 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
       flg = FOUND_F;
       
       //test
-      //yo();
+      yo();
       //edn
   }
   
