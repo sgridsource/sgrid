@@ -2000,9 +2000,6 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
     if (dgreater(record[k].nrm,0))
       flg = FOUND_F;
       
-      //test
-      yo();
-      //edn
   }
   
   /* check if the pertinent adjacent has been found */
