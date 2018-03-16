@@ -1356,6 +1356,9 @@ static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
     int n1 = n[0] ,n2 = n[1];//They are needed for macro Index
 
     find_external_faces_of_box(box,extface,1);
+    printf("external faces on box%d: ", box->b);
+    for(f=0; f<6; f++) if(extface[f]) printf(" %d", f);
+    printf("\n");
 
     for (f = 0; f < TOT_NUM_FACE; f++)
     {
