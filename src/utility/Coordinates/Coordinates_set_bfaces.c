@@ -121,6 +121,7 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
   int ob, oi;
   double oX,oY,oZ;
   double L;
+  char *guess;
 
   /* mark faces in periodic dirs with not external, i.e. extface[f]=0  */
   for(f=0; f<6; f++)
@@ -136,6 +137,10 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
     var_y = var_Y;
     var_z = var_Z;
   }
+
+  /* switch off the guess in XYZ_of_xyz, since we make better guesses here. */
+  guess = strdup(Gets("Coordinates_XYZ_of_xyz_Guess")); /* save par */
+  Sets("Coordinates_XYZ_of_xyz_Guess","no");
 
   /* find box size L of smallest box */
   L = smallest_box_size(grid);
@@ -266,6 +271,10 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
   } /* end loop over directions */
 
   free_intList(obl);
+
+  /* restore Coordinates_... pars to saved values */
+  Sets("Coordinates_XYZ_of_xyz_Guess", guess);
+  free(guess);
 }
 
 
