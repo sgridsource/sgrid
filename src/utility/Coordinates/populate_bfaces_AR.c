@@ -2180,15 +2180,22 @@ static void visualize_bfaces(tGrid *grid)
 static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAIR_S *pair, int np)
 {
 
-  FLAG_T flg;
+  FLAG_T flg1 , flg2 , flg3 = 0;
+  
+  flg1 = check_bface(pair,np,bface1);
+  flg2 = check_bface(pair,np,bface2);
 
-  flg = check_bface(pair,np,bface1);
+  if (flg1 == CONTINUE_F && flg2 == CONTINUE_F) 
+    return;
+    
+  /* This flg3 determines when there is a bface which 
+     two other bfaces paired with it */
+  else if (flg1 != CONTINUE_F && flg2 == CONTINUE_F)
+  {
+    flg3 = 1;
+  }
 
-  if (flg == CONTINUE_F) return;
 
-  flg = check_bface(pair,np,bface2);
-
-  if (flg == CONTINUE_F) return;
 
   FILE *fp1,*fp2;
   char fname1[100] = {0},fname2[100] = {0};// file name
@@ -2214,14 +2221,20 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
     appn1[0] = '\0';
     appn2[0] = '\0';
 
-    if (bface1->touch == 1 && bface1->setnormalderiv == 1 
+    if (flg3 == 1)
+    {
+      if (bface1->sameX == 1)  strcat(appn1,"X_\0");
+      if (bface1->sameY == 1)  strcat(appn1,"Y_\0");
+      if (bface1->sameZ == 1)  strcat(appn1,"Z_\0");
+    }
+    else if (bface1->touch == 1 && bface1->setnormalderiv == 1 
         && bface1->same_fpts == 1)
     {
       sprintf(appn1,"ND");
       sprintf(appn2,"NND");
     }
     else if (bface2->touch == 1 && bface2->setnormalderiv == 1
-        && bface1->same_fpts == 1)
+        && bface2->same_fpts == 1)
     {
       sprintf(appn2,"ND");
       sprintf(appn1,"NND");
