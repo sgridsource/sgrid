@@ -848,8 +848,9 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
       const int sh = FacePoint[b][f]->sh;
       int i;
       
-      blist = realloc(blist,FacePoint[b][f]->sh*sizeof(*blist));
-      
+      if(sh>0) { blist = realloc(blist, sh*sizeof(*blist)); }
+      else     { free(blist);  blist = NULL; }
+
       /* if this face is internal face */
       if (FacePoint[b][f]->internal_face == 1)
       {
