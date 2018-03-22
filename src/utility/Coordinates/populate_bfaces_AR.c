@@ -1045,7 +1045,7 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
           FacePoint[b][f]->inner[i].adjacent.outerbound = 1;
           FacePoint[b][f]->outerbound = 1;// Flag this face for future uses
         }
-
+        
         free(adj_box);
       }//for (i = 0; i < s; i++)
     }//for (f = 0; f < f_max; f++)
@@ -2270,7 +2270,11 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
     assert(fp1 != 0);
     assert(fp2 != 0);
 
-
+    
+    /* header */
+    fprintf(fp1,"#time = %f \n#x y z\n",bface1->grid->time);
+    fprintf(fp2,"#time = %f \n#x y z\n",bface2->grid->time);
+    
     m = bface1->fpts->npoints[bface1->b];
     assert(m > 0);
     for(i = 0; i < m; i++)
@@ -2307,7 +2311,11 @@ static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAI
     sprintf(fname1,"b1:%d f1:%d _%s",b1,f1,str);
     strcat(dir1,fname1);
     fp1 = fopen(dir1,"w+");
-
+    assert(fp1 != 0);
+    
+    /* header */
+    fprintf(fp1,"#time = %f \n#x y z\n",bface1->grid->time);
+    
     m = bface1->fpts->npoints[bface1->b];
     assert(m > 0);
     for(i = 0; i < m; i++)
@@ -2431,6 +2439,8 @@ static void visualize_boxes(tGrid *grid)
     fp = fopen(dir,"w+");
     assert(fp != 0);
 
+    /* header */
+    fprintf(fp,"#time = %f \n#x y z\n",grid->time);
 
     forallpoints(box,i)
     {
