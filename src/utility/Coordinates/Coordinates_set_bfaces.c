@@ -1166,6 +1166,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
       N = 0;
       forPointList_inbox(fpts, box, pi, ind)
       {
+        int ret;
         int face[6];
 
         /* get x,y,z */
@@ -1183,9 +1184,12 @@ int set_bits_in_all_bfaces(tGrid *grid)
         oY = obox->v[iY][oind];
         oZ = obox->v[iZ][oind];
         moveXYZ_off_face(obox, &oX,&oY,&oZ);
-        XYZ_of_xyz(obox, &oX,&oY,&oZ, x,y,z);
-        XYZ_on_face(obox, face, oX,oY,oZ);
-        if(face[of]) N++; /* count number of points we find on face of obox */
+        ret = XYZ_of_xyz(obox, &oX,&oY,&oZ, x,y,z);
+        if(ret>=0)
+        {
+          XYZ_on_face(obox, face, oX,oY,oZ);
+          if(face[of]) N++; /* count num. of points we find on face of obox */
+        }
 
         /* see if points in fpts are on our bface */
         X = box->v[iX][ind];
@@ -1204,6 +1208,15 @@ int set_bits_in_all_bfaces(tGrid *grid)
       }
       else
         touch=0;
+
+      /* if(touch==0)
+      {
+        Yo(1);
+        printbface(bface);
+        printbface(obface);
+        printf("N=%d\n", N);
+        Yo(2);
+      } */
 
       Set_bface_flags_and_continue:
         /* set the flags we have now */
@@ -1317,7 +1330,26 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
       /* check if the 2 are touching */
       if(bface->touch)
       {
-        if(obface->touch==0) errorexit("inconsistent touch flags");
+        if(obface->touch==0)
+        {
+          printf("current bface (called bface):\n");
+          printbface(bface);
+          printf("other bface (called obface):\n");
+          printbface(obface);
+          printf("\nIf same_fpts=0 and touch=0 in one bface, at least one\n"
+                 "point in the pointlist is not on the face of the other\n"
+                 "box. For Coordinates_set_bfaces_oldWT this can be\n"
+                 "caused by set_bfaces_on_boxface not really checking if\n"
+                 "edges or corners really belong to the bface. Then\n"
+                 "set_bits_in_all_bfaces cannot find these points on the\n"
+                 "face of the other box - see the lines with:\n"
+                 "          if(face[of]) N++;\n"
+                 "and\n"
+                 "      if(fpts->npoints[box->b] == N)\n"
+                 "in func: int set_bits_in_all_bfaces(tGrid *grid)\n\n");
+          errorexit("Inconsistent touch flags: one bface has touch=1 and\n"
+                    "the other has touch=0");
+        }
 
         /* set consistent setnormalderiv flag */
         if(sndorder2)
