@@ -497,7 +497,7 @@ int XYZ_on_face(tBox *box, int *face, double X, double Y, double Z)
   return nf; /* number of faces point is on */
 }
 
-/* find guess that is nearest X,Y,Z in box from x,y,z */
+/* move X,Y,Z away from box face if it is on it */
 int moveXYZ_off_face(tBox *box, double *X, double *Y, double *Z)
 {
   int face[6];
@@ -532,10 +532,9 @@ int moveXYZ_off_face(tBox *box, double *X, double *Y, double *Z)
 double guessXYZ_of_xyz(tBox *box, int *ind, double *X, double *Y, double *Z,
                        double x, double y, double z)
 {
-  double rmin = nearestXYZ_of_xyz(box, ind, X,Y,Z, x,y,z);
-  int face[6];
-
-  moveXYZ_off_face(box, X,Y,Z);
+  double rmin = nearestinnerXYZ_of_xyz(box, ind, X,Y,Z, x,y,z);
+  //int face[6];
+  //moveXYZ_off_face(box, X,Y,Z);
 
   return rmin;
 }
