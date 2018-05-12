@@ -292,6 +292,21 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
   tGrid *grid = vlx->grid;
   int b;
   int *offset;
+#ifndef LEVEL6_Pragmas
+  tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
+  tBox *box_p = grid_p->box[b];
+  tVarList *vlFx_p = vlalloc(grid_p);
+  tVarList *vlx_p  = vlalloc(grid_p);
+  tVarList *vlc1_p = vlalloc(grid_p);
+  tVarList *vlc2_p = vlalloc(grid_p);
+
+  /* make local copy of grid and var lists */      
+  copy_grid(grid, grid_p, 0);
+  vlpushvl(vlFx_p, vlFx);
+  vlpushvl(vlx_p, vlx);
+  vlpushvl(vlc1_p, vlc1);
+  vlpushvl(vlc2_p, vlc2);
+#endif
 
   /* set offsets */
   offset = (int *) calloc( grid->nboxes, sizeof(int) );
@@ -314,6 +329,7 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
     SGRID_LEVEL6_Pragma(omp parallel)
     {
       int i;
+#ifdef LEVEL6_Pragmas
       tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
       tBox *box_p = grid_p->box[b];
       tVarList *vlFx_p = vlalloc(grid_p);
@@ -327,6 +343,7 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
       vlpushvl(vlx_p, vlx);
       vlpushvl(vlc1_p, vlc1);
       vlpushvl(vlc2_p, vlc2);
+#endif
 
       SGRID_LEVEL6_Pragma(omp for)
       forallpoints(box_p,i)
@@ -369,12 +386,14 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
           x[i]=0;
         } /* end: for(j = 0; j < vlx_p->n; j++) */
       }
+#ifdef LEVEL6_Pragmas
       /* free local copies */
       vlfree(vlFx_p);
       vlfree(vlx_p);
       vlfree(vlc1_p);
       vlfree(vlc2_p);
       free_grid(grid_p);
+#endif
     }
   } /* end: forallboxes(grid0,b) */
   if(pr)
@@ -387,6 +406,14 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
            ncol, ncol, Acol);
     fflush(stdout);
   }
+#ifndef LEVEL6_Pragmas
+  /* free local copies */
+  vlfree(vlFx_p);
+  vlfree(vlx_p);
+  vlfree(vlc1_p);
+  vlfree(vlc2_p);
+  free_grid(grid_p);
+#endif
   free(offset);
 }
 
