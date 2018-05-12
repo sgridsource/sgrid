@@ -203,8 +203,9 @@ void *pmalloc(int n);
 #define PtrFromInd(box,i)     ((box)->v[(i)])
 #define vlldataptr(vl,box,i)  ((box)->v[(vl)->index[i]])
 extern int globalnvariables;
-int Ind(char *name);
 int IndLax(char *name);
+int Ind(char *name);
+int Set_vdb_iStart_AtPar(char *name);
 void AddVar(char *name, char *indices, char *description);
 void AddConstantVar(char *name, char *tensorindices, char *description);
 void AddVarToGrid(tGrid *grid, char *name, char *tensorindices,
