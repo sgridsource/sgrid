@@ -123,6 +123,7 @@ int GetnParameters(void);
 double GetCachedNumValByParIndex(int i);
 int GetCachedBoolValByParIndex(int i);
 int GetParIndex(char *name);
+int Set_pdb_iStart_AtPar(char *name);
 void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache);
 void print_parameter_database(void);
 void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,

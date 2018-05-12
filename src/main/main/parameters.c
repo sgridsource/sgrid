@@ -21,7 +21,7 @@
 /* global vars for parameter data base
    (tParameter is defined in src/main/main/sgrid_main.h) */
 tParameter *pdb;
-int npdb, npdbmax = 10000;
+int pdb_iStart = 0, npdb, npdbmax = 10000;
 
 tParameter *findparameter(char *name, int fatal);
 void setparameter(char *name, char *value);
@@ -211,24 +211,37 @@ void setparameter(char *name, char *value)
 
 
 
+/* find parameter index */
+int findparameterindex(char *name, int fatal)
+{
+  int i, iS = pdb_iStart;
+
+  if(!name) errorexit("findparameterindex: called without parameter name");
+
+  if( (iS < 0) || (iS >= npdb) ) iS = 0; /* make sure first i is in range */
+
+  for(i = iS; i < npdb; i++)
+    if(!strcmp(pdb[i].name, name))
+      return i;
+
+  for(i = 0; i < iS; i++)
+    if(!strcmp(pdb[i].name, name))
+      return i;
+
+  if(fatal) errorexits("Could not find parameter \"%s\"", name);
+
+  /* -1 means par was not found */
+  return -1;
+}
+
 /* find parameter */
 tParameter *findparameter(char *name, int fatal)
 {
-  int i;
+  int i = findparameterindex(name, fatal);
 
-  if (!name) {
-    errorexit("findparameter: called without parameter name");
-  }
+  if(i<0) return 0;
 
-  for (i = 0; i < npdb; i++)
-    if (!strcmp(pdb[i].name, name))
-      return &pdb[i];
-
-  if (fatal) {
-    printf("Could not find parameter \"%s\"\n", name);
-    errorexit("this one is required!");
-  }
-  return 0;
+  return &pdb[i];
 }
 
 
@@ -520,8 +533,14 @@ int GetCachedBoolValByParIndex(int i)
 /* get the par Index */
 int GetParIndex(char *name)
 {
-  tParameter *p = findparameter(name, 1);
-  return p-pdb; /* compute index using pointer arithmetic. Is this ok??? */
+  return findparameterindex(name, 1);
+}
+
+/* set the global var pdb_iStart to the index of par name */
+int Set_pdb_iStart_AtPar(char *name)
+{
+  pdb_iStart = findparameterindex(name, 1);
+  return pdb_iStart;
 }
 
 
