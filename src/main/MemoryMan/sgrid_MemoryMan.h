@@ -270,16 +270,6 @@ void enablesamevars(tGrid *grid, tGrid *newgrid);
 
 void realloc_gridvariables(tGrid *g, int nvariables);
 
-/* points.c */
-tPointList *AllocatePointList(tGrid *grid);
-void AddToPointList(tPointList *PL, int boxindex, int newpoint);
-void FreePointList(tPointList *PL);
-void prPointList(tPointList *PL);
-void prPointList_inbox(tPointList *PL, int b);
-void prPointList_ijk_inbox(tPointList *PL, int b);
-tPointList *DuplicatePointList_for_grid(tPointList *PL0, tGrid *grid);
-tPointList *DuplicatePointList(tPointList *PL0);
-
 /* boxlists.c */
 /* use lists with int entries */
 #define TYP int
@@ -292,3 +282,15 @@ int bl2_ifAttrib(tGrid *grid, intList *bl1, int iAttr, int AttrVal, intList *bl2
 int bl2_ifnotAttrib(tGrid *grid, intList *bl1, int iAttr, int AttrVal, intList *bl2);
 int bladd_neighbors(tBox *box, intList *bl);
 int bladd_neighbors_of_neighbors(tBox *box, intList *bl);
+
+/* points.c */
+tPointList *AllocatePointList(tGrid *grid);
+void AddToPointList(tPointList *PL, int boxindex, int newpoint);
+void DropFromPointList(tPointList *PL, int boxindex, int point);
+void DropListFromPointList(tPointList *PL, int boxindex, intList *drop);
+void FreePointList(tPointList *PL);
+void prPointList(tPointList *PL);
+void prPointList_inbox(tPointList *PL, int b);
+void prPointList_ijk_inbox(tPointList *PL, int b);
+tPointList *DuplicatePointList_for_grid(tPointList *PL0, tGrid *grid);
+tPointList *DuplicatePointList(tPointList *PL0);
