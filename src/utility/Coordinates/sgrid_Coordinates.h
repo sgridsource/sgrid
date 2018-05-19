@@ -123,6 +123,7 @@ void set_all_bfaces_with_ob_minus1_to_outerbound(tGrid *grid, int b0, int nb);
 int set_oXi_oYi_oZi_in_all_bfaces(tGrid *grid);
 int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid);
 void find_external_faces_of_box(tBox *box, int *extface, int inlcOuterBound);
+int remove_bfacepoints_that_cause_inconsistent_touch_bits(tGrid *grid);
 int set_consistent_flags_in_all_bfaces(tGrid *grid);
 
 /* from populate_bfaces_AR.c */
