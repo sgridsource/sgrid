@@ -162,10 +162,9 @@ void cheb_eval_onZeros(double c[], double u[], int n)
 {
   int k, j;
   int N=n+1;
-  double fac, sum, PIoN;
-
-  PIoN=PI/N;
-  fac=2.0/N;
+  double sum;
+  double PIoN=PI/N;
+  //double fac=2.0/N;
   
   for(j=0;j<=n;j++)
   {
@@ -182,10 +181,9 @@ void cheb_eval_onZeros(double c[], double u[], int n)
 void cheb_eval_onExtrema(double c[], double u[], int N)
 {
   int k, j;
-  double fac, sum, PIoN;
-
-  PIoN=PI/N;
-  fac=2.0/N;
+  double sum;
+  double PIoN=PI/N;
+  //double fac=2.0/N;
   
   for(j=0;j<=N;j++)
   {
