@@ -27,8 +27,8 @@ int WTsolver(tVarList *vlx, tVarList *vlb,
   nlines = 0;
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
   Aline = calloc(nlines, sizeof(*Aline));
-  if(Aline)  if(pr) printf("allocated %d matrix lines\n", nlines);
-  else       errorexit("no memory for Aline");
+  if(Aline) { if(pr) printf("allocated %d matrix lines\n", nlines); }
+  else        errorexit("no memory for Aline");
   for(line=0; line<nlines; line++)  Aline[line]=AllocateSparseVector();
 
   /* set Aline */                
