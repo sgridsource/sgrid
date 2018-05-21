@@ -46,6 +46,7 @@ libpaths += src/utility/Coordinates src/utility/Spectral
 libpaths += src/utility/output src/utility/evolve
 libpaths += src/utility/NumberChecker
 libpaths += src/utility/checkpoint
+libpaths += src/utility/boundary
 
 # --------------------------------------------------------------------------
 # the user choses the libraries and some options in the file MyConfig

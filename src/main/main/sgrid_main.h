@@ -73,6 +73,12 @@
 #define SGRID_TOPLEVEL_Pragma(x)
 #endif
 
+#if defined(LEVEL6_Pragmas) || defined(TOPLEVEL_Pragmas)
+#define SGRID_LEVEL6orTOP_Pragma(x)  _Pragma ( #x )
+#else
+#define SGRID_LEVEL6orTOP_Pragma(x)
+#endif
+
 
 /* snap effect for grid coordinates */
 #define dequaleps 1e-10
@@ -117,6 +123,7 @@ int GetnParameters(void);
 double GetCachedNumValByParIndex(int i);
 int GetCachedBoolValByParIndex(int i);
 int GetParIndex(char *name);
+int Set_pdb_iStart_AtPar(char *name);
 void print_pdb_i1_i2(tParameter *pdb, int i1, int i2, int pr_ind, int pr_cache);
 void print_parameter_database(void);
 void create_copy_of_pdb1_in_pdb2(tParameter *pdb1, int npdb1, int npdb1max,
@@ -196,8 +203,9 @@ void *pmalloc(int n);
 #define PtrFromInd(box,i)     ((box)->v[(i)])
 #define vlldataptr(vl,box,i)  ((box)->v[(vl)->index[i]])
 extern int globalnvariables;
-int Ind(char *name);
 int IndLax(char *name);
+int Ind(char *name);
+int Set_vdb_iStart_AtPar(char *name);
 void AddVar(char *name, char *indices, char *description);
 void AddConstantVar(char *name, char *tensorindices, char *description);
 void AddVarToGrid(tGrid *grid, char *name, char *tensorindices,

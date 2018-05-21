@@ -31,7 +31,7 @@ typedef struct tVAR {
 } tVar;
 
 tVar *vdb = 0;
-int nvdb = 0, globalnvariables = 0;
+int vdb_iStart = 0, nvdb = 0, globalnvariables = 0;
 
 
 
@@ -116,31 +116,37 @@ void AddVarToGrid(tGrid *grid, char *name, char *tensorindices,
 }
 
 
-/* return index of variable */
-int Ind(char *name) 
-{
-  int i;
-
-  for (i = 0; i < nvdb; i++)
-    if (!strcmp(vdb[i].name, name)) {
-      if (0) printf("index(%s) = %d\n", name, vdb[i].index);
-      return vdb[i].index;
-    }
-  errorexits("Ind: variable \"%s\" does not exist\n", name);
-  return 0;
-}
 
 /* return index of variable or -1 if it was not found */
 int IndLax(char *name) 
 {
-  int i;
+  int i, iS = vdb_iStart;
 
-  for (i = 0; i < nvdb; i++)
-    if (!strcmp(vdb[i].name, name)) {
-      if (0) printf("index(%s) = %d\n", name, vdb[i].index);
+  if( (iS < 0) || (iS >= nvdb) ) iS = 0; /* make sure first i is in range */
+
+  for(i = iS; i < nvdb; i++)
+    if(!strcmp(vdb[i].name, name))
+    {
+      if(0) printf("index(%s) = %d\n", name, vdb[i].index);
       return vdb[i].index;
     }
+
+  for(i = 0; i < iS; i++)
+    if(!strcmp(vdb[i].name, name))
+    {
+      if(0) printf("index(%s) = %d\n", name, vdb[i].index);
+      return vdb[i].index;
+    }
+
   return -1;
+}
+
+/* return index of variable */
+int Ind(char *name) 
+{
+  int i = IndLax(name);
+  if(i<0) errorexits("Ind: variable \"%s\" does not exist\n", name);
+  return i;
 }
 
 /* return index of variable given pointer */
@@ -153,6 +159,16 @@ int IndFromPtr(tBox *box, double *p)
       return vdb[i].index;
   return -1;
 }
+
+/* set the global var vdb_iStart to the index of variable "name" */
+int Set_vdb_iStart_AtPar(char *name)
+{
+  int i = IndLax(name);
+  if(i<0) errorexits("Ind: variable \"%s\" does not exist\n", name);
+  vdb_iStart = i;
+  return i;
+}
+
 
 /* return name given index */
 char *VarName(int i) 

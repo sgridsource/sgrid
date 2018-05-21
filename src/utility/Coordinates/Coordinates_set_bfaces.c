@@ -825,6 +825,10 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
   set_ofi_in_all_bfaces(grid);
   set_bits_in_all_bfaces(grid);
 
+  /* fix some issues */
+  if(remove_bfacepoints_that_cause_inconsistent_touch_bits(grid))
+    set_bits_in_all_bfaces(grid);
+
   /* set outer boundary flag */
   mark_all_bfaces_without_ob_as_outerbound(grid);
 
@@ -1175,6 +1179,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
       N = 0;
       forPointList_inbox(fpts, box, pi, ind)
       {
+        int ret;
         int face[6];
 
         /* get x,y,z */
@@ -1192,9 +1197,12 @@ int set_bits_in_all_bfaces(tGrid *grid)
         oY = obox->v[iY][oind];
         oZ = obox->v[iZ][oind];
         moveXYZ_off_face(obox, &oX,&oY,&oZ);
-        XYZ_of_xyz(obox, &oX,&oY,&oZ, x,y,z);
-        XYZ_on_face(obox, face, oX,oY,oZ);
-        if(face[of]) N++; /* count number of points we find on face of obox */
+        ret = XYZ_of_xyz(obox, &oX,&oY,&oZ, x,y,z);
+        if(ret>=0)
+        {
+          XYZ_on_face(obox, face, oX,oY,oZ);
+          if(face[of]) N++; /* count num. of points we find on face of obox */
+        }
 
         /* see if points in fpts are on our bface */
         X = box->v[iX][ind];
@@ -1213,6 +1221,15 @@ int set_bits_in_all_bfaces(tGrid *grid)
       }
       else
         touch=0;
+
+      /* if(touch==0)
+      {
+        Yo(1);
+        printbface(bface);
+        printbface(obface);
+        printf("N=%d\n", N);
+        Yo(2);
+      } */
 
       Set_bface_flags_and_continue:
         /* set the flags we have now */
@@ -1264,6 +1281,117 @@ int set_oXi_oYi_oZi_in_all_bfaces(tGrid *grid)
   }
   return 0;
 }
+
+/* fix case where 2 paired bfaces do not agree on touch flag */
+int remove_bfacepoints_that_cause_inconsistent_touch_bits(tGrid *grid)
+{
+  int iX = Ind("X");
+  int iY = iX+1;
+  int iZ = iX+2;
+  int ix = Ind("x");
+  int iy = ix+1;
+  int iz = ix+2;
+  int b, drppd=0;
+
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    double *pX = box->v[iX];
+    double *pY = box->v[iY];
+    double *pZ = box->v[iZ];
+    double *px = box->v[ix];
+    double *py = box->v[iy];
+    double *pz = box->v[iz];
+    int fi;
+
+    /* loop over bfaces */
+    forallbfaces(box, fi)
+    {
+      tBface *bface = box->bface[fi];
+      int f = bface->f;
+      tPointList *fpts = bface->fpts;
+      int dir = 1 + f/2;
+      int ob  = bface->ob;
+      int ofi = bface->ofi;
+      tBox *obox = NULL;
+      tBface *obface = NULL;
+      int pi, ind, oind;
+      double X,Y,Z, oX,oY,oZ, x,y,z, dist;
+      int of, od, opl;
+
+      if(ob<0)  continue; /* do nothing if there is no other box at this bface */
+      if(ofi<0) continue; /* do nothing if there not one face index in other box */
+
+      /* other box and corresponding bface */
+      obox = grid->box[ob];
+      obface = obox->bface[ofi];
+      of = obface->f;
+      od = 1+of/2;
+      if(od==1)       opl = (obox->n1-1) * (of%2);
+      else if(od==2)  opl = (obox->n2-1) * (of%2);
+      else            opl = (obox->n3-1) * (of%2);
+
+      if(obface->ofi < 0) continue; /* do nothing if not one other face index */
+
+      if(fpts == NULL) continue; /* do nothing if we do not have points */
+
+      if(obface->ofi != fi) continue; /* do nothing if not paired */
+
+      /* if touch is inconsistent try to remove trouble points from bface */
+      if(bface->touch==0 && obface->touch==1)
+      {
+        forPointList_inbox(fpts, box, pi, ind)
+        {
+          int ret;
+          int face[6];
+
+          /* get x,y,z */
+          if(box->x_of_X[1]==NULL) /* this is a Cartesian box */
+          {
+            x = pX[ind];   y = pY[ind];   z = pZ[ind];
+          }
+          else
+          {
+            x = px[ind];   y = py[ind];   z = pz[ind];
+          }
+          /* find closest point in other box */
+          dist = nearestXYZ_of_xyz_inplane(obox, &oind, &oX,&oY,&oZ,
+                                           x,y,z, od, opl);
+          oX = obox->v[iX][oind];
+          oY = obox->v[iY][oind];
+          oZ = obox->v[iZ][oind];
+          moveXYZ_off_face(obox, &oX,&oY,&oZ);
+          /* find in other box */
+          ret = XYZ_of_xyz(obox, &oX,&oY,&oZ, x,y,z);
+          face[of]=0;
+          if(ret>=0) XYZ_on_face(obox, face, oX,oY,oZ);
+          if(face[of]==0) /* point not on face of obox */
+          {
+            int fi0;
+            intList tmp[1];
+            /* can we drop point (because it is also in another
+               bface on this box)? */
+            forallbfaces(box, fi0)
+            {
+              tBface *bface0 = box->bface[fi0];
+              tmp->n = bface0->fpts->npoints[b];
+              tmp->e = bface0->fpts->point[b];
+              if(fi0!=fi && in_intList(tmp, ind))
+              {
+                DropFromPointList(fpts, b, ind);
+                drppd++;
+              }
+            }
+          }
+
+        } /* end forPointList_inbox */
+      } /* end if */
+    } /* end loop over bfaces */
+  }
+  return drppd;
+}
+
+
 
 /* set setnormalderiv=0 in all bfaces */
 int zero_setnormalderiv_flag_in_all_bfaces(tGrid *grid)
@@ -1322,7 +1450,26 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
       /* check if the 2 are touching */
       if(bface->touch)
       {
-        if(obface->touch==0) errorexit("inconsistent touch flags");
+        if(obface->touch==0)
+        {
+          printf("current bface (called bface):\n");
+          printbface(bface);
+          printf("other bface (called obface):\n");
+          printbface(obface);
+          printf("\nIf same_fpts=0 and touch=0 in one bface, at least one\n"
+                 "point in the pointlist is not on the face of the other\n"
+                 "box. For Coordinates_set_bfaces_oldWT this can be\n"
+                 "caused by set_bfaces_on_boxface not really checking if\n"
+                 "edges or corners really belong to the bface. Then\n"
+                 "set_bits_in_all_bfaces cannot find these points on the\n"
+                 "face of the other box - see the lines with:\n"
+                 "          if(face[of]) N++;\n"
+                 "and\n"
+                 "      if(fpts->npoints[box->b] == N)\n"
+                 "in func: int set_bits_in_all_bfaces(tGrid *grid)\n\n");
+          errorexit("Inconsistent touch flags: one bface has touch=1 and\n"
+                    "the other has touch=0");
+        }
 
         if(obface->ofi == fi) /* we have 2 paired bfaces */
         {

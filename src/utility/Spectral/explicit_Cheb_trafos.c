@@ -241,5 +241,15 @@ double cheb_basisfunc(void *aux, double a, double b, int n, int n1, double X)
 
   /* y=(2.0*X-a-b)/(a-b); */
   y=((X-a)+(X-b))/(a-b);
+  
+  /* catch small rounding errors, where |y| is a bit larger than 1 */
+  if(dequal(y, 1.0)) return 1.0;
+  if(dequal(y,-1.0))
+  { 
+    if(n%2) return -1.0;
+    else    return +1.0;
+  }
+  //if(y>1. || y<-1.) printf("cheb_basisfunc: y=%.19g out of range\n", y);
+
   return cos(n*acos(y));
 }

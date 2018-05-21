@@ -84,6 +84,33 @@ void AddToPointList(tPointList *PL, int boxindex, int newpoint)
   PL->nblist = addto_blist(boxindex, PL->blist, PL->nblist);
 }
 
+/* drop one point from a PointList in box boxindex */
+void DropFromPointList(tPointList *PL, int boxindex, int point)
+{
+  intList ilist[1];
+
+  /* make an intList point at the list in PL */
+  ilist->n = PL->npoints[boxindex];
+  ilist->e = PL->point[boxindex];
+
+  /* now drop point */
+  drop_intList(ilist, point);
+  PL->npoints[boxindex] = ilist->n;
+}
+
+/* drop points in intList from a PointList in box boxindex */
+void DropListFromPointList(tPointList *PL, int boxindex, intList *drop)
+{
+  intList ilist[1];
+
+  /* make an intList point at the list in PL */
+  ilist->n = PL->npoints[boxindex];
+  ilist->e = PL->point[boxindex];
+
+  /* now drop point */
+  droplist_intList(ilist, drop);
+  PL->npoints[boxindex] = ilist->n;
+}
 
 /* free a PointList */
 void FreePointList(tPointList *PL)
