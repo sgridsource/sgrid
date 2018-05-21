@@ -119,9 +119,6 @@ static void group_similar_points(struct FACE_POINT_S ***const FacePoint,tGrid *g
 
   for (b = 0; b < b_max; b++)
   {
-    int n1 = grid->box[b]->n1;
-    int n2 = grid->box[b]->n2;
-    int n3 = grid->box[b]->n3;
     int f, f_max;
     f_max = tot_num(FacePoint[b]);
 
@@ -763,6 +760,8 @@ struct POINT_S *point_in_FacePoint(struct FACE_POINT_S *FacePoint,int kind, int 
   {
     return &FacePoint->edge[indx];
   }
+  
+  return 0;
 }
 
 /*Adding a needle to hay*/
@@ -774,15 +773,12 @@ static void add_point(struct SIMILAR_S *hay,struct POINT_S *needle)
 }
 
 /*find outerbound bfaces, if it found a outerbound in returns continue flg*/
-static int find_outerbound_bfaces(struct FACE_POINT_S ***const FacePoint,
+static FLAG_T find_outerbound_bfaces(struct FACE_POINT_S ***const FacePoint,
 int b, int f,tGrid *grid)
 {
   if (FacePoint[b][f]->outerbound == 1)
   {
     tBox *box = grid->box[b];
-    int n1 = box->n1;
-    int n2 = box->n2;
-    int n3 = box->n3;
     int bfacei,i;
     int l = 0, s = 0;
 
@@ -835,9 +831,6 @@ static void find_adjacent_edge(struct FACE_POINT_S ***const FacePoint,tGrid *gri
 
   for (b = 0; b < b_max; b++)
   {
-    int n1 = grid->box[b]->n1;
-    int n2 = grid->box[b]->n2;
-    int n3 = grid->box[b]->n3;
     int f, f_max;
 
     f_max = tot_num(FacePoint[b]);
@@ -966,9 +959,6 @@ static void find_adjacent_inner(struct FACE_POINT_S ***const FacePoint,tGrid *gr
 
   for (b = 0; b < b_max; b++)
   {
-    int n1 = grid->box[b]->n1;
-    int n2 = grid->box[b]->n2;
-    int n3 = grid->box[b]->n3;
     int f, f_max;
 
     f_max = tot_num(FacePoint[b]);
@@ -1347,7 +1337,6 @@ static void init_FacePoint(struct FACE_POINT_S ***FacePoint,tGrid *grid)
 static void fill_geometry(struct FACE_POINT_S ***FacePoint,tGrid *grid)
 {
   int b, f;
-  FLAG_T flg = NONE_F;
 
   forallboxes(grid,b)
   {
@@ -1433,17 +1422,7 @@ static void get_normal(double *N,tBox *box,int face,long int ijk)
 
 }
 
-static void normalizing_N(double *N)
-{
-  double n = sqrt(SQ(N[0])+SQ(N[1])+SQ(N[2]));
 
-  assert(!dequal(n,0));
-
-  N[0] /= n;
-  N[1] /= n;
-  N[2] /= n;
-
-}
 /*Finding the total number of a row in a pointer to a structure*/
 static int tot_num(void *p)
 {
@@ -1602,6 +1581,12 @@ static int IsEdge(int f, int *n, int i, int j, int k)
     else
       return 0;
   }
+  else
+  {
+    errorexit("Could't find the face!\n");  
+  }
+  
+  return -1;
 }
 
 /*Populating the adjacent structure for each kind*/
@@ -1623,7 +1608,6 @@ static void populate_adjacent(struct FACE_POINT_S ***const FacePoint,FLAG_T kind
   } *record = 0;
   struct POINT_S *P;
   double X[3] = {0};
-  int ijk_adj[3];//the index of the point in adjacent box
   int face_list[TOT_NUM_FACE];
   FLAG_T flg;
   int k;
@@ -2124,7 +2108,6 @@ static int ijk_ind(tBox *box, int *i)
 {
   int n1 = box->n1;
   int n2 = box->n2;
-  int n3 = box->n3;
 
   return Index(i[0],i[1],i[2]);
 }
@@ -2181,7 +2164,8 @@ static void visualize_bfaces(tGrid *grid)
 static void print_bface(tBface *bface1,tBface *bface2,const char *str,struct PAIR_S *pair, int np)
 {
 
-  FLAG_T flg1 , flg2 , flg3 = 0;
+  FLAG_T flg1 , flg2; 
+  int flg3 = 0;
   
   flg1 = check_bface(pair,np,bface1);
   flg2 = check_bface(pair,np,bface2);
@@ -2381,15 +2365,10 @@ static void test_bfaces(tGrid *grid)
           tBox *box2 = grid->box[bface->ob];
           double x1[3];
           double x2[3];
-
-          int *npoints = bface->fpts->npoints;
           int blist = bface->fpts->blist[0];
 
           get_x_coord(x1,box,bface->fpts->point[blist][i]);
-
-          npoints = bface2->fpts->npoints;
           blist = bface2->fpts->blist[0];
-
           get_x_coord(x2,box2,bface2->fpts->point[blist][i]);
 
           if (!dequal(norm(x1,x2),0))
