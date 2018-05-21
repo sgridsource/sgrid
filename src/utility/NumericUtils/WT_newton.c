@@ -134,7 +134,7 @@ int WT_newton(double *x, int n, int *check,
 {
   int i,j;
   int its=0;
-  double lintol,den,f,fold,stpmax,sum,temp,test,*p,*xold;
+  double lintol,f,fold,stpmax,sum,temp,test,*p,*xold; // ,den
   double *newton_linesrch_fvec;
 
   p=vector(1,n);
@@ -190,7 +190,7 @@ int WT_newton(double *x, int n, int *check,
     }
     if (*check) {
       test=0.0;
-      den=FMAX(f,0.5*n);
+      //den=FMAX(f,0.5*n);
       for (i=1;i<=n;i++)
       {
         /* we do not have g[i], so set temp=0 for now... */

@@ -17,7 +17,7 @@ int rtsafe_itsP(double *x0,
 {
   int j, bisect;
   double df,dx,dxold,f,fh,fl;
-  double temp,xh,xl,rts, s1,s2;
+  double temp,xh,xl,rts;
 
   /* check bracket */
   if(!isfinite(x1))  return -2*MAXIT-1; /* bracket must be finite */
