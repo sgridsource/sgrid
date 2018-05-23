@@ -66,10 +66,12 @@ void AddVar(char *name, char *tensorindices, char *description)
         break; /* this var is there already */
 
     if(i < nvdb) /* we found a var that exist already */
+    {
       if(sgrid_restarts==0)
         errorexits("AddVar: variable \"%s\" already exists\n", fullname);
       else
         continue; /* jump to next var if sgrid_restarts!=0 */
+    }
 
     /* print name of variable */
     printf("  variable  %s\n", fullname);

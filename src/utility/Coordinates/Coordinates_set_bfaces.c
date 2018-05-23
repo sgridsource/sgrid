@@ -103,7 +103,7 @@ double smallest_box_size(tGrid *grid)
 void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
 {
   tGrid *grid = box->grid;
-  int pr = Getv("Coordinates_verbose", "yes");
+  //int pr = Getv("Coordinates_verbose", "yes");
   int var_x = Ind("x");
   int var_y = Ind("y");
   int var_z = Ind("z");
@@ -116,7 +116,6 @@ void find_external_faces_of_box(tBox *box, int *extface, int inclOuterBound)
   int n3 = box->n3;
   int nd, d, dir;     /* we use dir = d+1 */
   int i,j,k, p, f;
-  char str[1000];
   intList *obl; /* list that contains other boxes*/
   int ob, oi;
   double oX,oY,oZ;
@@ -288,7 +287,7 @@ int set_bfaces_on_boxface_oldWT(tBox *box, int f)
 {
   tGrid *grid = box->grid;
   int nbfaces_old = box->nbfaces;
-  int pr = Getv("Coordinates_verbose", "yes");
+  //int pr = Getv("Coordinates_verbose", "yes");
   int var_x = Ind("x");
   int var_y = Ind("y");
   int var_z = Ind("z");
@@ -473,7 +472,7 @@ int set_bfaces_on_boxface(tBox *box, int f)
 {
   tGrid *grid = box->grid;
   int nbfaces_old = box->nbfaces;
-  int pr = Getv("Coordinates_verbose", "yes");
+  //int pr = Getv("Coordinates_verbose", "yes");
   int var_x = Ind("x");
   int var_y = Ind("y");
   int var_z = Ind("z");
@@ -543,7 +542,6 @@ int set_bfaces_on_boxface(tBox *box, int f)
     /* if we are on 2 or more faces, we are on an edge or a corner */
     if(XYZ_on_face(box, face, X,Y,Z) > 1)
     {
-      int ff;
       face[f]=0; /* remove current face */
       /* move i,j,k inward away from edge or corner */
       i_in += face[0];
@@ -871,12 +869,12 @@ int set_bits_in_all_bfaces__old(tGrid *grid)
       int dir = 1 + f/2;
       int ob  = bface->ob;
       int ofi = bface->ofi;
-      int oXi = bface->oXi;
-      int oYi = bface->oYi;
-      int oZi = bface->oZi;
+      //int oXi = bface->oXi;
+      //int oYi = bface->oYi;
+      //int oZi = bface->oZi;
       tBox *obox = NULL;
       tBface *obface = NULL;
-      int touch, sameX, sameY, sameZ;
+      int sameX, sameY, sameZ;
       int pi, ind;
       double *oX;
       double *oY;
@@ -1042,9 +1040,9 @@ int set_bits_in_all_bfaces(tGrid *grid)
   forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
-    int n1 = box->n1;
-    int n2 = box->n2;
-    int n3 = box->n3;
+    //int n1 = box->n1;
+    //int n2 = box->n2;
+    //int n3 = box->n3;
     double *pX = box->v[iX];
     double *pY = box->v[iY];
     double *pZ = box->v[iZ];
@@ -1062,7 +1060,7 @@ int set_bits_in_all_bfaces(tGrid *grid)
       tPointList *ofpts = NULL;
       intList ilist[1]; /* allocate ilist on stack */
       intList *plist = NULL;
-      int dir = 1 + f/2;
+      //int dir = 1 + f/2;
       int ob  = bface->ob;
       int ofi = bface->ofi;
       tBox *obox = NULL;
@@ -1308,15 +1306,15 @@ int remove_bfacepoints_that_cause_inconsistent_touch_bits(tGrid *grid)
     forallbfaces(box, fi)
     {
       tBface *bface = box->bface[fi];
-      int f = bface->f;
+      //int f = bface->f;
+      //int dir = 1 + f/2;
       tPointList *fpts = bface->fpts;
-      int dir = 1 + f/2;
       int ob  = bface->ob;
       int ofi = bface->ofi;
       tBox *obox = NULL;
       tBface *obface = NULL;
       int pi, ind, oind;
-      double X,Y,Z, oX,oY,oZ, x,y,z, dist;
+      double oX,oY,oZ, x,y,z, dist;
       int of, od, opl;
 
       if(ob<0)  continue; /* do nothing if there is no other box at this bface */
@@ -1432,12 +1430,12 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
     forallbfaces(box,fi)
     {
       tBface *bface = box->bface[fi];
-      int f = bface->f;
+      //int f = bface->f;
       int ob  = bface->ob;
       int ofi = bface->ofi;
       tBox *obox = NULL;
       tBface *obface = NULL;
-      int of;
+      //int of;
 
       if(ob<0)  continue; /* do nothing if there is no other box at this bface */
       if(ofi<0) continue; /* do nothing if there not one face index in other box */
@@ -1445,7 +1443,7 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
       /* other box and corresponding bface */
       obox = grid->box[ob];
       obface = obox->bface[ofi];
-      of = obface->f;
+      //of = obface->f;
 
       /* check if the 2 are touching */
       if(bface->touch)
@@ -1737,8 +1735,8 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
         {
           int n1 = box->n1;
           int n2 = box->n2;
-          int n3 = box->n3;
-          int i,j,k, i0,j0,k0;
+          //int n3 = box->n3;
+          int i0,j0,k0;
           i0 = j0 = k0 = -1000;
 
           enablevar_inbox(box, oXi);

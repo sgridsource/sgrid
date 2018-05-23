@@ -94,7 +94,7 @@ int bladd_neighbors(tBox *box, intList *bl)
 /* make list bl of all neighbors of box, return list len */
 int bladd_neighbors_of_neighbors(tBox *box, intList *bl)
 {
-  int i, i2;
+  int i;
 
   intList *bln  = alloc_intList();
   intList *bln2 = alloc_intList();
