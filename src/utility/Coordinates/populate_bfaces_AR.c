@@ -7,6 +7,7 @@
 
 #define EPS 1E-5
 #define EPS2 1E-3
+#define RELATIVE_ERR 1E-11
 
 
 /*populating bface structure*/
@@ -65,7 +66,7 @@ int populate_bfaces(tGrid *grid)
   Sets("Coordinates_XYZ_of_xyz_Guess", guess);
   free(guess);
   free(maxits);
-
+  
   return 0;
 }
 
@@ -318,10 +319,12 @@ static void order_ftps_pair(tGrid *grid)
     {
       int ijk1 = pair[i].bface1->fpts->point[bln1][j1];
       double x1[3];
+      double x1_nrm;
       int j2;
 
       get_x_coord(x1,grid->box[bln1],ijk1);
-
+      x1_nrm = norm(x1,0);
+      
       for (j2 = 0; j2 < m2; j2++)
       {
         double x2[3];
@@ -329,7 +332,7 @@ static void order_ftps_pair(tGrid *grid)
 
         get_x_coord(x2,grid->box[bln2],ijk2);
 
-        if (dequal(norm(x1,x2),0))
+        if (dless(norm(x1,x2),x1_nrm*RELATIVE_ERR))
         {
           if (j1 != j2)
           {
@@ -1227,6 +1230,7 @@ static int IsCollocated(double *x1, int box2, int *ijk_adj,double *X,tGrid *grid
   int n2 = box->n2;
   int n3 = box->n3;
   double x2[3];
+  double x1_nrm = norm(x1,0);
   int i,j,k;
 
   for (i = 0; i < n1; i++)
@@ -1236,7 +1240,7 @@ static int IsCollocated(double *x1, int box2, int *ijk_adj,double *X,tGrid *grid
       {
         get_x_coord(x2,box,Index(i,j,k));
 
-        if (dequal(norm(x1,x2),0))
+        if (dless(norm(x1,x2),x1_nrm*RELATIVE_ERR))
         {
           ijk_adj[0] = i;
           ijk_adj[1] = j;
@@ -1254,6 +1258,11 @@ static int IsCollocated(double *x1, int box2, int *ijk_adj,double *X,tGrid *grid
 /*Calulcating the Euclidean norm*/
 static double norm(double *x1,double *x2)
 {
+  double x3[3] = {0};
+  
+  if (x2 == 0)
+    x2 = x3;
+    
   return sqrt(SQ(x1[0]-x2[0])+SQ(x1[1]-x2[1])+SQ(x1[2]-x2[2]));
 }
 
@@ -2365,13 +2374,15 @@ static void test_bfaces(tGrid *grid)
           tBox *box2 = grid->box[bface->ob];
           double x1[3];
           double x2[3];
+          double x1_nrm;
           int blist = bface->fpts->blist[0];
 
           get_x_coord(x1,box,bface->fpts->point[blist][i]);
+          x1_nrm = norm(x1,0);
           blist = bface2->fpts->blist[0];
           get_x_coord(x2,box2,bface2->fpts->point[blist][i]);
 
-          if (!dequal(norm(x1,x2),0))
+          if (!dless(norm(x1,x2),x1_nrm*RELATIVE_ERR))
           {
             errorexit("The indices of points "
               "for paired bfaces are not match!\n");
