@@ -252,9 +252,13 @@ static unsigned int check_sameXYZ(FLAG_T kind,tBface *bface)
   for (i = 1; i < m ; i++)
   {
     double X[3];
+    double diff;
     get_X_coord(X,box,bface->fpts->point[b][i]);
     
-    if (!dequal(X[slice],X0[slice]))
+    diff = X[slice]-X0[slice];
+    diff = diff > 0 ? diff: -diff;
+    
+    if (!dlesseq(diff,X0[slice]*RELATIVE_ERR))
       return 0;
   }
 
@@ -332,7 +336,7 @@ static void order_ftps_pair(tGrid *grid)
 
         get_x_coord(x2,grid->box[bln2],ijk2);
 
-        if (dless(norm(x1,x2),x1_nrm*RELATIVE_ERR))
+        if (dlesseq(norm(x1,x2),x1_nrm*RELATIVE_ERR))
         {
           if (j1 != j2)
           {
@@ -1240,7 +1244,7 @@ static int IsCollocated(double *x1, int box2, int *ijk_adj,double *X,tGrid *grid
       {
         get_x_coord(x2,box,Index(i,j,k));
 
-        if (dless(norm(x1,x2),x1_nrm*RELATIVE_ERR))
+        if (dlesseq(norm(x1,x2),x1_nrm*RELATIVE_ERR))
         {
           ijk_adj[0] = i;
           ijk_adj[1] = j;
@@ -2382,7 +2386,7 @@ static void test_bfaces(tGrid *grid)
           blist = bface2->fpts->blist[0];
           get_x_coord(x2,box2,bface2->fpts->point[blist][i]);
 
-          if (!dless(norm(x1,x2),x1_nrm*RELATIVE_ERR))
+          if (!dlesseq(norm(x1,x2),x1_nrm*RELATIVE_ERR))
           {
             errorexit("The indices of points "
               "for paired bfaces are not match!\n");
