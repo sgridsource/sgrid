@@ -158,7 +158,7 @@ void checkpoint_write_local(tGrid *g, FILE *fp)
       vlfree(vl);
     }
     /* info */
-    if (1) printf("wrote b %d, %d variables, total of %d points\n", b, nv, n);
+    if (pr) printf("wrote b %d, %d variables, total of %d points\n", b, nv, n);
     nall += n;
   }
   fprintf(fp, "$END_variables\n\n");
