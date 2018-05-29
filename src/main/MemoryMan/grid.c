@@ -491,6 +491,24 @@ int copy_grid(tGrid *g_old, tGrid *g_new, int pr)
   return 1;
 }
 
+/* copy var with index vi from g_old into g_new */
+int copy_gridvar(int vi, tGrid *g_old, tGrid *g_new)
+{
+  int b, ijk;
+
+  /* copy var with index vi in all boxes */
+  forallboxes(g_new, b)
+  {
+    tBox *box_new = g_new->box[b];
+    tBox *box_old = g_old->box[b];
+
+    if(box_new->v[vi] && box_old->v[vi])
+      for(ijk=0; ijk < min2(box_new->nnodes, box_old->nnodes); ijk++)
+        box_new->v[vi][ijk] = box_old->v[vi][ijk];
+  }
+  return 1;
+}
+
 
 /* let var pointers in g_new point to the same memory as in g_old */
 int point_grid_tosamevars(tGrid *g_old, tGrid *g_new, int pr)
