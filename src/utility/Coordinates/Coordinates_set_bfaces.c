@@ -842,8 +842,9 @@ printf("S ox,oy,oz=%g,%g,%g  oX,oY,oZ=%g,%g,%g\n",ox,oy,oz , oX,oY,oZ);
 }
 
 
-/* set bit fields in bfaces for each box on the grid */
-int set_bits_in_all_bfaces__old(tGrid *grid)
+/* old (version VER0) of setting bit fields in bfaces for each box on the grid,
+   only used in Projects/BNSdata/BNSgrid.c */
+int set_bits_in_all_bfaces_VER0(tGrid *grid)
 {
   int iX = Ind("X");
   int iY = iX+1;
