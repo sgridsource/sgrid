@@ -129,6 +129,11 @@ int templates_bicg_wrapper(
 	    int itmax, double tol, double *normres,
 	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
+int templates_sor_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *));
 void templates_Preconditioner_for_templates_solver(tVarList *vlx,
                                                    tVarList *vlr,
                                                    tVarList *vlc1,

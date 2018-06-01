@@ -805,6 +805,103 @@ int templates_bicg_wrapper(
   return ITER;
 }
 
+/* call SOR from templates */
+int templates_sor_wrapper(
+            tVarList *x, tVarList *b, tVarList *r, tVarList *c1,tVarList *c2,
+	    int itmax, double tol, double *normres,
+	    void (*lop)(tVarList *, tVarList *, tVarList *, tVarList *), 
+	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
+{
+  tGrid *grid = b->grid;
+  int pr = Getv("GridIterators_verbose", "yes");
+  int i,j;
+  long int N; /* dim of matrix */
+  double *B;
+  double *X;
+  double OMEGA = Getd("GridIterators_SOR_omega");
+  double *WORK;		long int LDW;
+  long int ITER;
+  double RESID;
+  long int INFO=-1;
+  double norm_b = GridL2Norm(b);
+
+  /* set long int vars */
+  N = 0 ;
+  forallboxes(grid,i)  N += grid->box[i]->nnodes;
+  N = (b->n) * N; 
+  LDW = N; 
+  ITER = itmax;
+  RESID = tol;
+  /* do we scale RESID? */
+  if(Getv("GridIterators_templates_RESID_mode", "tol/norm(b)") && norm_b>0.0)
+    RESID = RESID / norm_b;
+
+  if(pr) prTimeIn_s("Time BEFORE sor_: ");
+  if(pr) printf("  templates_sor_wrapper: itmax=%d tol=%.3e N=%ld LDW=%ld\n"
+                "  ITER=%ld RESID=%.3e\n",
+                itmax, tol, N, LDW, ITER, RESID);
+  
+  /* temporary storage */
+  B = (double *) calloc(N, sizeof(double));
+  X = (double *) calloc(N, sizeof(double));
+  WORK = (double *) calloc(N*(N+3), sizeof(double));
+  if(B==NULL || X==NULL || WORK==NULL)
+    errorexit("templates_sor_wrapper: out of memory for X, B, WORK\n");
+
+  /* in sor_:  work_dim1 = *ldw;   omega = work[work_dim1 + 1] */
+  WORK[LDW+1] = OMEGA;
+
+  /* increase global var index to store globals in new place in array */
+  iglobal_fortemplates++;
+  if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
+  if(iglobal_fortemplates>=MAX_NGLOBALS) errorexit("increase MAX_NGLOBALS");
+  fflush(stdout);
+
+  /* setup global vars and functions needed in matvec and psolveLEFT */
+  lop_fortemplates[iglobal_fortemplates]	= lop;
+  precon_fortemplates[iglobal_fortemplates]	= precon;
+  r_fortemplates[iglobal_fortemplates]		= r;
+  x_fortemplates[iglobal_fortemplates]		= x;
+  c1_fortemplates[iglobal_fortemplates]		= c1;
+  c2_fortemplates[iglobal_fortemplates]		= c2;
+  dim_fortemplates[iglobal_fortemplates]	= N;
+
+  /* setup local B and X */
+  COPY_VL_INTO_ARRAY(b, B);
+  COPY_VL_INTO_ARRAY(x, X);
+
+#ifdef TEMPLATES
+  /* call sor from templates */
+  sor_(&N, B, X, WORK,&LDW, &ITER,&RESID, matvec, templates_backsolve, &INFO);
+#else
+  COMPILETEMPLATES("sor");
+#endif
+  /* decrease global var index since globals are no longer needed */
+  iglobal_fortemplates--;
+  if(pr) printf("  iglobal_fortemplates=%d\n", iglobal_fortemplates);
+
+  /* read out x and normres */
+  COPY_ARRAY_INTO_VL(X, x);
+  *normres = RESID;
+
+  /* free temporary storage */
+  free(B);
+  free(X);
+  free(WORK);
+
+  if(pr) printf("  templates_sor_wrapper: ITER=%ld RESID=%.3e INFO=%ld\n",
+                ITER, RESID, INFO);
+  fflush(stdout);
+
+  if(pr) prTimeIn_s("Time AFTER sor_: ");
+
+  /* iteration failed */
+  if(INFO<0) return INFO;
+  if(INFO>0) return -ITER;
+  
+  /* success! */
+  return ITER;
+}
 
 
 /*************************************************************************/
