@@ -836,11 +836,6 @@ int templates_sor_wrapper(
   if(Getv("GridIterators_templates_RESID_mode", "tol/norm(b)") && norm_b>0.0)
     RESID = RESID / norm_b;
 
-  if(pr) prTimeIn_s("Time BEFORE sor_: ");
-  if(pr) printf("  templates_sor_wrapper: itmax=%d tol=%.3e N=%ld LDW=%ld\n"
-                "  ITER=%ld RESID=%.3e\n",
-                itmax, tol, N, LDW, ITER, RESID);
-  
   /* temporary storage */
   B = (double *) calloc(N, sizeof(double));
   X = (double *) calloc(N, sizeof(double));
@@ -848,8 +843,13 @@ int templates_sor_wrapper(
   if(B==NULL || X==NULL || WORK==NULL)
     errorexit("templates_sor_wrapper: out of memory for X, B, WORK\n");
 
-  /* in sor_:  work_dim1 = *ldw;   omega = work[work_dim1 + 1] */
-  WORK[LDW+1] = OMEGA;
+  /* in sor_:  work_dim1=*ldw; work-=work_offset;  omega=work[work_offset] */
+  WORK[0] = OMEGA;
+
+  if(pr) prTimeIn_s("Time BEFORE sor_: ");
+  if(pr) printf("  templates_sor_wrapper: itmax=%d tol=%.3e N=%ld LDW=%ld\n"
+                "  ITER=%ld RESID=%.3e OMEGA=%g\n",
+                itmax, tol, N, LDW, ITER, RESID, OMEGA);
 
   /* increase global var index to store globals in new place in array */
   iglobal_fortemplates++;
