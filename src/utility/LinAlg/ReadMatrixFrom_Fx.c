@@ -138,7 +138,7 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
               for(j = 0; j < vlx_p->n; j++)
               {
                 double *Fx = box->v[vlFx_p->index[j]]; 
-                if(Fx[i]!=0)
+                if(Fx[i]!=0.)
                   AddToSparseVector_critical(Aline[line], col, Fx[i]);
                 line++;
               }
@@ -283,7 +283,7 @@ printf("\nFIXME: SetMatrixLines_forSortedVars_slowly is not OpenMP parallel!!!")
             double *Fx = box->v[vlFx->index[j]]; 
             forallpoints(box,i)
             {
-              if(Fx[i]!=0)  AddToSparseVector(Aline[line], col, Fx[i]);
+              if(Fx[i]!=0.)  AddToSparseVector(Aline[line], col, Fx[i]);
               line++;
             }
           }
@@ -438,7 +438,7 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
               for(j = 0; j < vlx_p->n; j++)
               {
                 double *Fx = box->v[vlFx_p->index[j]]; 
-                if(Fx[i]!=0)  AddToSparseVector(Acol[col], line, Fx[i]);
+                if(Fx[i]!=0.)  AddToSparseVector(Acol[col], line, Fx[i]);
                 line++;
               }
           } /* end: forallboxes(grid_p,bb) */
@@ -576,7 +576,7 @@ printf("\nFIXME: SetMatrixColumns_forSortedVars_slowly is not OpenMP parallel!!!
 
             forallpoints(box,i)
             {
-              if(Fx[i]!=0)  AddToSparseVector(Acol[col], line, Fx[i]);
+              if(Fx[i]!=0.)  AddToSparseVector(Acol[col], line, Fx[i]);
               line++;
             }
           }
@@ -680,7 +680,7 @@ void SetMatrixColumns_ForOneVarInOneBox_slowly(tSparseVector **Acol,
       forallpoints(box_p, line)
       {
         double *Fx = box_p->v[vlFx_p->index[vlind]]; 
-        if(Fx[line]!=0)  AddToSparseVector(Acol[col], line, Fx[line]);
+        if(Fx[line]!=0.)  AddToSparseVector(Acol[col], line, Fx[line]);
       }
 
       /* remove the 1 in x at point i */
@@ -819,7 +819,7 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
         double *Fx = box_p->v[vlFx_p->index[vlind]];
         int iijjkk = Index(ii,jj,kk);
         int line = Ind_n1n2( (ii-i1),(jj-j1),(kk-k1), (i2-i1),(j2-j1) );
-        if(Fx[iijjkk]!=0)  AddToSparseVector(Acol[col], line, Fx[iijjkk]);
+        if(Fx[iijjkk]!=0.)  AddToSparseVector(Acol[col], line, Fx[iijjkk]);
       }
 
       /* remove the 1 in x at point ijk */
