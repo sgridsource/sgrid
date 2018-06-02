@@ -294,7 +294,6 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
   int *offset;
 #ifndef LEVEL6_Pragmas
   tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
-  tBox *box_p = grid_p->box[b];
   tVarList *vlFx_p = vlalloc(grid_p);
   tVarList *vlx_p  = vlalloc(grid_p);
   tVarList *vlc1_p = vlalloc(grid_p);
@@ -329,9 +328,9 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
     SGRID_LEVEL6_Pragma(omp parallel)
     {
       int i;
+      tBox *box_p;
 #ifdef LEVEL6_Pragmas
       tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
-      tBox *box_p = grid_p->box[b];
       tVarList *vlFx_p = vlalloc(grid_p);
       tVarList *vlx_p  = vlalloc(grid_p);
       tVarList *vlc1_p = vlalloc(grid_p);
@@ -344,6 +343,8 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
       vlpushvl(vlc1_p, vlc1);
       vlpushvl(vlc2_p, vlc2);
 #endif
+      /* set box_p */
+      box_p = grid_p->box[b];
 
       SGRID_LEVEL6_Pragma(omp for)
       forallpoints(box_p,i)
