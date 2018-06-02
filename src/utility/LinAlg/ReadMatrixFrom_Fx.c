@@ -50,73 +50,133 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr)
 {
   tGrid *grid = vlx->grid;
-  int b, col, line;
+  int b;
+  int *offset;
+#ifndef LEVEL6_Pragmas
+  tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
+  tVarList *vlFx_p = vlalloc(grid_p);
+  tVarList *vlx_p  = vlalloc(grid_p);
+  tVarList *vlc1_p = vlalloc(grid_p);
+  tVarList *vlc2_p = vlalloc(grid_p);
+
+  /* make local copy of grid and var lists */      
+  copy_grid(grid, grid_p, 0);
+  vlpushvl(vlFx_p, vlFx);
+  vlpushvl(vlx_p, vlx);
+  vlpushvl(vlc1_p, vlc1);
+  vlpushvl(vlc2_p, vlc2);
+#endif
+
+  /* set offsets */
+  offset = (int *) calloc( grid->nboxes, sizeof(int) );
+  offset[0] = 0;
+  for(b=1; b < grid->nboxes; b++)
+    offset[b] = offset[b-1] + (grid->box[b-1]->nnodes) * (vlx->n); 
 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
 
   /* go over all boxes, points and vars */
-  col = 0;
   forallboxes(grid,b)
   {
-    tBox *box = grid->box[b];
-    int i,j, bb;
-
-/* FIXME: make parallel
-   see SetMatrixColumns_slowly on how to do it. */
-printf("\nFIXME: SetMatrixLines_slowly is not OpenMP parallel!!!");
-
     if(pr)
     {
       printf("\n"); prdivider(0);
       printf("SetMatrixLines_slowly: working on box%d\ncol=",b);
     }
-    forallpoints(box,i)
-      for(j = 0; j < vlx->n; j++)
+
+    SGRID_LEVEL6_Pragma(omp parallel)
+    {
+      int i;
+      tBox *box_p;
+#ifdef LEVEL6_Pragmas
+      tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
+      tVarList *vlFx_p = vlalloc(grid_p);
+      tVarList *vlx_p  = vlalloc(grid_p);
+      tVarList *vlc1_p = vlalloc(grid_p);
+      tVarList *vlc2_p = vlalloc(grid_p);
+
+      /* make local copy of grid and var lists */      
+      copy_grid(grid, grid_p, 0);
+      vlpushvl(vlFx_p, vlFx);
+      vlpushvl(vlx_p, vlx);
+      vlpushvl(vlc1_p, vlc1);
+      vlpushvl(vlc2_p, vlc2);
+#endif
+      /* set box_p */
+      box_p = grid_p->box[b];
+
+      SGRID_LEVEL6_Pragma(omp for)
+      forallpoints(box_p,i)
       {
-        double *x = box->v[vlx->index[j]];
+        int j;
 
-        // col  = offset[b] + i*vlx->n + j;  
-        // where: offset[b] = grid->box[b-1]->nnodes
-        if(pr) { printf("%d ",col); fflush(stdout);}
-
-        /* put a single 1 into x at point i, i.e. in line=col */
-        x[i]=1;
-        
-        /* evaluate Fx if x has a single 1 in line=col, in order to
-           compute matrix column col */
-        Fx(vlFx, vlx, vlc1, vlc2);
-
-        /* check where in column col there are entries */
-        line = 0;
-        forallboxes(grid,bb)
+        for(j = 0; j < vlx_p->n; j++)
         {
-          tBox *box = grid->box[bb];
-          int i,j;
+          double *x = box_p->v[vlx_p->index[j]];
+          int col   = offset[b] + i*(vlx_p->n) + j;
+          int line;
+          int bb;
 
-          forallpoints(box,i)
-            for(j = 0; j < vlx->n; j++)
-            {
-              double *Fx = box->v[vlFx->index[j]]; 
-              if(Fx[i]!=0)  AddToSparseVector(Aline[line], col, Fx[i]);
-              line++;
-            }
-        } /* end: forallboxes(grid,bb) */
+          if(pr) { printf("%d ",col); fflush(stdout);}
 
-        /* remove the 1 in x at point i */
-        x[i]=0;
+          /* put a single 1 into x at point i, i.e. in line=col */
+          x[i]=1;
+          
+          /* evaluate Fx if x has a single 1 in line=col, in order to
+             compute matrix column col */
+          Fx(vlFx_p, vlx_p, vlc1_p, vlc2_p);
 
-        /* increase column counter */
-        col++;
+          /* check where in column col there are entries */
+          line = 0;
+          forallboxes(grid_p,bb)
+          {
+            tBox *box = grid_p->box[bb];
+            int i,j;
+
+            forallpoints(box,i)
+              for(j = 0; j < vlx_p->n; j++)
+              {
+                double *Fx = box->v[vlFx_p->index[j]]; 
+                if(Fx[i]!=0)
+                  AddToSparseVector_critical(Aline[line], col, Fx[i]);
+                line++;
+              }
+          } /* end: forallboxes(grid_p,bb) */
+
+          /* remove the 1 in x at point i */
+          x[i]=0;
+        } /* end: for(j = 0; j < vlx_p->n; j++) */
       }
+#ifdef LEVEL6_Pragmas
+      /* free local copies */
+      vlfree(vlFx_p);
+      vlfree(vlx_p);
+      vlfree(vlc1_p);
+      vlfree(vlc2_p);
+      free_grid(grid_p);
+#endif
+    }
   } /* end: forallboxes(grid,b) */
   if(pr)
   {
+    int nboxes = grid->nboxes;
+    int lb_nnodes = grid->box[nboxes-1]->nnodes;
+    int ncol = offset[nboxes-1] + (lb_nnodes-1)*vlx->n + vlx->n;
     printf("\nSetMatrixLines_slowly: "
            "the %d*%d matrix Aline=%p is now set!\n",
-           col, col, Aline);
+           ncol, ncol, Aline);
     fflush(stdout);
   }
+#ifndef LEVEL6_Pragmas
+  /* free local copies */
+  vlfree(vlFx_p);
+  vlfree(vlx_p);
+  vlfree(vlc1_p);
+  vlfree(vlc2_p);
+  free_grid(grid_p);
+#endif
+  free(offset);
 }
 /* NOTE: 
 In order to speed up SetMatrixLines_slowly we should make an Fx

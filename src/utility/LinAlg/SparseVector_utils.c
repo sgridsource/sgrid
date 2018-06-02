@@ -41,6 +41,12 @@ void AddToSparseVector(tSparseVector *SV, int newpos, double newval)
   
  SV->entries++;
 }
+/* same as AddToSparseVector, but let only one OpenMP thread in */
+void AddToSparseVector_critical(tSparseVector *SV, int newpos, double newval)
+{
+  #pragma omp critical (AddToSparseVector_c)
+  { AddToSparseVector(SV, newpos, newval); }
+}
 
 /* free a SparseVector */
 void FreeSparseVector(tSparseVector *SV)

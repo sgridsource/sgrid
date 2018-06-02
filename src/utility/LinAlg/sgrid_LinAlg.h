@@ -56,6 +56,7 @@ typedef struct T_VarBoxSubboxIndices {
 /* SparseVector_utils.c */
 tSparseVector *AllocateSparseVector(void);
 void AddToSparseVector(tSparseVector *SV, int newpos, double newval);
+void AddToSparseVector_critical(tSparseVector *SV, int newpos, double newval);
 void FreeSparseVector(tSparseVector *SV);
 void prSparseVector(tSparseVector *SV);
 tSparseVector **AllocateSparseVectorArray(int n);
