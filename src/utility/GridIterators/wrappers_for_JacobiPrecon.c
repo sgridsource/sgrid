@@ -336,7 +336,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   tGrid *grid_bak;
   int i, blocki, nblocks;
   int pr = Getv("GridIterators_verbose", "yes");
-  int dropbelow = Getd("GridIterators_setABStozero_below");
+  double dropbelow = Getd("GridIterators_setABStozero_below");
   int INFO;
   int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
   int nsb1 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb1");
