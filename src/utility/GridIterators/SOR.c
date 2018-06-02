@@ -138,8 +138,16 @@ int SOR_Iterator(tVarList *vlx, tVarList *vlb,
 
   /* set Aline */
   SetMatrixLines(Aline, lop, r, vlx, c1, c2, pr);
-  if(pr&&0) 
-    for(line=0; line<nlines; line++) prSparseVector(Aline[line]);
+  if(pr&&0) prSparseVectorArray(Aline,nlines);
+  if(Getv("GridIterators_verbose", "very"))
+  {
+    static unsigned long int id=0;
+    char name[1000];
+    snprintf(name, 999, "%s/lop_matrix%lu_%.0fs.mtx",
+             Gets("outdir"), id, getTimeIn_s());
+    write_SparseVectorArray_inMatrixMarketFormat(name, Aline,nlines, 0);
+    id++;
+  }
 
   /* allocate x,b */
   x = calloc(nlines, sizeof(double));
