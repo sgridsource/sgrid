@@ -51,6 +51,7 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
 {
   tGrid *grid = vlx->grid;
   int b;
+  double drop = Getd("GridIterators_setABStozero_below");
   int *offset;
 #ifndef LEVEL6_Pragmas
   tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
@@ -138,7 +139,7 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
               for(j = 0; j < vlx_p->n; j++)
               {
                 double *Fx = box->v[vlFx_p->index[j]]; 
-                if(Fx[i]!=0.)
+                if(fabs(Fx[i])>drop)
                   AddToSparseVector_critical(Aline[line], col, Fx[i]);
                 line++;
               }
@@ -233,6 +234,7 @@ void SetMatrixLines_forSortedVars_slowly(tSparseVector **Aline,
 {
   tGrid *grid = vlx->grid;
   int b, col, line;
+  double drop = Getd("GridIterators_setABStozero_below");
 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
@@ -283,7 +285,7 @@ printf("\nFIXME: SetMatrixLines_forSortedVars_slowly is not OpenMP parallel!!!")
             double *Fx = box->v[vlFx->index[j]]; 
             forallpoints(box,i)
             {
-              if(Fx[i]!=0.)  AddToSparseVector(Aline[line], col, Fx[i]);
+              if(fabs(Fx[i])>drop) AddToSparseVector(Aline[line], col, Fx[i]);
               line++;
             }
           }
@@ -351,6 +353,7 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
 {
   tGrid *grid = vlx->grid;
   int b;
+  double drop = Getd("GridIterators_setABStozero_below");
   int *offset;
 #ifndef LEVEL6_Pragmas
   tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
@@ -438,7 +441,7 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
               for(j = 0; j < vlx_p->n; j++)
               {
                 double *Fx = box->v[vlFx_p->index[j]]; 
-                if(Fx[i]!=0.)  AddToSparseVector(Acol[col], line, Fx[i]);
+                if(fabs(Fx[i])>drop) AddToSparseVector(Acol[col], line, Fx[i]);
                 line++;
               }
           } /* end: forallboxes(grid_p,bb) */
@@ -526,6 +529,7 @@ void SetMatrixColumns_forSortedVars_slowly(tSparseVector **Acol,
 {
   tGrid *grid = vlx->grid;
   int b, col, line;
+  double drop = Getd("GridIterators_setABStozero_below");
 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
@@ -576,7 +580,7 @@ printf("\nFIXME: SetMatrixColumns_forSortedVars_slowly is not OpenMP parallel!!!
 
             forallpoints(box,i)
             {
-              if(Fx[i]!=0.)  AddToSparseVector(Acol[col], line, Fx[i]);
+              if(fabs(Fx[i])>drop) AddToSparseVector(Acol[col], line, Fx[i]);
               line++;
             }
           }
@@ -633,7 +637,8 @@ void SetMatrixColumns_ForOneVarInOneBox_slowly(tSparseVector **Acol,
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr)
 {
   tGrid *grid = vlx->grid;
-  
+  double drop = Getd("GridIterators_setABStozero_below");
+ 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
 
@@ -680,7 +685,7 @@ void SetMatrixColumns_ForOneVarInOneBox_slowly(tSparseVector **Acol,
       forallpoints(box_p, line)
       {
         double *Fx = box_p->v[vlFx_p->index[vlind]]; 
-        if(Fx[line]!=0.)  AddToSparseVector(Acol[col], line, Fx[line]);
+        if(fabs(Fx[line])>drop) AddToSparseVector(Acol[col], line, Fx[line]);
       }
 
       /* remove the 1 in x at point i */
@@ -738,6 +743,7 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
 {
   tGrid *grid = vlx->grid;
   tBox *box = grid->box[b];
+  double drop = Getd("GridIterators_setABStozero_below");
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
@@ -819,7 +825,7 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
         double *Fx = box_p->v[vlFx_p->index[vlind]];
         int iijjkk = Index(ii,jj,kk);
         int line = Ind_n1n2( (ii-i1),(jj-j1),(kk-k1), (i2-i1),(j2-j1) );
-        if(Fx[iijjkk]!=0.)  AddToSparseVector(Acol[col], line, Fx[iijjkk]);
+        if(fabs(Fx[iijjkk])>drop) AddToSparseVector(Acol[col], line, Fx[iijjkk]);
       }
 
       /* remove the 1 in x at point ijk */
