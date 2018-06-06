@@ -534,7 +534,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       fflush(stdout);
       umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
                                          Blocks_JacobiPrecon.blockdims[i], 0);
-      if(Blocks_JacobiPrecon.umfpackA[blocki].NumericInfo)
+      if(Blocks_JacobiPrecon.umfpackA[i].NumericInfo)
         printf("^-Problem with LU decomposition in block%d\n", i);
     }
   }
