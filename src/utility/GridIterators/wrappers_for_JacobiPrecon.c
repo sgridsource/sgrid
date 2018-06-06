@@ -525,8 +525,8 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       if(pr) printf(" SuiteSparseQR_C_factorize_tSPQR_A in block%d...\n", i);
       fflush(stdout);
       SuiteSparseQR_C_factorize_tSPQR_A(&(Blocks_JacobiPrecon.SPQR[i]), 0);
-      if(Blocks_JacobiPrecon.umfpackA[blocki].NumericInfo)
-        printf("Problem with QR decomposition in block%d\n", i);
+      if(Blocks_JacobiPrecon.SPQR[i].cc_status)
+        printf("^-Problem with QR decomposition in block%d\n", i);
     }
     else
     {
@@ -534,8 +534,8 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       fflush(stdout);
       umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
                                          Blocks_JacobiPrecon.blockdims[i], 0);
-      if(Blocks_JacobiPrecon.SPQR[i].cc_status)
-        printf("Problem with LU decomposition in block%d\n", i);
+      if(Blocks_JacobiPrecon.umfpackA[blocki].NumericInfo)
+        printf("^-Problem with LU decomposition in block%d\n", i);
     }
   }
   if(pr) prTimeIn_s("Time AFTER LU or QR factorization: ");
