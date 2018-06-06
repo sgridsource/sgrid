@@ -22,6 +22,7 @@ typedef struct TBlocks_JacobiPrecon
                   1 means UMFPACK, 2 means SPQR */
   int *blockdims;           /* array of dims of blocks 0 to nblocks-1 */
   tSparseVector ***Mblock;  /* array of matrices for blocks 0 to nblocks-1 */
+  double **DiagM;           /* array of diag.vals for blocks 0 to nblocks-1 */
   tUMFPACK_A *umfpackA;  /* struct containing all needed for umfpack */
   tSPQR_A *SPQR;         /* struct containing all needed for SPQR*/
 } tBlocks_JacobiPrecon;
@@ -41,7 +42,7 @@ void Jacobi_Preconditioner_from_DiagM(tVarList *vlx, tVarList *vlb,
 {
   tGrid *grid = vlx->grid;
   int bi, line;
-  int pr = Getv("GridIterators_verbose", "yes");
+  /* int pr = Getv("GridIterators_verbose", "yes"); */
 
   /* set vlx */
   line = 0;
@@ -354,14 +355,12 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   /* allocate memory for blocks in Blocks_JacobiPrecon struct */
   nblocks = (b->n)*(grid->nboxes)*nsb1*nsb2*nsb3;
   Blocks_JacobiPrecon.nblocks = nblocks;
-  Blocks_JacobiPrecon.type = type;
-  Blocks_JacobiPrecon.blockdims = (int *) calloc(nblocks, sizeof(int));
-  Blocks_JacobiPrecon.Mblock 
-    = (tSparseVector ***) calloc(nblocks, sizeof(tSparseVector **));
-  Blocks_JacobiPrecon.umfpackA
-    = (tUMFPACK_A *) calloc(nblocks, sizeof(tUMFPACK_A));
-  Blocks_JacobiPrecon.SPQR
-    = (tSPQR_A *) calloc(nblocks, sizeof(tSPQR_A));
+  Blocks_JacobiPrecon.type    = type;
+  Blocks_JacobiPrecon.blockdims = calloc(nblocks, sizeof(int));
+  Blocks_JacobiPrecon.Mblock    = calloc(nblocks, sizeof(tSparseVector **));
+  Blocks_JacobiPrecon.DiagM     = calloc(nblocks, sizeof(double *));
+  Blocks_JacobiPrecon.umfpackA  = calloc(nblocks, sizeof(tUMFPACK_A));
+  Blocks_JacobiPrecon.SPQR      = calloc(nblocks, sizeof(tSPQR_A));
 
   /* convert grid to fin. diff.? */
   if(use_fd)
@@ -418,6 +417,17 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
                Gets("outdir"), blocki, getTimeIn_s());
       write_SparseVectorArray_inMatrixMarketFormat(name, Acol,ncols, 1);
     }
+
+    /* alloc memory for diagonal elements of matrix */
+    Blocks_JacobiPrecon.DiagM[blocki] = calloc(ncols, sizeof(double));
+    /* now set DiagM to diagonal of matrix Acol */
+    for(col=0; col<ncols; col++)
+      for(j=0; j<Acol[col]->entries; j++)
+        if(Acol[col]->pos[j] == col)
+        {
+          Blocks_JacobiPrecon.DiagM[blocki][col] = Acol[col]->val[j];
+          break;
+        }
 
     /* count number of entries in sparse matrix */
     nz = 0;
@@ -520,6 +530,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   {
     FreeSparseVectorArray(Blocks_JacobiPrecon.Mblock[blocki],
                           Blocks_JacobiPrecon.blockdims[blocki]);
+    free(Blocks_JacobiPrecon.DiagM[blocki]);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ap);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ai);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ax);
@@ -530,6 +541,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   }
   free(Blocks_JacobiPrecon.blockdims);
   free(Blocks_JacobiPrecon.Mblock);
+  free(Blocks_JacobiPrecon.DiagM);
   free(Blocks_JacobiPrecon.umfpackA);
   free(Blocks_JacobiPrecon.SPQR);
 
