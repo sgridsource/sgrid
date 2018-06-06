@@ -266,10 +266,15 @@ void Matrix_BlockJacobi_Solve(tBlocks_JacobiPrecon Blocks, int i,
 
   /* solve M x = b for x using the matrix M in block i */
   if(Blocks.type==2)
-    ret = SuiteSparseQR_solve_from_tSPQR_A_x_b(Blocks.SPQR[i], x, b, pr);
+  {
+    if(Blocks.SPQR[i].cc_status == 0)
+      ret = SuiteSparseQR_solve_from_tSPQR_A_x_b(Blocks.SPQR[i], x, b, pr);
+  }
   else
-    ret = umfpack_dl_solve_from_tUMFPACK_A_x_b(Blocks.umfpackA[i], x, b, pr);
-
+  {
+    if(Blocks.umfpackA[i].NumericInfo == 0)
+      ret = umfpack_dl_solve_from_tUMFPACK_A_x_b(Blocks.umfpackA[i], x, b, pr);
+  }
   /* if solve fails use diagonal of M only, i.e. like Jacobi precon */
   if(ret!=0)
     for(k=0; k<ncols; k++)
@@ -520,6 +525,8 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       if(pr) printf(" SuiteSparseQR_C_factorize_tSPQR_A in block%d...\n", i);
       fflush(stdout);
       SuiteSparseQR_C_factorize_tSPQR_A(&(Blocks_JacobiPrecon.SPQR[i]), 0);
+      if(Blocks_JacobiPrecon.umfpackA[blocki].NumericInfo)
+        printf("Problem with QR decomposition in block%d\n", i);
     }
     else
     {
@@ -527,6 +534,8 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
       fflush(stdout);
       umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
                                          Blocks_JacobiPrecon.blockdims[i], 0);
+      if(Blocks_JacobiPrecon.SPQR[i].cc_status)
+        printf("Problem with LU decomposition in block%d\n", i);
     }
   }
   if(pr) prTimeIn_s("Time AFTER LU or QR factorization: ");
