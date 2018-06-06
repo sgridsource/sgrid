@@ -26,6 +26,7 @@ typedef struct T_UMFPACK_A {
   LONGINT *Ai;
   double  *Ax;
   void    *Numeric;  /* computed with umfpack_dl_numeric */
+  int NumericInfo;   /* return value of umfpack_dl_numeric */
 } tUMFPACK_A;
 
 /* struct that contains all about a matrix, that we need for
@@ -38,6 +39,7 @@ typedef struct T_SPQR_A {
   void *A;  /* covert to: cholmod_sparse *A; */
   void *QR; /* covert to: SuiteSparseQR_C_factorization *QR; */
   void *cc; /* covert to: cholmod_common *cc; */
+  int cc_status;    /* cc->status after call to SuiteSparseQR_C_factorize */
 } tSPQR_A;
 
 /* struct that contains all info about one block made of var vi in box bi

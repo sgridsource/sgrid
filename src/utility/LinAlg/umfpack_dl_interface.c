@@ -169,7 +169,7 @@ int umfpack_dl_solve_fromAcolumns(tSparseVector **Acol,
                                   double dropbelow, int pr)
 {
   tGrid *grid = vlx->grid;
-  int i,j;
+  int j;
   int bi, line;
   int nvars=vlx->n;
   int nlines=0;
@@ -286,7 +286,6 @@ int umfpack_dl_solve_from_Ap_Ai_Ax(LONGINT *Ap, LONGINT *Ai, double *Ax,
                                    tVarList *vlx, tVarList *vlb, int pr)
 {
   tGrid *grid = vlx->grid;
-  int i,j;
   int bi, line;
   int nvars=vlx->n;
   int nlines=0;
@@ -450,6 +449,7 @@ int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
   INFO2=umfpack_dl_numeric(umfpackA->Ap, umfpackA->Ai, umfpackA->Ax,
                            Symbolic, &Numeric, null, Info);
   umfpackA->Numeric = Numeric;
+  umfpackA->NumericInfo = INFO2;
   umfpack_dl_free_symbolic(&Symbolic);
   if(pr)
   {
@@ -482,7 +482,7 @@ int umfpack_dl_solve_from_tUMFPACK_A_x_b(tUMFPACK_A umfpackA,
   int INFO=-6662442;
 
 #ifdef UMFPACK
-  double Info[UMFPACK_INFO];
+  //double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
 
   /* call umfpack routine */

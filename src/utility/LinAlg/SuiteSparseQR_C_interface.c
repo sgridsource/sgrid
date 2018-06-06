@@ -136,6 +136,7 @@ int allocate_and_init_tSPQR_A_struct(tSPQR_A *SPQR, LONGINT ncols,
   SPQR->QR = NULL;
   SPQR->cc = NULL;
 #endif
+  SPQR->cc_status = 0; /* all is OK by default after alloc */
   if(pr)
   { 
     printf("allocate_and_init_tSPQR_A_struct: "
@@ -180,7 +181,6 @@ int SuiteSparseQR_solve_fromAcolumns(tSparseVector **Acol,
                                      double dropbelow, int pr)
 {
   tGrid *grid = vlx->grid;
-  int i,j;
   int bi, line;
   int INFO=-6662442;
   int nvars=vlx->n;
@@ -288,7 +288,7 @@ int SuiteSparseQR_C_factorize_tSPQR_A(tSPQR_A *SPQR_A, int pr)
 
   QR = SuiteSparseQR_C_factorize(SPQR_A->ordering, SPQR_A->tol, A, cc);
   SPQR_A->QR = (void *) QR;
-  INFO=cc->status;
+  INFO = SPQR_A->cc_status = cc->status;
   if(pr || INFO!=0)
   { 
     printf(" SuiteSparseQR_C_factorize_tSPQR_A: output is:\n"

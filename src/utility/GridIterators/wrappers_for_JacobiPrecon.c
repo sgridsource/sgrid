@@ -490,6 +490,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     Blocks_JacobiPrecon.umfpackA[blocki].Ai  = Ai;
     Blocks_JacobiPrecon.umfpackA[blocki].Ax  = Ax;
     Blocks_JacobiPrecon.umfpackA[blocki].Numeric = NULL; /* it's set below */
+    Blocks_JacobiPrecon.umfpackA[blocki].NumericInfo = 0; /* set to OK */
 
     Blocks_JacobiPrecon.SPQR[blocki] = SPQR; /* the QR inside this is set below */
 
