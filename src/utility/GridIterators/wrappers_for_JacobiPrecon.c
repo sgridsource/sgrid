@@ -262,11 +262,22 @@ void Matrix_BlockJacobi_Solve(tBlocks_JacobiPrecon Blocks, int i,
                               double *x, double *b, int ncols)
 {
   int pr = 0; // Getv("GridIterators_verbose", "yes");
+  int k, ret=-6662442;
 
+  /* solve M x = b for x using the matrix M in block i */
   if(Blocks.type==2)
-    SuiteSparseQR_solve_from_tSPQR_A_x_b(Blocks.SPQR[i], x, b, pr);                                             
+    ret = SuiteSparseQR_solve_from_tSPQR_A_x_b(Blocks.SPQR[i], x, b, pr);
   else
-    umfpack_dl_solve_from_tUMFPACK_A_x_b(Blocks.umfpackA[i], x, b, pr);
+    ret = umfpack_dl_solve_from_tUMFPACK_A_x_b(Blocks.umfpackA[i], x, b, pr);
+
+  /* if solve fails use diagonal of M only, i.e. like Jacobi precon */
+  if(ret!=0)
+    for(k=0; k<ncols; k++)
+    {
+      double Mkk = Blocks.DiagM[i][k]; /* Mkk = diag entry k of block i */
+      if(Mkk!=0.) x[k] = b[k]/Mkk;
+      else        x[k] = 0.;
+    }
 }
 
 /* Blocks_JacobiPrecon contains a block diagonal matrix set with
