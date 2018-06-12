@@ -34,4 +34,9 @@ int bicg_(long int *N, double *B, double *X, double *WORK, long int *LDW,
               int (*psolve)(double *x, double *b),
               int (*psolvetrans)(double *x, double *b),
               long int *INFO);
+int sor_(long int *N, double *B, double *X, double *WORK, long int *LDW,
+         long int *ITER, double *RESID,
+         int (*matvec)(double *alpha, double *x, double *beta, double *y),
+         int (*backsolve)(long int *n, double *a, long int *lda, double x),
+         long int *INFO);
 int templates_backsolve(long int *n, double *a, long int *lda, double x);
