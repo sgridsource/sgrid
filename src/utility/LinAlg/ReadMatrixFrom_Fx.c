@@ -51,7 +51,7 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
 {
   tGrid *grid = vlx->grid;
   int b;
-  double drop = Getd("GridIterators_setABStozero_below");
+  double drop = Getd("LinAlg_setABStozero_below");
   int *offset;
 #ifndef LEVEL6_Pragmas
   tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
@@ -234,7 +234,7 @@ void SetMatrixLines_forSortedVars_slowly(tSparseVector **Aline,
 {
   tGrid *grid = vlx->grid;
   int b, col, line;
-  double drop = Getd("GridIterators_setABStozero_below");
+  double drop = Getd("LinAlg_setABStozero_below");
 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
@@ -353,7 +353,7 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
 {
   tGrid *grid = vlx->grid;
   int b;
-  double drop = Getd("GridIterators_setABStozero_below");
+  double drop = Getd("LinAlg_setABStozero_below");
   int *offset;
 #ifndef LEVEL6_Pragmas
   tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
@@ -529,7 +529,7 @@ void SetMatrixColumns_forSortedVars_slowly(tSparseVector **Acol,
 {
   tGrid *grid = vlx->grid;
   int b, col, line;
-  double drop = Getd("GridIterators_setABStozero_below");
+  double drop = Getd("LinAlg_setABStozero_below");
 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
@@ -637,7 +637,7 @@ void SetMatrixColumns_ForOneVarInOneBox_slowly(tSparseVector **Acol,
     tVarList *vlFx, tVarList *vlx, tVarList *vlc1, tVarList *vlc2, int pr)
 {
   tGrid *grid = vlx->grid;
-  double drop = Getd("GridIterators_setABStozero_below");
+  double drop = Getd("LinAlg_setABStozero_below");
  
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
@@ -743,7 +743,7 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
 {
   tGrid *grid = vlx->grid;
   tBox *box = grid->box[b];
-  double drop = Getd("GridIterators_setABStozero_below");
+  double drop = Getd("LinAlg_setABStozero_below");
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;

@@ -15,6 +15,8 @@ int sgrid_LinAlg(void)
   /* variables */
 
   /* parameters */
-  
+  AddPar("LinAlg_setABStozero_below", "0", "some numbers will be set to 0 "
+         "if their magnitude is below this value [any positive number]");
+
   return 0;
 }
