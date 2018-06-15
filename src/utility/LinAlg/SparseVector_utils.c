@@ -128,7 +128,7 @@ int write_SparseVectorArray_inMatrixMarketFormat(char *filename,
 
     nz+=entries;
     for(i=0; i<entries; i++)
-      if( A[j]->pos[i] > maxpos)  maxpos=A[j]->pos[i];
+      if(A[j]->pos[i] > maxpos)  maxpos=A[j]->pos[i];
   }
   if(isAcol) { ncols=n; nrows=maxpos+1; }
   else       { nrows=n; ncols=maxpos+1; }
@@ -140,9 +140,9 @@ int write_SparseVectorArray_inMatrixMarketFormat(char *filename,
   fprintf(fp, "%% A=%p\n", A);
   fprintf(fp, "%% n=%d\n", n);
   fprintf(fp, "%% isAcol=%d\n", isAcol);
-  fprintf(fp, "%% This is a %dx%d matrix with %d nonzeros\n", ncols,nrows, nz);
+  fprintf(fp, "%% This is a %dx%d matrix with %d nonzeros\n", nrows,ncols, nz);
   fprintf(fp, "%% BEGIN_matrix:\n");
-  fprintf(fp, "%d %d %d\n", ncols,nrows, nz);
+  fprintf(fp, "%d %d %d\n", nrows,ncols, nz);
 
   /* loop over vectors */
   for(j=0; j<n; j++)
