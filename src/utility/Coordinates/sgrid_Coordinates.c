@@ -97,8 +97,8 @@ int sgrid_Coordinates(void)
     AddPar("Coordinates_AnsorgNS_dsigma_pm_dphi_ZeroOnAxis", "no", "whether "
            "dsigma_pm_dphi and ddsigma_pm_dphidphi are 0 on x-axis [no,yes]");
   }
-  AddPar("Coordinates_set_bfaces", "no", "whether we set bfaces in the "
-         "function init_CoordTransform_And_Derivs [no,yes]");
+  AddPar("Coordinates_set_bfaces", "yes", "whether we set bfaces [yes,no],"
+         "and where we do it [IN_init_CoordTransform_And_Derivs]");
   AddPar("Coordinates_bface_options", "setnormalderiv_order1", "how we set some "
          "bface flags [none,populate_bfaces"
          "setnormalderiv_order0,setnormalderiv_order1,setnormalderiv_order2]");

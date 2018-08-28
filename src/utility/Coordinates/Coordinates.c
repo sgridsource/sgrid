@@ -963,7 +963,8 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
     compute_xyz_dXYZdxyz_ddXYZddxyz(grid);
 
   /* set all bfaces */
-  if(Getv("Coordinates_set_bfaces", "yes")) Coordinates_set_bfaces(grid);
+  if(Getv("Coordinates_set_bfaces", "IN_init_CoordTransform_And_Derivs"))
+    Coordinates_set_bfaces(grid);
 
   /* set the oX,oY,oZ vars needed for interpolation in bfaces */
   set_oX_oY_oZ_vars_for_bfaces(grid);

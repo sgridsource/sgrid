@@ -1790,6 +1790,9 @@ int Coordinates_set_bfaces(tGrid *grid)
 {
   int b, ret;
 
+  /* do nothing if Coordinates_set_bfaces = no */
+  if(Getv("Coordinates_set_bfaces", "no")) return 0;
+
   if(1) printf("Coordinates_set_bfaces:\n");
 
   if(Getv("Coordinates_bface_options","populate_bfaces")) /* use AR algorithm */
