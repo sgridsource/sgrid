@@ -100,7 +100,7 @@ void quick_VarList_output(tBox *box, tVarList *vl, double fake_t, int fake_i)
   for(vind=0; vind<vl->n; vind++)
   {
     char *varname = VarName(vl->index[vind]);
-    nl += strlen(varname)+1;
+    nl += strlen(varname)+2;
     names = realloc(names, nl);
     if(vind>0) strcat(names, " ");
     strcat(names, varname);
