@@ -1410,6 +1410,71 @@ int zero_setnormalderiv_flag_in_all_bfaces(tGrid *grid)
   return 0;
 }
 
+/* Toggle setnormalderiv flag of face 4 & 5 in all Cartesian cubes.
+   We want to avoid that BCs are the same on all sides of the cube. */
+int toggle_setnormalderiv_flag_in_faces4_5_of_cubes(tGrid *grid)
+{
+  int b;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int fi;
+
+    /* look at cubes only */
+    if(box->CI->type == 0)
+    {
+      /* loop over bfaces */
+      forallbfaces(box,fi)
+      {
+        tBface *bface = box->bface[fi];
+        int f = bface->f;
+        int ob  = bface->ob;
+        int ofi = bface->ofi;
+        tBox *obox = NULL;
+        tBface *obface = NULL;
+
+        /* do something only on face 4 and 5 */
+        if((f == 4) || (f == 5))
+        {
+          if(bface->setnormalderiv) bface->setnormalderiv = 0;
+          else                      bface->setnormalderiv = 1;
+        }
+        else /* otherwise go to next bface */
+          continue;
+
+        if(ob<0)  continue; /* do nothing if there is no other box at this bface */
+        if(ofi<0) continue; /* do nothing if there not one face index in other box */
+
+        /* other box and corresponding bface */
+        obox = grid->box[ob];
+        obface = obox->bface[ofi];
+
+        /* check if the 2 are touching */
+        if(bface->touch)
+        {
+          if(obface->touch==0)
+          {
+            printf("current bface (called bface):\n");
+            printbface(bface);
+            printf("other bface (called obface):\n");
+            printbface(obface);
+            errorexit("Bad touch flags: one bface has touch=1 and\n"
+                      "the other has touch=0");
+          }
+
+          if(obface->ofi == fi) /* we have 2 paired bfaces */
+          {
+            /* set consistent setnormalderiv flag */
+            if(bface->setnormalderiv == 0) obface->setnormalderiv = 1;
+            else                           obface->setnormalderiv = 0;
+          }
+        }
+      } /* end forallbfaces */
+    } /* end cube case */
+  }
+  return 0;
+}
+
 /* make sure bit fields in all bfaces are consitent.
    Right now we just set bface->setnormalderiv */
 int set_consistent_flags_in_all_bfaces(tGrid *grid)
@@ -1417,6 +1482,10 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
   int b;
   int sndorder1 = Getv("Coordinates_bface_options","setnormalderiv_order1");
   int sndorder2 = Getv("Coordinates_bface_options","setnormalderiv_order2");
+  int sndorder3 = Getv("Coordinates_bface_options","setnormalderiv_order3");
+
+  /*setnormalderiv_order3 implies setnormalderiv_order1 */
+  sndorder1 = sndorder1 || sndorder3;
 
   /* set setnormalderiv=0 in all bfaces if we want a particluar order */
   if(sndorder1 || sndorder2)
@@ -1494,6 +1563,9 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
       }
     } /* end forallbfaces */
   }
+
+  if(sndorder3) toggle_setnormalderiv_flag_in_faces4_5_of_cubes(grid);
+
   return 0;
 }
 
