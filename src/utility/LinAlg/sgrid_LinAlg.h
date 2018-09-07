@@ -25,6 +25,7 @@ typedef struct T_UMFPACK_A {
   LONGINT *Ap;       /* matrix */
   LONGINT *Ai;
   double  *Ax;
+  double  *Info;     /* set this to an array like: double Info[UMFPACK_INFO] */
   void    *Numeric;  /* computed with umfpack_dl_numeric */
   int NumericInfo;   /* return value of umfpack_dl_numeric */
 } tUMFPACK_A;

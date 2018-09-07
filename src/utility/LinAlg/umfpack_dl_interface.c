@@ -433,7 +433,6 @@ int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
   int INFO2=-6662442;
 
 #ifdef UMFPACK
-  double Info[UMFPACK_INFO];
   double *null = (double *) NULL;
   void *Symbolic, *Numeric;
 
@@ -447,13 +446,13 @@ int umfpack_dl_numeric_from_tUMFPACK_A(tUMFPACK_A *umfpackA,
     fflush(stdout);
   }
   INFO2=umfpack_dl_numeric(umfpackA->Ap, umfpackA->Ai, umfpackA->Ax,
-                           Symbolic, &Numeric, null, Info);
+                           Symbolic, &Numeric, null, umfpackA->Info);
   umfpackA->Numeric = Numeric;
   umfpackA->NumericInfo = INFO2;
   umfpack_dl_free_symbolic(&Symbolic);
   if(pr)
   {
-    printf("  Info[UMFPACK_RCOND]=%g\n", Info[UMFPACK_RCOND]);
+    printf("  Info[UMFPACK_RCOND]=%g\n", umfpackA->Info[UMFPACK_RCOND]);
     printf("umfpack_dl_numeric_from_tUMFPACK_A: umfpack_dl_numeric  -> INFO2=%d\n", INFO2);
     fflush(stdout);
   }

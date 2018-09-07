@@ -360,7 +360,14 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   int nsb2 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb2");
   int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
   int type;
-  
+#ifdef UMFPACK
+  int umfpack_rcond = UMFPACK_RCOND;
+  double Info[UMFPACK_INFO];
+#else
+  int umfpack_rcond = 0;
+  double Info[1];
+#endif
+
   if(Getv("GridIterators_Preconditioner_type", "SPQR")) /* use SPQR */
     type=2;
   else /* use umfpack */
@@ -494,6 +501,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     Blocks_JacobiPrecon.umfpackA[blocki].Ap  = Ap;
     Blocks_JacobiPrecon.umfpackA[blocki].Ai  = Ai;
     Blocks_JacobiPrecon.umfpackA[blocki].Ax  = Ax;
+    Blocks_JacobiPrecon.umfpackA[blocki].Info = Info; /* set to Info array */
     Blocks_JacobiPrecon.umfpackA[blocki].Numeric = NULL; /* it's set below */
     Blocks_JacobiPrecon.umfpackA[blocki].NumericInfo = 0; /* set to OK */
 
@@ -522,20 +530,23 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   {
     if(Blocks_JacobiPrecon.type==2) /* if we use SPQR */
     {
-      if(pr) printf(" SuiteSparseQR_C_factorize_tSPQR_A in block%d...\n", i);
-      fflush(stdout);
       SuiteSparseQR_C_factorize_tSPQR_A(&(Blocks_JacobiPrecon.SPQR[i]), 0);
+      if(pr) printf(" SuiteSparseQR_C_factorize_tSPQR_A block%d\n", i);
+      fflush(stdout);
       if(Blocks_JacobiPrecon.SPQR[i].cc_status)
-        printf("^-Problem with QR decomposition in block%d\n", i);
+        printf(" ^-Problem with QR decomposition in block%d\n", i);
     }
     else
     {
-      if(pr) printf(" umfpack_dl_numeric_from_tUMFPACK_A in block%d...\n", i);
-      fflush(stdout);
       umfpack_dl_numeric_from_tUMFPACK_A(&(Blocks_JacobiPrecon.umfpackA[i]),
                                          Blocks_JacobiPrecon.blockdims[i], 0);
+      if(pr) 
+        printf(" umfpack_dl_numeric_from_tUMFPACK_A block%d:"
+               " Info[UMFPACK_RCOND]=%g\n",
+               i, Blocks_JacobiPrecon.umfpackA[i].Info[umfpack_rcond]);
+      fflush(stdout);
       if(Blocks_JacobiPrecon.umfpackA[i].NumericInfo)
-        printf("^-Problem with LU decomposition in block%d\n", i);
+        printf(" ^-Problem with LU decomposition in block%d\n", i);
     }
   }
   if(pr) prTimeIn_s("Time AFTER LU or QR factorization: ");
