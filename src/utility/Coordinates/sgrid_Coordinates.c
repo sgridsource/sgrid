@@ -99,8 +99,8 @@ int sgrid_Coordinates(void)
   }
   AddPar("Coordinates_set_bfaces", "yes", "whether we set bfaces [yes,no],"
          "and where we do it [IN_init_CoordTransform_And_Derivs]");
-  AddPar("Coordinates_bface_options", "setnormalderiv_order1", "how we set some "
-         "bface flags [none,populate_bfaces,setnormalderiv_order0,"
+  AddPar("Coordinates_bface_options", "setnormalderiv_order3", "how we set "
+         "some bface flags [none,populate_bfaces,setnormalderiv_order0,"
          "setnormalderiv_order1,setnormalderiv_order2,setnormalderiv_order3]");
 
   return 0;
