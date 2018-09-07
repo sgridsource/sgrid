@@ -1563,7 +1563,12 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
       }
     } /* end forallbfaces */
   }
-
+  /* Note: sndorder3 it supposed to fix failures in 
+     templates_GMRES_with_BlockJacobi_precon. It fails if there is a Neumann
+     BC on all faces of a box. This can happen on box0 with sndorder2.
+     Or it can happen on box5&6 with sndorder1 if the BC on face1 of box5
+     or 6 is also a Neumann BC. The corresponding block is then a singular
+     matrix, as can be seen with GridIterators_verbose = yes */
   if(sndorder3) toggle_setnormalderiv_flag_in_faces4_5_of_cubes(grid);
 
   return 0;
