@@ -361,11 +361,11 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   int nsb3 = Getd("GridIterators_Preconditioner_BlockJacobi_nsb3");
   int type;
 #ifdef UMFPACK
+  int umfpack_info  = UMFPACK_INFO;
   int umfpack_rcond = UMFPACK_RCOND;
-  double Info[UMFPACK_INFO];
 #else
+  int umfpack_info  = 1;
   int umfpack_rcond = 0;
-  double Info[1];
 #endif
 
   if(Getv("GridIterators_Preconditioner_type", "SPQR")) /* use SPQR */
@@ -415,6 +415,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     LONGINT *Ap;
     LONGINT *Ai;
     double *Ax;
+    double *Info = NULL;
     tSPQR_A SPQR;
 
     /* allocate Acol for each block */
@@ -485,6 +486,9 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
 
       /* set Ap,Ai,Ax */
       set_umfpack_dl_matrix_from_columns(Ap,Ai,Ax, Acol, ncols, dropbelow, 0);
+
+      /* allocate UMFPACK's Info array */
+      Info = calloc(umfpack_info, sizeof(*Info));
     }
 
     /* since Acol is now in Ap,Ai,Ax or SPQR we free Acol */
@@ -566,6 +570,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ap);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ai);
     free(Blocks_JacobiPrecon.umfpackA[blocki].Ax);
+    free(Blocks_JacobiPrecon.umfpackA[blocki].Info);
 #ifdef UMFPACK
     umfpack_dl_free_numeric(&(Blocks_JacobiPrecon.umfpackA[blocki].Numeric));
 #endif
