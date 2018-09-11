@@ -57,7 +57,7 @@ int Newton(
   int linSolv_itmax, double linSolv_tolFac, double linSolv_tol)
 {
   tGrid *grid = vlFu->grid;
-  int i, j, inewton, b;
+  int inewton;
   double res, lin_normres = 0;
   int lin_its = 0;
   double lambda = 0.0;
@@ -227,8 +227,8 @@ void do_random_Newton_step(tVarList *vlu, double eps, tVarList *vldu)
 
     for(j = 0; j < vlu->n; j++)
     {
-      double *u  = box->v[vlu ->index[j]]; 
-      double *du = box->v[vldu->index[j]]; 
+      double *u  = box->v[vlu ->index[j]];
+      /* double *du = box->v[vldu->index[j]]; */
 
       forallpoints(box,i)
         u[i] += uav*eps*(RND()-0.5)*2.0; /* u^{n+1} = u^{n} + uav*eps*r */
@@ -288,7 +288,7 @@ exit(5);
     double lmin;
     double fx, fa,fb,fc;
     tVarList *vltemp;
-    double resb, resc;
+    double resc;
 
     /* res of full Newton step */
     Fu(vlFu, vlu, vlc1, vlc2);

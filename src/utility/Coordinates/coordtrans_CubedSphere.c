@@ -559,7 +559,7 @@ double interpolate_isig_in_plane1_at_p(tBox *box, int isig,
 double CubedSphere_sigma(tBox *box, int si, int ind, double A, double B)
 {
   int isig = box->CI->iSurf[si]; /* get index of var with sigma */
-  int p, n1,n2;
+  int p, n1;
 
   /* if var index does not seem set, use sigma = box->CI->s[si] */
   if(isig<1) return box->CI->s[si];
@@ -583,7 +583,7 @@ double CubedSphere_sigma(tBox *box, int si, int ind, double A, double B)
 double CubedSphere_dsigma_dA(tBox *box, int si, int ind, double A, double B)
 {
   int isig = box->CI->idSurfdX[si][2]; /* get index of var with dsigma/dA */
-  int p, n1,n2;
+  int p, n1;
 
   /* if var index does not seem set, use dsigma = 0 */
   if(isig<1) return 0.0;
@@ -606,7 +606,7 @@ double CubedSphere_dsigma_dA(tBox *box, int si, int ind, double A, double B)
 double CubedSphere_dsigma_dB(tBox *box, int si, int ind, double A, double B)
 {
   int isig = box->CI->idSurfdX[si][3]; /* get index of var with dsigma/dB */
-  int p, n1,n2;
+  int p, n1;
 
   /* if var index does not seem set, use dsigma = 0 */
   if(isig<1) return 0.0;

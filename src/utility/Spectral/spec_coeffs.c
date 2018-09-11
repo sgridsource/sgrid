@@ -757,8 +757,7 @@ void get_spec_functionpointerTO_get_coeffs(tBox *box, int direc,
 
 /* get all relevant function pointers and write them into box struct */
 void init_spec_functionpointers(tBox *box)
-{       
-  char str[1000];
+{
   int dir;
   void (*get_coeffs)(double *,double *, int);
   void (*coeffs_of_deriv)(void *, double, double, double *,double *, int);

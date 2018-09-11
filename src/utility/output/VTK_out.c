@@ -35,8 +35,6 @@ void write_raw_vtk_data(FILE *fp, double *buffer, int n, int stride, int offset,
 {
   int swap = BYTE_ORDER_LITTLE;  // if little endian, then swap since
                                  // the vtk default is big endian
-  float xfloat;
-  double xdouble;
   int i;
 
   if(!text && !binary)

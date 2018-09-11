@@ -15,8 +15,7 @@
 void checkpoint_read(tGrid *g)
 {
   FILE *fp;
-  int i, l;
-  char str[10000];
+  int i;
 
   /* if there is not a complete set of checkpoint files,
      don't do anything: assume that this run starts from the beginnning
@@ -86,7 +85,7 @@ void striptrailingnewline(char *s)
 void checkpoint_read_ParsAndIterations_local(tGrid *grid, FILE *fp)
 {
   char name[10000], value[10000], str[10000], *currentvalue;
-  int i,j,ret;
+  int j,ret;
   int bmin,bmax;
   int numberofpars, parsread;
 

@@ -99,7 +99,7 @@ int ModeComputer_set_sYlm_inbox(tBox *box, int Re_sYlmind, int Im_sYlmind,
     for(k=0; k<n3; k++)
     for(j=0; j<n2/2; j++)
     {
-      double R,I, theta,phi;
+      double theta,phi;
       ijk=Index(i,j,k);
 
       /* get theta, phi */
@@ -263,8 +263,8 @@ int ModeComputer(tGrid *grid)
   double *Re_sYlmp = box->v[Re_sYlmind];
   double *Im_sYlmp = box->v[Im_sYlmind];
   double *Xp = box->v[Ind("X")];
-  double *Yp = box->v[Ind("Y")];
-  double *Zp = box->v[Ind("Z")];
+  /* double *Yp = box->v[Ind("Y")];
+     double *Zp = box->v[Ind("Z")]; */
   
   printf("ModeComputer: Computing Modes\n");
   s    = Geti("ModeComputer_spinweight"); /* spin weight we use */

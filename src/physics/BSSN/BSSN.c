@@ -301,7 +301,7 @@ int filter_VarList(tVarList *vl)
     {
       int vi = vl->index[j];
       double *u = box->v[vi];
-      int pi,ijk;
+      //int pi,ijk;
 
       //printf("filter_VarList: VarName[vi]=%s\n", VarName(vi));
 

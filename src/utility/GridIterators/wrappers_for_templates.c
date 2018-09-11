@@ -201,7 +201,7 @@ int templates_gmres_wrapper(
 {
   tGrid *grid = b->grid;
   int pr = Getv("GridIterators_verbose", "yes");
-  int i,j;
+  int i;
   long int N; /* dim of matrix */
   double *B;
   double *X;
@@ -307,7 +307,7 @@ int templates_bicgstab_wrapper(
 {
   tGrid *grid = b->grid;
   int pr = Getv("GridIterators_verbose", "yes");
-  int i,j;
+  int i;
   long int N; /* dim of matrix */
   double *B;
   double *X;
@@ -403,7 +403,7 @@ int templates_cgs_wrapper(
 {
   tGrid *grid = b->grid;
   int pr = Getv("GridIterators_verbose", "yes");
-  int i,j;
+  int i;
   long int N; /* dim of matrix */
   double *B;
   double *X;
@@ -497,7 +497,6 @@ void SetMatrixColumns_And_InvDiag(
 {
   tGrid *grid = r->grid;
   tGrid *grid_bak;
-  int bi;
   int col, ent;
   tSparseVector **AcolD;
   int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
@@ -551,14 +550,13 @@ int templates_qmr_wrapper(
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
 {
   tGrid *grid = b->grid;
-  int nvars=b->n;
   int ncols;
   double *DiagMinv_JacobiPrecon_sav;
   tSparseVector **Acol;
   tSparseVector **AcolFD;
   double *DiagAinv;
   int pr = Getv("GridIterators_verbose", "yes");
-  int i,j;
+  int i;
   long int N; /* dim of matrix */
   double *B;
   double *X;
@@ -682,14 +680,13 @@ int templates_bicg_wrapper(
 	    void (*precon)(tVarList *, tVarList *, tVarList *, tVarList *))
 {
   tGrid *grid = b->grid;
-  int nvars=b->n;
   int ncols;
   double *DiagMinv_JacobiPrecon_sav;
   tSparseVector **Acol;
   tSparseVector **AcolFD;
   double *DiagAinv;
   int pr = Getv("GridIterators_verbose", "yes");
-  int i,j;
+  int i;
   long int N; /* dim of matrix */
   double *B;
   double *X;
@@ -814,7 +811,7 @@ int templates_sor_wrapper(
 {
   tGrid *grid = b->grid;
   int pr = Getv("GridIterators_verbose", "yes");
-  int i,j;
+  int i;
   long int N; /* dim of matrix */
   double *B;
   double *X;

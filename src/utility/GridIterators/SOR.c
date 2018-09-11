@@ -132,7 +132,7 @@ int SOR_Iterator(tVarList *vlx, tVarList *vlb,
   nlines = 0;
   forallboxes(grid,bi)  nlines+=(grid->box[bi]->nnodes)*nvars;
   Aline = calloc(nlines, sizeof(*Aline));
-  if(Aline)  if(pr) printf("allocated %d matrix lines\n", nlines);
+  if(Aline)  { if(pr) printf("allocated %d matrix lines\n", nlines); }
   else       errorexit("no memory for Aline");
   for(line=0; line<nlines; line++)  Aline[line]=AllocateSparseVector();
 
@@ -178,9 +178,8 @@ int SOR_Iterator(tVarList *vlx, tVarList *vlb,
 void SOR_Preconditioner_from_SOR_Aline(tVarList *vlx, tVarList *vlb,
                                        tVarList *vlc1, tVarList *vlc2)
 {
-  tGrid *grid = vlb->grid;
-  int bi;
-  int line, INFO;
+  /* tGrid *grid = vlb->grid; */
+  int INFO;
   int pr = Getv("GridIterators_verbose", "yes");
   int itmax = Getd("GridIterators_Preconditioner_itmax");
   double rtol = Getd("GridIterators_Preconditioner_reltol");
@@ -256,7 +255,7 @@ int linSolve_with_SOR_precon(tVarList *x, tVarList *b,
   tGrid *grid_bak;
   int bi;
   int pr = Getv("GridIterators_verbose", "yes");
-  int line, nvars, ent, INFO;
+  int line, nvars, INFO;
   int use_fd = Getv("GridIterators_Preconditioner_type", "fd");
   void (*SetMatrixLines)(tSparseVector **Aline,
        void  (*Fx)(tVarList *Fdx,  tVarList *dx,  tVarList *c1, tVarList *c2),

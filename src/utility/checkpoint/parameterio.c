@@ -41,7 +41,7 @@ int parameterio_update_pars(tGrid *g)
   char *updatefile = "sgrid_update_parameters.par";
   char *filename;
   FILE *fp;
-  int i, j, ret;
+  int j, ret;
   char name[10000], value[10000], str[10000], *currentvalue;
   int parsread;
 

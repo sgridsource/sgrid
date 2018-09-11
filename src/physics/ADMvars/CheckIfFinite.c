@@ -31,7 +31,7 @@ int CheckIfFinite(tGrid* grid, char *varname)
      incidentally, it makes sure every processor knows about it
   */
   {
-    double *sum;
+    //double *sum;
     //tVarList *vl = VLPtrEnable1(grid, varname);
 
     // TODO: FIX this!!!!!

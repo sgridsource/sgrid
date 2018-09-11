@@ -10,7 +10,6 @@
 void write3d_boxvar(tBox *box, char *name)
 {
   tGrid *grid = box->grid; 
-  int pr = 0;
   int text       = Getv("3dformat", "text");
   int binary     = Getv("3dformat", "binary");
   int vtk        = Getv("3dformat", "vtk");
@@ -21,7 +20,6 @@ void write3d_boxvar(tBox *box, char *name)
   int flt        = Getv("3dformat", "float");
   int dbl        = Getv("3dformat", "double");
   FILE *fp;
-  char filename[1000];
   int nseries;
   double *pX = box->v[Ind("X")];
   double *pY = box->v[Ind("Y")];

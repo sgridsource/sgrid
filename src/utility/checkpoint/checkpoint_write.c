@@ -77,7 +77,6 @@ void checkpoint_write_local(tGrid *g, FILE *fp)
   int i, j, b;
   int n, nall = 0, nv;
   int pr = 0;
-  int number_of_variables;
 
   /* write one line text header, check with "head -1 checkpoint.0" */
   fprintf(fp, "$BEGIN_checkpoint_header:  ");

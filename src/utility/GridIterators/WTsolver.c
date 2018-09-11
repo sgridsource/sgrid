@@ -64,12 +64,12 @@ int WTsolver(tVarList *vlx, tVarList *vlb,
 int WTiterator(tSparseVector **Aline, int nlines,
                double *x, double *b, int itmax, double tol, double *normres)
 {
-  int i,j,ent, it;
+  int i, it;
   int pr = Getv("GridIterators_verbose", "yes");
   double *mm;
   double *f;
   double *dx;
-  double Aij, mag_dx, newres, sfac,s0;
+  double mag_dx, newres, sfac,s0;
 
   mm = calloc(nlines, sizeof(double));
   f  = calloc(nlines, sizeof(double));
@@ -167,7 +167,7 @@ int WTiterator(tSparseVector **Aline, int nlines,
 int WTiterator1(tSparseVector **Aline, int nlines,
                double *x, double *b, int itmax, double tol, double *normres)
 {
-  int i,j,ent, it;
+  int i,ent, it;
   int pr = Getv("GridIterators_verbose", "yes");
   double *mm;
   double *f;
@@ -204,7 +204,7 @@ int WTiterator1(tSparseVector **Aline, int nlines,
   for(i=0; i<nlines; i++)
     for(ent = 0; ent < Aline[i]->entries; ent++)
     {
-       j   = Aline[i]->pos[ent];
+       /* j   = Aline[i]->pos[ent]; */
        Aij = Aline[i]->val[ent];
        mm[i] += Aij*Aij;
     }

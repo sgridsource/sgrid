@@ -209,7 +209,7 @@ void cart_partials(tBox *box, double *u, double *u1, double *u2, double *u3)
       SGRID_LEVEL3_Pragma(omp parallel for)
       forallpoints(box,ind)
       {
-        int i,m,m_1;
+        int i,m;
         double dv[4];
         double *Xp = box->v[Ind("X")];
         double *Yp = box->v[Ind("Y")];
@@ -334,7 +334,7 @@ void cart_partial_all(tBox *box, double *u, double *u1, double *u2, double *u3,
       SGRID_LEVEL3_Pragma(omp parallel for)
       forallpoints(box,ind) /* loop over all points */
       {
-        int i,j, m,n, m_1,n_1, vi;
+        int i,j, m,n;
         double dv[4];
         double ddv[4][4];
         double *Xp = box->v[Ind("X")];

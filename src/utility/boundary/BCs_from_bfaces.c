@@ -222,8 +222,8 @@ void FPsi_1Dinterp_for_bface(int iFPsi, tBface *bface, int idir,
   tBox *box = grid->box[bface->b];
   int n1 = box->n1;
   int n2 = box->n2;
-  int n3 = box->n3;
-  int dir = 1 + bface->f/2;
+  /* int n3 = box->n3;
+     int dir = 1 + bface->f/2; */
   int ob  = bface->ob;
   int ofi = bface->ofi;
   int oXi = bface->oXi;
@@ -354,10 +354,10 @@ void FPsi_2Dinterp_for_bface(int iFPsi, tBface *bface, int plN,
 {
   tGrid *grid = bface->grid;
   tBox *box = grid->box[bface->b];
-  int n1 = box->n1;
-  int n2 = box->n2;
-  int n3 = box->n3;
-  int dir = 1 + bface->f/2;
+  /* int n1 = box->n1;
+     int n2 = box->n2;
+     int n3 = box->n3;
+     int dir = 1 + bface->f/2; */
   int ob  = bface->ob;
   int ofi = bface->ofi;
   int oXi = bface->oXi;
@@ -601,7 +601,7 @@ int ijk_in_other_box_if_touch_samePoints_sameCoords(tBface *bface, int pi)
   tBox *obox = NULL;
   int n1 = box->n1;
   int n2 = box->n2;
-  int n3 = box->n3;
+  /* int n3 = box->n3; */
   int ijk, of, od, ok,oj,oi, oijk;
 
   /* get ijk from pi */
@@ -708,10 +708,9 @@ void FPsi_copy_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4],
 void set_interbox_BCs_for_bface(int iFPsi, tBface *bface, 
                                 int iPsi, int idPsi[4])
 {
-  tGrid *grid = bface->grid;
-  tBox *box = grid->box[bface->b];
+  /* tGrid *grid = bface->grid;
+     tBox *box = grid->box[bface->b]; */
   int ob = bface->ob;
-  int pi, ind;
 
   /* check if there is another box */
   if(ob>=0)

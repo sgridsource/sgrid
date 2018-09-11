@@ -1103,7 +1103,7 @@ int set_box_CI_struct_from_pars(tGrid *grid)
   char par[1000];
   char val[1000];
   char *num;
-  int b, i, im;
+  int b, i;
   forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
@@ -2307,7 +2307,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
   int read=0;
   double X,R;
   double Rsqr=-1, Xsqr=-1, Rsqr_p_Xsqr=-1;
-  double b, lep;
+  double b;
   double sigp_Bphi, sigp_1phi;
   double Ap;
   double B;  /* NOTE: B is Ansorg's B coord, while BB is my 
@@ -2524,7 +2524,7 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   double dABphi_dXRphi[4][4]; /* dABphi_dXRphi[k][l] = dA^k/dX^l */
   double dXRphi_dxyz[4][4];   /* dXRphi_dxyz[l][m]   = dX^l/dx^m */
   int l;
-  double b, lep;
+  double b;
   double sigp_Bphi, sigp_1phi;
   double dsigp_dphi_Bphi, dsigp_dphi_1phi, dsigp_dB_Bphi; /* dsigp_dB_1phi */
   double Ap;

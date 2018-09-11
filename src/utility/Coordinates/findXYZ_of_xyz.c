@@ -199,7 +199,7 @@ int recover_if_start_on_singularity(tBox *box,
   int stat = -1;
   int dir[4];  /* direction info */
   int zc[4];   /* cols with zeros, e.g. zc[3]=1 => col3 has all zeros */
-  int nf, i, j;
+  int i, j;
   double X[1], Y[1], Z[1];
 
   /* get input X0,Y0,Z0 into X,Y,Z */

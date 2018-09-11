@@ -32,7 +32,6 @@ void dump3d_boxvar(tBox *box, char *name)
 {
   FILE *fp;
   char filename[1000];
-  char str[1000];
 
   if(box->v[Ind(name)]==NULL) return;
 
