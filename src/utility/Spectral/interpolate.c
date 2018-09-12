@@ -187,6 +187,7 @@ double spec_interpolate_inplaneN(tBox *box, int N, int p, double *c,
   int n1 = box->n1;
   int n2 = box->n2;
   int n3 = box->n3;
+  int nmax = max3(n1, n2, n3);
   int i,j,k;
   double sum=0.0;
   double a1=box->bbox[0];
@@ -200,8 +201,8 @@ double spec_interpolate_inplaneN(tBox *box, int N, int p, double *c,
     errorexiti("spec_interpolate_inplaneN: box%d: one box->basis1/2/3 is NULL",box->b);
 
   /* allocate memory for B1/2 */
-  B1 = (double*) malloc(n1 * sizeof(double));
-  B2 = (double*) malloc(n2 * sizeof(double));
+  B1 = (double*) malloc(nmax * sizeof(double));
+  B2 = (double*) malloc(nmax * sizeof(double));
 
   /* set basis func values at X1,X2 */
   if(N==3)
