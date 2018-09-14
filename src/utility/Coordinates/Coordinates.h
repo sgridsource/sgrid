@@ -43,6 +43,10 @@ void ddxdXdX_from_dxdU_dUdX_ddxdUdU_ddUdXdX(double ddxdXdX[4][4][4],
                          double dxdU[4][4], double dUdX[4][4],
                          double ddxdUdU[4][4][4], double ddUdXdX[4][4][4]);
 double check_box_dx_dX(tBox *box, double X, double Y, double Z);
+void inverse3Dmatrix_from_3Dmatrix(double invM[4][4], double M[4][4]);
+void transpose3Dmatrix_from_3Dmatrix(double transpM[4][4], double M[4][4]);
+double DetOf3Dmatrix(double M[4][4]);
+void product_of_3Dmatrices(double M[4][4], double A[4][4], double B[4][4]);
 
 /* Some trivial functions */
 double zero_of_xyz(void *aux, int ind, double X, double Y, double Z);

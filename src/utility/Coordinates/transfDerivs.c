@@ -60,6 +60,52 @@ void dxdX_from_dXdx(double dxdX[4][4], double dXdx[4][4])
   dXdx_from_dxdX(dxdX, dXdx);
 }
 
+/* get inverse of a 3x3 matrix. Use dXdx_from_dxdX. */
+void inverse3Dmatrix_from_3Dmatrix(double invM[4][4], double M[4][4])
+{
+  dXdx_from_dxdX(invM, M);
+}
+/* get transpose of a 3x3 matrix. */
+void transpose3Dmatrix_from_3Dmatrix(double transpM[4][4], double M[4][4])
+{
+  transpM[1][1] = M[1][1];
+  transpM[1][2] = M[2][1];
+  transpM[1][3] = M[3][1];
+  transpM[2][1] = M[1][2];
+  transpM[2][2] = M[2][2];
+  transpM[2][3] = M[3][2];
+  transpM[3][1] = M[1][3];
+  transpM[3][2] = M[2][3];
+  transpM[3][3] = M[3][3];
+}
+/* determinant of 3x3 matrix */
+double DetOf3Dmatrix(double M[4][4])
+{
+  /* M = {{m11,m12,m13},{m21,m22,m23},{m31,m32,m33}}
+     Det[M] = m11*m22*m33 - m13*m22*m31 + m12*m23*m31 +
+              m13*m21*m32 - m11*m23*m32 - m12*m21*m33   */
+  LDOUBLE DetM =M[1][1]*M[2][2]*M[3][3] -
+                M[1][3]*M[2][2]*M[3][1] +
+                M[1][2]*M[2][3]*M[3][1] +
+                M[1][3]*M[2][1]*M[3][2] -
+                M[1][1]*M[2][3]*M[3][2] -
+                M[1][2]*M[2][1]*M[3][3];
+  return DetM;
+}
+/* compute M = A B */
+void product_of_3Dmatrices(double M[4][4], double A[4][4], double B[4][4])
+{
+  int i,j,k;
+  for(i=1; i<=3; i++)
+  for(j=1; j<=3; j++)
+  {
+    /* M[i][j] = A[i][k] * B[k][j]; */
+    M[i][j] = 0.;
+    for(k=1; k<=3; k++)  M[i][j] += A[i][k] * B[k][j];
+  }
+}
+
+
 /* compute d^2 X^i /(dx^j dx^k) from dx^n/dX^l and d^2 x^n/(dX^m dX^l) */
 void ddXdxdx_from_dXdx_ddxdXdX(double ddXdxdx[4][4][4],
                                double dXdx[4][4], double ddxdXdX[4][4][4])
