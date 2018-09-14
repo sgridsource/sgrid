@@ -99,11 +99,10 @@ void spec_Basis_times_CoeffMatrix_direc(tBox *box, int dir,
 /* Functions from integrals.c */
 void spec_Integral1(tBox *box, int direc, double *u, double *U);
 void spec_2dIntegral(tBox *box, int norm, double *u, double *U);
+void spec_SurfaceIntegral(tBox *box, int norm, double *u, double *U);
 double spec_3dIntegral(tBox *box, double *u, double *U);
 double BoxVolumeIntegral(tBox *box, int vind);
 double GridVolumeIntegral(tGrid *grid, int vind);
-void box_SurfaceIntegral(tBox *box, int norm, double *var);
-void BoxSurfaceIntegral(tBox *box, int norm, int vind);
 void spec_sphericalDF2dIntegral(tBox *box, double *u, double *U);
 double spec_sphericalDF3dIntegral(tBox *box, double *u, double *U);
 void spec_sphericalDF2dIntegral_at_radial_index_i(tBox *box, double *u, double *U, int i);

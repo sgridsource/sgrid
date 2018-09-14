@@ -160,6 +160,70 @@ void spec_2dIntegral(tBox *box, int norm, double *u, double *U)
     errorexit("spec_2dIntegral: possible values for normal norm are 1,2,3.");
 }
 
+/* compute surface integral  \int dA u(X,Y,Z)  of var u in
+   array u in a box, over a surface of X=const (norm=1),
+   Y=const (norm=3), Z=const (norm=3).
+   Here the surface element coming from Jacobian matrix is included. */
+void spec_SurfaceIntegral(tBox *box, int norm, double *u, double *U)
+{
+  int idXdx = Ind("dXdx");
+  int idYdx = Ind("dYdx");
+  int idZdx = Ind("dZdx");
+  double *dXdx  = box->v[idXdx];
+  double *dXdy  = box->v[idXdx+1];
+  double *dXdz  = box->v[idXdx+2];
+  double *dYdx  = box->v[idYdx];
+  double *dYdy  = box->v[idYdx+1];
+  double *dYdz  = box->v[idYdx+2];
+  double *dZdx  = box->v[idZdx];
+  double *dZdy  = box->v[idZdx+1];
+  double *dZdz  = box->v[idZdx+2];
+  int i;
+
+  if( box->x_of_X[1] != NULL ) /* not Cartesian coords */
+  {
+    forallpoints(box, i)
+    {
+      double J[4][4]; /* Jacobian matrix */
+      double T[4][4]; /* temp matrix, can hold: inverse Jac., transp. Jac. */
+      double m[4][4]; /* flat metric in X,Y,Z coords */
+      double sdetm2 = 1.; /* sqrt of det of 2-metric on surface */
+
+      if(dXdx!=NULL)
+      {
+        /* put inv. Jac. into T */
+        T[1][1] = dXdx[i];  T[1][2] = dXdy[i];  T[1][3] = dXdz[i];
+        T[2][1] = dYdx[i];  T[2][2] = dYdy[i];  T[2][3] = dYdz[i];
+        T[3][1] = dZdx[i];  T[3][2] = dZdy[i];  T[3][3] = dZdz[i];
+        /* get Jac. in J */
+        inverse3Dmatrix_from_3Dmatrix(J, T);
+        /* get: T = J^T*/
+        transpose3Dmatrix_from_3Dmatrix(T, J);
+        /* get: m = J^T J = T J */
+        product_of_3Dmatrices(m, T,J);
+
+        /* get det of 2D part of metric m */
+        if(norm==1)      sdetm2 = m[2][2] * m[3][3] - m[2][3] * m[3][2];
+        else if(norm==2) sdetm2 = m[1][1] * m[3][3] - m[1][3] * m[3][1];
+        else if(norm==3) sdetm2 = m[1][1] * m[2][2] - m[1][2] * m[2][1];
+        else errorexit("BoxSurfaceIntegral: possible values for normal "
+                       "norm are 1,2,3.");
+        /* sqrt of det of 2-metric on surface*/
+        sdetm2 = sqrt(fabs(sdetm2));
+      }
+      else
+        errorexit("BoxSurfaceIntegral: implement dXdx==NULL case");
+
+      /* set integrand with surface element sdetm2 */
+      U[i] = u[i] * sdetm2;
+    } /* end forallpoints loop */
+
+    /* now integrate with correct surface element */
+    spec_2dIntegral(box, norm, U, U);
+  }
+  else /* Cartesian integral without extra surface element */
+    spec_2dIntegral(box, norm, u, U);
+}
 
 /* compute volume integral over 3d var u */
 double spec_3dIntegral(tBox *box, double *u, double *U)
@@ -235,80 +299,6 @@ double GridVolumeIntegral(tGrid *grid, int vind)
   return VolInt;
 }
 
-/* compute surface integral  \int dA v(X,Y,Z)  of var v in
-   array var in a box, over a surface of X=const (norm=1),
-   Y=const (norm=3), Z=const (norm=3).
-   Here the surface element coming from Jacobian matrix is included. */
-void box_SurfaceIntegral(tBox *box, int norm, double *var)
-{
-  int idXdx = Ind("dXdx");
-  int idYdx = Ind("dYdx");
-  int idZdx = Ind("dZdx");
-  double *dXdx  = box->v[idXdx];
-  double *dXdy  = box->v[idXdx+1];
-  double *dXdz  = box->v[idXdx+2];
-  double *dYdx  = box->v[idYdx];
-  double *dYdy  = box->v[idYdx+1];
-  double *dYdz  = box->v[idYdx+2];
-  double *dZdx  = box->v[idZdx];
-  double *dZdy  = box->v[idZdx+1];
-  double *dZdz  = box->v[idZdx+2];
-  double *Integ = dmalloc(box->nnodes);
-  int i;
-
-  if( box->x_of_X[1] != NULL ) /* not Cartesian coords */
-  {
-    forallpoints(box, i)
-    {
-      double J[4][4]; /* Jacobian matrix */
-      double T[4][4]; /* temp matrix, can hold: inverse Jac., transp. Jac. */
-      double m[4][4]; /* flat metric in X,Y,Z coords */
-      double sdetm2 = 1.; /* sqrt of det of 2-metric on surface */
-
-      if(dXdx!=NULL)
-      {
-        /* put inv. Jac. into T */
-        T[1][1] = dXdx[i];  T[1][2] = dXdy[i];  T[1][3] = dXdz[i];
-        T[2][1] = dYdx[i];  T[2][2] = dYdy[i];  T[2][3] = dYdz[i];
-        T[3][1] = dZdx[i];  T[3][2] = dZdy[i];  T[3][3] = dZdz[i];
-        /* get Jac. in J */
-        inverse3Dmatrix_from_3Dmatrix(J, T);
-        /* get: T = J^T*/
-        transpose3Dmatrix_from_3Dmatrix(T, J);
-        /* get: m = J^T J = T J */
-        product_of_3Dmatrices(m, T,J);
-
-        /* get det of 2D part of metric m */
-        if(norm==1)      sdetm2 = m[2][2] * m[3][3] - m[2][3] * m[3][2];
-        else if(norm==2) sdetm2 = m[1][1] * m[3][3] - m[1][3] * m[3][1];
-        else if(norm==3) sdetm2 = m[1][1] * m[2][2] - m[1][2] * m[2][1];
-        else errorexit("BoxSurfaceIntegral: possible values for normal "
-                       "norm are 1,2,3.");
-        /* sqrt of det of 2-metric on surface*/
-        sdetm2 = sqrt(fabs(sdetm2));
-      }
-      else
-        errorexit("BoxSurfaceIntegral: implement dXdx==NULL case");
-
-      /* set integrand with surface element sdetm2 */
-      Integ[i] = var[i] * sdetm2;
-    } /* end forallpoints loop */
-
-    /* now integrate with correct surface element */
-    spec_2dIntegral(box, norm, Integ, Integ);
-  }
-  else /* Cartesian integral without extra surface element */
-    spec_2dIntegral(box, norm, var, Integ);
-
-  free(Integ);
-}
-/* compute surface integral  \int dA v(X,Y,Z)  of var v with
-   index vind in a box, over a surface of X=const (norm=1),
-   Y=const (norm=3), Z=const (norm=3). */
-void BoxSurfaceIntegral(tBox *box, int norm, int vind)
-{
-  box_SurfaceIntegral(box, norm, box->v[vind]);
-}
 
 /* compute U = 2d integral of var u over theta and phi */
 /* Note: U(r) = \int_0^{pi) dtheta \int_0^{2pi) dphi  
