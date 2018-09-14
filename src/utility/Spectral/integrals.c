@@ -235,11 +235,11 @@ double GridVolumeIntegral(tGrid *grid, int vind)
   return VolInt;
 }
 
-/* compute surface integral  \int dA v(X,Y,Z)  of var v with
-   index vind in a box, over a surface of X=const (norm=1),
+/* compute surface integral  \int dA v(X,Y,Z)  of var v in
+   array var in a box, over a surface of X=const (norm=1),
    Y=const (norm=3), Z=const (norm=3).
    Here the surface element coming from Jacobian matrix is included. */
-void BoxSurfaceIntegral(tBox *box, int norm, int vind)
+void box_SurfaceIntegral(tBox *box, int norm, double *var)
 {
   int idXdx = Ind("dXdx");
   int idYdx = Ind("dYdx");
@@ -253,7 +253,6 @@ void BoxSurfaceIntegral(tBox *box, int norm, int vind)
   double *dZdx  = box->v[idZdx];
   double *dZdy  = box->v[idZdx+1];
   double *dZdz  = box->v[idZdx+2];
-  double *var   = box->v[vind];
   double *Integ = dmalloc(box->nnodes);
   int i;
 
@@ -303,7 +302,13 @@ void BoxSurfaceIntegral(tBox *box, int norm, int vind)
 
   free(Integ);
 }
-
+/* compute surface integral  \int dA v(X,Y,Z)  of var v with
+   index vind in a box, over a surface of X=const (norm=1),
+   Y=const (norm=3), Z=const (norm=3). */
+void BoxSurfaceIntegral(tBox *box, int norm, int vind)
+{
+  box_SurfaceIntegral(box, norm, box->v[vind]);
+}
 
 /* compute U = 2d integral of var u over theta and phi */
 /* Note: U(r) = \int_0^{pi) dtheta \int_0^{2pi) dphi  
