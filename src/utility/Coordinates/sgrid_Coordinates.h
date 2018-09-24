@@ -151,3 +151,8 @@ int box_extremum_of_F(tBox *box, int Fi,
                       double *X, double *Y, double *Z, double *Fextr);
 int box_extremum_of_F_in_dir(tBox *box, int Fi, int dir, double C1, double C2,
                              double *C, double *Fextr);
+
+/* from find_ijk.c */
+int find_i_Of_X(tBox *box, double X0);
+int find_j_Of_Y(tBox *box, double Y0);
+int find_k_Of_Z(tBox *box, double Z0);
