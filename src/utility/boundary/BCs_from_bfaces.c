@@ -260,7 +260,10 @@ void FPsi_1Dinterp_for_bface(int iFPsi, tBface *bface, int idir,
   Pcoeffs[2] = dmalloc(obox->nnodes); /* get mem for coeffs */
   Pcoeffs[3] = dmalloc(obox->nnodes); /* get mem for coeffs */
 
-  /* if interp-dir is in oither face plane */
+  /* -1 means op and plN are not set yet */
+  op = plN = -1;
+
+  /* if interp-dir is in other face plane */
   if(odir!=idir)
   {
     plN = odir;
@@ -291,22 +294,45 @@ void FPsi_1Dinterp_for_bface(int iFPsi, tBface *bface, int idir,
   forPointList_inbox(bface->fpts, box, pi, ind)
   {
     int i1, i2;
-    int ok = kOfInd_n1n2(ind, n1,n2);
-    int oj = jOfInd_n1n2_k(ind, n1,n2, ok);
-    int oi = iOfInd_n1n2_jk(ind, n1,n2, oj,ok);
+    int oi, oj, ok;
+    double oX = box->v[oXi][ind];
+    double oY = box->v[oYi][ind];
+    double oZ = box->v[oZi][ind];
     double oC = box->v[oCi][ind]; /* this can be oX, oY, or oZ */
     double Pinterp[4], n[4];
 
     errorexit("oi, oj, ok are only correct if coords in box and obox are "
               "aligned and the number of points agree n1=on1, ... ");
 
-    if(odir==1)      oi = op;
-    else if(odir==2) oj = op;
-    else             ok = op;
+    if(odir==1)
+    {
+      oi = op;
+      oj = find_j_Of_Y(obox, oY);
+      ok = find_k_Of_Z(obox, oZ);
+    }
+    else if(odir==2)
+    {
+      oj = op;
+      oi = find_i_Of_X(obox, oX);
+      ok = find_k_Of_Z(obox, oZ);
+    }
+    else
+    {
+      ok = op;
+      oi = find_i_Of_X(obox, oX);
+      oj = find_j_Of_Y(obox, oY);
+    }
 
     if(idir==1)      { i1 = oj; i2 = ok; }
     else if(idir==2) { i1 = oi; i2 = ok; }
     else             { i1 = oi; i2 = oj; }
+
+    /* Do not set BC if i1 or i2 are negative. This can happen e.g.
+       if this is not the last BC we set at this point, because oX,oY,oZ
+       contains only the coords of the point of the other box we use
+       to set the last BC at this point. */
+    if(i1<0 || i2<0) continue;
+    //errorexit("i1<0 || i2<0, one of these may be wrong: oi, oj, ok");
 
     if(bface->setnormalderiv == 0)
     {
