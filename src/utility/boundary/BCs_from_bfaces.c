@@ -301,8 +301,7 @@ void FPsi_1Dinterp_for_bface(int iFPsi, tBface *bface, int idir,
     double oC = box->v[oCi][ind]; /* this can be oX, oY, or oZ */
     double Pinterp[4], n[4];
 
-    errorexit("oi, oj, ok are only correct if coords in box and obox are "
-              "aligned and the number of points agree n1=on1, ... ");
+    errorexit("are the oi, oj, ok below actually correct???");
 
     if(odir==1)
     {
