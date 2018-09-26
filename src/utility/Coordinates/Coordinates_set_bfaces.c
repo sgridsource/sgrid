@@ -1475,6 +1475,76 @@ int toggle_setnormalderiv_flag_in_faces4_5_of_cubes(tGrid *grid)
   return 0;
 }
 
+/* Toggle setnormalderiv flag between box->CI->dom=0 and box->CI->dom=4
+   boxes, as well between box->CI->dom=1 and box->CI->dom=5 boxes in
+   all types of cubed spheres.
+   We want to avoid too many Neuman BCs in dom 4 and 5. */
+int toggle_setnormalderiv_flag_of_CubSph_doms_0_4_and_1_5(tGrid *grid)
+{
+  int b;
+  forallboxes(grid, b)
+  {
+    tBox *box = grid->box[b];
+    int fi;
+    int domain = box->CI->dom;
+
+    /* look at cubed spheres only */
+    if( (0 < box->CI->type) && (box->CI->type <= CubedShell) )
+    {
+      /* loop over bfaces */
+      forallbfaces(box,fi)
+      {
+        tBface *bface = box->bface[fi];
+        int f = bface->f;
+        int ob  = bface->ob;
+        int ofi = bface->ofi;
+        tBox *obox = NULL;
+        tBface *obface = NULL;
+        int odomain = -1;
+
+        if(ob<0)  continue; /* do nothing if there is no other box at this bface */
+        if(ofi<0) continue; /* do nothing if there not one face index in other box */
+
+        /* other box and corresponding bface and domain */
+        obox = grid->box[ob];
+        obface = obox->bface[ofi];
+        odomain = obox->CI->dom;
+
+        /* do something only if domain,odomain is 0,4 or 1,5 */
+        if((domain == 0 && odomain == 4) || (domain == 1 && odomain == 5))
+        {
+          if(bface->setnormalderiv) bface->setnormalderiv = 0;
+          else                      bface->setnormalderiv = 1;
+        }
+        else /* otherwise go to next bface */
+          continue;
+
+        /* check if the 2 are touching */
+        if(bface->touch)
+        {
+          if(obface->touch==0)
+          {
+            printf("current bface (called bface):\n");
+            printbface(bface);
+            printf("other bface (called obface):\n");
+            printbface(obface);
+            errorexit("Bad touch flags: one bface has touch=1 and\n"
+                      "the other has touch=0");
+          }
+
+          if(obface->ofi == fi) /* we have 2 paired bfaces */
+          {
+            /* set consistent setnormalderiv flag */
+            if(bface->setnormalderiv == 0) obface->setnormalderiv = 1;
+            else                           obface->setnormalderiv = 0;
+          }
+        }
+      } /* end forallbfaces */
+    } /* end cubed sph. case */
+  }
+  return 0;
+}
+
 /* make sure bit fields in all bfaces are consitent.
    Right now we just set bface->setnormalderiv */
 int set_consistent_flags_in_all_bfaces(tGrid *grid)
@@ -1483,8 +1553,12 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
   int sndorder1 = Getv("Coordinates_bface_options","setnormalderiv_order1");
   int sndorder2 = Getv("Coordinates_bface_options","setnormalderiv_order2");
   int sndorder3 = Getv("Coordinates_bface_options","setnormalderiv_order3");
+  int sndorder4 = Getv("Coordinates_bface_options","setnormalderiv_order4");
 
-  /*setnormalderiv_order3 implies setnormalderiv_order1 */
+  /* setnormalderiv_order4 implies setnormalderiv_order3 */
+  sndorder3 = sndorder3 || sndorder4;
+
+  /* setnormalderiv_order3 implies setnormalderiv_order1 */
   sndorder1 = sndorder1 || sndorder3;
 
   /* set setnormalderiv=0 in all bfaces if we want a particluar order */
@@ -1570,6 +1644,13 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
      or 6 is also a Neumann BC. The corresponding block is then a singular
      matrix, as can be seen with GridIterators_verbose = yes */
   if(sndorder3) toggle_setnormalderiv_flag_in_faces4_5_of_cubes(grid);
+
+  /* Note: sndorder4 it supposed to fix more failures in 
+     templates_GMRES_with_BlockJacobi_precon. It fails for an odd number of
+     points in boxes 11,12 and 24,25, i.e. CubSph domains 4,5. Presumably this
+     happens because even with sndorder3 dom 4 and 5 have Neuman BCs
+     everywhere except for face1. */
+  if(sndorder4) toggle_setnormalderiv_flag_of_CubSph_doms_0_4_and_1_5(grid);
 
   return 0;
 }
