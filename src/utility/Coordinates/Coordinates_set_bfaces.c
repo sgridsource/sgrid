@@ -1558,11 +1558,8 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid)
   /* setnormalderiv_order4 implies setnormalderiv_order3 */
   sndorder3 = sndorder3 || sndorder4;
 
-  /* setnormalderiv_order3 implies setnormalderiv_order1 */
-  sndorder1 = sndorder1 || sndorder3;
-
   /* set setnormalderiv=0 in all bfaces if we want a particluar order */
-  if(sndorder1 || sndorder2)
+  if(sndorder1 || sndorder2 || sndorder3)
     zero_setnormalderiv_flag_in_all_bfaces(grid);
 
   forallboxes(grid, b)
