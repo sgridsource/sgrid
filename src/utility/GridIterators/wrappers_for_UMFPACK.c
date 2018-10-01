@@ -232,9 +232,12 @@ int UMFPACK_solve_wrapper(tVarList *x, tVarList *b,
     INFO=umfpack_di_solve_fromAcolumns(Acol, x, b, drop, pr);
   else
     INFO=umfpack_dl_solve_fromAcolumns(Acol, x, b, drop, pr);
-  if(pr) 
+  if(pr)
+  {
     printf("UMFPACK_solve_wrapper: "
            "umfpack_*_solve_fromAcolumns returned INFO=%d\n",INFO);
+    prTimeIn_s("WallTime: ");
+  }
 
   /* free matrix Acol */
   for(col=0; col<ncols; col++)  FreeSparseVector(Acol[col]);

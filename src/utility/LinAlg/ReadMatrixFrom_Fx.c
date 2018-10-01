@@ -384,7 +384,8 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
   {
     if(pr)
     {
-      printf("\n"); prdivider(0);  
+      printf("\n"); prdivider(0);
+      prTimeIn_s("WallTime: ");
       printf("SetMatrixColumns_slowly: working on box%d\ncol=",b);
     }
 
@@ -468,6 +469,7 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
     printf("\nSetMatrixColumns_slowly: "
            "the %d*%d matrix Acol=%p is now set!\n",
            ncol, ncol, Acol);
+    prTimeIn_s("WallTime: ");
     fflush(stdout);
   }
 #ifndef LEVEL6_Pragmas
