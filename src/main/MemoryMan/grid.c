@@ -618,6 +618,12 @@ void activate_allboxes(tGrid *grid)
 int IndexOf_ith_ActiveBox(tGrid *grid, int i)
 {
   int b, nn=0;
+
+  if(grid->ninactive == 0) 
+  {
+    if(i>=0 && i < grid->nboxes) return i;
+    else                         return -1;
+  }
   forallboxes(grid,b)
   {
     if(nn==i) break;

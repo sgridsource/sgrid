@@ -10,7 +10,7 @@
    acu_ = (blocki) - (nsb1)*(nsb2)*(nsb3)*(activeboxes((vlv)->grid)) * vi; \
    abi_ = acu_/((nsb1)*(nsb2)*(nsb3)); \
    bi   = IndexOf_ith_ActiveBox((vlv)->grid, abi_); \
-   acu_ = acu_ - (nsb1)*(nsb2)*(nsb3) * bi; \
+   acu_ = acu_ - (nsb1)*(nsb2)*(nsb3) * abi_; \
    sbk  = acu_/((nsb1)*(nsb2)); \
    acu_ = acu_ - (nsb1)*(nsb2) * sbk; \
    sbj  = acu_/(nsb1); \
