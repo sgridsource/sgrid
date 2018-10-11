@@ -327,6 +327,7 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
 
   /* copy struct tGRID */
   g_new->nboxes     = g_old->nboxes;
+  g_new->ninactive  = g_old->ninactive;
   g_new->nvariables = g_old->nvariables;
   g_new->iteration  = g_old->iteration;
   g_new->time	    = g_old->time;
@@ -407,6 +408,7 @@ int copy_grid_withoutvars(tGrid *g_old, tGrid *g_new, int pr)
        b_new->periodic[i] = b_old->periodic[i];
 
     /* copy attributes of boxes */
+    b_new->inactive = b_old->inactive;
     for(i = 0; i < NATTRIBS; i++)
       b_new->Attrib[i] = b_old->Attrib[i];
 
@@ -563,4 +565,57 @@ int set_gridvars_toNULL(tGrid *g_new, int pr)
   if(pr) printgrid(g_new);
 
   return 1;
+}
+
+
+/**********************************************/
+/* functions to deactivate and activate boxes */
+/**********************************************/
+
+/* set grid->ninactive to number of boxes with with box->inactive==0 */
+void set_ninactive(tGrid *grid)
+{
+  int b, n=0;
+  forallboxes(grid,b) n++;
+  grid->ninactive = grid->nboxes - n;
+}
+
+/* set box->inactive = fl for a list */
+void set_box_inactiveflags(tGrid *grid, intList *ilist, int fl)
+{
+  int i;
+  for(i=0; i<ilist->n; i++) grid->box[ilist->e[i]]->inactive = fl;
+  set_ninactive(grid);
+}
+/* deactivate boxes in ilist */
+void deactivate_boxes(tGrid *grid, intList *ilist)
+{
+  set_box_inactiveflags(grid, ilist, 1);
+}
+/* activate boxes in ilist */
+void activate_boxes(tGrid *grid, intList *ilist)
+{
+  set_box_inactiveflags(grid, ilist, 0);
+}
+/* activate all boxes */
+void activate_allboxes(tGrid *grid)
+{
+  int b;
+  for(b=0; b<grid->nboxes; b++) grid->box[b]->inactive = 0;
+  set_ninactive(grid);
+}
+
+/* find index b of ith box that has box->inactive==0
+   e.g. if box[0]->inactive=1 and box[1]->inactive=0, 
+   IndexOf_ith_NonSkipBox(grid, 0) returns 1  */
+int IndexOf_ith_ActiveBox(tGrid *grid, int i)
+{
+  int b, nn=0;
+  forallboxes(grid,b)
+  {
+    if(nn==i) break;
+    nn++;
+  }
+  if(b < grid->nboxes) return b;
+  else                 return -1;
 }

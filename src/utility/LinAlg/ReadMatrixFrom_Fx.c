@@ -53,6 +53,7 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
   int b;
   double drop = Getd("LinAlg_setABStozero_below");
   int *offset;
+  int offset_prev, nnodes_prev;
 #ifndef LEVEL6_Pragmas
   tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
   tVarList *vlFx_p = vlalloc(grid_p);
@@ -69,10 +70,14 @@ void SetMatrixLines_slowly(tSparseVector **Aline,
 #endif
 
   /* set offsets */
-  offset = (int *) calloc( grid->nboxes, sizeof(int) );
-  offset[0] = 0;
-  for(b=1; b < grid->nboxes; b++)
-    offset[b] = offset[b-1] + (grid->box[b-1]->nnodes) * (vlx->n); 
+  offset = calloc( grid->nboxes, sizeof(int) );
+  offset_prev = nnodes_prev = 0;
+  forallboxes(grid, b)
+  {
+    offset[b] = offset_prev + nnodes_prev * (vlx->n);
+    offset_prev = offset[b];
+    nnodes_prev = grid->box[b]->nnodes;
+  }
 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);
@@ -355,6 +360,7 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
   int b;
   double drop = Getd("LinAlg_setABStozero_below");
   int *offset;
+  int offset_prev, nnodes_prev;
 #ifndef LEVEL6_Pragmas
   tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
   tVarList *vlFx_p = vlalloc(grid_p);
@@ -371,10 +377,14 @@ void SetMatrixColumns_slowly(tSparseVector **Acol,
 #endif
 
   /* set offsets */
-  offset = (int *) calloc( grid->nboxes, sizeof(int) );
-  offset[0] = 0;
-  for(b=1; b < grid->nboxes; b++)
-    offset[b] = offset[b-1] + (grid->box[b-1]->nnodes) * (vlx->n); 
+  offset = calloc( grid->nboxes, sizeof(int) );
+  offset_prev = nnodes_prev = 0;
+  forallboxes(grid, b)
+  {
+    offset[b] = offset_prev + nnodes_prev * (vlx->n);
+    offset_prev = offset[b];
+    nnodes_prev = grid->box[b]->nnodes;
+  }
 
   /* set x to zero */
   vladd(vlx, 0.0,NULL, 0.0,NULL);

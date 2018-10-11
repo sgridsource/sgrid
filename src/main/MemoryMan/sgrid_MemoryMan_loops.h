@@ -10,9 +10,17 @@
 #define forallpoints(box,i) \
   for (i = 0; i < box->nnodes; i++)
 
-/* loop over all boxes */
-#define forallboxes(grid,boxindex) \
+/* loop over all boxes no matter if they are active or not */
+#define forallActiveAndInactiveboxes(grid,boxindex) \
   for(boxindex=0; boxindex < grid->nboxes; boxindex++)
+
+/* number of active boxes */
+#define activeboxes(grid) ((grid)->nboxes - (grid)->ninactive)
+
+/* loop over all boxes that are active, same as: forallActiveboxes */
+#define forallboxes(grid,boxindex) \
+  for(boxindex=0; boxindex < grid->nboxes; boxindex++) \
+    if(!(grid->box[boxindex]->inactive))
 
 /* loop over all points in all boxes */
 #define forallgridpoints(grid,curbox, boxindex,ijk) \

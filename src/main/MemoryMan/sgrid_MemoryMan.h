@@ -100,6 +100,7 @@ typedef struct tBOX {
   int periodic[4];      /* periodic[1]=1 means direction1 is periodic */
   double bbox[6];	/* global bounding box */
   int ibbox[6];	        /* global bounding box in index range */
+  int inactive;         /* if inactive=1 we skip this box in forallboxes, forallVarsBoxesAndSubboxes_defIndices, ... */
   int Attrib[NATTRIBS]; /* Each box can have attributes. They are usually set
                            and used inside certain modules/Projects. */
   struct tBFACE **bface;  // list of pointers to tBface
@@ -110,9 +111,10 @@ typedef struct tBOX {
 typedef struct tGRID {
   tBox **box;	/* list of pointers to boxes */
   int nboxes;	/* number of boxes */
-  /* int nall;// sometimes e.g. Newton may need extra eqns that are not on any grid
-                 point. We can collect them in an extra box if nall>nboxes. We then
-                 replace forallboxes with e.g. forallof that loops over nall boxes.*/
+  int ninactive; /*  number of boxes with inactive=1 */ 
+         /* sometimes e.g. Newton may need extra eqns that are not on any grid
+            point. We can collect them in an extra box that we set inactive
+            in certain calculations. Or Newton may need to skip some boxes. */
   int nvariables;	/* number of variables */
   int iteration;	/* number of iterations */
   double time;	/* physical time */
@@ -208,9 +210,13 @@ typedef struct tVARLIST {
 
 /**************************************************************************/
 /* loops */
-
 #include "sgrid_MemoryMan_loops.h"
 
+/**************************************************************************/
+/* use lists with int entries */
+#define TYP int
+#include "list_templates.h"
+#undef TYP
 
 /**************************************************************************/
 /* functions */
@@ -224,7 +230,10 @@ int copy_grid(tGrid *g_old, tGrid *g_new, int pr);
 int copy_gridvar(int vi, tGrid *g_old, tGrid *g_new);
 int point_grid_tosamevars(tGrid *g_old, tGrid *g_new, int pr);
 int set_gridvars_toNULL(tGrid *g_new, int pr);
-
+void deactivate_boxes(tGrid *grid, intList *ilist);
+void activate_boxes(tGrid *grid, intList *ilist);
+void activate_allboxes(tGrid *grid);
+int IndexOf_ith_ActiveBox(tGrid *grid, int i);
 
 /* print.c */
 void printgrid(tGrid *g);
@@ -272,10 +281,6 @@ void enablesamevars(tGrid *grid, tGrid *newgrid);
 void realloc_gridvariables(tGrid *g, int nvariables);
 
 /* boxlists.c */
-/* use lists with int entries */
-#define TYP int
-#include "list_templates.h"
-#undef TYP
 void pr_boxlist(intList *bl);
 int bladd_ifAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl);
 int bladd_ifnotAttrib(tGrid *grid, int iAttr, int AttrVal, intList *bl);

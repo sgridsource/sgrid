@@ -38,7 +38,7 @@ tPointList *AllocatePointList(tGrid *grid)
 
   PL->blist = NULL;
   PL->nblist= 0;
-  forallboxes(grid,boxindex)
+  forallActiveAndInactiveboxes(grid,boxindex)
   {
     PL->npoints[boxindex] = 0;
     PL->point[boxindex] = NULL;
@@ -119,7 +119,7 @@ void FreePointList(tPointList *PL)
   {
     int boxindex;
 
-    forallboxes(PL->grid,boxindex)
+    forallActiveAndInactiveboxes(PL->grid,boxindex)
       free(PL->point[boxindex]);
 
     free(PL->npoints);
@@ -211,7 +211,7 @@ tPointList *DuplicatePointList_for_grid(tPointList *PL0, tGrid *grid)
   PL = AllocatePointList(grid);
 
   /* copy all point indices */
-  forallboxes(grid, b)
+  forallActiveAndInactiveboxes(grid, b)
   {
     ret=realloc(PL->point[b], (sizeof( *(PL->point[b]) ))*(PL0->npoints[b]+2));
     if(ret==NULL) 

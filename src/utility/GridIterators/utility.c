@@ -104,7 +104,7 @@ void copy_varlist_into_array_LEVEL3(tVarList *vlx, double *x)
   tGrid *grid = vlx->grid;
   int nvar = vlx->n;
   int bi;
-  
+errorexit("calc. of lb, li, line works only if box->skip==0 for all boxes");
   forallboxes(grid,bi)
   {
     tBox *box = grid->box[bi];
@@ -156,7 +156,7 @@ void copy_array_into_varlist_LEVEL3(double *x, tVarList *vlx)
   tGrid *grid = vlx->grid;
   int nvar = vlx->n;
   int bi;
-  
+errorexit("calc. of lb, li, line works only if box->skip==0 for all boxes");
   forallboxes(grid,bi)
   {
     tBox *box = grid->box[bi];

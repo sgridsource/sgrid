@@ -2,13 +2,14 @@
 /* Wolfgang Tichy 8/2008 */
 
 
-/* macro that loops over vars, boxes and subboxes */
+/* macro that loops over vars, active boxes and subboxes */
 #define forallVarsBoxesAndSubboxes_defIndices(vlv, blocki, vi,bi, sbi,sbj,sbk, nsb1,nsb2,nsb3) \
-  for(blocki=0; (blocki)<(nsb1)*(nsb2)*(nsb3)*(grid->nboxes)*((vlv)->n); (blocki)++) { \
-   int acu_, vi, bi, sbk, sbj, sbi; \
-   vi   = (blocki)/((nsb1)*(nsb2)*(nsb3)*((vlv)->grid->nboxes)); \
-   acu_ = (blocki) - (nsb1)*(nsb2)*(nsb3)*((vlv)->grid->nboxes) * vi; \
-   bi   = acu_/((nsb1)*(nsb2)*(nsb3)); \
+  for(blocki=0; (blocki)<(nsb1)*(nsb2)*(nsb3)*(activeboxes((vlv)->grid))*((vlv)->n); (blocki)++) { \
+   int acu_, vi, abi_,bi, sbk, sbj, sbi; \
+   vi   = (blocki)/((nsb1)*(nsb2)*(nsb3)*(activeboxes((vlv)->grid))); \
+   acu_ = (blocki) - (nsb1)*(nsb2)*(nsb3)*(activeboxes((vlv)->grid)) * vi; \
+   abi_ = acu_/((nsb1)*(nsb2)*(nsb3)); \
+   bi   = IndexOf_ith_ActiveBox((vlv)->grid, abi_); \
    acu_ = acu_ - (nsb1)*(nsb2)*(nsb3) * bi; \
    sbk  = acu_/((nsb1)*(nsb2)); \
    acu_ = acu_ - (nsb1)*(nsb2) * sbk; \
