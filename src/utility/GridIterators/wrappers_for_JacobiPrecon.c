@@ -376,7 +376,7 @@ int linSolve_with_BlockJacobi_precon(tVarList *x, tVarList *b,
   if(pr) printf("linSolve_with_BlockJacobi_precon\n");
 
   /* allocate memory for blocks in Blocks_JacobiPrecon struct */
-  nblocks = (b->n)*(grid->nboxes)*nsb1*nsb2*nsb3;
+  nblocks = (b->n)*(activeboxes(grid))*nsb1*nsb2*nsb3;
   Blocks_JacobiPrecon.nblocks = nblocks;
   Blocks_JacobiPrecon.type    = type;
   Blocks_JacobiPrecon.blockdims = calloc(nblocks, sizeof(int));
