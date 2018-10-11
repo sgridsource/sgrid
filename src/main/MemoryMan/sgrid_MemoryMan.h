@@ -232,6 +232,7 @@ int point_grid_tosamevars(tGrid *g_old, tGrid *g_new, int pr);
 int set_gridvars_toNULL(tGrid *g_new, int pr);
 void deactivate_boxes(tGrid *grid, intList *ilist);
 void activate_boxes(tGrid *grid, intList *ilist);
+void deactivate_allboxes(tGrid *grid);
 void activate_allboxes(tGrid *grid);
 int IndexOf_ith_ActiveBox(tGrid *grid, int i);
 

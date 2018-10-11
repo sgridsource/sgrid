@@ -597,6 +597,13 @@ void activate_boxes(tGrid *grid, intList *ilist)
 {
   set_box_inactiveflags(grid, ilist, 0);
 }
+/* deactivate all boxes */
+void deactivate_allboxes(tGrid *grid)
+{
+  int b;
+  for(b=0; b<grid->nboxes; b++) grid->box[b]->inactive = 1;
+  set_ninactive(grid);
+}
 /* activate all boxes */
 void activate_allboxes(tGrid *grid)
 {
