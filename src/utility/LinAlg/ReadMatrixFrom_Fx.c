@@ -773,7 +773,9 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
            vlind,b, sbi,nsb1-1, sbj,nsb2-1, sbk,nsb3-1);
   }
 
+#ifndef TOPLEVEL_Pragmas
   SGRID_LEVEL6_Pragma(omp parallel)
+#endif
   {
     tGrid *grid_p = make_empty_grid(grid->nvariables, 0);
     tBox *box_p = grid_p->box[b];
@@ -809,7 +811,9 @@ void SetMatrixColumns_ForOneVarInOneSubBox_slowly(tSparseVector **Acol,
     Fx(vlFx_p, vlx_p, vlc1_p, vlc2_p);
 
     /* loop over subbox */
+#ifndef TOPLEVEL_Pragmas
     SGRID_LEVEL6_Pragma(omp for)
+#endif
     for(i=i1; i<i2; i++) /* do i loop first since usually i2-i1 > k2-k1 */
     for(k=k1; k<k2; k++)
     for(j=j1; j<j2; j++)
