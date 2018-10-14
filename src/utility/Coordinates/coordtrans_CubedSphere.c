@@ -633,7 +633,11 @@ double CubedSphere_dsigma_dB(tBox *box, int si, int ind, double A, double B)
 /************************************************************************/
 /*
 This is for a trafo from (lam,A,B) to (r,A,B):
-Recall in e.g. dom1: r = (sig1-sig0)*lam + sig0
+Recall in e.g. dom1: 
+x = (a1-a0)*lam + a0,  y = A*x,  z = B*x
+==> r^2 = (1 + A^2 + B^2)*x^2 = (1 + A^2 + B^2) * ((a1-a0)*lam + a0)
+def: sig1 = a1 * sqrt(1 + A^2 + B^2),  sig0 = a0 * sqrt(1 + A^2 + B^2),  
+Thus:  r = (sig1-sig0)*lam + sig0
 Def: L = sig1-sig0,   so: r = L lam + sig0
 */
 double r_of_lam_sig0sig1(double lam, double sig0, double sig1)
@@ -662,7 +666,7 @@ int r_dr_dlam_of_lamAB_CubSph(tBox *box, int ind, double lam,
                               double A, double B, double *r, double *drdlam)
 {
   int type = box->CI->type;
-  double sigma0,sigma1;
+  double sig0,sig1;
   double sqrt_1_A2_B2 = sqrt(1.0 + A*A + B*B);
   double a0, a1;
 
@@ -672,36 +676,36 @@ int r_dr_dlam_of_lamAB_CubSph(tBox *box, int ind, double lam,
     /* this gives a pyramid frustum */
     a0 = box->CI->s[0];
     a1 = box->CI->s[1];
-    sigma0 = a0 * sqrt_1_A2_B2;
-    sigma1 = a1 * sqrt_1_A2_B2;
+    sig0 = a0 * sqrt_1_A2_B2;
+    sig1 = a1 * sqrt_1_A2_B2;
   }
   else if(type==innerCubedSphere)
   {
     /* this gives a cubed sphere piece where the inner surface is curved
        and the outer surface is flat */
-    sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
+    sig0 = CubedSphere_sigma(box, 0, ind, A,B);
     a1 = box->CI->s[1];
-    sigma1 = a1 * sqrt_1_A2_B2;
+    sig1 = a1 * sqrt_1_A2_B2;
   }
   else if(type==outerCubedSphere)
   {
     /* this gives a cubed sphere piece where the outer surface is curved
        and the inner one is flat */
     a0 = box->CI->s[0];
-    sigma0 = a0 * sqrt_1_A2_B2;
-    sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
+    sig0 = a0 * sqrt_1_A2_B2;
+    sig1 = CubedSphere_sigma(box, 1, ind, A,B);
   }
   else if(type==CubedShell)
   {
     /* this gives a cubed sphere where both inner outer surfaces are curved */
-    sigma0 = CubedSphere_sigma(box, 0, ind, A,B);
-    sigma1 = CubedSphere_sigma(box, 1, ind, A,B);
+    sig0 = CubedSphere_sigma(box, 0, ind, A,B);
+    sig1 = CubedSphere_sigma(box, 1, ind, A,B);
   }
   else errorexit("unknown type");
 
   /* set r and dr/dlam */
-  *r      = r_of_lam_sig0sig1(lam, sigma0, sigma1);
-  *drdlam = dr_dlam_of_lam_sig0sig1(lam, sigma0, sigma1);
+  *r      = r_of_lam_sig0sig1(lam, sig0, sig1);
+  *drdlam = dr_dlam_of_lam_sig0sig1(lam, sig0, sig1);
   return 0;
 }
 
