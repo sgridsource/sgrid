@@ -547,7 +547,7 @@ void vlsetconstant(tVarList *u, const double c)
   int i, n;
   int b;
 
-  for (b = 0; b < grid->nboxes; b++)
+  forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
     int nnodes = box->nnodes;
@@ -577,7 +577,7 @@ void vlcopy(tVarList *v, tVarList *u)
   /* copy time */
   v->time = u->time;
 
-  for (b = 0; b < grid->nboxes; b++)
+  forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
     int nnodes = box->nnodes;
@@ -628,7 +628,7 @@ void vlswap(tVarList *v, tVarList *u)
   v->time = u->time;
   u->time = temp;
 
-  for (b = 0; b < grid->nboxes; b++)
+  forallboxes(grid, b)
   {
     tBox *box = grid->box[b];
     int nnodes = box->nnodes;
@@ -671,7 +671,7 @@ void vlaverage(tVarList *r, tVarList *a, tVarList *b)
   int i, n;
   int bi;
 
-  for (bi = 0; bi < grid->nboxes; bi++)
+  forallboxes(grid, bi)
   {
     tBox *box = grid->box[bi];
     int nnodes = box->nnodes;
@@ -703,7 +703,7 @@ void vlsubtract(tVarList *r, tVarList *a, tVarList *b)
   int i, n;
   int bi;
 
-  for (bi = 0; bi < grid->nboxes; bi++)
+  forallboxes(grid, bi)
   {
     tBox *box = grid->box[bi];
     int nnodes = box->nnodes;
@@ -738,7 +738,7 @@ void vladd(tVarList *r, double ca, tVarList *a, double cb, tVarList *b)
   int i, n;
   int bi;
 
-  for (bi = 0; bi < grid->nboxes; bi++)
+  forallboxes(grid, bi)
   {
     tBox *box = grid->box[bi];
     int nnodes = box->nnodes;
@@ -797,7 +797,7 @@ void vladdto(tVarList *r, const double ca, tVarList *a)
 
   if (ca == 0) return;
   
-  for (bi = 0; bi < grid->nboxes; bi++)
+  forallboxes(grid, bi)
   {
     tBox *box = grid->box[bi];
     int nnodes = box->nnodes;
