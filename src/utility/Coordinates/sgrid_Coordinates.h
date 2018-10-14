@@ -129,6 +129,10 @@ int set_consistent_flags_in_all_bfaces(tGrid *grid);
 /* from populate_bfaces_AR.c */
 int populate_bfaces(tGrid *grid);
 
+/* from coordtrans_CubedSphere.c */
+int r_dr_dlam_of_lamAB_CubSph(tBox *box, int ind, double lam,
+                              double A, double B, double *r, double *drdlam);
+
 /* from setup_CubedSpheres.c */
 void disable_and_reset_CI_iSurf_vars(tBox *box);
 void disable_Coordinates_CubedSphere_sigma01(tBox *box);
