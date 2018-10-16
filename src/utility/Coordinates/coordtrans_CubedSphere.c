@@ -550,6 +550,47 @@ double interpolate_isig_in_plane1_at_p(tBox *box, int isig,
   return interp;
 }
 
+/* Functions to get sigma0/1 for cubed spheres at any point A,B.
+   box->CI->FSurf[0/1] is supposed to contain a function that returns sigma.
+   Here si is 0/1 */
+double CubedSphere_sigma_AB(tBox *box, int si, double A, double B)
+{
+  int n1, p, isig;
+
+  if(box->CI->useF) return box->CI->FSurf[si](box, A,B);
+
+  /* if useF=0 interpolate box vars */
+  n1 = box->n1;
+  p = (n1-1) * (si==1);   /* set plane index p */
+  isig = box->CI->iSurf[si]; /* get index of var with sigma */
+  return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
+}
+/* dsigma/dA and dsigma/dB are derivs of sigma. */
+double CubedSphere_dsigma_dA_AB(tBox *box, int si, double A, double B)
+{
+  int n1, p, isig;
+
+  if(box->CI->useF) return box->CI->dFSurfdX[si][2](box, A,B);
+
+  /* if useF=0 interpolate box vars */
+  n1 = box->n1;
+  p = (n1-1) * (si==1);   /* set plane index p */
+  isig = box->CI->idSurfdX[si][2]; /* get index of var with dsigma/dA */
+  return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
+}
+double CubedSphere_dsigma_dB_AB(tBox *box, int si, double A, double B)
+{
+  int n1, p, isig;
+
+  if(box->CI->useF) return box->CI->dFSurfdX[si][3](box, A,B);
+
+  /* if useF=0 interpolate box vars */
+  n1 = box->n1;
+  p = (n1-1) * (si==1);   /* set plane index p */
+  isig = box->CI->idSurfdX[si][3]; /* get index of var with dsigma/dB */
+  return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
+}
+
 
 /* Functions to get sigma0/1 for cubed spheres from box->CI->iSurf[0/1].
    box->CI->iSurf[0/1] is supposed to contain the index of the var where

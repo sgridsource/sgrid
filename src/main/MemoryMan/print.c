@@ -51,27 +51,53 @@ void printnode(tNode *n)
 void printCI(tBox *box)
 {
   tCoordInfo *CI = box->CI;
-  int i, j;
+  int i, j, p;
 
-  printf("b%d: CI->dom=%d CI->type=%d\n", box->b, CI->dom, CI->type);
-  printf("CI->iSurf[] = [ ");
-  for(i=0;i<6;i++) printf("%d ", CI->iSurf[i]);
-  printf("]\n");
-  printf("idSurfdX[][] = [");
-  for(i=0;i<6;i++)
+  printf("b%d: CI->dom=%d CI->type=%d CI->useF=%d\n",
+         box->b, CI->dom, CI->type, CI->useF);
+
+  /* iSurf */
+  for(i=p=0; i<6; i++) if(CI->iSurf[i]) p++;
+  if(p)
   {
-    for(j=1;j<4;j++) printf(" %d", CI->idSurfdX[i][j]);
-    printf(";");
+    printf("CI->iSurf[] = [ ");
+    for(i=0;i<6;i++) printf("%d ", CI->iSurf[i]);
+    printf("]\n");
+    printf("idSurfdX[][] = [");
+    for(i=0;i<6;i++)
+    {
+      for(j=1;j<4;j++) printf(" %d", CI->idSurfdX[i][j]);
+      printf(";");
+    }
+    printf("]\n");
   }
-  printf("]\n");
+
+  /* s, xc */
   printf("CI->s[] = [ ");
   for(i=0;i<6;i++) printf("%g ", CI->s[i]);
   printf("]\n");
   printf("CI->xc[] = [ ");
   for(i=0;i<4;i++) printf("%g ", CI->xc[i]);
   printf("]\n");
-}
 
+  /* FSurf */
+  if(CI->useF)
+  {
+    printf("CI->FSurf[] = [ ");
+    for(i=0;i<6;i++) printf("%p ", CI->FSurf[i]);
+    printf("]\n");
+    printf("dFSurfdX[][] = [");
+    for(i=0;i<6;i++)
+    {
+      for(j=1;j<4;j++) printf(" %p", CI->dFSurfdX[i][j]);
+      printf(";");
+    }
+    printf("]\n");
+    printf("CI->iFCoef[] = [ ");
+    for(i=0;i<6;i++) printf("%d ", CI->iFCoef[i]);
+    printf("]\n");
+  }
+}
 
 void printbface(tBface *bface)
 {
