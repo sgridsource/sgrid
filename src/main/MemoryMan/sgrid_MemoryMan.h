@@ -32,7 +32,7 @@ typedef struct tCOORDINFO {
                points and to initialize vals inside iSurf and idSurfdX */
   double (*FSurf[6])(tBox *box, double C1, double C2);  /* 6 funcs that return surface val, e.g. FSurf[0]=sigma */
   double (*dFSurfdX[6][4])(tBox *box, double C1, double C2);  /* funcs that return derivs of FSurf, dFSurfdX[0][1]=dSurf[0]/dX */
-  int iFCoef[6]; /* index of boxvar with coeffs for FSurf[6] */
+  int iFS[6]; /* index of boxvar with values that define FSurf[6] */
 } tCoordInfo;
 
 /*************************************************************************/

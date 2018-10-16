@@ -93,8 +93,8 @@ void printCI(tBox *box)
       printf(";");
     }
     printf("]\n");
-    printf("CI->iFCoef[] = [ ");
-    for(i=0;i<6;i++) printf("%d ", CI->iFCoef[i]);
+    printf("CI->iFS[] = [ ");
+    for(i=0;i<6;i++) printf("%d ", CI->iFS[i]);
     printf("]\n");
   }
 }
