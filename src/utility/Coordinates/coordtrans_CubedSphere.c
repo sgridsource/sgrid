@@ -785,7 +785,7 @@ int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
   }
   else if(dir==2)
   { /* A = rx/ry;   B = rz/ry; */
-    *Phi = Arg_plus(pm*A, pm);  // - z1*PI; // pm * Arg_plus(A, 1.);
+    *Phi = Arg_plus(pm*A, pm);
     *Theta = Arg_plus(B*sin(*Phi), 1.);
   }
   else /* dir==3 */
