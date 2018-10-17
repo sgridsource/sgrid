@@ -754,29 +754,7 @@ int r_dr_dlam_of_lamAB_CubSph(tBox *box, int ind, double lam,
 /************************************************************************/
 /* some functions to relate Theta,Phi and A,B                           */
 /************************************************************************/
-/* get arctan(Y/X), returns value in (-PI,PI] */
-double ArcTan_YoX(double Y, double X)
-{
-  double atan_YoX;
-
-  if(X==0.)
-  {
-    if(Y>0.) return  PIh;
-    if(Y<0.) return -PIh;
-    return 0.;
-  }
-  atan_YoX = atan(Y/X);
-
-  if(X<0.) return PI+atan_YoX;
-  return atan_YoX;
-}
-/* get arctan(Y/X), returns value in [0,2PI) */
-double ArcTan_YoX_0_2PI(double Y, double X)
-{
-  double at = ArcTan_YoX(Y, X);
-  if(at<0.) return 2.*PI + at;
-  return at;
-}
+/* Arg_plus(X,Y) gives arctan(Y/X), it returns a value in (-PI,PI] */
 
 /* get Theta, Phi from A,B in one box */
 int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
@@ -792,7 +770,7 @@ int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
   pm = p;                /* pm = +/- 1.0 */
   z1 = (1. - pm)*0.5;    /* z1 = 0 or 1 */
 
-errorexit("testme");
+//errorexit("testme");
   if(dir==1)
   { /* A = ry/rx;   B = rz/rx;
        rx = r*cos(Phi)*sin(Theta)
@@ -803,18 +781,19 @@ errorexit("testme");
        Phi = atan(ry/rx);
        A = ry/rx = tan(Phi);
        B = rz/rx = 1/(tan(Theta)*cos(Phi));  => tan(Theta) = 1/(B*cos(Phi)) */
-    *Phi = ArcTan_YoX_0_2PI(A, 1.) + z1*PI;
-    *Theta = ArcTan_YoX_0_2PI(1., pm*B*cos(*Phi));
+    *Phi = Arg_plus(pm, pm*A);
+    *Theta = Arg_plus(B*cos(*Phi), 1.);
   }
   else if(dir==2)
   { /* A = rx/ry;   B = rz/ry; */
-    *Phi = pm * ArcTan_YoX_0_2PI(1., A);
-    *Theta = ArcTan_YoX_0_2PI(1., B*sin(*Phi));
+    *Phi = Arg_plus(pm*A, pm);  // - z1*PI; // pm * Arg_plus(A, 1.);
+    *Theta = Arg_plus(B*sin(*Phi), 1.);
   }
   else /* dir==3 */
   { /* A = ry/rz;   B = rx/rz;   A/B = ry/rx; */
-    *Phi = ArcTan_YoX_0_2PI(A, B);
-    *Theta = ArcTan_YoX_0_2PI(B, cos(*Phi));
+    *Phi = Arg_plus(pm*B, pm*A);
+    *Theta = Arg_plus(cos(*Phi), B);
+errorexit("Theta is wrong");
   }
 
   return 0;
