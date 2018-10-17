@@ -30,8 +30,8 @@ typedef struct tCOORDINFO {
   int type; /* coordinate type, e.g. outerCubedSphere */
   int useF; /* if useF=1 we use the funcs below to get values between grid
                points and to initialize vals inside iSurf and idSurfdX */
-  double (*FSurf[6])(tBox *box, double C1, double C2);  /* 6 funcs that return surface val, e.g. FSurf[0]=sigma */
-  double (*dFSurfdX[6][4])(tBox *box, double C1, double C2);  /* funcs that return derivs of FSurf, dFSurfdX[0][1]=dSurf[0]/dX */
+  double (*FSurf[6])(tBox *box, int f, double C1, double C2); /* 6 funcs that return surface val, e.g. FSurf[0]=sigma */
+  double (*dFSurfdX[6][4])(tBox *box, int f, double C1, double C2); /* funcs that return derivs of FSurf, dFSurfdX[0][1]=dSurf[0]/dX */
   int iFS[6]; /* index of boxvar with values that define FSurf[6] */
 } tCoordInfo;
 

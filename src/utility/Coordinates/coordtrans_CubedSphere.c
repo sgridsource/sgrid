@@ -558,7 +558,7 @@ double CubedSphere_sigma_AB(tBox *box, int si, double A, double B)
 {
   int n1, p, isig;
 
-  if(box->CI->useF) return box->CI->FSurf[si](box, A,B);
+  if(box->CI->useF) return box->CI->FSurf[si](box, si, A,B);
 
   /* if useF=0 interpolate box vars */
   n1 = box->n1;
@@ -571,7 +571,7 @@ double CubedSphere_dsigma_dA_AB(tBox *box, int si, double A, double B)
 {
   int n1, p, isig;
 
-  if(box->CI->useF) return box->CI->dFSurfdX[si][2](box, A,B);
+  if(box->CI->useF) return box->CI->dFSurfdX[si][2](box, si, A,B);
 
   /* if useF=0 interpolate box vars */
   n1 = box->n1;
@@ -583,7 +583,7 @@ double CubedSphere_dsigma_dB_AB(tBox *box, int si, double A, double B)
 {
   int n1, p, isig;
 
-  if(box->CI->useF) return box->CI->dFSurfdX[si][3](box, A,B);
+  if(box->CI->useF) return box->CI->dFSurfdX[si][3](box, si, A,B);
 
   /* if useF=0 interpolate box vars */
   n1 = box->n1;
@@ -750,6 +750,76 @@ int r_dr_dlam_of_lamAB_CubSph(tBox *box, int ind, double lam,
   *drdlam = dr_dlam_of_lam_sig0sig1(lam, sig0, sig1);
   return 0;
 }
+
+/************************************************************************/
+/* some functions to relate Theta,Phi and A,B                           */
+/************************************************************************/
+/* get arctan(Y/X), returns value in (-PI,PI] */
+double ArcTan_YoX(double Y, double X)
+{
+  double atan_YoX;
+
+  if(X==0.)
+  {
+    if(Y>0.) return  PIh;
+    if(Y<0.) return -PIh;
+    return 0.;
+  }
+  atan_YoX = atan(Y/X);
+
+  if(X<0.) return PI+atan_YoX;
+  return atan_YoX;
+}
+/* get arctan(Y/X), returns value in [0,2PI) */
+double ArcTan_YoX_0_2PI(double Y, double X)
+{
+  double at = ArcTan_YoX(Y, X);
+  if(at<0.) return 2.*PI + at;
+  return at;
+}
+
+/* get Theta, Phi from A,B in one box */
+int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
+                          double *Theta, double *Phi)
+{
+  int domain = box->CI->dom;  /* get domain and type info from box */
+  int dir, p;
+  double pm, z1;
+
+  /* get direction, pm */
+  dir = domain/2 + 1;
+  p  = 2*(domain%2) - 1; /* p  = +/- 1 */
+  pm = p;                /* pm = +/- 1.0 */
+  z1 = (1. - pm)*0.5;    /* z1 = 0 or 1 */
+
+errorexit("testme");
+  if(dir==1)
+  { /* A = ry/rx;   B = rz/rx;
+       rx = r*cos(Phi)*sin(Theta)
+       ry = r*sin(Phi)*sin(Theta)
+       rz = r*cos(Theta)
+       ry/rx = tan(Phi);                rz/rx = 1/(tan(Theta)*cos(Phi));
+       rx/rz = cos(Phi)*tan(Theta)      rz/ry = 1/(tan(Theta)*sin(Phi));
+       Phi = atan(ry/rx);
+       A = ry/rx = tan(Phi);
+       B = rz/rx = 1/(tan(Theta)*cos(Phi));  => tan(Theta) = 1/(B*cos(Phi)) */
+    *Phi = ArcTan_YoX_0_2PI(A, 1.) + z1*PI;
+    *Theta = ArcTan_YoX_0_2PI(1., pm*B*cos(*Phi));
+  }
+  else if(dir==2)
+  { /* A = rx/ry;   B = rz/ry; */
+    *Phi = pm * ArcTan_YoX_0_2PI(1., A);
+    *Theta = ArcTan_YoX_0_2PI(1., B*sin(*Phi));
+  }
+  else /* dir==3 */
+  { /* A = ry/rz;   B = rx/rz;   A/B = ry/rx; */
+    *Phi = ArcTan_YoX_0_2PI(A, B);
+    *Theta = ArcTan_YoX_0_2PI(B, cos(*Phi));
+  }
+
+  return 0;
+}
+
 
 
 /************************************************************************/
