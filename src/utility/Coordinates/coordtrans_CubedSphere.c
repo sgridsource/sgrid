@@ -796,6 +796,16 @@ int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
         => Theta = atan(sqrt(A^2 + B^2)) = Arg(1, sqrt(A^2 + B^2))   */
     *Phi = Arg_plus(pm*B, pm*A);
     *Theta = Arg_plus(pm, sqrt(A*A + B*B));
+    /* Derivs of Phi, Theta using dArgdx and dArgdy:
+       dPhi/dA = B/sqrt(A^2 + B^2)   dPhi/dB = -A/sqrt(A^2 + B^2) 
+       dPhi/dA = cos(Phi)            dPhi/dB = -sin(Phi)
+       Theta =  Arg(1, s) => dTheta/ds = 1/(1+s^2)
+       dTheta/dA = dTheta/ds ds/dA
+       dTheta/dA = (1/(1+s^2)) A/sqrt(A^2 + B^2)
+       dTheta/dB = (1/(1+s^2)) B/sqrt(A^2 + B^2)
+       dTheta/dA = (1/(1+s^2)) sin(Phi)
+       dTheta/dB = (1/(1+s^2)) cos(Phi)
+       I.e. derivs are not continous across north pole!!! */
   }
 
   return 0;
