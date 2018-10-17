@@ -762,15 +762,14 @@ int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
 {
   int domain = box->CI->dom;  /* get domain and type info from box */
   int dir, p;
-  double pm, z1;
+  double pm;
 
   /* get direction, pm */
   dir = domain/2 + 1;
   p  = 2*(domain%2) - 1; /* p  = +/- 1 */
   pm = p;                /* pm = +/- 1.0 */
-  z1 = (1. - pm)*0.5;    /* z1 = 0 or 1 */
+  //z1 = (1. - pm)*0.5;  /* z1 = 0 or 1 */
 
-//errorexit("testme");
   if(dir==1)
   { /* A = ry/rx;   B = rz/rx;
        rx = r*cos(Phi)*sin(Theta)
@@ -790,10 +789,13 @@ int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
     *Theta = Arg_plus(B*sin(*Phi), 1.);
   }
   else /* dir==3 */
-  { /* A = ry/rz;   B = rx/rz;   A/B = ry/rx; */
+  { /* A = ry/rz;   B = rx/rz;   A/B = ry/rx;
+       A = sin(Phi)*tan(Theta)
+       B = cos(Phi)*tan(Theta)  => A/B = tan(Phi) => Phi = atan(A/B)= Arg(B,A)
+       s^2 = A^2 + B^2 = tan(Theta)^2
+        => Theta = atan(sqrt(A^2 + B^2)) = Arg(1, sqrt(A^2 + B^2))   */
     *Phi = Arg_plus(pm*B, pm*A);
-    *Theta = Arg_plus(cos(*Phi), B);
-errorexit("Theta is wrong");
+    *Theta = Arg_plus(pm, sqrt(A*A + B*B));
   }
 
   return 0;
