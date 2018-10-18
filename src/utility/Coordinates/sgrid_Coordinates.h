@@ -136,6 +136,9 @@ int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
                           double *Theta, double *Phi);
 
 /* from setup_CubedSpheres.c */
+void init_CubedSphere_from_CI_iFS(tBox *box, int si);
+void copy_CubedSphere_sigma01_inplane(tBox *box, int si,
+                                      int isigma_src, int isigma_dest);
 void disable_and_reset_CI_iSurf_vars(tBox *box);
 void disable_Coordinates_CubedSphere_sigma01(tBox *box);
 void compute_CubedSphere_dsigma01(tBox *box, int isigma,
@@ -162,3 +165,6 @@ int box_extremum_of_F_in_dir(tBox *box, int Fi, int dir, double C1, double C2,
 int find_i_Of_X(tBox *box, double X0);
 int find_j_Of_Y(tBox *box, double Y0);
 int find_k_Of_Z(tBox *box, double Z0);
+
+/* from FSurf_CubedSpheres.c */
+int FSurf_CubSph_init_from_CI_iFS(tBox *box, int si);

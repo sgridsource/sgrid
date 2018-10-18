@@ -7,6 +7,43 @@
 
 
 
+
+/* init box->CI->iSurf[si] and its derivs from values in box->CI->iFS[si] */
+void init_CubedSphere_from_CI_iFS(tBox *box, int si)
+{
+  if(box->CI->useF)
+    FSurf_CubSph_init_from_CI_iFS(box, si);
+  else /* copy from box->CI->iFS[si] */
+  {
+    int isigma    = box->CI->iSurf[si];
+    int isigma_dA = box->CI->idSurfdX[si][2];
+    int isigma_dB = box->CI->idSurfdX[si][3];
+
+    copy_CubedSphere_sigma01_inplane(box, si, box->CI->iFS[si], isigma);
+    /* and set derivs */
+    compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
+  }
+}
+
+/* copy a sigma */
+void copy_CubedSphere_sigma01_inplane(tBox *box, int si,
+                                      int isigma_src, int isigma_dest)
+{
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
+  int p = (n1-1) * (si==1);   /* set plane index p */
+  int i,j,k;
+  double *s = box->v[isigma_src];
+  double *d = box->v[isigma_dest];
+
+  forplane1(i,j,k, n1,n2,n3, p)
+  {
+    int ijk = Index(i,j,k);
+    d[ijk] = s[ijk];
+  }
+}
+
 /* set var sigma01 to a const in first or last plane of dir1,
    si selects plane: si=0: first, si=1: last */
 void set_const_CubedSphere_sigma01_inplane(tBox *box, int isigma, int si,
