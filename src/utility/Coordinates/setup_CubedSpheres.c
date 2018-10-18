@@ -8,25 +8,56 @@
 
 
 
-/* init box->CI->iSurf[si] and its derivs from values in box->CI->iFS[si] */
-void init_CubedSphere_from_CI_iFS(tBox *box, int si)
+/* init box->CI->iSurf[si] and its derivs by copying values
+   from box->CI->iFS[si] */
+void init_1CubedSphere_by_copying_CI_iFS(tBox *box, int si)
 {
+  int isigma, isigma_dA, isigma_dB;
   int iFS = box->CI->iFS[si];
+
+  //printf("init_1CubedSphere_by_copying_CI_iFS: si=%d\n", si);
 
   /* do nothing if box->CI->iFS[si] is not set */
   if(iFS<1) return;
   
-  if(box->CI->useF)
-    FSurf_CubSph_init_from_CI_iFS(box, si);
-  else /* copy from box->CI->iFS[si] */
-  {
-    int isigma    = box->CI->iSurf[si];
-    int isigma_dA = box->CI->idSurfdX[si][2];
-    int isigma_dB = box->CI->idSurfdX[si][3];
+  isigma    = box->CI->iSurf[si];
+  isigma_dA = box->CI->idSurfdX[si][2];
+  isigma_dB = box->CI->idSurfdX[si][3];
 
-    copy_CubedSphere_sigma01_inplane(box, si, iFS, isigma);
-    /* and set derivs */
-    compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
+  copy_CubedSphere_sigma01_inplane(box, si, iFS, isigma);
+  /* and set derivs */
+  compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
+
+  //printf("init_1CubedSphere_by_copying_CI_iFS: work done!\n");
+}
+
+/* init box->CI->iSurf[si] and its derivs from values in box->CI->iFS[si],
+   on the 6 boxes starting with index bi_dom0 */
+void init_6CubedSphereBoxes_from_CI_iFS(tGrid *grid, int bi_dom0)
+{
+  tBox *box = grid->box[bi_dom0];
+  int type = box->CI->type;
+  int dom  = box->CI->dom;
+
+  //printf("init_6CubedSphereBoxes_from_CI_iFS: bi_dom0=%d dom=%d\n",
+  //       bi_dom0,dom);
+
+  if(dom!=0) return; /* do nothing if this is not dom0 */
+
+  if(type==innerCubedSphere || type==outerCubedSphere || type==CubedShell)
+  {
+    if(box->CI->useF)
+      FSurf_CubSph_init6Boxes_from_CI_iFS(grid, bi_dom0);
+    else /* copy from box->CI->iFS[si] */
+    {
+      int i, si;
+      for(i=0; i<6; i++) /* loop over 6 boxes */
+      {
+        box = grid->box[bi_dom0 + i];
+        for(si=0; si<=1; si++) /* loop over lam=0 and lam=1 faces */
+          init_1CubedSphere_by_copying_CI_iFS(box, si);
+      }
+    }
   }
 }
 
@@ -294,8 +325,9 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
         enablevar_inbox(box, isigma);
         enablevar_inbox(box, isigma_dA);
         enablevar_inbox(box, isigma_dB);
-        init_CubedSphere_from_CI_iFS(box, 0);
-        init_CubedSphere_from_CI_iFS(box, 1);
+          /* wait until dom=5 and then set all 6 boxes from dom0 to dom5 */
+        if(box->CI->dom==5)
+          init_6CubedSphereBoxes_from_CI_iFS(grid, b0);
       }
     }
 

@@ -277,31 +277,66 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tBox *box, int si)
 /* initialize function FSurf_CubSph_sigma01_func and its coeffs in 
    isigma01_co of FSurf. Get coeffs from integrating over var in
    box->CI->iFS[si]. */
-int FSurf_CubSph_init_from_CI_iFS(tBox *box, int si)
+int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
 {
-  int n1 = box->n1;
-  int s  = si ? n1-1 : 0;  /* i-index of surface */
-  int iFS = box->CI->iFS[si];
-  int ret;
+  tBox *box = grid->box[bi_dom0];
+  int type = box->CI->type;
+  int dom  = box->CI->dom;
+  int ret =  -1;
+  int i, si, si0, si1;
 
-  /* set lmax we use */
-  /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
-     to store the table.
-     So when is (lmax*(lmax+1))/2 + lmax+1 = n1?
-     set L = lmax ==> L^2/2 + 3L/2 + 1 = n1  <==> L^2 + 3 L + 2 - 2*n1 = 0
-     so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n1)) = -3 +- sqrt(8*n1 + 1) 
-         L = (sqrt(8*n1 + 1) - 3)/2  */
-  lmax = 0.5*(sqrt(8.*n1 + 1.) - 3.);
+  if(dom!=0) return -1; /* do nothing if this is not dom0 */
 
-  /* save var indices */ 
-  isigma01_co        = Ind("Coordinates_CubedSphere_sigma01_co");
-  box->CI->FSurf[si] = FSurf_CubSph_sigma01_func;
+  /* figure out range of si */
+  switch(type)
+  {
+  case outerCubedSphere:
+    si0 = si1 = 1;
+    break;
+  case innerCubedSphere:
+    si0 = si1 = 0;
+    break;
+  case CubedShell:
+    si0 = 0;
+    si1 = 1;
+    break;
+  default:
+    si0 = +2; /* do not loop over si */
+    si1 = -1;
+  }
 
-  /* set coeffs co from values of sigma in FS */
-  ret=FSurf_CubSph_set_Ylm_coeffs(box, s, iFS,-1, lmax, isigma01_co);
+  /* loop if si0<=si1 */
+  for(si=si0; si<=si1; si++)
+  {
+    int n1 = box->n1;
+    /* set lmax we use */
+    /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
+       to store the table.
+       So when is (lmax*(lmax+1))/2 + lmax+1 = n1?
+       set L = lmax ==> L^2/2 + 3L/2 + 1 = n1  <==> L^2 + 3 L + 2 - 2*n1 = 0
+       so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n1)) = -3 +- sqrt(8*n1 + 1) 
+       L = (sqrt(8*n1 + 1) - 3)/2  */
+    lmax = 0.5*(sqrt(8.*n1 + 1.) - 3.);
 
-  /* set var box->CI->iSurf and its derivs */
-  ret=FSurf_CubSph_set_sigma01vars_from_sigma01_func(box, si);
+    /* save coeffs var index */ 
+    isigma01_co = Ind("Coordinates_CubedSphere_sigma01_co");
 
+    for(i=bi_dom0; i<6; i++) /* loop over 6 boxes */
+    {
+      box = grid->box[bi_dom0 + i];
+      int n1 = box->n1;
+      int s  = si ? n1-1 : 0;  /* i-index of surface */
+      int iFS = box->CI->iFS[si];
+
+      /* set surface function */
+      box->CI->FSurf[si] = FSurf_CubSph_sigma01_func;
+
+      /* set coeffs co from values of sigma in FS */
+      ret=FSurf_CubSph_set_Ylm_coeffs(box, s, iFS,-1, lmax, isigma01_co);
+
+      /* set var box->CI->iSurf and its derivs */
+      ret=FSurf_CubSph_set_sigma01vars_from_sigma01_func(box, si);
+    }
+  }
   return ret;
 }

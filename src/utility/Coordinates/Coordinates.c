@@ -709,8 +709,11 @@ int init_CoordTransform_And_Derivs(tGrid *grid)
       /* set Coordinates_CubedSphere_sigma01 and derivs, if it is on */
       if(box->v[isigdef]!=NULL)
       {
-        init_CubedSphere_from_CI_iFS(box, 0);
-        init_CubedSphere_from_CI_iFS(box, 1);
+        //printf("init_CoordTransform_And_D.. b=%d box->CI->dom=%d\n",
+        //       b, box->CI->dom);
+        /* wait until dom=5 and then set all 6 boxes from dom0 to dom5 */
+        if(box->CI->dom==5)
+          init_6CubedSphereBoxes_from_CI_iFS(grid, b-5);
       }
     }
     else if( Getv(str, "stretchedCubedSphere") )
