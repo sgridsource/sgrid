@@ -132,6 +132,8 @@ int populate_bfaces(tGrid *grid);
 /* from coordtrans_CubedSphere.c */
 int r_dr_dlam_of_lamAB_CubSph(tBox *box, int ind, double lam,
                               double A, double B, double *r, double *drdlam);
+int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
+                          double *Theta, double *Phi);
 
 /* from setup_CubedSpheres.c */
 void disable_and_reset_CI_iSurf_vars(tBox *box);

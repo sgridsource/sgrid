@@ -36,6 +36,10 @@ int sgrid_Coordinates(void)
   AddVar("Coordinates_CubedSphere_sigma01",     "", "sigma_{0/1}");
   AddVar("Coordinates_CubedSphere_dsigma01_dA", "", "d/dA sigma_{0/1}");
   AddVar("Coordinates_CubedSphere_dsigma01_dB", "", "d/dB sigma_{0/1}");
+  /* we should not set the above three explicitly, rather set the this one: */
+  AddVar("Coordinates_CubedSphere_sigma01_def", "", "var we use to define and "
+         "set the sigma_{0/1} in Coordinates_CubedSphere_sigma01");
+  AddVar("Coordinates_CubedSphere_sigma01_co",  "", "Ylm coeffs of sigma");
   
   /* parameters */
   for(b=0; b<nboxes; b++)
