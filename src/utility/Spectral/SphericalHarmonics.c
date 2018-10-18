@@ -230,8 +230,7 @@ int test_SphericalHarmonics(void)
             return -1;
           }
         }
-      printf("final l=%d m=%d  theta=%g phi=%g  dR=%g dI=%g\n",
-             l,m, theta,phi, dR,dI);
+      printf("l=%d m=%d  final theta,phi  dR=%g dI=%g\n", l,m, dR,dI);
     }
   exit(0);
   return 0;
