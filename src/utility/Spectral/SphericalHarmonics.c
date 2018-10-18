@@ -132,14 +132,15 @@ void set_YlmTabs(int lmax, double th, double ph, double *ReYtab, double *ImYtab)
 void Ylm_from_Tabs(int lmax, double *ReYtab, double *ImYtab, int l, int m,
                   double *ReYlm, double *ImYlm)
 {
-  int i = ind_lm(l,m);
+  int mm = abs(m);
+  int i = ind_lm(l,mm);
   double pm, cc;
 
   /* take care of case with negative m */
   if(m<0)
   {
-    pm = 1 - 2*(m%2); /* (-1)^m */
-    cc = -1.;         /* -1 for complex conj. */
+    pm = 1 - 2*(mm%2); /* (-1)^m */
+    cc = -1.;          /* -1 for complex conj. */
     *ReYlm = pm*ReYtab[i];
     *ImYlm = pm*ImYtab[i]*cc;
   }
@@ -153,43 +154,40 @@ void Ylm_from_Tabs(int lmax, double *ReYtab, double *ImYtab, int l, int m,
 /* some slow functions for testing */
 double Plm_slowly(int l, int m, double x)
 {
-  int i = ind_lm(l,m);
   double ret;
   double *Ptab = alloc_Plm_Tab(l);
 
   set_PlmTab(l, x, Ptab);
-  ret = Ptab[i];
+  ret = Plm_from_Tab(l, Ptab, l,m);
 
   free(Ptab);
   return ret;
 }
 double Re_Ylm_slowly(int l, int m, double theta, double phi)
 {
-  int i = ind_lm(l,m);
-  double ret;
+  double R, I;
   double *ReYtab = alloc_Plm_Tab(l);
   double *ImYtab = alloc_Plm_Tab(l);
 
   set_YlmTabs(l, theta, phi, ReYtab, ImYtab);
-  ret = ReYtab[i];
+  Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &R,&I);
 
   free(ImYtab);
   free(ReYtab);
-  return ret;
+  return R;
 }
 double Im_Ylm_slowly(int l, int m, double theta, double phi)
 {
-  int i = ind_lm(l,m);
-  double ret;
+  double R, I;
   double *ReYtab = alloc_Plm_Tab(l);
   double *ImYtab = alloc_Plm_Tab(l);
 
   set_YlmTabs(l, theta, phi, ReYtab, ImYtab);
-  ret = ImYtab[i];
+  Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &R,&I);
 
   free(ImYtab);
   free(ReYtab);
-  return ret;
+  return I;
 }
 
 
@@ -201,9 +199,11 @@ double Im_sYlm(int l, int m, int s, double theta, double phi);
 int test_SphericalHarmonics(void)
 {
   int l,m, lmax=4;
+  double *ReYtab = alloc_Plm_Tab(lmax);
+  double *ImYtab = alloc_Plm_Tab(lmax);
 
   for(l=0; l<=lmax; l++)
-    for(m=0; m<=l; m++)
+    for(m=-l; m<=l; m++)
     {
       double theta, phi, R1,I1, R2,I2, dR,dI;
       for(theta = 0.11; theta<3.0; theta+=0.51)
@@ -211,6 +211,10 @@ int test_SphericalHarmonics(void)
         {
           R1 = Re_Ylm_slowly(l,m, theta,phi);
           I1 = Im_Ylm_slowly(l,m, theta,phi);
+          /*
+          set_YlmTabs(l, theta, phi, ReYtab, ImYtab);
+          Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &R1,&I1);
+          */
           R2 = Re_sYlm(l,m,0, theta,phi);
           I2 = Im_sYlm(l,m,0, theta,phi);
           dR = R1 - R2;
@@ -219,19 +223,22 @@ int test_SphericalHarmonics(void)
           {
             printf("l=%d m=%d  theta=%g phi=%g  dR=%g dI=%g\n",
                    l,m, theta,phi, dR,dI);
-            /*
             printf("l=%d m=%d  theta=%g phi=%g  R1=%g I1=%g\n",
                    l,m, theta,phi, R1,I1);
             printf("l=%d m=%d  theta=%g phi=%g  R2=%g I2=%g\n",
                    l,m, theta,phi, R2,I2);
+            /*
             printf("PLegendre=%g\n", PLegendre(l,m, cos(theta)));
             printf("Plm_slowly=%g\n", Plm_slowly(l,m, cos(theta)));
             */
-            return -1;
+            //return -1;
           }
         }
       printf("l=%d m=%d  final theta,phi  dR=%g dI=%g\n", l,m, dR,dI);
     }
   exit(0);
+
+  free(ImYtab);
+  free(ReYtab);
   return 0;
 }
