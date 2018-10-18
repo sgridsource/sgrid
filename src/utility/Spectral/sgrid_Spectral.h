@@ -121,3 +121,9 @@ void spec_Coeffs_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
 void spec_Eval_varlist(tBox *box, tVarList *vlu, tVarList *vlc);
 void spec_interpolate_Var_from_grid2_to_grid1(tGrid *grid1, tGrid *grid2,
                                               int vind, int tempind);
+
+/* from SphericalHarmonics.c */
+double *alloc_Plm_Tab(int lmax);
+void set_YlmTabs(int lmax, double th, double ph, double *ReYtab,double *ImYtab);
+void Ylm_from_Tabs(int lmax, double *ReYtab, double *ImYtab, int l, int m,
+                  double *ReYlm, double *ImYlm);
