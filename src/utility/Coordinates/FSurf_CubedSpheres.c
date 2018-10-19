@@ -179,6 +179,9 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   double *Re_Integp;
   double *Im_Integp;
   double *Integ =  box->v[Integ_ind];
+  double *Xp = box->v[Ind("X")];
+  double *Yp = box->v[Ind("Y")];
+  double *Zp = box->v[Ind("Z")];
 
   //printf("lmax=%d\n", lmax);
 
@@ -206,15 +209,27 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   {
     i=0;
     for(l=0; l<=lmax; l++)
-    for(m=0; m<=l; m++) /* here we set only integrands for m>=0 */
+    for(m=0; m<=l; m++, i++) /* here we set only integrands for m>=0 */
     {
-      double R,I, RYlm,IYlm;
+      double R,I, RYlm,IYlm, lam,A,B, r,oor2,dr;
 
       /* get Re and Im part of data at surface where i=s */
       ijk=Index(s,j,k);
+      lam = Xp[ijk];
+      A   = Yp[ijk];
+      B   = Zp[ijk];
       R = Re_varp[ijk];
       if(Im_vind<=0) I = 0.; /* imag. part is zero */
       else           I = Im_varp[ijk];
+
+      /* We need to compute \int d\phi d\theta \sin(theta) (Y_l^m)^* var .
+         Later we actually compute  \int dA dB (Integ).
+         Now \int dA dB = d\phi d\theta \sin(theta) r^2.
+         So we need to devide by r^2 !!! */
+      r_dr_dlam_of_lamAB_CubSph(box,-1, lam,A,B, &r, &dr);
+      oor2 = 1./(r*r);
+      R = R * oor2;  /* divide R,I in integrand by r^2 */
+      I = I * oor2;
       
       /* get spherical harmonic Ylm */
       ijk=Index(i%N1,j,k);
@@ -228,7 +243,6 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
          psi_Integ = (Y, psi)  */
       Re_Integp[Ijk] = RYlm * R + IYlm * I;
       Im_Integp[Ijk] = RYlm * I - IYlm * R;
-      i++;
     }
   }
 
