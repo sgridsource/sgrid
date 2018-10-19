@@ -252,14 +252,14 @@ int FSurf_CubSph_set_Ylm_coeffs(tGrid *grid, int bi_dom0, int ico)
 
     /* find sum of co[ijk] over 6 boxes. This sum is the Ylm coeff. */
     sum = 0.;
-    for(ii=bi_dom0; ii<6; ii++) /* loop over 6 boxes */
+    for(ii=0; ii<6; ii++) /* loop over 6 boxes */
     {
       tBox *box = grid->box[bi_dom0 + ii];
       double *co = box->v[ico];
       sum += co[ijk];
     }
     /* now store sum back into co in all 6 boxes */
-    for(ii=bi_dom0; ii<6; ii++)
+    for(ii=0; ii<6; ii++)
     {
       tBox *box = grid->box[bi_dom0 + ii];
       double *co = box->v[ico];
@@ -350,7 +350,7 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
     /* save coeffs var index */ 
     isigma01_co = Ind("Coordinates_CubedSphere_sigma01_co");
 
-    for(i=bi_dom0; i<6; i++) /* loop over 6 boxes */
+    for(i=0; i<6; i++) /* loop over 6 boxes */
     {
       box = grid->box[bi_dom0 + i];
       int n1 = box->n1;
