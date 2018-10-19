@@ -323,6 +323,7 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
         // if(1) deform_CubedSphere_sigma01(box, isigdef, 0.2, -0.1);
         /* enable isigma and its derivs, and set them  */
         enablevar_inbox(box, isigma);
+        enablevar_inbox(box, isigma_co);
         enablevar_inbox(box, isigma_dA);
         enablevar_inbox(box, isigma_dB);
           /* wait until dom=5 and then set all 6 boxes from dom0 to dom5 */
