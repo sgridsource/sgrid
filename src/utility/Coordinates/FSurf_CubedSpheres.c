@@ -50,10 +50,25 @@ double FSurf_CubSph_sigma01_func(tBox *box, int si, double A, double B)
          (f,g) = int f^* g
          and define
          psi_mode = (Ylm, psi)  */
-      /* fv = \sum c_lm Ylm
-            = \sum (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
-                    i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )
-         We assume that fv is real: */
+      /* fv = \sum_{l,m} c_lm Ylm
+            = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                          i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )
+         fv = \sum_l [ c_{l0} Yl0 +
+                       \sum_{m=1}^l ( c_{l,m} Ylm + c_{l,-m} Ylm^* ) ]
+         We assume that fv is real:
+          => c_{l,-m} = c_{l,m}^* <----- WRONG!!!
+          => Re_c_{l,-m} = Re_c_lm,  Im_c_{l,-m} = -Im_c_lm
+         fv = \sum_l [ c_{l0} Yl0 +
+                      \sum_{m=1}^l ( c_{l,m} Ylm + c_{l,m}^* Ylm^* ) ]
+            = \sum_l [ c_{l0} Yl0 +
+                      \sum_{m=1}^l ((   Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                                      i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm  ) +
+                                    (   Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                                     -i Re_c_lm Im_Ylm - i Im_c_lm Re_Ylm  )) ]
+            = \sum_l [ c_{l0} Yl0 +
+                      \sum_{m=1}^l (( Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                                      Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm   )) ]
+             */
       fv += Rco*Re_Ylm - Ico*Im_Ylm;
     }
 
@@ -65,20 +80,17 @@ double FSurf_CubSph_sigma01_func(tBox *box, int si, double A, double B)
 
 /* put the sYlm in two variables on the grid */
 /*
-If we have output at the points of SphericalDF in sgrid I can use
 We can use spec_SurfaceIntegral to compute surface integrals.
 For each mode coeff we need, we could add one radial point.
 E.g. make vars for Re and Im where at
-i=0     we put rY_0^{0}  + iY_0^{0}
-i=1     we put rY_1^{-1} + iY_1^{-1}
-i=2     we put rY_1^{0}  + iY_1^{0}
-i=3     we put rY_1^{1}  + iY_1^{1}
-i=4     we put rY_2^{-2} + iY_2^{-2}
-i=5     we put rY_2^{-1} + iY_2^{-1}
-i=6     we put rY_2^{0}  + iY_2^{0}
-i=7     we put rY_2^{1}  + iY_2^{1}
-Then I can use spec_SurfaceIntegral over these vars to compute the real part
-of all coeffs.
+i=0     we put rY_0^{0} + iY_0^{0}
+i=1     we put rY_1^{0} + iY_1^{0}
+i=2     we put rY_1^{1} + iY_1^{1}
+i=3     we put rY_2^{0} + iY_2^{0}
+i=4     we put rY_2^{1} + iY_2^{1}
+i=5     we put rY_2^{2} + iY_2^{2}
+I.e. we use only positive m, because we integrate against real functions.
+Then I can use spec_SurfaceIntegral over these vars to compute the all coeffs.
 */
 /* NOTE: Re_Ylmp,Im_Ylmp have size N1*n2*n3 */                         
 int FSurf_CubSph_set_Ylm(tBox *box, int N1, double *Re_Ylmp, double *Im_Ylmp,
