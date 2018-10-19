@@ -79,7 +79,7 @@ double FSurf_CubSph_sigma01_func(tBox *box, int si, double A, double B)
 
 /* put the sYlm in two variables on the grid */
 /*
-We can use spec_SurfaceIntegral to compute surface integrals.
+We can use spec_2dIntegral to compute surface integrals.
 For each mode coeff we need, we could add one radial point.
 E.g. make vars for Re and Im where at
 i=0     we put rY_0^{0} + iY_0^{0}
@@ -89,7 +89,7 @@ i=3     we put rY_2^{0} + iY_2^{0}
 i=4     we put rY_2^{1} + iY_2^{1}
 i=5     we put rY_2^{2} + iY_2^{2}
 I.e. we use only positive m, because Y_l^{-m} = (-1)^m (Y_l^m)^* .
-Then I can use spec_SurfaceIntegral over these vars to compute the all coeffs.
+Then I can use spec_2dIntegral over these vars to compute the all coeffs.
 */
 /* NOTE: Re_Ylmp,Im_Ylmp have size N1*n2*n3, where N1=n1*S1 */                         
 int FSurf_CubSph_set_Ylm(tBox *box, int S1, double *Re_Ylmp, double *Im_Ylmp,
@@ -179,18 +179,21 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   double *Re_Integp;
   double *Im_Integp;
   double *Integ =  box->v[Integ_ind];
-  double *Xp = box->v[Ind("X")];
   double *Yp = box->v[Ind("Y")];
   double *Zp = box->v[Ind("Z")];
 
   //printf("lmax=%d\n", lmax);
+
+printf("VarName(Re_vind)=%s Re_vind=%d Re_varp[s]=%g\n",
+VarName(Re_vind),Re_vind, Re_varp[s]);
+//quick_Vars_output(box, VarName(Re_vind), 7,7);
 
   /* do we have imag. part in our var? */
   if(Im_vind>0) Im_varp = box->v[Im_vind];
   else          Im_varp = NULL;
 
   /* make room for all the Ylm's */
-  S1 = 1;     /* for now, otherwise we have use spec_SurfaceIntegral over */
+  S1 = 1;     /* for now, otherwise we have use spec_2dIntegral over */
   N1 = S1*n1; /* several segements */
   Re_Ylmp = calloc(N1*n2*n3, sizeof(double));
   Im_Ylmp = calloc(N1*n2*n3, sizeof(double));
@@ -211,25 +214,28 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
     for(l=0; l<=lmax; l++)
     for(m=0; m<=l; m++, i++) /* here we set only integrands for m>=0 */
     {
-      double R,I, RYlm,IYlm, lam,A,B, r,oor2,dr;
+      double R,I, RYlm,IYlm, A,B;
+      double Theta,Phi, dThetadA,dThetadB, dPhidA,dPhidB, Jac, fac;
 
-      /* get Re and Im part of data at surface where i=s */
+      /* get A,B and Re, Im part of data at surface where i=s */
       ijk=Index(s,j,k);
-      lam = Xp[ijk];
-      A   = Yp[ijk];
-      B   = Zp[ijk];
+      A = Yp[ijk];
+      B = Zp[ijk];
       R = Re_varp[ijk];
       if(Im_vind<=0) I = 0.; /* imag. part is zero */
       else           I = Im_varp[ijk];
 
       /* We need to compute \int d\phi d\theta \sin(theta) (Y_l^m)^* var .
          Later we actually compute  \int dA dB (Integ).
-         Now \int dA dB = d\phi d\theta \sin(theta) r^2.
-         So we need to devide by r^2 !!! */
-      r_dr_dlam_of_lamAB_CubSph(box, ijk, lam,A,B, &r, &dr);
-      oor2 = 1./(r*r);
-      R = R * oor2;  /* divide R,I in integrand by r^2 */
-      I = I * oor2;
+         Now \int d\phi d\theta \sin(theta) = \int dA dB Jac
+         So we need to multiply by the Jacobian  */
+      /* get Theta, Phi and their derivs */
+      ThetaPhi_dThetaPhidAB_of_AB_CubSph(box, A,B, &Theta,&Phi,
+                                         &dThetadA,&dThetadB, &dPhidA,&dPhidB);
+      Jac = fabs(dThetadA*dPhidB - dThetadB*dPhidA); /* Jacobian */
+      fac = Jac * sin(Theta);
+      R = R * fac;
+      I = I * fac;
       
       /* get spherical harmonic Ylm */
       ijk=Index(i%N1,j,k);
@@ -243,14 +249,20 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
          psi_Integ = (Y, psi)  */
       Re_Integp[Ijk] = RYlm * R + IYlm * I;
       Im_Integp[Ijk] = RYlm * I - IYlm * R;
+printf("b%ds%d Jac=%g R=%g RYlm=%g IYlm=%g @ %g %g\n",
+box->b,s, Jac, R, RYlm, IYlm, A,B);
+//quick_Array_output(box, Re_Integp, "Re_Integp", 8,8);
+
     }
   }
 
   /* integrate over surfaces */
-  spec_SurfaceIntegral(box,0, 1, Re_Integp, Re_Integp);
-  spec_SurfaceIntegral(box,0, 1, Im_Integp, Im_Integp);
+  spec_2dIntegral(box, 1, Re_Integp, Re_Integp);  
+  spec_2dIntegral(box, 1, Im_Integp, Im_Integp);
   // If we have more than one segment (S1>1) we need several more
-  // spec_SurfaceIntegral calls!
+  // spec_2dIntegral calls!
+
+quick_Array_output(box, Re_Integp, "Re_Integp", 9,9);
 
   /* Put Integs into var with index Integ_ind */
   offset = ((box->nnodes/2)*s)/(n1-1);  /* offset for Integs in Integ */
@@ -396,8 +408,8 @@ lmax=0;
       box->CI->FSurf[si] = FSurf_CubSph_sigma01_func;
 
       /* integrate (Ylm^* FS) and store results in co */
-      /* we need to set sigma from iFS so that integrals can work */
-      init_1CubedSphere_by_copying_CI_iFS(box, si);
+      ///* we need to set sigma from iFS so that integrals can work */
+      //init_1CubedSphere_by_copying_CI_iFS(box, si);
       ret=FSurf_CubSph_get_Ylm_integrals(box, s, iFS,-1, lmax, isigma01_co);
     }
   }
