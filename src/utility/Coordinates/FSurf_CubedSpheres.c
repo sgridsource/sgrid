@@ -175,7 +175,7 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   Im_Ylmp = calloc(N1*n2*n3, sizeof(double));
   Re_Integp = calloc(N1*n2*n3, sizeof(double));
   Im_Integp = calloc(N1*n2*n3, sizeof(double));
-  if(Re_Ylmp || Im_Ylmp || Re_Integp || Im_Integp)
+  if(Re_Ylmp==NULL || Im_Ylmp==NULL || Re_Integp==NULL || Im_Integp==NULL)
     errorexit("out of memory for Re_Ylmp, Im_Ylmp, ...");
 
   /* precompute the Ylm */
