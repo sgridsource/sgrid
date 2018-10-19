@@ -226,7 +226,7 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
          Later we actually compute  \int dA dB (Integ).
          Now \int dA dB = d\phi d\theta \sin(theta) r^2.
          So we need to devide by r^2 !!! */
-      r_dr_dlam_of_lamAB_CubSph(box,-1, lam,A,B, &r, &dr);
+      r_dr_dlam_of_lamAB_CubSph(box, ijk, lam,A,B, &r, &dr);
       oor2 = 1./(r*r);
       R = R * oor2;  /* divide R,I in integrand by r^2 */
       I = I * oor2;
@@ -381,7 +381,7 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
        so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n1)) = -3 +- sqrt(8*n1 + 1) 
        L = (sqrt(8*n1 + 1) - 3)/2  */
     lmax = 0.5*(sqrt(8.*n1 + 1.) - 3.);
-
+lmax=0;
     /* save coeffs var index */ 
     isigma01_co = Ind("Coordinates_CubedSphere_sigma01_co");
 
@@ -396,14 +396,21 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
       box->CI->FSurf[si] = FSurf_CubSph_sigma01_func;
 
       /* integrate (Ylm^* FS) and store results in co */
+      /* we need to set sigma from iFS so that integrals can work */
+      init_1CubedSphere_by_copying_CI_iFS(box, si);
       ret=FSurf_CubSph_get_Ylm_integrals(box, s, iFS,-1, lmax, isigma01_co);
-
-      /* set var box->CI->iSurf and its derivs */
-      ret=FSurf_CubSph_set_sigma01vars_from_sigma01_func(box, si);
     }
   }
   /* set coeffs co from values of integrals already in co */
   ret=FSurf_CubSph_set_Ylm_coeffs(grid, bi_dom0, isigma01_co);
+
+  /* set var box->CI->iSurf and its derivs */
+  for(si=si0; si<=si1; si++)
+    for(i=0; i<6; i++) /* loop over 6 boxes */
+    {
+      box = grid->box[bi_dom0 + i];
+      ret=FSurf_CubSph_set_sigma01vars_from_sigma01_func(box, si);
+    }
 
   return ret;
 }

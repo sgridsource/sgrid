@@ -645,3 +645,6 @@ double dA_dz_sCubedSphere(void *aux, int ind, double rho, double A, double B);
 double dB_dx_sCubedSphere(void *aux, int ind, double rho, double A, double B);
 double dB_dy_sCubedSphere(void *aux, int ind, double rho, double A, double B);
 double dB_dz_sCubedSphere(void *aux, int ind, double rho, double A, double B);
+
+/* setup_CubedSpheres.c */
+void init_1CubedSphere_by_copying_CI_iFS(tBox *box, int si);
