@@ -56,7 +56,15 @@ void printCI(tBox *box)
   printf("b%d: CI->dom=%d CI->type=%d CI->useF=%d\n",
          box->b, CI->dom, CI->type, CI->useF);
 
-  /* iSurf */
+  /* s, xc */
+  printf("CI->s[] = [ ");
+  for(i=0;i<6;i++) printf("%g ", CI->s[i]);
+  printf("]\n");
+  printf("CI->xc[] = [ ");
+  for(i=0;i<4;i++) printf("%g ", CI->xc[i]);
+  printf("]\n");
+
+  /* iFS, iSurf */
   for(i=p=0; i<6; i++) if(CI->iFS[i]) p++;
   if(p)
   {
@@ -75,27 +83,24 @@ void printCI(tBox *box)
     printf("]\n");
   }
 
-  /* s, xc */
-  printf("CI->s[] = [ ");
-  for(i=0;i<6;i++) printf("%g ", CI->s[i]);
-  printf("]\n");
-  printf("CI->xc[] = [ ");
-  for(i=0;i<4;i++) printf("%g ", CI->xc[i]);
-  printf("]\n");
-
   /* FSurf */
   if(CI->useF)
   {
     printf("CI->FSurf[] = [ ");
     for(i=0;i<6;i++) printf("%p ", CI->FSurf[i]);
     printf("]\n");
-    printf("dFSurfdX[][] = [");
-    for(i=0;i<6;i++)
+    for(i=p=0; i<6; i++) for(j=1;j<4;j++) if(CI->dFSurfdX[i][j]) p++;
+    if(p)
     {
-      for(j=1;j<4;j++) printf(" %p", CI->dFSurfdX[i][j]);
-      printf(";");
+
+      printf("dFSurfdX[][] = [");
+      for(i=0;i<6;i++)
+      {
+        for(j=1;j<4;j++) printf(" %p", CI->dFSurfdX[i][j]);
+        printf(";");
+      }
+      printf("]\n");
     }
-    printf("]\n");
   }
 }
 
