@@ -72,6 +72,8 @@ void set_PlmTab_for_l_GE_m(int lmax, int m, double x, double *P)
   Pmm = PLegendre(m,m, x);
   P[ind_lm(m,m)] = Pmm;
 
+  if(m == lmax) return;
+
   /* set P_{m+1}^m = x*(2*m+1) P_m^m */
   Pmp1_m = x*(2*m+1)*Pmm;
   P[ind_lm(m+1,m)] = Pmp1_m;
