@@ -141,12 +141,12 @@ int FSurf_CubSph_set_Ylm(tBox *box, int N1, double *Re_Ylmp, double *Im_Ylmp,
 }
 
 
-/* Compute coeffs of var that has real part at varindex Re_vind and imag.
-   part at Im_vind. Do integral over surface with index i=s in X-dir.
-   Put coeffs into var with index co_ind.
+/* Compute integrals of (Ylm^* var) that has real part at varindex Re_vind and
+   imag. part at Im_vind. Do integrals over surface with index i=s in X-dir.
+   Put integrals into var with index Integ_ind.
    If var has zero imag. part set Im_vind=-1. */
-int FSurf_CubSph_set_Ylm_coeffs(tBox *box, int s, int Re_vind, int Im_vind,
-                                int lmax, int co_ind)
+int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
+                                   int lmax, int Integ_ind)
 {
   int l,m, i,j,k, ijk, Ijk;
   int n1=box->n1;
@@ -154,16 +154,15 @@ int FSurf_CubSph_set_Ylm_coeffs(tBox *box, int s, int Re_vind, int Im_vind,
   int n3=box->n3;
   int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
   int N1;                               /* X-dim of Re_Ylmp,Im_Ylmp arrays */
-  int offset; /* offset used to write into var co_ind */
+  int offset; /* offset used to write into var Integ_ind */
   double *Re_varp = box->v[Re_vind];
   double *Im_varp;
   double *Re_Ylmp;
   double *Im_Ylmp;
-  double *Re_coeffp;
-  double *Im_coeffp;
-  double *co =  box->v[co_ind];
+  double *Re_Integp;
+  double *Im_Integp;
+  double *Integ =  box->v[Integ_ind];
 
-  //printf("FSurf_CubSph_set_Ylm_coeffs: Computing coeffs\n");
   //printf("lmax=%d\n", lmax);
 
   /* do we have imag. part in our var? */
@@ -174,15 +173,14 @@ int FSurf_CubSph_set_Ylm_coeffs(tBox *box, int s, int Re_vind, int Im_vind,
   N1 = n1; /* for now because spec_SurfaceIntegral only works then */
   Re_Ylmp = calloc(N1*n2*n3, sizeof(double));
   Im_Ylmp = calloc(N1*n2*n3, sizeof(double));
-  Re_coeffp = calloc(N1*n2*n3, sizeof(double));
-  Im_coeffp = calloc(N1*n2*n3, sizeof(double));
-  if(Re_Ylmp || Im_Ylmp || Re_coeffp || Im_coeffp)
+  Re_Integp = calloc(N1*n2*n3, sizeof(double));
+  Im_Integp = calloc(N1*n2*n3, sizeof(double));
+  if(Re_Ylmp || Im_Ylmp || Re_Integp || Im_Integp)
     errorexit("out of memory for Re_Ylmp, Im_Ylmp, ...");
 
   /* precompute the Ylm */
   FSurf_CubSph_set_Ylm(box, N1, Re_Ylmp, Im_Ylmp, lmax);
   if(N1!=n1) errorexit("implement case where N1!=n1");
-
 
   /* set integrands */
   for(k=0; k<n3; k++)
@@ -208,37 +206,68 @@ int FSurf_CubSph_set_Ylm_coeffs(tBox *box, int s, int Re_vind, int Im_vind,
       /* There is a choice of sign here: define the inner product by
          (f,g) = int f^* g
          and define
-         psi_coeff = (Y, psi)  */
-      Re_coeffp[Ijk] = RYlm * R + IYlm * I;
-      Im_coeffp[Ijk] = RYlm * I - IYlm * R;
+         psi_Integ = (Y, psi)  */
+      Re_Integp[Ijk] = RYlm * R + IYlm * I;
+      Im_Integp[Ijk] = RYlm * I - IYlm * R;
       i++;
     }
   }
 
   /* integrate over surfaces */
-  spec_SurfaceIntegral(box,0, 1, Re_coeffp, Re_coeffp);
-  spec_SurfaceIntegral(box,0, 1, Im_coeffp, Im_coeffp);
+  spec_SurfaceIntegral(box,0, 1, Re_Integp, Re_Integp);
+  spec_SurfaceIntegral(box,0, 1, Im_Integp, Im_Integp);
 
-  /* Put coeffs into var with index co_ind */
-  offset = ((box->nnodes/2)*s)/(n1-1);  /* offset for coeffs in co */
+  /* Put Integs into var with index Integ_ind */
+  offset = ((box->nnodes/2)*s)/(n1-1);  /* offset for Integs in Integ */
   ijk = offset;
   i = 0;
   for(l=0; l<=lmax; l++)
   for(m=-l; m<=l; m++)
   {
-    /* set Re and Im part of coeff */
-    co[ijk++] = Re_coeffp[i];
-    co[ijk++] = Im_coeffp[i];
+    /* set Re and Im part of Integ */
+    Integ[ijk++] = Re_Integp[i];
+    Integ[ijk++] = Im_Integp[i];
     i++;
   }
 
-  free(Im_coeffp);
-  free(Re_coeffp);
+  free(Im_Integp);
+  free(Re_Integp);
   free(Im_Ylmp);
   free(Re_Ylmp);
   return 0;
 }
 
+/* take integrals over all six boxes and add them such that they become
+   the coeffs in the Ylm expansion */
+int FSurf_CubSph_set_Ylm_coeffs(tGrid *grid, int bi_dom0, int ico)
+{
+  tBox *box0 = grid->box[bi_dom0];
+  int ijk;
+
+  /* ijk loop in box0, assumes all 6 boxes have same n1,n2,n3 */
+  forallpoints(box0, ijk)
+  {
+    int ii;
+    double sum;
+
+    /* find sum of co[ijk] over 6 boxes. This sum is the Ylm coeff. */
+    sum = 0.;
+    for(ii=bi_dom0; ii<6; ii++) /* loop over 6 boxes */
+    {
+      tBox *box = grid->box[bi_dom0 + ii];
+      double *co = box->v[ico];
+      sum += co[ijk];
+    }
+    /* now store sum back into co in all 6 boxes */
+    for(ii=bi_dom0; ii<6; ii++)
+    {
+      tBox *box = grid->box[bi_dom0 + ii];
+      double *co = box->v[ico];
+      co[ijk] = sum;
+    }
+  }
+  return 0;
+}
 
 /* set var box->CI->iSurf and its derivs from FSurf_CubSph_sigma01_func */
 int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tBox *box, int si)
@@ -331,12 +360,15 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
       /* set surface function */
       box->CI->FSurf[si] = FSurf_CubSph_sigma01_func;
 
-      /* set coeffs co from values of sigma in FS */
-      ret=FSurf_CubSph_set_Ylm_coeffs(box, s, iFS,-1, lmax, isigma01_co);
+      /* integrate (Ylm^* FS) and store results in co */
+      ret=FSurf_CubSph_get_Ylm_integrals(box, s, iFS,-1, lmax, isigma01_co);
 
       /* set var box->CI->iSurf and its derivs */
       ret=FSurf_CubSph_set_sigma01vars_from_sigma01_func(box, si);
     }
   }
+  /* set coeffs co from values of integrals already in co */
+  ret=FSurf_CubSph_set_Ylm_coeffs(grid, bi_dom0, isigma01_co);
+
   return ret;
 }
