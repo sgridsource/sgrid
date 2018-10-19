@@ -184,9 +184,9 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
 
   //printf("lmax=%d\n", lmax);
 
-printf("VarName(Re_vind)=%s Re_vind=%d Re_varp[s]=%g\n",
-VarName(Re_vind),Re_vind, Re_varp[s]);
-//quick_Vars_output(box, VarName(Re_vind), 7,7);
+  //printf("VarName(Re_vind)=%s Re_vind=%d Re_varp[s]=%g\n",
+  //VarName(Re_vind),Re_vind, Re_varp[s]);
+  //quick_Vars_output(box, VarName(Re_vind), 7,7);
 
   /* do we have imag. part in our var? */
   if(Im_vind>0) Im_varp = box->v[Im_vind];
@@ -249,10 +249,9 @@ VarName(Re_vind),Re_vind, Re_varp[s]);
          psi_Integ = (Y, psi)  */
       Re_Integp[Ijk] = RYlm * R + IYlm * I;
       Im_Integp[Ijk] = RYlm * I - IYlm * R;
-printf("b%ds%d Jac=%g R=%g RYlm=%g IYlm=%g @ %g %g\n",
-box->b,s, Jac, R, RYlm, IYlm, A,B);
-//quick_Array_output(box, Re_Integp, "Re_Integp", 8,8);
-
+      //printf("b%ds%d Jac=%g R=%g RYlm=%g IYlm=%g @ %g %g\n",
+      //box->b,s, Jac, R, RYlm, IYlm, A,B);
+      //quick_Array_output(box, Re_Integp, "Re_Integp", 8,8);
     }
   }
 
@@ -262,7 +261,7 @@ box->b,s, Jac, R, RYlm, IYlm, A,B);
   // If we have more than one segment (S1>1) we need several more
   // spec_2dIntegral calls!
 
-quick_Array_output(box, Re_Integp, "Re_Integp", 9,9);
+  //quick_Array_output(box, Re_Integp, "Re_Integp", 9,9);
 
   /* Put Integs into var with index Integ_ind */
   offset = ((box->nnodes/2)*s)/(n1-1);  /* offset for Integs in Integ */
@@ -393,7 +392,7 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
        so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n1)) = -3 +- sqrt(8*n1 + 1) 
        L = (sqrt(8*n1 + 1) - 3)/2  */
     lmax = 0.5*(sqrt(8.*n1 + 1.) - 3.);
-lmax=0;
+
     /* save coeffs var index */ 
     isigma01_co = Ind("Coordinates_CubedSphere_sigma01_co");
 
@@ -415,6 +414,7 @@ lmax=0;
   }
   /* set coeffs co from values of integrals already in co */
   ret=FSurf_CubSph_set_Ylm_coeffs(grid, bi_dom0, isigma01_co);
+  //quick_Vars_output(box, "Coordinates_CubedSphere_sigma01_co", 9,9);
 
   /* set var box->CI->iSurf and its derivs */
   for(si=si0; si<=si1; si++)
