@@ -556,39 +556,45 @@ double interpolate_isig_in_plane1_at_p(tBox *box, int isig,
    Here si is 0/1. */
 double CubedSphere_sigma_AB(tBox *box, int si, double A, double B)
 {
+  tCoordInfo *CI = box->CI;
   int n1, p, isig;
 
-  if(box->CI->useF) return box->CI->FSurf[si](box, si, A,B);
+  if(CI->useF && CI->FSurf[si] != NULL)
+    return       CI->FSurf[si](box, si, A,B);
 
   /* if useF=0 interpolate box vars */
   n1 = box->n1;
   p = (n1-1) * (si==1);   /* set plane index p */
-  isig = box->CI->iSurf[si]; /* get index of var with sigma */
+  isig = CI->iSurf[si]; /* get index of var with sigma */
   return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
 }
 /* dsigma/dA and dsigma/dB are derivs of sigma. */
 double CubedSphere_dsigma_dA_AB(tBox *box, int si, double A, double B)
 {
+  tCoordInfo *CI = box->CI;
   int n1, p, isig;
 
-  if(box->CI->useF) return box->CI->dFSurfdX[si][2](box, si, A,B);
+  if(CI->useF && CI->dFSurfdX[si][2] != NULL)
+    return       CI->dFSurfdX[si][2](box, si, A,B);
 
   /* if useF=0 interpolate box vars */
   n1 = box->n1;
   p = (n1-1) * (si==1);   /* set plane index p */
-  isig = box->CI->idSurfdX[si][2]; /* get index of var with dsigma/dA */
+  isig = CI->idSurfdX[si][2]; /* get index of var with dsigma/dA */
   return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
 }
 double CubedSphere_dsigma_dB_AB(tBox *box, int si, double A, double B)
 {
+  tCoordInfo *CI = box->CI;
   int n1, p, isig;
 
-  if(box->CI->useF) return box->CI->dFSurfdX[si][3](box, si, A,B);
+  if(CI->useF && CI->dFSurfdX[si][3] != NULL)
+    return       CI->dFSurfdX[si][3](box, si, A,B);
 
   /* if useF=0 interpolate box vars */
   n1 = box->n1;
   p = (n1-1) * (si==1);   /* set plane index p */
-  isig = box->CI->idSurfdX[si][3]; /* get index of var with dsigma/dB */
+  isig = CI->idSurfdX[si][3]; /* get index of var with dsigma/dB */
   return interpolate_isig_in_plane1_at_p(box, isig, p, A,B, 1);
 }
 
