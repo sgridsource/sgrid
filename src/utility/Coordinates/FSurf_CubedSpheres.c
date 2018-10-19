@@ -21,6 +21,7 @@ double FSurf_CubSph_sigma01_func(tBox *box, int si, double A, double B)
   int N = box->nnodes;
   int offset = si ? N/2 : 0;  /* offset for coeffs in co */
   int ijk, l,m;
+  double sm;
   double *co = box->v[isigma01_co];
   double fv, Theta,Phi;
   double *ReYtab = alloc_Plm_Tab(lmax);
@@ -35,13 +36,15 @@ double FSurf_CubSph_sigma01_func(tBox *box, int si, double A, double B)
   /* get func val fv at Theta,Phi */
   fv = 0.;
   ijk=offset;
+  /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
   for(l=0; l<=lmax; l++)
-    for(m=-l; m<=l; m++)
+    for(sm=1., m=0;  m<=l;  m++, sm=-sm)
     {
-      double Rco, Ico, Re_Ylm, Im_Ylm;
+      double Rclm, Iclm, Re_Ylm, Im_Ylm;
+      double Rclmm, Iclmm, Re_Ylmm, Im_Ylmm;
       /* get real and imag part of coeffs in co */
-      Rco = co[ijk++];
-      Ico = co[ijk++];
+      Rclm = co[ijk++];
+      Iclm = co[ijk++];
 
       /* get Ylm at Theta,Phi */
       Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
@@ -50,28 +53,24 @@ double FSurf_CubSph_sigma01_func(tBox *box, int si, double A, double B)
          (f,g) = int f^* g
          and define
          psi_mode = (Ylm, psi)  */
-      /* fv = \sum_{l,m} c_lm Ylm
-            = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
-                          i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )
-         fv = \sum_l [ c_{l0} Yl0 +
-                       \sum_{m=1}^l ( c_{l,m} Ylm + c_{l,-m} Ylm^* ) ]
-         We assume that fv is real:
-          => c_{l,-m} = c_{l,m}^* <----- WRONG!!!
-          => Re_c_{l,-m} = Re_c_lm,  Im_c_{l,-m} = -Im_c_lm
-         fv = \sum_l [ c_{l0} Yl0 +
-                      \sum_{m=1}^l ( c_{l,m} Ylm + c_{l,m}^* Ylm^* ) ]
-            = \sum_l [ c_{l0} Yl0 +
-                      \sum_{m=1}^l ((   Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
-                                      i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm  ) +
-                                    (   Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
-                                     -i Re_c_lm Im_Ylm - i Im_c_lm Re_Ylm  )) ]
-            = \sum_l [ c_{l0} Yl0 +
-                      \sum_{m=1}^l (( Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
-                                      Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm   )) ]
-             */
-      fv += Rco*Re_Ylm - Ico*Im_Ylm;
-    }
+      /* fv = \sum_{l,m} c_l^m Y_l^m
+         fv = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                          i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )  */
+      /* fv = \sum_{l,m} c_l^m Y_l^m
+            = \sum_l [ c_l^0 Y_l^0 +
+                      \sum_{m=1}^l ( c_l^m Y_l^m + c_l^{-m} Y_l^{-m} ) ]
+         Note: Y_l^{-m} = (-1)^m (Y_l^m)^*  <--always
+               c_l^{-m} = (-1)^m (c_l^m)^*  <--if fv is real */
+      Re_Ylmm =  sm*Re_Ylm;
+      Im_Ylmm = -sm*Im_Ylm;
+      Rclmm =  sm*Rclm; /* assuming fv is real */
+      Iclmm = -sm*Iclm;
 
+      if(m==0)
+        fv += Rclm*Re_Ylm;
+      else /* assuming fv is real */
+        fv += Rclm*Re_Ylm - Iclm*Im_Ylm + Rclmm*Re_Ylmm - Iclmm*Im_Ylmm;
+    }
   free(ImYtab);
   free(ReYtab);
   return fv;
@@ -89,21 +88,23 @@ i=2     we put rY_1^{1} + iY_1^{1}
 i=3     we put rY_2^{0} + iY_2^{0}
 i=4     we put rY_2^{1} + iY_2^{1}
 i=5     we put rY_2^{2} + iY_2^{2}
-I.e. we use only positive m, because we integrate against real functions.
+I.e. we use only positive m, because Y_l^{-m} = (-1)^m (Y_l^m)^* .
 Then I can use spec_SurfaceIntegral over these vars to compute the all coeffs.
 */
-/* NOTE: Re_Ylmp,Im_Ylmp have size N1*n2*n3 */                         
-int FSurf_CubSph_set_Ylm(tBox *box, int N1, double *Re_Ylmp, double *Im_Ylmp,
+/* NOTE: Re_Ylmp,Im_Ylmp have size N1*n2*n3, where N1=n1*S1 */                         
+int FSurf_CubSph_set_Ylm(tBox *box, int S1, double *Re_Ylmp, double *Im_Ylmp,
                          int lmax)
 {
   int n1=box->n1;
   int n2=box->n2;
   int n3=box->n3;
+  int Ng=n1*n2*n3;
   double *Yp = box->v[Ind("Y")];
   double *Zp = box->v[Ind("Z")];
   double *ReYtab = alloc_Plm_Tab(lmax);
   double *ImYtab = alloc_Plm_Tab(lmax);
   int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
+  int N1 = n1*S1; /* i-range of Re_Ylmp,Im_Ylmp arrays */
   int l,m, i,j,k, ijk, Ijk;
 
   if(nYs>N1) errorexit("size of Re_Ylmp,Im_Ylmp arrays is too small");
@@ -130,8 +131,9 @@ int FSurf_CubSph_set_Ylm(tBox *box, int N1, double *Re_Ylmp, double *Im_Ylmp,
     /* make tables of Ylm at Theta,Phi */
     set_YlmTabs(lmax, theta,phi, ReYtab, ImYtab);
 
+    /* set all Ylm with positive m, since Y_l^{-m} = (-1)^m (Y_l^m)^* */
     for(l=0; l<=lmax; l++)
-    for(m=-l; m<=l; m++)
+    for(m=0; m<=l; m++)
     {
       /* get Ylm at theta,phi */
       Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
@@ -139,7 +141,8 @@ int FSurf_CubSph_set_Ylm(tBox *box, int N1, double *Re_Ylmp, double *Im_Ylmp,
       /* set spherical harmonic Ylm at point ijk. 
          NOTE: Re_Ylmp and Im_Ylmp may not be on the grid and thus have a
          different range for the index i */
-      Ijk=Ind_n1n2(i,j,k, N1,n2);
+      ijk=Index(i%N1,j,k);
+      Ijk=ijk + Ng*(i/N1);
       Re_Ylmp[Ijk] = Re_Ylm;
       Im_Ylmp[Ijk] = Im_Ylm;
       i++;
@@ -164,8 +167,10 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   int n1=box->n1;
   int n2=box->n2;
   int n3=box->n3;
+  int Ng=n1*n2*n3;
   int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
-  int N1;                               /* X-dim of Re_Ylmp,Im_Ylmp arrays */
+  int N1;                               /* i-range of Re_Ylmp,Im_Ylmp arrays */
+  int S1;                               /* num. of segments: S1 = N1/n1 */
   int offset; /* offset used to write into var Integ_ind */
   double *Re_varp = box->v[Re_vind];
   double *Im_varp;
@@ -182,7 +187,8 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   else          Im_varp = NULL;
 
   /* make room for all the Ylm's */
-  N1 = n1; /* for now because spec_SurfaceIntegral only works then */
+  S1 = 1;     /* for now, otherwise we have use spec_SurfaceIntegral over */
+  N1 = S1*n1; /* several segements */
   Re_Ylmp = calloc(N1*n2*n3, sizeof(double));
   Im_Ylmp = calloc(N1*n2*n3, sizeof(double));
   Re_Integp = calloc(N1*n2*n3, sizeof(double));
@@ -191,7 +197,7 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
     errorexit("out of memory for Re_Ylmp, Im_Ylmp, ...");
 
   /* precompute the Ylm */
-  FSurf_CubSph_set_Ylm(box, N1, Re_Ylmp, Im_Ylmp, lmax);
+  FSurf_CubSph_set_Ylm(box, S1, Re_Ylmp, Im_Ylmp, lmax);
   if(N1!=n1) errorexit("implement case where N1!=n1");
 
   /* set integrands */
@@ -200,7 +206,7 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   {
     i=0;
     for(l=0; l<=lmax; l++)
-    for(m=-l; m<=l; m++)
+    for(m=0; m<=l; m++) /* here we set only integrands for m>=0 */
     {
       double R,I, RYlm,IYlm;
 
@@ -211,7 +217,8 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
       else           I = Im_varp[ijk];
       
       /* get spherical harmonic Ylm */
-      Ijk=Ind_n1n2(i,j,k, N1,n2);
+      ijk=Index(i%N1,j,k);
+      Ijk=ijk + Ng*(i/N1);
       RYlm = Re_Ylmp[Ijk];
       IYlm = Im_Ylmp[Ijk];
 
@@ -228,13 +235,15 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   /* integrate over surfaces */
   spec_SurfaceIntegral(box,0, 1, Re_Integp, Re_Integp);
   spec_SurfaceIntegral(box,0, 1, Im_Integp, Im_Integp);
+  // If we have more than one segment (S1>1) we need several more
+  // spec_SurfaceIntegral calls!
 
   /* Put Integs into var with index Integ_ind */
   offset = ((box->nnodes/2)*s)/(n1-1);  /* offset for Integs in Integ */
   ijk = offset;
   i = 0;
   for(l=0; l<=lmax; l++)
-  for(m=-l; m<=l; m++)
+  for(m=0; m<=l; m++)
   {
     /* set Re and Im part of Integ */
     Integ[ijk++] = Re_Integp[i];
