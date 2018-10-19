@@ -134,6 +134,10 @@ int r_dr_dlam_of_lamAB_CubSph(tBox *box, int ind, double lam,
                               double A, double B, double *r, double *drdlam);
 int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
                           double *Theta, double *Phi);
+int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tBox *box, double A, double B,
+                                       double *Theta,    double *Phi,
+                                       double *dThetadA, double *dThetadB,
+                                       double *dPhidA,   double *dPhidB);
 
 /* from setup_CubedSpheres.c */
 void init_6CubedSphereBoxes_from_CI_iFS(tGrid *grid, int bi_dom0);

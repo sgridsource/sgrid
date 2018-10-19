@@ -816,6 +816,89 @@ int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
 
   return 0;
 }
+/* get Theta, Phi, dTheta/dA, dTheta/dB, dPhi/dA, dPhi/dB, 
+   from A,B in one box */
+int ThetaPhi_dThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
+                                    double *Theta,    double *Phi,
+                                    double *dThetadA, double *dThetadB,
+                                    double *dPhidA,   double *dPhidB)
+{
+  int domain = box->CI->dom;  /* get domain and type info from box */
+  int dir, p;
+  double pm;
+
+  /* get direction, pm */
+  dir = domain/2 + 1;
+  p  = 2*(domain%2) - 1; /* p  = +/- 1 */
+  pm = p;                /* pm = +/- 1.0 */
+  //z1 = (1. - pm)*0.5;  /* z1 = 0 or 1 */
+
+  if(dir==1)
+  { /* A = ry/rx;   B = rz/rx;
+       rx = r*cos(Phi)*sin(Theta)
+       ry = r*sin(Phi)*sin(Theta)
+       rz = r*cos(Theta)
+       ry/rx = tan(Phi);                rz/rx = 1/(tan(Theta)*cos(Phi));
+       rx/rz = cos(Phi)*tan(Theta)      rz/ry = 1/(tan(Theta)*sin(Phi));
+       Phi = atan(ry/rx);
+       A = ry/rx = tan(Phi);
+       B = rz/rx = 1/(tan(Theta)*cos(Phi));  => tan(Theta) = 1/(B*cos(Phi)) */
+    *Phi = Arg_plus(pm, pm*A);
+    *Theta = Arg_plus(B*cos(*Phi), 1.);
+    /* note:  1+tan^2(phi) = 1/cos^2(phi) ==> cos(phi) = 1/sqrt(1+tan^2(phi)) */
+
+    /* Derivs */
+    *dPhidA   = dArgdy(pm, pm*A)*pm;
+    *dPhidB   = 0.;
+    *dThetadA = dArgdx(B*cos(*Phi), 1.) * B*(-sin(*Phi)) * (*dPhidA);
+    *dThetadB = dArgdx(B*cos(*Phi), 1.) *
+                ( cos(*Phi) + B*(-sin(*Phi)) * (*dPhidB) );
+  }
+  else if(dir==2)
+  { /* A = rx/ry;   B = rz/ry; */
+    *Phi = Arg_plus(pm*A, pm);
+    *Theta = Arg_plus(B*sin(*Phi), 1.);
+
+    /* Derivs */
+    *dPhidA   = dArgdx(pm*A, pm)*pm;
+    *dPhidB   = 0.;
+    *dThetadA = dArgdx(B*sin(*Phi), 1.) * B*(cos(*Phi)) * (*dPhidA);
+    *dThetadB = dArgdx(B*sin(*Phi), 1.) *
+                ( sin(*Phi) + B*(cos(*Phi)) * (*dPhidB) );
+  }
+  else /* dir==3 */
+  { /* A = ry/rz;   B = rx/rz;   A/B = ry/rx;
+       A = sin(Phi)*tan(Theta)
+       B = cos(Phi)*tan(Theta)  => A/B = tan(Phi) => Phi = atan(A/B)= Arg(B,A)
+       s^2 = A^2 + B^2 = tan(Theta)^2
+        => Theta = atan(sqrt(A^2 + B^2)) = Arg(1, sqrt(A^2 + B^2))   */
+    double dsqrtA2B2_dA, dsqrtA2B2_dB;
+    double sqrtA2B2 = sqrt(A*A + B*B);
+
+    *Phi = Arg_plus(pm*B, pm*A);
+    *Theta = Arg_plus(pm, sqrtA2B2);
+    /* Derivs of Phi, Theta using dArgdx and dArgdy:
+       dPhi/dA = B/sqrt(A^2 + B^2)   dPhi/dB = -A/sqrt(A^2 + B^2) 
+       dPhi/dA = cos(Phi)            dPhi/dB = -sin(Phi)
+       Theta =  Arg(1, s) => dTheta/ds = 1/(1+s^2)
+       dTheta/dA = dTheta/ds ds/dA
+       dTheta/dA = (1/(1+s^2)) A/sqrt(A^2 + B^2)
+       dTheta/dB = (1/(1+s^2)) B/sqrt(A^2 + B^2)
+       dTheta/dA = (1/(1+s^2)) sin(Phi)
+       dTheta/dB = (1/(1+s^2)) cos(Phi)
+       I.e. derivs are not continous across north pole!!! */
+
+    /* Derivs */
+    *dPhidA = dArgdy(pm*B, pm*A)*pm;
+    *dPhidB = dArgdx(pm*B, pm*A)*pm;
+    dsqrtA2B2_dA = A/sqrtA2B2; 
+    dsqrtA2B2_dB = B/sqrtA2B2; 
+    *dThetadA = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dA;
+    *dThetadB = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dB;
+  }
+
+  return 0;
+}
 
 
 
