@@ -818,10 +818,10 @@ int ThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
 }
 /* get Theta, Phi, dTheta/dA, dTheta/dB, dPhi/dA, dPhi/dB, 
    from A,B in one box */
-int ThetaPhi_dThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
-                                    double *Theta,    double *Phi,
-                                    double *dThetadA, double *dThetadB,
-                                    double *dPhidA,   double *dPhidB)
+int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tBox *box, double A, double B,
+                                       double *Theta,    double *Phi,
+                                       double *dThetadA, double *dThetadB,
+                                       double *dPhidA,   double *dPhidB)
 {
   int domain = box->CI->dom;  /* get domain and type info from box */
   int dir, p;
@@ -872,8 +872,9 @@ int ThetaPhi_dThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
        B = cos(Phi)*tan(Theta)  => A/B = tan(Phi) => Phi = atan(A/B)= Arg(B,A)
        s^2 = A^2 + B^2 = tan(Theta)^2
         => Theta = atan(sqrt(A^2 + B^2)) = Arg(1, sqrt(A^2 + B^2))   */
-    double dsqrtA2B2_dA, dsqrtA2B2_dB;
     double sqrtA2B2 = sqrt(A*A + B*B);
+    double dsqrtA2B2_dA = A/sqrtA2B2; 
+    double dsqrtA2B2_dB = B/sqrtA2B2; 
 
     *Phi = Arg_plus(pm*B, pm*A);
     *Theta = Arg_plus(pm, sqrtA2B2);
@@ -891,8 +892,6 @@ int ThetaPhi_dThetaPhi_of_AB_CubSph(tBox *box, double A, double B,
     /* Derivs */
     *dPhidA = dArgdy(pm*B, pm*A)*pm;
     *dPhidB = dArgdx(pm*B, pm*A)*pm;
-    dsqrtA2B2_dA = A/sqrtA2B2; 
-    dsqrtA2B2_dB = B/sqrtA2B2; 
     *dThetadA = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dA;
     *dThetadB = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dB;
   }
