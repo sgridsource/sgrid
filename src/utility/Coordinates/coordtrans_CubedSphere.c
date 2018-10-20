@@ -873,14 +873,13 @@ int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tBox *box, double A, double B,
        s^2 = A^2 + B^2 = tan(Theta)^2
         => Theta = atan(sqrt(A^2 + B^2)) = Arg(1, sqrt(A^2 + B^2))   */
     double sqrtA2B2 = sqrt(A*A + B*B);
-    double dsqrtA2B2_dA = A/sqrtA2B2; 
-    double dsqrtA2B2_dB = B/sqrtA2B2; 
+    double oosqrtA2B2;
 
     *Phi = Arg_plus(pm*B, pm*A);
     *Theta = Arg_plus(pm, sqrtA2B2);
     /* Derivs of Phi, Theta using dArgdx and dArgdy:
-       dPhi/dA = B/sqrt(A^2 + B^2)   dPhi/dB = -A/sqrt(A^2 + B^2) 
-       dPhi/dA = cos(Phi)            dPhi/dB = -sin(Phi)
+       dPhi/dA = B/(A^2 + B^2)         dPhi/dB = -A/(A^2 + B^2)
+       dPhi/dA = cos(Phi)/tan(Theta)   dPhi/dB = -sin(Phi)/tan(Theta)
        Theta =  Arg(1, s) => dTheta/ds = 1/(1+s^2)
        dTheta/dA = dTheta/ds ds/dA
        dTheta/dA = (1/(1+s^2)) A/sqrt(A^2 + B^2)
@@ -888,14 +887,23 @@ int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tBox *box, double A, double B,
        dTheta/dA = (1/(1+s^2)) sin(Phi)
        dTheta/dB = (1/(1+s^2)) cos(Phi)
        I.e. derivs are not continous across north pole!!! */
-
-    /* Derivs */
+    /* Note:  we have this:
+    //double dsqrtA2B2_dA = A/sqrtA2B2;
+    //double dsqrtA2B2_dB = B/sqrtA2B2;
     *dPhidA = dArgdy(pm*B, pm*A)*pm;
     *dPhidB = dArgdx(pm*B, pm*A)*pm;
-//FIXME: dArgdy(pm*B, pm*A)*pm and dsqrtA2B2_dA give NAN for A=B=0
-//       get all from sin(phi) and cos(phi)
     *dThetadA = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dA;
-    *dThetadB = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dB;
+    *dThetadB = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dB; */
+
+    /* Rewrite Derivs as */
+    *dThetadA = dArgdy(pm, sqrtA2B2) * sin(*Phi)*pm;
+    *dThetadB = dArgdy(pm, sqrtA2B2) * cos(*Phi)*pm;
+    if(sqrtA2B2!=0.)
+      oosqrtA2B2 = 1./sqrtA2B2;
+    else /* regularize */
+      oosqrtA2B2 = 0.;  /* check: is this ok? */
+    *dPhidA =  cos(*Phi)*pm * oosqrtA2B2;
+    *dPhidB = -sin(*Phi)*pm * oosqrtA2B2;
   }
 
   return 0;
