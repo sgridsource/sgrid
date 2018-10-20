@@ -266,7 +266,7 @@ void SphHarm_dphi_forRealFunc(double *c, double *cdphi, int lmax)
   double Rc,Ic, Rcd,Icd; /* Re and Im part of c and cdphi */
 
   for(i=0, l=0; l<=lmax; l++)
-    for(m=0; m<=l; m++, i++) /* here we set only use  m>=0 */
+    for(m=0; m<=l; m++, i+=2) /* here we set only use  m>=0 */
     {
       Rc = c[i];
       Ic = c[i+1];
@@ -296,7 +296,7 @@ void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax)
   double Rcld,Icld; /* Re, Im part of csdth */
 
   for(i=0, l=0; l<=lmax; l++)
-    for(m=0; m<=l; m++, i++) /* here we set only use  m>=0 */
+    for(m=0; m<=l; m++, i+=2) /* here we set only use  m>=0 */
     {
       l_2 = l*2;
       elm = l*l - m*m;
