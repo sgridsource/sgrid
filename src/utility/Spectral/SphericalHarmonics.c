@@ -244,3 +244,78 @@ int test_SphericalHarmonics(void)
   free(ReYtab);
   return 0;
 }
+
+
+/******************************************************************/
+/* routines for expansions in Ylm:  f = \sum_l \sum_m c_l^m Y_l^m */
+/******************************************************************/
+
+/* NOTE: Here coeffs are stored in this order in memory
+   c_0^0, c_1^0,c_1^1, c_2^0,c_2^1,c_2^2, ...
+   Each coeffs has a Re and Im part, i.e. in memory we have:
+   Rc_0^0, Ic_0^0,  Rc_1^0, Ic_1^0, Rc_1^1, Ic_1^1, ... */
+
+/* use Sph. Hamonic coeffs c of a real function to compute coeffs cdphi of
+   phi-deriv of function. We use only m>=0, since func is real. */
+void SphHarm_dphi_forRealFunc(double *c, double *cdphi, int lmax)
+{
+  int i, l,m;
+  double Rc,Ic, Rcd,Icd; /* Re and Im part of c and cdphi */
+
+  for(i=0, l=0; l<=lmax; l++)
+    for(m=0; m<=l; m++, i++) /* here we set only use  m>=0 */
+    {
+      Rc = c[i];
+      Ic = c[i+1];
+      Icd =  m*Rc;
+      Rcd = -m*Ic;
+      cdphi[i]   = Rcd;
+      cdphi[i+1] = Icd;
+    }
+}
+
+/* use Sph. Hamonic coeffs c of a real function to compute coeffs csdth of
+   theta-deriv of function. We use only m>=0, since func is real. */
+/* NOTE:
+     \sin(\theta)\partial_{\theta} Y_l^m
+       = l e_{l+1}^m  Y_{l+1}^m  -  (l+1) e_l^m  Y_{l-1}^m
+   Thus
+     (\sin(\theta)\partial_{\theta} f)_l^m
+       = (l-1) e_l^m f_{l-1}^m  -  (l+2) e_{l+1}^m f_{l+1}^m
+   where:
+     e_0^0 := 0,   e_l^m := \sqrt{ (l^2 - m^2)/((2l+1)(2l-1)) }   */
+void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax)
+{
+  int i, l,m, lp1, lm1, lp1_2, l_2, lp2;
+  double elm; /* e_0^0 := 0, e_l^m := sqrt( (l^2 - m^2)/((2l+1)(2l-1)) ) */
+  double elp1m; /* e_{l+1}^m */
+  double Rclm1,Iclm1, Rclp1,Iclp1; /* Re, Im part of c_{l-1}^m and c_{l+1}^m */
+  double Rcld,Icld; /* Re, Im part of csdth */
+
+  for(i=0, l=0; l<=lmax; l++)
+    for(m=0; m<=l; m++, i++) /* here we set only use  m>=0 */
+    {
+      l_2 = l*2;
+      elm = l*l - m*m;
+      elm = elm/( (l_2 + 1)*(l_2 - 1) );
+      elm = sqrt(elm);
+
+      lp1 = l+1;
+      lp1_2 = lp1*2;
+      elp1m = lp1*lp1 - m*m;
+      elp1m = elp1m/( (lp1_2 + 1)*(lp1_2 - 1) );
+      elp1m = sqrt(elp1m);
+
+      Rclp1 = c[i+lp1_2];
+      Iclp1 = c[i+lp1_2+1];
+      Rclm1 = c[i-l_2];
+      Iclm1 = c[i-l_2+1];
+
+      lm1  = l - 1;
+      lp2  = lp1 + 1;
+      Rcld = lm1 * elm * Rclm1 - lp2 * elp1m * Rclp1;
+      Icld = lm1 * elm * Iclm1 - lp2 * elp1m * Iclp1;
+      csdth[i]   = Rcld;
+      csdth[i+1] = Icld;
+    }
+}

@@ -127,3 +127,5 @@ double *alloc_Plm_Tab(int lmax);
 void set_YlmTabs(int lmax, double th, double ph, double *ReYtab,double *ImYtab);
 void Ylm_from_Tabs(int lmax, double *ReYtab, double *ImYtab, int l, int m,
                   double *ReYlm, double *ImYlm);
+void SphHarm_dphi_forRealFunc(double *c, double *cdphi, int lmax);
+void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax);
