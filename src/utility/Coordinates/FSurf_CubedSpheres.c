@@ -425,17 +425,20 @@ int FSurf_CubSph_set_Ylm_coeffs(tGrid *grid, int bi_dom0, int ico)
 /* set var box->CI->iSurf and its derivs from FSurf_CubSph_sigma01_func */
 int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tBox *box, int si)
 {
+  tCoordInfo *CI = box->CI;
   int n1=box->n1;
   int n2=box->n2;
   int n3=box->n3;
   double *Yp = box->v[Ind("Y")];
   double *Zp = box->v[Ind("Z")];
   int i,j,k, ijk;
-  double A,B, F;
-  int isigma    = box->CI->iSurf[si];
-  int isigma_dA = box->CI->idSurfdX[si][2];
-  int isigma_dB = box->CI->idSurfdX[si][3];
-  double *sigma = box->v[isigma];
+  double A,B;
+  int isigma    = CI->iSurf[si];
+  int isigma_dA = CI->idSurfdX[si][2];
+  int isigma_dB = CI->idSurfdX[si][3];
+  double *sigma    = box->v[isigma];
+  double *sigma_dA = box->v[isigma_dA];
+  double *sigma_dB = box->v[isigma_dB];
 
   i = si*(n1-1);
   for(k=0; k<n3; k++)
@@ -447,13 +450,18 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tBox *box, int si)
     B = Zp[ijk];
 
     /* set sigma01 var */
-    F = box->CI->FSurf[si](box,si, A,B);
-    sigma[ijk] = F;
+    sigma[ijk] = CI->FSurf[si](box,si, A,B);
+
+    /* set sigma01 derivs */
+    if(CI->dFSurfdX[si][2] != NULL)
+      sigma_dA[ijk] = CI->dFSurfdX[si][2](box,si, A,B);
+    if(CI->dFSurfdX[si][3] != NULL)
+      sigma_dB[ijk] = CI->dFSurfdX[si][3](box,si, A,B);
   }
 
-  /* now set derivs */
-  compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
-  /* NOTE: Here we could also use spectral derivs of our Ylm expansions!!! */
+  /* set derivs, if we didn't have a dFSurfdX */
+  if(CI->dFSurfdX[si][2] == NULL)
+    compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
 }
 
 /* initialize function FSurf_CubSph_sigma01_func and its coeffs in 
