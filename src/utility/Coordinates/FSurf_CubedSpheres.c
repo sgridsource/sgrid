@@ -474,6 +474,7 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
   int dom  = box->CI->dom;
   int ret =  -1;
   int i, si, si0, si1;
+  int use_dFSurfdX = Getv("Coordinates_CubedSphere_use_dFSurfdX", "yes");
 
   if(dom!=0) return -1; /* do nothing if this is not dom0 */
 
@@ -514,12 +515,18 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
     for(i=0; i<6; i++) /* loop over 6 boxes */
     {
       box = grid->box[bi_dom0 + i];
+      tCoordInfo *CI = box->CI;
       int n1 = box->n1;
       int s  = si ? n1-1 : 0;  /* i-index of surface */
-      int iFS = box->CI->iFS[si];
+      int iFS = CI->iFS[si];
 
       /* set surface function */
-      box->CI->FSurf[si] = FSurf_CubSph_sigma01_func;
+      CI->FSurf[si] = FSurf_CubSph_sigma01_func;
+      if(use_dFSurfdX)
+      {
+        CI->dFSurfdX[si][2] = FSurf_CubSph_dsigma01_dA_func;
+        CI->dFSurfdX[si][3] = FSurf_CubSph_dsigma01_dB_func;
+      }
 
       /* integrate (Ylm^* FS) and store results in co */
       ///* we need to set sigma from iFS so that integrals can work */
