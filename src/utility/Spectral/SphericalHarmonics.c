@@ -254,6 +254,9 @@ int test_SphericalHarmonics(void)
    c_0^0, c_1^0,c_1^1, c_2^0,c_2^1,c_2^2, ...
    Each coeffs has a Re and Im part, i.e. in memory we have:
    Rc_0^0, Ic_0^0,  Rc_1^0, Ic_1^0, Rc_1^1, Ic_1^1, ... */
+/* Also in some fields people use latitude instead of theta:
+   latitude = \pi/2 - \theta
+   \partial_{latitude} = -\partial_{\theta} */
 
 /* use Sph. Hamonic coeffs c of a real function to compute coeffs cdphi of
    phi-deriv of function. We use only m>=0, since func is real. */
