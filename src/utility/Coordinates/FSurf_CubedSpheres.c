@@ -76,6 +76,113 @@ double FSurf_CubSph_sigma01_func(tBox *box, int si, double A, double B)
   return fv;
 }
 
+/* compute values of surface function derivs */
+void FSurf_CubSph_sigma01_derivs(tBox *box, int si, double A, double B,
+                                 int lmax, double *dsigdA, double *dsigdB)
+{
+  int N = box->nnodes;
+  int offset = si ? N/2 : 0;  /* offset for coeffs in co */
+  int nYs = (lmax*(lmax+1))/2 + lmax+1; /* number of Ylm's we use */
+  int ijk, l,m;
+  double sm;
+  double *co = box->v[isigma01_co];
+  double ft, fp; /* ft = sin(Theta) dsigma/dTheta, fp = dsigma/dPhi */
+  double fth;    /* fth= dsigma/dTheta */
+  double Theta,Phi, dThetadA,dThetadB, dPhidA,dPhidB;
+  double *ReYtab = alloc_Plm_Tab(lmax);
+  double *ImYtab = alloc_Plm_Tab(lmax);
+  double *csdth = calloc(nYs*2, sizeof(double));
+  double *cdphi = calloc(nYs*2, sizeof(double));
+
+  /* get Theta,Phi from A,B */
+  ThetaPhi_dThetaPhidAB_of_AB_CubSph(box, A,B, &Theta,&Phi,
+                                     &dThetadA,&dThetadB, &dPhidA,&dPhidB);
+  /* regularize case where Theta = 0:
+     Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
+     to find d/dTheta Ylm. So for now just add epsilon to Theta. */
+  if(Theta==0.0) Theta = 1e-12;
+
+  /* make tables of Ylm at Theta,Phi */
+  set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
+
+  /* get func vals ft,fp at Theta,Phi */
+  fp = ft = 0.;
+  ijk=offset;
+  /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
+  for(l=0; l<=lmax; l++)
+    for(sm=1., m=0;  m<=l;  m++, sm=-sm)
+    {
+      double Re_Ylm, Im_Ylm, Re_Ylmm, Im_Ylmm;
+      double Rcsdth, Icsdth, Rcsdthm, Icsdthm;
+      double Rcdphi, Icdphi, Rcdphim, Icdphim;
+
+      /* get coeffs of derivs */
+      SphHarm_sin_theta_dtheta_forRealFunc(co+offset, csdth, lmax);
+      SphHarm_dphi_forRealFunc(co+offset, csdth, lmax);
+
+      /* get real and imag part of coeffs in arrays */
+      Rcsdth = csdth[ijk];
+      Rcdphi = cdphi[ijk++];
+      Icsdth = csdth[ijk];
+      Icdphi = cdphi[ijk++];
+
+      /* get Ylm at Theta,Phi */
+      Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
+
+      /* There is a choice of sign here: define the inner product by
+         (f,g) = int f^* g
+         and define
+         psi_mode = (Ylm, psi)  */
+      /* fv = \sum_{l,m} c_l^m Y_l^m
+         fv = \sum_{l,m} (  Re_c_lm Re_Ylm -   Im_c_lm Im_Ylm +
+                          i Re_c_lm Im_Ylm + i Im_c_lm Re_Ylm   )  */
+      /* fv = \sum_{l,m} c_l^m Y_l^m
+            = \sum_l [ c_l^0 Y_l^0 +
+                      \sum_{m=1}^l ( c_l^m Y_l^m + c_l^{-m} Y_l^{-m} ) ]
+         Note: Y_l^{-m} = (-1)^m (Y_l^m)^*  <--always
+               c_l^{-m} = (-1)^m (c_l^m)^*  <--if fv is real */
+      Re_Ylmm =  sm*Re_Ylm;
+      Im_Ylmm = -sm*Im_Ylm;
+      Rcsdthm =  sm*Rcsdth; /* assuming func is real */
+      Icsdthm = -sm*Icsdth;
+      Rcdphim =  sm*Rcdphi; /* assuming func is real */
+      Icdphim = -sm*Icdphi;
+
+      if(m==0)
+      {
+        ft += Rcsdth*Re_Ylm;
+        fp += Rcdphi*Re_Ylm;
+      }
+      else /* assuming fv is real */
+      {
+        ft += Rcsdth*Re_Ylm - Icsdth*Im_Ylm + Rcsdthm*Re_Ylmm - Icsdthm*Im_Ylmm;
+        fp += Rcdphi*Re_Ylm - Icdphi*Im_Ylm + Rcdphim*Re_Ylmm - Icdphim*Im_Ylmm;
+      }
+    }
+  /* get derivs from ft,fp, and dThetadA,dThetadB, dPhidA,dPhidB */
+  fth = ft/sin(Theta);
+  *dsigdA = fth*dThetadA + fp*dPhidA;
+  *dsigdB = fth*dThetadB + fp*dPhidB;
+  free(cdphi);
+  free(csdth);
+  free(ImYtab);
+  free(ReYtab);
+}
+/* return value of sigma01 A-deriv */
+double FSurf_CubSph_dsigma01_dA_func(tBox *box, int si, double A, double B)
+{
+  double dsigdA, dsigdB;
+  FSurf_CubSph_sigma01_derivs(box, si, A,B, lmax, &dsigdA, &dsigdB);
+  return dsigdA;
+}
+/* return value of sigma01 B-deriv */
+double FSurf_CubSph_dsigma01_dB_func(tBox *box, int si, double A, double B)
+{
+  double dsigdA, dsigdB;
+  FSurf_CubSph_sigma01_derivs(box, si, A,B, lmax, &dsigdA, &dsigdB);
+  return dsigdB;
+}
+
 
 /* put the sYlm in two variables on the grid */
 /*

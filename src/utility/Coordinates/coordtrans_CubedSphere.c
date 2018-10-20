@@ -892,6 +892,8 @@ int ThetaPhi_dThetaPhidAB_of_AB_CubSph(tBox *box, double A, double B,
     /* Derivs */
     *dPhidA = dArgdy(pm*B, pm*A)*pm;
     *dPhidB = dArgdx(pm*B, pm*A)*pm;
+//FIXME: dArgdy(pm*B, pm*A)*pm and dsqrtA2B2_dA give NAN for A=B=0
+//       get all from sin(phi) and cos(phi)
     *dThetadA = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dA;
     *dThetadB = dArgdy(pm, sqrtA2B2) * dsqrtA2B2_dB;
   }
