@@ -301,7 +301,7 @@ void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax)
       l_2 = l*2;
       elm = l*l - m*m;
       elm = elm/( (l_2 + 1)*(l_2 - 1) );
-      elm = sqrt(elm);
+      elm = sqrt(fabs(elm));
 
       lp1 = l+1;
       lp1_2 = lp1*2;
@@ -320,5 +320,13 @@ void SphHarm_sin_theta_dtheta_forRealFunc(double *c, double *csdth, int lmax)
       Icld = lm1 * elm * Iclm1 - lp2 * elp1m * Iclp1;
       csdth[i]   = Rcld;
       csdth[i+1] = Icld;
+/*
+if(!isfinite(Rcld+Icld))
+{
+printf("Rcld=%g Icld=%g\n",
+Rcld,Icld);
+errorexit("NAN!");
+}
+*/
     }
 }

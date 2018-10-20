@@ -102,12 +102,16 @@ void FSurf_CubSph_sigma01_derivs(tBox *box, int si, double A, double B,
      to find d/dTheta Ylm. So for now just add epsilon to Theta. */
   if(Theta==0.0) Theta = 1e-12;
 
+  /* get coeffs of derivs */
+  SphHarm_sin_theta_dtheta_forRealFunc(co+offset, csdth, lmax);
+  SphHarm_dphi_forRealFunc(co+offset, cdphi, lmax);
+
   /* make tables of Ylm at Theta,Phi */
   set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
 
   /* get func vals ft,fp at Theta,Phi */
   fp = ft = 0.;
-  ijk=offset;
+  ijk=0;
   /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
   for(l=0; l<=lmax; l++)
     for(sm=1., m=0;  m<=l;  m++, sm=-sm)
@@ -116,16 +120,19 @@ void FSurf_CubSph_sigma01_derivs(tBox *box, int si, double A, double B,
       double Rcsdth, Icsdth, Rcsdthm, Icsdthm;
       double Rcdphi, Icdphi, Rcdphim, Icdphim;
 
-      /* get coeffs of derivs */
-      SphHarm_sin_theta_dtheta_forRealFunc(co+offset, csdth, lmax);
-      SphHarm_dphi_forRealFunc(co+offset, csdth, lmax);
-
       /* get real and imag part of coeffs in arrays */
       Rcsdth = csdth[ijk];
       Rcdphi = cdphi[ijk++];
       Icsdth = csdth[ijk];
       Icdphi = cdphi[ijk++];
-
+/*
+if(!isfinite(Rcsdth+Rcdphi+Icsdth+Icdphi))
+{
+printf("l=%d m=%d ijk=%d Rcsdth=%g Rcdphi=%g Icsdth=%g Icdphi=%g\n",
+l,m,ijk, Rcsdth,Rcdphi,Icsdth,Icdphi);
+errorexit("NAN!");
+}
+*/
       /* get Ylm at Theta,Phi */
       Ylm_from_Tabs(lmax, ReYtab, ImYtab, l,m, &Re_Ylm,&Im_Ylm);
 
@@ -167,6 +174,14 @@ void FSurf_CubSph_sigma01_derivs(tBox *box, int si, double A, double B,
   free(csdth);
   free(ImYtab);
   free(ReYtab);
+/*
+if(!isfinite(*dsigdA) || !isfinite(*dsigdB))
+{
+printf("fth=%g fp=%g dThetadA=%g dThetadB=%g dPhidA=%g dPhidB=%g\n",
+fth,fp, dThetadA,dThetadB, dPhidA,dPhidB);
+errorexit("NAN!");
+}
+*/
 }
 /* return value of sigma01 A-deriv */
 double FSurf_CubSph_dsigma01_dA_func(tBox *box, int si, double A, double B)
