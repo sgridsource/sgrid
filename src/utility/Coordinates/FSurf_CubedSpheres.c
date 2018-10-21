@@ -94,20 +94,21 @@ void FSurf_CubSph_sigma01_derivs(tBox *box, int si, double A, double B,
   double *csdth = calloc(nYs*2, sizeof(double));
   double *cdphi = calloc(nYs*2, sizeof(double));
 
-  /* get Theta,Phi from A,B */
+  /* regularize case where A=B=0 <==> Theta=0:
+     Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
+     to find d/dTheta Ylm. Also dPhidA blows up!!!
+     So for now just add epsilon to B. */
+  if(A==0. && B==0.) B = 1e-10;
+
+  /* get Theta,Phi and their derivs from A,B */
   ThetaPhi_dThetaPhidAB_of_AB_CubSph(box, A,B, &Theta,&Phi,
                                      &dThetadA,&dThetadB, &dPhidA,&dPhidB);
-  /* regularize case where Theta = 0:
-     Note for Theta=0 we cannot use sin(Theta) d/dTheta Ylm
-     to find d/dTheta Ylm. So for now just add epsilon to Theta. */
-  if(Theta==0.0) Theta = 1e-12;
+  /* make tables of Ylm at Theta,Phi */
+  set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
 
   /* get coeffs of derivs */
   SphHarm_sin_theta_dtheta_forRealFunc(co+offset, csdth, lmax);
   SphHarm_dphi_forRealFunc(co+offset, cdphi, lmax);
-
-  /* make tables of Ylm at Theta,Phi */
-  set_YlmTabs(lmax, Theta,Phi, ReYtab, ImYtab);
 
   /* get func vals ft,fp at Theta,Phi */
   fp = ft = 0.;
