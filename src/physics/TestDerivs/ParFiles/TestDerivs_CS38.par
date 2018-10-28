@@ -3,7 +3,6 @@ physics = TestDerivs
 TestDerivs_useDD = no
 
 TestDerivs_grid = CubedSpheres
-Coordinates_CubedSphere_sigma01_vars = yes
 nboxes = 38 # 13 # 26 # 32 # 38
 
 n1  = 8

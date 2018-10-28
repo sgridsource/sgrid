@@ -5,7 +5,6 @@ TestDerivs_useDD = no
 nboxes = 13
 
 TestDerivs_grid = CubedSpheres
-Coordinates_CubedSphere_sigma01_vars = yes
 
 n1  = 8
 n2  = 8

@@ -1,0 +1,41 @@
+physics = TestDerivs
+
+TestDerivs_useDD = no
+
+TestDerivs_grid = CubedSpheres DeformCubSph useF
+nboxes = 38 # 13 # 26 # 32 # 38
+
+n1  = 8
+n2  = 8
+n3  = 8
+
+iterate_parameters = yes
+iterate_parameter1 = n1  8 12 16 20 # 24
+iterate_parameter2 = n2  8 12 16 20 # 24
+iterate_parameter3 = n3  8 12 16 20 # 24
+
+0doutput_VolumeIntegralJacobian = one
+
+0douttime	= 0.1
+0doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx
+0doutputall	= yes
+
+1douttime	= 0.1
+1doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_CubedSphere_sigma01 Coordinates_CubedSphere_sigma01_def Coordinates_CubedSphere_dsigma01_dA Coordinates_CubedSphere_dsigma01_dB
+1doutputall	= yes
+
+2douttime	= 0.1
+2doutput	= TestDerivs_u TestDerivs_Err_dux TestDerivs_Err_dduxx  x y z  X Y Z dXdx dYdx dZdx ddXddxx ddYddxx ddZddxx Coordinates_CubedSphere_sigma01 Coordinates_CubedSphere_sigma01_def Coordinates_CubedSphere_dsigma01_dA Coordinates_CubedSphere_dsigma01_dB
+2doutputall	= yes
+
+3douttime	= 0.1
+3doutput	= x y z
+3doutputall	= yes
+3dformat	= vtk float
+
+outputX0_box1 = 1
+outputX0_box2 = 1
+outputX0_box3 = 1
+outputX0_box4 = 1
+outputX0_box5 = 1
+outputX0_box6 = 1
