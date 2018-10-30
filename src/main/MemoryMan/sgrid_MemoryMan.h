@@ -17,8 +17,8 @@ typedef struct tSINGINFO {
   int f[6];         /* face sing. is on (runs from 0 to 5 like bbox) */
 } tSingInfo;
 
-/* incomplete struct declaration so we can use tBox * below */
-typedef struct tBOX tBox;
+/* incomplete struct declaration so we can use struct tBOX * below */
+struct tBOX;
 
 /* struct that contains info that helps with coord trafo */
 typedef struct tCOORDINFO {
@@ -34,8 +34,8 @@ typedef struct tCOORDINFO {
   int type; /* coordinate type, e.g. outerCubedSphere */
   int useF; /* if useF=1 we use the funcs below to get values between grid
                points and to initialize vals inside iSurf and idSurfdX */
-  double (*FSurf[6])(tBox *box, int f, double C1, double C2); /* 6 funcs that return surface val, e.g. FSurf[0]=sigma */
-  double (*dFSurfdX[6][4])(tBox *box, int f, double C1, double C2); /* funcs that return derivs of FSurf, dFSurfdX[0][1]=dSurf[0]/dX */
+  double (*FSurf[6])(struct tBOX *box, int f, double C1, double C2); /* 6 funcs that return surface val, e.g. FSurf[0]=sigma */
+  double (*dFSurfdX[6][4])(struct tBOX *box, int f, double C1, double C2); /* funcs that return derivs of FSurf, dFSurfdX[0][1]=dSurf[0]/dX */
 } tCoordInfo;
 
 /*************************************************************************/
