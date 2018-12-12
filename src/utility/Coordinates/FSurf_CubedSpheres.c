@@ -320,8 +320,8 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   /* make room for all the Ylm's */
   S1 = nYs/n1;     /* number of segments if nYs is divisible by n1 */
   if(nYs%n1) S1++; /* if there was a remainder, increase S1 */
-  printf("FSurf_CubSph_get_Ylm_integrals: b=%d lmax=%d nYs=%d n1=%d S1=%d\n",
-         box->b, lmax, nYs, n1, S1);
+  //printf("FSurf_CubSph_get_Ylm_integrals: b=%d lmax=%d nYs=%d n1=%d S1=%d\n",
+  //       box->b, lmax, nYs, n1, S1);
   N1 = S1*n1;
   Re_Ylmp = calloc(N1*n2*n3, sizeof(double));
   Im_Ylmp = calloc(N1*n2*n3, sizeof(double));
@@ -403,8 +403,6 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   for(l=0; l<=lmax; l++)
   for(m=0; m<=l; m++)
   {
-    if(ijk>=Ng) errorexit("decrease lmax!");
-  
     /* set Re and Im part of Integ */
     Ijk = (i%N1) + Ng*(i/N1);
     Integ[ijk++] = Re_Integp[Ijk];
