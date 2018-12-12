@@ -37,7 +37,7 @@ double FSurf_CubSph_sigma01_func(tBox *box, int si, double A, double B)
   /* get func val fv at Theta,Phi */
   fv = 0.;
   ijk=offset;
-  if(nYs>=N/2) errorexit("decrease global lmax in FSurf_CubedSpheres.c!");
+  if(nYs>=N/4) errorexit("decrease global lmax in FSurf_CubedSpheres.c!");
   /* loop over positive m, here Ylmm=Y_l^{-m}, sm = (-1)^m */
   for(l=0; l<=lmax; l++)
     for(sm=1., m=0;  m<=l;  m++, sm=-sm)
@@ -395,7 +395,7 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   //quick_Array_output(box, Re_Integp, "Re_Integp", 9,9);
 
   /* Put Integs into var with index Integ_ind */
-  if(nYs>=Ng/2) errorexit("decrease lmax!");
+  if(nYs>=Ng/4) errorexit("decrease lmax!");
   offset = ((box->nnodes/2)*s)/(n1-1);  /* offset for Integs in Integ */
   ijk = offset;
   i = 0;
