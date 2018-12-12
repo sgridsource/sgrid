@@ -332,7 +332,6 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
 
   /* precompute the Ylm */
   FSurf_CubSph_set_Ylm(box, S1, Re_Ylmp, Im_Ylmp, lmax);
-  if(N1!=n1) errorexit("implement case where N1!=n1");
 
   /* set integrands */
   for(k=0; k<n3; k++)
