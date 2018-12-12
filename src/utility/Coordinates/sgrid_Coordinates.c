@@ -66,7 +66,8 @@ int sgrid_Coordinates(void)
   }
   AddPar("Coordinates_CubedSphere_use_dFSurfdX", "yes", "use dFSurfdX [yes,no]");
   AddPar("Coordinates_CubedSphere_sigma01_lmax", "from_n1", "lmax for Ylm's "
-         "used in FSurf_CubSph_sigma01_func [#,from_n1,sqrt(n2*n3)/4+1]");
+         "used in FSurf_CubSph_sigma01_func [#,from_n1,sqrt(n2*n3)/4+1,"
+         "sqrt(n2*n3)/4,sqrt(n2*n3)/2,sqrt(n2*n3)]");
   AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");
   AddPar("CoordinateTransforms_stored", "yes",
          "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");

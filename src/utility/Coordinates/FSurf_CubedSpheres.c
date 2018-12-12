@@ -501,13 +501,15 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
   int ret =  -1;
   int i, si, si0, si1;
   int use_dFSurfdX = Getv("Coordinates_CubedSphere_use_dFSurfdX", "yes");
+  int n1 = box->n1;
+  int n2 = box->n2;
+  int n3 = box->n3;
 
   if(dom!=0) return -1; /* do nothing if this is not dom0 */
 
   /* set lmax we use */
   if(Getv("Coordinates_CubedSphere_sigma01_lmax","from_n1"))
   {
-    int n1 = box->n1;
     /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
        to store the table.
        So when is (lmax*(lmax+1))/2 + lmax+1 = n1?
@@ -517,13 +519,17 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
     lmax = 0.5*(sqrt(8.*n1 + 1.) - 3.);
   }
   else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n2*n3)/4+1"))
-  {
-    int n2 = box->n2;
-    int n3 = box->n3;
     lmax = sqrt(n2*n3)/4 + 1;
-  }
+  else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n2*n3)/4"))
+    lmax = sqrt(n2*n3)/4;
+  else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n2*n3)/2"))
+    lmax = sqrt(n2*n3)/2;
+  else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n2*n3)"))
+    lmax = sqrt(n2*n3);
   else
     lmax = Geti("Coordinates_CubedSphere_sigma01_lmax");
+
+  if(lmax<1) errorexit("lmax<1 is suspicious!");
 
   /* save coeffs var index */ 
   isigma01_co = Ind("Coordinates_CubedSphere_sigma01_co");
