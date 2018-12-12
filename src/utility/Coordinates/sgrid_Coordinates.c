@@ -64,8 +64,9 @@ int sgrid_Coordinates(void)
            "select dXdx or ddXdxdx, to compute them using spectral derivs "
            "[no,dXdx,ddXdxdx]");
   }
-  AddPar("Coordinates_CubedSphere_use_dFSurfdX", "yes", "verbose [yes,no]");
-
+  AddPar("Coordinates_CubedSphere_use_dFSurfdX", "yes", "use dFSurfdX [yes,no]");
+  AddPar("Coordinates_CubedSphere_sigma01_lmax", "from_n1", "lmax for Ylm's "
+         "used in FSurf_CubSph_sigma01_func [#,from_n1,sqrt(n2*n3)/4+1]");
   AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");
   AddPar("CoordinateTransforms_stored", "yes",
          "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");

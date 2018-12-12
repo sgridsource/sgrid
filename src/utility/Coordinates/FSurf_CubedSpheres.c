@@ -507,6 +507,30 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
 
   if(dom!=0) return -1; /* do nothing if this is not dom0 */
 
+  /* set lmax we use */
+  if(Getv("Coordinates_CubedSphere_sigma01_lmax","from_n1"))
+  {
+    int n1 = box->n1;
+    /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
+       to store the table.
+       So when is (lmax*(lmax+1))/2 + lmax+1 = n1?
+       set L = lmax ==> L^2/2 + 3L/2 + 1 = n1  <==> L^2 + 3 L + 2 - 2*n1 = 0
+       so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n1)) = -3 +- sqrt(8*n1 + 1) 
+       L = (sqrt(8*n1 + 1) - 3)/2  */
+    lmax = 0.5*(sqrt(8.*n1 + 1.) - 3.);
+  }
+  else if(Getv("Coordinates_CubedSphere_sigma01_lmax","sqrt(n2*n3)/4+1"))
+  {
+    int n2 = box->n2;
+    int n3 = box->n3;
+    lmax = sqrt(n2*n3)/4 + 1;
+  }
+  else
+    lmax = Geti("Coordinates_CubedSphere_sigma01_lmax");
+
+  /* save coeffs var index */ 
+  isigma01_co = Ind("Coordinates_CubedSphere_sigma01_co");
+
   /* figure out range of si */
   switch(type)
   {
@@ -528,19 +552,6 @@ int FSurf_CubSph_init6Boxes_from_CI_iFS(tGrid *grid, int bi_dom0)
   /* loop if si0<=si1 */
   for(si=si0; si<=si1; si++)
   {
-    int n1 = box->n1;
-    /* set lmax we use */
-    /* We need (lmax*(lmax+1))/2 + lmax+1  complex numbers at each point A,B
-       to store the table.
-       So when is (lmax*(lmax+1))/2 + lmax+1 = n1?
-       set L = lmax ==> L^2/2 + 3L/2 + 1 = n1  <==> L^2 + 3 L + 2 - 2*n1 = 0
-       so: 2L = -3 +- sqrt(9 - 4*(2 - 2*n1)) = -3 +- sqrt(8*n1 + 1) 
-       L = (sqrt(8*n1 + 1) - 3)/2  */
-    lmax = 0.5*(sqrt(8.*n1 + 1.) - 3.);
-
-    /* save coeffs var index */ 
-    isigma01_co = Ind("Coordinates_CubedSphere_sigma01_co");
-
     for(i=0; i<6; i++) /* loop over 6 boxes */
     {
       box = grid->box[bi_dom0 + i];
