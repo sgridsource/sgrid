@@ -266,8 +266,8 @@ int FSurf_CubSph_set_Ylm(tBox *box, int S1, double *Re_Ylmp, double *Im_Ylmp,
       /* set spherical harmonic Ylm at point ijk. 
          NOTE: Re_Ylmp and Im_Ylmp may not be on the grid and thus have a
          different range for the index i */
-      ijk=Index(i%N1,j,k);
-      Ijk=ijk + Ng*(i/N1);
+      ijk=Index(i%n1,j,k);
+      Ijk=ijk + Ng*(i/n1);
       Re_Ylmp[Ijk] = Re_Ylm;
       Im_Ylmp[Ijk] = Im_Ylm;
       i++;
@@ -365,8 +365,8 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
       I = I * fac;
       
       /* get spherical harmonic Ylm */
-      ijk=Index(i%N1,j,k);
-      Ijk=ijk + Ng*(i/N1);
+      ijk=Index(i%n1,j,k);
+      Ijk=ijk + Ng*(i/n1);
       RYlm = Re_Ylmp[Ijk];
       IYlm = Im_Ylmp[Ijk];
 
@@ -403,7 +403,7 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   for(m=0; m<=l; m++)
   {
     /* set Re and Im part of Integ */
-    Ijk = (i%N1) + Ng*(i/N1);
+    Ijk = (i%n1) + Ng*(i/n1);
     Integ[ijk++] = Re_Integp[Ijk];
     Integ[ijk++] = Im_Integp[Ijk];
     i++;
