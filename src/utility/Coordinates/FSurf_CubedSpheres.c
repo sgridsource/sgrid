@@ -286,7 +286,7 @@ int FSurf_CubSph_set_Ylm(tBox *box, int S1, double *Re_Ylmp, double *Im_Ylmp,
 int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
                                    int lmax, int Integ_ind)
 {
-  int l,m, i,j,k, ijk, Ijk;
+  int l,m, i,j,k, ijk, Ijk, seg;
   int n1=box->n1;
   int n2=box->n2;
   int n3=box->n3;
@@ -316,8 +316,11 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   else          Im_varp = NULL;
 
   /* make room for all the Ylm's */
-  S1 = 1;     /* for now, otherwise we have use spec_2dIntegral over */
-  N1 = S1*n1; /* several segements */
+  S1 = nYs/n1;     /* number of segments if nYs is divisible by n1 */
+  if(nYs%n1) S1++; /* if there was a remainder, increase S1 */
+  printf("FSurf_CubSph_get_Ylm_integrals: b=%d lmax=%d nYs=%d n1=%d S1=%d\n",
+         box->b, lmax, nYs, n1, S1);
+  N1 = S1*n1;
   Re_Ylmp = calloc(N1*n2*n3, sizeof(double));
   Im_Ylmp = calloc(N1*n2*n3, sizeof(double));
   Re_Integp = calloc(N1*n2*n3, sizeof(double));
@@ -379,10 +382,14 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   }
 
   /* integrate over surfaces */
-  spec_2dIntegral(box, 1, Re_Integp, Re_Integp);  
-  spec_2dIntegral(box, 1, Im_Integp, Im_Integp);
-  // If we have more than one segment (S1>1) we need several more
-  // spec_2dIntegral calls!
+  /* If we have more than one segment (S1>1) we need spec_2dIntegral calls
+     for each segment! */
+  for(seg=0; seg<S1; seg++)
+  {
+    int os = Ng*seg;
+    spec_2dIntegral(box, 1, Re_Integp+os, Re_Integp+os);  
+    spec_2dIntegral(box, 1, Im_Integp+os, Im_Integp+os);
+  }
 
   //quick_Array_output(box, Re_Integp, "Re_Integp", 9,9);
 
@@ -393,9 +400,12 @@ int FSurf_CubSph_get_Ylm_integrals(tBox *box, int s, int Re_vind, int Im_vind,
   for(l=0; l<=lmax; l++)
   for(m=0; m<=l; m++)
   {
+    if(ijk>=Ng) errorexit("decrease lmax!");
+  
     /* set Re and Im part of Integ */
-    Integ[ijk++] = Re_Integp[i];
-    Integ[ijk++] = Im_Integp[i];
+    Ijk = (i%N1) + Ng*(i/N1);
+    Integ[ijk++] = Re_Integp[Ijk];
+    Integ[ijk++] = Im_Integp[Ijk];
     i++;
   }
 
