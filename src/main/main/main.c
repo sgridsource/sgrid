@@ -261,6 +261,25 @@ int make_output_directory(void)
   /* check if we remove outdir_previous */
   if(!GetvLax("sgrid_options", "--keep_previous"))
   {
+    char *prev = checkpoint_filename("_previous", "");
+    char *curr = checkpoint_filename("", "");
+    FILE *fpprev = fopen(prev, "r");
+    FILE *fpcurr = fopen(curr, "r");
+
+    //printf("prev: %s, curr: %s\n", prev, curr);
+    if(0) printf("Safety first: checking data before overwriting "
+                 "previous directory.\n");
+    if(fpprev && !fpcurr)
+    {
+        printf("Warning: %s exists, while %s does not.\n", prev, curr);
+        printf("Warning: This could result in the loss of the checkpoint!\n");
+        errorexit("There may be important data in the previous directory!");
+    }
+    if(fpprev) fclose(fpprev);
+    if(fpcurr) fclose(fpcurr);
+    free(prev);
+    free(curr);
+  
     /* remove outdir_previous and move outdir to outdir_previous */
     system2("rm -rf", outdirp);
     system3("mv", outdir, outdirp);
