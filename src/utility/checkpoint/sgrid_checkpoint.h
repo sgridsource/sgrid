@@ -3,6 +3,8 @@
 
 #include "wolfio.h"
 
+/* checkpoint.c */
+char *checkpoint_filename(char *suffix, char *flag);
 int checkpoint(tGrid *grid);
 int parameterio_write_current_pars(tGrid *g);
 int parameterio_update_pars(tGrid *g);

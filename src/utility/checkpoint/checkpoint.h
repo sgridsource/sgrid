@@ -3,7 +3,6 @@
 
 
 /* checkpoint.c */
-char *checkpoint_filename(char *suffix, char *flag);
 int checkpoint_checkforfiles(char *suffix);
 int checkpoint_checkifrestart(tGrid* grid);
 FILE *checkpoint_openfiles(char *suffix);
