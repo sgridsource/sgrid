@@ -107,12 +107,12 @@ char *checkpoint_filename(char *suffix, char *flag)
   char formatstring[100];
 
   /* name of directory */
-  if( strlen(Gets("checkpoint_indir"))>0 && strstr(flag, "r") )
+  if( strstr(flag, "r") && strlen(Gets("checkpoint_indir"))>0 )
   {
     dir = cmalloc(strlen(Gets("checkpoint_indir")) + 2);
     sprintf(dir, "%s", Gets("checkpoint_indir"));
   }
-  else if( strlen(Gets("checkpoint_outdir"))>0 && strstr(flag, "w") )
+  else if( strstr(flag, "w") && strlen(Gets("checkpoint_outdir"))>0 )
   {
     dir = cmalloc(strlen(Gets("checkpoint_outdir")) + 2);
     sprintf(dir, "%s", Gets("checkpoint_outdir"));
