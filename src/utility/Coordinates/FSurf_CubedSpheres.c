@@ -488,6 +488,8 @@ int FSurf_CubSph_set_sigma01vars_from_sigma01_func(tBox *box, int si)
   /* set derivs, if we didn't have a dFSurfdX */
   if(CI->dFSurfdX[si][2] == NULL)
     compute_CubedSphere_dsigma01(box, isigma, isigma_dA, isigma_dB);
+
+  return 0;
 }
 
 /* initialize function FSurf_CubSph_sigma01_func and its coeffs in 
