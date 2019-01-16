@@ -52,10 +52,10 @@ void checkpoint_interpolate_Vars_get_Pars(char *filename,
      => read them from pdb2 as well */
   /* make list of pars that need to be taken from pdb2: */
   /* add parlist1 to parlist */
-  parlist = cmalloc(strlen(parlist1) + (grid->nboxes)*6*13);
+  parlist = cmalloc(strlen(parlist1) + (grid->nboxes)*8*14);
   strcpy(parlist, parlist1);
 
-  /* add box?_min? and box?_max? to parlist */
+  /* add box?_min?, box?_max?, box?_CI_s, box?_CI_xc to parlist */
   forallboxes(grid, b)
   {
     char str[1000];
@@ -73,6 +73,11 @@ void checkpoint_interpolate_Vars_get_Pars(char *filename,
     strncat(parlist, str, 999);
     snprintf(str, 999, " box%d_max3", b);
     strncat(parlist, str, 999);
+
+    snprintf(str, 999, " box%d_CI_s", b);
+    strncat(parlist, str, 999);
+    snprintf(str, 999, " box%d_CI_xc", b);
+    strncat(parlist, str, 999);
   }
 
   /* loop over pars in parlist */
@@ -89,9 +94,9 @@ void checkpoint_interpolate_Vars_get_Pars(char *filename,
     Sets(par, val);  /* set par value in pdb */
     fflush(stdout);
   }
-  printf(" Note: Here we added box?_min? and box?_max?, because "
-         " we can only interpolate\n"
-         " if the box boundaries are in the same place.\n");
+  printf(" Note: Here we added box?_min?, box?_max?, box?_CI_s, box?_CI_xc "
+         " because we\n"
+         " can only interpolate if the box boundaries are in the same place.\n");
 
   /* we can only interpolate if the box boundaries are in the same place
      on both grids => Adjust grid1. */
