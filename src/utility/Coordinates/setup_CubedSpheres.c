@@ -336,6 +336,9 @@ int convert_6boxes_to_CubedSphere(tGrid *grid, int b0, int type, int stretch,
     free_all_bfaces(box);
   }
 
+  /* now that we have set CI, save it in pars */
+  set_box_CI_pars_from_box_CI_struct(grid);
+
   /* convert boxes to what the pars now say */
   set_BoxStructures_fromPars(grid, 0);
 
