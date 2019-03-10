@@ -102,6 +102,15 @@ OR:
 2. examine the core file from the crash with gdb:
  gdb sgrid core.9073
 
+NOTE: if the program exits with:
+"ElectricFence Exiting: mprotect() failed: Segmentation fault"
+ElectricFence probably ran out of memory map areas!!!
+You can increase them with e.g.
+ cat /proc/sys/vm/max_map_count
+ echo 128000 > /proc/sys/vm/max_map_count 
+If the program works afterwards, only ElectricFence ran out of memory map
+areas.
+
 duma is an alternative to electric fence:
 ------------------------------------------
 INSTRUCTIONS FOR DEBUGGING YOUR PROGRAM
