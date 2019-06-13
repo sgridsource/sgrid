@@ -27,6 +27,11 @@
   for (j = 0; j < n2; j++) \
   for (i = 0; i < n1; i++)    
 
+#define forinnerijk(i,j,k, n1,n2,n3) \
+  for(k = 1; k < (n3-1); k++) \
+  for(j = 1; j < (n2-1); j++) \
+  for(i = 1; i < (n1-1); i++)
+
 
 /* NOTE: In C99 these two have the same effect:
    #pragma omp parallel for
