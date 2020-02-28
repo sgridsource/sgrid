@@ -43,6 +43,10 @@ int WT_newton(double *x, int n, int *check,
 int zbrac_P(double (*func)(double,void *par), double *x1, double *x2, void *par);
 int zbrent_itsP(double *x0, double (*func)(double,void *par),
                 double x1, double x2, void *par, int ITMAX, double tol);
+int newton1d_brak(double *x0,
+                  void (*fdf)(double x, void *par, double *f, double *df),
+                  double x1, double x2, void *par, int maxits, double xacc,
+                  int pr);
 
   	  	               	   
 /* 1D and 3D integrals */

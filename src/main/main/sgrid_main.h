@@ -196,6 +196,8 @@ double min3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
                         int *ai, int *imin);
 double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int n2,
                         int *ai, int *imax);
+int get_par_from_str(const char *str, char *name, const char *delim,
+                     char *value, int n);
 int copy_file_into_dir(char *fname, char *dir);
 int system2(char *s1, char *s2);
 int system3(char *s1, char *s2, char *s3);
