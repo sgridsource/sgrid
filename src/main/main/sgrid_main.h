@@ -173,6 +173,8 @@ void errorexiti(char *file, int line, char *s, int i);
 #define errorexit(s) errorexit(__FILE__, __LINE__, (s))
 #define errorexits(s,t) errorexits(__FILE__, __LINE__, (s), (t))
 #define errorexiti(s,i) errorexiti(__FILE__, __LINE__, (s), (i))
+#define PRF     printf("%s", __func__)
+#define PRFs(s) printf("%s%s", __func__, s)
 
 void yo(void);
 void Yo(double x);

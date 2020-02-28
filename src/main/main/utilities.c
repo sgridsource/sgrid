@@ -2,6 +2,7 @@
 /* Wolfgang Tichy, April 2005  &  Bernd Bruegmann, 12/99 */
 
 #include <time.h>
+#include <ctype.h>       /* for isspace */
 
 #include "sgrid.h"
 #include "main.h"
@@ -178,6 +179,67 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
   if(*ai==1) { fmax = max2_in_1d_array(f0,n0, f2,n2, ai, imax); *ai = (*ai)*2; }
   else       { fmax = max2_in_1d_array(f0,n0, f1,n1, ai, imax); }
   return fmax;
+}
+
+
+/* remove all trailing and leading whitespaces */
+void trim_whitespace(char *str)
+{
+  int len, f,i;
+
+  if(!str) return;
+
+  len = strlen(str);
+  //printf("str=|%s| len=%d\n", str, len);
+
+  /* remove all trailing spaces */
+  for(f=len-1; f>=0; f--) if(!isspace(str[f])) break;
+  len = f+1;
+  str[len] = 0;
+  //printf("str=|%s| len=%d\n", str, len);
+
+  /* find first no-space char */
+  for(f=0; f<len; f++) if(!isspace(str[f])) break;
+  len = len-f;
+
+  /* shift all chars left by f */
+  if(f) for(i=0; i<=len; i++) str[i] = str[i+f];
+  //printf("str=|%s| len=%d\n", str, len);
+}
+
+/* parse a string to find a parname and its value,
+   returns 1 if str contains the delimiter delim (e.g. "=") otherwise 0. */
+int get_par_from_str(const char *str, char *name, const char *delim,
+                     char *value, int n)
+{
+  char *str2, *saveptr, *nam, *val;
+  int ret;
+
+  /* duplicate, because strtok_r writes into str2 */
+  str2 = strdup(str);
+
+  /* find parname and its value */
+  nam = strtok_r(str2, delim, &saveptr);
+  val = strtok_r(NULL, delim, &saveptr);
+
+  if( (!(*nam)) || (strlen(str2)==strlen(str)) )
+  {
+    ret = 0;
+  }
+  else
+  {
+    /* trim spaces */
+    trim_whitespace(nam);
+    trim_whitespace(val);
+
+    strncpy(name,  nam, n);
+    if(val) strncpy(value, val, n);
+    else    value[0] = 0;
+    ret = 1;
+  }
+
+  free(str2);
+  return ret;
 }
 
 
