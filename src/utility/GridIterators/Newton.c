@@ -365,15 +365,6 @@ exit(5);
   return lambda;
 }
 
-/* Newton startup initialization */
-int Init_Newton(tGrid *grid)
-{
-  /* set function pointer to NULL */
-  Newton_do_before_linSolver = NULL;
-
-  return 0;
-}
-
 /* get linear solver function pointer from string */
 tLinSolver get_linSolver_by_name(char *name)
 {

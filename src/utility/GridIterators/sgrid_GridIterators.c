@@ -11,7 +11,7 @@ int sgrid_GridIterators(void)
   printf("Adding GridIterators\n");
 
   /* functions */
-  AddFun(PRE_GRID, Init_Newton, "initialize Newton");
+  //AddFun(PRE_GRID, Init_Newton, "initialize Newton");
 
   /* global parameter */
   AddPar("GridIterators_verbose", "yes", "talk about it [yes,no,yes very]");
