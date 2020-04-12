@@ -26,6 +26,12 @@ typedef struct tNEWTONSTEPVARS {
 int (*Newton_do_before_linSolver)(tGrid *grid, tNewtonResults inp,
                                   tNewtonArgPointers out);
 
+/* function pointer that is called after each Newton step,
+   if it does not point to NULL */
+int (*Newton_do_after_step)(tVarList *vlFu, tVarList *vlu,
+                            tVarList *vlc1, tVarList *vlc2);
+
+
 /* funcs */
 void do_partial_Newton_step(tVarList *vlu, double lambda, tVarList *vldu);
 void do_random_Newton_step(tVarList *vlu, double eps, tVarList *vldu);
@@ -167,6 +173,11 @@ int Newton(
         }
       }
     } while(!linSolverOK);
+
+    /* user defined function that is called after a Newton step,
+       if it does not point to NULL */
+    if(Newton_do_after_step != NULL)
+      Newton_do_after_step(vlFu, vlu, vlc1, vlc2);
 
     /* sync vlu. sync is not needed if du is synced */
     /* bampi_vlsynchronize(vlu); */
