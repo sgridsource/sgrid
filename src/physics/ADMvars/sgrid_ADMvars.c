@@ -15,7 +15,7 @@ int sgrid_ADMvars()
 
   /* functions */
   AddFun(ANALYZE, computeADMconstraints, "compute ADM constraints");
-  AddFun(PRE_INITIALDATA, allocateADMvars, "allocate mem. for some ADM vars");
+  AddFun(POST_GRID, allocateADMvars, "allocate mem. for some ADM vars");
 
   /* 3+1 field variables */
   AddVar("g",      "(ij)", "metric");
