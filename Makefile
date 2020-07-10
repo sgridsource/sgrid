@@ -12,7 +12,8 @@ TOP   := $(shell pwd)
 # name the fruit of our labor
 EXEC = sgrid
 EXECDIR = $(TOP)/exe
-
+RELAPROJECTDIR = src/Projects
+PROJECTDIR = $(TOP)/$(RELAPROJECTDIR)
 
 # variables common to all setups
 CC = gcc	# gcc or icc
@@ -50,7 +51,17 @@ libpaths += src/utility/boundary
 
 # --------------------------------------------------------------------------
 # the user choses the libraries and some options in the file MyConfig
+projects =#
 include MyConfig
+
+# --------------------------------------------------------------------------
+# set variable projectnames from git targets in projects. NOTE: there must
+# be a / just before the actual projectname (e.g. mars.fau.edu:/DNSdata)
+projectnames = $(notdir $(projects))
+
+# set projectpaths and add them to libpaths
+projectpaths = $(addprefix $(RELAPROJECTDIR)/,$(projectnames))
+libpaths += $(projectpaths)
 
 # --------------------------------------------------------------------------
 # some more libraries are currently required, those need to be last
@@ -160,6 +171,35 @@ clean:
 # remove emacs backup files
 cleantilde:
 	find . -name "*~" -exec rm {} \;
+
+# print some vars
+printvars:
+	@echo projects=$(projects)
+	@echo PROJECTDIR=$(PROJECTDIR)
+	@echo projectpaths=$(projectpaths)
+	@echo projectnames=$(projectnames)
+	@echo libpaths=$(libpaths)
+
+
+# targets to get git projects
+git_clone:
+	@echo ==================== Cloning sgrid projects ====================
+	-for X in $(projects); do N=$$(basename $$X); printf "==== %s ====\n" $$N; git clone $$X $(PROJECTDIR)/$$N; done
+#	@$(MAKE) install_git_hooks
+
+#git_pull: install_git_hooks
+git_pull:
+	@echo ====================== main part of sgrid ======================
+	git pull
+	@echo ======================== sgrid projects ========================
+	@for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git pull; fi done
+
+git_status:
+	@echo ====================== main part of sgrid ======================
+	git status -uno
+	@echo ======================== sgrid projects ========================
+	@for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; fi done
+
 
 # remove code that is not needed once the corresponding libs have been built
 rm_MemoryMan_code:
