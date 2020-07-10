@@ -57,7 +57,8 @@ include MyConfig
 # --------------------------------------------------------------------------
 # set variable projectnames from git targets in projects. NOTE: there must
 # be a / just before the actual projectname (e.g. mars.fau.edu:/DNSdata)
-projectnames = $(notdir $(projects))
+projectbasenames = $(basename $(projects))
+projectnames = $(notdir $(projectbasenames))
 
 # set projectpaths and add them to libpaths
 projectpaths = $(addprefix $(RELAPROJECTDIR)/,$(projectnames))
@@ -184,7 +185,7 @@ printvars:
 # targets to get git projects
 git_clone:
 	@echo ==================== Cloning sgrid projects ====================
-	-for X in $(projects); do N=$$(basename $$X); printf "==== %s ====\n" $$N; git clone $$X $(PROJECTDIR)/$$N; done
+	-for X in $(projects); do N=$$(basename $$X .git); printf "==== %s ====\n" $$N; git clone $$X $(PROJECTDIR)/$$N; done
 #	@$(MAKE) install_git_hooks
 
 #git_pull: install_git_hooks
@@ -192,13 +193,13 @@ git_pull:
 	@echo ====================== main part of sgrid ======================
 	git pull
 	@echo ======================== sgrid projects ========================
-	@for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git pull; fi done
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git pull; fi done
 
 git_status:
 	@echo ====================== main part of sgrid ======================
 	git status -uno
 	@echo ======================== sgrid projects ========================
-	@for X in $(projects); do N=$$(basename $$X); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; fi done
+	@for X in $(projects); do N=$$(basename $$X .git); if [ -d "$(PROJECTDIR)/$$N" ]; then printf "==== %s ====\n" $$N; cd $(PROJECTDIR)/$$N; git status -uno; fi done
 
 
 # remove code that is not needed once the corresponding libs have been built
