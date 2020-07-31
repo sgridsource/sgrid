@@ -40,21 +40,29 @@ int readvariable(FILE *in, char *infostr, int *ndata, double **data)
   return 1;
 }
 
-/* write a single var */
+/* write a single var as ascii or binary floats */
 void dumpvariable(FILE *out, char *name, char *time, int boxi,
-                  int n1, int n2, int n3, double *data)
+                  int n1, int n2, int n3, double *data, int ascii)
 {
   int i;
   int N= n1*n2*n3;
   float dat;
 
-  fprintf(out,
-    "# \"time = %s\" , box%d: n1=%d n2=%d n3=%d , N=%d numbers , type=float\n",
-    time, boxi, n1,n2,n3, N);
-  for(i=0;i<N;i++)
+  fprintf(out, "# \"time = %s\" , box%d: n1=%d n2=%d n3=%d , N=%d numbers , ",
+          time, boxi, n1,n2,n3, N);
+  if(ascii)
   {
-    dat = data[i];
-    fwrite(&dat, sizeof(dat), 1, out);
+    fprintf(out, "type=ascii\n");
+    for(i=0;i<N;i++) fprintf(out, "%g\n", data[i]);
+  }
+  else /* write as float */
+  {
+    fprintf(out, "type=float\n");
+    for(i=0;i<N;i++)
+    {
+      dat = data[i];
+      fwrite(&dat, sizeof(dat), 1, out);
+    }
   }
   fprintf(out, "\n");
 }
@@ -75,7 +83,7 @@ int main(int argc, char *argv[])
   char bn2[STRLEN];
   char bn3[STRLEN];
   double *data=NULL;
-  int i, ndata, n1,n2,n3, boxi;
+  int i, ndata, n1,n2,n3, boxi, ascii, found;
   char *astr;
   char *varname;
 
@@ -83,10 +91,12 @@ int main(int argc, char *argv[])
   data = (double *) calloc(10, sizeof(double));
   
   printf("# extractvar_from_checkpoint \n");
-  if(argc!=6)  
+  if(argc<6 || argc>7)  
   {
-   printf("# usage: extractvar_from_checkpoint -V vname b  checkpoint.0 v.XYZ\n");
-   printf("# options: -V vname b  extract var \"vname\" from box b\n");
+   printf("# usage: extractvar_from_checkpoint -V vname b  [-A]  "
+          "checkpoint.0 v.XYZ\n");
+   printf("# options: -V vname b   extract var \"vname\" from box b\n");
+   printf("#          -A           write in ASCII format\n");
    printf("# examples:\n");
    printf("# extractvar_from_checkpoint -V gxx 1  checkpoint.0 gxx.XYZ1\n");
    return -1;
@@ -94,6 +104,7 @@ int main(int argc, char *argv[])
 
   /* default options */
   varname=NULL;
+  ascii=0;
 
   /* parse command line options, which start with - */
   for(i=1; (i<argc)&&(argv[i][0] == '-'); i++)
@@ -111,6 +122,10 @@ int main(int argc, char *argv[])
      i++;
      boxi=atoi(argv[i+1]);
      i++;
+   }
+   else if( (strcmp(astr+1,"A")==0) )
+   {
+     ascii=1;
    }
    else 
    {
@@ -180,6 +195,7 @@ int main(int argc, char *argv[])
   }
 
   /* read, modify and write a variable */
+  found = 0;
   while(readvariable(in, infostr, &ndata, &data))
   {
     int bi;
@@ -192,10 +208,14 @@ int main(int argc, char *argv[])
     if(strcmp(str1, varname)==0)
       if(bi==boxi)
       {
-        dumpvariable(out, varname, time, boxi, n1,n2,n3, data);
+        dumpvariable(out, varname, time, boxi, n1,n2,n3, data, ascii);
+        found = 1;
         break;
       }
   }
+
+  /* printf message if var cannot be found in the specified box */
+  if(!found) printf(" could not find %s in box%d.\n", varname, boxi);
 
   /* close files, free memory and return */
   fclose(in);
