@@ -13,19 +13,19 @@
 ##ibpaths += src/physics/ConvTest
 libpaths += src/utility/boundary
 libpaths += src/physics/ADMvars
-libpaths += src/physics/SingleBH
-libpaths += src/physics/BSSN
-libpaths += src/physics/Z4secondO
-libpaths += src/physics/ScalarWave
-libpaths += src/physics/TestDerivs
-libpaths += src/physics/Poisson
+#libpaths += src/physics/SingleBH
+#libpaths += src/physics/BSSN
+#libpaths += src/physics/Z4secondO
+#libpaths += src/physics/ScalarWave
+#libpaths += src/physics/TestDerivs
+#libpaths += src/physics/Poisson
 libpaths += src/utility/GridIterators
 libpaths += src/utility/LinAlg
-libpaths += src/physics/ScalarOnKerr
+#libpaths += src/physics/ScalarOnKerr
 #libpaths += src/physics/ScalarOnKerr/DV_CircSchwSource
-libpaths += src/physics/ScalarOnKerr/DV_CircSchwSource2
+#libpaths += src/physics/ScalarOnKerr/DV_CircSchwSource2
 libpaths += src/utility/s2kit
-libpaths += src/physics/TestID
+#libpaths += src/physics/TestID
 libpaths += src/physics/ModeComputer
 libpaths += src/physics/PN_CircularOrbit_GWs
 
@@ -44,19 +44,19 @@ EXEC = sgrid
 EXECDIR = $(TOP)/exe
 
 # pick a C compiler, only gcc and icc have been tested, gcc is the default
-CC = icc
+CC = cc
 # pick a C++ compiler, and a compiler to link, e.g. g++
 #CXX =
 #CLINKER = g++  -L/opt/intel/cce/10.1.021/lib -lsvml -limf -lintlc
-CLINKER = icpc
+#CLINKER = icpc
 
 # optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
 OFLAGS = -O3 # -O3 -openmp # -O2 -axT # -O2 # -p -g # -O2 -Wall -pg
 
 # ------------------------------------------------------------------------
 # compile in special libraries:
-DFLAGS += -DLAPACK
-SPECIALLIBS += -llapack # -lefence
+#DFLAGS += -DLAPACK
+#SPECIALLIBS += -llapack # -lefence
 
 DFLAGS += -DUMFPACK
 #SPECIALINCS += -I/usr/include/ufsparse
@@ -68,7 +68,7 @@ SPECIALLIBS += -lumfpack -lamd -lblas
 #SPECIALLIBS += -L$(TEMPLATESDIR) -L$(TEMPLATESDIR)/F2CLIBS \
 #               -literatortemplates -lI77 -lF77
 
-DFLAGS += -DFFTW3
-FFTW3DIR = /opt/fftw-3.1.3
-SPECIALINCS += -I$(FFTW3DIR)/include
-SPECIALLIBS += -L$(FFTW3DIR)/lib -lfftw3
+#DFLAGS += -DFFTW3
+#FFTW3DIR = /opt/fftw-3.1.3
+#SPECIALINCS += -I$(FFTW3DIR)/include
+#SPECIALLIBS += -L$(FFTW3DIR)/lib -lfftw3
