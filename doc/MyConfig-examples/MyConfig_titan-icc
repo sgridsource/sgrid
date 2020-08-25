@@ -19,8 +19,6 @@ libpaths += src/physics/Z4secondO
 libpaths += src/physics/ScalarWave
 libpaths += src/physics/TestDerivs
 libpaths += src/physics/Poisson
-#libpaths += src/physics/BNSdata
-libpaths += src/Projects/BNSdata
 libpaths += src/utility/GridIterators
 libpaths += src/utility/LinAlg
 libpaths += src/physics/ScalarOnKerr
@@ -30,9 +28,13 @@ libpaths += src/utility/s2kit
 libpaths += src/physics/TestID
 libpaths += src/physics/ModeComputer
 libpaths += src/physics/PN_CircularOrbit_GWs
-libpaths += src/Projects/RealisticBBH
-libpaths += src/Projects/QLMsolver
-libpaths += src/Projects/IsometricEmbedding
+
+repo = giter@mars.physics.fau.edu:
+#projects += $(repo)/BNSdata
+projects += $(repo)/DNSdata
+projects += $(repo)/RealisticBBH
+projects += $(repo)/QLMsolver
+projects += $(repo)/IsometricEmbedding
 
 # ------------------------------------------------------------------------
 # override various options in the Makefile
