@@ -5,8 +5,8 @@ OBJS := sgrid_$(NAME).o ADMvars.o ADMconstraints.o utility.o CheckIfFinite.o ADM
 
 include $(TOP)/Makefile.subdirs
 
-ADMconstraints.c: ADMconstraints.m
+ADMconstraints.c: | ADMconstraints.m
 	math < ADMconstraints.m > /dev/null
 
-ADMenergy_spheric_intergrand.c: ADMenergy_spheric_intergrand.m
+ADMenergy_spheric_intergrand.c: | ADMenergy_spheric_intergrand.m
 	math < ADMenergy_spheric_intergrand.m > /dev/null
