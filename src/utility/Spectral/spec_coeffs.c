@@ -13,6 +13,8 @@
     for(j=(p)*((sel)==2); ( j<(n2) ) && ( ( j==(p) ) || (sel)!=2 ); j++)
 /* end this loop with: end_forLines_free2Lines(uline,duline) */
 
+/* NOTE: SGRID_LEVEL3_Pragma(omp parallel for) does not work in front of
+         forLines_alloc2Lines_selectloop */
 
 
 /* init a n1*n1 matrix M used to compute coeffs */
@@ -402,7 +404,7 @@ void spec_analysis1_inplaneN(tBox *box, int direc, int N, int p,
   {
     if(box->TransformType1)
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,cline,n1, sel,p)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -412,7 +414,7 @@ void spec_analysis1_inplaneN(tBox *box, int direc, int N, int p,
     }
     else
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,cline,n1, sel,p)
       {
         get_memline(u, uline, 1, j, k, n1, n2, n3);
@@ -425,7 +427,7 @@ void spec_analysis1_inplaneN(tBox *box, int direc, int N, int p,
   {
     if(box->TransformType2)
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(i,k, n1,n3, uline,cline,n2, sel,p)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -435,7 +437,7 @@ void spec_analysis1_inplaneN(tBox *box, int direc, int N, int p,
     }
     else
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(i,k, n1,n3, uline,cline,n2, sel,p)
       {
         get_memline(u, uline, 2, i, k, n1, n2, n3);
@@ -448,7 +450,7 @@ void spec_analysis1_inplaneN(tBox *box, int direc, int N, int p,
   {
     if(box->TransformType3)
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(i,j, n1,n2, uline,cline,n3, sel,p)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -458,7 +460,7 @@ void spec_analysis1_inplaneN(tBox *box, int direc, int N, int p,
     }
     else
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(i,j, n1,n2, uline,cline,n3, sel,p)
       {
         get_memline(u, uline, 3, i, j, n1, n2, n3);
@@ -512,7 +514,7 @@ void spec_synthesis1_inplaneN(tBox *box, int direc, int N, int p,
   {
     if(box->TransformType1)
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,cline,n1, sel,p)
       {
         get_memline(c, cline, 1, j, k, n1, n2, n3);
@@ -522,7 +524,7 @@ void spec_synthesis1_inplaneN(tBox *box, int direc, int N, int p,
     }
     else
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(j,k, n2,n3, uline,cline,n1, sel,p)
       {
         get_memline(c, cline, 1, j, k, n1, n2, n3);
@@ -535,7 +537,7 @@ void spec_synthesis1_inplaneN(tBox *box, int direc, int N, int p,
   {
     if(box->TransformType2)
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(i,k, n1,n3, uline,cline,n2, sel,p)
       {
         get_memline(c, cline, 2, i, k, n1, n2, n3);
@@ -545,7 +547,7 @@ void spec_synthesis1_inplaneN(tBox *box, int direc, int N, int p,
     }
     else
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(i,k, n1,n3, uline,cline,n2, sel,p)
       {
         get_memline(c, cline, 2, i, k, n1, n2, n3);
@@ -558,7 +560,7 @@ void spec_synthesis1_inplaneN(tBox *box, int direc, int N, int p,
   {
     if(box->TransformType3)
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(i,j, n1,n2, uline,cline,n3, sel,p)
       {
         get_memline(c, cline, 3, i, j, n1, n2, n3);
@@ -568,7 +570,7 @@ void spec_synthesis1_inplaneN(tBox *box, int direc, int N, int p,
     }
     else
     {
-      SGRID_LEVEL3_Pragma(omp parallel for)
+      //SGRID_LEVEL3_Pragma(omp parallel for)
       forLines_alloc2Lines_selectloop(i,j, n1,n2, uline,cline,n3, sel,p)
       {
         get_memline(c, cline, 3, i, j, n1, n2, n3);
