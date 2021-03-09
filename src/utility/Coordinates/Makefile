@@ -13,20 +13,20 @@ OBJS := sgrid_$(NAME).o $(NAME).o cartesianDerivs.o doubleCovering.o\
 
 include $(TOP)/Makefile.subdirs
 
-coordtrans_AnsorgXRphi.c: coordtrans_AnsorgXRphi.m
+coordtrans_AnsorgXRphi.c: | coordtrans_AnsorgXRphi.m
 	math < coordtrans_AnsorgXRphi.m > /dev/null
 
-coordtrans_AnsorgNS0.c: coordtrans_AnsorgNS0.m
+coordtrans_AnsorgNS0.c: | coordtrans_AnsorgNS0.m
 	math < coordtrans_AnsorgNS0.m > /dev/null
 
-coordtrans_AnsorgNS1.c: coordtrans_AnsorgNS1.m
+coordtrans_AnsorgNS1.c: | coordtrans_AnsorgNS1.m
 	math < coordtrans_AnsorgNS1.m > /dev/null
 
-coordtrans_AnsorgNS2.c: coordtrans_AnsorgNS2.m
+coordtrans_AnsorgNS2.c: | coordtrans_AnsorgNS2.m
 	math < coordtrans_AnsorgNS2.m > /dev/null
 
-coordtrans_AnsorgNS3.c: coordtrans_AnsorgNS3.m
+coordtrans_AnsorgNS3.c: | coordtrans_AnsorgNS3.m
 	math < coordtrans_AnsorgNS3.m > /dev/null
 
-coordtrans_Bfunc.c: coordtrans_Bfunc.m
+coordtrans_Bfunc.c: | coordtrans_Bfunc.m
 	math < coordtrans_Bfunc.m > /dev/null
