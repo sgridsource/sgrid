@@ -49,9 +49,6 @@ void write3d_boxvar(tBox *box, char *name)
     /* open file (returns non-null file pointer) */
     fp = fopen_vtk(name, "XYZ", box->b, nseries-1);
 
-    /* FIXME: only fakepoints works so far!!! */
-    fakepoints=1;
-
     if(fakepoints) /* put data on a fake grid with uniform grid spacings dX,dY,dZ */
     {
       double X0 = box->bbox[0];
@@ -122,7 +119,6 @@ void write3d_boxvar(tBox *box, char *name)
         /* write data,
            has to be in the file right after the \n of the last header line */
         write_raw_vtk_data(fp, pV, n1*n2*n3,1,0, dbl, flt, text, binary);
-        errorexit("this is not in proper vtk format");
       }
     }
     fclose(fp);
