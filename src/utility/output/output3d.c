@@ -109,13 +109,13 @@ void write3d_boxvar(tBox *box, char *name)
         fprintf(fp, "DIMENSIONS %d %d %d\n", n1, n2, n3);
         fprintf(fp, "X_COORDINATES %d %s\n", n1, dbl ? "double" : "float");
         write_raw_vtk_data(fp, pX, n1,1,0, 1, 0, text, binary);
-        fprintf(fp, "\n");
+        fprintf(fp, "\n\n");
         fprintf(fp, "Y_COORDINATES %d %s\n", n2, dbl ? "double" : "float");
         write_raw_vtk_data(fp, pY, n2,n1,0, 1, 0, text, binary);
-        fprintf(fp, "\n");
+        fprintf(fp, "\n\n");
         fprintf(fp, "Z_COORDINATES %d %s\n", n3, dbl ? "double" : "float");
         write_raw_vtk_data(fp, pZ, n3,n1*n2,0, 1, 0, text, binary);
-        fprintf(fp, "\n");
+        fprintf(fp, "\n\n");
         fprintf(fp, "POINT_DATA %d\n", n1*n2*n3);
         fprintf(fp, "SCALARS scalars %s\n", dbl ? "double" : "float");
         fprintf(fp, "LOOKUP_TABLE default\n");
