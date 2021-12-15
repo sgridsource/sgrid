@@ -395,6 +395,14 @@ int PN_CircularOrbit_GWs(tGrid *grid)
             but instead has dims of M^2
            +last term should probably have eta instead of 1/eta
            +last term should be dimensionless, but instead has dims of M^4 */
+        /* maybe this is a more correct Eqn: */
+        E2PN = -0.5*mu*pow(Momega,2.0/3.0)*
+               ( 1 - ((9.0+eta)/12.0)*pow(Momega,2.0/3.0)
+                 +(8.0/3.0)*LNhat_dot_Seff*Momega / (M*M)
+                 +(1.0/24.0)*(-81.0+57.0*eta-eta*eta)*pow(Momega,4.0/3.0)
+                 +(somsqr1_dot_somsqr2 - 3*LNhat_dot_somsqr1*LNhat_dot_somsqr2)
+                  *(eta)*pow(Momega,4.0/3.0)
+               );
 
         /* Eq 12 */
         E3PN = E2PN - 0.5*mu*pow(Momega,2.0/3.0)*
