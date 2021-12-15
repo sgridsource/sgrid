@@ -380,7 +380,8 @@ int PN_CircularOrbit_GWs(tGrid *grid)
         /* some dot products */
         LNhat_dot_Seff = LNhatx*Seff_x + LNhaty*Seff_y + LNhatz*Seff_z; 
 
-        /* Eq 11 and Eq 12 */
+        /* Eq 11 and Eq 12 of Buonanno,..., Phys.Rev. D67, 104025.
+           Note also: Erratum Phys. Rev. D 74, 029904 (2006) */
         E2PN = -0.5*mu*pow(Momega,2.0/3.0)*
                ( 1 - ((9.0+eta)/12.0)*pow(Momega,2.0/3.0) 
                  +(8.0/3.0)*LNhat_dot_Seff*Momega
