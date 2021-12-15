@@ -383,6 +383,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
         /* Eq 11 and Eq 12 of Buonanno,..., Phys.Rev. D67, 104025.
            Note also: Erratum Phys. Rev. D 74, 029904 (2006) */
         /* Eq 11 as in paper: */
+        /*
         E2PN = -0.5*mu*pow(Momega,2.0/3.0)*
                ( 1 - ((9.0+eta)/12.0)*pow(Momega,2.0/3.0) 
                  +(8.0/3.0)*LNhat_dot_Seff*Momega
@@ -390,6 +391,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
                  +(somsqr1_dot_somsqr2 - 3*LNhat_dot_somsqr1*LNhat_dot_somsqr2)
                   *(m1*m1*m2*m2/eta)*pow(Momega,4.0/3.0)
                );
+        */
         /* Note all spin terms in Eq 11 have wrong prefactors!!!
            +(8.0/3.0)*LNhat_dot_Seff*Momega should be dimensionless,
             but instead has dims of M^2
@@ -403,6 +405,7 @@ int PN_CircularOrbit_GWs(tGrid *grid)
                  +(somsqr1_dot_somsqr2 - 3*LNhat_dot_somsqr1*LNhat_dot_somsqr2)
                   *(eta)*pow(Momega,4.0/3.0)
                );
+        /* FIXME: the spin terms in E2PN should be checked!!!*/
 
         /* Eq 12 */
         E3PN = E2PN - 0.5*mu*pow(Momega,2.0/3.0)*
