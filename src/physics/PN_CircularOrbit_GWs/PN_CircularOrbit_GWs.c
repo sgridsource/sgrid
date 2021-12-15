@@ -447,6 +447,15 @@ int PN_CircularOrbit_GWs(tGrid *grid)
     PN_CircOrbit_xodeint(m1, m2, ti, tf, yvec);
   }
   fclose(out_orb);
+
+  if(EOM_type==BuonannoEtAl2003 || EOM_type==TaylorT4)
+  {
+    printf("*** WARNING ***\n");
+    printf("Eq 11 of BuonannoEtAl2003 is wrong!\n");
+    printf("We use a E2PN with corrected dimensions here, but it still may "
+           "not be correct.\n");
+    printf("Check Refs 17,20 and 21 of BuonannoEtAl2003.\n");
+  }
   return 0;
 }
 
