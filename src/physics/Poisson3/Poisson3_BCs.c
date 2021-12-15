@@ -10,8 +10,11 @@
 /* ... */
 
 
-
-
+/************************************************************************/
+/* Helper funcs for Poisson3_set_interbox_and_outerBCs__old.
+   Since we do not use Poisson3_set_interbox_and_outerBCs__old, they are
+   not really needed anymore */
+/************************************************************************/
 
 /* find normal vector of box faces for Cartesian coords. */
 void CartBox_normal(tBface *bface, int ijk, double *nx, double *ny, double *nz)
@@ -184,6 +187,11 @@ int ind_in_other_box_if_sameXYZ(tBox *box, int fi, int ind)
   return oind;
 }
 
+
+/************************************************************************/
+/* Old version of Poisson3_set_interbox_and_outerBCs
+   Not use anymore. */
+/************************************************************************/
 /* set BC's between boxes and at outerbound */
 void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
                                         int iPsix, int iPsiy, int iPsiz,
@@ -564,6 +572,13 @@ void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
     }
   }
 }
+
+
+
+/************************************************************************/
+/* Functions that we really need in the new version of Poisson3_set_BCs */
+/************************************************************************/
+
 /* set BC's between boxes and at outerbound */
 void Poisson3_set_interbox_and_outerBCs(tBox *box, int iFPsi, int iPsi,
                                         int iPsix, int iPsiy, int iPsiz,
