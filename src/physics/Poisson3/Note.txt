@@ -1,0 +1,30 @@
+About the Poisson3 project:
+---------------------------
+We solve 2 coupled Poisson eqs for Psi and Chi:
+ Chi Psixx + Psiyy + Chi Chi Psizz[i] = rh1
+ Chixx + Psix Chiyy + Chizz = rh2
+
+
+Some explanations:
+------------------
+
+sgrid_Poisson3.c
+----------------
+-most important file
+-defines vars like Poisson3_Psi that we solve for
+-schedules functions like Poisson3_startup or Poisson3_solve that we want
+ to call
+
+Poisson3.c
+----------
+-contains most functions that are called
+-E.g. the 2 coupled Poisson eqs are inside the function F_Poisson3
+-F_Poisson3 is passed to the Newton solver by Poisson3_solve which was
+ scheduled in sgrid_Poisson3.c
+-The Newton solver also needs the linearized equations which are in the
+ function J_Poisson3.
+
+Poisson3_BCs.c
+--------------
+-contains boundary conditions (BCs)
+-func Poisson3_set_BCs sets BCs using Poisson3_set_interbox_and_outerBCs
