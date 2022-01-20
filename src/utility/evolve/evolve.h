@@ -12,6 +12,6 @@ void evolve_icn(tGrid *grid);
 void evolve_euler(tGrid *grid);
 void evolve_rk(tGrid *grid);
 
-void (*evolve_rhs)
+extern void (*evolve_rhs)
   (tVarList *unew, tVarList *upre, double c, tVarList *ucur);
-void (*evolve_algebraicConditions)(tVarList *unew, tVarList *upre);
+extern void (*evolve_algebraicConditions)(tVarList *unew, tVarList *upre);
