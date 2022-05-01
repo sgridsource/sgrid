@@ -23,7 +23,11 @@ void initialize_libraries(void)
 
 /**************************************************************************/
 /* main */
-int main(int argc, char **argv) 
+#ifndef LIBSGRID
+int main(int argc, char **argv)
+#else
+int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
+#endif
 {
   tGrid *g;
   int restart, lnum;
