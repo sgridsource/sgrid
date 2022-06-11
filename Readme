@@ -9,3 +9,20 @@ The code is private for now (don't distribute, please).
 
 sgrid is supposed to be:
 - extremely simple
+
+
+6/2022 Plans for making SGRID public:
+-------------------------------------
+*move some modules that are currently in physics into a new dir e.g.
+ old_physics
+*make some modules that are currently in physics into their own projects
+
+*do not compile the old utility/NumericUtils by default anymore (so that we
+ can remove it later)
+*add utility/numerics from Nmesh instead
+*add new func shims to utility/numerics that have the same names as the ones
+ needed from utility/NumericUtils, which simply call the funcs from nmesh or
+ from the GSL
+*e.g. make a new odeintegrate that simply calls gsl_odeiv2_driver_apply and
+ optionally also stores the kmax data points like it is done in
+ integrate_TOV_ODE.c from nmesh to show the TOV table on the screen
