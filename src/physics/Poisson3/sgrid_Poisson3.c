@@ -13,7 +13,7 @@ int sgrid_Poisson3()
   /* functions */
   AddFun(PRE_COORDINATES, Poisson3_initboxes, "initialize boxes we use");
   AddFun(PRE_INITIALDATA, Poisson3_startup, "initialize Poisson3");
-  AddFun(INITIALDATA, Poisson3_solve, "solve Poisson3 Eq.");
+  AddFun(INITIALDATA, Poisson3_solve, "solve Poisson3 Eqs.");
   AddFun(ANALYZE, Poisson3_analyze, "compute error");
 
   /* variables */
