@@ -17,15 +17,15 @@ int sgrid_Poisson3()
   AddFun(ANALYZE, Poisson3_analyze, "compute error");
 
   /* variables */
-  AddVar("Poisson3_Psi",     "",
-         "function that satisfies Poisson3 Eq: Laplace Psi = rh1");
+  AddVar("Poisson3_Psi",     "", "function that satisfies Eq 1: "
+         "Chi Psixx + Psiyy + Chi Chi Psizz[i] = rh1");
   AddVar("Poisson3_Psi",     "i",    "1st deriv of Psi");
   AddVar("Poisson3_Psi",     "(ij)", "2nd deriv of Psi");
   AddVar("Poisson3_rh1",     "",     "Source on RHS1");
   AddVar("Poisson3_Err_Psi", "",     "Error in Psi");
 
-  AddVar("Poisson3_Chi",     "",
-         "another function that satisfies Poisson3: Laplace Chi = rh2");
+  AddVar("Poisson3_Chi",     "", "another function that satisfies Eq 2: "
+         "Chixx + Psix Chiyy + Chizz = rh2");
   AddVar("Poisson3_Chi",     "i",    "1st deriv of Chi");
   AddVar("Poisson3_Chi",     "(ij)", "2nd deriv of Chi");
   AddVar("Poisson3_rh2",     "",     "Source on RHS2");
@@ -49,7 +49,7 @@ int sgrid_Poisson3()
   AddPar("Poisson3_linSolver_tol","0", "tol for linSolver is "
          "max2((*normres)*linSolv_tolFac, linSolv_tol)");
   AddPar("Poisson3_linSolver_Precon", "I", 
-         "Preconditioner used [I,fd_UMFPACK]");
+         "Preconditioner used [I,fd_UMFPACK,templates]");
   AddPar("Poisson3_grid", "", "what grid we use [2starcubes,CubedSpheres]");
   AddPar("Poisson3_set_bfaces", "yes", "do we set bfaces [yes,no]");
 	     	   	   	 
