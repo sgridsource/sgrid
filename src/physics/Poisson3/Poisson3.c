@@ -357,7 +357,7 @@ void F_Poisson3(tVarList *VLFu, tVarList *VLu,
     D_and_DD_of_S(box, VLu->index[0], VLuAll->index[1], VLuAll->index[4]);
     D_and_DD_of_S(box, VLu->index[1], VLuAll->index[11], VLuAll->index[14]);
 
-    /* Poisson eqs */
+    /* Poisson3 eqs */
     forallpoints(box, i)
     {
       FPsi[i] = Chi[i]*Psixx[i] + Psiyy[i] + Chi[i]*Chi[i]*Psizz[i] - rh1[i];
@@ -412,7 +412,7 @@ void J_Poisson3(tVarList *VLJlu, tVarList *VLlu,
     D_and_DD_of_S(box, VLlu->index[0], VLluAll->index[1], VLluAll->index[4]);
     D_and_DD_of_S(box, VLlu->index[1], VLluAll->index[11], VLluAll->index[14]);
 
-    /* Poisson eqs */
+    /* linearized Poisson3 eqs */
     forallpoints(box, i)
     {
       JlPsi[i] = Chi[i]*lPsixx[i] + lChi[i]*Psixx[i]  +  lPsiyy[i]  +
