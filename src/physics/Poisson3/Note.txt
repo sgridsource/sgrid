@@ -1,7 +1,7 @@
 About the Poisson3 project:
 ---------------------------
 We solve 2 coupled Poisson eqs for Psi and Chi:
- Chi Psixx + Psiyy + Chi Chi Psizz[i] = rh1
+ Chi Psixx + Psiyy + Chi Chi Psizz = rh1
  Chixx + Psix Chiyy + Chizz = rh2
 
 
