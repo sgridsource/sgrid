@@ -352,7 +352,7 @@ void FPsi_1Dinterp_for_bface(int iFPsi, tBface *bface, int idir,
                   n[2] * (dPsi[2][ind] - Pinterp[2]) +
                   n[3] * (dPsi[3][ind] - Pinterp[3]);
     }
-    if(!finite(Pinterp[1]))
+    if(!finit(Pinterp[1]))
     {
       printf("Pinterp[1]=%g  i1=%d oC=%.13g i2=%d  ind=%d\n",
              Pinterp[1], i1,oC,i2, ind);
@@ -597,7 +597,7 @@ void FPsi_3Dinterp_for_bface(int iFPsi, tBface *bface, int iPsi, int idPsi[4])
                   n[2] * (dPsi[2][ind] - Pinterp[2]) +
                   n[3] * (dPsi[3][ind] - Pinterp[3]);
     }
-    if(!finite(Pinterp[1]))
+    if(!finit(Pinterp[1]))
     {
       printf("Pinterp[1]=%g  X=%.13g Y=%.13g Z=%.13g  ind=%d\n",
              Pinterp[1], X,Y,Z, ind);
