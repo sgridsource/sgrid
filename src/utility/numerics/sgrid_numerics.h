@@ -28,8 +28,6 @@ int find_2roots_region(double x0[2],
 //int gaussjordan_inv(int n, double a[]);
 //int M_to_Minv_gaussjordan(int n, const double M[], double Minv[]);
 
-
-
 /* NumericUtils_shims.c */
 int newton_linesrch_itsP(double x[], int n, int *check,
                      void (*vecfuncP)(int, double [], double [], void *par),
@@ -45,3 +43,5 @@ int WT_newton(double *x, int n, int *check,
         int (*precon)(int n, double *b, double *dx, double *x, void *par),
         int linitmax, double lintolfac);
 #define zbrac_P rt_brak
+int zbrent_itsP(double *x0, double (*func)(double,void *par),
+                double x1, double x2, void *par, int ITMAX, double tol);

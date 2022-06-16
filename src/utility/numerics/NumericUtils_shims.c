@@ -37,3 +37,11 @@ int WT_newton(double *x, int n, int *check,
   errorexit("not implemented in numerics");
   return -1;
 }
+
+/* old way of finding root in bracket [x1,x2] */
+int zbrent_itsP(double *x0, double (*func)(double,void *par),
+                double x1, double x2, void *par, int ITMAX, double tol)
+{
+
+  return rtbrent_brak(x0, func, x1,x2, par, ITMAX, tol, 1);
+}
