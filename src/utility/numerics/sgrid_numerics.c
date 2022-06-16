@@ -6,7 +6,7 @@
 
 
 
-int nmesh_numerics(void)
+int sgrid_numerics(void)
 {
   printf("Adding numerics\n");
 
