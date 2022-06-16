@@ -45,3 +45,31 @@ int zbrent_itsP(double *x0, double (*func)(double,void *par),
 
   return rtbrent_brak(x0, func, x1,x2, par, ITMAX, tol, 1);
 }
+
+/* lu_decomp but for a matrix that starts with a[1][1],
+   indx also starts at indx[1].
+   returns -i, if i=row with all zeros
+   returns +j, if j=column with all zeros,
+   0 otherwise */
+int ludcmpSing(double **a, int n, int *indx, double *d)
+{
+  int parity, ret;
+  double (*A)[n];
+
+  A = (double (*)[n]) &(a[1][1]);
+
+  ret = lu_decomp(n, A, indx+1, &parity);
+  *d = parity;
+
+  return ret;
+}
+
+/* LU solve for matrix, vector and indx, that all start at index 1 */
+void lubksb(double **a, int n, int *indx, double b[])
+{
+  double (*A)[n];
+
+  A = (double (*)[n]) &(a[1][1]);
+
+  lu_solve(n, A, indx+1, b+1);
+}
