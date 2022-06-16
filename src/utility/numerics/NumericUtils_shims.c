@@ -23,7 +23,22 @@ int newton_linesrch_itsP(double x[], int n, int *check,
   return newton_linesearch(n, x, check, vecfuncP,par,1, MAXITS, TOLF);
 }
 
-
+/* global func pointer (this is NOT threadsafe!!!) */
+void (*vecfunc_globalHack)(int n, double x[], double fv[]);
+void vecfuncP_shim(int n, double x[], double fv[], void *par)
+{
+  vecfunc_globalHack(n, x, fv);
+}
+/* never call newton_linesrch_its from more than one thread!!! */
+int newton_linesrch_its(double x[], int n, int *check,
+			void (*vecfunc)(int, double [], double []),
+			int MAXITS, double TOLF)
+{
+  errorexit("numerics does not support newton_linesrch_its: "
+            "use newton_linesearch or newton_linesrch_itsP");
+  vecfunc_globalHack = vecfunc;
+  return newton_linesearch(n, x, check, vecfuncP_shim,NULL,1, MAXITS, TOLF);
+}
 
 /* not done! */
 int WT_newton(double *x, int n, int *check,
