@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-/* find a bracket [x1,x2] that contains a root of func(x, par)
+/* find a bracket [x1,x2] that contains a root of a 1d function func(x, par)
    returns number of tries j    if ok
    returns <0                   if failure */
 #define FAC 1.6
