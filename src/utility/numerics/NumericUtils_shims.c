@@ -52,7 +52,6 @@ int zbrac_P(double (*func)(double,void *par), double *x1, double *x2,
 int zbrent_itsP(double *x0, double (*func)(double,void *par),
                 double x1, double x2, void *par, int ITMAX, double tol)
 {
-
   return rtbrent_brak(x0, func, x1,x2, par, ITMAX, tol, 1);
 }
 
@@ -101,4 +100,68 @@ void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
 	    double (*func)(double, void *ppointer), void *parpointer)
 {
   min_brak(func,parpointer, ax,bx,cx, fa,fb,fc, 1073741824);
+}
+
+
+/**********************************************************************/
+/* some mem alloc func from public part of nr with float -> double */
+/**********************************************************************/
+#define NR_END 1
+/* allocate a double vector with subscript range v[nl..nh] */
+double *vector(long nl, long nh)
+{
+        double *v = malloc((size_t) ((nh-nl+1+NR_END)*sizeof(double)));
+        if(!v) errorexit("allocation failure in vector()");
+        return v-nl+NR_END;
+}
+
+/* allocate an int vector with subscript range v[nl..nh] */
+int *ivector(long nl, long nh)
+{
+        int *v = malloc((size_t) ((nh-nl+1+NR_END)*sizeof(int)));
+        if(!v) errorexit("allocation failure in ivector()");
+        return v-nl+NR_END;
+}
+
+/* allocate a double matrix with subscript range m[nrl..nrh][ncl..nch] */
+double **matrix(long nrl, long nrh, long ncl, long nch)
+{
+        long i, nrow=nrh-nrl+1,ncol=nch-ncl+1;
+        double **m;
+
+        /* allocate pointers to rows */
+        m = malloc((size_t)((nrow+NR_END)*sizeof(double*)));
+        if(!m) errorexit("allocation failure 1 in matrix()");
+        m += NR_END;
+        m -= nrl;
+
+        /* allocate rows and set pointers to them */
+        m[nrl] = malloc((size_t)((nrow*ncol+NR_END)*sizeof(double)));
+        if(!m[nrl]) errorexit("allocation failure 2 in matrix()");
+        m[nrl] += NR_END;
+        m[nrl] -= ncl;
+
+        for(i=nrl+1;i<=nrh;i++) m[i] = m[i-1] + ncol;
+
+        /* return pointer to array of pointers to rows */
+        return m;
+}
+
+/* free a double vector allocated with vector() */
+void free_vector(double *v, long nl, long nh)
+{
+        free(v+nl-NR_END);
+}
+
+/* free an int vector allocated with ivector() */
+void free_ivector(int *v, long nl, long nh)
+{
+        free(v+nl-NR_END);
+}
+
+/* free a double matrix allocated by matrix() */
+void free_matrix(double **m, long nrl, long nrh, long ncl, long nch)
+{
+        free(m[nrl]+ncl-NR_END);
+        free(m+nrl-NR_END);
 }

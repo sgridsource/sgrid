@@ -52,6 +52,9 @@ int min_brak(double (*func)(double x, void *p), void *par,
              double *ax, double *bx, double *cx,
              double *fa, double *fb, double *fc, int maxits);
 
+/* WT_Random.c, BUT try to avoid RND */
+double RND(void);
+
 /* NumericUtils_shims.c */
 int newton_linesrch_itsP(double x[], int n, int *check,
                      void (*vecfuncP)(int, double [], double [], void *par),
@@ -76,12 +79,9 @@ double brent_with_pointer_to_pars(double ax, double bx, double cx,
 void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
 	    double *fa, double *fb, double *fc,
 	    double (*func)(double, void *ppointer), void *parpointer);
-
-/* WT_Random.c, BUT try to avoid RND */
-double RND(void);
-double brent_with_pointer_to_pars(double ax, double bx, double cx,
-             double (*f)(double, void *ppointer), double tol,
-	     double *xmin, void *parpointer);
-void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
-	    double *fa, double *fb, double *fc,
-	    double (*func)(double, void *ppointer), void *parpointer);
+double *vector(long nl, long nh);
+int *ivector(long nl, long nh);
+double **matrix(long nrl, long nrh, long ncl, long nch);
+void free_vector(double *v, long nl, long nh);
+void free_ivector(int *v, long nl, long nh);
+void free_matrix(double **m, long nrl, long nrh, long ncl, long nch);
