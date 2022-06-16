@@ -16,7 +16,7 @@ int rt_brak(double (*func)(double x, void *par),
 
   if (*x1 == *x2)
   {
-    printf("Bad initial range in rt_brak\n");
+    printf("rt_brak: Warning: *x1 and *x2 are equal!\n");
     return -1;
   }
 
@@ -41,7 +41,7 @@ int rt_brak(double (*func)(double x, void *par),
       f2 = (*func)(*x2, par);
     }
   }
-  printf("Did not find bracket in rt_brak\n");
+  printf("rt_brak: Could not find bracket!\n");
   return -j-1;
 }
 #undef FAC
