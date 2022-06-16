@@ -76,3 +76,22 @@ void lubksb(double **a, int n, int *indx, double b[])
 
   lu_solve(n, A, indx+1, b+1);
 }
+
+/* Brent's method */
+double brent_with_pointer_to_pars(double ax, double bx, double cx, 
+             double (*f)(double, void *ppointer), double tol,
+	     double *xmin, void *parpointer)
+{
+  double fmin;
+
+  minbrent_brak(ax,bx,cx, f,parpointer, 100,tol, xmin,&fmin, 1);
+  return fmin;
+}
+
+/* bracket a min */
+void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
+	    double *fa, double *fb, double *fc,
+	    double (*func)(double, void *ppointer), void *parpointer)
+{
+  min_brak(ax,bx,cx, fa,fb,fc, func, parpointer);
+}

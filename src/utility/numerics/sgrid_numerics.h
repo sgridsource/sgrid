@@ -43,6 +43,15 @@ int newton_linesearch(int n, double x[], int *check,
 //int gaussjordan_inv(int n, double a[]);
 //int M_to_Minv_gaussjordan(int n, const double M[], double Minv[]);
 
+/* minbrent_brak.c */
+int minbrent_brak(double ax, double bx, double cx, 
+                  double (*f)(double x, void *p),
+                  void *par, int maxits, double tol,
+                  double *xmin, double *fmin, int pr);
+int min_brak(double *ax, double *bx, double *cx,
+             double *fa, double *fb, double *fc,
+             double (*func)(double x, void *p), void *par);
+
 /* NumericUtils_shims.c */
 int newton_linesrch_itsP(double x[], int n, int *check,
                      void (*vecfuncP)(int, double [], double [], void *par),
@@ -60,6 +69,18 @@ int WT_newton(double *x, int n, int *check,
 #define zbrac_P rt_brak
 int zbrent_itsP(double *x0, double (*func)(double,void *par),
                 double x1, double x2, void *par, int ITMAX, double tol);
+double brent_with_pointer_to_pars(double ax, double bx, double cx, 
+             double (*f)(double, void *ppointer), double tol,
+	     double *xmin, void *parpointer);
+void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
+	    double *fa, double *fb, double *fc,
+	    double (*func)(double, void *ppointer), void *parpointer);
 
 /* WT_Random.c, BUT try to avoid RND */
 double RND(void);
+double brent_with_pointer_to_pars(double ax, double bx, double cx, 
+             double (*f)(double, void *ppointer), double tol,
+	     double *xmin, void *parpointer);
+void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
+	    double *fa, double *fb, double *fc,
+	    double (*func)(double, void *ppointer), void *parpointer);
