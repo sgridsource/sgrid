@@ -60,3 +60,6 @@ int WT_newton(double *x, int n, int *check,
 #define zbrac_P rt_brak
 int zbrent_itsP(double *x0, double (*func)(double,void *par),
                 double x1, double x2, void *par, int ITMAX, double tol);
+
+/* WT_Random.c, BUT try to avoid RND */
+double RND(void);
