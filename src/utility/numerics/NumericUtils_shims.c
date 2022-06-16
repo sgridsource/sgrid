@@ -1,5 +1,8 @@
+/* NumericUtils_shims.c */
+/* Wolfgang Tichy 6/2022 */
 
-
+#include "sgrid.h"
+#include "numerics.h"
 
 
 /* Newton linesearch with vecfuncP that has an argument par for

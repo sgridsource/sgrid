@@ -28,6 +28,17 @@ int find_2roots_region(double x0[2],
                        double x1, double x2, void *par,
                        int maxits, double xacc, int pr);
 
+/* lu.c */
+int lu_decomp(int n, double A[][n], int *p_idx, int *parity);
+void lu_solve(int n, double A[][n], int *p_idx, double b[]);
+double lu_det(int n, double A[][n], int parity);
+
+/* newton_linesearch.c */
+int newton_linesearch(int n, double x[], int *check,
+                      void (*vecfuncP)(int, double [], double [], void *par),
+                      void *par, int vecfuncP_ilow, int itmax, double tolf);
+
+
 ///* matrix_inv.c */
 //int gaussjordan_inv(int n, double a[]);
 //int M_to_Minv_gaussjordan(int n, const double M[], double Minv[]);
