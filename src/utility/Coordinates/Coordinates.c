@@ -2475,7 +2475,7 @@ void xyz_of_AnsorgNS(tBox *box, int ind, int domain,
     *y = LARGE * cos(phi);
     *z = LARGE * sin(phi);
   }
-//if(!finite(X))
+//if(!finit(X))
 //{
 //printf("X=%g ", X);
 //printf("sigp_Bphi=%g ", sigp_Bphi);
@@ -3123,9 +3123,9 @@ void dABphi_dxyz_AnsorgNS(tBox *box, int ind, int domain,
   *dBBdy = dBBdB * dBdy;
   *dBBdz = dBBdB * dBdz;
 
-//if( !finite(*dAdx) || !finite(*dAdy) || !finite(*dAdz) ||  
-//    !finite(*dBBdx) || !finite(*dBBdy) || !finite(*dBBdz) ||  
-//    !finite(*dphidx) || !finite(*dphidy) || !finite(*dphidz) )
+//if( !finit(*dAdx) || !finit(*dAdy) || !finit(*dAdz) ||
+//    !finit(*dBBdx) || !finit(*dBBdy) || !finit(*dBBdz) ||
+//    !finit(*dphidx) || !finit(*dphidy) || !finit(*dphidz) )
 //{
 ////int k,l;
 ////for(k=1; k<=3; k++)
@@ -3340,7 +3340,7 @@ double interpolate_isig_using_box_with_original_sigma_pm(tBox *box, int isig,
   //spec_Coeffs_inplaneN(ibox, 1,0, ibox->v[isig], c);
   //interp = spec_interpolate_inplaneN(ibox, 1,0, c, B,phi);
 
-if(0 && !finite(interp))
+if(0 && !finit(interp))
 {
 printf("box->b=%d\n", box->b);
 printf("%p\n", box->x_of_X[1]);

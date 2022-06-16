@@ -338,7 +338,7 @@ int b_XYZ_of_xyz_inboxlist(tGrid *grid, int *blist, int nb,
     X1=*X; Y1=*Y; Z1=*Z;
     stat = XYZ_of_xyz(box, &X1,&Y1,&Z1, x,y,z);
 
-//if(!finite(X1) || !finite(Y1) || !finite(Z1))
+//if(!finit(X1) || !finit(Y1) || !finit(Z1))
 //errorexit("not finite");
     if(stat<0) continue;
     if(dless(X1,box->bbox[0]) || dless(box->bbox[1],X1)) continue;
