@@ -1,5 +1,5 @@
-/* nmesh_numerics.h */
-/* Wolfgang Tichy, June 2019 */
+/* sgrid_numerics.h */
+/* Wolfgang Tichy, June 2022 */
 
 
 /* newton1d_brak.c */

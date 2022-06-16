@@ -1,3 +1,4 @@
+/* newton_linesearch.c */
 /* (c) Wolfgang Tichy 6.6.2022 */
 
 #include <stdio.h>

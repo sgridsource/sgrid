@@ -1,4 +1,6 @@
-/* Note all floats are replaced by doubles here: */
+/* lu.c */
+/* Crout's algorithm for LU decomposition and solve
+   Wolfgang Tichy 6/2022 */
 
 #include <stdlib.h>
 #include <stdio.h>
