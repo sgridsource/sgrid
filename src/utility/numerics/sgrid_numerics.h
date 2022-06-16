@@ -59,6 +59,9 @@ double RND(void);
 int newton_linesrch_itsP(double x[], int n, int *check,
                      void (*vecfuncP)(int, double [], double [], void *par),
                      void *par, int MAXITS, double TOLF);
+int newton_linesrch_its(double x[], int n, int *check,
+			void (*vecfunc)(int, double [], double []),
+			int MAXITS, double TOLF);
 int WT_newton(double *x, int n, int *check,
         void (*F_x)(int, double *x, double *Fx, void *par),
         void (*J_x_dx)(int, double *dx, double *Jdx, double *x, void *par),
