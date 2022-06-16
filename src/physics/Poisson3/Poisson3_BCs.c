@@ -352,8 +352,8 @@ void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
                 FPsi[ind] = nx * (Psix[ind] - dPinterp[1]) +
                             ny * (Psiy[ind] - dPinterp[2]) +
                             nz * (Psiz[ind] - dPinterp[3]);
-                if(!finite(dPinterp[1]) ||
-                   !finite(dPinterp[2]) || !finite(dPinterp[3]))
+                if(!finit(dPinterp[1]) ||
+                   !finit(dPinterp[2]) || !finit(dPinterp[3]))
                 {
                   NumberChecker_CheckIfFinite(grid, "Poisson3_temp1");
                   NumberChecker_CheckIfFinite(grid, "Poisson3_temp2");
@@ -395,7 +395,7 @@ void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
                   spec_interpolate_in_dir_at_i1_i2(obox, 2, oi,ok, Pcoeffs, Y);
 
                 FPsi[ind] = Psi[ind] - Pinterp;
-                if(!finite(Pinterp))
+                if(!finit(Pinterp))
                 {
                   NumberChecker_CheckIfFinite(grid, "Poisson3_temp1");
                   printf("Pinterp=%g  oi=%d Y=%.13g ok=%d  ind=%d\n",
@@ -467,8 +467,8 @@ void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
               FPsi[ind] = nx * (Psix[ind] - dPinterp[1]) +
                           ny * (Psiy[ind] - dPinterp[2]) +
                           nz * (Psiz[ind] - dPinterp[3]);
-              if(!finite(dPinterp[1]) ||
-                 !finite(dPinterp[2]) || !finite(dPinterp[3]))
+              if(!finit(dPinterp[1]) ||
+                 !finit(dPinterp[2]) || !finit(dPinterp[3]))
               {
                 NumberChecker_CheckIfFinite(grid, "Poisson3_temp1");
                 NumberChecker_CheckIfFinite(grid, "Poisson3_temp2");
@@ -507,7 +507,7 @@ void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
               Pinterp = spec_interpolate_inplaneN(obox, odir, op,
                                                   Pcoeffs, X1,X2); 
               FPsi[ind] = Psi[ind] - Pinterp;
-              if(!finite(Pinterp))
+              if(!finit(Pinterp))
               {
                 NumberChecker_CheckIfFinite(grid, "Poisson3_temp1");
                 printf("Pinterp=%g  X1=%.13g X2=%.13g  ind=%d\n",
@@ -537,7 +537,7 @@ void Poisson3_set_interbox_and_outerBCs__old(tBox *box, int iFPsi, int iPsi,
           double Y = box->v[oYi][ind];
           double Z = box->v[oZi][ind];
           double Pinterp = spec_interpolate(obox, Pcoeffs, X,Y,Z);
-          if(!finite(Pinterp))
+          if(!finit(Pinterp))
           {
             printf("Pinterp=%g  X=%.13g Y=%.13g Z=%.13g  ind=%d\n",
                    Pinterp, X,Y,Z, ind);
