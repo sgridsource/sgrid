@@ -7,9 +7,8 @@
    returns number of tries j    if ok
    returns <0                   if failure */
 #define FAC 1.6
-#define NTRIES 50
-int rt_brak(double (*func)(double x, void *par),
-            double *x1, double *x2, void *par)
+int rt_brak(double (*func)(double x, void *par), void *par,
+            double *x1, double *x2, int maxits)
 {
   int j;
   double f1,f2;
@@ -23,7 +22,7 @@ int rt_brak(double (*func)(double x, void *par),
   f1 = (*func)(*x1, par);
   f2 = (*func)(*x2, par);
 
-  for(j=1; j<=NTRIES; j++)
+  for(j=1; j<=maxits; j++)
   {
     /* return if we have a bracket */
     if(f1*f2 < 0.) return j;
@@ -45,4 +44,3 @@ int rt_brak(double (*func)(double x, void *par),
   return -j-1;
 }
 #undef FAC
-#undef NTRIES

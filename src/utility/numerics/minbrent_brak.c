@@ -18,9 +18,9 @@ const double tmgolden = 1.618034; /* 1 + (1 - golden) */
    you need to check if iter>maxits !!!
    returns <0        if error!!! */
 #define ZERO_EPS 1.0e-10
-int minbrent_brak(double ax, double bx, double cx, 
-                  double (*f)(double x, void *p),
-                  void *par, int maxits, double tol,
+int minbrent_brak(double (*f)(double x, void *p), void *par,
+                  double ax, double bx, double cx,
+                  int maxits, double tol,
                   double *xmin, double *fmin, int pr)
 {
   double a,b;
@@ -73,7 +73,7 @@ int minbrent_brak(double ax, double bx, double cx,
       	u = x+d;
       	if(u-a < tol2 || b-u < tol2) d = A_WITH_SIGN_B(tol1, xm-x);
       }
-    } 
+    }
     else
     {
       e = (x >= xm ? a-x : b-x);
@@ -119,11 +119,12 @@ int minbrent_brak(double ax, double bx, double cx,
 /* find a bracket for a min */
 #define GLIMIT 100.0
 #define TINY 1.0e-20
-int min_brak(double *ax, double *bx, double *cx,
-             double *fa, double *fb, double *fc,
-             double (*func)(double x, void *p), void *par)
+int min_brak(double (*func)(double x, void *p), void *par,
+             double *ax, double *bx, double *cx,
+             double *fa, double *fb, double *fc, int maxits)
 {
   double ulim,u,r,q,fu,dum;
+  int iter;
 
   *fa = (*func)(*ax, par);
   *fb = (*func)(*bx, par);
@@ -132,11 +133,14 @@ int min_brak(double *ax, double *bx, double *cx,
     MOVE4(dum,*ax,*bx,dum)
     MOVE4(dum,*fb,*fa,dum)
   }
- 
+
   *cx = (*bx) + tmgolden*(*bx-*ax);
   *fc = (*func)(*cx, par);
-  while(*fb > *fc)
+
+  for(iter=1; iter<=maxits; iter++)
   {
+    if(*fb <= *fc) break;
+
     r = (*bx-*ax)*(*fb-*fc);
     q = (*bx-*cx)*(*fb-*fa);
 
@@ -144,7 +148,7 @@ int min_brak(double *ax, double *bx, double *cx,
               (2.*A_WITH_SIGN_B(fmax(fabs(q-r),TINY), q-r));
 
     ulim = (*bx) + GLIMIT*(*cx-*bx);
- 
+
     if((*bx-u)*(u-*cx) > 0.)
     {
       fu = (*func)(u, par);
@@ -154,13 +158,13 @@ int min_brak(double *ax, double *bx, double *cx,
         *bx = u;
         *fa = (*fb);
         *fb = fu;
-        return 0;
+        return iter;
       }
       else if (fu > *fb)
       {
         *cx = u;
         *fc = fu;
-        return 0;
+        return iter;
       }
       u = (*cx) + tmgolden*(*cx-*bx);
       fu = (*func)(u, par);
@@ -187,7 +191,7 @@ int min_brak(double *ax, double *bx, double *cx,
     MOVE4(*ax, *bx, *cx, u)
     MOVE4(*fa, *fb, *fc, fu)
   }
-  return 0;
+  return iter;
 }
 #undef GLIMIT
 #undef TINY

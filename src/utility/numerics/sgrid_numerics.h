@@ -11,8 +11,8 @@ int rtbisect(double *x0, double (*func)(double,void *par),
              double x1, double x2, void *par, int maxits, double xacc, int pr);
 
 /* rt_brak.c */
-int rt_brak(double (*func)(double x, void *par),
-            double *x1, double *x2, void *par);
+int rt_brak(double (*func)(double x, void *par), void *par,
+            double *x1, double *x2, int maxits);
 
 /* rtbrent_brak.c */
 int rtbrent_brak(double *x0, double (*func)(double,void *par),
@@ -44,13 +44,13 @@ int newton_linesearch(int n, double x[], int *check,
 //int M_to_Minv_gaussjordan(int n, const double M[], double Minv[]);
 
 /* minbrent_brak.c */
-int minbrent_brak(double ax, double bx, double cx, 
-                  double (*f)(double x, void *p),
-                  void *par, int maxits, double tol,
+int minbrent_brak(double (*f)(double x, void *p), void *par,
+                  double ax, double bx, double cx,
+                  int maxits, double tol,
                   double *xmin, double *fmin, int pr);
-int min_brak(double *ax, double *bx, double *cx,
-             double *fa, double *fb, double *fc,
-             double (*func)(double x, void *p), void *par);
+int min_brak(double (*func)(double x, void *p), void *par,
+             double *ax, double *bx, double *cx,
+             double *fa, double *fb, double *fc, int maxits);
 
 /* NumericUtils_shims.c */
 int newton_linesrch_itsP(double x[], int n, int *check,
@@ -66,10 +66,11 @@ int WT_newton(double *x, int n, int *check,
             double *x, void *par, int itmax, double tol),
         int (*precon)(int n, double *b, double *dx, double *x, void *par),
         int linitmax, double lintolfac);
-#define zbrac_P rt_brak
+int zbrac_P(double (*func)(double,void *par), double *x1, double *x2,
+            void *par);
 int zbrent_itsP(double *x0, double (*func)(double,void *par),
                 double x1, double x2, void *par, int ITMAX, double tol);
-double brent_with_pointer_to_pars(double ax, double bx, double cx, 
+double brent_with_pointer_to_pars(double ax, double bx, double cx,
              double (*f)(double, void *ppointer), double tol,
 	     double *xmin, void *parpointer);
 void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
@@ -78,7 +79,7 @@ void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
 
 /* WT_Random.c, BUT try to avoid RND */
 double RND(void);
-double brent_with_pointer_to_pars(double ax, double bx, double cx, 
+double brent_with_pointer_to_pars(double ax, double bx, double cx,
              double (*f)(double, void *ppointer), double tol,
 	     double *xmin, void *parpointer);
 void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,

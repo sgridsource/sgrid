@@ -41,6 +41,13 @@ int WT_newton(double *x, int n, int *check,
   return -1;
 }
 
+/* bracket for root */
+int zbrac_P(double (*func)(double,void *par), double *x1, double *x2,
+            void *par)
+{
+  rt_brak(func,par, x1,x2, 50);
+}
+
 /* old way of finding root in bracket [x1,x2] */
 int zbrent_itsP(double *x0, double (*func)(double,void *par),
                 double x1, double x2, void *par, int ITMAX, double tol)
@@ -84,7 +91,7 @@ double brent_with_pointer_to_pars(double ax, double bx, double cx,
 {
   double fmin;
 
-  minbrent_brak(ax,bx,cx, f,parpointer, 100,tol, xmin,&fmin, 1);
+  minbrent_brak(f,parpointer, ax,bx,cx, 100,tol, xmin,&fmin, 1);
   return fmin;
 }
 
@@ -93,5 +100,5 @@ void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
 	    double *fa, double *fb, double *fc,
 	    double (*func)(double, void *ppointer), void *parpointer)
 {
-  min_brak(ax,bx,cx, fa,fb,fc, func, parpointer);
+  min_brak(func,parpointer, ax,bx,cx, fa,fb,fc, 1073741824);
 }
