@@ -181,6 +181,27 @@ double max3_in_1d_array(double *f0, int n0, double *f1, int n1, double *f2, int 
   return fmax;
 }
 
+/* Read bit pattern in x to determine if it is finite, because
+   isfinite(x) does not always work with -Ofast or -ffast-math */
+int finit(double x)
+{
+  union {
+    uint64_t bits; /* must be same number of bytes as double */
+    double d;
+  } ud;
+  ud.d = x;
+
+  //printf(" %lx ", ud.bits);
+
+  /* According to IEEE 754:
+     NaN starts with 7FF0, 7FF8 or 7FFF. -NaN starts with FFF0, FFF8 or FFFF.
+     Inf starts with 7FF0. -Inf starts with FFF0. */
+  if((ud.bits | 0x800FFFFFFFFFFFFF) == 0xFFFFFFFFFFFFFFFF)
+    return 0;
+  else
+    return 1;
+}
+
 
 /* remove all trailing and leading whitespaces */
 void trim_whitespace(char *str)
