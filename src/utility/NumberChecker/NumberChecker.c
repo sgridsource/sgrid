@@ -37,7 +37,7 @@ int NumberChecker_CheckIfFinite(tGrid* grid, char *varname)
     // TODO: FIX this!!!!!
     //bampi_allreduce_sum(vl, &sum);  
 
-    //if(!finite(*sum)) num=0.1;
+    //if(!finit(*sum)) num=0.1;
 
     // TODO: FIX this!!!!!
     //free(sum);
@@ -72,7 +72,7 @@ num = 0.0;
     }
     else forallpoints(box,ijk)
     {
-      if( !finite(var[ijk]) || fabs(var[ijk])>maxNumber ) 
+      if( !finit(var[ijk]) || fabs(var[ijk])>maxNumber )
       {
         if(messageflag==0)
           printf("NAN/INF: %s=%g at ijk=%d: x=%g y=%g z=%g "
