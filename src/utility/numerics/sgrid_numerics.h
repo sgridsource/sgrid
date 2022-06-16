@@ -55,6 +55,13 @@ int min_brak(double (*func)(double x, void *p), void *par,
 /* WT_Random.c, BUT try to avoid RND */
 double RND(void);
 
+/* attenuation.c has Attenuation functions */
+double Attenuation01(double x, double s, double p);
+double Att_0to1_x_x0_w_q_s(double x, double x0, double w, double q, double s);
+double dAtt_0to1_x_x0_w_q_s(double x, double x0, double w, double q, double s);
+double Att_1to0_x_x0_w_q_s(double x, double x0, double w, double q, double s);
+double dAtt_1to0_x_x0_w_q_s(double x, double x0, double w, double q, double s);
+
 /* NumericUtils_shims.c */
 int newton_linesrch_itsP(double x[], int n, int *check,
                      void (*vecfuncP)(int, double [], double [], void *par),
