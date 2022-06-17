@@ -135,9 +135,9 @@ double odeintegrate(double y[], int nvar, double x1, double x2,
     xs = x1;
     for(j=1; j<=nvar; j++) y[j] = yp[j][1];
 
-    for(k=1; k<kmax; k++)
+    for(k=2; k<=kmax; k++)
     {
-      xe = x1 + k * (xf-x1) / (kmax-1);
+      xe = x1 + (k-1) * (xf-x1) / (kmax-1);
 
       //printf("k=%d: xs=%g xe=%g\n ", k, xs,xe);
 
@@ -197,7 +197,8 @@ double odeintegrateP(double y[], int nvar, double x1, double x2,
     *kcount = *kcount + 1;
   }
 
-  printf("x1=%g x2=%g\n", x1,x2);
+  //printf("x1=%.17g x2=%.17g\n", x1,x2);
+  //printf("y[2]=%g\n", y[2]);
 
   /* do the integral over the full region */
   xs = x1;
@@ -206,7 +207,8 @@ double odeintegrateP(double y[], int nvar, double x1, double x2,
                           h1, eps, eps);
   xf = xs; /* save final x */
 
-  printf("xs=%g xf=%g xe=%g\n ", xs, xf, xe);
+  //printf("xs=%.17g xf=%.17g xe=%.17g\n ", xs, xf, xe);
+  //printf("   ==> y[2]=%g\n", y[2]);
 
   if(kmax>1)
   {
@@ -214,11 +216,12 @@ double odeintegrateP(double y[], int nvar, double x1, double x2,
     xs = x1;
     for(j=1; j<=nvar; j++) y[j] = yp[j][1];
 
-    for(k=1; k<kmax; k++)
+    for(k=2; k<=kmax; k++)
     {
-      xe = x1 + k * (xf-x1) / (kmax-1);
+      xe = x1 + (k-1) * (xf-x1) / (kmax-1);
 
-      printf("k=%d: xs=%g xe=%g\n ", k, xs,xe);
+      //printf("k=%d: xs=%.17g xe=%.17g\n ", k, xs,xe);
+      //printf("      y[2]=%g\n", y[2]);
 
       GSL_odeint_rk8pd(&xs, xe, nvar, y+1, Shim_derivsP_y_to_ym1,shim,
                        h1, eps, eps);
@@ -226,10 +229,12 @@ double odeintegrateP(double y[], int nvar, double x1, double x2,
       for(j=1; j<=nvar; j++) yp[j][k] = y[j];
       *kcount = *kcount + 1;
 
-      printf("     xs=%g xe=%g\n ", xs,xe);
+      //printf("     xs=%.17g xe=%.17g\n ", xs,xe);
+      //printf("     y[2]=%g\n", y[2]);
       if(xs<xe) break;
     }
   }
-  printf("kmax=%d *kcount=%d\n", kmax, *kcount);
+  //printf("kmax=%d *kcount=%d\n", kmax, *kcount);
+
   return xs;
 }
