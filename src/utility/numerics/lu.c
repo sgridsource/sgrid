@@ -26,6 +26,7 @@ int lu_decomp(int n, double A[][n], int *p_idx, int *parity)
   if(!vscal)
   {
     printf("allocation failed!");
+    abort();
     exit(1);
   }
 

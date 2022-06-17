@@ -82,6 +82,7 @@ int newton_linesearch(int n, double x[], int *check,
   if(!p_idx || !fjac || !g || !p || !xold || !newton_linesrch_fvec)
   {
     printf("allocation failure!!!");
+    abort();
     exit(1);
   }
 
