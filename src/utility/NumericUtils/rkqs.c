@@ -57,6 +57,42 @@ void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
 	free_vector(ytemp,1,n);
 	free_vector(yerr,1,n);
 }
+
+/* version with extra parameter arg for derivs */
+void rkqsP(double y[], double dydx[], int n, double *x, double htry,
+        double eps, double yscal[], double *hdid, double *hnext,
+	int (*derivsP)(double x, const double *y, double *dy, void *p),
+	void *par)
+{
+	void rkckP(double y[], double dydx[], int n, double x, double h,
+		double yout[], double yerr[],
+		int (*derivsP)(double x, const double *y, double *dy, void *p),
+		void *par);
+	int i;
+	double errmax,h,htemp,xnew,*yerr,*ytemp;
+
+	yerr=vector(1,n);
+	ytemp=vector(1,n);
+	h=htry;
+	for (;;) {
+		rkckP(y,dydx,n,*x,h,ytemp,yerr,derivsP, par);
+		errmax=0.0;
+		for (i=1;i<=n;i++) errmax=FMAX(errmax,fabs(yerr[i]/yscal[i]));
+		errmax /= eps;
+		if (errmax <= 1.0) break;
+		htemp=SAFETY*h*pow(errmax,PSHRNK);
+		h=(h >= 0.0 ? FMAX(htemp,0.1*h) : FMIN(htemp,0.1*h));
+		xnew=(*x)+h;
+		if (xnew == *x) nrerror("stepsize underflow in rkqs");
+	}
+	if (errmax > ERRCON) *hnext=SAFETY*h*pow(errmax,PGROW);
+	else *hnext=5.0*h;
+	*x += (*hdid=h);
+	for (i=1;i<=n;i++) y[i]=ytemp[i];
+	free_vector(ytemp,1,n);
+	free_vector(yerr,1,n);
+}
+
 #undef SAFETY
 #undef PGROW
 #undef PSHRNK

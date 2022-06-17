@@ -86,6 +86,10 @@ double odeintegrate(double ystart[], int nvar, double x1, double x2,
 void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
 	double yscal[], double *hdid, double *hnext,
 	void (*derivs)(double, double [], double []));
+void rkqsP(double y[], double dydx[], int n, double *x, double htry,
+        double eps, double yscal[], double *hdid, double *hnext,
+	int (*derivsP)(double x, const double *y, double *dy, void *p),
+	void *par);
 
 /* 1D Minimization */
 void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
