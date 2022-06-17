@@ -92,7 +92,6 @@ int Shim_derivs_to_derivsP(double x, const double *y, double *dy, void *p)
 }
 
 /* here the entries are y[1], xp[1], yp[1][1] */
-/*
 double odeintegrate(double y[], int nvar, double x1, double x2,
 	double eps, double h1, double hmin, int *nok, int *nbad,
 	void (*derivs)(double, double [], double []),
@@ -101,30 +100,57 @@ double odeintegrate(double y[], int nvar, double x1, double x2,
 	int kmax, int *kcount, double *xp, double **yp, double dxsav,
 	int *status)
 {
-  double xs;
+  double xs, xf, xe;
   int stat, j, k;
   struct Shim_derivs par[1];
 
   par->derivs = derivs;
 
   *status = 0;
-  *kcount = kmax;
+  *kcount = 0;;
 
-printf("x1=%g x2=%g\n", x1,x2);
-  xs = x1;
-  for(k=1; k<=kmax; k++)
+  if(kmax>0)
   {
-    double xe = x1 + k * (x2-x1) / kmax;
-printf("k=%d: xs=%g xe=%g\n ", k, xs,xe);
-
-    stat = GSL_odeint_rk8pd(&xs, xe, nvar, y+1,
-                            Shim_derivs_to_derivsP,par,
-                            h1, eps, eps);
-    xp[k] = xs;
-    for(j=1; j<=nvar; j++) yp[j][k] = y[j];
-printf("     xs=%g xe=%g\n ", xs,xe);
-    if(xs<xe) break;
+    /* save initial x and y in xp, yp */
+    xs = x1;
+    xp[1] = xs;
+    for(j=1; j<=nvar; j++) yp[j][1] = y[j];
+    *kcount = *kcount + 1;
   }
+
+  printf("x1=%g x2=%g\n", x1,x2);
+
+  /* do the integral over the full region */
+  xs = x1;
+  xe = x2;
+  stat = GSL_odeint_rk8pd(&xs, xe, nvar, y+1, Shim_derivs_to_derivsP,par,
+                          h1, eps, eps);
+  xf = xs; /* save final x */
+
+  //printf("xs=%g xf=%g xe=%g\n ", xs, xf, xe);
+
+  if(kmax>1)
+  {
+    /* now integrate again to create the damn nr-data (what a waste) */
+    xs = x1;
+    for(j=1; j<=nvar; j++) y[j] = yp[j][1];
+
+    for(k=1; k<kmax; k++)
+    {
+      xe = x1 + k * (xf-x1) / (kmax-1);
+
+      //printf("k=%d: xs=%g xe=%g\n ", k, xs,xe);
+
+      GSL_odeint_rk8pd(&xs, xe, nvar, y+1, Shim_derivs_to_derivsP,par,
+                       h1, eps, eps);
+      xp[k] = xs;
+      for(j=1; j<=nvar; j++) yp[j][k] = y[j];
+      *kcount = *kcount + 1;
+
+      //printf("     xs=%g xe=%g\n ", xs,xe);
+      if(xs<xe) break;
+    }
+  }
+  //printf("kmax=%d *kcount=%d\n", kmax, *kcount);
   return xs;
 }
-*/
