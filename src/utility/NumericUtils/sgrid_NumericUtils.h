@@ -83,6 +83,15 @@ double odeintegrate(double ystart[], int nvar, double x1, double x2,
 	double *, double *, void (*)(double, double [], double [])),
 	int kmax, int *kcount, double *xp, double **yp, double dxsav,
 	int *status);
+double odeintegrateP(double ystart[], int nvar, double x1, double x2,
+	double eps, double h1, double hmin, int *nok, int *nbad,
+	int (*derivsP)(double x, const double *y, double *dy, void *p),
+	void *par,
+	void (*rkqsP)(double [], double [], int, double *, double, double, double [],
+	double *, double *,
+	int (*derP)(double x, const double *y, double *dy, void *p), void *p),
+	int kmax, int *kcount, double *xp, double **yp, double dxsav,
+	int *status);
 void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
 	double yscal[], double *hdid, double *hnext,
 	void (*derivs)(double, double [], double []));
