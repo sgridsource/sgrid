@@ -50,7 +50,7 @@ int GSL_odeint_rk8pd(double *xs, double xe, int n, double *ystart,
 }
 #else
 #define G_SUCCESS 0
-#define gsl_odeiv2_step_type int
+#define gsl_odeiv2_step_type void
 int GSL_odeint(double *xs, double xe, int n, double *y,
         int (*derivsP)(double x, const double *y, double *dy, void *p),
         void *pars,
