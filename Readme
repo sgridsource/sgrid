@@ -3,12 +3,18 @@ Readme file for 'sgrid'
 Wolfgang Tichy, 4/2005
 
 
-'sgrid' is a code for numerical relativity using spectral methods. 
-The code is private for now (don't distribute, please). 
+'sgrid' is a code for numerical relativity using spectral methods.
+The code is private for now (don't distribute, please).
 
 
 sgrid is supposed to be:
 - extremely simple
+
+
+We can now compile sgrid into a library by setting:
+---------------------------------------------------
+DFLAGS += -DLIBSGRID
+*This will be needed for compiling with cactus.
 
 
 6/2022 Plans for making SGRID public:
@@ -23,6 +29,14 @@ sgrid is supposed to be:
 *add new func shims to utility/numerics that have the same names as the ones
  needed from utility/NumericUtils, which simply call the funcs from nmesh or
  from the GSL
-*e.g. make a new odeintegrate that simply calls gsl_odeiv2_driver_apply and
- optionally also stores the kmax data points like it is done in
+*e.g. make a new odeintegrateP that simply calls gsl_odeiv2_driver_apply
+ and optionally also stores the kmax data points like it is done in
  integrate_TOV_ODE.c from nmesh to show the TOV table on the screen
+
+==> There is now utility/numerics which should be used instead NumericUtils.
+*still todo:
+------------
+*in main Makefile comment out
+libpaths += src/utility/NumericUtils
+*then either in the Makefile or as the last lib in MyConfig add:
+libpaths += src/utility/numerics
