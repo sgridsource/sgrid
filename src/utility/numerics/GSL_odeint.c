@@ -106,17 +106,23 @@ double odeintegrate(double y[], int nvar, double x1, double x2,
 
   par->derivs = derivs;
 
+  *status = 0;
   *kcount = kmax;
 
+printf("x1=%g x2=%g\n", x1,x2);
   xs = x1;
   for(k=1; k<=kmax; k++)
   {
     double xe = x1 + k * (x2-x1) / kmax;
+printf("k=%d: xs=%g xe=%g\n ", k, xs,xe);
+
     stat = GSL_odeint_rk8pd(&xs, xe, nvar, y+1,
                             Shim_derivs_to_derivsP,par,
                             h1, eps, eps);
     xp[k] = xs;
     for(j=1; j<=nvar; j++) yp[j][k] = y[j];
+printf("     xs=%g xe=%g\n ", xs,xe);
+    if(xs<xe) break;
   }
   return xs;
 }
