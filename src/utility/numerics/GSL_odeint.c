@@ -118,7 +118,7 @@ double odeintegrate(double y[], int nvar, double x1, double x2,
     *kcount = *kcount + 1;
   }
 
-  printf("x1=%g x2=%g\n", x1,x2);
+  //printf("x1=%g x2=%g\n", x1,x2);
 
   /* do the integral over the full region */
   xs = x1;
@@ -156,6 +156,17 @@ double odeintegrate(double y[], int nvar, double x1, double x2,
 }
 
 
+/* convert from starting at y[0] to starting at y[1] */
+struct Shim_y_to_ym1 {
+  int (*derivsP)(double x, const double y[], double dy[], void *p);
+  void *orig_par;
+};
+int Shim_derivsP_y_to_ym1(double x, const double *y, double *dy, void *p)
+{
+  struct Shim_y_to_ym1 *shim = p;
+  return shim->derivsP(x, y-1, dy-1, shim->orig_par);
+}
+
 /* here the entries are y[1], xp[1], yp[1][1] */
 double odeintegrateP(double y[], int nvar, double x1, double x2,
 	double eps, double h1, double hmin, int *nok, int *nbad,
@@ -169,6 +180,10 @@ double odeintegrateP(double y[], int nvar, double x1, double x2,
 {
   double xs, xf, xe;
   int stat, j, k;
+  struct Shim_y_to_ym1 shim[1];
+
+  shim->derivsP  = derivsP;
+  shim->orig_par = par;
 
   *status = 0;
   *kcount = 0;;
@@ -191,7 +206,7 @@ double odeintegrateP(double y[], int nvar, double x1, double x2,
                           h1, eps, eps);
   xf = xs; /* save final x */
 
-  //printf("xs=%g xf=%g xe=%g\n ", xs, xf, xe);
+  printf("xs=%g xf=%g xe=%g\n ", xs, xf, xe);
 
   if(kmax>1)
   {
@@ -203,7 +218,7 @@ double odeintegrateP(double y[], int nvar, double x1, double x2,
     {
       xe = x1 + k * (xf-x1) / (kmax-1);
 
-      //printf("k=%d: xs=%g xe=%g\n ", k, xs,xe);
+      printf("k=%d: xs=%g xe=%g\n ", k, xs,xe);
 
       GSL_odeint_rk8pd(&xs, xe, nvar, y+1, derivsP,par,
                        h1, eps, eps);
@@ -211,7 +226,7 @@ double odeintegrateP(double y[], int nvar, double x1, double x2,
       for(j=1; j<=nvar; j++) yp[j][k] = y[j];
       *kcount = *kcount + 1;
 
-      //printf("     xs=%g xe=%g\n ", xs,xe);
+      printf("     xs=%g xe=%g\n ", xs,xe);
       if(xs<xe) break;
     }
   }

@@ -66,7 +66,7 @@ libpaths += $(projectpaths)
 
 # --------------------------------------------------------------------------
 # some more libraries are currently required, those need to be last
-libpaths += src/utility/NumericUtils
+#libpaths += src/utility/NumericUtils
 
 # --------------------------------------------------------------------------
 # set CXX and CLINKER to CC if they are not set in MyConfig
