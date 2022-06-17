@@ -6,10 +6,10 @@
 
 
 #ifdef GSL
-#define SUCCESS GSL_SUCCESS
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+#define G_SUCCESS GSL_SUCCESS
 
 /* integrate from *xs to xe where we pass in the the n-dim vector y(xs)
    into y, here the first entries are y[0] and dt[0] */
@@ -49,7 +49,7 @@ int GSL_odeint_rk8pd(double *xs, double xe, int n, double *ystart,
                     hstart,epsabs,epsrel, gsl_odeiv2_step_rk8pd);
 }
 #else
-#define SUCCESS 0
+#define G_SUCCESS 0
 #define gsl_odeiv2_step_type int
 int GSL_odeint(double *xs, double xe, int n, double *y,
         int (*derivsP)(double x, const double *y, double *dy, void *p),
@@ -88,10 +88,11 @@ int Shim_derivs_to_derivsP(double x, const double *y, double *dy, void *p)
   double *yy = (double *) y;
   struct Shim_derivs *par = p;
   par->derivs(x, yy-1, dy-1);
-  return SUCCESS;
+  return G_SUCCESS;
 }
 
 /* here the entries are y[1], xp[1], yp[1][1] */
+/*
 double odeintegrate(double y[], int nvar, double x1, double x2,
 	double eps, double h1, double hmin, int *nok, int *nbad,
 	void (*derivs)(double, double [], double []),
@@ -126,3 +127,4 @@ printf("     xs=%g xe=%g\n ", xs,xe);
   }
   return xs;
 }
+*/
