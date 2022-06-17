@@ -120,12 +120,13 @@ void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
 }
 
 /* function that does nothing */
+/*
 void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
           double yscal[], double *hdid, double *hnext,
           void (*derivs)(double, double [], double []))
 {
 }
-
+*/
 
 /**********************************************************************/
 /* some mem alloc func from public part of nr with float -> double */
