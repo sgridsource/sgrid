@@ -62,6 +62,16 @@ double dAtt_0to1_x_x0_w_q_s(double x, double x0, double w, double q, double s);
 double Att_1to0_x_x0_w_q_s(double x, double x0, double w, double q, double s);
 double dAtt_1to0_x_x0_w_q_s(double x, double x0, double w, double q, double s);
 
+
+/* GSL_odeint.c */
+double odeintegrate(double y[], int nvar, double x1, double x2,
+	double eps, double h1, double hmin, int *nok, int *nbad,
+	void (*derivs)(double, double [], double []),
+	void (*rkqs)(double [], double [], int, double *, double, double, double [],
+	double *, double *, void (*)(double, double [], double [])),
+	int kmax, int *kcount, double *xp, double **yp, double dxsav,
+	int *status);
+
 /* NumericUtils_shims.c */
 int newton_linesrch_itsP(double x[], int n, int *check,
                      void (*vecfuncP)(int, double [], double [], void *par),
@@ -89,6 +99,9 @@ double brent_with_pointer_to_pars(double ax, double bx, double cx,
 void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
 	    double *fa, double *fb, double *fc,
 	    double (*func)(double, void *ppointer), void *parpointer);
+void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
+          double yscal[], double *hdid, double *hnext,
+          void (*derivs)(double, double [], double []));
 double *vector(long nl, long nh);
 int *ivector(long nl, long nh);
 double **matrix(long nrl, long nrh, long ncl, long nch);

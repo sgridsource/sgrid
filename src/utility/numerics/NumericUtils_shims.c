@@ -119,6 +119,13 @@ void mnbrak_with_pointer_to_pars(double *ax, double *bx, double *cx,
   min_brak(func,parpointer, ax,bx,cx, fa,fb,fc, 1073741824);
 }
 
+/* function that does nothing */
+void rkqs(double y[], double dydx[], int n, double *x, double htry, double eps,
+          double yscal[], double *hdid, double *hnext,
+          void (*derivs)(double, double [], double []))
+{
+}
+
 
 /**********************************************************************/
 /* some mem alloc func from public part of nr with float -> double */
