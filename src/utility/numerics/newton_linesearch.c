@@ -59,7 +59,8 @@ void linesrchP(int n, double xold[], double fold, double g[], double p[],
                          if(!finit(f)) return -its-itmax*10;\
                          return -its-1;}
 int newton_linesearch(int n, double x[], int *check,
-                      void (*vecfuncP)(int, double [], double [], void *par),
+                      void (*vecfuncP)(int n, double x[], double f[],
+                                       void *par),
                       void *par, int vecfuncP_ilow, int itmax, double tolf)
 {
   int i,j;
@@ -211,8 +212,8 @@ int newton_linesearch(int n, double x[], int *check,
 #define EPS 1.0e-7    /* should be approx square root of machine precision */
 #define HMIN 1.0e-10  /* min h we use in fin. diff. computation of derivs */
 void fd_jacobianP(int n, double x[], double fvec[], double(*df)[n],
-	void (*vecfunc)(int, double [], double [], void *par),
-	void *par, int vecfunc_ilow)
+                  void (*vecfunc)(int, double [], double [], void *par),
+                  void *par, int vecfunc_ilow)
 {
   int i0=vecfunc_ilow;
   int i,j, k, df_nonzero;
