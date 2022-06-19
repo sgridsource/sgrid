@@ -7,12 +7,12 @@
 #include <math.h>
 
 
-/* WT: do LU-decomp for matrix A[i][j] in place, here i,j \in [0,n-1]
-   lu_decomp writes into A:
+/* WT: do LU-decomp of matrix A[i][j] in place, here i,j \in [0,n-1]
+   lu_decomp writes back into A:
      U is in upper triangular part plus diagonal of A[i][j]
      L is in lower triangular part of A[i][j], with L_{ii}=1
    writes the permutations into p_idx
-   writes the parity of the permutions in parity
+   writes the parity of the permutions into parity
    returns -(i+1), if i=row with all zeros
    returns +(j+1), if j=column with all zeros,
    returns 0 otherwise */

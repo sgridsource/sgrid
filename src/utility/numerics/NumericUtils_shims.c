@@ -133,7 +133,7 @@ void rkqsP(double y[], double dydx[], int n, double *x, double htry,
 }
 
 /**********************************************************************/
-/* some mem alloc func from public part of nr with float -> double */
+/* some mem alloc funcs from public part of nr with float -> double */
 /**********************************************************************/
 #define NR_END 1
 /* allocate a double vector with subscript range v[nl..nh] */
