@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define A_WITH_SIGN_B(A,B) ((B)>=0. ? fabs(A) : -fabs(A))
+#define A_WITH_SIGNOF_B(A,B) ((B)>=0. ? fabs(A) : -fabs(A))
 #define MOVE4(a,b,c,d) (a)=(b);(b)=(c);(c)=(d);
 
 /* Golden ration and related things */
@@ -69,9 +69,9 @@ int minbrent_brak(double (*f)(double x, void *p), void *par,
       }
       else
       {
-      	d = p/q;
-      	u = x+d;
-      	if(u-a < tol2 || b-u < tol2) d = A_WITH_SIGN_B(tol1, xm-x);
+        d = p/q;
+        u = x+d;
+        if(u-a < tol2 || b-u < tol2) d = A_WITH_SIGNOF_B(tol1, xm-x);
       }
     }
     else
@@ -80,7 +80,7 @@ int minbrent_brak(double (*f)(double x, void *p), void *par,
       d = golden * e;
     }
 
-    u = (fabs(d) >= tol1 ? x+d : x+A_WITH_SIGN_B(tol1, d));
+    u = (fabs(d) >= tol1 ? x+d : x+A_WITH_SIGNOF_B(tol1, d));
     fu = (*f)(u, par);
     if (fu <= fx)
     {
@@ -96,15 +96,15 @@ int minbrent_brak(double (*f)(double x, void *p), void *par,
 
       if (fu <= fw || w == x)
       {
-      	v = w;
-      	w = u;
-      	fv = fw;
-      	fw = fu;
+        v = w;
+        w = u;
+        fv = fw;
+        fw = fu;
       }
       else if (fu <= fv || v == x || v == w)
       {
-      	v = u;
-      	fv = fu;
+        v = u;
+        fv = fu;
       }
     }
   }
@@ -145,7 +145,7 @@ int min_brak(double (*func)(double x, void *p), void *par,
     q = (*bx-*cx)*(*fb-*fa);
 
     u = (*bx)-((*bx-*cx)*q-(*bx-*ax)*r) /
-              (2.*A_WITH_SIGN_B(fmax(fabs(q-r),TINY), q-r));
+              (2.*A_WITH_SIGNOF_B(fmax(fabs(q-r),TINY), q-r));
 
     ulim = (*bx) + GLIMIT*(*cx-*bx);
 
@@ -196,4 +196,4 @@ int min_brak(double (*func)(double x, void *p), void *par,
 #undef GLIMIT
 #undef TINY
 #undef MOVE4
-#undef A_WITH_SIGN_B
+#undef A_WITH_SIGNOF_B
