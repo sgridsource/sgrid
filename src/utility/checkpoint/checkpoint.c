@@ -1,5 +1,5 @@
 /* checkpoint.c */
-/* Wolfgang Tichy 11/2008 */
+/* Bernd Bruegmann 01/2006, Wolfgang Tichy 11/2008 */
 
 /* write and read checkpoint files 
 */
