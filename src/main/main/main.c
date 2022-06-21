@@ -1,5 +1,5 @@
 /* main.c */
-/* Wolfgang Tichy, April 2005 */
+/* Wolfgang Tichy, April 2005, Bernd Bruegmann, 12/99 */
 
 #include "sgrid.h"
 #include "main.h"
