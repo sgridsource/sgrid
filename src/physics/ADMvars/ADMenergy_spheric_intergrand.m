@@ -1,7 +1,7 @@
 (* ADMconstraints.m 
    Wolfgang Tichy 1/2004 *)
 
-(* compute ADM constraints from ADM variables *)
+(* compute ADM energy integrand *)
 
 
 (* variables *)

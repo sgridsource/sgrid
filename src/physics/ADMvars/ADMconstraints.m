@@ -1,5 +1,5 @@
 (* ADMconstraints.m 
-   Wolfgang Tichy 1/2004 *)
+   Wolfgang Tichy 1/2004, Bernd Bruegmann 11/02 *)
 
 (* compute ADM constraints from ADM variables *)
 
