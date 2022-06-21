@@ -1,0 +1,11 @@
+About the C code generating system in this directory
+----------------------------------------------------
+
+This set of Mathematica scripts in MathematicaToC can be quite useful at
+generating C code. However, we want to stress that the way we access the C
+arrays of nmesh via Mathematica is fragile. Any mistake in the declared
+symmetries or in the order of variables in a Mathematica script will lead to
+C code that accesses the wrong arrays or even arrays that do not exist.
+Also, any small omission or syntax error results in C code that will not
+even compile. When this happens it is hard to track down such an error. Thus
+the system has to be used with caution.
