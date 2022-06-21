@@ -39,10 +39,10 @@ for(k = n3-1; k >=0; k--) { sss += c[k] * B3[k]; }
 
 Switch on OpenMP directives in MyConfig:
 ----------------------------------------
-#for icc compile with
+#for old (e.g. version 10) icc compile with
 OFLAGS = -O3 -openmp 
 
-#for gcc compile with 
+#for gcc (and newer icc on Linux) compile with
 OFLAGS = -O3 -fopenmp
 
 # use OpenMP pragmas of LEVEL6
