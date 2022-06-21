@@ -1,0 +1,56 @@
+6/2022 Plans for making SGRID public:
+-------------------------------------
+
+*move some stuff out of dir src/physics
+ (google How to Move a Directory to New Git Repository with Commit History)
+  ==>
+# First of all, clone the main repository that contains a directory to move.
+git clone https://github.com/USERNAME/PRIMARY-REPO.git 
+
+# Change directory to the newly cloned repository
+cd REPOSITORY-NAME
+
+# Next, the filter-branch option lets you rewrite Git revision history by
+# rewriting the branches mentioned in the command line. This will filter the
+# subdirectory from the rest of the files in the current repository.
+git filter-branch --prune-empty --subdirectory-filter SUB_DIRECTORY_NAME BRANCH_NAME 
+# Here:
+# SUB_DIRECTORY_NAME: The relative path to the directory within the project
+# files, you need to separate from others.
+# BRANCH_NAME: Select the branch name from which the directory will be filtered,
+# like “main”, “master”, “develop” etc. Once the above command executed
+# successfully, you will see that the current directory has only files that
+# were in the subdirectory.
+
+# Create a new repository.
+# Set the new URL as the origin of the current directory. This is the same
+# directory where you have filtered code from the previous git repository.
+git remote set-url origin https://github.com/USERNAME/NEW_REPO_NAME.git 
+
+# Next, verify that the Git origin URLs have been updated.
+git remote -v 
+
+# Finally, Push all the files to the new repository.
+git push -u origin BRANCH_NAME 
+
+# Btw, IF this works enter it into tricks/git
+
+*dir in src/physics that should be public:
+ ADMvars ConvTest ModeComputer Poisson3 ScalarOnKerr ScalarWave SingleBH
+ TestDerivs TestID testwave
+ BTW, BSSN could be public if I ask Bernd first...
+
+*dirs to move out of src/physics:
+ BSSN BNSdata PN_CircularOrbit_GWs Poisson Poisson2 Z4secondO
+ rename BNSdata to BNSdata_v1 (this should not be needed anymore)
+
+*move old unneeded funcs out of Poisson3_BCs.c into new file
+
+*move NumericUtils out of src/utility use utility/numerics instead
+*must be last in MyConfig: libpaths += src/utility/numerics
+*in main Makefile comment out: libpaths += src/utility/NumericUtils
+
+*all the things we move out we put into private repos on quark into the
+ subdir sgrid-projects
+
+*copy doc/nmesh.txt to doc/sgrid.txt
