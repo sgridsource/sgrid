@@ -1,5 +1,5 @@
 (* BSSN_rhs.m 
-   Wolfgang Tichy  4/2004       *)
+   Wolfgang Tichy 4/2004, Bernd Bruegmann 10/98, 10/02 *)
 
 (* compute right hand side of BSSN equations *)
 

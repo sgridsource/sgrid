@@ -1,5 +1,5 @@
 /* sgrid_BSSN.c */
-/* Wolfgang Tichy  4/2004 */
+/* Wolfgang Tichy  4/2004, Bernd Bruegmann 6/02 */
 
 #include "sgrid.h"
 #include "BSSN.h"

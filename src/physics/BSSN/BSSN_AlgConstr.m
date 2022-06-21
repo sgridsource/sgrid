@@ -1,5 +1,5 @@
 (* BSSN_AlgConstr.m 
-   Wolfgang Tichy  9/2008       *)
+   Wolfgang Tichy 9/2008, Bernd Bruegmann 4/2006  *)
 
 (* compute trA and detg, and also enforce algebraic constraints *)
 
