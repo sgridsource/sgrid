@@ -36,8 +36,8 @@ int sgrid_GridIterators(void)
          "what we do at end of Newton step [Jdu]");
   AddPar("GridIterators_templates_RESID_mode", "tol/norm(b)",
          "how we compute input RESID from tol [tol/norm(b),tol]");
-  AddPar("GridIterators_UMFPACK_version", "di",
-         "umfpack version to be called [di,dl]");
+  AddPar("GridIterators_UMFPACK_version", "dl", "umfpack version to be "
+         "called (double/int or double/long) [di,dl]");
   AddPar("GridIterators_templates_as_Preconditioner", "GMRES",
          "which templates wrapper we use as precon [GMRES,BICGSTAB,CGS]");
   AddPar("GridIterators_Preconditioner_type", "fd",
