@@ -54,3 +54,7 @@ git push -u origin BRANCH_NAME
  subdir sgrid-projects
 
 *copy doc/nmesh.txt to doc/sgrid.txt
+
+*Run some cases with spin where we use
+ DNSdata_new_q = FromFields
+ to test the sign issue Roxana told me about.
