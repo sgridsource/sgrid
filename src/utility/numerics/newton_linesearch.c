@@ -131,7 +131,7 @@ int newton_linesearch(int n, double x[], int *check,
       int k,l;
       double ma;
       int *idx = calloc(n, sizeof(int));
-      if(!idx) { printf("allocation failure!!!"); exit(1); }
+      if(!idx) { printf("allocation failure!!!"); abort(); exit(1); }
       for(l=0; l<n; l++)
       {
         for(ma=0.0, k=0; k<n; k++)
@@ -223,6 +223,7 @@ void fd_jacobianP(int n, double x[], double fvec[], double(*df)[n],
   if(!f)
   {
     printf("allocation failure!!!");
+    abort();
     exit(1);
   }
 
@@ -338,7 +339,7 @@ void linesrchP(int n, double xold[], double fold,
         {
           discrimi = b*b-3.*a*g_slope;
           if(discrimi<0.)
-          { printf("Roundoff problem in linesrchP\n"); exit(1); }
+          { printf("Roundoff problem in linesrchP\n"); abort(); exit(1); }
           else
           { tmplam = (-b+sqrt(discrimi))/(3.*a); }
         }
@@ -391,6 +392,7 @@ void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[],
   if(!cent || !dir)
   {
     printf("allocation failure!!!");
+    abort();
     exit(1);
   }
 
