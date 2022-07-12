@@ -10,4 +10,6 @@
 #include <string.h>
 #include <stdint.h>      /* for uint64_t */
 
+#include "rename_symbols.h"
+
 #include "sgrid_automatic_include.h"
