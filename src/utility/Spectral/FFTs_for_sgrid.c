@@ -162,7 +162,7 @@ void numrec_four1(double data[], unsigned long nn, int isign)
 
   n=nn << 1;
   j=1;
-  for (i=1;i<n;i+=2)
+  for(i=1;i<n;i+=2)
   {
     if (j > i)
     {
@@ -189,9 +189,9 @@ void numrec_four1(double data[], unsigned long nn, int isign)
     wpIm=sin(theta);
     wRe=1.;
     wIm=0.;
-    for (m=1;m<mmax;m+=2)
+    for(m=1; m<mmax; m+=2)
     {
-      for (i=m;i<=n;i+=istep)
+      for(i=m; i<=n; i+=istep)
       {
         j=i+mmax;
         tmpRe=wRe*data[j]-wIm*data[j+1];
@@ -215,7 +215,7 @@ void numrec_realft(double data[], unsigned long n, int isign)
 {
   unsigned long i, i1,i2,i3,i4, np3;
   double c1=0.5,c2;
-  double h1r,h1i, h2r,h2i;
+  double h1Re,h1Im, h2Re,h2Im;
   double wRe,wIm, wpRe,wpIm;
   double wtmp, theta;
 
@@ -236,30 +236,30 @@ void numrec_realft(double data[], unsigned long n, int isign)
   wRe=1.+wpRe;
   wIm=wpIm;
   np3=n+3;
-  for(i=2;i<=(n>>2);i++)
+  for(i=2; i<=(n>>2); i++)
   {
     i4=1+(i3=np3-(i2=1+(i1=i+i-1)));
-    h1r=c1*(data[i1]+data[i3]);
-    h1i=c1*(data[i2]-data[i4]);
-    h2r = -c2*(data[i2]+data[i4]);
-    h2i=c2*(data[i1]-data[i3]);
-    data[i1]=h1r+wRe*h2r-wIm*h2i;
-    data[i2]=h1i+wRe*h2i+wIm*h2r;
-    data[i3]=h1r-wRe*h2r+wIm*h2i;
-    data[i4] = -h1i+wRe*h2i+wIm*h2r;
+    h1Re=c1*(data[i1]+data[i3]);
+    h1Im=c1*(data[i2]-data[i4]);
+    h2Re = -c2*(data[i2]+data[i4]);
+    h2Im=c2*(data[i1]-data[i3]);
+    data[i1]=h1Re+wRe*h2Re-wIm*h2Im;
+    data[i2]=h1Im+wRe*h2Im+wIm*h2Re;
+    data[i3]=h1Re-wRe*h2Re+wIm*h2Im;
+    data[i4] = -h1Im+wRe*h2Im+wIm*h2Re;
     wtmp=wRe;
     wRe=wRe*wpRe-wIm*wpIm+wRe;
     wIm=wIm*wpRe+wtmp*wpIm+wIm;
   }
   if(isign == 1)
   {
-    data[1] = (h1r=data[1])+data[2];
-    data[2] = h1r-data[2];
+    data[1] = (h1Re=data[1])+data[2];
+    data[2] = h1Re-data[2];
   }
   else
   {
-    data[1]=c1*((h1r=data[1])+data[2]);
-    data[2]=c1*(h1r-data[2]);
+    data[1]=c1*((h1Re=data[1])+data[2]);
+    data[2]=c1*(h1Re-data[2]);
     numrec_four1(data,n>>1,-1);
   }
 }
@@ -279,7 +279,7 @@ void numrec_cosft1(double y[], int n)
   sum=0.5*(y[1]-y[n+1]);
   y[1]=0.5*(y[1]+y[n+1]);
   n2=n+2;
-  for(j=2;j<=(n>>1);j++)
+  for(j=2; j<=(n>>1); j++)
   {
     wtmp=wRe;
     wRe=wRe*wpRe-wIm*wpIm+wRe;
@@ -304,8 +304,10 @@ void numrec_cosft1(double y[], int n)
 void numrec_cosft2(double y[], int n, int isign)
 {
   int i;
-  double sum,sum1,y1,y2,ytmp;
-  double theta,wIm=0.,wIm1,wpIm,wpRe,wRe=1.,wRe1,wtmp;
+  double sum, sum1, y1,y2, ytmp;
+  double wIm=0., wIm1, wpIm;
+  double wRe=1., wRe1, wpRe;
+  double theta, wtmp;
 
   theta=0.5*PI/n;
   wRe1=cos(theta);
@@ -314,7 +316,7 @@ void numrec_cosft2(double y[], int n, int isign)
   wpIm=sin(2.*theta);
   if(isign == 1)
   {
-    for(i=1;i<=n/2;i++)
+    for(i=1; i<=n/2; i++)
     {
       y1=0.5*(y[i]+y[n-i+1]);
       y2=wIm1*(y[i]-y[n-i+1]);
@@ -325,7 +327,7 @@ void numrec_cosft2(double y[], int n, int isign)
       wIm1=wIm1*wpRe+wtmp*wpIm+wIm1;
     }
     numrec_realft(y,n,1);
-    for(i=3;i<=n;i+=2)
+    for(i=3; i<=n; i+=2)
     {
       wtmp=wRe;
       wRe=wRe*wpRe-wIm*wpIm+wRe;
@@ -346,9 +348,9 @@ void numrec_cosft2(double y[], int n, int isign)
   else if(isign == -1)
   {
     ytmp=y[n];
-    for(i=n;i>=4;i-=2) y[i]=y[i-2]-y[i];
+    for(i=n; i>=4; i-=2) y[i]=y[i-2]-y[i];
     y[2]=2.*ytmp;
-    for(i=3;i<=n;i+=2)
+    for(i=3; i<=n; i+=2)
     {
       wtmp=wRe;
       wRe=wRe*wpRe-wIm*wpIm+wRe;
@@ -359,7 +361,7 @@ void numrec_cosft2(double y[], int n, int isign)
       y[i+1]=y2;
     }
     numrec_realft(y,n,-1);
-    for(i=1;i<=n/2;i++)
+    for(i=1; i<=n/2; i++)
     {
       y1=y[i]+y[n-i+1];
       y2=(0.5/wIm1)*(y[i]-y[n-i+1]);
