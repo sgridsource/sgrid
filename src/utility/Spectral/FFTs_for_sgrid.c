@@ -98,7 +98,7 @@ void four_int_numrecFFT(double a, double b, double c[], double cint[], int n)
     cint[2*j-1] += -c[2*j] / (PI2_con*j);
     cint[2*j]   +=  c[2*j-1] / (PI2_con*j);
   }
-  if( N%2 == 0 ) cint[N-1] += 0.0;
+  if( N%2 == 0 ) cint[N-1] += 0.;
 
   /* free temp mem u */  
   free(u);
@@ -153,196 +153,223 @@ void cheb_eval_onExtrema_numrecFFT(double c[], double u[], int N)
 /*********************************************************************/
 /* FFTs using same conventions as in numrec                          */
 /*********************************************************************/
-#define SWAP(a,b) tempr=(a);(a)=(b);(b)=tempr
+#define SWAP(a,b) tmpRe=(a);(a)=(b);(b)=tmpRe
 void numrec_four1(double data[], unsigned long nn, int isign)
 {
-	unsigned long n, mmax, m,i,j, istep;
-	double wr,wi, wpr,wpi, theta;
-	double wtemp, tempr, tempi;
+  unsigned long n, mmax, m,i,j, istep;
+  double wRe,wIm, wpRe,wpIm, theta;
+  double wtmp, tmpRe, tmpIm;
 
-	n=nn << 1;
-	j=1;
-	for (i=1;i<n;i+=2) {
-		if (j > i) {
-			SWAP(data[j],data[i]);
-			SWAP(data[j+1],data[i+1]);
-		}
-		m=n >> 1;
-		while (m >= 2 && j > m) {
-			j -= m;
-			m >>= 1;
-		}
-		j += m;
-	}
+  n=nn << 1;
+  j=1;
+  for (i=1;i<n;i+=2)
+  {
+    if (j > i)
+    {
+      SWAP(data[j],data[i]);
+      SWAP(data[j+1],data[i+1]);
+    }
+    m=n >> 1;
+    while(m >= 2 && j > m)
+    {
+      j -= m;
+      m >>= 1;
+    }
+    j += m;
+  }
 
-	/*  Danielson-Lanczos algorithm: */
-	mmax=2;
-	while (n > mmax) {
-		istep=mmax << 1;
-		theta=isign*(twoPI/mmax);
-		wtemp=sin(0.5*theta);
-		wpr = -2.0*wtemp*wtemp;
-		wpi=sin(theta);
-		wr=1.0;
-		wi=0.0;
-		for (m=1;m<mmax;m+=2) {
-			for (i=m;i<=n;i+=istep) {
-				j=i+mmax;
-				tempr=wr*data[j]-wi*data[j+1];
-				tempi=wr*data[j+1]+wi*data[j];
-				data[j]=data[i]-tempr;
-				data[j+1]=data[i+1]-tempi;
-				data[i] += tempr;
-				data[i+1] += tempi;
-			}
-			wr=(wtemp=wr)*wpr-wi*wpi+wr;
-			wi=wi*wpr+wtemp*wpi+wi;
-		}
-		mmax=istep;
-	}
+  /*  Danielson-Lanczos algorithm: */
+  mmax=2;
+  while(n > mmax)
+  {
+    istep=mmax << 1;
+    theta=isign*(twoPI/mmax);
+    wtmp=sin(0.5*theta);
+    wpRe = -2.*wtmp*wtmp;
+    wpIm=sin(theta);
+    wRe=1.;
+    wIm=0.;
+    for (m=1;m<mmax;m+=2)
+    {
+      for (i=m;i<=n;i+=istep)
+      {
+        j=i+mmax;
+        tmpRe=wRe*data[j]-wIm*data[j+1];
+        tmpIm=wRe*data[j+1]+wIm*data[j];
+        data[j]=data[i]-tmpRe;
+        data[j+1]=data[i+1]-tmpIm;
+        data[i] += tmpRe;
+        data[i+1] += tmpIm;
+      }
+      wtmp=wRe;
+      wRe=wRe*wpRe-wIm*wpIm+wRe;
+      wIm=wIm*wpRe+wtmp*wpIm+wIm;
+    }
+    mmax=istep;
+  }
 }
 #undef SWAP
 
 /* FFT of real valued func */
 void numrec_realft(double data[], unsigned long n, int isign)
 {
-	void numrec_four1(double data[], unsigned long nn, int isign);
-	unsigned long i, i1,i2,i3,i4, np3;
-	double c1=0.5,c2;
-	double h1r,h1i, h2r,h2i;
-	double wr,wi, wpr,wpi;
-	double wtemp, theta;
+  unsigned long i, i1,i2,i3,i4, np3;
+  double c1=0.5,c2;
+  double h1r,h1i, h2r,h2i;
+  double wRe,wIm, wpRe,wpIm;
+  double wtmp, theta;
 
-	theta=PI/(double) (n>>1);
-	if (isign == 1) {
-		c2 = -0.5;
-		numrec_four1(data,n>>1,1);
-	} else {
-		c2=0.5;
-		theta = -theta;
-	}
-	wtemp=sin(0.5*theta);
-	wpr = -2.0*wtemp*wtemp;
-	wpi=sin(theta);
-	wr=1.0+wpr;
-	wi=wpi;
-	np3=n+3;
-	for (i=2;i<=(n>>2);i++) {
-		i4=1+(i3=np3-(i2=1+(i1=i+i-1)));
-		h1r=c1*(data[i1]+data[i3]);
-		h1i=c1*(data[i2]-data[i4]);
-		h2r = -c2*(data[i2]+data[i4]);
-		h2i=c2*(data[i1]-data[i3]);
-		data[i1]=h1r+wr*h2r-wi*h2i;
-		data[i2]=h1i+wr*h2i+wi*h2r;
-		data[i3]=h1r-wr*h2r+wi*h2i;
-		data[i4] = -h1i+wr*h2i+wi*h2r;
-		wr=(wtemp=wr)*wpr-wi*wpi+wr;
-		wi=wi*wpr+wtemp*wpi+wi;
-	}
-	if (isign == 1) {
-		data[1] = (h1r=data[1])+data[2];
-		data[2] = h1r-data[2];
-	} else {
-		data[1]=c1*((h1r=data[1])+data[2]);
-		data[2]=c1*(h1r-data[2]);
-		numrec_four1(data,n>>1,-1);
-	}
+  theta=PI/(double) (n>>1);
+  if(isign == 1)
+  {
+    c2 = -0.5;
+    numrec_four1(data,n>>1,1);
+  }
+  else
+  {
+    c2=0.5;
+    theta = -theta;
+  }
+  wtmp=sin(0.5*theta);
+  wpRe = -2.*wtmp*wtmp;
+  wpIm=sin(theta);
+  wRe=1.+wpRe;
+  wIm=wpIm;
+  np3=n+3;
+  for(i=2;i<=(n>>2);i++)
+  {
+    i4=1+(i3=np3-(i2=1+(i1=i+i-1)));
+    h1r=c1*(data[i1]+data[i3]);
+    h1i=c1*(data[i2]-data[i4]);
+    h2r = -c2*(data[i2]+data[i4]);
+    h2i=c2*(data[i1]-data[i3]);
+    data[i1]=h1r+wRe*h2r-wIm*h2i;
+    data[i2]=h1i+wRe*h2i+wIm*h2r;
+    data[i3]=h1r-wRe*h2r+wIm*h2i;
+    data[i4] = -h1i+wRe*h2i+wIm*h2r;
+    wtmp=wRe;
+    wRe=wRe*wpRe-wIm*wpIm+wRe;
+    wIm=wIm*wpRe+wtmp*wpIm+wIm;
+  }
+  if(isign == 1)
+  {
+    data[1] = (h1r=data[1])+data[2];
+    data[2] = h1r-data[2];
+  }
+  else
+  {
+    data[1]=c1*((h1r=data[1])+data[2]);
+    data[2]=c1*(h1r-data[2]);
+    numrec_four1(data,n>>1,-1);
+  }
 }
 
 /* cos FT1 of numrec */
 void numrec_cosft1(double y[], int n)
 {
-	void numrec_realft(double data[], unsigned long n, int isign);
-	int j, n2;
-	double sum, y1,y2;
-	double wi=0.0,wpi, wpr,wr=1.0;
-	double wtemp, theta;
+  int j, n2;
+  double sum, y1,y2;
+  double wIm=0.,wpIm, wpRe,wRe=1.;
+  double wtmp, theta;
 
-	theta=PI/n;
-	wtemp=sin(0.5*theta);
-	wpr = -2.0*wtemp*wtemp;
-	wpi=sin(theta);
-	sum=0.5*(y[1]-y[n+1]);
-	y[1]=0.5*(y[1]+y[n+1]);
-	n2=n+2;
-	for (j=2;j<=(n>>1);j++) {
-		wr=(wtemp=wr)*wpr-wi*wpi+wr;
-		wi=wi*wpr+wtemp*wpi+wi;
-		y1=0.5*(y[j]+y[n2-j]);
-		y2=(y[j]-y[n2-j]);
-		y[j]=y1-wi*y2;
-		y[n2-j]=y1+wi*y2;
-		sum += wr*y2;
-	}
-	numrec_realft(y,n,1);
-	y[n+1]=y[2];
-	y[2]=sum;
-	for (j=4;j<=n;j+=2) {
-		sum += y[j];
-		y[j]=sum;
-	}
+  theta=PI/n;
+  wtmp=sin(0.5*theta);
+  wpRe = -2.*wtmp*wtmp;
+  wpIm=sin(theta);
+  sum=0.5*(y[1]-y[n+1]);
+  y[1]=0.5*(y[1]+y[n+1]);
+  n2=n+2;
+  for(j=2;j<=(n>>1);j++)
+  {
+    wtmp=wRe;
+    wRe=wRe*wpRe-wIm*wpIm+wRe;
+    wIm=wIm*wpRe+wtmp*wpIm+wIm;
+    y1=0.5*(y[j]+y[n2-j]);
+    y2=(y[j]-y[n2-j]);
+    y[j]=y1-wIm*y2;
+    y[n2-j]=y1+wIm*y2;
+    sum += wRe*y2;
+  }
+  numrec_realft(y,n,1);
+  y[n+1]=y[2];
+  y[2]=sum;
+  for(j=4;j<=n;j+=2)
+  {
+    sum += y[j];
+    y[j]=sum;
+  }
 }
 
 /* cos FT2 of numrec */
 void numrec_cosft2(double y[], int n, int isign)
 {
-	void numrec_realft(double data[], unsigned long n, int isign);
-	int i;
-	double sum,sum1,y1,y2,ytemp;
-	double theta,wi=0.0,wi1,wpi,wpr,wr=1.0,wr1,wtemp;
+  int i;
+  double sum,sum1,y1,y2,ytmp;
+  double theta,wIm=0.,wIm1,wpIm,wpRe,wRe=1.,wRe1,wtmp;
 
-	theta=0.5*PI/n;
-	wr1=cos(theta);
-	wi1=sin(theta);
-	wpr = -2.0*wi1*wi1;
-	wpi=sin(2.0*theta);
-	if (isign == 1) {
-		for (i=1;i<=n/2;i++) {
-			y1=0.5*(y[i]+y[n-i+1]);
-			y2=wi1*(y[i]-y[n-i+1]);
-			y[i]=y1+y2;
-			y[n-i+1]=y1-y2;
-			wr1=(wtemp=wr1)*wpr-wi1*wpi+wr1;
-			wi1=wi1*wpr+wtemp*wpi+wi1;
-		}
-		numrec_realft(y,n,1);
-		for (i=3;i<=n;i+=2) {
-			wr=(wtemp=wr)*wpr-wi*wpi+wr;
-			wi=wi*wpr+wtemp*wpi+wi;
-			y1=y[i]*wr-y[i+1]*wi;
-			y2=y[i+1]*wr+y[i]*wi;
-			y[i]=y1;
-			y[i+1]=y2;
-		}
-		sum=0.5*y[2];
-		for (i=n;i>=2;i-=2) {
-			sum1=sum;
-			sum += y[i];
-			y[i]=sum1;
-		}
-	} else if (isign == -1) {
-		ytemp=y[n];
-		for (i=n;i>=4;i-=2) y[i]=y[i-2]-y[i];
-		y[2]=2.0*ytemp;
-		for (i=3;i<=n;i+=2) {
-			wr=(wtemp=wr)*wpr-wi*wpi+wr;
-			wi=wi*wpr+wtemp*wpi+wi;
-			y1=y[i]*wr+y[i+1]*wi;
-			y2=y[i+1]*wr-y[i]*wi;
-			y[i]=y1;
-			y[i+1]=y2;
-		}
-		numrec_realft(y,n,-1);
-		for (i=1;i<=n/2;i++) {
-			y1=y[i]+y[n-i+1];
-			y2=(0.5/wi1)*(y[i]-y[n-i+1]);
-			y[i]=0.5*(y1+y2);
-			y[n-i+1]=0.5*(y1-y2);
-			wr1=(wtemp=wr1)*wpr-wi1*wpi+wr1;
-			wi1=wi1*wpr+wtemp*wpi+wi1;
-		}
-	}
+  theta=0.5*PI/n;
+  wRe1=cos(theta);
+  wIm1=sin(theta);
+  wpRe = -2.*wIm1*wIm1;
+  wpIm=sin(2.*theta);
+  if(isign == 1)
+  {
+    for(i=1;i<=n/2;i++)
+    {
+      y1=0.5*(y[i]+y[n-i+1]);
+      y2=wIm1*(y[i]-y[n-i+1]);
+      y[i]=y1+y2;
+      y[n-i+1]=y1-y2;
+      wtmp=wRe1;
+      wRe1=wRe1*wpRe-wIm1*wpIm+wRe1;
+      wIm1=wIm1*wpRe+wtmp*wpIm+wIm1;
+    }
+    numrec_realft(y,n,1);
+    for(i=3;i<=n;i+=2)
+    {
+      wtmp=wRe;
+      wRe=wRe*wpRe-wIm*wpIm+wRe;
+      wIm=wIm*wpRe+wtmp*wpIm+wIm;
+      y1=y[i]*wRe-y[i+1]*wIm;
+      y2=y[i+1]*wRe+y[i]*wIm;
+      y[i]=y1;
+      y[i+1]=y2;
+    }
+    sum=0.5*y[2];
+    for(i=n;i>=2;i-=2)
+    {
+      sum1=sum;
+      sum += y[i];
+      y[i]=sum1;
+    }
+  }
+  else if(isign == -1)
+  {
+    ytmp=y[n];
+    for(i=n;i>=4;i-=2) y[i]=y[i-2]-y[i];
+    y[2]=2.*ytmp;
+    for(i=3;i<=n;i+=2)
+    {
+      wtmp=wRe;
+      wRe=wRe*wpRe-wIm*wpIm+wRe;
+      wIm=wIm*wpRe+wtmp*wpIm+wIm;
+      y1=y[i]*wRe+y[i+1]*wIm;
+      y2=y[i+1]*wRe-y[i]*wIm;
+      y[i]=y1;
+      y[i+1]=y2;
+    }
+    numrec_realft(y,n,-1);
+    for(i=1;i<=n/2;i++)
+    {
+      y1=y[i]+y[n-i+1];
+      y2=(0.5/wIm1)*(y[i]-y[n-i+1]);
+      y[i]=0.5*(y1+y2);
+      y[n-i+1]=0.5*(y1-y2);
+      wtmp=wRe1;
+      wRe1=wRe1*wpRe-wIm1*wpIm+wRe1;
+      wIm1=wIm1*wpRe+wtmp*wpIm+wIm1;
+    }
+  }
 }
 
 
@@ -517,15 +544,15 @@ void four_eval_FFTW3(double *c, double *u, int n)
 {
   int j, s;
   int N=n+1;
-  double ooN=1.0/N;
+  double ooN=1./N;
   int Nc = ( N / 2 ) + 1;
   fftw_complex *cco = fftw_malloc(sizeof(fftw_complex) * Nc);
   double *co = (double *) cco;
 
   /* convert */
-  co[Nc*2-1] = 0.0;
+  co[Nc*2-1] = 0.;
   for(s=1, j=2; j<=N; j++, s=-s)  co[j] = s*c[j-1]*ooN;
-  co[1] = 0.0;
+  co[1] = 0.;
   co[0] = c[0]*ooN;
 
   /* execute right plan */
@@ -540,7 +567,7 @@ void cheb_coeffs_fromZeros_FFTW3(double *c, double *u, int n)
 {
   int j;
   int N=n+1;
-  double ooN=1.0/N;
+  double ooN=1./N;
 
   /* execute right plan */
   fftw_execute_r2r(FFTW_REDFT10_1d_plan[N], u, c);
@@ -553,7 +580,7 @@ void cheb_coeffs_fromZeros_FFTW3(double *c, double *u, int n)
 void cheb_coeffs_fromExtrema_FFTW3(double *c, double *u, int N)
 {
   int j;
-  double ooN=1.0/N;
+  double ooN=1./N;
 
   /* execute right plan */
   fftw_execute_r2r(FFTW_REDFT00_1d_plan[N+1], u, c);
@@ -583,7 +610,7 @@ void cheb_eval_onExtrema_FFTW3(double *c, double *u, int N)
   double c_N = c[N];
 
   /* convert */
-  c[N] *= 2.0;
+  c[N] *= 2.;
 
   /* execute right plan */
   fftw_execute_r2r(FFTW_REDFT00_1d_plan[N+1], c, u);
