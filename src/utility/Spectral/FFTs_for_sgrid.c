@@ -151,14 +151,14 @@ void cheb_eval_onExtrema_numrecFFT(double c[], double u[], int N)
 
 
 /*********************************************************************/
-/* from numrec                                                       */
+/* FFTs using same conventions as in numrec                          */
 /*********************************************************************/
 #define SWAP(a,b) tempr=(a);(a)=(b);(b)=tempr
 void numrec_four1(double data[], unsigned long nn, int isign)
 {
-	unsigned long n,mmax,m,j,istep,i;
-	double wtemp,wr,wpr,wpi,wi,theta;
-	double tempr,tempi;
+	unsigned long n, mmax, m,i,j, istep;
+	double wr,wi, wpr,wpi, theta;
+	double wtemp, tempr, tempi;
 
 	n=nn << 1;
 	j=1;
@@ -174,6 +174,8 @@ void numrec_four1(double data[], unsigned long nn, int isign)
 		}
 		j += m;
 	}
+
+	/*  Danielson-Lanczos algorithm: */
 	mmax=2;
 	while (n > mmax) {
 		istep=mmax << 1;
@@ -205,9 +207,11 @@ void numrec_four1(double data[], unsigned long nn, int isign)
 void numrec_realft(double data[], unsigned long n, int isign)
 {
 	void numrec_four1(double data[], unsigned long nn, int isign);
-	unsigned long i,i1,i2,i3,i4,np3;
-	double c1=0.5,c2,h1r,h1i,h2r,h2i;
-	double wr,wi,wpr,wpi,wtemp,theta;
+	unsigned long i, i1,i2,i3,i4, np3;
+	double c1=0.5,c2;
+	double h1r,h1i, h2r,h2i;
+	double wr,wi, wpr,wpi;
+	double wtemp, theta;
 
 	theta=PI/(double) (n>>1);
 	if (isign == 1) {
@@ -250,9 +254,10 @@ void numrec_realft(double data[], unsigned long n, int isign)
 void numrec_cosft1(double y[], int n)
 {
 	void numrec_realft(double data[], unsigned long n, int isign);
-	int j,n2;
-	double sum,y1,y2;
-	double theta,wi=0.0,wpi,wpr,wr=1.0,wtemp;
+	int j, n2;
+	double sum, y1,y2;
+	double wi=0.0,wpi, wpr,wr=1.0;
+	double wtemp, theta;
 
 	theta=PI/n;
 	wtemp=sin(0.5*theta);
