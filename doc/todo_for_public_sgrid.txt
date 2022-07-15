@@ -58,3 +58,15 @@ git push -u origin BRANCH_NAME
 *Run some cases with spin where we use
  DNSdata_new_q = FromFields
  to test the sign issue Roxana told me about.
+
+
+About github
+------------
+*use "GitHub Free for organizations"
+*in my personal account under "Settings" I can then create new orgnizations
+ for free
+*make one organization for the main sgrid, for all its projects, and all
+ python scripts
+*can later make another organization for nmesh
+*an organization has a 500MB limit (does this count against my personal
+ account limit of also 500MB?)
