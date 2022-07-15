@@ -70,3 +70,5 @@ About github
 *can later make another organization for nmesh
 *an organization has a 500MB limit (does this count against my personal
  account limit of also 500MB?)
+*use "Copy an entire repo to a new server" in wolfGIT/tricks/git to get
+ sgrid repo into github
