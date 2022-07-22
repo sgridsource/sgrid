@@ -29,9 +29,8 @@ OBJSWITHPATH = $(addprefix $(OBJDIR)/,$(OBJS))
 # c: create archive without warning 
 # s: symbol table is created (ar s = ranlib), needed for interdependencies
 # note that $@ is the matched target
-
 $(LIBDIR)/$(NEWLIB): $(OBJSWITHPATH)
-	$(AR) rucs $@ $(OBJSWITHPATH)
+	$(AR) rcs $@ $(OBJSWITHPATH)
 
 
 # secondary target: build object files
