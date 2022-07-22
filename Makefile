@@ -67,11 +67,11 @@ libpaths += $(projectpaths)
 # --------------------------------------------------------------------------
 # some more libraries are currently required, those need to be last
 libpaths += src/utility/Coordinates
-libpaths += src/utility/NumericUtils
-## check if we have old NumericUtils, if not add new numerics
-#ifneq ($(findstring NumericUtils,$(libpaths)),NumericUtils)
-#libpaths += src/utility/numerics
-#endif
+#libpaths += src/utility/NumericUtils
+# check if we have old NumericUtils, if not add new numerics
+ifneq ($(findstring NumericUtils,$(libpaths)),NumericUtils)
+libpaths += src/utility/numerics
+endif
 
 # --------------------------------------------------------------------------
 # set CXX and CLINKER to CC if they are not set in MyConfig
