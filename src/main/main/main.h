@@ -16,3 +16,6 @@ int finalize_grid(tGrid *g);
 
 /* variables.c */
 void free_global_vdb(void);
+
+/* parameters.c */
+void free_global_parameter_database(void);
