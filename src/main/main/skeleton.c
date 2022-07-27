@@ -38,6 +38,26 @@ void AddFun(int step, int (*f)(tGrid *), char *name)
   strcpy(t->name, name);
 }
 
+/* remove all functions from all func bins */
+void remove_all_Funs(void)
+{
+  int step;
+
+  for(step=0; step<NFUNCTIONS; step++)
+  {
+    tTodo *t, *p=NULL;
+
+    for(t = fps[step]; t; )
+    {
+      //printf("step%d %p %s\n", step, t, t->name);
+      p = t;         /* previous entry */
+      t = t->next;   /* get next entry */
+      free(p->name); /* free previous name */
+      free(p);       /* free previous entry */
+    }
+  }
+}
+
 
 void RunFun(int step, tGrid *grid) 
 {

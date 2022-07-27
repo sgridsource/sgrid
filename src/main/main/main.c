@@ -99,6 +99,7 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
   /* since we now return from main free some more things */
   free_global_parameter_database();
   free_global_vdb();
+  remove_all_Funs();
 
   sgrid_MPI_Finalize();
   return 0;

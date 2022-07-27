@@ -14,6 +14,9 @@ int evolve_grid(tGrid *grid);
 int finalize_grid(tGrid *g);
 
 
+/* skeleton.c */
+void remove_all_Funs(void);
+
 /* variables.c */
 void free_global_vdb(void);
 
