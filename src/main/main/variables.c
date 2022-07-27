@@ -118,6 +118,25 @@ void AddVarToGrid(tGrid *grid, char *name, char *tensorindices,
 }
 
 
+/* free entire variable data base vdb */
+void free_global_vdb(void)
+{
+  int i;
+  /* free alloced mem of each var */
+  for(i=0; i<nvdb; i++)
+  {
+    free(vdb[i].name);
+    free(vdb[i].tensorindices);
+    free(vdb[i].description);
+    free(vdb[i].io);
+  }
+  /* vdb and reset all counters */
+  free(vdb);
+  vdb = NULL;
+  vdb_iStart = nvdb = globalnvariables = 0;
+}
+
+
 
 /* return index of variable or -1 if it was not found */
 int IndLax(char *name) 

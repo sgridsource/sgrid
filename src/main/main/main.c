@@ -96,6 +96,9 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
     sgrid_restarts++; /* sgrid_restarts counts the actual restarts */
   } while(restart); /* end restarts loop */
 
+  /* since we now return from main free some more things */
+  free_global_vdb();
+
   sgrid_MPI_Finalize();
   return 0;
 }

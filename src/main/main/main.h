@@ -14,3 +14,5 @@ int evolve_grid(tGrid *grid);
 int finalize_grid(tGrid *g);
 
 
+/* variables.c */
+void free_global_vdb(void);
