@@ -56,6 +56,8 @@ void remove_all_Funs(void)
       free(p);       /* free previous entry */
     }
   }
+  /* make all fps point to NULL again */
+  for(step=0; step<NFUNCTIONS; step++) fps[step] = NULL;
 }
 
 
