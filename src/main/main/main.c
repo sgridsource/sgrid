@@ -85,6 +85,7 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
       RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
       initialize_grid(g);
       evolve_grid(g);
+      RunFun(PRE_FINALIZE_GRID, g); /* hook before finalize_grid, e.g. for special cleanup */
       finalize_grid(g);
       RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
       makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
