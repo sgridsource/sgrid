@@ -237,6 +237,11 @@ int free_BoundaryPointLists(tGrid *grid)
   FreePointList(selectedBoundaryPointList);
   FreePointList(ExcisionBoundaryPointList);
   FreePointList(boxBoundaryPointList);
+  radiativeBoundaryPointList = NULL;
+  constantBoundaryPointList = NULL;
+  selectedBoundaryPointList = NULL;
+  ExcisionBoundaryPointList = NULL;
+  boxBoundaryPointList = NULL;
 
   return 0;
 }
