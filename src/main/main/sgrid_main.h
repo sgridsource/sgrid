@@ -157,6 +157,7 @@ enum
   OUTPUT,
   POST_OUTPUT,
   POST_FINALIZE_GRID,
+  LAST,
   NFUNCTIONS
 };
 void AddFun(int step, int (*f)(tGrid *), char *name);

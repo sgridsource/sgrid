@@ -97,6 +97,7 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
   } while(restart); /* end restarts loop */
 
   /* since we now return from main free some more things */
+  RunFun(LAST, g); /* hook at very end, e.g. for special cleanup */
   free_global_parameter_database();
   free_global_vdb();
   remove_all_Funs();
