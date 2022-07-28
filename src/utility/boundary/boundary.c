@@ -17,14 +17,17 @@ int initialize_BoundaryPointLists(tGrid *grid)
   int i,j,k;
   int n1,n2,n3;
   int nboxes = grid->nboxes;
+
+  /* free global point lists first */
+  free_BoundaryPointLists(grid);
   
+  /* now allocate them: */
+  PRF;printf(": allocating all boundary PointLists\n");
   radiativeBoundaryPointList = AllocatePointList(grid);
   constantBoundaryPointList = AllocatePointList(grid);
   selectedBoundaryPointList = AllocatePointList(grid);
   ExcisionBoundaryPointList = AllocatePointList(grid);
   boxBoundaryPointList = AllocatePointList(grid);
-
-  printf("boundary: initialize_BoundaryPointLists:\n");
 
   /* make PointList containing all boundaries of all boxes */
   forallboxes(grid,bi)
@@ -231,7 +234,7 @@ int initialize_BoundaryPointLists(tGrid *grid)
 /* free all the point lists */
 int free_BoundaryPointLists(tGrid *grid)
 {
-  PRF;printf(": freeing all PointLists\n");
+  PRF;printf(": freeing all boundary PointLists\n");
   FreePointList(radiativeBoundaryPointList);
   FreePointList(constantBoundaryPointList);
   FreePointList(selectedBoundaryPointList);
