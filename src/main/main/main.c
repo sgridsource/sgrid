@@ -85,6 +85,7 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
       RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
       initialize_grid(g);
       evolve_grid(g);
+      RunFun(PRE_FINALIZE_GRID, g); /* hook before finalize_grid, e.g. for special cleanup */
       finalize_grid(g);
       RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
       makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
@@ -95,6 +96,12 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
     /*       we also do not free fps in skeleton.c */
     sgrid_restarts++; /* sgrid_restarts counts the actual restarts */
   } while(restart); /* end restarts loop */
+
+  /* since we now return from main free some more things */
+  RunFun(LAST, g); /* hook at very end, e.g. for special cleanup */
+  free_global_parameter_database();
+  free_global_vdb();
+  remove_all_Funs();
 
   sgrid_MPI_Finalize();
   return 0;

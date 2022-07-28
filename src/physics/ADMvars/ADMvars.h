@@ -5,3 +5,4 @@ void ADMconstraints(tVarList *u);
 int allocateADMvars(tGrid *grid);
 int ExitIfNAN(tGrid* grid);
 void ADMenergy_spheric_intergrand(tVarList *u);
+int free_ADM_globals(tGrid *grid);

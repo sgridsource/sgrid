@@ -49,21 +49,12 @@ void linesrchP(int n, double xold[], double fold, double g[], double p[],
 #define TOLMIN 1.0e-13
 #define TOLX 1.0e-14
 #define STPMX 100.0
-
-#define FREE_RETURN {free(newton_linesrch_fvec); free(xold);\
-                     free(p); free(g); free(fjac); free(p_idx);\
-                     if(!finit(f)) return -its-itmax*10;\
-                     return its;}
-#define FREE_RETURN_ERR {free(newton_linesrch_fvec); free(xold);\
-                         free(p); free(g); free(fjac); free(p_idx);\
-                         if(!finit(f)) return -its-itmax*10;\
-                         return -its-1;}
 int newton_linesearch(int n, double x[], int *check,
                       void (*vecfuncP)(int n, double x[], double f[],
                                        void *par),
                       void *par, int vecfuncP_ilow, int itmax, double tolf)
 {
-  int i,j;
+  int i,j, ret;
   int its=0; /* no iterations yet */
   double f,fold, stpmax, sum,temp,test;
   int *p_idx;
@@ -97,7 +88,8 @@ int newton_linesearch(int n, double x[], int *check,
   if(test < 0.01*tolf)
   {
     *check=0;
-    FREE_RETURN
+    ret = its;
+    goto finalize;
   }
 
   for(sum=0.0,i=0; i<n; i++) sum += SQR(x[i]);
@@ -171,7 +163,8 @@ int newton_linesearch(int n, double x[], int *check,
     if(test < tolf)
     {
       *check=0;
-      FREE_RETURN
+      ret = its;
+      goto finalize;
     }
     if(*check)
     {
@@ -183,7 +176,8 @@ int newton_linesearch(int n, double x[], int *check,
         if(temp > test) test = temp;
       }
       *check=(test < TOLMIN ? 1 : 0);
-      FREE_RETURN
+      ret = its;
+      goto finalize;
     }
     test = 0.0;
     for(i=0; i<n; i++)
@@ -191,16 +185,28 @@ int newton_linesearch(int n, double x[], int *check,
       temp=(fabs(x[i]-xold[i]))/fmax(fabs(x[i]),1.0);
       if(temp > test) test = temp;
     }
-    if(test < TOLX) FREE_RETURN
+    if(test < TOLX)
+    {
+      ret = its;
+      goto finalize;
+    }
   }
   /* printf("itmax exceeded in newton_linesearch\n"); */
-  FREE_RETURN_ERR
+  ret = -its-1;
+
+finalize:
+  free(newton_linesrch_fvec);
+  free(xold);
+  free(p);
+  free(g);
+  free(fjac);
+  free(p_idx);
+  if(!finit(f)) return -its-itmax*10;
+  return ret;
 }
 #undef TOLMIN
 #undef TOLX
 #undef STPMX
-#undef FREE_RETURN
-#undef FREE_RETURN_ERR
 
 
 

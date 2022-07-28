@@ -643,7 +643,7 @@ void FirstAndSecondDerivsOf_S(tBox *box, int i_S, int i_dSa, int i_ddSab)
   double *ddS23 = box->v[i_ddSab+4];
   double *ddS33 = box->v[i_ddSab+5];
 
-  FirstDerivsOf_Sa(box, i_S, i_dSa);
+  FirstDerivsOf_S(box, i_S, i_dSa);
   
   /* compute all second derivs in box */
   cart_partials(box, dS1, ddS11,ddS12,ddS13);

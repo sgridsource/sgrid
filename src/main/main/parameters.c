@@ -20,8 +20,8 @@
 
 /* global vars for parameter data base
    (tParameter is defined in src/main/main/sgrid_main.h) */
-tParameter *pdb;
-int pdb_iStart = 0, npdb, npdbmax = 10000;
+tParameter *pdb = NULL;
+int pdb_iStart = 0, npdb = 0, npdbmax = 10000;
 
 tParameter *findparameter(char *name, int fatal);
 void setparameter(char *name, char *value);
@@ -158,13 +158,12 @@ void parse_parameter_file(char *parfile)
 /* make new parameter in parameter data base, merge if already there */
 void makeparameter(char *name, char *value, char *description) 
 {
-  static int firstcall = 1;
   tParameter *p;
 
   if (0) printf("Makp %s = %s,  %s\n", name, value, description);
 
-  if (firstcall) {
-    firstcall = 0;
+  if(!pdb)
+  {
     pdb = (tParameter *) calloc(npdbmax, sizeof(tParameter));
     if (!pdb) errorexit("makeparameter: out of memory");
     npdb = 0;
@@ -764,4 +763,13 @@ void free_global_parameter_database_contents(void)
 {
   free_pdb_contents(pdb, npdb);
   npdb = 0;
+  pdb_iStart = 0;
+}
+
+/* free the global parameter database pdb and set npdb=0 */
+void free_global_parameter_database(void)
+{
+  free_global_parameter_database_contents();
+  free(pdb);
+  pdb = NULL;
 }

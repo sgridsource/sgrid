@@ -193,57 +193,60 @@ double Im_Ylm_slowly(int l, int m, double theta, double phi)
 }
 
 
-/* from physics/ModeComputer/SpinWeightedSphericalHarmonics.c */
-double Re_sYlm(int l, int m, int s, double theta, double phi);
-double Im_sYlm(int l, int m, int s, double theta, double phi);
-
-/* test: compare with Re_sYlm and Im_sYlm */
-int test_SphericalHarmonics(void)
-{
-  int l,m, lmax=4;
-  double *ReYtab = alloc_Plm_Tab(lmax);
-  double *ImYtab = alloc_Plm_Tab(lmax);
-
-  for(l=0; l<=lmax; l++)
-    for(m=-l; m<=l; m++)
-    {
-      double theta, phi, R1,I1, R2,I2, dR,dI;
-      for(theta = 0.11; theta<3.0; theta+=0.51)
-        for(phi = 0.07; phi<6.0; phi+=0.53)
-        {
-          R1 = Re_Ylm_slowly(l,m, theta,phi);
-          I1 = Im_Ylm_slowly(l,m, theta,phi);
-          /*
-          set_YlmTabs(l, theta, phi, ReYtab, ImYtab);
-          Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &R1,&I1);
-          */
-          R2 = Re_sYlm(l,m,0, theta,phi);
-          I2 = Im_sYlm(l,m,0, theta,phi);
-          dR = R1 - R2;
-          dI = I1 - I2;
-          if(fabs(dR)>1e-10 || fabs(dI)>1e-10)
-          {
-            printf("l=%d m=%d  theta=%g phi=%g  dR=%g dI=%g\n",
-                   l,m, theta,phi, dR,dI);
-            printf("l=%d m=%d  theta=%g phi=%g  R1=%g I1=%g\n",
-                   l,m, theta,phi, R1,I1);
-            printf("l=%d m=%d  theta=%g phi=%g  R2=%g I2=%g\n",
-                   l,m, theta,phi, R2,I2);
-            /*
-            printf("PLegendre=%g\n", PLegendre(l,m, cos(theta)));
-            printf("Plm_slowly=%g\n", Plm_slowly(l,m, cos(theta)));
-            */
-            //return -1;
-          }
-        }
-      printf("l=%d m=%d  final theta,phi  dR=%g dI=%g\n", l,m, dR,dI);
-    }
-  exit(0);
-
-  free(ImYtab);
-  free(ReYtab);
-  return 0;
-}
+// The following test is commented out so that we can compile
+// without ModeComputer:
+//
+// /* from physics/ModeComputer/SpinWeightedSphericalHarmonics.c */
+// double Re_sYlm(int l, int m, int s, double theta, double phi);
+// double Im_sYlm(int l, int m, int s, double theta, double phi);
+//
+// /* test: compare with Re_sYlm and Im_sYlm */
+// int test_SphericalHarmonics(void)
+// {
+//   int l,m, lmax=4;
+//   double *ReYtab = alloc_Plm_Tab(lmax);
+//   double *ImYtab = alloc_Plm_Tab(lmax);
+//
+//   for(l=0; l<=lmax; l++)
+//     for(m=-l; m<=l; m++)
+//     {
+//       double theta, phi, R1,I1, R2,I2, dR,dI;
+//       for(theta = 0.11; theta<3.0; theta+=0.51)
+//         for(phi = 0.07; phi<6.0; phi+=0.53)
+//         {
+//           R1 = Re_Ylm_slowly(l,m, theta,phi);
+//           I1 = Im_Ylm_slowly(l,m, theta,phi);
+//           /*
+//           set_YlmTabs(l, theta, phi, ReYtab, ImYtab);
+//           Ylm_from_Tabs(l, ReYtab, ImYtab, l,m, &R1,&I1);
+//           */
+//           R2 = Re_sYlm(l,m,0, theta,phi);
+//           I2 = Im_sYlm(l,m,0, theta,phi);
+//           dR = R1 - R2;
+//           dI = I1 - I2;
+//           if(fabs(dR)>1e-10 || fabs(dI)>1e-10)
+//           {
+//             printf("l=%d m=%d  theta=%g phi=%g  dR=%g dI=%g\n",
+//                    l,m, theta,phi, dR,dI);
+//             printf("l=%d m=%d  theta=%g phi=%g  R1=%g I1=%g\n",
+//                    l,m, theta,phi, R1,I1);
+//             printf("l=%d m=%d  theta=%g phi=%g  R2=%g I2=%g\n",
+//                    l,m, theta,phi, R2,I2);
+//             /*
+//             printf("PLegendre=%g\n", PLegendre(l,m, cos(theta)));
+//             printf("Plm_slowly=%g\n", Plm_slowly(l,m, cos(theta)));
+//             */
+//             //return -1;
+//           }
+//         }
+//       printf("l=%d m=%d  final theta,phi  dR=%g dI=%g\n", l,m, dR,dI);
+//     }
+//   exit(0);
+//
+//   free(ImYtab);
+//   free(ReYtab);
+//   return 0;
+// }
 
 
 /******************************************************************/

@@ -7,11 +7,6 @@
 # here are simple examples for libraries, they may be mutually exclusive
 
 # black hole evolution
-#libpaths += src/physics/adm
-#libpaths += src/physics/bssn
-#libpaths += src/physics/testwave
-##ibpaths += src/physics/ConvTest
-libpaths += src/utility/boundary
 libpaths += src/physics/ADMvars
 libpaths += src/physics/SingleBH
 libpaths += src/physics/BSSN
@@ -28,8 +23,10 @@ libpaths += src/utility/s2kit
 libpaths += src/physics/TestID
 libpaths += src/physics/ModeComputer
 libpaths += src/physics/PN_CircularOrbit_GWs
+libpaths += src/utility/NumericUtils
 
-repo = giter@mars.physics.fau.edu:
+repo = giter@quark.physics.fau.edu:
+projects += $(repo)/EoS_T0
 #projects += $(repo)/BNSdata
 projects += $(repo)/DNSdata
 projects += $(repo)/RealisticBBH

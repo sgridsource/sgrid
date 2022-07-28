@@ -159,3 +159,11 @@ int allocateADMvars(tGrid *grid)
 
   return 0;
 }
+
+/* free global ADM varlists */
+int free_ADM_globals(tGrid *grid)
+{
+  vlfree(K_initial);
+  vlfree(psiandderivs);
+  return 0;
+}

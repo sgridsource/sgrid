@@ -156,7 +156,9 @@ enum
   ANALYZE, 
   OUTPUT,
   POST_OUTPUT,
+  PRE_FINALIZE_GRID,
   POST_FINALIZE_GRID,
+  LAST,
   NFUNCTIONS
 };
 void AddFun(int step, int (*f)(tGrid *), char *name);
