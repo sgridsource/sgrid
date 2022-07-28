@@ -75,6 +75,7 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
     parse_command_line_options();
     make_output_directory();
     initialize_libraries();
+    //PrintFuncs();
 
     iterate_parameters(0); /* start of new iteration */
     while(iterate_parameters(1))

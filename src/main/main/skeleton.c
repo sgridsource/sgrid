@@ -69,3 +69,30 @@ void RunFun(int step, tGrid *grid)
     (*(t->f))(grid);
   }
 }
+
+
+
+/* print functions in func bin step */
+void PrintFun(int step)
+{
+  tTodo *t;
+
+  if(!fps[step]) return;
+
+  printf("func_T%02d:\n", step);
+  for(t = fps[step]; t->next; t = t->next)
+  {
+    printf("          %s\n", t->name);
+  }
+}
+
+/* print functions in all function bins */
+void PrintFuncs(void)
+{
+  int step;
+
+  prdivider(0);
+  printf("Function bin skeleton: functions are called in this order:\n");
+  for(step=0; step<NFUNCTIONS; step++) PrintFun(step);
+  prdivider(0);
+}

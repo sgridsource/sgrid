@@ -163,6 +163,7 @@ enum
 };
 void AddFun(int step, int (*f)(tGrid *), char *name);
 void RunFun(int step, tGrid *grid);
+void PrintFuncs(void);
 
 /* tensors.c */
 #define NINDEXLIST 100
