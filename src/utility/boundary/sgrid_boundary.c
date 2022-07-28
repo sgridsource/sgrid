@@ -20,6 +20,8 @@ int sgrid_boundary(void)
   /* functions */
   AddFun(PRE_INITIALDATA, initialize_BoundaryPointLists,
          "initialize all Boundary PointLists");
+  AddFun(PRE_FINALIZE_GRID, free_BoundaryPointLists,
+         "free all Boundary PointLists");
          
   /* parameters */
   AddPar("boundary", "", "boundary condition"

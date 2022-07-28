@@ -228,6 +228,19 @@ int initialize_BoundaryPointLists(tGrid *grid)
   return 0;
 }
 
+/* free all the point lists */
+int free_BoundaryPointLists(tGrid *grid)
+{
+  PRF;printf(": freeing all PointLists\n");
+  FreePointList(radiativeBoundaryPointList);
+  FreePointList(constantBoundaryPointList);
+  FreePointList(selectedBoundaryPointList);
+  FreePointList(ExcisionBoundaryPointList);
+  FreePointList(boxBoundaryPointList);
+
+  return 0;
+}
+
 
 /* apply all active boundary conditions after a standard evolution step */
 void set_boundary(tVarList *unew, tVarList *upre, double c, tVarList *ucur)
