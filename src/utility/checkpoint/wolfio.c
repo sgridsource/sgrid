@@ -41,17 +41,19 @@ int sscan_word_at_p(const char *str, int p, char *word);
   returns EOF if end of string reached and no word found	
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "sgrid.h"
+
 
 #define MAXSTRINGLEN 65535   
 
 /* use this to use wolfio fscanf1 */
 #define FSCANF1 fscanf1
 /* otherwise use: #define FSCANF1 fscanf */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
 
 /* Functions */
