@@ -170,12 +170,12 @@ void PrintFuncs(void);
 void tensorindexlist(char *tensorindices, int *nilist, char **ilist, int *sym);
 
 /* utilities.c */
-void errorexit(char *file, int line, char *s);
-void errorexits(char *file, int line, char *s, char *t);
-void errorexiti(char *file, int line, char *s, int i);
-#define errorexit(s) errorexit(__FILE__, __LINE__, (s))
-#define errorexits(s,t) errorexits(__FILE__, __LINE__, (s), (t))
-#define errorexiti(s,i) errorexiti(__FILE__, __LINE__, (s), (i))
+void SGRID_errorexit(char *file, int line, char *s);
+void SGRID_errorexits(char *file, int line, char *s, char *t);
+void SGRID_errorexiti(char *file, int line, char *s, int i);
+#define errorexit(s)    SGRID_errorexit(__FILE__, __LINE__, (s))
+#define errorexits(s,t) SGRID_errorexits(__FILE__, __LINE__, (s), (t))
+#define errorexiti(s,i) SGRID_errorexiti(__FILE__, __LINE__, (s), (i))
 #define PRF     printf("%s", __func__)
 #define PRFs(s) printf("%s%s", __func__, s)
 

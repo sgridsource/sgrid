@@ -537,7 +537,7 @@ void finalexit(int ec)
 #undef errorexits
 #undef errorexiti
 
-void errorexit(char *file, int line, char *s) 
+void SGRID_errorexit(char *file, int line, char *s)
 {
   fflush(stdout);
   fprintf(stderr, "Error: %s  ", s);
@@ -547,7 +547,7 @@ void errorexit(char *file, int line, char *s)
   finalexit(1);
 }
 
-void errorexits(char *file, int line, char *s, char *t)
+void SGRID_errorexits(char *file, int line, char *s, char *t)
 {
   fflush(stdout);
   fprintf(stderr, "Error: ");
@@ -558,7 +558,7 @@ void errorexits(char *file, int line, char *s, char *t)
   finalexit(1);
 }
 
-void errorexiti(char *file, int line, char *s, int i)
+void SGRID_errorexiti(char *file, int line, char *s, int i)
 {
   fflush(stdout);
   fprintf(stderr, "Error: ");
@@ -569,5 +569,8 @@ void errorexiti(char *file, int line, char *s, int i)
   finalexit(1);
 }
 
-/* do not write functions beyond this line because the undef/define 
-   method for the errorexit functions means that they should go last */
+/* Do not write functions beyond this line, because the undef/define
+   method for the errorexit functions means that they should go last.
+   However, now the funcs are called SGRID_errorexit*, while the macros are
+   called errorexit*. Then the functions do not necessarily have to be last
+   in this file any longer. */
