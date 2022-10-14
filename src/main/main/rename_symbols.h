@@ -28,4 +28,5 @@
 #define fscanf1 SGRID_fscanf1
 
 /* Projects/EoS_T0/EoS_T0.c */
-#define EoS_T0 SGRID_EoS_T0
+#define EoS_T0_rho0_P_rhoE_from_hm1 SGRID_EoS_T0_rho0_P_rhoE_from_hm1
+#define epsl_of_rho0_rhoE SGRID_epsl_of_rho0_rhoE
