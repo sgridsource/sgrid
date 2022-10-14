@@ -11,7 +11,8 @@ int parse_command_line_options(void);
 int make_output_directory(void);
 int initialize_grid(tGrid *g);
 int evolve_grid(tGrid *grid);
-int finalize_grid(tGrid *g);
+tGrid *finalize_grid(tGrid *g);
+void free_everything(void);
 
 
 /* skeleton.c */

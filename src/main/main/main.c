@@ -4,6 +4,9 @@
 #include "sgrid.h"
 #include "main.h"
 
+/* global vars: */
+tGrid *sgrid_grid = NULL;      /* to save the grid */
+int sgrid_memory_persists = 0; /* if 1 do not free memory at program end */
 
 /* global var that tells us how often we have restarted sgrid */
 int sgrid_restarts;
@@ -82,27 +85,34 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
     {
       RunFun(POST_PARAMETERS, 0); /* hook for funs right after iterate_parameters */
       RunFun(PRE_GRID, 0);  /* hook for special grid preparation */
-      g = make_grid(1);
+      sgrid_grid = g = make_grid(1);
       RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
       initialize_grid(g);
       evolve_grid(g);
-      RunFun(PRE_FINALIZE_GRID, g); /* hook before finalize_grid, e.g. for special cleanup */
-      finalize_grid(g);
-      RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
+      if(!sgrid_memory_persists)
+      {
+        RunFun(PRE_FINALIZE_GRID, g); /* hook before finalize_grid, e.g. for special cleanup */
+        sgrid_grid = g = finalize_grid(g);
+        RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
+      }
       makeparameter("outdir_previous_iteration", "", "outdir of previous iteration");
       Sets("outdir_previous_iteration", Gets("outdir"));
     }
-    free_global_parameter_database_contents(); /* free strings in parameter database pdb */
+    if(!sgrid_memory_persists)
+      free_global_parameter_database_contents(); /* free strings in parameter database pdb */
     /* NOTE: currently we do not free vdb in variables.c */
     /*       we also do not free fps in skeleton.c */
     sgrid_restarts++; /* sgrid_restarts counts the actual restarts */
   } while(restart); /* end restarts loop */
 
   /* since we now return from main free some more things */
-  RunFun(LAST, g); /* hook at very end, e.g. for special cleanup */
-  free_global_parameter_database();
-  free_global_vdb();
-  remove_all_Funs();
+  if(!sgrid_memory_persists)
+  {
+    RunFun(LAST, g); /* hook at very end, e.g. for special cleanup */
+    free_global_parameter_database();
+    free_global_vdb();
+    remove_all_Funs();
+  }
 
   sgrid_MPI_Finalize();
   return 0;
@@ -470,9 +480,25 @@ int evolve_grid(tGrid *grid)
 
 
 /* finalize grid */
-int finalize_grid(tGrid *g)
+tGrid *finalize_grid(tGrid *g)
 {
   prdivider(0);
   free_grid(g);
-  return 0;
+  return NULL;
+}
+
+
+/* call all necessary functions to free all memory */
+void free_everything(void)
+{
+  tGrid *g = sgrid_grid;
+
+  if(g) RunFun(PRE_FINALIZE_GRID, g); /* hook before finalize_grid, e.g. for special cleanup */
+  sgrid_grid = g = finalize_grid(g);
+  RunFun(POST_FINALIZE_GRID, g); /* hook after finalize_grid, e.g. for special cleanup */
+
+  RunFun(LAST, g); /* hook at very end, e.g. for special cleanup */
+  free_global_parameter_database();
+  free_global_vdb();
+  remove_all_Funs();
 }
