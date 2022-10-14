@@ -1943,6 +1943,7 @@ int set_oX_oY_oZ_vars_for_bfaces(tGrid *grid)
 /* set bfaces for each box on the grid */
 int Coordinates_set_bfaces(tGrid *grid)
 {
+  int pr = Getv("Coordinates_verbose", "yes");
   int b, ret;
 
   /* do nothing if Coordinates_set_bfaces = no */
@@ -1960,7 +1961,7 @@ int Coordinates_set_bfaces(tGrid *grid)
   set_oX_oY_oZ_vars_for_bfaces(grid);
 
   /* print all bfaces */
-  forallboxes(grid, b) printbfaces(grid->box[b]);
+  if(pr) forallboxes(grid, b) printbfaces(grid->box[b]);
 
   return ret;
 }

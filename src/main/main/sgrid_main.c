@@ -23,5 +23,6 @@ int sgrid_main(void)
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
 
   AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
+  AddPar("verbose", "yes", " [yes,no]");
   return 0;
 }

@@ -85,7 +85,7 @@ int libsgrid_main(int argc, char **argv) /* in case we build libsgrid */
     {
       RunFun(POST_PARAMETERS, 0); /* hook for funs right after iterate_parameters */
       RunFun(PRE_GRID, 0);  /* hook for special grid preparation */
-      sgrid_grid = g = make_grid(1);
+      sgrid_grid = g = make_grid(Getv("verbose", "yes"));
       RunFun(POST_GRID, g); /* hook for special treatment after grid creation */
       initialize_grid(g);
       evolve_grid(g);
