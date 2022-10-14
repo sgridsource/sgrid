@@ -8,6 +8,8 @@
 
 /* sgrid core and output functions */
 #define make_grid SGRID_make_grid
+#define sgrid_memory_persists SGRID_memory_persists
+#define free_everything SGRID_free_everything
 #define write_raw_vtk_data SGRID_write_raw_vtk_data
 
 /* main/main/utilities.c */
@@ -24,3 +26,6 @@
 #define fscanline SGRID_fscanline
 #define fscan_str_using_getc SGRID_fscan_str_using_getc
 #define fscanf1 SGRID_fscanf1
+
+/* Projects/EoS_T0/EoS_T0.c */
+#define EoS_T0 SGRID_EoS_T0
