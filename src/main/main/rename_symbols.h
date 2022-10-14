@@ -8,7 +8,6 @@
 
 /* sgrid core and output functions */
 #define make_grid SGRID_make_grid
-#define sgrid_memory_persists SGRID_memory_persists
 #define free_everything SGRID_free_everything
 #define write_raw_vtk_data SGRID_write_raw_vtk_data
 
