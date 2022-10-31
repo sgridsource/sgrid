@@ -46,8 +46,6 @@ int sscan_word_at_p(const char *str, int p, char *word);
 #include <string.h>
 #include <ctype.h>
 
-#include "sgrid.h"
-
 
 #define MAXSTRINGLEN 65535   
 
