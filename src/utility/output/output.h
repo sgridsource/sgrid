@@ -15,4 +15,7 @@ void output0d_boxvar(tBox *box, char *name);
 void write3d_boxvar(tBox *box, char *name);
 void write_raw_vtk_data(FILE *fp, double *buffer, int n, int stride, int offset,
 		        int dbl, int flt, int text, int binary);
+void write_raw_vtk_points(FILE *fp, double *px, double *py, double *pz,
+                          int n, int stride, int offset,
+                        int dbl, int flt, int text, int binary);
 FILE *fopen_vtk(char *varname, char *suffix, int b, int n);
