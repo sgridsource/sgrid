@@ -77,7 +77,7 @@ int sgrid_output(void)
 	 "format for 2d output (opendx,vtk,text,binary,float,double)"); 
 
   AddPar("3dformat", "dump float binary", "format for 3d output "
-	 "(dump,vtk,text,binary,float,double,fakepoints)"); 
+	 "(dump,vtk,text,binary,float,double,fakepoints,addpoints)");
   AddPar("hdf5_timesteps_in_one_file", "yes", 
          "whether all timesteps are put into one hdf5 file");
 

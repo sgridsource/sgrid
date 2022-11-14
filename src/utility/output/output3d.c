@@ -24,6 +24,9 @@ void write3d_boxvar(tBox *box, char *name)
   double *pX = box->v[Ind("X")];
   double *pY = box->v[Ind("Y")];
   double *pZ = box->v[Ind("Z")];
+  double *px = box->v[Ind("x")];
+  double *py = box->v[Ind("y")];
+  double *pz = box->v[Ind("z")];
   double *pV = box->v[Ind(name)];
   int n1 = box->n1;
   int n2 = box->n2;
@@ -46,9 +49,6 @@ void write3d_boxvar(tBox *box, char *name)
   /* output one file per time step in separate subdirectories */
   if(vtk)
   {
-    /* open file (returns non-null file pointer) */
-    fp = fopen_vtk(name, "XYZ", box->b, nseries-1);
-
     if(fakepoints) /* put data on a fake grid with uniform grid spacings dX,dY,dZ */
     {
       double X0 = box->bbox[0];
@@ -69,6 +69,9 @@ void write3d_boxvar(tBox *box, char *name)
         dX = dY = dZ = 1.0;
       }
 
+      /* open file (returns non-null file pointer) */
+      fp = fopen_vtk(name, "XYZ", box->b, nseries-1);
+
       /* write header */
       fprintf(fp, "# vtk DataFile Version 2.0\n");
       fprintf(fp, "variable %s, box %d, time %.16g, "
@@ -87,15 +90,42 @@ void write3d_boxvar(tBox *box, char *name)
       /* write data,
          has to be in the file right after the \n of the last header line */
       write_raw_vtk_data(fp, pV, n1*n2*n3,1,0, dbl, flt, text, binary);
+
+      fclose(fp);
     }
     else
     {
-      if(addpoints) /* add grid in X,Y,Z coords. */
+      if(addpoints) /* add grid in x,y,z coords. */
       {
-        errorexit("implement 3d vtk output with real grid point coordinates");
+        /* open file (returns non-null file pointer) */
+        fp = fopen_vtk(name, "xyz", box->b, nseries-1);
+        /* here we use the lower case Cartesian x,y,z */
+
+        fprintf(fp, "# vtk DataFile Version 2.0\n");
+        fprintf(fp, "variable %s, box %d, time %.16g\n",
+                name, box->b, grid->time);
+        fprintf(fp, binary ? "BINARY" : "ASCII\n");
+        fprintf(fp, "\n");
+        fprintf(fp, "DATASET STRUCTURED_GRID\n");
+        fprintf(fp, "DIMENSIONS %d %d %d\n", n1, n2, n3);
+        fprintf(fp, "POINTS %d %s\n", n1*n2*n3, dbl ? "double" : "float");
+        write_raw_vtk_points(fp, px, py, pz, n1*n2*n3,1,0, dbl, flt, text, binary);
+
+        fprintf(fp, "\n\n");
+        fprintf(fp, "POINT_DATA %d\n", n1*n2*n3);
+        fprintf(fp, "SCALARS %s %s\n", name, dbl ? "double" : "float");
+        fprintf(fp, "LOOKUP_TABLE default\n");
+        /* write data,
+           has to be in the file right after the \n of the last header line */
+        write_raw_vtk_data(fp, pV, n1*n2*n3,1,0, dbl, flt, text, binary);
+
+        fclose(fp);
       }
       else /* use RECTILINEAR_GRID */
       {
+        /* open file (returns non-null file pointer) */
+        fp = fopen_vtk(name, "XYZ", box->b, nseries-1);
+
         /* write header */
         fprintf(fp, "# vtk DataFile Version 2.0\n");
         fprintf(fp, "variable %s, box %d, time %.16g\n", 
@@ -119,8 +149,9 @@ void write3d_boxvar(tBox *box, char *name)
         /* write data,
            has to be in the file right after the \n of the last header line */
         write_raw_vtk_data(fp, pV, n1*n2*n3,1,0, dbl, flt, text, binary);
+
+        fclose(fp);
       }
     }
-    fclose(fp);
-  }
+  } /* end if(vtk) */
 }
