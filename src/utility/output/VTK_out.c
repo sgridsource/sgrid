@@ -123,6 +123,142 @@ void write_raw_vtk_data(FILE *fp, double *buffer, int n, int stride, int offset,
   }
 }
 
+
+void write_raw_vtk_points(FILE *fp, double *px, double *py, double *pz,
+                          int n, int stride, int offset,
+                        int dbl, int flt, int text, int binary)
+{
+  int swap = BYTE_ORDER_LITTLE;  // if little endian, then swap since
+                                 // the vtk default is big endian
+  int i;
+
+  if(!text && !binary)
+    errorexit("write_raw_vtk_data: pick text or binary format");
+  if(text && binary)
+    errorexit("write_raw_vtk_data: pick either text or binary format");
+  if(dbl && flt)
+    errorexit("write_raw_vtk_data: pick either double or float format");
+
+  if(text)
+  {
+    if(dbl)
+      for (i = 0; i < n; i++)
+        fprintf(fp, "%.16g %.16g %.16g\n", px[stride*i+offset], py[stride*i+offset], pz[stride*i+offset]);
+    else
+      for (i = 0; i < n; i++)
+        fprintf(fp, "%.7g %.7g %.7g\n",
+                (float) px[stride*i+offset], (float) py[stride*i+offset], (float) pz[stride*i+offset]);
+  }
+
+  if(binary)
+  {
+    if(sizeof(char) != 1)
+      errorexit("write_raw_vtk_data: size of char is not 1");
+
+    if(!swap)
+    {
+      if(dbl)
+      {
+        for(i = 0; i < n; i++)
+        {
+          const double xdouble = px[stride*i+offset];
+          const double ydouble = py[stride*i+offset];
+          const double zdouble = pz[stride*i+offset];
+          fwrite(&xdouble, sizeof(double), 1, fp);
+          fwrite(&ydouble, sizeof(double), 1, fp);
+          fwrite(&zdouble, sizeof(double), 1, fp);
+        }
+      }
+      if(flt)
+      {
+        for (i = 0; i < n; i++)
+        {
+          const double xfloat = px[stride*i+offset];
+          const double yfloat = py[stride*i+offset];
+          const double zfloat = pz[stride*i+offset];
+          fwrite(&xfloat, sizeof(float), 1, fp);
+          fwrite(&yfloat, sizeof(float), 1, fp);
+          fwrite(&zfloat, sizeof(float), 1, fp);
+        }
+      }
+    }
+
+    if(swap)
+    {
+      if(dbl && sizeof(double) == 8)
+      {
+        char cx[8], cy[8], cz[8];
+        for (i = 0; i < n; i++)
+        {
+          const double xdouble = px[stride*i+offset];
+          const double ydouble = py[stride*i+offset];
+          const double zdouble = pz[stride*i+offset];
+          const char *x = (char *)&xdouble;
+          const char *y = (char *)&ydouble;
+          const char *z = (char *)&zdouble;
+          cx[0] = x[7];
+          cx[1] = x[6];
+          cx[2] = x[5];
+          cx[3] = x[4];
+          cx[4] = x[3];
+          cx[5] = x[2];
+          cx[6] = x[1];
+          cx[7] = x[0];
+          fwrite(cx, sizeof(char), 8, fp);
+          cy[0] = y[7];
+          cy[1] = y[6];
+          cy[2] = y[5];
+          cy[3] = y[4];
+          cy[4] = y[3];
+          cy[5] = y[2];
+          cy[6] = y[1];
+          cy[7] = y[0];
+          fwrite(cy, sizeof(char), 8, fp);
+          cz[0] = z[7];
+          cz[1] = z[6];
+          cz[2] = z[5];
+          cz[3] = z[4];
+          cz[4] = z[3];
+          cz[5] = z[2];
+          cz[6] = z[1];
+          cz[7] = z[0];
+          fwrite(cz, sizeof(char), 8, fp);
+        }
+      }
+      else if (flt && sizeof(float) == 4)
+      {
+        char cx[4], cy[4], cz[4];
+        for (i = 0; i < n; i++)
+        {
+            const float xfloat = px[stride*i+offset];
+            const float yfloat = py[stride*i+offset];
+            const float zfloat = pz[stride*i+offset];
+            const char *x = (char *)&xfloat;
+            const char *y = (char *)&yfloat;
+            const char *z = (char *)&zfloat;
+            cx[0] = x[3];
+            cx[1] = x[2];
+            cx[2] = x[1];
+            cx[3] = x[0];
+            fwrite(cx, sizeof(char), 4, fp);
+            cy[0] = y[3];
+            cy[1] = y[2];
+            cy[2] = y[1];
+            cy[3] = y[0];
+            fwrite(cy, sizeof(char), 4, fp);
+            cz[0] = z[3];
+            cz[1] = z[2];
+            cz[2] = z[1];
+            cz[3] = z[0];
+            fwrite(cz, sizeof(char), 4, fp);
+        }
+      }
+      else
+        errorexit("write_raw_vtk_data: size of float/double is not 4/8");
+    }
+  }
+}
+
 /* open file for vtk writing */
 FILE *fopen_vtk(char *varname, char *suffix, int b, int n)
 {
