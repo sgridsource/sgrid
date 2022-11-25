@@ -7,7 +7,7 @@
    - expand contractions to sums with explicit indices
    - expand free indices by writing several equations with explicit indices
    - glue explicit indices to variable name, g[1,2] becomes g12
-*)  
+*)
 
 
 (* set number of dimensions
@@ -35,41 +35,46 @@ expcontraction = {
 (* careful: Union sorts, so apply to elements for which this is ok or wanted *)
 expfreesort[x_,a_Symbol] := Union[Flatten[Table[x, {a,imin,imax}]]]
 expfreesort[x_,{a_Symbol}] := expfreesort[x,a]
-expfreesort[x_,{a_Symbol,b__}] := 
+expfreesort[x_,{a_Symbol,b__}] :=
   Union[Flatten[Table[expfreesort[x,{b}], {a,imin,imax}]]]
 
 expexpsign = -x_ :> x
 expfreeexp[x_Symbol] := x
-expfreeexp[x_[a__]] := 
+expfreeexp[x_[a__]] :=
   DeleteCases[Union[Flatten[expfreesort[x[a], {a}]/.expexpsign]], 0]
 
 (* careful: when called on equations, LHS and RHS must have same syms *)
 expequsign = -x_ == y_ :> x == -y
 expfreeequ[x_Symbol==y_] := x==y
-expfreeequ[delt[x_Symbol]==y_] := delt[x] == y 
-expfreeequ[x_[a__]==y_] := 
+expfreeequ[delt[x_Symbol]==y_] := delt[x] == y
+expfreeequ[x_[a__]==y_] :=
   DeleteCases[Union[Flatten[expfreesort[x[a]==y,{a}]/.expequsign]], True]
-expfreeequ[delt[x_[a__]]==y_] := 
+expfreeequ[delt[x_[a__]]==y_] :=
   DeleteCases[Union[Flatten[expfreesort[delt[x[a]]==y,{a}]/.expequsign]], True]
 
 (* expand free indices:
    for equations, expansion is based on lhs
    for expressions, only top level list is handled
 *)
-expfreeindices = {
-  x_ :> Flatten[Map[expfreeequ,x]] /; !FreeQ[x,y_==z_],
-  x_ :> Flatten[Map[expfreeexp,x]] /; FreeQ[x,y_==z_]
-}
+If[ValueQ[MathicsVersion],
+  expfreeindices = {
+    x_  /; !FreeQ[x,y_==z_] :> Flatten[Map[expfreeequ,x]],
+    x_  /;  FreeQ[x,y_==z_] :> Flatten[Map[expfreeexp,x]]
+  },
+  expfreeindices = {
+    x_ :> Flatten[Map[expfreeequ,x]] /; !FreeQ[x,y_==z_],
+    x_ :> Flatten[Map[expfreeexp,x]] /; FreeQ[x,y_==z_]
+  }
+]
 
 
-
-glue[a_,b_] := (* SequenceForm[a,b]; *) 
- ToExpression[ToString[a] <> ToString[b]]; 
+glue[a_,b_] := (* SequenceForm[a,b]; *)
+ ToExpression[ToString[a] <> ToString[b]];
 glueall[x_] := x //. y_Symbol[a_,b___] :> glue[y,a][b] /. y_[] :> y
 gluevariables[variables_] := Module[{varexpanded, vartoglue, varglued},
   varexpanded = Flatten[Map[expfreeexp, variables]];
   vartoglue = Cases[varexpanded, x_[a__]];
-  varglued = Map[glueall, vartoglue]; 
+  varglued = Map[glueall, vartoglue];
   Table[vartoglue[[i]] -> varglued[[i]], {i, 1, Length[varglued]}]
 ]
 
@@ -83,7 +88,7 @@ prlist[a_,b_] := Block[{},
 ];
 
 colpow = {
-  Power[x_,2] -> pow2[x], 
+  Power[x_,2] -> pow2[x],
   Power[x_,-2] -> pow2inv[x]
 }
 
@@ -114,7 +119,7 @@ If[False, prlist["all = all /. expfreeindices", all]]
    - these are all variables that appear on the lhs of an assignment
      but are not in the list of variables
    - treat the indices as abstract by using patterns
-   - note that the level specification {2} also ensures that scalars do 
+   - note that the level specification {2} also ensures that scalars do
      not become patterns!
 *)
 (* old: auxvariables = Complement[Map[#[[1]]&, tocompute], variables]; *)
@@ -122,7 +127,7 @@ If[False, prlist["all = all /. expfreeindices", all]]
 lhsvariables = Map[#[[1]]&, tocompute];
 lhsvariables = DeleteCases[lhsvariables, Cif | Cinstruction];
 patternofvariables = Map[(Pattern[#, Blank[]]) &, variables, {2}];
-auxvariables = DeleteCases[lhsvariables, 
+auxvariables = DeleteCases[lhsvariables,
                            patternofvariables /. List -> Alternatives];
 auxvariables = Union[auxvariables];   (* sort and remove duplicates *)
 
@@ -138,7 +143,7 @@ Clear[locvariables];
 (* check whether constvariables is set, if not set it to {dummy} *)
 convariables = constvariables;
 Clear[constvariables];
-If[convariables === constvariables, 
+If[convariables === constvariables,
   constvariables = {dummy}, constvariables = convariables];
 Clear[convariables];
 
