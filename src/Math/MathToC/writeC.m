@@ -156,7 +156,7 @@ writeCassign[e_] := Module[{x, nfields, nf, acc, one},
   (* Cinstruction: a piece of C-code *)
   If[e[[1]] === Cinstruction,
       pr["\n"]; 
-      pr[StringForm["`` \n\n", e[[2]]]];
+      pr[StringForm["``\n\n", e[[2]]]];
   ];
 
 ]
