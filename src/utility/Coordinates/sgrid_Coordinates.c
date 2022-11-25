@@ -71,7 +71,7 @@ int sgrid_Coordinates(void)
   AddPar("Coordinates_verbose", "yes", "verbose [yes,no]");
   AddPar("CoordinateTransforms_stored", "yes",
          "whether we store Coordinate Transforms in dXdx,... ddXddxx,...");
-  AddPar("Coordinates_newtTOLF", "1e-10", "newton tolerence");
+  AddPar("Coordinates_newtTOLF", "1e-10", "newton tolerance");
   AddPar("Coordinates_newtMAXITS", "100000", "max. newton iterations");
   AddPar("Coordinates_XYZ_of_xyz_Guess", "no", "should XYZ_of_xyz make an "
          "initial guess for X,Y,Z [yes,no]");

@@ -430,7 +430,7 @@ tLinSolver get_linSolver_by_name(char *name)
   else if(strcmp(name, "templates_cgs_wrapper_with_SOR_precon")==0)
     linear_solver=templates_cgs_wrapper_with_SOR_precon;
   else
-    errorexit("InitRealisticBBH: unknown RealisticBBH_linSolver");
+    errorexits("unknown linear solver %s",name);
 
   return linear_solver;
 }

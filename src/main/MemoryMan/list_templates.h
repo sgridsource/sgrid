@@ -16,7 +16,7 @@
 /*********************/
 /* for generic lists */
 /*********************/
-/* the new type name can be obtained like this. E.g. LIST(float) gives foatList */
+/* the new type name can be obtained like this. E.g. LIST(float) gives floatList */
 #define LIST(TYP) PASTE(TYP,List)
 
 /* define a new list with entries of a certain type TYP, 
