@@ -3,8 +3,13 @@
 
 (* Mathematica script:
    Given equations in tensor notation, write corresponding C code.
-*)  
+*)
 
+(* Mathics is not looking relative to input files by default. *)
+(* Add MathematicaToC directory to the Path, if we are running on Mathics *)
+If[ValueQ[MathicsVersion],
+  PrependTo[$Path, DirectoryName[$InputFileName]]
+]
 
 (*************************)
 (* apply tensor formulas *)
@@ -33,5 +38,3 @@
 (* write C code *)
 
 << writeC.m
-
-
