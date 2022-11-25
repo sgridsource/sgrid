@@ -26,10 +26,41 @@ If[optimizeflag =!= False,
   sule = a_ /; a < 0 -> minus (- a);
   tule = minus -> -1;
 
-  dif = dif /. collginv;
-  dif = dif //. rule;      (* sufficient for numbers with different signs *) 
-  dif = dif /. sule //. rule /. tule;
+  If[ValueQ[MathicsVersion],
+    (* START of special Mathics stuff: *)
+    (* This can take a long time and make expressions
+       long and complicated in Mathics 4.0.0 *)
+    (*
+    dif = Map[# /. collginv &, dif];
+    If[False, prlist["Map[# /. collginv &, dif]", dif]];
+    *)
 
+    (* Use FullSimplify instead *)
+    (*
+    dif = FullSimplify /@ dif;
+    If[False, prlist["FullSimplify /@ dif", dif]];
+    *)
+
+    (* in Mathics rule does not check cancellation in fractions,
+       so we do it here explicitely *)
+    (* Mathics 4.0.0: Cancel is very slow *)
+    (*
+    dif = Cancel /@ dif;
+    *)
+
+    (* Using Apart instead, which is faster *)
+    dif = Apart /@ dif;
+
+    (* Factor equations *) (* Consider using Factor *)
+    dif = Map[# //. rule &, dif];     (* sufficient for numbers with different signs *)
+    dif = Map[# /. sule //. rule /. tule &, dif];
+    , (* END of special Mathics stuff *)
+
+    (* For real Mathematica: *)
+    dif = dif /. collginv;
+    dif = dif //. rule;      (* sufficient for numbers with different signs *) 
+    dif = dif /. sule //. rule /. tule;
+  ]
 ]
 
 timer["after optimize.m"]
