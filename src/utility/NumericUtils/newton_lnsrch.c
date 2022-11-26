@@ -388,7 +388,7 @@ int newton_linesrch_itsP(double x[], int n, int *check,
                     else    p[l] = 0.0;
                   } // end l-loop
                   free_ivector(idx,1,n);
-		} /* end Sing. tretment */
+		} /* end Sing. treatment */
 		else lubksb(fjac,n,indx,p);
 		linesrchP(n,xold,fold,g,p,x,&f,stpmax,check,
 		         f_to_minimize_in_linesrchP, 
@@ -465,7 +465,7 @@ void newton_lnsrch_set_vecs_for_lininterp(int n, double vec[],
   cent=vector(1,n);
   dir =vector(1,n);
 
-  s=1;
+  s=sc=1;
   for(i=1; i<=n; i++) 
   {
     /* pos. vec. of center */
