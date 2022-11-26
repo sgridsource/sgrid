@@ -225,6 +225,7 @@ tomatlab[tanh[e_]] := "tanh(" <> tomatlab[e] <> ")"
 tomatlab[cosh[e_]] := "cosh(" <> tomatlab[e] <> ")"
 tomatlab[log[e_]] := "log(" <> tomatlab[e] <> ")"
 tomatlab[erf[e_]] := "erf(" <> tomatlab[e] <> ")"
+tomatlab[sqrt[e_]] := "sqrt(" <> tomatlab[e] <> ")"
 
 tomatlab[e_] := ToString[e]
 
