@@ -1,0 +1,80 @@
+Hannes Rueter made changes all over sgrid for the two Projects:
+ DNSdataTwoFluid
+ MultiEoS
+
+In November 2022 WT looked at them. Here is what we think:
+
+Improvements we like in TwoFluid
+---------------------------------
+src/Math/MathToC/TensorEquationsToC.m  : DONE.
+src/Math/MathToC/expandindices.m       : DONE.
+src/Math/MathToC/optimize.m            : DONE.
+src/Math/MathToC/writeC.m              : DONE.
+
+src/main/MemoryMan/list_templates.h          : DONE.
+src/utility/Coordinates/sgrid_Coordinates.c  : DONE.
+src/utility/GridIterators/Newton.c           : DONE.
+
+src/utility/output/VTK_out.c   : DONE.
+src/utility/output/output.h    : DONE.
+src/utility/output/output3d.c  : DONE.
+
+src/utility/NumericUtils/newton_lnsrch.c  : DONE.
+
+The "DONE." above indicates that WT has merged the relevant parts into the
+branch new_master (which will itself be merged into master). 
+
+The Mathics stuff in src/Math/MathToC/ could not just be used as is, because
+it broke Mathematica compatibility, which we plan to keep for now. We have
+tested that what is in new_master now, works under Mathematica and still
+gives identical results. Yet, it should now also work with Mathics 5, but
+this remains to be tested, and it sure is not exactly as in branch TwoFluid.
+
+The VTK related stuff src/utility/output was taken more or less verbatim
+from TwoFluid, but VTK output with point coords only happens if we say
+3dformat = vtk addpoints
+
+NOTE:
+We won't merge stuff from main, even though some of the const stuff might be
+good. It's just to hard to test if all other projects will keep working wit
+this....
+
+
+Improvements in TwoFluid that we need to worry about:
+-----------------------------------------------------
+src/utility/Coordinates/find_extrema.c   :
+---
+commit 3d6ab7b4eae9cbaca285790568775d5670dbea26
+Author: Hannes Rüter <physics@hannesrueter.de>
+Date:   Thu Jul 14 15:00:29 2022 +0200
+    Attempt to make box_extremum_of_F_in_dir more stable
+---
+@@ -213,22 +213,6 @@
+In func box_extremum_of_F_in_dir there are these extra lines in TwoFluid:
++  if(stat<0) {
++    // fields can oscillate at the outer bounds
++    // try again with tighter bounds
++    printf("trying again with tighter bounds\n");
++
++    Cl = box->bbox[(dir-1)*2];
++    Ch = box->bbox[(dir-1)*2+1];
++    const double center = (Cl + Ch)/2;
++    const double dC = (Ch - Cl);
++
++    Cl = center - dC / 4;
++    Ch = center + dC / 4;
++
++    stat = zbrac_P(f1_from_c1_dir_ZP, &Cl,&Ch, (void *) par);
++  }
++
+BUT I do not like this!!! It searches in a greatly reduced interval. This
+can only cause trouble! I wonder if DNSdataTwoFluid actually needs this???
+If so, it should make its own private box_extremum_of_F_in_dir function!!!
+
+----------------------------------------------------------------------------
+
+So we consider the partial merge of TwoFluid done now. Nobody should ever
+attempt to just merge TwoFluid into master now. It's not what we want and
+would also results in tons of conflicts.
+
+WT
