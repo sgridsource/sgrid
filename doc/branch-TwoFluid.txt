@@ -23,7 +23,7 @@ src/utility/output/output3d.c  : DONE.
 src/utility/NumericUtils/newton_lnsrch.c  : DONE.
 
 The "DONE." above indicates that WT has merged the relevant parts into the
-branch new_master (which will itself be merged into master). 
+branch new_master (which will itself be merged into master).
 
 The Mathics stuff in src/Math/MathToC/ could not just be used as is, because
 it broke Mathematica compatibility, which we plan to keep for now. We have
@@ -40,9 +40,28 @@ We won't merge stuff from main, even though some of the const stuff might be
 good. It's just to hard to test if all other projects will keep working wit
 this....
 
+---
+src/utility/NumericUtils/odeintegrate.c : TAKEN CARE OF
+---
+commit 8713789aa14fb8304b4e6787a1a7d9b422d25df3
+Author: Hannes Rüter <physics@hannesrueter.de>
+Date:   Mon Apr 11 16:15:16 2022 +0100
+    Add maximum norm to the yscale in odeintegrate
+---
+The main diff in func odeintegrate is this:
+- yscal[i]=fabs(y[i])+fabs(dydx[i]*h)+TINY;
++ yscal[i]=max_abs_scale*max_absy[i]+fabs(y[i])+fabs(dydx[i]*h)+TINY;
+I.e. Hannes scales differently. This changes the number that odeintegrate
+returns, even though it should converge to the same result as before.
+DNSdataTwoFluid needs this change. I added the func odeintegrate_HR to
+odeintegrate.c in master, which contains Hannes' version. So now
+DNSdataTwoFluid uses odeintegrate_HR, while all other projects use
+odeintegrate, which contains the old version from before Apr 11, 2022.
+
 
 Improvements in TwoFluid that we need to worry about:
 -----------------------------------------------------
+---
 src/utility/Coordinates/find_extrema.c   :
 ---
 commit 3d6ab7b4eae9cbaca285790568775d5670dbea26
@@ -71,21 +90,6 @@ In func box_extremum_of_F_in_dir there are these extra lines in TwoFluid:
 BUT I do not like this!!! It searches in a greatly reduced interval. This
 can only cause trouble! I wonder if DNSdataTwoFluid actually needs this???
 If so, it should make its own private box_extremum_of_F_in_dir function!!!
-
----
-src/utility/NumericUtils/odeintegrate.c
----
-commit 8713789aa14fb8304b4e6787a1a7d9b422d25df3
-Author: Hannes Rüter <physics@hannesrueter.de>
-Date:   Mon Apr 11 16:15:16 2022 +0100
-    Add maximum norm to the yscale in odeintegrate
----
-The main diff is this:
-- yscal[i]=fabs(y[i])+fabs(dydx[i]*h)+TINY;
-+ yscal[i]=max_abs_scale*max_absy[i]+fabs(y[i])+fabs(dydx[i]*h)+TINY;
-I.e. we scale differently.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-
-
 
 
 ----------------------------------------------------------------------------
