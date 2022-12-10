@@ -75,7 +75,10 @@ If so, it should make its own private box_extremum_of_F_in_dir function!!!
 ---
 src/utility/NumericUtils/odeintegrate.c
 ---
-...
+commit 8713789aa14fb8304b4e6787a1a7d9b422d25df3
+Author: Hannes Rüter <physics@hannesrueter.de>
+Date:   Mon Apr 11 16:15:16 2022 +0100
+    Add maximum norm to the yscale in odeintegrate
 ---
 The main diff is this:
 - yscal[i]=fabs(y[i])+fabs(dydx[i]*h)+TINY;
