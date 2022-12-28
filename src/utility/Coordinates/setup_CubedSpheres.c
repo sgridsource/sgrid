@@ -483,14 +483,14 @@ int arrange_1box12CubSph_into_full_cube(tGrid *grid, int b0, double *xc,
 
 /* make two big touching cubes like this
     __________ __________
-   |\        /|\        /|
-   | \  __  / | \  __  / |
-   |  \/  \/  |  \/  \/  |
+   |\   23   /|\   10   /|
+   | \  __  / | \  __  / |   The center cube on the right is box0
+   |  \/17\/  |  \/4 \/  |   The center cube on the left is box13
+   |20/\__/\  |7 /\__/\  |
+   | | |__| | | |1|__|2| |
+   |  \/16\/21|  \/3 \/ 8|
    |  /\__/\  |  /\__/\  |
-   | | |__| | | | |__| | |
-   |  \/  \/  |  \/  \/  |
-   |  /\__/\  |  /\__/\  |
-   | /      \ | /      \ |
+   | /  22  \ | /   9  \ |
    |/________\|/________\|
 */
 int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
@@ -514,7 +514,7 @@ int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
   /* set bface info for the 1 face at x=0 where the two outer cubes
      are now touching */
   //....
-  // do all faces have common points??? Assume this next:              
+  // do all faces have common points??? Assume this next:
   /* all faces are touching and have the same points */
   //set_touching_bfaces_of_boxes_with_same_facepoints(grid, b0, bl-b0);
 
@@ -528,16 +528,16 @@ int two_full_cubes_touching_at_x0(tGrid *grid, int b0, double dc,
 /* surround two big touching cubes with cubed spheres that have
    A,B that are in an extended range
          _______
-      __/       \__ 
-     /             \   
-    /__     3     __\  
-   /   -- _____ --   \     e.g. dom0/1 have A = [-0.8, 0.8] 
-  |   0  |  |  |   1  |         dom2/3 have A = [-1.25,1.25]
+      __/       \__
+     /             \
+    /__  26+3     __\
+   /   -- _____ --   \     e.g. dom0/1 have A = [-0.8, 0.8]
+  |26+0  |  |  |26+1  |         dom2/3 have A = [-1.25,1.25]
   |      |__|__|      |
    \ __--       --__ /      r0 is radius of outer sphere
-    \       2       /       2*dc is sidelength of one cube 
+    \    26+2       /       2*dc is sidelength of one cube
      \__         __/
-        \_______/ 
+        \_______/
 */
 int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
         double dc, double din1, double dmid1, double din2, double dmid2,
@@ -556,7 +556,7 @@ int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
     if(i<2) Din[i] = 2.0*dc;
     else    Din[i] = dc;
     Dout[i] = r0;
-  }  
+  }
   xc[1] = xc[2] = xc[3] = 0.0;
   bl = convert_6boxes_to_CubedSphere(grid, bl, outerCubedSphere,0,
                                      xc, Din,Dout);
@@ -569,21 +569,21 @@ int sphere_around_two_full_cubes_touching_at_x0(tGrid *grid, int b0,
                    ___________
              _____/           \______
           __/                        \_
-         /                             \
+         /             35              \
        _- \-                         -/
       /     \-       _______       -/
      |        \-  __/       \__  -/   ...
-    |           \/             \/   
-   /            /__           __\  
+    |           \/     29      \/
+   /            /__           __\
   |            /   -- _____ --   \    r0 is radius of inner sphere (sphere0)
-  |           |      |  |  |      |   r1 is radius of outer sphere (sphere1)
+  |    32     |  26  |  |  |  27  |   r1 is radius of outer sphere (sphere1)
   |           |      |__|__|      |
-  |            \ __--       --__ / 
-   \            \               /  
-    |          _/\__         __/
-     |       _/     \_______/ 
-      \    _/  
-       -_ /
+  |            \ __--       --__ /
+   \            \      28       /  33
+    |          _/\__         __/\_
+     |       _/     \_______/     \_
+      \    _/                       \_
+       -_ /            34             \
          \      ...
 */
 int two_spheres_around_two_full_cubes(tGrid *grid, int b0,
@@ -602,7 +602,7 @@ int two_spheres_around_two_full_cubes(tGrid *grid, int b0,
   {
     Din[i]  = r0;
     Dout[i] = r1;
-  }  
+  }
   xc[1] = xc[2] = xc[3] = 0.0;
   bl = convert_6boxes_to_CubedSphere(grid, bl, CubedShell,1, xc, Din,Dout);
   return bl;
