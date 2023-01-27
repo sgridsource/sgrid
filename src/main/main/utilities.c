@@ -532,7 +532,8 @@ void finalexit(int ec)
 /* Function to print errno. Use as: print_errno(stdout, errno); */
 void print_errno(FILE *fp, int ErrNo)
 {
-  if(ErrNo) fprintf(fp, "ErrNo %d: %s\n", ErrNo, strerror(ErrNo));
+  if(GetvLax("errorexit", "errno"))
+    if(ErrNo) fprintf(fp, "ErrNo %d: %s\n", ErrNo, strerror(ErrNo));
 }
 
 /* the one function every program should have */

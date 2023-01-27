@@ -22,7 +22,7 @@ int sgrid_main(void)
   AddPar("finaltime", "0", "iterate until grid reaches this time");
   AddPar("iterate_parameters", "no", "whether to iterate certain parameters");
 
-  AddPar("errorexit", "exit", "how we exit in case of error [exit,abort]");
+  AddPar("errorexit", "exit", "how we stop on errors [exit,abort,errno]");
   AddPar("verbose", "yes", " [yes,no]");
   return 0;
 }
