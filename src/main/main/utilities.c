@@ -529,6 +529,12 @@ void finalexit(int ec)
   else                               exit(ec);
 }
 
+/* Function to print errno. Use as: print_errno(stdout, errno); */
+void print_errno(FILE *fp, int ErrNo)
+{
+  if(ErrNo) fprintf(fp, "ErrNo %d: %s\n", ErrNo, strerror(ErrNo));
+}
+
 /* the one function every program should have */
 /* note that sgrid_main.h defines a macro so that the user does not have
    to specify __FILE__ and __LINE__ for location where the error occured
@@ -539,9 +545,11 @@ void finalexit(int ec)
 
 void SGRID_errorexit(char *file, int line, char *s)
 {
+  int ErrNo = errno;
   fflush(stdout);
   fprintf(stderr, "Error: %s  ", s);
   fprintf(stderr, "(%s, line %d)\n", file, line);
+  print_errno(stderr, ErrNo);
   fflush(stderr);
   sgrid_MPI_Finalize();
   finalexit(1);
@@ -549,10 +557,12 @@ void SGRID_errorexit(char *file, int line, char *s)
 
 void SGRID_errorexits(char *file, int line, char *s, char *t)
 {
+  int ErrNo = errno;
   fflush(stdout);
   fprintf(stderr, "Error: ");
   fprintf(stderr, s, t);
   fprintf(stderr, "  (%s, line %d)\n", file, line);
+  print_errno(stderr, ErrNo);
   fflush(stderr);
   sgrid_MPI_Finalize();
   finalexit(1);
@@ -560,10 +570,12 @@ void SGRID_errorexits(char *file, int line, char *s, char *t)
 
 void SGRID_errorexiti(char *file, int line, char *s, int i)
 {
+  int ErrNo = errno;
   fflush(stdout);
   fprintf(stderr, "Error: ");
   fprintf(stderr, s, i);
   fprintf(stderr, "  (%s, line %d)\n", file, line);
+  print_errno(stderr, ErrNo);
   fflush(stderr);
   sgrid_MPI_Finalize();
   finalexit(1);

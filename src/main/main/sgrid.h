@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <stdint.h>      /* for uint64_t */
 
