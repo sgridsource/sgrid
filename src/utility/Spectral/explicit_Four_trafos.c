@@ -239,3 +239,40 @@ double four_basisfunc(void *aux, double a, double b, int k, int N, double X)
   if(k%2!=0)            return cos(j*K*X)*2.0/N;
   return sin(j*K*X)*2.0/N;
 }
+
+
+/* print test results */
+void four_test_print(int N)
+{
+  double f[N], c[N], cder[N], cint[N], f2[N], f3[N];
+  double L=2*PI;
+  int i;
+
+  for(i=0; i<N; i++)
+    f[i] = 2*PI*i/N;
+
+  four_coeffs(c, f, N-1);
+  four_eval(c, f2, N-1);
+  four_int(0.,L, c, cint, N-1);
+  four_deriv(NULL, 0.,L, c, cder, N-1);
+
+  for(i=0; i<N; i++)
+  {
+    int k;
+    f3[i] = 0.;
+    for(k=0; k<N; k++)
+      f3[i] += c[k]*four_basisfunc(NULL, 0.,L, k, N, 2*PI*i/N);
+  }
+
+  printf("N=%d\n", N);
+  for(i=0; i<N; i++)
+    printf("%.3e %.2e %.2e %.9e %.9e %.9e\n",
+           f[i], f2[i]-f[i], f3[i]-f[i], c[i], cder[i], cint[i]);
+}
+
+/* start test */
+void four_test(void)
+{
+  four_test_print(5);
+  four_test_print(6);
+}
