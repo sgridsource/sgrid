@@ -36,7 +36,6 @@ DFLAGS += -DLIBSGRID
 ==> There is now utility/numerics which should be used instead NumericUtils.
 *still todo:
 ------------
-*in main Makefile comment out
+*Change DNSdataTwoFluid so that it works without NumericUtils.
+ Until then DNSdataTwoFluid still needs:
 libpaths += src/utility/NumericUtils
-*then either in the Makefile or as the last lib in MyConfig add:
-libpaths += src/utility/numerics

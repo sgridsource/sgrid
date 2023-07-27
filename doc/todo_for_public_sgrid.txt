@@ -44,12 +44,6 @@ git push -u origin BRANCH_NAME
  BSSN BNSdata PN_CircularOrbit_GWs Poisson Poisson2 Z4secondO
  rename BNSdata to BNSdata_v1 (this should not be needed anymore)
 
-*move old unneeded funcs out of Poisson3_BCs.c into new file
-
-*move NumericUtils out of src/utility use utility/numerics instead
-*must be last in MyConfig: libpaths += src/utility/numerics
-*in main Makefile comment out: libpaths += src/utility/NumericUtils
-
 *all the things we move out we put into private repos on quark into the
  subdir sgrid-projects
 
