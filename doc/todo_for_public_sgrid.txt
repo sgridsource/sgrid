@@ -66,3 +66,8 @@ About github
  account limit of also 500MB?)
 *use "Copy an entire repo to a new server" in wolfGIT/tricks/git to get
  sgrid repo into github
+
+==> I made the organization https://github.com/sgridsource
+*in it we have: EoS_T0 and EccRed
+*the ecc. red. scripts EccRed are all ok, but I need to edit
+ the explanation of where the ETK has d-proper vs time in EccRed_v2.md
