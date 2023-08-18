@@ -1,0 +1,106 @@
+How to compile sgrid:
+=====================
+1. simplest case:
+-----------------
+cd sgrid
+make
+
+2. or first edit MyConfig:
+--------------------------
+There is a file MyConfig that the main Makefile includes. In it we set
+the compiler flags and libraries we wish to use when compiling. If it is
+not present, an example is copied from doc/MyConfig.example . It contains
+all kinds of possible options that are commented out. For example, some
+projects (e.g. DNSdata) use the GNU Scientific Library (GSL). To compile
+these we need the following in MyConfig:
+SPECIALLIBS += -lgsl -lgslcblas  # to link with the GSL
+
+3. more make targets:
+---------------------
+make clean
+make git_pull
+make git_clone
+
+
+How to run sgrid:
+=================
+cd sgrid/exe
+./sgrid parfile.par
+
+Example parfiles are e.g. in Projects/DNSdata/ParFiles . See also
+Projects/DNSdata/ParFiles/Note.txt.
+
+
+How to update sgrid:
+====================
+cd sgrid
+make git_pull
+
+
+How it works:
+=============
+sgrid is modular. Modules are in:
+src/physics
+src/Projects
+
+Each module has its own Makefile and requires at least 5 files. E.g. for
+the Poisson3 module we have:
+Makefile            <-- Makefile to build module
+sgrid_Poisson3.c    <-- file that describes funcs, vars, and parameters
+Poisson3.c          <-- main C code of module
+Poisson3.h          <-- header file visible to this module only
+sgrid_Poisson3.h    <-- globally visible header file
+
+See also src/physics/Poisson3/Note.txt and src/physics/Poisson3/Poisson3.pdf
+
+Large modules tend to have a few additional C-files. Yet they usually do
+not have more header files, because all function prototypes normally go into
+one of the 2 header files.
+
+
+Looking at the output:
+======================
+By default sgrid creates an output dir named after the parfile used. E.g.
+./sgrid SLy_maxmass.par
+results in a new dir "SLy_maxmass" that contains the data from the run. ASCII output
+or 2D VTK output can be displayed with tgraph
+from https://github.com/wofti/tgraph .
+
+This can be as simple as:
+tgraph.py -c 1:2 SLy_maxmass/DNSdata_q.X2
+tgraph.py -c 1:2:3 SLy_maxmass/DNSdata_q.XY2
+
+Or if Cartesian coords are desired on the axes something like:
+tgraph.py -c 3:6:9 { SLy_maxmass/x.XY2 SLy_maxmass/y.XY2 SLy_maxmass/DNSdata_q.XY2 }
+
+3D output can also be in VTK legacy format, which can be visualized with
+programs like paraview or visit.
+
+
+Getting more sgrid projects:
+============================
+# There are some modules already within the main part of sgrid.
+# E.g. there are:
+ADMvars
+GridIterators
+LinAlg
+
+# BUT, most important physics projects reside in their own git repos.
+# E.g. there are:
+DNSdata
+EoS_T0
+
+# To get and compile all these you need to add the lines
+libpaths += src/physics/ADMvars
+libpaths += src/utility/GridIterators
+libpaths += src/utility/LinAlg
+repo = giter@quark.physics.fau.edu:
+projects += $(repo)/EoS_T0
+projects += $(repo)/DNSdata
+# in the "# modules we add:" section of sgrid/MyConfig and then type:
+make git_clone
+# To later update them, type:
+make git_pull
+# To compile them use:
+make clean
+make

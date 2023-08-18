@@ -4,7 +4,8 @@
 # modules (or libraries) will be included in the build.
 
 # ------------------------------------------------------------------------
-# here are simple examples for libraries, they may be mutually exclusive
+# Here are simple examples for modules, they may be mutually exclusive.
+# modules we add:
 
 # ADM vars and iterative solvers
 libpaths += src/physics/ADMvars
