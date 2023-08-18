@@ -144,7 +144,7 @@ sgrid: $(autoinclude) $(autoinitial)
 
 # if there is no MyConfig file, use the example provided in doc
 MyConfig:
-	-if test ! -f MyConfig; then cp doc/MyConfig.example MyConfig; fi 
+	-if test ! -f MyConfig; then cp doc/MyConfig.example MyConfig; $(MAKE) git_clone; fi
 
 # automatic configuration files
 $(autoinclude): MyConfig
