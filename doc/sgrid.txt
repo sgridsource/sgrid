@@ -104,3 +104,11 @@ make git_pull
 # To compile them use:
 make clean
 make
+
+
+Compiling the sgrid library
+===========================
+# We can now compile sgrid into a library by setting:
+DFLAGS += -DLIBSGRID
+# the file MyConfig.
+# This will be needed for compiling sgrid support into e.g. cactus.
