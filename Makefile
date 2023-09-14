@@ -166,7 +166,14 @@ $(autoinitial): MyConfig
 
 # create tar file
 tar:
-	cd ..; tar czf sgrid.tgz --exclude lib --exclude exe ./sgrid
+	cd ..; tar cf sgrid.tar --exclude lib --exclude exe --exclude .git ./sgrid
+
+# create tarfile for compiling libsgrid with DNSdata
+tar_DNSlibsgrid:
+	mv MyConfig MyConfig.temp
+	cp doc/MyConfig.DNSlibsgrid MyConfig
+	$(MAKE) git_clone
+	$(MAKE) tar
 
 # take a fresh look at things
 clean:
