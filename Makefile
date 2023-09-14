@@ -170,10 +170,12 @@ tar:
 
 # create tarfile for compiling libsgrid with DNSdata
 tar_DNSlibsgrid:
-	mv MyConfig MyConfig.temp
+	mv MyConfig MyConfig.temp001
 	cp doc/MyConfig.DNSlibsgrid MyConfig
 	$(MAKE) git_clone
 	$(MAKE) tar
+	rm -f MyConfig
+	mv MyConfig.temp001 MyConfig
 
 # take a fresh look at things
 clean:
