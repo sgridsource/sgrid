@@ -1,15 +1,17 @@
 Readme file for 'sgrid'
 -----------------------
-Wolfgang Tichy, 4/2005
+Wolfgang Tichy, 9/2023
 
 
 'sgrid' is a code for numerical relativity using spectral methods.
 The code is private for now (don't distribute yet, please). But it will soon
 be made public under the GPL. See the files LICENSE and COPYING.
 
-The main documentation is in doc/sgrid.txt , but see also
-doc/MyConfig.example . Furthermore, many dirs have Note.txt files with
-additional hints.
+Documentation:
+--------------
+The main documentation and compilation instructions are in doc/sgrid.txt ,
+but see also doc/MyConfig.example .
+Furthermore, many dirs have Note.txt files with additional hints.
 
 
 6/2022 Plans for making SGRID public:

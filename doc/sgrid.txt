@@ -9,11 +9,15 @@ make
 --------------------------
 There is a file MyConfig that the main Makefile includes. In it we set
 the compiler flags and libraries we wish to use when compiling. If it is
-not present, an example is copied from doc/MyConfig.example . It contains
-all kinds of possible options that are commented out. For example, some
-projects (e.g. DNSdata) use the GNU Scientific Library (GSL). To compile
-these we need the following in MyConfig:
-SPECIALLIBS += -lgsl -lgslcblas  # to link with the GSL
+not present, an example is copied from doc/MyConfig.example .
+E.g. to compile with gcc and OpenMP we need to have this in MyConfig:
+CC = gcc               # select the gcc compiler
+OFLAGS = -O3 -fopenmp  # use optimization and compile with OpenMP
+
+doc/MyConfig.example also contains all kinds of possible options that are
+commented out. For example, some projects need the GNU Scientific Library
+(GSL). To compile these projects we need the following in MyConfig:
+SPECIALLIBS += -lgsl -lgslcblas  # link with the GSL
 
 3. more make targets:
 ---------------------
@@ -108,7 +112,7 @@ make
 
 Compiling the sgrid library
 ===========================
-# We can now compile sgrid into a library by setting:
+# We can also compile sgrid into a library by setting:
 DFLAGS += -DLIBSGRID
 # in the file MyConfig.
 # This will be needed for compiling sgrid support into e.g. cactus.
