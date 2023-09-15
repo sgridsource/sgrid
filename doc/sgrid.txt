@@ -25,6 +25,8 @@ make clean
 make git_pull
 make git_clone
 
+4. Also note the section "Compiling the sgrid library" if you need libsgrid
+
 
 How to run sgrid:
 =================
@@ -110,8 +112,8 @@ make clean
 make
 
 
-Compiling the sgrid library
-===========================
+Compiling the sgrid library (libsgrid)
+======================================
 We can also compile sgrid into a library. MyConfig then needs to have:
 DFLAGS += -DLIBSGRID
 
