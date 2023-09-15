@@ -3,13 +3,11 @@ Tips on debugging
 
 1. Don't write buggy code.
 --------------------------
-   Be aware of what you do and take sufficiently small steps so that 
-   it is always easy to find small mistakes.
+Be aware of what you do and take sufficiently small steps so that it is
+always easy to find small mistakes.
 
-   Run the test suites before commits
-
-   Use floatdiff (see in sgrid/utilities) to check diffs before and after 
-   a code modification
+Use floatdiff (see in sgrid/utilities) to check diffs before and after
+a code modification
 
 
 2. If you do have a bug:
@@ -20,11 +18,11 @@ Compile sgrid with debug flag turned on. In MyConfig, set
 # optimization flags, say -O, -O2, -g for debugging, -pg for profiling, ...
 OFLAGS = -g
 
-Then "make clean" and "make". Should also work for parts of the code.
+Then "make clean" and "make".
 
 --------
 
-A simple debugger is gdb. 
+A simple debugger is gdb.
 
 > gdb
 
@@ -59,14 +57,14 @@ Sometimes we are left with a core file. This can be loaded with:
 ================================================================
 gdb /home1/00304/tg455767/sgrid/exe/sgrid core.46702
 (gdb) bt
-Note: On most systems core files seem to be off bt default, but e.g. on
-      stampede I could activate them by typing:
+Note: On most systems core files seem to be off by default, but e.g. on
+      stampede we could activate them by typing:
 ulimit -c 6000000
 
 --------
 
-I can start gdb also like this:
-===============================
+We can start gdb also like this:
+================================
 gdb --args ./sgrid l.par
 (gdb) r           ... run code
 (gdb) bt          ... to see calling stack
@@ -77,14 +75,8 @@ gdb --args ./sgrid l.par
 
 --------
 
-Bracket the problem in time by checking out for different dates:
-cvs co -D 7/21/2003 sgrid
-
---------
-
-
-Wolfgang's tips for finding seg faults:
----------------------------------------
+Tips for finding segfaults:
+---------------------------
 
 If you need to debug segfaults with electric fence do this:
 -----------------------------------------------------------
@@ -107,14 +99,14 @@ NOTE: if the program exits with:
 ElectricFence probably ran out of memory map areas!!!
 You can increase them with e.g.
  cat /proc/sys/vm/max_map_count
- echo 128000 > /proc/sys/vm/max_map_count 
+ echo 128000 > /proc/sys/vm/max_map_count
 If the program works afterwards, only ElectricFence ran out of memory map
 areas.
 
 duma is an alternative to electric fence:
 ------------------------------------------
 INSTRUCTIONS FOR DEBUGGING YOUR PROGRAM
-1. Link with libduma.a i.e. with -lduma or 
+1. Link with libduma.a i.e. with -lduma or
    SPECIALLIBS += -lduma
 2. Run  your program in a debugger and fix any overruns or accesses
    to free memory.
