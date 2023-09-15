@@ -112,11 +112,12 @@ make
 
 Compiling the sgrid library
 ===========================
-# We can also compile sgrid into a library by setting:
+We can also compile sgrid into a library. MyConfig then needs to have:
 DFLAGS += -DLIBSGRID
-# in the file MyConfig.
-# This will be needed for compiling sgrid support into e.g. cactus.
-# Note: If we compile e.g. DNSdata into a library with the aim of only
-# reading existing sgrid data files we do not need the UMFPACK, TEMPLATES,
-# and GSL libraries at all! So these should then be removed from MyConfig
-# (when building the sgrid library) to facilitate compilation.
+
+The resulting library will be in the file lib/libsgrid.a
+It is needed for compiling sgrid support into e.g. Cactus.
+Note: If we compile e.g. DNSdata into a library with the aim of only reading
+      existing sgrid data files we do not need the UMFPACK, TEMPLATES,
+      and GSL libraries at all! So these should then be removed from MyConfig
+      (when building the sgrid library) to facilitate compilation.
