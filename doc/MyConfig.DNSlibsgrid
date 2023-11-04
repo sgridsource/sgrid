@@ -14,7 +14,8 @@ libpaths += src/utility/GridIterators
 libpaths += src/utility/LinAlg
 
 # DNSdata and EoS at T=0
-repo = giter@quark.physics.fau.edu:
+#repo = git@github.com:sgridsource
+repo = https://github.com/sgridsource
 projects += $(repo)/EoS_T0
 projects += $(repo)/DNSdata
 

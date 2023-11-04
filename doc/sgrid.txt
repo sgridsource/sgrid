@@ -100,7 +100,8 @@ EoS_T0
 libpaths += src/physics/ADMvars
 libpaths += src/utility/GridIterators
 libpaths += src/utility/LinAlg
-repo = giter@quark.physics.fau.edu:
+#repo = git@github.com:sgridsource
+repo = https://github.com/sgridsource
 projects += $(repo)/EoS_T0
 projects += $(repo)/DNSdata
 # in the "# modules we add:" section of sgrid/MyConfig and then type:
