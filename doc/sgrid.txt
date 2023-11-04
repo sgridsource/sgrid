@@ -68,8 +68,8 @@ Looking at the output:
 ======================
 By default sgrid creates an output dir named after the parfile used. E.g.
 ./sgrid SLy_maxmass.par
-results in a new dir "SLy_maxmass" that contains the data from the run. ASCII output
-or 2D VTK output can be displayed with tgraph
+results in a new dir "SLy_maxmass" that contains the data from the run.
+ASCII output or 2D VTK output can be displayed with tgraph
 from https://github.com/wofti/tgraph .
 
 This can be as simple as:
