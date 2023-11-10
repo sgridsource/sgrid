@@ -1,7 +1,7 @@
-Nmesh is is a computer program for numerical relativity using discontinuous
+sgrid is is a computer program for numerical relativity using discontinuous
 Galerkin methods. 
 
 The authors of each part are mentioned at the top of every source file.
 
-Nmesh is provided under the terms of the GNU General Public License version
+sgrid is provided under the terms of the GNU General Public License version
 2 only, which can be found in the file LICENSE.
