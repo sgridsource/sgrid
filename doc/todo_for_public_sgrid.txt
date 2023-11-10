@@ -68,6 +68,17 @@ About github
  sgrid repo into github
 
 ==> I made the organization https://github.com/sgridsource
-*in it we have: EoS_T0 and EccRed
-*the ecc. red. scripts EccRed are all ok, but I need to edit
- the explanation of where the ETK has d-proper vs time in EccRed_v2.md
+*in it we have: sgrid, DNSdata, EoS_T0 and EccRed
+*need READMEs for all of them
+
+
+6/2022 Plans for making SGRID public:
+-------------------------------------
+*There is now utility/numerics which should be used instead NumericUtils.
+
+*still todo:
+------------
+*There is now utility/numerics which should be used instead NumericUtils.
+*Change DNSdataTwoFluid so that it works without NumericUtils.
+ Until then DNSdataTwoFluid still needs:
+libpaths += src/utility/NumericUtils

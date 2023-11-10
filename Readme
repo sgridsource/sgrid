@@ -1,29 +1,17 @@
-Readme file for 'sgrid'
+Readme file for sgrid
 -----------------------
-Wolfgang Tichy, 9/2023
+Wolfgang Tichy, 11/2023
 
+sgrid is a code for numerical relativity using spectral methods.
+The code is public under the GPL, see the files LICENSE and COPYING.
 
-'sgrid' is a code for numerical relativity using spectral methods.
-The code is private for now (don't distribute yet, please). But it will soon
-be made public under the GPL. See the files LICENSE and COPYING.
 
 Documentation:
 --------------
-The main documentation and compilation instructions are in doc/sgrid.txt ,
-but see also doc/MyConfig.example .
-Furthermore, many dirs have Note.txt files with additional hints.
+* The main documentation and compilation instructions are in doc/sgrid.txt ,
+  but see also doc/MyConfig.example .
 
+* In addition, there is help on installation and compilation at:
+  https://www.physics.fau.edu/~wolf/Research/FAU-sgrid
 
-6/2022 Plans for making SGRID public:
--------------------------------------
-*move some modules that are currently in physics into a new dir e.g.
- old_physics
-*make some modules that are currently in physics into their own projects
-
-==> There is now utility/numerics which should be used instead NumericUtils.
-
-*still todo:
-------------
-*Change DNSdataTwoFluid so that it works without NumericUtils.
- Until then DNSdataTwoFluid still needs:
-libpaths += src/utility/NumericUtils
+* Furthermore, many dirs have Note.txt files with additional hints.
