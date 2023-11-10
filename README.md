@@ -1,8 +1,9 @@
 # Readme file for sgrid
-Wolfgang Tichy, 11/2023
+Wolfgang Tichy, 11/2023:
 
 sgrid is a code for numerical relativity using spectral methods.
-The code is public under the GPL, see the files LICENSE and COPYING.
+The code is public under the GPL, see the files 
+[LICENSE](LICENSE) and [COPYING](COPYING).
 
 
 # Documentation:
