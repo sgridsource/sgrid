@@ -1,5 +1,5 @@
-sgrid is is a computer program for numerical relativity using discontinuous
-Galerkin methods. 
+sgrid is is a computer program for numerical relativity using
+pseudospectral methods.
 
 The authors of each part are mentioned at the top of every source file.
 
