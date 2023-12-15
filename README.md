@@ -16,3 +16,9 @@ The code is public under the GPL, see the files
   [https://www.physics.fau.edu/~wolf/Research/FAU-sgrid](https://www.physics.fau.edu/~wolf/Research/FAU-sgrid)
 
 * Furthermore, many dirs have Note.txt files with additional hints.
+
+
+# Cite us:
+
+If you use sgrid in a publication, please cite at least some of the
+references in [doc/citations.bib](doc/citations.bib).
