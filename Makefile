@@ -167,6 +167,7 @@ $(autoinitial): MyConfig
 # create tar file
 tar:
 	cd ..; tar cf sgrid.tar --exclude lib --exclude exe --exclude .git ./sgrid
+	mv ../sgrid.tar ../sgrid_"$$(git rev-parse --short HEAD)".tar
 
 # create tarfile for compiling libsgrid with DNSdata
 tar_DNSlibsgrid:
