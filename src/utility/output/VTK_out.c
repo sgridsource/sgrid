@@ -11,17 +11,12 @@
    The VTK lagacy data format used here is by default big endian binary data.
    This used to be the default on "workstations", while x86 "PCs"
    typically use little endian.
-
-   There exists /usr/include/endian.h, but how standard is this?
-   also see /usr/include/byteswap.h, which does not do 8 bytes for non-gcc?
-   see include/bits/byteswap.h for gcc/x86 optimized code
 */
-#include <endian.h>
-#if  __BYTE_ORDER == __LITTLE_ENDIAN
-#define BYTE_ORDER_LITTLE 1
-#else
-#define BYTE_ORDER_LITTLE 0
-#endif
+static inline char get_byte_order(void) {
+  const short order = 1;
+  return *(char*)&order;
+}
+#define BYTE_ORDER_LITTLE get_byte_order()
 
 
 /* in 3d and 2d it usually comes down to this: write numbers 
