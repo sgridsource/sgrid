@@ -271,6 +271,14 @@ tVarList *VLPtrEnable1(tGrid *grid, char *varname);
 void VLDisableFree(tVarList *vl);
 
 /* endianIO.c */
+size_t SGRID_fwrite_swapbytes(const void *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t SGRID_fread_swapbytes(void *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t SGRID_fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t SGRID_fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t SGRID_fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp);
+size_t SGRID_fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp);
+int SGRID_return_BYTE_ORDER_LITTLE(void);
+int SGRID_print_endian_info(tGrid *grid);
 size_t fwrite_double_little(const double *buf, size_t nmemb, FILE *fp);
 size_t fread_double_little(double *buf, size_t nmemb, FILE *fp);
 
