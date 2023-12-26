@@ -19,7 +19,7 @@
         mov    $0x1,%eax
         retq
    But it will also be inlined, and thus will cause no overhead at all! */
-static inline unsigned int byte_order_is_little(void)
+static inline unsigned int SGRID_byte_order_is_little(void)
 {
   unsigned int ui = 1;
   unsigned char *s = (unsigned char *) &ui;
@@ -49,14 +49,14 @@ static inline unsigned int byte_order_is_little(void)
 
 /* instead of the "defines" above for BYTE_ORDER_LITTLE we simply
    use the inline-function byte_order_is_little to just test endianness */
-#define BYTE_ORDER_LITTLE byte_order_is_little()
+#define BYTE_ORDER_LITTLE SGRID_byte_order_is_little()
 /* this should cause no overhead! */
 
 
 
 
 /* use fwrite to write an array, but swap byte order */
-size_t fwrite_swapbytes(const void *ptr, size_t size, size_t nmemb, FILE *fp)
+size_t SGRID_fwrite_swapbytes(const void *ptr, size_t size, size_t nmemb, FILE *fp)
 {
   const char *buf = ptr;
   size_t i, count;
@@ -72,7 +72,7 @@ size_t fwrite_swapbytes(const void *ptr, size_t size, size_t nmemb, FILE *fp)
 }
 
 /* use fread to write an array, but swap byte order */
-size_t fread_swapbytes(void *ptr, size_t size, size_t nmemb, FILE *fp)
+size_t SGRID_fread_swapbytes(void *ptr, size_t size, size_t nmemb, FILE *fp)
 {
   char *buf = ptr;
   size_t i, count;
@@ -88,7 +88,7 @@ size_t fread_swapbytes(void *ptr, size_t size, size_t nmemb, FILE *fp)
 }
 
 /* use fwrite to write to a file in little endian format */
-size_t fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp)
+size_t SGRID_fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp)
 {
   int little = BYTE_ORDER_LITTLE; /* endianess */
 
@@ -96,12 +96,12 @@ size_t fwrite_little(const void *ptr, size_t size, size_t nmemb, FILE *fp)
   if(little)
     return fwrite(ptr, size, nmemb, fp);
   else
-    return fwrite_swapbytes(ptr, size, nmemb, fp);
+    return SGRID_fwrite_swapbytes(ptr, size, nmemb, fp);
 }
 
 
 /* use fread to read from a file in little endian format */
-size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp)
+size_t SGRID_fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp)
 {
   int little = BYTE_ORDER_LITTLE; /* endianess */
 
@@ -109,11 +109,11 @@ size_t fread_little(void *ptr, size_t size, size_t nmemb, FILE *fp)
   if(little)
     return fread(ptr, size, nmemb, fp);
   else
-    return fread_swapbytes(ptr, size, nmemb, fp);
+    return SGRID_fread_swapbytes(ptr, size, nmemb, fp);
 }
 
 /* use fwrite to write to a file in big endian format */
-size_t fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp)
+size_t SGRID_fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp)
 {
   int little = BYTE_ORDER_LITTLE; /* endianess */
 
@@ -121,12 +121,12 @@ size_t fwrite_big(const void *ptr, size_t size, size_t nmemb, FILE *fp)
   if(!little)
     return fwrite(ptr, size, nmemb, fp);
   else
-    return fwrite_swapbytes(ptr, size, nmemb, fp);
+    return SGRID_fwrite_swapbytes(ptr, size, nmemb, fp);
 }
 
 
 /* use fread to read from a file in big endian format */
-size_t fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp)
+size_t SGRID_fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp)
 {
   int little = BYTE_ORDER_LITTLE; /* endianess */
 
@@ -134,20 +134,20 @@ size_t fread_big(void *ptr, size_t size, size_t nmemb, FILE *fp)
   if(!little)
     return fread(ptr, size, nmemb, fp);
   else
-    return fread_swapbytes(ptr, size, nmemb, fp);
+    return SGRID_fread_swapbytes(ptr, size, nmemb, fp);
 }
 
 
 /* return value of BYTE_ORDER_LITTLE */
-int return_BYTE_ORDER_LITTLE(void)
+int SGRID_return_BYTE_ORDER_LITTLE(void)
 {
   return BYTE_ORDER_LITTLE; /* endianess */
 }
 
 /* print what byte order we have */
-int print_endian_info(tGrid *grid)
+int SGRID_print_endian_info(tGrid *grid)
 {
-  printf("BYTE_ORDER_LITTLE = %d\n", return_BYTE_ORDER_LITTLE());
+  printf("BYTE_ORDER_LITTLE = %d\n", SGRID_return_BYTE_ORDER_LITTLE());
   return 0;
 }
 
@@ -165,7 +165,7 @@ size_t fwrite_double_little(const double *buf, size_t nmemb, FILE *fp)
   if(sizeof(double) != 8)
     errorexit("fwrite_double_little: size of double is not 8");
 
-  return fwrite_little(buf, sizeof(double), nmemb, fp);
+  return SGRID_fwrite_little(buf, sizeof(double), nmemb, fp);
 
 }
 
@@ -178,5 +178,5 @@ size_t fread_double_little(double *buf, size_t nmemb, FILE *fp)
   if(sizeof(double) != 8)
     errorexit("fread_double_little: size of double is not 8");
 
-  return fread_little(buf, sizeof(double), nmemb, fp);
+  return SGRID_fread_little(buf, sizeof(double), nmemb, fp);
 }
