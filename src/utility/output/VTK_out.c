@@ -12,16 +12,11 @@
    This used to be the default on "workstations", while x86 "PCs"
    typically use little endian.
 
-   There exists /usr/include/endian.h, but how standard is this?
-   also see /usr/include/byteswap.h, which does not do 8 bytes for non-gcc?
-   see include/bits/byteswap.h for gcc/x86 optimized code
-*/
-#include <endian.h>
-#if  __BYTE_ORDER == __LITTLE_ENDIAN
-#define BYTE_ORDER_LITTLE 1
-#else
-#define BYTE_ORDER_LITTLE 0
-#endif
+   Here we use SGRID_return_BYTE_ORDER_LITTLE to find out if our machine is
+   little or big endian. Then we swap bytes if this is needed.
+   BUT it would be better to just use SGRID_fwrite_big, because it swaps
+   bytes as needed on its own. */
+#define BYTE_ORDER_LITTLE SGRID_return_BYTE_ORDER_LITTLE()
 
 
 /* in 3d and 2d it usually comes down to this: write numbers 
