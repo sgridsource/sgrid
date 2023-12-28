@@ -47,8 +47,8 @@ static inline unsigned int SGRID_byte_order_is_little(void)
 #endif
 */
 
-/* instead of the "defines" above for BYTE_ORDER_LITTLE we simply
-   use the inline-function byte_order_is_little to just test endianness */
+/* instead of the "defines" above for BYTE_ORDER_LITTLE we simply use the
+   inline-function SGRID_byte_order_is_little to just test endianness */
 #define BYTE_ORDER_LITTLE SGRID_byte_order_is_little()
 /* this should cause no overhead! */
 
