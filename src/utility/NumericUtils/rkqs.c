@@ -93,6 +93,20 @@ void rkqsP(double y[], double dydx[], int n, double *x, double htry,
 	free_vector(yerr,1,n);
 }
 
+/* rkqs version for Hannes Ruter's odeintegrate_HR, that has on more
+   const function arguments */
+void rkqs_HR(double y[], double dydx[], int n, double *x, double htry,
+        double eps, double yscal[], double *hdid, double *hnext,
+	void (*derivs)(const double, const double [], double []))
+{
+  union { /* union to convert from rkqs_HR to rkqs */
+    void (*F_cd_cdp_dp)(const double, const double [], double []);
+    void (*F_d_dp_dp)(double, double [], double []);
+  } HR2Nu;
+  HR2Nu.F_cd_cdp_dp = derivs;
+  rkqs(y, dydx, n, x, htry, eps, yscal, hdid, hnext, HR2Nu.F_d_dp_dp);
+}
+
 #undef SAFETY
 #undef PGROW
 #undef PSHRNK

@@ -131,6 +131,11 @@ void rkqsP(double y[], double dydx[], int n, double *x, double htry,
 	void *par)
 {
 }
+void rkqs_HR(double y[], double dydx[], int n, double *x, double htry,
+        double eps, double yscal[], double *hdid, double *hnext,
+	void (*derivs)(const double, const double [], double []))
+{
+}
 
 /**********************************************************************/
 /* some mem alloc funcs from public part of nr with float -> double */
