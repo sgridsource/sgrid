@@ -93,8 +93,12 @@ void rkqsP(double y[], double dydx[], int n, double *x, double htry,
 	free_vector(yerr,1,n);
 }
 
-/* rkqs version for Hannes Ruter's odeintegrate_HR, that has on more
-   const function arguments */
+/* rkqs version for Hannes Ruter's odeintegrate_HR, that has more const
+   function arguments in derivs.
+   Note: rkqs_HR just calls rkqs
+         BUT really everybody should use rkqsP! Or better yet:
+         src/utility/numerics should be used instead of
+         src/utility/NumericUtils */
 void rkqs_HR(double y[], double dydx[], int n, double *x, double htry,
         double eps, double yscal[], double *hdid, double *hnext,
 	void (*derivs)(const double, const double [], double []))
