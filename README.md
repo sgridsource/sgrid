@@ -13,7 +13,7 @@ The code is public under the GPL, see the files
   but see also [doc/MyConfig.example](doc/MyConfig.example).
 
 * In addition, there is help on installation and compilation at:
-  [https://www.physics.fau.edu/~wolf/Research/FAU-sgrid](https://www.physics.fau.edu/~wolf/Research/FAU-sgrid)
+  [https://wofti.github.io/Research/FAU-sgrid](https://wofti.github.io/Research/FAU-sgrid)
 
 * Furthermore, many dirs have Note.txt files with additional hints.
 
