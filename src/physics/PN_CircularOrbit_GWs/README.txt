@@ -19,7 +19,8 @@ To run, start with e.g. ParFiles/q3S0.4S0.6.par
 *if PN_CircularOrbit_GWs_t2 is chosen too large, sgrid crashes with
  "stepsize underflow in rkqs". This is nothing much to worry about! Since
  the PN formulation is breaking down when the two particles get close,
- divergencies occur, that the RK-integrator cannot handle. BUT any data
+ divergencies occur, that the RK-integrator cannot handle. Simply reduce
+ PN_CircularOrbit_GWs_t2 to a value before the crash and run again. Any data
  outputted before the crash should be fine.
 
 Units
