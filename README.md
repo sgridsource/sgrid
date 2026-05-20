@@ -17,14 +17,8 @@ The code is public under the GPL, see the files
 
 * Furthermore, many dirs have Note.txt files with additional hints.
 
-
-# DNS parameter files
-
-* In
-  [https://github.com/sgridsource:DNSdata/ParFiles](https://github.com/sgridsource:DNSdata/ParFiles)
-  there are several example parameter files for the creation of
-  double neutron star (DNS) initial data, with brief descriptions in
-  [https://github.com/sgridsource:DNSdata/ParFiles/Note.txt](https://github.com/sgridsource:DNSdata/ParFiles/Note.txt).
+* More info about example parameter files for double neutron star (DNS)
+  initial data is in [DNSdata](https://github.com/sgridsource/DNSdata).
 
 
 # Cite us:
