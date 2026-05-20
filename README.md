@@ -18,7 +18,8 @@ The code is public under the GPL, see the files
 * Furthermore, many dirs have Note.txt files with additional hints.
 
 * More info about example parameter files for double neutron star (DNS)
-  initial data is in [DNSdata](https://github.com/sgridsource/DNSdata).
+  initial data is in the README.md file from
+  [DNSdata](https://github.com/sgridsource/DNSdata).
 
 
 # Cite us:
