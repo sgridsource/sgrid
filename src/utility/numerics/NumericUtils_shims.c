@@ -62,7 +62,7 @@ int WT_newton(double *x, int n, int *check,
 int zbrac_P(double (*func)(double,void *par), double *x1, double *x2,
             void *par)
 {
-  rt_brak(func,par, x1,x2, 50);
+  return rt_brak(func,par, x1,x2, 50);
 }
 
 /* old way of finding root in bracket [x1,x2] */
