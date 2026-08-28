@@ -72,6 +72,16 @@ int zbrent_itsP(double *x0, double (*func)(double,void *par),
   return rtbrent_brak(x0, func, x1,x2, par, ITMAX, tol, 1);
 }
 
+/* Old root finder with bracket [x1,x2] from old type vecfuncP.
+   Here x[], and the x[], f[], in vecfuncP are accessed as x[1] or f[1],
+   as is done in Fortran or numrec... */
+int zbrent_itsP_1dVF(double x[],
+                     void (*vecfuncP)(int n,double x[], double f[],void *par),
+                     double x1, double x2, void *par, int ITMAX, double tol)
+{
+  return rtbrent_brak_1dVF(x, vecfuncP, x1,x2, par, 1, ITMAX, tol, 1);
+}
+
 /* lu_decomp but for a matrix that starts with a[1][1],
    indx also starts at indx[1].
    returns -i, if i=row with all zeros

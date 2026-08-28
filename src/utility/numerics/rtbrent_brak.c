@@ -151,3 +151,42 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
   *x0 = b;
   return iter;
 }
+
+
+/***************************************************************************/
+/* Interface for using a 1d vecfuncP (from newton_linesearch for n=1)
+   with rtbrent_brak  */
+/***************************************************************************/
+
+/* struct with vecfuncP and pars for it */
+struct VecfuncP_And_Pars
+{
+  void (*vecfuncP)(int n, double x[], double f[], void *par);
+  void *par;
+  int vecfuncP_ilow;
+};
+/* func suitable for rtbrent_brak */
+double rtbrent_brak_func_from_vecfuncP(double x, void *vecfuncP_and_par)
+{
+  struct VecfuncP_And_Pars *p = vecfuncP_and_par;
+  double f;
+  p->vecfuncP(1, &x - p->vecfuncP_ilow, &f - p->vecfuncP_ilow, p->par);
+  return f;
+}
+
+/* rtbrent_brak_1dVF uses the same args as newton_linesearch, plus x1,x2
+   *use vecfuncP_ilow=1 if vecfuncP is for the old newton_linesrch_itsP
+   *use vecfuncP_ilow=0 if vecfuncP is for newton_linesearch with
+    vecfuncP_ilow=0. */
+int rtbrent_brak_1dVF(double *x0,
+                      void (*vecfuncP)(int n,double x[], double f[],void *par),
+                      double x1, double x2, void *par, int vecfuncP_ilow,
+                      int itmax, double xacc, int pr)
+{
+  struct VecfuncP_And_Pars p[1];
+  p->vecfuncP      = vecfuncP;
+  p->par           = par;
+  p->vecfuncP_ilow = vecfuncP_ilow;
+  return rtbrent_brak(x0 + vecfuncP_ilow, rtbrent_brak_func_from_vecfuncP,
+                      x1,x2, p, itmax, xacc, pr);
+}
