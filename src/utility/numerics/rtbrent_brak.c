@@ -153,6 +153,42 @@ int rtbrent_brak(double *x0, double (*func)(double,void *par),
 }
 
 
+/*************************************************************************/
+/* 2nd interface for Brent's method where we pass in
+     void (*fdf)(double x, void *par, double *f, double *df)
+   (as in newton1d_brak) instead of
+     double (*func)(double,void *par) */
+/*************************************************************************/
+
+/* struct with fdf and pars for it */
+struct fdf_And_Pars
+{
+  void (*fdf)(double x, void *par, double *f, double *df);
+  void *par;
+};
+/* func suitable for rtbrent_brak */
+double rtbrent_brak_func_from_fdf(double x, void *fdf_and_par)
+{
+  struct fdf_And_Pars *p = fdf_and_par;
+  double f, df;
+  p->fdf(x, p->par, &f, &df);
+  return f;
+}
+
+/* call rtbrent_brak, but work with fdf while ignoring df */
+int rtbrent_brak_fdf(double *x0,
+                     void (*fdf)(double x, void *par, double *f, double *df),
+                     double x1, double x2, void *par, int maxits, double xacc,
+                     int pr)
+{
+  struct fdf_And_Pars p[1];
+  p->fdf = fdf;
+  p->par = par;
+  return rtbrent_brak(x0, rtbrent_brak_func_from_fdf,
+                      x1,x2, p, maxits, xacc, pr);
+}
+
+
 /***************************************************************************/
 /* Interface for using a 1d vecfuncP (from newton_linesearch for n=1)
    with rtbrent_brak  */
