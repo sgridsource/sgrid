@@ -155,6 +155,13 @@
 /* utility/evolve */
 #define evolve_test_analyze SGRID_evolve_test_analyze
 
+/* utility/numerics */
+#define rtbrent_brak SGRID_rtbrent_brak
+#define rtbrent_brak_1dVF SGRID_rtbrent_brak_1dVF
+#define rtbrent_brak_fdf SGRID_rtbrent_brak_fdf
+#define rtbrent_brak_func_from_fdf SGRID_rtbrent_brak_func_from_fdf
+#define rtbrent_brak_func_from_vecfuncP SGRID_rtbrent_brak_func_from_vecfuncP
+
 /***********************************/
 /* symbols in sgrid projects       */
 /***********************************/
