@@ -4,11 +4,8 @@
 #include <math.h>
 
 //#include "nmesh.h"
-/* numerics.h with rename_symbols.h is before sgrid_numerics.h */
-#include "numerics.h"
-#include "sgrid_numerics.h"
-
-#define DOUBLE_EPS 1e-14 /* machine double floating point precision */
+#include "numerics.h" //numerics.h with rename_symbols.h must be before sgrid_numerics.h
+#define DOUBLE_EPS 1e-14 //machine double floating point precision
 
 /* find root using Brent's method with bracketing in [x1,x2]:
 

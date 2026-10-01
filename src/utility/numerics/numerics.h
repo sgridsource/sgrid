@@ -8,6 +8,10 @@
 int finit(double x);
 
 
+/* rt_brak.c */
+int rt_brak_f(double (*func)(double x, void *par), void *par,
+              double *x1, double *x2, double Fac, int maxits);
+
 /* rtbrent_brak.c */
 int rtbrent_brak_1dVF(double *x0,
                       void (*vecfuncP)(int n,double x[], double f[],void *par),
