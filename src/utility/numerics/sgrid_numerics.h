@@ -111,6 +111,8 @@ int zbrent_itsP(double *x0, double (*func)(double,void *par),
 int zbrent_itsP_1dVF(double *x0,
                      void (*vecfuncP)(int n,double x[], double f[],void *par),
                      double x1, double x2, void *par, int ITMAX, double tol);
+int zbrac_f_itsP_1dVF(void (*vecfuncP)(int n,double x[], double f[],void *par),
+                      void *par, double *x1, double *x2, double Fac, int maxits);
 double brent_with_pointer_to_pars(double ax, double bx, double cx,
              double (*f)(double, void *ppointer), double tol,
 	     double *xmin, void *parpointer);
