@@ -11,6 +11,8 @@ int rtbisect(double *x0, double (*func)(double,void *par),
              double x1, double x2, void *par, int maxits, double xacc, int pr);
 
 /* rt_brak.c */
+int rt_brak_f(double (*func)(double x, void *par), void *par,
+              double *x1, double *x2, double Fac, int maxits);
 int rt_brak(double (*func)(double x, void *par), void *par,
             double *x1, double *x2, int maxits);
 
