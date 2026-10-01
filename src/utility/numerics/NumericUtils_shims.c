@@ -82,6 +82,13 @@ int zbrent_itsP_1dVF(double x[],
   return rtbrent_brak_1dVF(x, vecfuncP, x1,x2, par, 1, ITMAX, tol, 1);
 }
 
+/* bracket finder related to zbrent_itsP_1dVF */
+int zbrac_f_itsP_1dVF(void (*vecfuncP)(int n,double x[], double f[],void *par),
+                      void *par, double *x1, double *x2, double Fac, int maxits)
+{
+  return rt_brak_f_1dVF(vecfuncP, par, 1, x1,x2, Fac, maxits);
+}
+
 /* lu_decomp but for a matrix that starts with a[1][1],
    indx also starts at indx[1].
    returns -i, if i=row with all zeros

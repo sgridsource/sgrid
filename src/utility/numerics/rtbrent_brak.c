@@ -4,7 +4,10 @@
 #include <math.h>
 
 //#include "nmesh.h"
+/* numerics.h with rename_symbols.h is before sgrid_numerics.h */
 #include "numerics.h"
+#include "sgrid_numerics.h"
+
 #define DOUBLE_EPS 1e-14 /* machine double floating point precision */
 
 /* find root using Brent's method with bracketing in [x1,x2]:
@@ -188,6 +191,11 @@ int rtbrent_brak_fdf(double *x0,
                       x1,x2, p, maxits, xacc, pr);
 }
 
+/* could also make:
+int rt_brak_f_fdf(void (*fdf)(double x, void *par, double *f, double *df),
+                  void *par, double *x1, double *x2, double Fac, int maxits)
+*/
+
 
 /***************************************************************************/
 /* Interface for using a 1d vecfuncP (from newton_linesearch for n=1)
@@ -225,4 +233,16 @@ int rtbrent_brak_1dVF(double *x0,
   p->vecfuncP_ilow = vecfuncP_ilow;
   return rtbrent_brak(x0 + vecfuncP_ilow, rtbrent_brak_func_from_vecfuncP,
                       x1,x2, p, itmax, xacc, pr);
+}
+
+/* rt_brak_f_1dVF uses vecfuncP instead of func(x,par) */
+int rt_brak_f_1dVF(void (*vecfuncP)(int n,double x[], double f[],void *par),
+                   void *par, int vecfuncP_ilow,
+                   double *x1, double *x2, double Fac, int maxits)
+{
+  struct VecfuncP_And_Pars p[1];
+  p->vecfuncP      = vecfuncP;
+  p->par           = par;
+  p->vecfuncP_ilow = vecfuncP_ilow;
+  return rt_brak_f(rtbrent_brak_func_from_vecfuncP, p, x1,x2, Fac, maxits);
 }

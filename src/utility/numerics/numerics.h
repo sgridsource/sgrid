@@ -13,3 +13,6 @@ int rtbrent_brak_1dVF(double *x0,
                       void (*vecfuncP)(int n,double x[], double f[],void *par),
                       double x1, double x2, void *par, int vecfuncP_ilow,
                       int itmax, double xacc, int pr);
+int rt_brak_f_1dVF(void (*vecfuncP)(int n,double x[], double f[],void *par),
+                   void *par, int vecfuncP_ilow,
+                   double *x1, double *x2, double Fac, int maxits);
